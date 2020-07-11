@@ -1,0 +1,40 @@
+! Sections:
+!   -> Config
+!   -> Theme
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! => Config
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! xrdb -load ~/.Xresources
+
+! Make fonts and terminal look better
+Xft.dpi: 96
+Xft.antialias: true
+! Hintstyle is the amount of font reshaping done to line up to the grid. Hinting values are: hintnone, hintslight, hintmedium, and hintfull. hintslight will make the font more fuzzy to line up to the grid but will be better in retaining font shape (see [2]), while hintfull will be a crisp font that aligns well to the pixel grid but will lose a greater amount of font shape. hintslight implicitly uses the autohinter in a vertical-only mode in favor of font-native information for non-CFF (.otf) fonts.
+Xft.hinting: true
+! Use Rgb
+Xft.rgba: rgb
+! Use hinting automatically
+Xft.autohint: false
+! Hintstyle is the amount of font reshaping done to line up to the grid. Hinting values are: hintnone, hintslight, hintmedium, and hintfull. hintslight will make the font more fuzzy to line up to the grid but will be better in retaining font shape while hintfull will be a crisp font that aligns well to the pixel grid but will lose a greater amount of font shape. hintslight implicitly uses the autohinter in a vertical-only mode in favor of font-native information for non-CFF (.otf)
+Xft.hintstyle: hintslight
+!When using Cleartype subpixel rendering, you should enable the LCD filter, which is designed to reduce colour fringing.
+Xft.lcdfilter: lcddefault
+
+! Disables scrollbar
+URxvt.scrollBar:    false
+URxvt*cursorBlink:  true
+URxvt.saveLines: 5000
+
+! Copy paste
+URxvt.iso14755: false
+URxvt.keysym.Shift-Control-V:	eval:paste_clipboard
+URxvt.keysym.Shift-Control-C:	eval:selection_to_clipboard
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! => Theme
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+URxvt.font: xft:UbuntuMono:Regular:size=15
+

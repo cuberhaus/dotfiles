@@ -1,0 +1,1 @@
+set -g status-right '♫ #{spotify_song} #{spotify_playback} | #{battery_status_bg} #{battery_icon} #{battery_percentage} #{prefix_highlight} | %a %Y-%m-%d %H:%M'
