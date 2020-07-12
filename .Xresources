@@ -36,5 +36,5 @@ URxvt.keysym.Shift-Control-C:	eval:selection_to_clipboard
 ! => Theme
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-URxvt.font: xft:UbuntuMono:Regular:size=15
+URxvt.font: xft:UbuntuMono:Regular:size=16
 

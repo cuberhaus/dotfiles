@@ -1,0 +1,10 @@
+arch_install {
+    sudo pacman -S htop ncdu vifm vlc thunderbird virtualbox-qt transmission gvim
+    sudo pacman -S dhcpcd git tmux nvidia rxvt-unicode stow exa python3 chromium thunar
+    # Fonts
+    sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts ttf-ms-fonts
+}
+
+i3_install {
+    sudo pacman -S i3-gaps feh compton rofi i3blocks python-dbus pulseaudio
+}

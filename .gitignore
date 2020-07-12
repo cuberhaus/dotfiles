@@ -1,0 +1,45 @@
+# Compiled Python files
+*.pyc
+
+# Folder view configuration files
+.DS_Store
+Desktop.ini
+
+# Thumbnail cache files
+._*
+Thumbs.db
+
+# Files that might appear on external disks
+.Spotlight-V100
+.Trashes
+
+# Git merge files
+*orig
+
+# Albert files
+.config/albert/core.db
+.config/albert/org.albert*
+.config/albert/last_used_version
+
+# Vifm files
+.config/vifm/scripts
+.config/vifm/colors
+.config/vifm/vifminfo
+.config/vifm/vifm-help.txt
+
+# Stretchly
+.config/stretchly/Cache/
+.config/stretchly/Code Cache/
+.config/stretchly/Cookies
+.config/stretchly/Cookies-journal
+.config/stretchly/GPUCache/
+.config/stretchly/Network Persistent State
+.config/stretchly/Session Storage/
+.config/stretchly/TransportSecurity
+
+# Transmission
+
+.config/transmission/dht.dat
+.config/transmission/resume/
+.config/transmission/stats.json
+.config/transmission/torrents/

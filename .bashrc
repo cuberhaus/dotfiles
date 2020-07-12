@@ -102,7 +102,7 @@ alias free='free -m'                      # show sizes in MB
 alias c="clear"
 
 # Get Ubuntu Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
-alias update="sudo apt-get update; sudo apt-get full-upgrade; brew update; brew upgrade; sudo apt-get autoclean; sudo apt-get clean; sudo apt-get autoremove"
+alias update="sudo pacman -Syu"
 
 # Git
 alias gs="git status"
@@ -113,7 +113,7 @@ alias gc="git commit -m "
 alias gp="git push"
 
 # Nautilus
-alias o="nautilus . & 2> /dev/null"
+alias o="thunar . & 2> /dev/null"
 
 # Lock screen
 LockScreens=('pipes.sh' 'cmatrix')
