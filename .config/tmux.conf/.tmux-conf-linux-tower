@@ -1,1 +1,1 @@
-set -g status-right '#{prefix_highlight} ♫ #{spotify_song} #{spotify_playback} | %a %Y-%m-%d %H:%M'
+set -g status-right '#{prefix_highlight} | %a %Y-%m-%d %H:%M'

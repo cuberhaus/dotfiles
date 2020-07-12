@@ -3,6 +3,8 @@ arch_install {
     sudo pacman -S dhcpcd git tmux nvidia rxvt-unicode stow exa python3 chromium thunar
     # Fonts
     sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts ttf-ms-fonts
+    # Tmux
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 }
 
 i3_install {
