@@ -113,7 +113,7 @@ alias gc="git commit -m "
 alias gp="git push"
 
 # Nautilus
-alias o="thunar . & 2> /dev/null"
+alias o='thunar . & 2> /dev/null'
 
 # Lock screen
 LockScreens=('pipes.sh' 'cmatrix')
