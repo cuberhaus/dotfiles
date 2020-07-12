@@ -7,8 +7,12 @@ arch_install {
     pacman -S gtk-2 gtk-3 LXAppearance arc-gtk-theme 
     # Tmux
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    # AUR 
+    pacman -S --needed base-devel
 }
 
 i3_install {
     sudo pacman -S i3-gaps feh compton rofi i3blocks python-dbus pulseaudio
+    # battery plus
+    sudo pacman -S awk bc upower
 }

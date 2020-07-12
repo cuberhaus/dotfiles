@@ -301,5 +301,7 @@ bindsym $mod+Pause mode "$mode_system"
 
 # Wallpaper
 exec_always feh --bg-scale ~/wallpapers/dracula_ghost..png
+#Bluetooth
+exec blueman-applet
 # Some kind of window manager ??
 exec compton
