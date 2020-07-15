@@ -52,6 +52,9 @@ i3_install () {
     # calendar
     sudo pacman -S yad xdotool
 }
+snap_install () {
+    https://wiki.archlinux.org/index.php/Snap
+}
 
 ### Installation starts here
 
