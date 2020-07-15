@@ -3,18 +3,19 @@ arch_install () {
     # Doxygen
     sudo pacman -S doxygen texlive-most graphviz gcc
     # System tools
-    sudo pacman -S dhcpcd git tmux nvidia python3 stow
+    sudo pacman -S dhcpcd git nvidia python3 stow
     # Terminal
     sudo pacman -S rxvt-unicode gvim exa
     # Manage storage
     sudo pacman -S ncdu
     # Apps
-    sudo pacman -S thunderbird virtualbox-qt transmission chromium thunar
+    sudo pacman -S thunderbird virtualbox-qt transmission chromium thunar albert
     # Fonts
     sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts ttf-ms-fonts
     # Theme
     sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme
     # Tmux
+    sudo pacman -S tmux
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     # AUR
     sudo pacman -S --needed base-devel
