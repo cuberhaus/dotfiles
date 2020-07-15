@@ -300,7 +300,7 @@ bindsym $mod+Pause mode "$mode_system"
 ###############################################################
 
 # Wallpaper
-exec_always feh --bg-scale ~/wallpapers/dracula_ghost..png
+exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
 #Bluetooth
 exec blueman-applet
 # Some kind of window manager ??

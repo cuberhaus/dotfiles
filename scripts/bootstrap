@@ -9,6 +9,10 @@ arch_install {
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     # AUR 
     pacman -S --needed base-devel
+    # Display manager
+    pacman -S lightdm-gtk-greeter lightdm
+    # Image viewer
+    sudo pacman -S nomacs
 }
 
 i3_install {
