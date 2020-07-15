@@ -54,3 +54,4 @@ sudo pacman -Syu
 
 arch_install
 i3_install
+vim_install

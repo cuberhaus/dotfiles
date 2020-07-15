@@ -11,4 +11,5 @@ ycm_install () {
     rm -r ycm_build
 }
 cd ~
+arch_based_install
 ycm_install
