@@ -1,6 +1,4 @@
-[submodule ".config/i3blocks/.config/i3blocks/i3blocks-contrib"]
-	path = .config/i3blocks/.config/i3blocks/i3blocks-contrib
-	url = https://github.com/vivien/i3blocks-contrib
+
 [submodule ".config/i3blocks/i3blocks-contrib"]
 	path = .config/i3blocks/i3blocks-contrib
 	url = https://github.com/vivien/i3blocks-contrib
