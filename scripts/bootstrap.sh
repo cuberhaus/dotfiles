@@ -1,26 +1,7 @@
 #! /usr/bin/env bash
 arch_install () {
-    # Doxygen
-    sudo pacman -S doxygen texlive-most graphviz gcc
-    # System tools
-    sudo pacman -S dhcpcd git nvidia python3 stow
-    # Terminal
-    sudo pacman -S rxvt-unicode gvim exa
-    # Manage storage
-    sudo pacman -S ncdu
-    # Apps
-    sudo pacman -S thunderbird virtualbox-qt transmission chromium thunar albert
-    # Fonts
-    sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts ttf-ms-fonts
     # Theme
     sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme
-    # Tmux
-    sudo pacman -S tmux
-    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-    # AUR
-    sudo pacman -S --needed base-devel
-    # Display manager
-    sudo pacman -S lightdm-gtk-greeter lightdm
     # Image viewer
     sudo pacman -S nomacs
     # Audio
@@ -28,6 +9,26 @@ arch_install () {
     # Video player
 	sudo pacman -S vlc
     mkdir ~/.cache/vlc
+    # Apps
+    sudo pacman -S thunderbird virtualbox-qt transmission chromium thunar albert
+
+    # Terminal
+    sudo pacman -S rxvt-unicode gvim exa
+    # Tmux
+    sudo pacman -S tmux
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    # Manage storage
+    sudo pacman -S ncdu
+    # System tools
+    sudo pacman -S dhcpcd git nvidia python3 stow
+    # AUR
+    sudo pacman -S --needed base-devel
+    # Display manager
+    sudo pacman -S lightdm-gtk-greeter lightdm
+    # Fonts
+    sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts ttf-ms-fonts
+    # Doxygen
+    sudo pacman -S doxygen texlive-most graphviz gcc
 
 }
 
