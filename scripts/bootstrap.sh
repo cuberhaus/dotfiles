@@ -13,7 +13,7 @@ arch_install () {
     # Fonts
     sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts ttf-ms-fonts
     # Theme
-    pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme
+    sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme
     # Tmux
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     # AUR
