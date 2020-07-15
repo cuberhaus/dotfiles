@@ -71,7 +71,7 @@ bindsym $mod+p workspace prev
 bindsym $mod+n workspace next
 
 # Custom Rofi | change with ctrl tab
-bindsym $mod+d exec "rofi -modi window,drun,run -show drun "
+bindsym $mod+d exec "rofi -modi window,drun,run -show drun -show-icons"
 
 # start a terminal
 bindsym $mod+Return exec urxvt
@@ -227,10 +227,11 @@ bindsym $mod+7 workspace $ws7
 bindsym $mod+8 workspace $ws8
 bindsym $mod+9 workspace $ws9
 bindsym $mod+0 workspace $ws10
-for_window [class="Spotify"] move to workspace $ws3
-for_window [class="Skype"] move to workspace $ws4
-for_window [class="Discord"] move to workspace $ws3
 for_window [class="jetbrains-studio"] move to workspace $ws2
+for_window [class="Spotify"] move to workspace $ws3
+for_window [class="walc"] move to workspace $ws4
+for_window [class="Discord"] move to workspace $ws4
+for_window [class="Skype"] move to workspace $ws4
 for_window [class="Steam"] move to workspace $ws5
 for_window [class="Lutris"] move to workspace $ws5
 
@@ -268,7 +269,7 @@ client.urgent           $urgent-bg-color    $urgent-bg-color   $text-color      
 # finds out, if available)
 bar {
     strip_workspace_numbers yes
-        status_command i3blocks -c ~/.config/i3/i3blocks.conf
+        status_command i3blocks -c ~/.config/i3blocks/i3blocks.conf
         colors {
             background $bg-color
                 separator #757575
@@ -301,7 +302,7 @@ bindsym $mod+Pause mode "$mode_system"
 
 # Wallpaper
 exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
-#Bluetooth
+# Bluetooth "blueman"
 exec blueman-applet
 # Some kind of window manager ??
 exec compton
