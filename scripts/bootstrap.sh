@@ -54,6 +54,13 @@ i3_install () {
 }
 snap_install () {
     https://wiki.archlinux.org/index.php/Snap
+
+	git clone https://aur.archlinux.org/snapd.git
+	cd snapd
+	makepkg -si
+	sudo systemctl enable --now apparmor.service
+	sudo systemctl enable --now snapd.apparmor.service
+	sudo systemctl enagle --now snapd.socket
 }
 
 ### Installation starts here
