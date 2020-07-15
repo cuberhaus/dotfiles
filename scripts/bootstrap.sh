@@ -1,7 +1,8 @@
 #! /usr/bin/env bash
+
 arch_install () {
     # Theme
-    sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme
+    sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme cmatrix
     # Image viewer
     sudo pacman -S nomacs
     # Audio
@@ -48,12 +49,16 @@ i3_install () {
     sudo pacman -S light
     # battery plus
     sudo pacman -S awk bc upower
+    # calendar
+    sudo pacman -S yad xdotool
 }
+
+### Installation starts here
 
 cd ~/
 # Update
 sudo pacman -Syu
-
+# Base install
 arch_install
 i3_install
 vim_install
