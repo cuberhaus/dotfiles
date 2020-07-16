@@ -171,9 +171,9 @@ GIT_PROMPT_ONLY_IN_REPO=0 # Set config variables first
 
 # as last entry source the gitprompt script
 # GIT_PROMPT_THEME=Custom # use custom theme specified in file GIT_PROMPT_THEME_FILE (default ~/.git-prompt-colors.sh)
-# GIT_PROMPT_THEME_FILE=~/.git-prompt-colors.sh
-GIT_PROMPT_THEME=Solarized # use theme optimized for solarized color scheme
-source ~/.config/.bash-git-prompt/gitprompt.sh
+GIT_PROMPT_THEME_FILE=~/.git-prompt-colors.sh
+GIT_PROMPT_THEME=Custom # use theme optimized for solarized color scheme
+source ~/.config/bash-git-prompt/gitprompt.sh
 # Fast prompt ends
 
 # Powerline Shell
