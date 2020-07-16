@@ -2,6 +2,18 @@
 
  
 # Arch
+
+# Git
+### Install this repo:
+```
+git clone --recurse-submodules https://github.com/Pol-Gil/ArchDotfiles
+```
+### Update all submodules:
+```
+git fetch --recurse-submodules
+git merge --recurse-submodules
+```
+
 # Stow
 ### Adding files to stow symlink:
 
@@ -85,12 +97,6 @@ List installed packages
 pacman -Qqe > pkglist.txt
 ```
 
-# Git
-To update all submodules:
-```
-git fetch --recurse-submodules
-git merge --recurse-submodules
-```
 # Disk Partition
 Use cfdisk instead of fdisk
 ```
