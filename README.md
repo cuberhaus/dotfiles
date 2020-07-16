@@ -72,15 +72,15 @@ https://wiki.archlinux.org/index.php/Persistent_block_device_naming
 ```
 lsblk -f
 ```
-### List currently running services:
+List currently running services:
 ```
 systemctl --type=service
 ```
-### Show systemd Journal:
+Show systemd Journal:
 ```
 journalctl
 ```
-### List installed packages
+List installed packages
 ```
 pacman -Qqe > pkglist.txt
 ```
