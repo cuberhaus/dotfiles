@@ -91,7 +91,7 @@ To update all submodules:
 git fetch --recurse-submodules
 git merge --recurse-submodules
 ```
-### Disk Partition
+# Disk Partition
 Use cfdisk instead of fdisk
 ```
 cfdisk
