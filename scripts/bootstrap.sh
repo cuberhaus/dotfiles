@@ -3,6 +3,7 @@
 arch_install () {
     # Theme
     sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme cmatrix arc-icon-theme
+    # Notifications
     # Image viewer
     sudo pacman -S nomacs
     # Audio | Equalizer qpaeq
@@ -56,7 +57,7 @@ i3_install () {
 }
 
 snap_install () {
-    https://wiki.archlinux.org/index.php/Snap
+    # https://wiki.archlinux.org/index.php/Snap
 
 	git clone https://aur.archlinux.org/snapd.git
 	cd snapd
@@ -67,7 +68,7 @@ snap_install () {
 }
 
 spotify_install () {
-    https://wiki.archlinux.org/index.php/Spotify
+    # https://wiki.archlinux.org/index.php/Spotify
     git clone https://aur.archlinux.org/spotify.git
     cd spotify
     curl -sS https://download.spotify.com/debian/pubkey.gpg | gpg --import -
@@ -82,6 +83,13 @@ Network_manager_install () {
     sudo pacman -S nm-connection-editor
     # Applet
     sudo pacman -S nm-applet
+}
+Auto-mounting () {
+# https://wiki.archlinux.org/index.php/USB_storage_devices
+    # Daemon to manipulate storage devices
+    sudo pacman -S udisks2
+    # Automater
+    sudo pacman -S udiskie
 }
 
 ### Installation starts here
