@@ -2,3 +2,6 @@
 [submodule ".config/i3blocks/i3blocks-contrib"]
 	path = .config/i3blocks/i3blocks-contrib
 	url = https://github.com/vivien/i3blocks-contrib
+[submodule ".config/i3blocks/scripts/i3blocks-spotify"]
+	path = .config/i3blocks/scripts/i3blocks-spotify
+	url = https://github.com/firatakandere/i3blocks-spotify
