@@ -73,6 +73,7 @@ spotify_install () {
 }
 
 Network_manager_install () {
+    # Network Manager and enable daemon on startup
     sudo pacman -S networkmanager
     systemctl enable NetworkManager.service
     # Gui
