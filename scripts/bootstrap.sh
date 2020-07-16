@@ -2,7 +2,7 @@
 
 arch_install () {
     # Theme
-    sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme cmatrix
+    sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme cmatrix arc-icon-theme
     # Image viewer
     sudo pacman -S nomacs
     # Audio
