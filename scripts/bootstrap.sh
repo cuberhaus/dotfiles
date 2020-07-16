@@ -5,8 +5,8 @@ arch_install () {
     sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme cmatrix arc-icon-theme
     # Image viewer
     sudo pacman -S nomacs
-    # Audio
-    sudo pacman -S pulseaudio
+    # Audio | Equalizer qpaeq
+    sudo pacman -S pulseaudio pulseaudio-equalizer pulseaudio-bluetooth
     # Video player
 	sudo pacman -S vlc
     mkdir ~/.cache/vlc
@@ -51,6 +51,8 @@ i3_install () {
     sudo pacman -S awk bc upower
     # calendar
     sudo pacman -S yad xdotool
+    # Audio
+    sudo pacman -S pulseaudio alsa-utils
 }
 
 snap_install () {
@@ -88,6 +90,7 @@ cd ~/
 # Update
 sudo pacman -Syu
 # Base install
+Network_manager_install
 arch_install
 i3_install
 vim_install
