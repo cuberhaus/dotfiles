@@ -72,6 +72,15 @@ spotify_install () {
     makepkg -si
 }
 
+Network_manager_install () {
+    sudo pacman -S networkmanager
+    systemctl enable NetworkManager.service
+    # Gui
+    sudo pacman -S nm-connection-editor
+    # Applet
+    sudo pacman -S nm-applet
+}
+
 ### Installation starts here
 
 cd ~/
