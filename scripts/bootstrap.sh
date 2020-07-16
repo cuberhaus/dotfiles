@@ -52,6 +52,7 @@ i3_install () {
     # calendar
     sudo pacman -S yad xdotool
 }
+
 snap_install () {
     https://wiki.archlinux.org/index.php/Snap
 
@@ -63,6 +64,14 @@ snap_install () {
 	sudo systemctl enagle --now snapd.socket
 }
 
+spotify_install () {
+    https://wiki.archlinux.org/index.php/Spotify
+    git clone https://aur.archlinux.org/spotify.git
+    cd spotify
+    curl -sS https://download.spotify.com/debian/pubkey.gpg | gpg --import -
+    makepkg -si
+}
+
 ### Installation starts here
 
 cd ~/
@@ -72,3 +81,4 @@ sudo pacman -Syu
 arch_install
 i3_install
 vim_install
+spotify_install
