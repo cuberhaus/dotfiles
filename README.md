@@ -2,7 +2,15 @@
 
  
 # Arch
-
+# Pacman
+Remove a package and its dependancies:
+```
+sudo pacman -Rs
+```
+Remove all orphan packages:
+```
+pacman -Rns $(pacman -Qtdq)
+```
 # Git
 ### Install this repo:
 ```
