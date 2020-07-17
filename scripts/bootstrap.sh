@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 arch_install () {
+    sudo pacman -S xorg
     # Theme
     sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme cmatrix arc-icon-theme
     # Notifications
