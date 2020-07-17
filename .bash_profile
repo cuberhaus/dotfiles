@@ -16,5 +16,6 @@ fi
 if [ -d "$HOME/.config/pfetch" ] ; then
         PATH="$HOME/.config/pfetch:$PATH"
 fi
+
 # Source .bashrc
 [[ -f ~/.bashrc ]] && . ~/.bashrc

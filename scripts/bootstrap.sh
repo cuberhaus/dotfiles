@@ -1,7 +1,11 @@
 #! /usr/bin/env bash
-
+# YOU NEED TO ADD YOURSELF TO WHEEL AND TO VIDEO
+# video makes backlight work and wheel gives you sudo privilege
+# usermod -a -G wheel video
 arch_install () {
     sudo pacman -S xorg
+    # Drivers
+    sudo pacman -S nvidia xf86-video-intel
     # Theme
     sudo pacman -S lxappearance gtk2 gtk3 arc-gtk-theme cmatrix arc-icon-theme
     # Notifications
@@ -23,7 +27,7 @@ arch_install () {
     # Manage storage
     sudo pacman -S ncdu
     # System tools
-    sudo pacman -S base-devel dhcpcd git nvidia python3 stow
+    sudo pacman -S base-devel dhcpcd git python3 stow
     # AUR
     sudo pacman -S --needed base-devel
     # Display manager
