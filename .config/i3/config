@@ -234,6 +234,7 @@ for_window [class="Discord"] move to workspace $ws4
 for_window [class="Skype"] move to workspace $ws4
 for_window [class="Steam"] move to workspace $ws5
 for_window [class="Lutris"] move to workspace $ws5
+# calendar
 for_window [class="Yad"] floating enable
 
 # move focused container to workspace

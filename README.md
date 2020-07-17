@@ -1,6 +1,3 @@
-
-
- 
 # Arch
 # Pacman
 Remove a package and its dependancies:

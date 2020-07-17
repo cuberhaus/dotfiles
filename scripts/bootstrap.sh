@@ -22,7 +22,7 @@ arch_install () {
     # Manage storage
     sudo pacman -S ncdu
     # System tools
-    sudo pacman -S dhcpcd git nvidia python3 stow
+    sudo pacman -S base-devel dhcpcd git nvidia python3 stow
     # AUR
     sudo pacman -S --needed base-devel
     # Display manager
@@ -84,6 +84,7 @@ Network_manager_install () {
     # Applet
     sudo pacman -S nm-applet
 }
+
 Auto-mounting () {
 # https://wiki.archlinux.org/index.php/USB_storage_devices
     # Daemon to manipulate storage devices
