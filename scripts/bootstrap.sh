@@ -39,7 +39,7 @@ vim_install () {
     cd ~/
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
-    bash ~/scripts/ycm
+    bash ~/scripts/ycm.sh
 }
 
 i3_install () {
