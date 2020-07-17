@@ -26,6 +26,7 @@ arch_install () {
     # AUR
     sudo pacman -S --needed base-devel
     # Display manager
+    #systemctl enable lightdm.service
     sudo pacman -S lightdm-gtk-greeter lightdm
     # Fonts
     sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts ttf-ms-fonts
@@ -78,7 +79,7 @@ spotify_install () {
 Network_manager_install () {
     # Network Manager and enable daemon on startup
     sudo pacman -S networkmanager
-    systemctl enable NetworkManager.service
+    #systemctl enable NetworkManager.service
     # Gui
     sudo pacman -S nm-connection-editor
     # Applet
@@ -99,7 +100,7 @@ cd ~/
 # Update
 sudo pacman -Syu
 # Base install
-Network_manager_install
+#Network_manager_install
 arch_install
 i3_install
 vim_install
