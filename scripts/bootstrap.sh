@@ -3,7 +3,7 @@
 arch_install () {
     sudo pacman -S xorg
     # Theme
-    sudo pacman -S LXAppearance gtk-2 gtk-3 arc-gtk-theme cmatrix arc-icon-theme
+    sudo pacman -S lxappearance gtk2 gtk3 arc-gtk-theme cmatrix arc-icon-theme
     # Notifications
     # Image viewer
     sudo pacman -S nomacs
@@ -95,6 +95,10 @@ Auto-mounting () {
     sudo pacman -S udiskie
 }
 
+base16 () {
+    git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
+}
+
 ### Installation starts here
 
 cd ~/
@@ -106,3 +110,5 @@ arch_install
 i3_install
 vim_install
 spotify_install
+Auto-mounting
+base16
