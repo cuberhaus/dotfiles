@@ -5,7 +5,8 @@
 arch_install () {
     sudo pacman -S xorg
     # Drivers
-    sudo pacman -S nvidia xf86-video-intel
+    # Add force composition pipeline in nvidia-settings
+    sudo pacman -S nvidia nvidia-settings xf86-video-intel
     # Theme
     sudo pacman -S lxappearance gtk2 gtk3 arc-gtk-theme cmatrix arc-icon-theme
     # Notifications
@@ -119,3 +120,5 @@ Auto-mounting
 base16
 sudo pacman -S discord
 yay -S skypeforlinux-stable-bin
+# configure nvidia
+nvidia-xconfig
