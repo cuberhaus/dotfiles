@@ -12,7 +12,7 @@ arch_install () {
 	sudo pacman -S vlc
     mkdir ~/.cache/vlc
     # Apps
-    sudo pacman -S thunderbird virtualbox-qt transmission chromium thunar albert
+    sudo pacman -S thunderbird chromium thunar albert
 
     # Terminal
     sudo pacman -S rxvt-unicode gvim exa
