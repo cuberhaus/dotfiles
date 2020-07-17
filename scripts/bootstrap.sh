@@ -117,3 +117,5 @@ vim_install
 spotify_install
 Auto-mounting
 base16
+sudo pacman -S discord
+yay -S skypeforlinux-stable-bin
