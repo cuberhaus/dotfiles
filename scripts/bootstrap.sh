@@ -56,6 +56,7 @@ i3_install () {
     sudo pacman -S light
     # battery plus
     sudo pacman -S awk bc upower
+    sudo pacman -S acpi
     # calendar
     sudo pacman -S yad xdotool
     # Audio
