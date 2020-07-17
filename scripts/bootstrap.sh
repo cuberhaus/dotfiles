@@ -30,7 +30,7 @@ arch_install () {
     #systemctl enable lightdm.service
     sudo pacman -S lightdm-gtk-greeter lightdm
     # Fonts
-    sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts ttf-ms-fonts
+    sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts
     # Doxygen
     sudo pacman -S doxygen texlive-most graphviz gcc
 
