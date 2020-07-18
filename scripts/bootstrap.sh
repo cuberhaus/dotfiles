@@ -15,6 +15,8 @@ arch_install () {
     sudo pacman -S nomacs
     # Pdf viewer
     sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
+    # Office
+    sudo pacman -S libreoffice-still
     # Audio | Equalizer qpaeq
     sudo pacman -S pulseaudio pulseaudio-equalizer pulseaudio-bluetooth
     # Video player
@@ -109,10 +111,13 @@ base16 () {
 }
 
 yay_install () {
-
+    # Microsoft fonts
     yay -S ttf-ms-fonts
+    # Backups
+    yay -S timeshift
     yay -S skypeforlinux-stable-bin
     yay -S android-sdk
+    yay -S slack-desktop
 }
 
 ### Installation starts here
