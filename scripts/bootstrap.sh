@@ -20,7 +20,7 @@ arch_install () {
     sudo pacman -S thunderbird chromium thunar albert
 
     # Terminal
-    sudo pacman -S rxvt-unicode gvim exa
+    sudo pacman -S rxvt-unicode gvim exa ranger
     # Tmux
     sudo pacman -S tmux
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
