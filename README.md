@@ -8,6 +8,10 @@ Remove all orphan packages:
 ```
 pacman -Rns $(pacman -Qtdq)
 ```
+List all AUR packages:
+```
+pacman -Qm
+```
 # Git
 ### Install this repo:
 ```
