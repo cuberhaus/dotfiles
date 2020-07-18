@@ -119,6 +119,16 @@ yay_install () {
     yay -S android-sdk
     yay -S slack-desktop
 }
+# do this but i dont know exactly how
+do_once () {
+    sudo echo "Section "InputClass"
+        Identifier "libinput touchpad catchall"
+        MatchIsTouchpad "on"
+        MatchDevicePath "/dev/input/event*"
+        Driver "libinput"
+		Option "NaturalScrolling" "true"
+EndSection"  >> /etc/X11/xorg.conf.d/30-touchpad.conf
+}
 
 ### Installation starts here
 
