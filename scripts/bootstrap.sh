@@ -10,8 +10,11 @@ arch_install () {
     # Theme
     sudo pacman -S lxappearance gtk2 gtk3 arc-gtk-theme cmatrix arc-icon-theme
     # Notifications
+    sudo pacman -S dunst
     # Image viewer
     sudo pacman -S nomacs
+    # Pdf viewer
+    sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
     # Audio | Equalizer qpaeq
     sudo pacman -S pulseaudio pulseaudio-equalizer pulseaudio-bluetooth
     # Video player
@@ -105,6 +108,13 @@ base16 () {
     git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
 }
 
+yay_install () {
+
+    yay -S ttf-ms-fonts
+    yay -S skypeforlinux-stable-bin
+    yay -S android-sdk
+}
+
 ### Installation starts here
 
 cd ~/
@@ -119,6 +129,5 @@ spotify_install
 Auto-mounting
 base16
 sudo pacman -S discord
-yay -S skypeforlinux-stable-bin
 # configure nvidia
 nvidia-xconfig
