@@ -3,7 +3,8 @@
 #
 # Mounts external disks automatically
 udiskie &
-
+# bash completion vim file to see what it is
+source /usr/share/bash-completion/bash_completion
 # Use vim
 export VISUAL=vim
 export EDITOR="$VISUAL"
