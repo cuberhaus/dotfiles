@@ -129,6 +129,8 @@ do_once () {
 		Option "NaturalScrolling" "true"
 EndSection"  >> /etc/X11/xorg.conf.d/30-touchpad.conf
 }
+games_install () {
+}
 
 ### Installation starts here
 
