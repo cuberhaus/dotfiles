@@ -206,7 +206,7 @@ bindsym $mod+shift+x exec i3lock
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
 set $ws1 "1: Home"
-set $ws2 "2: Dev"
+set $ws2 "2: Work"
 set $ws3 "3: Spotify"
 set $ws4 "4: Chat"
 set $ws5 "5: Games"
@@ -228,6 +228,7 @@ bindsym $mod+8 workspace $ws8
 bindsym $mod+9 workspace $ws9
 bindsym $mod+0 workspace $ws10
 for_window [class="jetbrains-studio"] move to workspace $ws2
+for_window [class="Thunderbird"] move to workspace $ws2
 for_window [class="Spotify"] move to workspace $ws3
 for_window [class="walc"] move to workspace $ws4
 for_window [class="Discord"] move to workspace $ws4
