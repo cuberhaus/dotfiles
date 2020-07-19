@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 # YOU NEED TO ADD YOURSELF TO WHEEL AND TO VIDEO
 # video makes backlight work and wheel gives you sudo privilege
-# usermod -a -G wheel video
+# usermod -a -G wheel video input
 arch_install () {
     sudo pacman -S xorg
     # Drivers
@@ -26,7 +26,7 @@ arch_install () {
     sudo pacman -S thunderbird chromium thunar albert
 
     # Terminal
-    sudo pacman -S rxvt-unicode gvim exa ranger
+    sudo pacman -S rxvt-unicode gvim exa ranger bash-completion
     # Tmux
     sudo pacman -S tmux
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
@@ -129,7 +129,9 @@ do_once () {
 		Option "NaturalScrolling" "true"
 EndSection"  >> /etc/X11/xorg.conf.d/30-touchpad.conf
 }
+
 games_install () {
+    sudo pacman -S steam lutris
 }
 
 ### Installation starts here
