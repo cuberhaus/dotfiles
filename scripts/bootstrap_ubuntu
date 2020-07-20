@@ -1,0 +1,218 @@
+#! /usr/bin/env bash
+
+ubuntu_minimal_install () {
+
+    # Update
+    sudo apt-get update; sudo apt-get full-upgrade
+    # System tools
+    sudo apt-get install git build-essential file python3 python3-pip npm samba-common-bin texlive-full doxygen fonts-powerline cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils curl gnome-screensaver arc-theme autoconf automake sassc optipng inkscape gnome-shell libgtk-3-dev pkg-config yarn nodejs pavucontrol
+    # Terminal
+    sudo apt-get install rxvt-unicode htop ranger vim-gtk 
+    # Tmux
+    sudo apt-get install tmux  
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    # Manage storage 
+    sudo apt-get install ncdu 
+    # Apps
+    sudo apt-get install thunderbird virtualbox-qt transmission timeshift gparted 
+    # Audio
+    sudo apt-get install vlc 
+    # Theme
+    sudo apt-get install LXAppearance
+    # Themes base16
+    cd ~/
+    git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
+
+    # Video player
+    mkdir ~/.cache/vlc
+
+    if [[ $FirstRun == y ]]; then
+        sudo mkdir /var/lib/samba/usershares
+        sudo adduser `id -un` libvirt
+        sudo adduser `id -un` kvm
+
+        # Pip3
+        sudo pip3 install spotify-cli-linux
+    fi
+}
+
+brew_install () {
+    cd ~/
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+    brew update
+    brew upgrade
+    brew install gcc patchelf graphviz exa
+}
+
+chrome_install () {
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    sudo apt install ./google-chrome-stable_current_amd64.deb
+    rm google-chrome-stable_current_amd64.deb
+}
+
+vim_install () {
+    cd ~/
+    vim +PlugInstall +qall
+    # Vim YouCompleteMe plugin install
+    if [[ $FirstRun == y ]]; then
+        bash ~/scripts/ycm
+    fi
+}
+
+steam_install () {
+    wget https://repo.steampowered.com/steam/archive/precise/steam_latest.deb
+    sudo apt install ./steam_latest.deb
+    rm steam_latest.deb
+}
+
+powerline_install () {
+    pip3 install powerline-shell
+}
+
+albert_install () {
+    if ! command -v albert 2>/dev/null; then
+        cd ~/
+        curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
+        echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_20.04/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
+        sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_20.04/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
+        sudo apt-get update
+        sudo apt-get install albert
+    fi
+}
+
+bloat_install () {
+    brew install pipes-sh
+    sudo apt-get install neofetch cmatrix
+}
+
+i3_install () {
+    sudo add-apt-repository ppa:kgilmer/speed-ricer
+    sudo apt-get update
+    sudo apt-get install i3-gaps
+    sudo apt-get install feh compton rofi i3blocks python-dbus player-ctl pulseaudio
+    # Add current user to group video, type groups to see which groups you are in
+    sudo usermod -a -G video $LOGNAME
+    # Light setup | Enables brightness controls
+    git clone https://github.com/haikarainen/light
+    ./autogen.sh
+    ./configure && make
+    sudo make install
+
+    ./configure --with-udev && make
+    sudo make install
+}
+
+emacs_install () {
+    sudo apt-get install emacs-gtk 
+    # Doom
+
+    # required dependencies
+    sudo apt-get install git ripgrep
+    # optional dependencies
+    sudo apt-get install tar fd-find clang
+}
+# Rufus for linux
+unetbootin () {
+    sudo add-apt-repository ppa:gezakovacs/ppa
+	sudo apt-get update
+	sudo apt-get install unetbootin 
+}
+
+
+### MAIN
+# Ask for variables
+echo "Are you sure you want to bootstrap your machine? [y/n]"
+read BootStrap
+if [[ $BootStrap == n ]]; then
+    exit
+fi
+
+echo "Is it the first time you run this script? [y/n]"
+read FirstRun
+
+echo "Do you want bloat? [y/n]"
+read Bloat
+
+echo "Do you want to play Games? [y/n]"
+read Games
+
+
+# Stow WIP
+#cd ~/dotfiles/dotfiles
+## Cleans any existing files on ~/
+#find . -exec rm '../../{}' ';'
+##find . -exec mv '../../{}' '~/backup' ';'
+#
+#mkdir dotfiles 
+#git clone
+#stow -vt ~ dotfiles
+
+
+# Start installation
+ubuntu_minimal_install
+if [[ $FirstRun == y ]]; then
+    brew_install
+    chrome_install
+fi
+vim_install
+albert_install
+if [[ $Bloat == y ]]; then
+    bloat_install
+fi
+
+if [[ $Games == y ]]; then
+    steam_install
+fi
+
+i3_install
+
+snaps=(dialog --separate-output --checklist "Select which snaps you would like to install" 22 76 16)
+options=(1 "Spotify" on
+    2 "Discord" on
+    3 "Whatsapp" on
+    4 "To-do list" off
+    5 "Skype" on
+    6 "atom" off
+    7 "slack" off
+    8 "Android Studio" on)
+snap_choices=$("${snaps[@]}" "${options[@]}" 2>&1 >/dev/tty)
+clear
+for choice in $snap_choices
+do
+    case $choice in
+        1)
+            sudo snap install spotify
+            ;;
+        2)
+            sudo snap install discord
+            ;;
+        3)
+            sudo snap install walc
+            ;;
+        4)
+            sudo snap install ao
+            ;;
+        5)
+            sudo snap install android-studio --classic
+            ;;
+        6)
+            sudo snap install skype --classic
+            ;;
+        7)
+            sudo snap install atom --classic
+            ;;
+        8)
+            sudo snap install slack --classic
+            ;;
+    esac
+done
+
+# Stretchly
+#cd ~/
+#git clone https://github.com/hovancik/stretchly
+#cd stretchly
+#npm install
+#sudo apt-get install libappindicator1
+
+cd ~/
