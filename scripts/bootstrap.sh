@@ -11,6 +11,8 @@ arch_install () {
     sudo pacman -S lxappearance gtk2 gtk3 arc-gtk-theme cmatrix arc-icon-theme
     # Notifications
     sudo pacman -S dunst
+    # Preview images on ranger
+    sudo pacman -S w3m
     # Image viewer
     sudo pacman -S nomacs
     # Pdf viewer
