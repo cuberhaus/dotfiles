@@ -2,7 +2,7 @@
 # ~/.bash_profile
 #
 # Mounts external disks automatically
-udiskie &
+udiskie > /dev/null 2>&1 &
 # bash completion vim file to see what it is
 source /usr/share/bash-completion/bash_completion
 # Use vim
@@ -17,6 +17,6 @@ fi
 if [ -d "$HOME/.config/pfetch" ] ; then
         PATH="$HOME/.config/pfetch:$PATH"
 fi
-
+export PATH="${PATH}:${HOME}/.local/bin/"
 # Source .bashrc
 [[ -f ~/.bashrc ]] && . ~/.bashrc

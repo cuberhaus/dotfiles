@@ -114,12 +114,13 @@ alias gc="git commit -m "
 alias gp="git push"
 
 # Nautilus
-alias o='thunar . & 2> /dev/null'
+alias o='thunar . > /dev/null 2>&1 &
+'
 
 # Lock screen
 LockScreens=('pipes.sh' 'cmatrix')
 alias lock='${LockScreens[$RANDOM % 2]}'
-alias afk="gnome-screensaver-command -l & disown 2> /dev/null"
+alias afk="betterlockscreen -l"
 
 # List files
 alias l="ls -G -F --color=auto"

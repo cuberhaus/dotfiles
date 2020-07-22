@@ -11,6 +11,8 @@ arch_install () {
     sudo pacman -S lxappearance gtk2 gtk3 arc-gtk-theme cmatrix arc-icon-theme
     # Notifications
     sudo pacman -S dunst
+    # Bluetooth
+    sudo pacman -S bluez bluez-utils
     # Preview images on ranger
     sudo pacman -S w3m
     # Image viewer
@@ -120,6 +122,8 @@ yay_install () {
     yay -S skypeforlinux-stable-bin
     yay -S android-sdk
     yay -S slack-desktop
+    # Lockscreen
+    yay -S betterlockscreen
 }
 # do this but i dont know exactly how
 do_once () {
