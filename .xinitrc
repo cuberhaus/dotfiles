@@ -8,15 +8,7 @@ sysmodmap=/etc/X11/xinit/.Xmodmap
 # merge in defaults and keymaps
 
 if [ -f $sysresources ]; then
-
-
-
-
-
-
-
     xrdb -merge $sysresources
-
 fi
 
 if [ -f $sysmodmap ]; then
@@ -24,15 +16,7 @@ if [ -f $sysmodmap ]; then
 fi
 
 if [ -f "$userresources" ]; then
-
-
-
-
-
-
-
     xrdb -merge "$userresources"
-
 fi
 
 if [ -f "$usermodmap" ]; then
@@ -48,4 +32,15 @@ if [ -d /etc/X11/xinit/xinitrc.d ] ; then
  unset f
 fi
 
+# Si tens un portatil posa el teclat en catala
+if laptop-detect ; then
+        setxkbmap es 
+fi
+
+betterlockscreen -u ~/wallpapers/landscape > /dev/null 2>&1 &
+# Swaps esc key with caps lock
+xmodmap -e "clear lock"
+xmodmap -e "keycode 9 = Caps_Lock NoSymbol Caps_Lock"
+xmodmap -e "keycode 66 = Escape NoSymbol Escape"
+# Starts i3
 i3

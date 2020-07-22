@@ -193,4 +193,3 @@ source ~/.config/bash-git-prompt/gitprompt.sh
 if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
     exec tmux attach
 fi
-
