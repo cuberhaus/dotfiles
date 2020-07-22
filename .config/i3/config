@@ -308,4 +308,4 @@ exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
 # Bluetooth "blueman"
 exec blueman-applet
 # Some kind of window manager ??
-exec compton
+exec picom
