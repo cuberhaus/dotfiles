@@ -3,7 +3,7 @@
 if laptop-detect ; then
     setxkbmap es 
 fi
-betterlockscreen -u ~/wallpapers/landscape
+betterlockscreen -u ~/wallpapers/landscape > /dev/null 2>&1 &
 xmodmap -e "clear lock"
 xmodmap -e "keycode 9 = Caps_Lock NoSymbol Caps_Lock"
 xmodmap -e "keycode 66 = Escape NoSymbol Escape"
