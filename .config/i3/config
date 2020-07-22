@@ -28,7 +28,8 @@ smart_borders on
 smart_gaps on
 hide_edge_borders smart_no_gaps
 
-default_border none
+# No titles but little borders that help see where next window will go, super + v, super + b
+default_border pixel 2
 # want it
 #for_window [class="^.*"] border pixel 2
 set $mod Mod4
