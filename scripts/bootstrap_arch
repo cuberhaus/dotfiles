@@ -42,6 +42,14 @@ arch_install () {
     sudo pacman -S base-devel dhcpcd git python3 stow
     # AUR
     sudo pacman -S --needed base-devel
+    # Ntp for time syncro
+    #https://wiki.archlinux.org/index.php/Systemd-timesyncd
+    systemctl enable systemd-timesyncd.service
+    systemctl disable ntpd.service
+	#systemctl stop ntpd.service
+	#systemctl start systemd-timesyncd.service
+	#systemctl enable systemd-timesyncd.service 
+
     # Display manager
     #systemctl enable lightdm.service
     sudo pacman -S lightdm-gtk-greeter lightdm
