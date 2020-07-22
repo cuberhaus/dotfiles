@@ -31,6 +31,8 @@ arch_install () {
 
     # Terminal
     sudo pacman -S rxvt-unicode gvim exa ranger bash-completion
+    # Fuzzy finder
+    sudo pacman -S fzf
     # Tmux
     sudo pacman -S tmux
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
@@ -125,6 +127,18 @@ yay_install () {
     # Lockscreen
     yay -S betterlockscreen
 }
+
+cava_install () {
+    pacman -S base-devel fftw ncurses alsa-lib iniparser pulseaudio
+    git clone https://github.com/karlstav/cava
+    cd cava
+    ./autogen.sh
+    ./configure
+    make
+    make install
+    #make uninstall
+}
+
 # do this but i dont know exactly how
 do_once () {
     sudo echo "Section "InputClass"
