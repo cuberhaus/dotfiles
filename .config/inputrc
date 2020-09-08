@@ -1,0 +1,14 @@
+$include /etc/inputrc
+set editing-mode vi
+$if mode=vi
+    # display which vi mode is currently active
+    set show-mode-in-prompt on
+    #set a different cursor shape for each mode
+    $if term=linux
+        set vi-ins-mode-string \1\e[?0c\2
+        set vi-cmd-mode-string \1\e[?8c\2
+    $else
+        set vi-ins-mode-string \1\e[6 q\2
+        set vi-cmd-mode-string \1\e[2 q\2
+    $endif
+$endif

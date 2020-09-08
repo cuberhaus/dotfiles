@@ -1,0 +1,40 @@
+
+[submodule ".config/i3blocks/i3blocks-contrib"]
+	path = .config/i3blocks/i3blocks-contrib
+	url = https://github.com/vivien/i3blocks-contrib
+[submodule ".config/i3blocks/scripts/i3blocks-spotify"]
+	path = .config/i3blocks/scripts/i3blocks-spotify
+	url = https://github.com/firatakandere/i3blocks-spotify
+[submodule ".config/bash-git-prompt"]
+	path = .config/bash-git-prompt
+	url = https://github.com/magicmonty/bash-git-prompt
+[submodule ".config/ranger/plugins/ranger_devicons"]
+	path = .config/ranger/plugins/ranger_devicons
+	url = https://github.com/alexanderjeurissen/ranger_devicons
+[submodule ".local/share/xfce4/terminal/base16-xfce4-terminal"]
+	path = .local/share/xfce4/terminal/base16-xfce4-terminal
+	url = https://github.com/afq984/base16-xfce4-terminal
+[submodule ".config/i3/i3-layout-manager"]
+	path = .config/i3/i3-layout-manager
+	url = https://github.com/klaxalk/i3-layout-manager
+[submodule "/home/pol/dotfiles/dotfiles/.config/powerlevel10k"]
+	path = .config/powerlevel10k
+	url = https://github.com/romkatv/powerlevel10k.git
+[submodule "/home/pol/dotfiles/dotfiles/.config/oh-my-zsh"]
+	path = .config/oh-my-zsh
+	url = https://github.com/ohmyzsh/ohmyzsh.git
+[submodule ".local/xdg/wallpapers"]
+	path = .local/xdg/wallpapers
+	url = https://github.com/Pol-Gil/wallpapers
+[submodule ".config/zsh/zsh-autosuggestions"]
+	path = .config/zsh/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions
+[submodule ".config/base16-shell"]
+	path = .config/base16-shell
+	url = https://github.com/chriskempson/base16-shell.git
+[submodule ".tmux/plugins/tpm"]
+	path = .tmux/plugins/tpm
+	url = https://github.com/tmux-plugins/tpm
+[submodule ".config/zsh/zsh-syntax-highlighting"]
+	path = .config/zsh/zsh-syntax-highlighting
+	url = https://github.com/zsh-users/zsh-syntax-highlighting.git

@@ -1,0 +1,90 @@
+#! /usr/bin/env bash
+
+manjaro_install() {
+    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
+    sudo pacman -S xclip                 # Clipboard
+    sudo pacman -S laptop-detect         # Detect if using a laptop 
+    sudo pacman -S npm
+	sudo pacman -S base-devel
+    sudo pacman -S discord
+    sudo pacman -S code                  # Visual code (settings sync plugin req.)
+    sudo pacman -S yarn                  # Package installer
+    sudo pacman -S texstudio             # Latex text editor
+    sudo pacman -S reflector             # Update Arch mirrors
+    sudo pacman -S dnsutils              # Ip
+    sudo pacman -S net-tools             # Ips
+    sudo pacman -S cmatrix               # Bloat
+    sudo pacman -S thunderbird           # Email
+    sudo pacman -S qbittorrent           # Torrent Downloader
+    sudo pacman -S calibre               # Book manager
+    sudo pacman -S ncdu                  # Manage storage
+    sudo pacman -S ranger                # Ranger
+    sudo pacman -S w3m                   # Preview images on ranger
+    sudo pacman -S fortune-mod           # Random quote
+    mkdir ~/.cache/zsh
+    sudo pacman -S termite               # Terminal emulator
+    sudo pacman -S gvim                  # Vim version with extra features
+    sudo pacman -S exa                   # "ls" on steroids
+    sudo pacman -S htop                  # Show system resources
+    sudo pacman -S the_silver_searcher   # Better and faster ack (and grep)
+    sudo pacman -S fzf                   # Fuzzy finder
+    sudo pacman -S tmux                  # Terminal multiplexer
+    sudo pacman -S doxygen texlive-most graphviz # Doxygen
+    sudo pacman -S gcc                   # Cpp
+    # IRC APPS
+    sudo pacman -S hexchat               # Graphical
+    sudo pacman -S vlc                   # Media Player
+    mkdir ~/.cache/vlc
+    sudo pacman -S git python3 stow      # To deploy dotfiles and more
+}
+
+vim_install () {
+    cd ~/
+    vim +PlugInstall +qall
+    # Vim YouCompleteMe plugin install
+    bash ~/scripts/ycm.sh
+    sudo pacman -S python2 python-pip
+    sudo npm install -g neovim
+    python3 -m pip install --user --upgrade pynvim
+    sudo gem install neovim
+}
+
+yay_install() {
+    cd ~/
+    git clone https://aur.archlinux.org/yay.git
+    cd yay
+    makepkg -si
+    sudo rm -r /home/pol/yay
+}
+
+apps_AUR_install () {
+    # GUI
+    #yay -S ttf-ms-fonts                 # Microsoft fonts
+    #yay -S emoji-keyboard               # Emoji
+    yay -S skypeforlinux-stable-bin     # Skype
+    yay -S slack-desktop                # Slack
+    yay -S android-studio
+    yay -S typora                       # Markdown editor
+    yay -S youtube-dl                   # Download youtube videos
+    # Terminal
+    #yay -S autojump                     # Smart jumping through terminal
+    # Backups
+    yay -S timeshift  #  sudo timeshift-gtk
+    sudo pacman -S cron
+}
+
+### Installation starts here
+echo "Is it the first time you run this script? [y/n]"
+read FirstRun
+cd ~/
+if [[ $FirstRun == y ]]; then
+    echo "#! /bin/sh 
+export DISTRO=manjaro" >> ~/.config/distro
+fi
+cd ~/
+sudo pacman -Syu
+manjaro_install
+vim_install
+#yay_install
+apps_AUR_install
+

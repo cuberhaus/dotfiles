@@ -1,0 +1,76 @@
+# Calibre
+Calibre Library/metadata_db_prefs_backup.json
+# Windows
+*.swp
+*~
+# Tmux
+.tmux/plugins/tmux-battery/
+.tmux/plugins/tmux-pain-control/
+.tmux/plugins/tmux-prefix-highlight/
+.tmux/plugins/tmux-sensible/
+
+# Vim
+.vim/autoload/
+.vim/plugged/
+
+# Fonts
+.local/share/fonts/Meslo/.uuid
+.local/share/fonts/fontawesome/.uuid
+.local/share/fonts/.uuid
+
+# Ubuntu
+.config/zsh/.zcompdump
+
+
+# Ranger
+.config/ranger/plugins/__init__.py
+
+# Zsh
+.config/zsh/.zcompdump-pol-5.8
+
+# Nvidia
+.config/nvidia/settings
+# Compiled Python files
+*.pyc
+
+# Folder view configuration files
+.DS_Store
+Desktop.ini
+
+# Thumbnail cache files
+._*
+Thumbs.db
+
+# Files that might appear on external disks
+.Spotlight-V100
+.Trashes
+
+# Git merge files
+*orig
+
+# Albert files
+.config/albert/core.db
+.config/albert/org.albert*
+.config/albert/last_used_version
+
+# Vifm files
+.config/vifm/scripts
+.config/vifm/colors
+.config/vifm/vifminfo
+.config/vifm/vifm-help.txt
+
+# Stretchly
+.config/stretchly/Cache/
+.config/stretchly/Code Cache/
+.config/stretchly/Cookies
+.config/stretchly/Cookies-journal
+.config/stretchly/GPUCache/
+.config/stretchly/Network Persistent State
+.config/stretchly/Session Storage/
+.config/stretchly/TransportSecurity
+
+# Transmission
+.config/transmission/dht.dat
+.config/transmission/resume/
+.config/transmission/stats.json
+.config/transmission/torrents/

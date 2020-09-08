@@ -1,0 +1,24 @@
+#! /usr/bin/env bash
+# Update
+sudo apt-get update; sudo apt-get full-upgrade
+# System tools
+sudo apt-get install git stow build-essential file python3 python3-pip npm samba-common-bin texlive-full doxygen fonts-powerline curl autoconf automake sassc optipng inkscape libgtk-3-dev pkg-config yarn nodejs
+sudo apt-get install w3m ranger
+sudo apt-get install ncdu bash-completion vim-gtk htop tmux 
+# Themes base16
+cd ~/
+git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
+# Brew
+  cd ~/
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    
+    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+    brew update
+    brew upgrade
+    brew install gcc patchelf graphviz exa
+# Vim 
+   cd ~/
+    vim +PlugInstall +qall
+    # Vim YouCompleteMe plugin install
+        bash ~/scripts/ycm
+sudo apt-get install cmatrix neofetch

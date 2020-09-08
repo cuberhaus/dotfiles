@@ -1,0 +1,282 @@
+#! /usr/bin/env bash
+# User name should be pol
+# df "check for disk space"
+# YOU NEED TO ADD YOURSELF TO WHEEL AND TO VIDEO
+# video makes backlight work and wheel gives you sudo privilege
+# usermod -a -G wheel video input
+# Configure nvidia nvidia-xconfig
+
+arch_install () {
+    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
+    sudo pacman -S ruby
+    sudo pacman -S laptop-detect         # Detect if using a laptop 
+    sudo pacman -S npm
+    sudo pacman -S discord
+    sudo pacman -S xorg-xinit            # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
+    sudo pacman -S xdg-user-dirs         # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
+    sudo pacman -S code                  # Visual code (settings sync plugin req.)
+    sudo pacman -S yarn                  # Package installer
+    sudo pacman -S texstudio             # Latex text editor
+    sudo pacman -S file-roller           # Archive Manager
+    sudo pacman -S xorg                  # Display server
+    sudo pacman -S reflector             # Update Arch mirrors
+    sudo pacman -S dnsutils              # Ip
+    sudo pacman -S net-tools             # Ips
+    sudo pacman -S cmatrix               # Bloat
+    sudo pacman -S dunst                 # Notifications
+    sudo pacman -S nomacs                # Image viewer
+    sudo pacman -S thunderbird           # Email
+    #sudo pacman -S claws-mail           # Alternative mail
+    sudo pacman -S qbittorrent           # Torrent Downloader
+    # sudo pacman -S transmission-gtk    # A simpler Torrent D.
+    sudo pacman -S calibre               # Book manager
+    sudo pacman -S libreoffice-still     # Office
+    sudo pacman -S chromium              # Web browser
+    sudo pacman -S ncdu                  # Manage storage
+    sudo pacman -S tor tor-browser       # Tor private browser
+    sudo pacman -S thunar                # File manager
+    sudo pacman -S gvfs                  # Trash support thunar
+    sudo pacman -S thunar-archive-plugin # Archive plugin for compressing
+    sudo pacman -S thunar-media-tags-plugin thunar-volman tumbler  ffmpegthumbnailer raw-thumbnailer libgsf # Support for different files and thumbnails
+    sudo pacman -S xclip                 # Clipboard
+    sudo pacman -S udisks2               # Daemon to manipulate storage devices
+    sudo pacman -S udiskie               # Automater
+    sudo pacman -S ranger                # Ranger
+    sudo pacman -S w3m                   # Preview images on ranger
+    sudo pacman -S base-devel            # AUR
+    # Terminal
+    sudo pacman -S zsh                   # Zsh shell
+    sudo pacman -S zsh-completions       # Zsh completions
+    #OBSOLETE sudo pacman -S zsh-syntax-highlighting # Fish-like syntax highlighting
+    sudo pacman -S fortune-mod           # Random quote
+    mkdir ~/.cache/zsh
+    sudo pacman -S termite               # Terminal emulator
+    sudo pacman -S gvim                  # Vim version with extra features
+    sudo pacman -S exa                   # "ls" on steroids
+    sudo pacman -S bash-completion       # Better bash completion
+    sudo pacman -S htop                  # Show system resources
+    sudo pacman -S the_silver_searcher   # Better and faster ack (and grep)
+    sudo pacman -S fzf                   # Fuzzy finder
+    sudo pacman -S bat                   # "Cat" on steroids
+    sudo pacman -S tmux                  # Terminal multiplexer
+    sudo pacman -S doxygen texlive-most graphviz # Doxygen
+    sudo pacman -S gcc                   # Cpp
+    # IRC APPS
+    sudo pacman -S hexchat               # Graphical
+    sudo pacman -S weechat               # Terminal-based
+    # Drivers
+    sudo pacman -S nvidia nvidia-utils   # Nvidia
+    sudo pacman -S xf86-video-intel mesa lib32-mesa    # Intel
+    sudo pacman -S lib32-nvidia-utils    # Requires adding multilib libraries
+    sudo pacman -S nvidia-settings       # Add force composition pipeline in nvidia-settings
+    # System tools
+    sudo pacman -S git python3 stow      # To deploy dotfiles and more
+    sudo pacman -S dhcpcd 
+    # Pdf viewer
+    sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
+    # Calendar
+    sudo pacman -S gnome-calendar gnome-keyring libsecret seahorse
+    # Audio | Equalizer qpaeq
+    sudo pacman -S playerctl
+    sudo pacman -S pulseaudio pulseaudio-equalizer pulseaudio-bluetooth
+    # Apps
+    sudo pacman -S tumbler ffmpegthumbnailer raw-thumbnailer
+    # Theme
+    sudo pacman -S lxappearance gtk2 gtk3 arc-gtk-theme arc-icon-theme
+    # Fonts
+    sudo pacman -S gnome-font-viewer      # Font viewer
+    sudo pacman -S noto-fonts-emoji       # Classic Emoji
+    sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts
+    #OBSOLETE sudo pacman -S ttf-font-awesome
+    # Bluetooth
+    sudo pacman -S bluez bluez-utils
+    if [[ $FirstRun == y ]]; then
+        systemctl enable bluetooth.service
+    fi
+    # Video player
+    sudo pacman -S vlc
+    if [[ $FirstRun == y ]]; then
+        mkdir ~/.cache/vlc
+    fi
+    # Display manager
+    if [[ $FirstRun == y ]]; then
+        systemctl enable lightdm.service
+    fi
+    sudo pacman -S lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings
+    # Ntp for time syncro
+    #https://wiki.archlinux.org/index.php/Systemd-timesyncd
+    if [[ $FirstRun == y ]]; then
+        systemctl enable systemd-timesyncd.service
+        systemctl disable ntpd.service
+    fi
+    #systemctl stop ntpd.service
+    #systemctl start systemd-timesyncd.service
+    #systemctl enable systemd-timesyncd.service
+    # https://wiki.archlinux.org/index.php/USB_storage_devices
+
+    # Network Manager and enable daemon on startup
+    sudo pacman -S networkmanager
+    if [[ $FirstRun == y ]]; then
+        systemctl enable NetworkManager.service
+    fi
+    # Gui
+    sudo pacman -S nm-connection-editor
+    # Applet
+    sudo pacman -S nm-applet
+}
+
+vim_install () {
+    cd ~/
+    vim +PlugInstall +qall
+    # Vim YouCompleteMe plugin install
+    bash ~/scripts/ycm.sh
+    sudo pacman -S python2 python-pip
+    sudo npm install -g neovim
+    python3 -m pip install --user --upgrade pynvim
+    sudo gem install neovim
+}
+
+i3_install () {
+    sudo pacman -S i3-gaps   # i3 with gaps
+    sudo pacman -S rofi      # App menu Super+d
+    sudo pacman -S i3blocks  # Bottom bar
+    sudo pacman -S picom     # Compositor, for transparencies
+    sudo pacman -S feh       # Wallpaper
+    sudo pacman -S light     # Brightness
+    sudo pacman -S acpi
+    sudo pacman -S perl-anyevent-i3 python-dbus
+    sudo pacman -S awk bc upower             # battery plus
+    sudo pacman -S yad xdotool               # calendar
+    sudo pacman -S pulseaudio alsa-utils     # Audio
+}
+
+
+bloat_install () {
+    sudo pacman -S lolcat 
+    sudo pacman -S cowsay    # A cow displaying text
+    sudo pacman -S ponysay asciiquarium
+    sudo pacman -S sl        # Steam locomotor, (Did you mean to type ls?)
+}
+
+bloat_AUR_install() {
+    yay -S pipes.sh          # Lockscreens
+    yay -S figlet toilet     # Cool letters
+    yay -S cava # https://github.com/karlstav/cava
+}
+
+yay_install() {
+    cd ~/
+    git clone https://aur.archlinux.org/yay.git
+    cd yay
+    makepkg -si
+    sudo rm -r /home/pol/yay
+}
+
+virtualbox_install() {
+    sudo pacman -S virtualbox
+    sudo pacman -S virtualbox-host-modules-arch
+}
+
+apps_AUR_install () {
+    # GUI
+    #OBSOLETE yay -S ttf-font-awesome-4           # Font awesome 5 has errors
+    yay -S spotify
+    yay -S ttf-ms-fonts                 # Microsoft fonts
+    yay -S emoji-keyboard               # Emoji
+    yay -S skypeforlinux-stable-bin     # Skype
+    yay -S slack-desktop
+    yay -S android-studio
+    yay -S typora                       # Markdown editor
+    yay -S youtube-dl                   # Download youtube videos
+    # Terminal
+    #yay -S autojump                     # Smart jumping through terminal
+    # Backups
+    yay -S timeshift  #  sudo timeshift-gtk
+    sudo pacman -S cron
+    # Lockscreen
+    yay -S betterlockscreen
+    sudo pacman -S xss-lock
+    # Office / Word compatible
+    #yay -S freeoffice
+}
+
+# Trash
+
+# do this but i dont know exactly how
+#do_once () {
+#    sudo echo 'Section "InputClass"
+#    Identifier "libinput touchpad catchall"
+#    MatchIsTouchpad "on"
+#    MatchDevicePath "/dev/input/event*"
+#    Driver "libinput"
+#    Option "NaturalScrolling" "true"
+#    EndSection'  >> /etc/X11/xorg.conf.d/30-touchpad.conf
+#}
+    # Git repositories
+    # OBSOLETE git clone https://github.com/zsh-users/zsh-autosuggestions ~/.config/zsh/zsh-autosuggestions
+    # OBSOLETE git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k # Zsh prompt
+    #git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm                                           # Plugin manager for tmux
+    # OBSOLETE git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell                           # Base16
+    # OBSOLETE git clone https://github.com/alexanderjeurissen/ranger_devicons ~/.config/ranger/plugins/ranger_devicons    # Ranger devicons
+
+
+games_install () {
+    sudo pacman -S steam lutris
+}
+
+laptop_install() {
+    sudo pacman -S tlp
+    sudo systemctl enable tlp.service
+}
+
+DWall() {
+    cd $HOME
+    git clone https://github.com/adi1090x/dynamic-wallpaper.git
+    cd dynamic-wallpaper
+    chmod +x install.sh
+    ./install.sh
+    cd $HOME
+    sudo rm -r ~/home/pol/dynamic-wallpaper
+}
+
+color_scripts_install() {
+    git clone https://gitlab.com/dwt1/shell-color-scripts.git
+    cd shell-color-scripts
+    rm -rf /opt/shell-color-scripts || return 1
+    sudo mkdir -p /opt/shell-color-scripts/colorscripts || return 1
+    sudo cp -rf colorscripts/* /opt/shell-color-scripts/colorscripts
+    sudo cp colorscript.sh /usr/bin/colorscript
+    # optional for zsh completion
+    sudo cp zsh_completion/_colorscript /usr/share/zsh/site-functions
+}
+
+### Installation starts here
+
+echo "Is it the first time you run this script? [y/n]"
+read FirstRun
+cd ~/
+if [[ $FirstRun == y ]]; then
+    echo "#! /bin/sh 
+export DISTRO=arch" >> ~/.config/distro
+fi
+sudo pacman -Syu # Update
+arch_install
+i3_install
+bloat_install
+if [[ $FirstRun == y ]]; then
+    yay_install
+    vim_install
+    apps_AUR_install
+    laptop_install
+    games_install
+    cava_install
+    bloat_AUR_install
+    DWall
+fi
+
+# Zsh has to be on the bottom due to script ending abruptly
+#sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" # Oh my Zsh
+# Oh My Zsh
+#git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.config/.oh-my-zsh
+
+chsh -s $(which zsh) # Change default shell to zsh

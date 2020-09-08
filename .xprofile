@@ -1,0 +1,9 @@
+#!/bin/sh
+# This file runs when a DM logs you into a graphical session.
+# If you use startx/xinit like a Chad, this file will also be sourced.
+[[ -f ~/.zshenv ]] && source ~/.zshenv
+# Has to go before i3 for some stupid reason?
+if [[ "$DISTRO" == "arch" ]]; then
+    # xss-lock displays betterlockscreen when lid is closed
+    exec xss-lock -- betterlockscreen -l &
+fi

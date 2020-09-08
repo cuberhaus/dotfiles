@@ -1,0 +1,87 @@
+[
+{
+	"border": "pixel",
+		"floating": "auto_off",
+		"fullscreen_mode": 0,
+		"layout": "splith",
+		"percent": 0.5,
+		"type": "con",
+		"nodes": [
+		{
+			"border": "pixel",
+			"current_border_width": 2,
+			"floating": "auto_off",
+			"geometry": {
+				"height": 1058,
+				"width": 1920,
+				"x": 0,
+				"y": 0
+			},
+			"name": "adi1090x/dynamic-wallpaper: Simple bash script to set a Dynamic Wallpaper according to certain conditions. - Chromium",
+			"percent": 0.5,
+			"swallows": [
+			{
+				"class": "^Chromium$"
+			}
+			],
+			"type": "con"
+		},
+		{
+			"border": "pixel",
+			"floating": "auto_off",
+			"layout": "splitv",
+			"percent": 0.5,
+			"type": "con",
+			"nodes": [
+			{
+				"border": "pixel",
+				"floating": "auto_off",
+				"layout": "splith",
+				"percent": 0.5,
+				"type": "con",
+				"nodes": [
+				{
+					"border": "pixel",
+					"current_border_width": 2,
+					"floating": "auto_off",
+					"geometry": {
+						"height": 458,
+						"width": 814,
+						"x": 0,
+						"y": 0
+					},
+					"name": "pol@pol:~/dotfiles/dotfiles",
+					"percent": 1,
+					"swallows": [
+					{
+						"class": "^Termite$"
+					}
+					],
+					"type": "con"
+				}
+				]
+			},
+			{
+				"border": "pixel",
+				"current_border_width": 2,
+				"floating": "auto_off",
+				"geometry": {
+					"height": 458,
+					"width": 814,
+					"x": 0,
+					"y": 0
+				},
+				"name": "pol@pol:~",
+				"percent": 0.5,
+				"swallows": [
+				{
+					"class": "^Termite$"
+				}
+				],
+				"type": "con"
+			}
+			]
+		}
+	]
+}
+]

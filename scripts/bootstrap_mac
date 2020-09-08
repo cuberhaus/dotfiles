@@ -1,0 +1,119 @@
+#!/bash/sh
+
+app_store_install() {
+    brew install mas
+    mas install 1444383602 # GoodNotes
+    mas install 736189492 # Notability
+    mas install 1147396723 # WhatsApp 
+    mas install 497799835 # Xcode 
+    mas install 441258766 # Magnet
+    mas install 1274495053 # Microsoft To Do 
+    mas install 409201541 # Pages
+    mas install 409203825 # Numbers 
+    mas install 409183694 # Keynote
+}
+
+brew_install() {
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+}
+
+mac_install () {
+    ### Terminal stuff
+    brew install exa                    # "ls" on steroids
+    brew install git                    # Git
+    brew install htop                   # Resource viewer
+    brew install neofetch               # System info
+    brew install pipes-sh               # Pipes wallpaper
+    brew install stow                   # Stow dotfiles
+    brew install tmux                   # Terminal multiplexer
+    brew install wget                   # Download from command line
+    brew install yarn                   # Package manager
+    brew install fzf                    # Fuzzy Finder
+    brew install bat                    # Cat on steroids
+    brew install the_silver_searcher    # Grep on steroids
+    brew install ranger w3m             # Ranger and previews
+    brew install autojump               # Autojump obsolete?
+    brew install ncdu                   # Storage manager
+    ## Extract function 
+    brew install unrar
+    brew install p7zip
+    # Dependancies
+    brew install ack
+    brew install astyle
+    brew install bison
+    brew install cmake          
+    brew install flex
+    brew install go
+    brew install graphviz
+    brew install llvm
+    brew install mono
+    brew install pkg-config
+    brew install ripgrep
+    brew install sox
+    brew install swig
+    #brew install bash-completion
+    #brew install bash-git-prompt    
+
+    ### Avoid some error messages
+    mkdir ~/.cache/zsh
+    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
+
+    ### Terminal Font
+    brew tap homebrew/cask-fonts
+    brew cask install font-inconsolata-nerd-font # Change iTerm font to this one
+
+    ### GUI Applications
+    brew cask install ccleaner          # CleanUp
+    brew cask install calibre           # Book manager
+    brew cask install spotify           # Music player
+    brew cask install skype             # Videocalls
+    brew cask install vlc               # Media Player
+    brew cask install transmission      # Torrent Downloader
+    brew cask install tomighty          # Pomodoro timer
+    brew cask install alfred            # Better Spotlight
+    brew cask install telegram          # Quickly transfer files
+    brew cask install discord           # Group calls
+    brew cask install slack             # Work
+    brew cask install iterm2            # Best terminal emulator
+    brew cask install karabiner-elements # Swap Esc with Caps_lock
+    brew cask install google-chrome     # Web browser
+    brew cask install the-unarchiver    # Archiver "faster"
+    #brew cask install keka              # Archiver open source
+    #brew cask install unetbootin        # Burn iso's (or use dd command)
+    #brew cask install chromium          # Open source web browser
+    #brew cask install qbittorrent
+}
+
+doom_emacs_install() {
+    # required dependencies
+    brew install git ripgrep
+    # optional dependencies
+    brew install coreutils fd
+    # Installs clang
+    xcode-select --install
+    brew tap d12frosted/emacs-plus
+    brew install emacs-plus --with-modern-cg433n-icon
+    ln -s /usr/local/opt/emacs-plus/Emacs.app /Applications/Emacs.app
+}
+
+bloat_install() {
+    brew install cowsay fortune coreutils # Cows
+    brew install cmatrix            # Matrix
+}
+
+vim_install () {
+    brew install macvim             # Vim
+    brew install neovim             # NeoVim
+    cd ~/
+    vim +PlugInstall +qall
+    # Vim YouCompleteMe plugin install
+    bash ~/scripts/ycm.sh
+    sudo npm install -g neovim
+    python3 -m pip install --user --upgrade pynvim
+    sudo gem install neovim
+}
+
+brew_install
+mac_install
+vim_install
+bloat_install

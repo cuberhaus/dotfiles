@@ -1,0 +1,56 @@
+! Sections:
+!   -> Config
+!   -> Theme
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! => Xft
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+! Make fonts and terminal look better
+Xft.dpi: 96
+Xft.antialias: true
+! Hintstyle is the amount of font reshaping done to line up to the grid. Hinting values are: hintnone, hintslight, hintmedium, and hintfull. hintslight will make the font more fuzzy to line up to the grid but will be better in retaining font shape (see [2]), while hintfull will be a crisp font that aligns well to the pixel grid but will lose a greater amount of font shape. hintslight implicitly uses the autohinter in a vertical-only mode in favor of font-native information for non-CFF (.otf) fonts.
+Xft.hinting: true
+! Use Rgb
+Xft.rgba: rgb
+! Use hinting automatically
+Xft.autohint: false
+! Hintstyle is the amount of font reshaping done to line up to the grid. Hinting values are: hintnone, hintslight, hintmedium, and hintfull. hintslight will make the font more fuzzy to line up to the grid but will be better in retaining font shape while hintfull will be a crisp font that aligns well to the pixel grid but will lose a greater amount of font shape. hintslight implicitly uses the autohinter in a vertical-only mode in favor of font-native information for non-CFF (.otf)
+Xft.hintstyle: hintfull
+!When using Cleartype subpixel rendering, you should enable the LCD filter, which is designed to reduce colour fringing.
+Xft.lcdfilter: lcddefault
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! => URxvt
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! xrdb -load ~/.Xresources
+
+! Disables scrollbar
+URxvt.scrollBar:    false
+URxvt*cursorBlink:  true
+URxvt.saveLines: 5000
+
+! Copy paste
+URxvt.iso14755: false
+URxvt.iso14755_52: false
+URxvt.keysym.Shift-Control-V:	eval:paste_clipboard
+URxvt.keysym.Shift-Control-C:	eval:selection_to_clipboard
+! Extensions
+URxvt.colorUL: #4682B4
+! Clickable links
+URxvt.perl-ext-common: default,matcher,resize-font
+URxvt.url-launcher: /usr/bin/xdg-open
+URxvt.matcher.button: 1
+! Colored links
+!URxvt.matcher.rend.0: Uline Bold fg5
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! => Theme
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!Install nerd fonts
+URxvt.font: xft:RobotoMono Nerd Font Mono, \
+xft:RobotoMono for Powerline, \
+xft:mononoki Nerd Font, \
+xft:UbuntuMono Nerd Font:size=14, \
+

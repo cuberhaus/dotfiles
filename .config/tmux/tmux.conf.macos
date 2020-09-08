@@ -1,0 +1,7 @@
+# Without spotify
+set -g status-right '#{battery_status_bg} #{battery_icon} #{battery_percentage} #{prefix_highlight} | %a %Y-%m-%d %H:%M'
+
+set -g @continuum-boot-options 'iterm,fullscreen'
+
+### Spotify bar
+# set -g status-right ' ♫ #{spotify_status} #{spotify_artist}: #{spotify_track} | #{battery_status_bg} #{battery_icon} #{battery_percentage} #{prefix_highlight} | %a %Y-%m-%d %H:%M'
