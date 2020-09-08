@@ -8,6 +8,54 @@
 - ![Gentoo_icon][Gentoo_icon]Gentoo
 - Openbox
 
+## ![Imgur](https://i.imgur.com/nnJ6y17.png) Git
+#### Install this repo:
+```
+git clone --recurse-submodules https://github.com/Pol-Gil/ArchDotfiles
+```
+#### Add new submodule
+```
+git submodule add URL   DIRECTORY
+```
+#### Submodules info
+```
+git submodule status
+```
+#### Update all submodules:
+```
+git submodule update --recursive --remote
+```
+#### Clone newly added submodules:
+[Source 1](https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules), [Source 2](https://stackoverflow.com/questions/38208748/how-do-i-clone-a-local-repo-with-submodules)
+```
+git submodule sync
+git submodule update --init --recursive
+```
+#### Move Submodule
+[Explanation](https://stackoverflow.com/questions/4604486/how-do-i-move-an-existing-git-submodule-within-a-git-repository)
+```
+git mv old/submod new/submod
+```
+#### View submodules differences
+```
+git diff --submodule=diff
+```
+#### Download only a part of a repository:
+> https://github.com/lodash/lodash/tree/master/test ➜  https://github.com/lodash/lodash/trunk/test
+```
+svn checkout https://github.com/lodash/lodash/trunk/test
+```
+#### Make the current commit the [only commit][only commit] in a git repo
+```
+git checkout --orphan newBranch
+git add -A  # Add all files and commit them
+git commit
+git branch -D master  # Deletes the master branch
+git branch -m master  # Rename the current branch to master
+git push -f origin master  # Force push master branch to github
+git gc --aggressive --prune=all     # remove the old files
+```
+> Doing this didn't reduce the repo size at all
 
 # ![Arch icon][Arch_icon] Arch
 ## Pacman
@@ -135,43 +183,6 @@ sudo apt-get autoremove
 ```
 comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)
 ```
-## ![Imgur](https://i.imgur.com/nnJ6y17.png) Git
-#### Install this repo:
-```
-git clone --recurse-submodules https://github.com/Pol-Gil/ArchDotfiles
-```
-#### Add new submodule
-```
-git submodule add URL   DIRECTORY
-```
-#### Submodules info
-```
-git submodule status
-```
-#### Update all submodules:
-```
-git submodule update --recursive --remote
-```
-#### Clone newly added submodules:
-[Source 1](https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules), [Source 2](https://stackoverflow.com/questions/38208748/how-do-i-clone-a-local-repo-with-submodules)
-```
-git submodule sync
-git submodule update --init --recursive
-```
-#### Move Submodule
-[Explanation](https://stackoverflow.com/questions/4604486/how-do-i-move-an-existing-git-submodule-within-a-git-repository)
-```
-git mv old/submod new/submod
-```
-#### View submodules differences
-```
-git diff --submodule=diff
-```
-#### Download only a part of a repository:
-> https://github.com/lodash/lodash/tree/master/test ➜  https://github.com/lodash/lodash/trunk/test
-```
-svn checkout https://github.com/lodash/lodash/trunk/test
-```
 ## Stow
 #### Adding files to stow symlink:
 
@@ -258,3 +269,4 @@ choco list --local-only
 [Ubuntu_icon]: https://i.imgur.com/EX9n2Ib.png?1
 [MacOS_icon]: https://i.imgur.com/olG7ewE.png?1 
 [Gentoo_icon]: https://i.imgur.com/cKReKS2.png 
+[only commit]: https://stackoverflow.com/questions/9683279/make-the-current-commit-the-only-initial-commit-in-a-git-repository
