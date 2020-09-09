@@ -75,6 +75,10 @@ List installed packages
 ```
 pacman -Qqe > pkglist.txt
 ```
+Remove cache:
+```
+yay -Sc
+```
 ## Usb
 Remove Usb safely: 
 
