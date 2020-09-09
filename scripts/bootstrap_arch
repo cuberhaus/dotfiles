@@ -36,8 +36,8 @@ arch_install () {
     sudo pacman -S dnsutils              # Ip
     sudo pacman -S net-tools             # Ips
     # GUI
-    sudo pacman -S gimp
-    sudo pacman -S audacity
+    sudo pacman -S gimp                  # Image editor
+    sudo pacman -S audacity              # Audio editor
     sudo pacman -S discord
     sudo pacman -S xorg-xinit            # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
     sudo pacman -S code                  # Visual code (settings sync plugin req.)

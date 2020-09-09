@@ -183,6 +183,18 @@ sudo apt-get autoremove
 ```
 comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)
 ```
+
+# ![Windows][Windows 10 icon] Windows
+## Chocolatey
+#### Upgrade packages
+```
+choco upgrade all
+```
+#### List packages
+```
+choco list --local-only
+```
+
 ## Stow
 #### Adding files to stow symlink:
 
@@ -243,6 +255,7 @@ git remote set-url origin git@hostname:USERNAME/REPOSITORY.git
 git remote set-url origin https://hostname/USERNAME/REPOSITORY.git
 ```
 
+###### Other comments:
 > In Unix-like operating systems, a device file or special file is an interface to a device driver that appears in a file system as if it were an ordinary file.  
 > On Linux they are in the /dev directory, according to the Filesystem Hierarchy Standard.
 
@@ -252,16 +265,7 @@ git remote set-url origin https://hostname/USERNAME/REPOSITORY.git
 > About [OVA][OVA] files:  
 > An OVA file is an Open Virtualization Appliance that contains a compressed, "installable" version of a virtual machine. When you open an OVA file it extracts the VM and imports it into whatever virtualization software you have installed on your computer.
 
-# Windows
-## Chocolatey
-#### Upgrade packages
-```
-choco upgrade all
-```
-#### List packages
-```
-choco list --local-only
-```
+[Windows 10 icon]: https://i.imgur.com/b3co2Zl.png
 [OVA]: https://wikis.utexas.edu/display/MSBTech/Installing+OVA+files+using+VirtualBox#:~:text=An%20OVA%20file%20is%20an,have%20installed%20on%20your%20computer.
 [brew page]: https://brew.sh/
 [Manjaro_icon]: https://i.imgur.com/rfuvfYo.png 
