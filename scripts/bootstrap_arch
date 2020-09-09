@@ -84,7 +84,10 @@ arch_install () {
     # Apps
     sudo pacman -S tumbler ffmpegthumbnailer raw-thumbnailer
     # Theme
-    sudo pacman -S lxappearance gtk2 gtk3 arc-gtk-theme arc-icon-theme
+    sudo pacman -S lxappearance 
+    sudo pacman -S gtk2 gtk3
+    sudo pacman -S arc-gtk-theme arc-icon-theme # Arc theme and its icon's
+    sudo pacman -S papirus-icon-theme     # Best icon theme!
     # Fonts
     sudo pacman -S gnome-font-viewer      # Font viewer
     sudo pacman -S noto-fonts-emoji       # Classic Emoji
