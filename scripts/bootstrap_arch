@@ -7,8 +7,24 @@
 # Configure nvidia nvidia-xconfig
 
 arch_install () {
+
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
     mkdir ~/.cache/zsh
+    # Nemo "best filemanager"
+    gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
+    gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg -e # Termite execute argument is -e in gnome-terminal its -x
+    sudo pacman -S nemo
+    sudo pacman -S nemo-fileroller
+    sudo pacman -S nemo-preview
+    sudo pacman -S nemo-seahorse
+    sudo pacman -S nemo-share
+    #sudo pacman -S nemo-terminal
+
+    # Thunar
+    #sudo pacman -S thunar                # File manager
+    #sudo pacman -S gvfs                  # Trash support thunar
+    #sudo pacman -S thunar-archive-plugin # Archive plugin for compressing
+    #sudo pacman -S thunar-media-tags-plugin thunar-volman tumbler  ffmpegthumbnailer raw-thumbnailer libgsf # Support for different files and thumbnails
     # Terminal
     sudo pacman -S base-devel            # AUR
     sudo pacman -S zsh                   # Zsh shell
@@ -36,6 +52,7 @@ arch_install () {
     sudo pacman -S dnsutils              # Ip
     sudo pacman -S net-tools             # Ips
     # GUI
+    sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"
     sudo pacman -S gimp                  # Image editor
     sudo pacman -S audacity              # Audio editor
     sudo pacman -S discord
@@ -52,10 +69,6 @@ arch_install () {
     sudo pacman -S libreoffice-still     # Office
     sudo pacman -S chromium              # Web browser
     sudo pacman -S ncdu                  # Manage storage
-    sudo pacman -S thunar                # File manager
-    sudo pacman -S gvfs                  # Trash support thunar
-    sudo pacman -S thunar-archive-plugin # Archive plugin for compressing
-    sudo pacman -S thunar-media-tags-plugin thunar-volman tumbler  ffmpegthumbnailer raw-thumbnailer libgsf # Support for different files and thumbnails
     sudo pacman -S xclip                 # Clipboard
     sudo pacman -S udisks2               # Daemon to manipulate storage devices
     sudo pacman -S udiskie               # Automater
