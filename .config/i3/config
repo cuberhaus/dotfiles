@@ -75,6 +75,8 @@ floating_modifier $mod
 ###############################################################
 # Layout Scripts
 bindsym $mod+g exec /home/pol/.config/i3/i3-layout-manager/layout_manager.sh
+# File manager
+bindsym $mod+Shift+f exec nemo
 
 # Chmod +x to make work.sh executable
 set $layout Layout: (s)  Spotify, (w)  Work  
