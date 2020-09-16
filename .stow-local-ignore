@@ -1,0 +1,13 @@
+^/README.*
+^/LICENSE.*
+^/COPYING
+
+.+~          # emacs backup files
+\#.*\#       # emacs autosave files
+
+/.git
+/.gitignore
+
+# It didn't respect this:
+/.gitconfig
+/.gitmodules
