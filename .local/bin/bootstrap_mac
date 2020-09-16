@@ -18,6 +18,8 @@ brew_install() {
 }
 
 mac_install () {
+    # Avoid terminal prompts
+    touch ~/.hushlogin
     ### Terminal stuff
     brew install exa                    # "ls" on steroids
     brew install git                    # Git

@@ -13,6 +13,7 @@ font = Monospace 12
 # Font recommended by powerlevel10k
 font = MesloLGS NF 12 
 font = Hack Nerd Font 12
+font = Material Icons 12
 # Best rated font
 font = SauceCodePro Nerd Font 13 
 #fullscreen = true

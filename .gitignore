@@ -1,5 +1,6 @@
 # Calibre
 Calibre Library/metadata_db_prefs_backup.json
+
 # Windows
 *.swp
 *~
@@ -14,9 +15,10 @@ Calibre Library/metadata_db_prefs_backup.json
 .vim/plugged/
 
 # Fonts
-.local/share/fonts/Meslo/.uuid
-.local/share/fonts/fontawesome/.uuid
-.local/share/fonts/.uuid
+*.uuid
+#.local/share/fonts/Meslo/.uuid
+#.local/share/fonts/fontawesome/.uuid
+#.local/share/fonts/.uuid
 
 # Ubuntu
 .config/zsh/.zcompdump

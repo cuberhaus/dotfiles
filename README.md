@@ -11,7 +11,7 @@
 ## ![Imgur](https://i.imgur.com/nnJ6y17.png) Git
 #### Install this repo:
 ```
-git clone --recurse-submodules https://github.com/Pol-Gil/ArchDotfiles
+git clone --recurse-submodules https://github.com/cuberhaus/dotfiles 
 ```
 #### Add new submodule
 ```
@@ -74,6 +74,10 @@ pacman -Qm
 List installed packages
 ```
 pacman -Qqe > pkglist.txt
+```
+Remove cache:
+```
+yay -Sc
 ```
 ## Usb
 Remove Usb safely: 
