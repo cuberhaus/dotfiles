@@ -197,6 +197,8 @@ virtualbox_install() {
 }
 
 apps_AUR_install () {
+    sudo pacman -S r                    # Probabilitat i estadística
+    yay -S rstudio-desktop              # Probabilitat i estadística IDE
     # GUI
     yay -S spotify
     yay -S ttf-ms-fonts                 # Microsoft fonts
