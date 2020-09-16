@@ -16,8 +16,8 @@ export EDITOR="$VISUAL"
 
 export QT_QPA_PLATFORMTHEME="qt5ct"
 # Add to path
-if [ -d "$HOME/scripts" ] ; then
-        PATH="$HOME/scripts:$PATH"
+if [ -d "$HOME/.local/bin" ] ; then
+        PATH="$HOME/.local/bin:$PATH"
 fi
 
 if [ -d "$HOME/.config/i3/i3-layout-manager" ] ; then
