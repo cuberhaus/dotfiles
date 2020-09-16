@@ -9,5 +9,5 @@
 /.gitignore
 
 # It didn't respect this:
-/.gitconfig
+#/.gitconfig
 /.gitmodules

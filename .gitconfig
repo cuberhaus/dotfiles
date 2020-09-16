@@ -1,6 +1,6 @@
 [user]
-	email = polcg@hotmail.es
-	name = polthelost
+	email = pol@gmail.com
+	name = cuberhaus 
 [alias]
     lg = !"git lg1"
     lg1 = !"git lg1-specific --all"
