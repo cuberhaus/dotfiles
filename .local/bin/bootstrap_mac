@@ -20,6 +20,8 @@ brew_install() {
 mac_install () {
     # Avoid terminal prompts
     touch ~/.hushlogin
+    brew install r                      # Probabilitat i estadística
+    brew install rstudio                # Probabilitat i estadística IDE
     ### Terminal stuff
     brew install exa                    # "ls" on steroids
     brew install git                    # Git
