@@ -11,6 +11,8 @@ iwr -useb https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim |`
 Rem Swap caps with escape https://github.com/susam/uncap#readme
 
 :windows_install
+choco install r.project         Rem Probabilitat i estadística
+choco install r.studio          Rem Probabilitat i estadística IDE
 choco install poshgit           Rem git bar
 choco install adobereader -y 	Rem Pdf viewer
 choco install chromium -y 	    Rem Open source Web browser
