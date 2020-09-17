@@ -155,6 +155,7 @@ vim_install () {
     sudo gem install neovim
 }
 
+# Best Tiling Window Manager
 i3_install () {
     sudo pacman -S i3-gaps   # i3 with gaps
     sudo pacman -S rofi      # App menu Super+d
@@ -169,6 +170,18 @@ i3_install () {
     sudo pacman -S pulseaudio alsa-utils     # Audio
 }
 
+# Best Desktop 
+cinnamon_install() {
+    sudo pacman -S cinnamon                  # Desktop
+    sudo pacman -S xed                       # GUI notepad
+    yay -S xviewer                           # Image viewer
+    sudo pacman -S xreader                   # Document viewer
+    yay -S xplayer                           # Media player
+    yay -S pix                               # Image viewer
+    # Fallback mode in case cinnamon crashes
+    sudo pacman -S metacity 
+    sudo pacman -S gnome-shell               # To have a taskbar
+}
 
 bloat_install () {
     sudo pacman -S lolcat 
