@@ -43,6 +43,7 @@ arch_install () {
     sudo pacman -S doxygen texlive-most graphviz # Doxygen
     sudo pacman -S gcc                   # Cpp
     sudo pacman -S git python3 stow      # To deploy dotfiles and more
+    sudo pacman -S github-cli            # Github from terminal, create issues...
     sudo pacman -S dhcpcd 
     sudo pacman -S ruby
     sudo pacman -S laptop-detect         # Detect if using a laptop 
