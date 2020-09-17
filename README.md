@@ -199,7 +199,7 @@ choco upgrade all
 choco list --local-only
 ```
 
-## Stow
+## ![GNU icon][GNU icon] Stow 
 #### Adding files to stow symlink:
 
 1. Create files with the same name of those we want to add to the repo
@@ -232,7 +232,7 @@ git clone https://github.com/Pol-Gil/ArchDotfiles
 stow -nvt ~ dotfiles/
 ```
 
-## SSH
+## ![SSH icon2][SSH icon2] SSH
 [Github](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
 #### Create the key
 ```
@@ -269,6 +269,9 @@ git remote set-url origin https://hostname/USERNAME/REPOSITORY.git
 > About [OVA][OVA] files:  
 > An OVA file is an Open Virtualization Appliance that contains a compressed, "installable" version of a virtual machine. When you open an OVA file it extracts the VM and imports it into whatever virtualization software you have installed on your computer.
 
+[SSH icon2]: https://i.imgur.com/RY2Xk5O.png?1
+[SSH icon]: https://i.imgur.com/Jtz8Dma.png?1
+[GNU icon]: https://i.imgur.com/dc4F2u2.png?1
 [Windows 10 icon]: https://i.imgur.com/b3co2Zl.png
 [OVA]: https://wikis.utexas.edu/display/MSBTech/Installing+OVA+files+using+VirtualBox#:~:text=An%20OVA%20file%20is%20an,have%20installed%20on%20your%20computer.
 [brew page]: https://brew.sh/
