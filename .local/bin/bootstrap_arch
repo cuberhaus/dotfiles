@@ -101,6 +101,7 @@ arch_install () {
     sudo pacman -S lxappearance 
     sudo pacman -S gtk2 gtk3
     sudo pacman -S arc-gtk-theme arc-icon-theme # Arc theme and its icon's
+    sudo pacman -S adapta-gtk-theme       # Alternative theme
     sudo pacman -S papirus-icon-theme     # Best icon theme!
     # Fonts
     sudo pacman -S gnome-font-viewer      # Font viewer
