@@ -295,6 +295,7 @@ sudo pacman -Syu # Update
 arch_install
 i3_install
 bloat_install
+cinnamon_install
 if [[ $FirstRun == y ]]; then
     yay_install
     vim_install
