@@ -217,12 +217,13 @@ apps_AUR_install () {
     sudo pacman -S r                    # Probabilitat i estadística
     yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
     # GUI
-    yay -S spotify
+    yay -S whatsapp-nativefier          # Whatsapp client
+    yay -S spotify                      # Spotify
     yay -S ttf-ms-fonts                 # Microsoft fonts
     yay -S emoji-keyboard               # Emoji
     yay -S skypeforlinux-stable-bin     # Skype
-    yay -S slack-desktop
-    yay -S android-studio
+    yay -S slack-desktop                # Slack
+    yay -S android-studio               # Android Studio
     yay -S typora                       # Markdown editor
     yay -S youtube-dl                   # Download youtube videos
     # Terminal
