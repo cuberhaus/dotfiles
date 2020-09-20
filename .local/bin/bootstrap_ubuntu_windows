@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-
+### First deploy dotfiles with stow, then execute scripts
 ubuntu_minimal_install () {
   mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
   mkdir ~/.cache/zsh
