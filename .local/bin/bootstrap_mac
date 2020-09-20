@@ -65,6 +65,8 @@ mac_install () {
     ### Terminal Font
     brew tap homebrew/cask-fonts
     brew cask install font-inconsolata-nerd-font # Change iTerm font to this one
+    
+    brew cask install dbeaver-community # BD
 
     ### GUI Applications
     brew cask install ccleaner          # CleanUp
