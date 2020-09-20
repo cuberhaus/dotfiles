@@ -11,11 +11,12 @@ ubuntu_minimal_install () {
     sudo apt-get install texlive-full doxygen   # Doxygen
     sudo apt-get install ruby-dev
     # Terminal
+    sudo apt-get install stow
     sudo apt-get install subversion		        # To download repos
     sudo apt-get install neovim		            # Neovim
     sudo apt-get install zsh
     sudo apt-get install htop			        # Show system resources
-    sudo apt-get install ranger 		        # Ranger
+    sudo apt-get install ranger w3m		        # Ranger
     sudo apt-get install vim-gtk 		        # Vim with full functionality
     sudo apt-get install silversearcher-ag      # Better and faster ack (and grep)
     sudo apt-get install fzf                    # Fuzzy finder

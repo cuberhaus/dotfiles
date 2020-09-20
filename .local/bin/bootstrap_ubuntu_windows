@@ -1,24 +1,61 @@
 #! /usr/bin/env bash
-# Update
-sudo apt-get update; sudo apt-get full-upgrade
-# System tools
-sudo apt-get install git stow build-essential file python3 python3-pip npm samba-common-bin texlive-full doxygen fonts-powerline curl autoconf automake sassc optipng inkscape libgtk-3-dev pkg-config yarn nodejs
-sudo apt-get install w3m ranger
-sudo apt-get install ncdu bash-completion vim-gtk htop tmux 
-# Themes base16
-cd ~/
-git clone https://github.com/chriskempson/base16-shell.git ~/.config/base16-shell
-# Brew
-  cd ~/
+
+ubuntu_minimal_install () {
+  mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
+  mkdir ~/.cache/zsh
+  # Update
+  sudo apt-get update; sudo apt-get full-upgrade
+  # System tools
+  sudo apt-get install git build-essential file python3 python3-pip npm samba-common-bin fonts-powerline  curl gnome-screensaver arc-theme autoconf automake sassc optipng inkscape gnome-shell libgtk-3-dev pkg-config yarn nodejs
+  #sudo apt-get install texlive-full doxygen   # Doxygen
+  sudo apt-get install ruby-dev
+  # Terminal
+    sudo apt-get install stow
+    sudo apt-get install subversion		        # To download repos
+    sudo apt-get install neovim		            # Neovim
+    sudo apt-get install zsh
+    sudo apt-get install htop			        # Show system resources
+    sudo apt-get install ranger w3m		        # Ranger
+    sudo apt-get install vim-gtk 		        # Vim with full functionality
+    sudo apt-get install silversearcher-ag      # Better and faster ack (and grep)
+    sudo apt-get install fzf                    # Fuzzy finder
+    sudo apt-get install bat                    # Better cat
+    # Tmux
+    sudo apt-get install tmux  		            # Terminal multiplexer
+    # Manage storage 
+    sudo apt-get install ncdu 		            # Manage storage
+}
+
+brew_install () {
+    cd ~/
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-    
     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
     brew update
     brew upgrade
-    brew install gcc patchelf graphviz exa
-# Vim 
-   cd ~/
+    brew install gcc patchelf graphviz 
+    brew install exa				             # "ls" on steroids
+}
+
+vim_install () {
+    cd ~/
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
-        bash ~/scripts/ycm
-sudo apt-get install cmatrix neofetch
+    bash ~/scripts/ycm
+    sudo npm install -g neovim
+    python3 -m pip install --user --upgrade pynvim
+    sudo gem install neovim
+}
+
+### MAIN
+echo "Is it the first time you run this script? [y/n]"
+read FirstRun
+
+if [[ $FirstRun == y ]]; then
+    echo "#! /bin/sh 
+export DISTRO=ubuntu" >> ~/.config/distro
+fi
+
+ubuntu_minimal_install
+brew_install
+vim_install
+chsh -s $(which zsh) # Change default shell to zsh

@@ -16,7 +16,7 @@ choco install r.studio          Rem Probabilitat i estadística IDE
 choco install poshgit           Rem git bar
 choco install adobereader -y 	Rem Pdf viewer
 choco install chromium -y 	    Rem Open source Web browser
-choco install skype -y		
+choco install skype -y		    Rem Skype
 choco install ccleaner -y 	    Rem Cleanup
 choco install 7zip.install -y   Rem Archiver
 choco install vlc -y		    Rem Media player
@@ -29,10 +29,10 @@ choco install thunderbird -y    Rem Email client
 choco install atom -y           Rem GUI Editor
 choco install vscode -y         Rem GUI Editor
 choco install yarn -y           Rem Packages
-choco install spotify -y
-choco install discord -y
-choco install telegram -y
-choco install calibre -y
+choco install spotify -y        Rem Spotify
+choco install discord -y        Rem Discord
+choco install telegram -y       Rem Telegram
+choco install calibre -y        Rem Books manager
 choco install microsoft-windows-terminal -y	Rem Windows terminal
 choco install toastify -y 		Rem Toastify adds some missing functionallity to the Spotify client.
 choco install qbittorrent -y    Rem Torrent client
