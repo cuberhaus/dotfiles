@@ -179,10 +179,8 @@ cinnamon_install() {
     yay -S mint-themes mint-y-icons mint-backgrounds # Themes
     gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
     sudo pacman -S gnome-screenshot          # Take screenshots with impr pant 
-    sudo pacman -S xed                       # GUI notepad
     yay -S xviewer                           # Image viewer
     sudo pacman -S xreader                   # Document viewer
-    yay -S xplayer                           # Media player
     yay -S pix                               # Image viewer
     # Fallback mode in case cinnamon crashes
     sudo pacman -S metacity 
@@ -216,15 +214,16 @@ virtualbox_install() {
 }
 
 apps_AUR_install () {
-    #sudo pacman -S r                    # Probabilitat i estadística
-    #yay -S rstudio-desktop              # Probabilitat i estadística IDE
+    sudo pacman -S r                    # Probabilitat i estadística
+    yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
     # GUI
-    yay -S spotify
+    yay -S whatsapp-nativefier          # Whatsapp client
+    yay -S spotify                      # Spotify
     yay -S ttf-ms-fonts                 # Microsoft fonts
     yay -S emoji-keyboard               # Emoji
     yay -S skypeforlinux-stable-bin     # Skype
-    yay -S slack-desktop
-    yay -S android-studio
+    yay -S slack-desktop                # Slack
+    yay -S android-studio               # Android Studio
     yay -S typora                       # Markdown editor
     yay -S youtube-dl                   # Download youtube videos
     # Terminal
@@ -238,8 +237,6 @@ apps_AUR_install () {
     # Office / Word compatible
     #yay -S freeoffice
 }
-
-# Trash
 
 # do this but i dont know exactly how
 #do_once () {
@@ -287,6 +284,7 @@ color_scripts_install() {
 echo "Is it the first time you run this script? [y/n]"
 read FirstRun
 cd ~/
+# Distro variable
 if [[ $FirstRun == y ]]; then
     echo "#! /bin/sh 
 export DISTRO=arch" >> ~/.config/distro
@@ -294,7 +292,7 @@ fi
 sudo pacman -Syu # Update
 arch_install
 i3_install
-bloat_install
+#bloat_install
 cinnamon_install
 if [[ $FirstRun == y ]]; then
     yay_install
@@ -303,7 +301,7 @@ if [[ $FirstRun == y ]]; then
     laptop_install
     games_install
     cava_install
-    bloat_AUR_install
+    #bloat_AUR_install
     DWall
 fi
 
