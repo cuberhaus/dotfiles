@@ -261,6 +261,7 @@ alias reload='exec ${SHELL} -l'
 alias path='echo -e ${PATH//:/\\n}'
 
 # Cpp
+alias eda++="g++ -std=c++11"
 alias p1++="g++ -ansi -O2 -DNDEBUG -D_GLIBCXX_DEBUG -Wall -Wextra -Werror -Wno-uninitialized -Wno-sign-compare -Wshadow"
 alias p2++="g++ -D GLIBCXX_DEBUG -O2 -Wall -Wextra -Werror -Wno-sign-compare -std=c++11"
 
