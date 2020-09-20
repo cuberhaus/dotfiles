@@ -38,9 +38,11 @@ choco install toastify -y 		Rem Toastify adds some missing functionallity to the
 choco install qbittorrent -y    Rem Torrent client
 choco install rufus -y          Rem burn iso's on usb
 choco install powershell-core   Rem Updated powershell
+Rem choco install gimp -y           Rem Photoshop
+Rem choco install autohotkey.portable -y Rem Automation software
 Rem choco install git-lfs
-Rem choco install audacity
-Rem choco install slack
+Rem choco install audacity      Rem Audio editor
+Rem choco install slack         Rem Slack
 Rem choco install googlechrome 	Rem Web browser
 Rem choco install jre8
 Rem choco install teamviewer 	
