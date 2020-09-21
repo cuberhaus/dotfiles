@@ -11,6 +11,7 @@ iwr -useb https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim |`
 Rem Swap caps with escape https://github.com/susam/uncap#readme
 
 :windows_install
+Install-Module git-aliases -Scope CurrentUser -AllowClobber Rem https://github.com/gluons/powershell-git-aliases
 Install-Module PSWindowsUpdate
 Get-WindowsUpdate
 Install-WindowsUpdate
