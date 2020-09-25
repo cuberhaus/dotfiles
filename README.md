@@ -1,12 +1,4 @@
 # Cuberhaus's dotfiles 
-#### WORKING 
-- ![Arch_icon][Arch_icon] Arch
-- ![Manjaro_icon][Manjaro_icon] Manjaro
-- ![Ubuntu_icon][Ubuntu_icon] Ubuntu
-- ![MacOS_icon][MacOS_icon] MacOS
-#### WIP
-- ![Gentoo_icon][Gentoo_icon]Gentoo
-- Openbox
 
 ## ![Imgur](https://i.imgur.com/nnJ6y17.png) Git
 #### Install this repo:
@@ -258,6 +250,15 @@ git remote set-url origin git@hostname:USERNAME/REPOSITORY.git
 ```
 git remote set-url origin https://hostname/USERNAME/REPOSITORY.git
 ```
+
+#### WORKING 
+- ![Arch_icon][Arch_icon] Arch
+- ![Manjaro_icon][Manjaro_icon] Manjaro
+- ![Ubuntu_icon][Ubuntu_icon] Ubuntu
+- ![MacOS_icon][MacOS_icon] MacOS
+#### WIP
+- ![Gentoo_icon][Gentoo_icon]Gentoo
+- Openbox
 
 ###### Other comments:
 > In Unix-like operating systems, a device file or special file is an interface to a device driver that appears in a file system as if it were an ordinary file.  
