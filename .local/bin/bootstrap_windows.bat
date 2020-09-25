@@ -43,6 +43,7 @@ choco install qbittorrent -y    Rem Torrent client
 choco install rufus -y          Rem burn iso's on usb
 choco install powershell-core   Rem Updated powershell
 choco install linkshellextension
+choco install wsl2              Rem Windows subsystem for linux 2
 Rem choco install gimp -y           Rem Photoshop
 Rem choco install autohotkey.portable -y Rem Automation software
 Rem choco install git-lfs
