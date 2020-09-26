@@ -27,6 +27,7 @@ arch_install () {
     #sudo pacman -S thunar-archive-plugin # Archive plugin for compressing
     #sudo pacman -S thunar-media-tags-plugin thunar-volman tumbler  ffmpegthumbnailer raw-thumbnailer libgsf # Support for different files and thumbnails
     # Terminal
+    sudo pacman -S svn
     sudo pacman -S base-devel            # AUR
     sudo pacman -S zsh                   # Zsh shell
     sudo pacman -S zsh-completions       # Zsh completions
