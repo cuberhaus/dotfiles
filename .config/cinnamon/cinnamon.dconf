@@ -1,0 +1,57 @@
+[/]
+applet-cache-updated=1601146009
+enabled-applets=['panel1:left:0:menu@cinnamon.org:0', 'panel1:left:1:show-desktop@cinnamon.org:1', 'panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:14:systray@cinnamon.org:3', 'panel1:right:15:xapp-status@cinnamon.org:4', 'panel1:right:16:notifications@cinnamon.org:5', 'panel1:right:17:printers@cinnamon.org:6', 'panel1:right:18:removable-drives@cinnamon.org:7', 'panel1:right:20:network@cinnamon.org:9', 'panel1:right:21:sound@cinnamon.org:10', 'panel1:right:22:power@cinnamon.org:11', 'panel1:right:23:calendar@cinnamon.org:12', 'panel1:right:13:weather@mockturtl:13', 'panel1:right:12:betterlock:14', 'panel1:right:1:workspace-switcher@cinnamon.org:25']
+favorite-apps=['chromium.desktop', 'firefox.desktop', 'cinnamon-settings.desktop', 'nemo.desktop', 'termite.desktop']
+next-applet-id=27
+panel-zone-symbolic-icon-sizes='[{"panelId": 1, "left": 28, "center": 28, "right": 16}]'
+panels-height=['1:40']
+workspace-expo-view-as-grid=true
+
+[cinnamon-session]
+prefer-hybrid-sleep=false
+
+[desktop/applications/terminal]
+exec='termite'
+exec-arg='-e'
+
+[desktop/background]
+picture-options='zoom'
+picture-uri='file:///usr/share/backgrounds/linuxmint-ulyana/jheston_beach.jpg'
+
+[desktop/background/slideshow]
+delay=15
+image-source='xml:///usr/share/gnome-background-properties/linuxmint-ulyana.xml'
+
+[desktop/interface]
+gtk-theme='Arc-Dark'
+icon-theme='ePapirus'
+scaling-factor=uint32 0
+text-scaling-factor=1.0
+
+[desktop/media-handling]
+autorun-never=false
+
+[desktop/session]
+idle-delay=uint32 900
+
+[desktop/sound]
+event-sounds=false
+
+[desktop/wm/preferences]
+resize-with-right-button=true
+theme='Arc-Darker'
+
+[settings-daemon/peripherals/keyboard]
+numlock-state='off'
+
+[settings-daemon/plugins/power]
+lid-close-ac-action='suspend'
+lid-close-battery-action='suspend'
+sleep-display-ac=1800
+sleep-display-battery=300
+sleep-inactive-ac-timeout=0
+sleep-inactive-battery-timeout=1800
+
+[theme]
+name='Arc-Dark'
+theme-cache-updated=1601145932

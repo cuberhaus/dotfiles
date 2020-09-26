@@ -1,0 +1,150 @@
+[Lollypop]
+network-access-acl=262142
+notification-flag=2
+volume-rate=0.7099761962890625
+window-maximized=false
+window-position=[644, 0]
+window-size=[632, 993]
+
+[calendar]
+active-view='month'
+window-maximized=true
+window-position=(0, 0)
+window-size=(1920, 1015)
+
+[control-center]
+last-panel='online-accounts'
+
+[desktop/a11y/applications]
+screen-keyboard-enabled=false
+screen-reader-enabled=false
+
+[desktop/a11y/mouse]
+dwell-click-enabled=false
+dwell-threshold=10
+dwell-time=1.2
+secondary-click-enabled=false
+secondary-click-time=1.2
+
+[desktop/calendar]
+show-weekdate=false
+
+[desktop/input-sources]
+sources=[('xkb', 'us')]
+xkb-options=@as []
+
+[desktop/interface]
+gtk-im-module='gtk-im-context-simple'
+toolkit-accessibility=false
+
+[evolution-data-server]
+migrated=true
+network-monitor-gio-name=''
+
+[evolution-data-server/calendar]
+reminders-past=@as []
+
+[file-roller/dialogs/new]
+default-extension='.tar.gz'
+encrypt-header=false
+volume-size=0
+
+[file-roller/listing]
+list-mode='as-folder'
+name-column-width=250
+show-path=false
+sort-method='name'
+sort-type='ascending'
+
+[file-roller/ui]
+sidebar-width=200
+window-height=993
+window-width=632
+
+[meld]
+wrap-mode='none'
+
+[meld/window-state]
+height=1058
+width=1920
+
+[nautilus/compression]
+default-compression-format='zip'
+
+[nautilus/icon-view]
+default-zoom-level='standard'
+
+[nautilus/list-view]
+default-column-order=['name', 'size', 'type', 'owner', 'group', 'permissions', 'where', 'date_modified', 'date_modified_with_time', 'date_accessed', 'recency', 'starred', 'detailed_type']
+default-visible-columns=['name', 'size', 'date_modified', 'starred']
+
+[nautilus/preferences]
+default-folder-viewer='icon-view'
+search-filter-time-type='last_modified'
+
+[nautilus/window-state]
+initial-size=(949, 967)
+maximized=false
+
+[nm-applet/eap/0b4df08d-9d98-406b-a9b8-78ded537b6ab]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
+[nm-applet/eap/6a564236-12d8-4b7c-a870-d961b765b5a3]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
+[nm-applet/eap/6e5d9cfc-3b61-45a0-a5f0-592ed8d45cac]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
+[nm-applet/eap/8f0aa845-2c8e-4e8c-824d-d7eafa2c2aa8]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
+[nm-applet/eap/c0b6c4e9-565f-4c75-a96b-53fd2910afb5]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
+[rhythmbox]
+position=(0, 0)
+size=(1920, 1058)
+
+[rhythmbox/library/source]
+show-browser=true
+
+[rhythmbox/player]
+volume=0.7099761962890625
+
+[rhythmbox/plugins]
+active-plugins=['mpris', 'mtpdevice', 'generic-player', 'iradio', 'mmkeys', 'power-manager', 'dbus-media-server', 'rb', 'artsearch', 'notification', 'audioscrobbler', 'android', 'audiocd']
+seen-plugins=['mpris', 'mtpdevice', 'fmradio', 'pythonconsole', 'daap', 'dbus-media-server', 'rb', 'listenbrainz', 'artsearch', 'soundcloud', 'replaygain', 'im-status', 'grilo', 'cd-recorder', 'webremote', 'magnatune', 'ipod', 'rblirc', 'notification', 'audioscrobbler', 'lyrics']
+
+[rhythmbox/plugins/audioscrobbler/Last.fm]
+scrobbling-enabled=true
+
+[rhythmbox/plugins/audioscrobbler/Libre.fm]
+scrobbling-enabled=true
+
+[rhythmbox/plugins/iradio]
+initial-stations-loaded=true
+
+[rhythmbox/plugins/iradio/source]
+show-browser=true
+
+[rhythmbox/podcast/source]
+show-browser=true
+
+[rhythmbox/rhythmdb]
+locations=['file:///home/pol']
+
+[shell]
+had-bluetooth-devices-setup=true
+
+[terminal/legacy]
+default-show-menubar=false
+
+[terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9]
+font='UbuntuMono Nerd Font Mono 1'
+scrollbar-policy='never'
+use-system-font=false
