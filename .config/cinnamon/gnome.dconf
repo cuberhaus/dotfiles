@@ -34,6 +34,7 @@ sources=[('xkb', 'us')]
 xkb-options=@as []
 
 [desktop/interface]
+document-font-name='Verdana 11'
 gtk-im-module='gtk-im-context-simple'
 toolkit-accessibility=false
 

@@ -16,13 +16,14 @@ exec-arg='-e'
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///usr/share/backgrounds/linuxmint-ulyana/jheston_beach.jpg'
+picture-uri='file:///usr/share/backgrounds/linuxmint-tricia/agucklhorn-lake_brienz.jpg'
 
 [desktop/background/slideshow]
 delay=15
-image-source='xml:///usr/share/gnome-background-properties/linuxmint-ulyana.xml'
+image-source='xml:///usr/share/gnome-background-properties/linuxmint-tricia.xml'
 
 [desktop/interface]
+font-name='Verdana 12'
 gtk-theme='Arc-Dark'
 icon-theme='ePapirus'
 scaling-factor=uint32 0
@@ -40,6 +41,7 @@ event-sounds=false
 [desktop/wm/preferences]
 resize-with-right-button=true
 theme='Arc-Darker'
+titlebar-font='Verdana Bold 11'
 
 [settings-daemon/peripherals/keyboard]
 numlock-state='off'
