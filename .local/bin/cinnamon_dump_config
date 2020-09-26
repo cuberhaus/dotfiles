@@ -1,0 +1,6 @@
+#!/bin/sh
+
+dconf dump /org/cinnamon/ > ~/.config/cinnamon/cinnamon.dconf
+dconf dump /org/nemo/ > ~/.config/cinnamon/nemo.dconf
+dconf dump /org/gtk/ > ~/.config/cinnamon/gtk.dconf
+dconf dump /org/gnome/ > ~/.config/cinnamon/gnome.dconf
