@@ -186,6 +186,8 @@ cinnamon_install() {
     # Fallback mode in case cinnamon crashes
     sudo pacman -S metacity 
     sudo pacman -S gnome-shell               # To have a taskbar
+    #color pick applet
+    sudo pacman -S python-numpy python-xlib
 }
 
 bloat_install () {
