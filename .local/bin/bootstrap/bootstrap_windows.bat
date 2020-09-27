@@ -17,6 +17,7 @@ Install-Module git-aliases -Scope CurrentUser -AllowClobber Rem https://github.c
 Install-Module PSWindowsUpdate
 Get-WindowsUpdate
 Install-WindowsUpdate
+choco install fzf               Rem Fuzzy finder
 choco install r.project         Rem Probabilitat i estadística
 choco install r.studio          Rem Probabilitat i estadística IDE
 choco install poshgit           Rem git bar
