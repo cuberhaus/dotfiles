@@ -6,6 +6,9 @@ window-maximized=false
 window-position=[644, 0]
 window-size=[632, 993]
 
+[books]
+window-maximized=true
+
 [calendar]
 active-view='month'
 window-maximized=true
@@ -26,6 +29,20 @@ dwell-time=1.2
 secondary-click-enabled=false
 secondary-click-time=1.2
 
+[desktop/app-folders]
+folder-children=['Utilities', 'YaST']
+
+[desktop/app-folders/folders/Utilities]
+apps=['gnome-abrt.desktop', 'gnome-system-log.desktop', 'gnome-system-monitor.desktop', 'gucharmap.desktop', 'nm-connection-editor.desktop', 'org.gnome.baobab.desktop', 'org.gnome.Calculator.desktop', 'org.gnome.DejaDup.desktop', 'org.gnome.Dictionary.desktop', 'org.gnome.DiskUtility.desktop', 'org.gnome.eog.desktop', 'org.gnome.Evince.desktop', 'org.gnome.FileRoller.desktop', 'org.gnome.fonts.desktop', 'org.gnome.Screenshot.desktop', 'org.gnome.seahorse.Application.desktop', 'org.gnome.Terminal.desktop', 'org.gnome.tweaks.desktop', 'org.gnome.Usage.desktop', 'simple-scan.desktop', 'vinagre.desktop', 'yelp.desktop']
+categories=['X-GNOME-Utilities']
+name='X-GNOME-Utilities.directory'
+translate=true
+
+[desktop/app-folders/folders/YaST]
+categories=['X-SuSE-YaST']
+name='suse-yast.directory'
+translate=true
+
 [desktop/calendar]
 show-weekdate=false
 
@@ -34,9 +51,33 @@ sources=[('xkb', 'us')]
 xkb-options=@as []
 
 [desktop/interface]
-document-font-name='Verdana 11'
+cursor-theme='breeze_cursors'
+document-font-name='Sans 11'
+enable-animations=true
+font-name='Noto Sans,  10'
 gtk-im-module='gtk-im-context-simple'
+gtk-theme='Arc-Dark'
+icon-theme='breeze'
+toolbar-style='text'
 toolkit-accessibility=false
+
+[desktop/notifications]
+application-children=['skypeforlinux', 'org-gnome-books']
+
+[desktop/notifications/application/org-gnome-books]
+application-id='org.gnome.Books.desktop'
+
+[desktop/notifications/application/skypeforlinux]
+application-id='skypeforlinux.desktop'
+
+[desktop/peripherals/touchpad]
+two-finger-scrolling-enabled=true
+
+[desktop/search-providers]
+sort-order=['org.gnome.Contacts.desktop', 'org.gnome.Documents.desktop', 'org.gnome.Nautilus.desktop']
+
+[desktop/wm/preferences]
+button-layout='icon:minimize,maximize,close'
 
 [evolution-data-server]
 migrated=true
@@ -44,6 +85,10 @@ network-monitor-gio-name=''
 
 [evolution-data-server/calendar]
 reminders-past=@as []
+
+[file-roller/dialogs/extract]
+recreate-folders=true
+skip-newer=false
 
 [file-roller/dialogs/new]
 default-extension='.tar.gz'
@@ -61,6 +106,85 @@ sort-type='ascending'
 sidebar-width=200
 window-height=993
 window-width=632
+
+[gnome-panel/layout]
+object-id-list=['menu-bar', 'clock', 'notification-area', 'show-destkop', 'user-menu', 'window-list', 'workspace-switcher']
+toplevel-id-list=['top-panel', 'bottom-panel']
+
+[gnome-panel/layout/objects/clock]
+object-iid='org.gnome.gnome-panel.clock::clock'
+pack-index=1
+pack-type='end'
+toplevel-id='top-panel'
+
+[gnome-panel/layout/objects/menu-bar]
+object-iid='org.gnome.gnome-panel.menu::menu-bar'
+pack-index=0
+toplevel-id='top-panel'
+
+[gnome-panel/layout/objects/notification-area]
+object-iid='org.gnome.gnome-panel.notification-area::notification-area'
+pack-index=2
+pack-type='end'
+toplevel-id='top-panel'
+
+[gnome-panel/layout/objects/show-destkop]
+object-iid='org.gnome.gnome-panel.wncklet::show-desktop'
+pack-index=0
+toplevel-id='bottom-panel'
+
+[gnome-panel/layout/objects/user-menu]
+object-iid='org.gnome.gnome-panel.menu::user-menu'
+pack-index=0
+pack-type='end'
+toplevel-id='top-panel'
+
+[gnome-panel/layout/objects/window-list]
+object-iid='org.gnome.gnome-panel.wncklet::window-list'
+pack-index=1
+toplevel-id='bottom-panel'
+
+[gnome-panel/layout/objects/workspace-switcher]
+object-iid='org.gnome.gnome-panel.wncklet::workspace-switcher'
+pack-index=0
+pack-type='end'
+toplevel-id='bottom-panel'
+
+[gnome-panel/layout/toplevels/bottom-panel]
+animation-speed='fast'
+auto-hide=false
+auto-hide-size=1
+enable-buttons=false
+expand=true
+hide-delay=300
+monitor=0
+orientation='bottom'
+size=24
+unhide-delay=100
+x=0
+x-centered=false
+x-right=-1
+y=1056
+y-bottom=0
+y-centered=false
+
+[gnome-panel/layout/toplevels/top-panel]
+animation-speed='fast'
+auto-hide=false
+auto-hide-size=1
+enable-buttons=false
+expand=true
+hide-delay=300
+monitor=0
+orientation='top'
+size=24
+unhide-delay=100
+x=0
+x-centered=false
+x-right=-1
+y=0
+y-bottom=-1
+y-centered=false
 
 [meld]
 wrap-mode='none'
@@ -107,6 +231,9 @@ ignore-phase2-ca-cert=false
 ignore-ca-cert=false
 ignore-phase2-ca-cert=false
 
+[photos]
+window-maximized=true
+
 [rhythmbox]
 position=(0, 0)
 size=(1920, 1058)
@@ -139,8 +266,32 @@ show-browser=true
 [rhythmbox/rhythmdb]
 locations=['file:///home/pol']
 
+[settings-daemon/plugins/media-keys]
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']
+
+[settings-daemon/plugins/media-keys/custom-keybindings/custom0]
+binding='<Super>Return'
+command='termite'
+name='Terminal'
+
+[settings-daemon/plugins/xsettings]
+antialiasing='grayscale'
+hinting='slight'
+
 [shell]
+enabled-extensions=@as []
 had-bluetooth-devices-setup=true
+
+[shell/weather]
+automatic-location=true
+locations=@av []
+
+[shell/world-clocks]
+locations=@av []
+
+[software]
+check-timestamp=int64 1601145110
+first-run=false
 
 [terminal/legacy]
 default-show-menubar=false

@@ -1,5 +1,5 @@
 [desktop]
-font='Verdana 10'
+font='Verdana 11'
 
 [extensions/nemo-terminal]
 terminal-position='bottom'
@@ -22,7 +22,7 @@ show-show-thumbnails-toolbar=false
 selection-menu-make-link=true
 
 [window-state]
-geometry='1118x551+391+242'
+geometry='1118x551+593+223'
 maximized=false
 side-pane-view='places'
 sidebar-bookmark-breakpoint=1

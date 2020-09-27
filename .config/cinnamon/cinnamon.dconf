@@ -1,14 +1,29 @@
 [/]
-applet-cache-updated=1601146009
-enabled-applets=['panel1:left:0:menu@cinnamon.org:0', 'panel1:left:1:show-desktop@cinnamon.org:1', 'panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:14:systray@cinnamon.org:3', 'panel1:right:15:xapp-status@cinnamon.org:4', 'panel1:right:16:notifications@cinnamon.org:5', 'panel1:right:17:printers@cinnamon.org:6', 'panel1:right:18:removable-drives@cinnamon.org:7', 'panel1:right:20:network@cinnamon.org:9', 'panel1:right:21:sound@cinnamon.org:10', 'panel1:right:22:power@cinnamon.org:11', 'panel1:right:23:calendar@cinnamon.org:12', 'panel1:right:13:weather@mockturtl:13', 'panel1:right:12:betterlock:14', 'panel1:right:1:workspace-switcher@cinnamon.org:25']
+applet-cache-updated=1601164600
+command-history=['r']
+enabled-applets=['panel1:left:0:menu@cinnamon.org:0', 'panel1:left:1:show-desktop@cinnamon.org:1', 'panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:9:systray@cinnamon.org:3', 'panel1:right:11:xapp-status@cinnamon.org:4', 'panel1:right:12:notifications@cinnamon.org:5', 'panel1:right:3:printers@cinnamon.org:6', 'panel1:right:13:removable-drives@cinnamon.org:7', 'panel1:right:14:network@cinnamon.org:9', 'panel1:right:15:sound@cinnamon.org:10', 'panel1:right:16:power@cinnamon.org:11', 'panel1:right:17:calendar@cinnamon.org:12', 'panel1:right:10:weather@mockturtl:13', 'panel1:right:8:workspace-switcher@cinnamon.org:25', 'panel1:right:18:clean-show-desktop@filipetorresbr:31', 'panel1:right:4:recent@cinnamon.org:40', 'panel1:right:6:force-quit@cinnamon.org:45', 'panel1:right:5:show-hide-applets@mohammad-sn:48', 'panel1:right:0:color-picker@fmete:51']
 favorite-apps=['chromium.desktop', 'firefox.desktop', 'cinnamon-settings.desktop', 'nemo.desktop', 'termite.desktop']
-next-applet-id=27
+next-applet-id=52
+panel-edit-mode=false
+panel-launchers=['DEPRECATED']
 panel-zone-symbolic-icon-sizes='[{"panelId": 1, "left": 28, "center": 28, "right": 16}]'
+panels-enabled=['1:0:bottom']
 panels-height=['1:40']
 workspace-expo-view-as-grid=true
 
 [cinnamon-session]
 prefer-hybrid-sleep=false
+
+[desktop/a11y/applications]
+screen-keyboard-enabled=false
+screen-reader-enabled=false
+
+[desktop/a11y/mouse]
+dwell-click-enabled=false
+dwell-threshold=10
+dwell-time=1.2
+secondary-click-enabled=false
+secondary-click-time=1.2
 
 [desktop/applications/terminal]
 exec='termite'
@@ -16,18 +31,31 @@ exec-arg='-e'
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///usr/share/backgrounds/linuxmint-tricia/agucklhorn-lake_brienz.jpg'
+picture-uri='file:///home/pol/.local/share/cinnamon/applets/Mint-Unsplash-Background@omidmaldar/background'
 
 [desktop/background/slideshow]
 delay=15
-image-source='xml:///usr/share/gnome-background-properties/linuxmint-tricia.xml'
+image-source='xml:///usr/share/gnome-background-properties/linuxmint-ulyana.xml'
 
 [desktop/interface]
-font-name='Verdana 12'
+cursor-blink-time=1200
+font-name='Verdana 11'
 gtk-theme='Arc-Dark'
-icon-theme='ePapirus'
+icon-theme='Papirus-Dark'
 scaling-factor=uint32 0
 text-scaling-factor=1.0
+toolkit-accessibility=false
+
+[desktop/keybindings]
+custom-list=['__dummy__', 'custom0']
+
+[desktop/keybindings/custom-keybindings/custom0]
+binding=['<Primary><Alt>t']
+command='termite'
+name='Termite'
+
+[desktop/keybindings/media-keys]
+terminal=@as []
 
 [desktop/media-handling]
 autorun-never=false
@@ -40,11 +68,17 @@ event-sounds=false
 
 [desktop/wm/preferences]
 resize-with-right-button=true
-theme='Arc-Darker'
-titlebar-font='Verdana Bold 11'
+theme='Arc-Dark'
+titlebar-font='Verdana Bold 12'
+
+[muffin]
+tile-hud-threshold=25
+workspace-cycle=false
 
 [settings-daemon/peripherals/keyboard]
+delay=uint32 500
 numlock-state='off'
+repeat-interval=uint32 30
 
 [settings-daemon/plugins/power]
 lid-close-ac-action='suspend'
@@ -54,6 +88,10 @@ sleep-display-battery=300
 sleep-inactive-ac-timeout=0
 sleep-inactive-battery-timeout=1800
 
+[sounds]
+login-enabled=true
+map-enabled=false
+
 [theme]
 name='Arc-Dark'
-theme-cache-updated=1601145932
+theme-cache-updated=1601160593
