@@ -1,8 +1,8 @@
 # Config Files
 alias zsh_aliases="vim $ZDOTDIR/.zsh_aliases"
 alias zshenv="vim ~/.zshenv"
-alias zshrc="vim ~/$ZOTDIR/.zshrc"
-alias zprofile="vim ~/$ZDOTDIR/.zprofile"
+alias zshrc="vim $ZDOTDIR/.zshrc"
+alias zprofile="vim $ZDOTDIR/.zprofile"
 alias vimrc="vim ~/.vim/vimrc"
 alias bashrc="vim ~/.bashrc"
 alias tmux.conf="vim ~/.config/tmux/tmux.conf"
@@ -130,7 +130,7 @@ ex ()
       *.7z)        7z x $1      ;;
       *.deb)       ar x $1      ;;
       *.tar.xz)    tar xf $1    ;;
-      *.tar.zst)   unzstd $1    ;;      
+      *.tar.zst)   unzstd $1    ;;
       *)           echo "'$1' cannot be extracted via ex()" ;;
     esac
   else
