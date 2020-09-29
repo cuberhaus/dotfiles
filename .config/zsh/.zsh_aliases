@@ -1,0 +1,192 @@
+# Config Files
+alias zsh_aliases="vim $ZDOTDIR/.zsh_aliases"
+alias zshenv="vim ~/.zshenv"
+alias zshrc="vim ~/$ZOTDIR/.zshrc"
+alias zprofile="vim ~/$ZDOTDIR/.zprofile"
+alias vimrc="vim ~/.vim/vimrc"
+alias bashrc="vim ~/.bashrc"
+alias tmux.conf="vim ~/.config/tmux/tmux.conf"
+alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
+alias vpacman="sudo vim /etc/pacman.conf"
+alias vgrub="sudo vim /etc/default/grub"
+alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
+alias vslim="sudo vim /etc/slim.conf"
+alias voblogout="sudo vim /etc/oblogout.conf"
+alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
+alias vconfgrub="sudo vim /boot/grub/grub.cfg"
+
+# Clean-up
+alias Xres="xrdb -load ~/.config/X11/xresources"
+alias nvidia-settings="nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settings"
+alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
+
+# Use NeoVim
+alias vim="nvim"
+
+# Easier navigation: .., ..., ...., ....., ~ and -
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+
+## Colorize the grep command output for ease of use (good for log files)##
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+
+#alias vfzf='vim $(fzf)'
+#alias fzf='fzf'
+alias fz='vim $(fzf)'
+alias qt='fortune -c | cowthink -f $(find /usr/share/cows -type f | shuf -n 1)'
+
+# root privileges
+alias doas="doas --"
+#alias sudo='sudo '
+
+# adding flags
+alias cp="cp -i"                          # confirm before overwriting something
+alias df="df -h"                          # human-readable sizes
+alias free="free -m"                      # show sizes in MB
+
+# Clear
+alias c="clear"
+
+# Git
+alias gs="git status"
+alias gf="git fetch"
+alias ga="git add "
+alias gm="git merge"
+alias gc="git commit -m "
+alias gp="git push"
+alias gsu="git submodule update --recursive --remote"
+alias yolo='git commit -m "$(curl -s http://whatthecommit.com/index.txt)"'
+
+# Lock screen
+LockScreens=('pipes.sh' 'cmatrix')
+alias lock='${LockScreens[$RANDOM % 2]}'
+alias afk="betterlockscreen -l"
+
+# List files
+alias ls='exa -G -F --long --header --links --group --git  --group-directories-first'
+alias la='exa -G -a -F --long --header --links --group --git  --group-directories-first'
+alias lsd='exa -D -a'
+
+# IP adresses
+alias ip='dig +short myip.opendns.com @resolver1.opendns.com'
+alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
+
+# Reload the shell (i.e. invoke as a login shell)
+alias reload='exec ${SHELL} -l'
+
+# Print each PATH entry on a separate line
+alias path='echo -e ${PATH//:/\\n}'
+
+# Cpp
+alias eda++="g++ -std=c++11"
+alias p1++="g++ -ansi -O2 -DNDEBUG -D_GLIBCXX_DEBUG -Wall -Wextra -Werror -Wno-uninitialized -Wno-sign-compare -Wshadow"
+alias p2++="g++ -D GLIBCXX_DEBUG -O2 -Wall -Wextra -Werror -Wno-sign-compare -std=c++11"
+
+#userlist
+alias userlist="cut -d: -f1 /etc/passwd"
+
+#switch between bash and zsh
+alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
+alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
+
+#get the error messages from journalctl
+alias jctl="journalctl -p 3 -xb"
+
+#check vulnerabilities microcode
+alias microcode='grep . /sys/devices/system/cpu/vulnerabilities/*'
+
+#youtube-dl
+alias yta-aac="youtube-dl --extract-audio --audio-format aac "
+alias yta-best="youtube-dl --extract-audio --audio-format best "
+alias yta-flac="youtube-dl --extract-audio --audio-format flac "
+alias yta-m4a="youtube-dl --extract-audio --audio-format m4a "
+alias yta-mp3="youtube-dl --extract-audio --audio-format mp3 "
+alias yta-opus="youtube-dl --extract-audio --audio-format opus "
+alias yta-vorbis="youtube-dl --extract-audio --audio-format vorbis "
+alias yta-wav="youtube-dl --extract-audio --audio-format wav "
+
+alias ytv-best="youtube-dl -f bestvideo+bestaudio "
+
+# # ex = EXtractor for all kinds of archives
+# # usage: ex <file>
+ex ()
+{
+  if [ -f $1 ] ; then
+    case $1 in
+      *.tar.bz2)   tar xjf $1   ;;
+      *.tar.gz)    tar xzf $1   ;;
+      *.bz2)       bunzip2 $1   ;;
+      *.rar)       unrar x $1   ;;
+      *.gz)        gunzip $1    ;;
+      *.tar)       tar xf $1    ;;
+      *.tbz2)      tar xjf $1   ;;
+      *.tgz)       tar xzf $1   ;;
+      *.zip)       unzip $1     ;;
+      *.Z)         uncompress $1;;
+      *.7z)        7z x $1      ;;
+      *.deb)       ar x $1      ;;
+      *.tar.xz)    tar xf $1    ;;
+      *.tar.zst)   unzstd $1    ;;      
+      *)           echo "'$1' cannot be extracted via ex()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+### MacOS
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    alias update="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask; brew cleanup"
+    alias o='open . > /dev/null 2>&1 &'
+    # Show active network interfaces
+    alias ifactive="ifconfig | pcregrep -M -o '^[^\t:]+:([^\n]|\n\t)*status: active'"
+
+    # Clean up LaunchServices to remove duplicates in the “Open With” menu
+    alias lscleanup="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder"
+
+    # Flush Directory Service cache
+    alias flush="dscacheutil -flushcache && killall -HUP mDNSResponder"
+
+    # Recursively delete `.DS_Store` files
+    alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
+
+    # Empty the Trash on all mounted volumes and the main HDD.
+    # Also, clear Apple’s System Logs to improve shell startup speed.
+    # Finally, clear download history from quarantine. https://mths.be/bum
+    alias emptytrash="sudo rm -rfv /Volumes/*/.Trashes; sudo rm -rfv ~/.Trash; sudo rm -rfv /private/var/log/asl/*.asl; sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* 'delete from LSQuarantineEvent'"
+
+    # Show/hide hidden files in Finder
+    alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
+    alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
+fi
+
+### Arch
+if [[ "$DISTRO" == "arch" ]]; then
+    alias o='nemo . > /dev/null 2>&1 &'
+    alias update='sudo pacman -Syyu'
+    #get fastest mirrors in your neighborhood
+    alias mirror="sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist"
+    alias mirrord="sudo reflector --latest 50 --number 20 --sort delay --save /etc/pacman.d/mirrorlist"
+    alias mirrors="sudo reflector --latest 50 --number 20 --sort score --save /etc/pacman.d/mirrorlist"
+    alias mirrora="sudo reflector --latest 50 --number 20 --sort age --save /etc/pacman.d/mirrorlist"
+
+    alias pacman='sudo pacman --color auto'
+    #pacman unlock
+    alias unlock="sudo rm /var/lib/pacman/db.lck"
+fi
+
+### Manjaro
+if [[ "$DISTRO" == "manjaro" ]]; then
+    alias o='nautilus . > /dev/null 2>&1 &'
+fi
+
+### Ubuntu
+if [[ "$DISTRO" == "ubuntu" ]]; then
+    alias o='nautilus . > /dev/null 2>&1 &'
+    alias update="sudo apt-get update; sudo apt-get full-upgrade; brew update; brew upgrade; sudo apt-get autoclean; sudo apt-get clean; sudo apt-get autoremove"
+    alias tmux="tmux -f ~/.config/tmux/tmux.conf"
+fi

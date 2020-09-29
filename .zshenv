@@ -1,25 +1,39 @@
 #!/bin/sh
-# ~/.zshenv
-# Zsh files:
-export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
-# For more information RTFM
-# https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
-
-# Use vim
-export VISUAL=vim
-export EDITOR="$VISUAL"
-
-export QT_QPA_PLATFORMTHEME="qt5ct"
 # Add to path
 if [ -d "$HOME/.local/bin" ] ; then
         PATH="$HOME/.local/bin:$PATH"
 fi
 
 if [ -d "$HOME/.config/i3/i3-layout-manager" ] ; then
-        PATH="$HOME/.config/i3/i3-layout-manager:$PATH"
+        PATH="$HOME/.config/i3/i3-layout-manager:$PATH" 
 fi
-export PATH="${PATH}:${HOME}/.local/bin/"
-PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
+
+if [ -d "$HOME/.gem/ruby/2.7.0/bin" ] ; then
+        PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
+fi
+
+#if [ -d "/usr/local/sbin" ] ; then
+#        PATH="/usr/local/sbin:$PATH"
+#fi
+#PATH_ARRAY=($HOME/.local/bin 
+#    $HOME/.config/i3/i3-layout-manager 
+#    $HOME/.gem/ruby/2.7.0/bin 
+#    /usr/local/sbin)
+#
+# Zsh files:
+export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+# For more information RTFM
+# https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
+
+# Path to your oh-my-zsh installation.
+export ZSH="$HOME/.config/oh-my-zsh"
+export VISUAL=vim
+export EDITOR="$VISUAL"
+export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
+export QT_QPA_PLATFORMTHEME="qt5ct"
+#INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
+#OBJECTES=/Users/$USER/assig/pro2/objectes
 
 # ~/ Clean-up:
 export GEM_HOME="$XDG_DATA_HOME"/gem
@@ -55,7 +69,6 @@ export ADB_VENDOR_KEY="$XDG_CONFIG_HOME"/android
 export GTK_RC_FILES="$XDG_CONFIG_HOME"/gtk-1.0/gtkrc
 export GTK2_RC_FILES="$XDG_CONFIG_HOME"/gtk-2.0/gtkrc
 
-export PATH="/usr/local/sbin:$PATH"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # DISTRO variable
     source ~/.config/distro
