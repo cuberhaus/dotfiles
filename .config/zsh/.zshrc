@@ -246,8 +246,8 @@ alias lock='${LockScreens[$RANDOM % 2]}'
 alias afk="betterlockscreen -l"
 
 # List files
-alias ls='exa -G -F --long --header --git  --group-directories-first'
-alias la='exa -G -a -F --long --header --git  --group-directories-first'
+alias ls='exa -G -F --long --header --links --group --git  --group-directories-first'
+alias la='exa -G -a -F --long --header --links --group --git  --group-directories-first'
 alias lsd='exa -D -a'
 
 # IP adresses
