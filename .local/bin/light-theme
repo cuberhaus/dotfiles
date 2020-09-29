@@ -1,0 +1,10 @@
+BASE16_SHELL=$HOME/.config/base16-shell/
+[ -s $BASE16_SHELL/profile_helper.sh ] && \
+              eval "$($BASE16_SHELL/profile_helper.sh)"
+
+dconf load /org/cinnamon/ < ~/.config/cinnamon/light/cinnamon.dconf
+dconf load /org/nemo/ < ~/.config/cinnamon/light/nemo.dconf
+dconf load /org/gtk/ < ~/.config/cinnamon/light/gtk.dconf
+dconf load /org/gnome/ < ~/.config/cinnamon/light/gnome.dconf
+
+base16_one-light

@@ -1,0 +1,30 @@
+[desktop]
+font='Verdana 11'
+
+[extensions/nemo-terminal]
+terminal-position='bottom'
+
+[plugins]
+disabled-actions=['add-desklets.nemo_action']
+disabled-extensions=['NemoTerminalProvider+NemoPython', 'SeahorseNemo']
+
+[preferences]
+show-computer-icon-toolbar=true
+show-hidden-files=true
+show-home-icon-toolbar=false
+show-location-entry=true
+show-new-folder-icon-toolbar=false
+show-open-in-terminal-toolbar=false
+show-reload-icon-toolbar=true
+show-show-thumbnails-toolbar=false
+
+[preferences/menu-config]
+selection-menu-make-link=true
+
+[window-state]
+geometry='1118x551+593+223'
+maximized=false
+side-pane-view='places'
+sidebar-bookmark-breakpoint=1
+sidebar-width=171
+start-with-sidebar=true
