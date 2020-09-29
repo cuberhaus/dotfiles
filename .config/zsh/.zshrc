@@ -345,7 +345,7 @@ fi
 
 ### Arch
 if [[ "$DISTRO" == "arch" ]]; then
-    alias o='thunar . > /dev/null 2>&1 &'
+    alias o='nemo . > /dev/null 2>&1 &'
     alias update='sudo pacman -Syyu'
     #get fastest mirrors in your neighborhood
     alias mirror="sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist"

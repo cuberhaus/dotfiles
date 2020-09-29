@@ -51,6 +51,11 @@ git gc --aggressive --prune=all     # remove the old files
 
 # ![Arch icon][Arch_icon] Arch
 ## Pacman
+
+Print all environment variables:
+```
+env
+```
 Remove a package and its _dependancies_:
 ```
 sudo pacman -Rs
