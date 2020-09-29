@@ -231,6 +231,10 @@ ignore-phase2-ca-cert=false
 ignore-ca-cert=false
 ignore-phase2-ca-cert=false
 
+[nm-applet/eap/d3558690-b4da-4985-b536-893ff3e35970]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
 [photos]
 window-maximized=true
 

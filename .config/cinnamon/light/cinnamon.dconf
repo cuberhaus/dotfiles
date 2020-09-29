@@ -31,16 +31,16 @@ exec-arg='-e'
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///home/pol/.local/share/cinnamon/applets/Mint-Unsplash-Background@omidmaldar/background'
+picture-uri='file:///home/pol/dotfiles/dotfiles/.local/xdg/wallpapers/landscapes/pineapple-supply-co-IQ0jqC0Jjuk-unsplash.jpg'
 
 [desktop/background/slideshow]
 delay=15
-image-source='xml:///usr/share/gnome-background-properties/linuxmint-ulyana.xml'
+image-source='xml:///usr/share/gnome-background-properties/linuxmint-qiana.xml'
 
 [desktop/interface]
 cursor-blink-time=1200
 font-name='Verdana 11'
-gtk-theme='Arc'
+gtk-theme='Arc-Lighter'
 icon-theme='Papirus-Dark'
 scaling-factor=uint32 0
 text-scaling-factor=1.0
@@ -68,7 +68,7 @@ event-sounds=false
 
 [desktop/wm/preferences]
 resize-with-right-button=true
-theme='Arc'
+theme='Arc-Lighter'
 titlebar-font='Verdana Bold 12'
 
 [muffin]
