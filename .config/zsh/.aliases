@@ -1,5 +1,7 @@
+#! /bin/bash
+
 # Config Files
-alias zsh_aliases="vim $ZDOTDIR/.zsh_aliases"
+alias aliases="vim $ZDOTDIR/.aliases"
 alias zshenv="vim ~/.zshenv"
 alias zshrc="vim $ZDOTDIR/.zshrc"
 alias zprofile="vim $ZDOTDIR/.zprofile"
