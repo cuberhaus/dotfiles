@@ -107,6 +107,6 @@ manjaro_install
 vim_install
 if [[ $FirstRun == y ]]; then
 	yay_install
+	apps_AUR_install
 fi
-apps_AUR_install
 

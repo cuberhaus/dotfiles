@@ -28,6 +28,8 @@ elif [[ "$DISTRO" == "arch" ]]; then
     arch_based_install # Installs needed dependancies to build
 elif [[ "$DISTRO" == "ubuntu" ]]; then
     ubuntu_based_install
+elif [[ "$DISTRO" == "manjaro" ]]; then
+    arch_based_install # Installs needed dependancies to build
 fi
 # Start
 cd ~
