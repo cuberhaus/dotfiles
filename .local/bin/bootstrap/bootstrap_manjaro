@@ -42,7 +42,6 @@ manjaro_install() {
 }
 
 vim_install () {
-    sudo pacman -S gvim                  # Vim version with extra features
     sudo pacman -S neovim
     cd ~/
     vim +PlugInstall +qall
