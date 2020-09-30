@@ -10,6 +10,7 @@ arch_install () {
 
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
     mkdir ~/.cache/zsh
+    mkdir ~/.cache/vlc
 
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
@@ -21,21 +22,16 @@ arch_install () {
     sudo pacman -S nemo-share
     #sudo pacman -S nemo-terminal
 
-    # Thunar
-    #sudo pacman -S thunar                # File manager
-    #sudo pacman -S gvfs                  # Trash support thunar
-    #sudo pacman -S thunar-archive-plugin # Archive plugin for compressing
-    #sudo pacman -S thunar-media-tags-plugin thunar-volman tumbler  ffmpegthumbnailer raw-thumbnailer libgsf # Support for different files and thumbnails
     # Terminal
     sudo pacman -S svn
     sudo pacman -S base-devel            # AUR
     sudo pacman -S zsh                   # Zsh shell
-    sudo pacman -S zsh-completions       # Zsh completions
+    #sudo pacman -S zsh-completions       # Zsh completions
     sudo pacman -S fortune-mod           # Random quote
     sudo pacman -S termite               # Terminal emulator
     sudo pacman -S gvim                  # Vim version with extra features
     sudo pacman -S exa                   # "ls" on steroids
-    sudo pacman -S bash-completion       # Better bash completion
+    #sudo pacman -S bash-completion       # Better bash completion
     sudo pacman -S htop                  # Show system resources
     sudo pacman -S the_silver_searcher   # Better and faster ack (and grep)
     sudo pacman -S fzf                   # Fuzzy finder
@@ -54,6 +50,13 @@ arch_install () {
     sudo pacman -S reflector             # Update Arch mirrors
     sudo pacman -S dnsutils              # Ip
     sudo pacman -S net-tools             # Ips
+    sudo pacman -S ncdu                  # Manage storage
+    sudo pacman -S xclip                 # Clipboard
+    sudo pacman -S udisks2               # Daemon to manipulate storage devices
+    sudo pacman -S udiskie               # Automater
+    sudo pacman -S ranger                # Ranger
+    sudo pacman -S w3m                   # Preview images on ranger
+
     # GUI
     sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"
     sudo pacman -S gimp                  # Image editor
@@ -71,13 +74,8 @@ arch_install () {
     sudo pacman -S calibre               # Book manager
     sudo pacman -S libreoffice-still     # Office
     sudo pacman -S chromium              # Web browser
-    sudo pacman -S ncdu                  # Manage storage
-    sudo pacman -S xclip                 # Clipboard
-    sudo pacman -S udisks2               # Daemon to manipulate storage devices
-    sudo pacman -S udiskie               # Automater
-    sudo pacman -S ranger                # Ranger
-    sudo pacman -S w3m                   # Preview images on ranger
     sudo pacman -S transmission-gtk      # A simpler Torrent D.
+    sudo pacman -S vlc                   # Video player
     #sudo pacman -S qbittorrent           # Torrent Downloader
     #sudo pacman -S tor tor-browser       # Tor private browser
     #sudo pacman -S claws-mail           # Alternative mail
@@ -114,11 +112,6 @@ arch_install () {
     sudo pacman -S bluez bluez-utils
     if [[ $FirstRun == y ]]; then
         systemctl enable bluetooth.service
-    fi
-    # Video player
-    sudo pacman -S vlc
-    if [[ $FirstRun == y ]]; then
-        mkdir ~/.cache/vlc
     fi
     # Display manager
     if [[ $FirstRun == y ]]; then
