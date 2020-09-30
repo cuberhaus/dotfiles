@@ -3,7 +3,7 @@
 ## ![Imgur](https://i.imgur.com/nnJ6y17.png) Git
 #### Install this repo:
 ```
-git clone --recurse-submodules https://github.com/cuberhaus/dotfiles 
+git clone --recurse-submodules https://github.com/cuberhaus/dotfiles ~/dotfiles/dotfiles
 ```
 #### Add new submodule
 ```
@@ -194,6 +194,11 @@ choco upgrade all
 #### List packages
 ```
 choco list --local-only
+```
+#### Swap esc and mayus
+```
+Wind + r
+uncap 0x1b:0x14
 ```
 
 ## ![GNU icon][GNU icon] Stow 
