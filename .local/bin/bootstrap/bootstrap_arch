@@ -7,11 +7,9 @@
 # Configure nvidia nvidia-xconfig
 
 arch_install () {
-
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
     mkdir ~/.cache/zsh
     mkdir ~/.cache/vlc
-
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
     gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg -e # Termite execute argument is -e in gnome-terminal its -x
@@ -20,7 +18,6 @@ arch_install () {
     sudo pacman -S nemo-preview
     sudo pacman -S nemo-seahorse
     sudo pacman -S nemo-share
-    #sudo pacman -S nemo-terminal
 
     # Terminal
     sudo pacman -S svn
@@ -58,6 +55,7 @@ arch_install () {
     sudo pacman -S w3m                   # Preview images on ranger
 
     # GUI
+	sudo pacman -S dbeaver				 # Base de dades
     sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"
     sudo pacman -S gimp                  # Image editor
     sudo pacman -S audacity              # Audio editor
@@ -189,9 +187,6 @@ bloat_install () {
     sudo pacman -S cowsay    # A cow displaying text
     sudo pacman -S ponysay asciiquarium
     sudo pacman -S sl        # Steam locomotor, (Did you mean to type ls?)
-}
-
-bloat_AUR_install() {
     yay -S pipes.sh          # Lockscreens
     yay -S figlet toilet     # Cool letters
     yay -S cava # https://github.com/karlstav/cava
@@ -211,6 +206,9 @@ virtualbox_install() {
 }
 
 apps_AUR_install () {
+	# f5fpc -s -x -t https://upclink.upc.edu
+	# f5fpc --stop
+	yay -S f5fpc						# Connexio a UPClink
     sudo pacman -S r                    # Probabilitat i estadística
     yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
     # GUI
@@ -266,17 +264,6 @@ DWall() {
     sudo rm -r ~/home/pol/dynamic-wallpaper
 }
 
-color_scripts_install() {
-    git clone https://gitlab.com/dwt1/shell-color-scripts.git
-    cd shell-color-scripts
-    rm -rf /opt/shell-color-scripts || return 1
-    sudo mkdir -p /opt/shell-color-scripts/colorscripts || return 1
-    sudo cp -rf colorscripts/* /opt/shell-color-scripts/colorscripts
-    sudo cp colorscript.sh /usr/bin/colorscript
-    # optional for zsh completion
-    sudo cp zsh_completion/_colorscript /usr/share/zsh/site-functions
-}
-
 ### Installation starts here
 
 echo "Is it the first time you run this script? [y/n]"
@@ -290,7 +277,6 @@ fi
 sudo pacman -Syu # Update
 arch_install
 i3_install
-#bloat_install
 cinnamon_install
 if [[ $FirstRun == y ]]; then
     yay_install
@@ -299,7 +285,7 @@ if [[ $FirstRun == y ]]; then
     laptop_install
     games_install
     cava_install
-    #bloat_AUR_install
+    #bloat_install
     DWall
 fi
 

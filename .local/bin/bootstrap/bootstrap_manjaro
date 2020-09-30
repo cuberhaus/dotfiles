@@ -34,6 +34,7 @@ manjaro_install() {
     sudo pacman -S w3m                   # Preview images on ranger
 
 	# GUI
+	sudo pacman -S dbeaver				 # Base de dades
     sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"
     sudo pacman -S gimp                  # Image editor
     sudo pacman -S audacity              # Audio editor
@@ -74,6 +75,9 @@ yay_install() {
 }
 
 apps_AUR_install () {
+	# f5fpc -s -x -t https://upclink.upc.edu
+	# f5fpc --stop
+	yay -S f5fpc						# Connexio a UPClink
     sudo pacman -S r                    # Probabilitat i estadística
     yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
     # GUI
