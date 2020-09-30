@@ -229,7 +229,7 @@ apps_AUR_install () {
     yay -S skypeforlinux-stable-bin     # Skype
     yay -S slack-desktop                # Slack
     yay -S android-studio               # Android Studio
-    yay -S typora                       # Markdown editor
+    #yay -S typora                       # Markdown editor
     yay -S youtube-dl                   # Download youtube videos
     # Terminal
     #yay -S autojump                     # Smart jumping through terminal

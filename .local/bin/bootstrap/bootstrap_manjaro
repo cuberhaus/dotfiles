@@ -3,7 +3,6 @@
 manjaro_install() {
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
     mkdir ~/.cache/zsh
-
     sudo pacman -S xclip                 # Clipboard
     sudo pacman -S laptop-detect         # Detect if using a laptop 
     sudo pacman -S npm
@@ -12,8 +11,8 @@ manjaro_install() {
     sudo pacman -S code                  # Visual code (settings sync plugin req.)
     sudo pacman -S yarn                  # Package installer
     sudo pacman -S texstudio             # Latex text editor
-    sudo pacman -So pacman -S ncdu                  # Manage storage
-    sudo reflector             # Update Arch mirrors
+    sudo pacman -S ncdu                  # Manage storage
+    sudo reflector             		     # Update Arch mirrors
     sudo pacman -S dnsutils              # Ip
     sudo pacman -S net-tools             # Ips
     sudo pacman -S cmatrix               # Bloat
@@ -39,6 +38,7 @@ manjaro_install() {
     sudo pacman -S vlc                   # Media Player
     mkdir ~/.cache/vlc
     sudo pacman -S git python3 stow      # To deploy dotfiles and more
+	sudo pacman -S chromium
 }
 
 vim_install () {
@@ -63,13 +63,17 @@ yay_install() {
 }
 
 apps_AUR_install () {
+    sudo pacman -S r                    # Probabilitat i estadística
+    yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
     # GUI
-    #yay -S ttf-ms-fonts                 # Microsoft fonts
-    #yay -S emoji-keyboard               # Emoji
+    yay -S whatsapp-nativefier          # Whatsapp client
+    yay -S spotify                      # Spotify
+    yay -S ttf-ms-fonts                 # Microsoft fonts
+    yay -S emoji-keyboard               # Emoji
     yay -S skypeforlinux-stable-bin     # Skype
     yay -S slack-desktop                # Slack
     yay -S android-studio
-    yay -S typora                       # Markdown editor
+    #yay -S typora                       # Markdown editor
     yay -S youtube-dl                   # Download youtube videos
     # Terminal
     #yay -S autojump                     # Smart jumping through terminal
@@ -90,6 +94,8 @@ cd ~/
 sudo pacman -Syu
 manjaro_install
 vim_install
-#yay_install
+if [[ $FirstRun == y ]]; then
+	yay_install
+fi
 apps_AUR_install
 
