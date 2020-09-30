@@ -145,6 +145,14 @@ Show systemd Journal:
 ```
 journalctl
 ```
+Change user owner of a file:
+```
+chown $user $file
+```
+Change group of a file:
+```
+chgrp $group $file
+```
 
 ## Disk Partition
 Use cfdisk instead of fdisk
