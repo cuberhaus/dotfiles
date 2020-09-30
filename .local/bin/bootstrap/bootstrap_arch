@@ -224,14 +224,14 @@ apps_AUR_install () {
     yay -S android-studio               # Android Studio
     #yay -S typora                       # Markdown editor
     yay -S youtube-dl                   # Download youtube videos
-    # Terminal
-    #yay -S autojump                     # Smart jumping through terminal
     # Backups
     yay -S timeshift  #  sudo timeshift-gtk
     sudo pacman -S cron
     # Lockscreen
     yay -S betterlockscreen
     sudo pacman -S xss-lock
+    # Terminal
+    #yay -S autojump                     # Smart jumping through terminal
     # Office / Word compatible
     #yay -S freeoffice
 }

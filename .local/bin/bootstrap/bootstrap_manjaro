@@ -86,11 +86,11 @@ apps_AUR_install () {
     yay -S android-studio
     #yay -S typora                       # Markdown editor
     yay -S youtube-dl                   # Download youtube videos
-    # Terminal
-    #yay -S autojump                     # Smart jumping through terminal
     # Backups
     yay -S timeshift  #  sudo timeshift-gtk
     sudo pacman -S cron
+    # Terminal
+    #yay -S autojump                     # Smart jumping through terminal
 }
 
 ### Installation starts here
