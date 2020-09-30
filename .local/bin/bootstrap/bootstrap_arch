@@ -148,6 +148,7 @@ arch_install () {
 }
 
 vim_install () {
+    sudo pacman -S neovim
     cd ~/
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install

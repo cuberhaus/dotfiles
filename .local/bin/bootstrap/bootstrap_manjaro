@@ -2,6 +2,8 @@
 
 manjaro_install() {
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
+    mkdir ~/.cache/zsh
+
     sudo pacman -S xclip                 # Clipboard
     sudo pacman -S laptop-detect         # Detect if using a laptop 
     sudo pacman -S npm
@@ -10,12 +12,13 @@ manjaro_install() {
     sudo pacman -S code                  # Visual code (settings sync plugin req.)
     sudo pacman -S yarn                  # Package installer
     sudo pacman -S texstudio             # Latex text editor
-    sudo pacman -S reflector             # Update Arch mirrors
+    sudo pacman -So pacman -S ncdu                  # Manage storage
+    sudo reflector             # Update Arch mirrors
     sudo pacman -S dnsutils              # Ip
     sudo pacman -S net-tools             # Ips
     sudo pacman -S cmatrix               # Bloat
     sudo pacman -S thunderbird           # Email
-    sudo pacman -S qbittorrent           # Torrent Downloader
+    sudo pacman -S transmission-gtk      # A simpler Torrent D.
     sudo pacman -S calibre               # Book manager
     sudo pacman -S ncdu                  # Manage storage
     sudo pacman -S ranger                # Ranger
@@ -39,6 +42,8 @@ manjaro_install() {
 }
 
 vim_install () {
+    sudo pacman -S gvim                  # Vim version with extra features
+    sudo pacman -S neovim
     cd ~/
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
