@@ -71,7 +71,8 @@ arch_install () {
     sudo pacman -S thunderbird           # Email
     sudo pacman -S calibre               # Book manager
     sudo pacman -S libreoffice-still     # Office
-    sudo pacman -S chromium              # Web browser
+    #sudo pacman -S chromium              # Web browser
+    sudo pacman -S firefox               # Open source browser
     sudo pacman -S transmission-gtk      # A simpler Torrent D.
     sudo pacman -S vlc                   # Video player
     #sudo pacman -S qbittorrent           # Torrent Downloader

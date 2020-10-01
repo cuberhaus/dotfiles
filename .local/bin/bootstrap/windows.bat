@@ -23,6 +23,7 @@ choco install r.studio          Rem Probabilitat i estadística IDE
 choco install poshgit           Rem git bar
 choco install adobereader -y 	Rem Pdf viewer
 choco install chromium -y 	    Rem Open source Web browser
+choco install firefox -y        Rem Open source web browser
 choco install skype -y		    Rem Skype
 choco install ccleaner -y 	    Rem Cleanup
 choco install 7zip.install -y   Rem Archiver
