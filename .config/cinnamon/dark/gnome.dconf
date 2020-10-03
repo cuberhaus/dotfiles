@@ -9,6 +9,21 @@ window-size=[632, 993]
 [books]
 window-maximized=true
 
+[calculator]
+accuracy=9
+angle-units='degrees'
+base=10
+button-mode='basic'
+number-format='automatic'
+show-thousands=false
+show-zeroes=false
+source-currency=''
+source-units='degree'
+target-currency=''
+target-units='radian'
+window-position=(785, 354)
+word-size=64
+
 [calendar]
 active-view='month'
 window-maximized=true
@@ -294,7 +309,7 @@ locations=@av []
 locations=@av []
 
 [software]
-check-timestamp=int64 1601145110
+check-timestamp=int64 1601757944
 first-run=false
 
 [terminal/legacy]
