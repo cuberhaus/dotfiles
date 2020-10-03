@@ -62,7 +62,7 @@ arch_install () {
     sudo pacman -S audacity              # Audio editor
     sudo pacman -S discord
     sudo pacman -S xorg-xinit            # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
-    sudo pacman -S code                  # Visual code (settings sync plugin req.)
+    #sudo pacman -S code                  # Visual code (settings sync plugin req.) ### USE REAL VISUAL STUDIO NOT THIS
     sudo pacman -S yarn                  # Package installer
     sudo pacman -S texstudio             # Latex text editor
     sudo pacman -S file-roller           # Archive Manager
@@ -140,6 +140,45 @@ arch_install () {
     sudo pacman -S nm-applet
 }
 
+yay_install() {
+    cd ~/
+    git clone https://aur.archlinux.org/yay.git
+    cd yay
+    makepkg -si
+    sudo rm -r /home/pol/yay
+}
+
+apps_AUR_install () {
+	# f5fpc -s -x -t https://upclink.upc.edu
+	# f5fpc --stop
+	yay -S f5fpc						# Connexio a UPClink
+    sudo pacman -S r                    # Probabilitat i estadística
+    yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
+    # GUI
+    yay -S visual-studio-code-bin       # Microsoft's Visual Code
+    yay -S birdtray                     # Thunderbird tray
+    yay -S whatsapp-nativefier          # Whatsapp client
+    yay -S spotify                      # Spotify
+    yay -S ttf-ms-win10
+    yay -S ttf-ms-fonts                 # Microsoft fonts ##deprecated
+    yay -S emoji-keyboard               # Emoji
+    yay -S skypeforlinux-stable-bin     # Skype
+    yay -S slack-desktop                # Slack
+    yay -S android-studio               # Android Studio
+    #yay -S typora                       # Markdown editor
+    yay -S youtube-dl                   # Download youtube videos
+    # Backups
+    yay -S timeshift  #  sudo timeshift-gtk
+    sudo pacman -S cron
+    # Lockscreen
+    yay -S betterlockscreen
+    sudo pacman -S xss-lock
+    # Terminal
+    #yay -S autojump                     # Smart jumping through terminal
+    # Office / Word compatible
+    #yay -S freeoffice
+}
+
 vim_install () {
     sudo pacman -S neovim
     cd ~/
@@ -194,48 +233,11 @@ bloat_install () {
     yay -S cava # https://github.com/karlstav/cava
 }
 
-yay_install() {
-    cd ~/
-    git clone https://aur.archlinux.org/yay.git
-    cd yay
-    makepkg -si
-    sudo rm -r /home/pol/yay
-}
-
 virtualbox_install() {
     sudo pacman -S virtualbox
     sudo pacman -S virtualbox-host-modules-arch
 }
 
-apps_AUR_install () {
-	# f5fpc -s -x -t https://upclink.upc.edu
-	# f5fpc --stop
-	yay -S f5fpc						# Connexio a UPClink
-    sudo pacman -S r                    # Probabilitat i estadística
-    yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
-    # GUI
-    yay -S birdtray                     # Thunderbird tray
-    yay -S whatsapp-nativefier          # Whatsapp client
-    yay -S spotify                      # Spotify
-    yay -S ttf-ms-win10
-    yay -S ttf-ms-fonts                 # Microsoft fonts ##deprecated
-    yay -S emoji-keyboard               # Emoji
-    yay -S skypeforlinux-stable-bin     # Skype
-    yay -S slack-desktop                # Slack
-    yay -S android-studio               # Android Studio
-    #yay -S typora                       # Markdown editor
-    yay -S youtube-dl                   # Download youtube videos
-    # Backups
-    yay -S timeshift  #  sudo timeshift-gtk
-    sudo pacman -S cron
-    # Lockscreen
-    yay -S betterlockscreen
-    sudo pacman -S xss-lock
-    # Terminal
-    #yay -S autojump                     # Smart jumping through terminal
-    # Office / Word compatible
-    #yay -S freeoffice
-}
 
 # do this but i dont know exactly how
 #do_once () {
