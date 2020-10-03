@@ -13,5 +13,5 @@ sort-column='name'
 sort-directories-first=false
 sort-order='ascending'
 type-format='category'
-window-position=(345, 79)
+window-position=(0, 83)
 window-size=(1231, 902)

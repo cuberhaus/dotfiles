@@ -12,6 +12,9 @@ if [ -d "$HOME/.gem/ruby/2.7.0/bin" ] ; then
         PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
 fi
 
+### SET VIM AS MANPAGER ###
+export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
+
 #if [ -d "/usr/local/sbin" ] ; then
 #        PATH="/usr/local/sbin:$PATH"
 #fi

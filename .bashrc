@@ -23,8 +23,6 @@
 
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # dash is the FASTEST SHELL
-export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
-export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
 
 ###############################################################
 # => Theme
@@ -73,9 +71,6 @@ source ~/.config/bash-git-prompt/gitprompt.sh
 set keyseq-timeout 50
 
 export HISTCONTROL=ignoredups:erasedups   # no duplicate entries
-
-### SET VIM AS MANPAGER ###
-export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
 
 # Enable vim mode
 set -o vi

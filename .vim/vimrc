@@ -359,6 +359,11 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Moving around, tabs, windows and buffers
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"Press Enter to jump to the subject (topic) under the cursor.
+"Press Backspace to return from the last jump.
+map <buffer> <CR> <C-]>
+map <buffer> <BS> <C-T>
+
 map <C-down> <C-E>
 map <C-up> <C-Y>
 " Disable highlight when <leader><cr> is pressed
