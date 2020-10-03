@@ -1,5 +1,6 @@
 CALL :windows_install
 CALL :vim_install
+REM CALL :games_install
 EXIT /B %ERRORLEVEL% 
 
 :vim_install
@@ -43,13 +44,14 @@ choco install telegram -y       Rem Telegram
 choco install calibre -y        Rem Books manager
 choco install microsoft-windows-terminal -y	Rem Windows terminal
 choco install toastify -y 		Rem Toastify adds some missing functionallity to the Spotify client.
-choco install qbittorrent -y    Rem Torrent client
 choco install rufus -y          Rem burn iso's on usb
 choco install powershell-core   Rem Updated powershell
 choco install linkshellextension -y Rem Make links from explorer
 choco install wsl2 -y           Rem Windows subsystem for linux 2
 choco install gimp -y           Rem Photoshop
-choco install audacity      Rem Audio editor
+choco install audacity          Rem Audio editor
+choco install transmission -y   Rem Simple torrent client
+REM choco install qbittorrent -y    Rem Torrent client
 Rem choco install slack         Rem Slack
 Rem choco install autohotkey.portable -y Rem Automation software
 Rem choco install git-lfs
