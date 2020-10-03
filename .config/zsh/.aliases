@@ -1,6 +1,7 @@
 #! /bin/bash
 
 # Config Files
+alias arch="vim ~/.local/bin/bootstrap/arch"
 alias aliases="vim $ZDOTDIR/.aliases"
 alias zshenv="vim ~/.zshenv"
 alias zshrc="vim $ZDOTDIR/.zshrc"

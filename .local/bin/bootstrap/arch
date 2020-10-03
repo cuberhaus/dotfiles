@@ -55,6 +55,7 @@ arch_install () {
     sudo pacman -S w3m                   # Preview images on ranger
 
     # GUI
+    sudo pacman -S remmina               # Remote conexions
 	sudo pacman -S dbeaver				 # Base de dades
     sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"
     sudo pacman -S gimp                  # Image editor
