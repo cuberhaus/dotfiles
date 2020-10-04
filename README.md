@@ -193,22 +193,6 @@ sudo apt-get autoremove
 comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)
 ```
 
-# ![Windows][Windows 10 icon] Windows
-## Chocolatey
-#### Upgrade packages
-```
-choco upgrade all
-```
-#### List packages
-```
-choco list --local-only
-```
-#### Swap esc and mayus
-```
-Wind + r
-uncap 0x1b:0x14
-```
-
 ## ![GNU icon][GNU icon] Stow 
 #### Adding files to stow symlink:
 
