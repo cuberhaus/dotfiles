@@ -4,12 +4,21 @@ REM CALL :games_install
 EXIT /B %ERRORLEVEL% 
 
 :vim_install
-choco install vim -y		    Rem Editor
+choco install vim -y
 choco install neovim -y
-
+Rem vim plug neovim
+iwr -useb https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim |`
+ni "$env:LOCALAPPDATA/nvim-data/site/autoload/plug.vim" -Force
 Rem vim plug for PowerShell
 iwr -useb https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim |`
     ni $HOME/vimfiles/autoload/plug.vim -Force
+Rem npm
+npm install -g neovim
+Rem Python3
+pip install --upgrade neovim
+EXIT /B 0
+
+:swap
 Rem Swap caps with escape https://github.com/susam/uncap#readme
 EXIT /B 0
 

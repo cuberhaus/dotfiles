@@ -18,4 +18,3 @@ if [[ $theme == l || $theme == L ]]; then
 elif [[ $theme == d || $theme == D ]]; then
     dark
 fi
-

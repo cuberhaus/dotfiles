@@ -25,11 +25,11 @@ ycm_install () {
 if [[ "$OSTYPE" == "darwin"* ]]; then
     mac_install
 elif [[ "$DISTRO" == "arch" ]]; then
-    arch_based_install # Installs needed dependancies to build
+    arch_based_install
 elif [[ "$DISTRO" == "ubuntu" ]]; then
     ubuntu_based_install
 elif [[ "$DISTRO" == "manjaro" ]]; then
-    arch_based_install # Installs needed dependancies to build
+    arch_based_install
 fi
 # Start
 cd ~
