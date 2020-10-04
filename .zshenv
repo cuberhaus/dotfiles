@@ -3,7 +3,7 @@
 if [ -d "$HOME/.local/bin" ] ; then
         PATH="$HOME/.local/bin:$PATH"
 fi
-
+PATH=".:$PATH"
 if [ -d "$HOME/.config/i3/i3-layout-manager" ] ; then
         PATH="$HOME/.config/i3/i3-layout-manager:$PATH" 
 fi

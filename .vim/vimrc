@@ -254,15 +254,15 @@ endif
 " => Colors and Fonts
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 ""Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
-"if (empty($TMUX))
-"  if (has("nvim"))
-"    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-"  endif
-"  if (has("termguicolors"))
-"    set termguicolors
-"  endif
-"endif
-"
+if (empty($TMUX))
+  if (has("nvim"))
+    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+  endif
+  if (has("termguicolors"))
+    set termguicolors
+  endif
+endif
+
 " Enable syntax highlighting
 syntax enable
 
@@ -283,14 +283,14 @@ if filereadable(expand("~/.vimrc_background"))
 endif
 " TRUECOLOR SCHEMES uncheck to enable
 "autocmd vimenter * colorscheme gruvbox
-"colorscheme onedark
+colorscheme onedark
 
 " fixes glitch? in colors when using vim with tmux
 set background=dark
 set t_Co=256
 
 " This is what sets vim to use 24-bit colors. It will also work for any version of neovim
-"set termguicolors
+set termguicolors
 
 "Barra
 " Configuració per a vim-airline 
