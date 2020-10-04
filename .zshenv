@@ -3,14 +3,13 @@
 if [ -d "$HOME/.local/bin" ] ; then
         PATH="$HOME/.local/bin:$PATH"
 fi
-PATH=".:$PATH"
 if [ -d "$HOME/.config/i3/i3-layout-manager" ] ; then
         PATH="$HOME/.config/i3/i3-layout-manager:$PATH" 
 fi
-
 if [ -d "$HOME/.gem/ruby/2.7.0/bin" ] ; then
         PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
 fi
+PATH=".:$PATH"
 
 ### SET VIM AS MANPAGER ###
 export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
