@@ -1,5 +1,7 @@
+set uncap=~\WinDotfiles\dotfiles\uncap.exe Rem uncap location
 CALL :windows_install
 CALL :vim_install
+CALL :swap
 REM CALL :games_install
 EXIT /B %ERRORLEVEL% 
 
@@ -19,6 +21,7 @@ pip install --upgrade neovim
 EXIT /B 0
 
 :swap
+mv %uncap% C:\Windows\
 Rem Swap caps with escape https://github.com/susam/uncap#readme
 EXIT /B 0
 
