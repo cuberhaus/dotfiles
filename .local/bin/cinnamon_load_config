@@ -1,6 +1,21 @@
 #!/bin/sh
+light() {
+    dconf load /org/cinnamon/ < ~/.config/cinnamon/light/cinnamon.dconf
+    dconf load /org/nemo/ < ~/.config/cinnamon/light/nemo.dconf
+    dconf load /org/gtk/ < ~/.config/cinnamon/light/gtk.dconf
+    dconf load /org/gnome/ < ~/.config/cinnamon/light/gnome.dconf
+}
+dark() {
+    dconf load /org/cinnamon/ < ~/.config/cinnamon/dark/cinnamon.dconf
+    dconf load /org/nemo/ < ~/.config/cinnamon/dark/nemo.dconf
+    dconf load /org/gtk/ < ~/.config/cinnamon/dark/gtk.dconf
+    dconf load /org/gnome/ < ~/.config/cinnamon/dark/gnome.dconf
+}
+echo "Light theme / Dark theme [l/d]"
+read theme
+if [[ $theme == l || $theme == L ]]; then
+    light
+elif [[ $theme == d || $theme == D ]]; then
+    dark
+fi
 
-dconf load /org/cinnamon/ < ~/.config/cinnamon/cinnamon.dconf
-dconf load /org/nemo/ < ~/.config/cinnamon/nemo.dconf
-dconf load /org/gtk/ < ~/.config/cinnamon/gtk.dconf
-dconf load /org/gnome/ < ~/.config/cinnamon/gnome.dconf
