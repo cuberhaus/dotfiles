@@ -11,7 +11,7 @@ dark() {
     dconf load /org/gtk/ < ~/.config/cinnamon/dark/gtk.dconf
     dconf load /org/gnome/ < ~/.config/cinnamon/dark/gnome.dconf
 }
-echo "Light theme / Dark theme [l/d]"
+echo "Change theme to Light/Dark theme [l/d]"
 read theme
 if [[ $theme == l || $theme == L ]]; then
     light
