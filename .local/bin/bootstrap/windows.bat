@@ -1,6 +1,8 @@
 set uncap=~\WinDotfiles\dotfiles\uncap.exe Rem uncap location
 CALL :windows_install
 CALL :vim_install
+cd "~\dotfiles\.local\bin\
+CALL ycm.bat
 CALL :swap
 REM CALL :games_install
 EXIT /B %ERRORLEVEL% 
