@@ -99,6 +99,10 @@ migrated=true
 network-monitor-gio-name=''
 
 [evolution-data-server/calendar]
+notify-window-height=106
+notify-window-width=533
+notify-window-x=0
+notify-window-y=0
 reminders-past=@as []
 
 [file-roller/dialogs/extract]

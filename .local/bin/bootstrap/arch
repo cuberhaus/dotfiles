@@ -110,17 +110,17 @@ arch_install () {
 
     # Bluetooth
     sudo pacman -S bluez bluez-utils
-    if [[ $FirstRun == y ]]; then
+    if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
     fi
     # Display manager
-    if [[ $FirstRun == y ]]; then
+    if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable lightdm.service
     fi
     sudo pacman -S lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings
     # Ntp for time syncro
     #https://wiki.archlinux.org/index.php/Systemd-timesyncd
-    if [[ $FirstRun == y ]]; then
+    if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable systemd-timesyncd.service
         systemctl disable ntpd.service
     fi
@@ -131,7 +131,7 @@ arch_install () {
 
     # Network Manager and enable daemon on startup
     sudo pacman -S networkmanager
-    if [[ $FirstRun == y ]]; then
+    if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable NetworkManager.service
     fi
     # Gui
@@ -275,7 +275,7 @@ echo "Is it the first time you run this script? [y/n]"
 read FirstRun
 cd ~/
 # Distro variable
-if [[ $FirstRun == y ]]; then
+if [[ $FirstRun == y || $FirstRun == Y ]]; then
     echo "#! /bin/sh 
 export DISTRO=arch" >> ~/.config/distro
 fi
@@ -283,13 +283,14 @@ sudo pacman -Syu # Update
 arch_install
 i3_install
 cinnamon_install
-if [[ $FirstRun == y ]]; then
+if [[ $FirstRun == y || $FirstRun == Y ]]; then
     yay_install
     vim_install
     apps_AUR_install
     laptop_install
     games_install
-    cava_install
+    cava_install 
+    applets             # Installs Cinnamon applets
     #bloat_install
     DWall
 fi

@@ -1,0 +1,51 @@
+#!/bin/sh
+ex ()
+{
+    if [ -f $1 ] ; then
+        case $1 in
+            *.tar.bz2)   tar xjf $1   ;;
+            *.tar.gz)    tar xzf $1   ;;
+            *.bz2)       bunzip2 $1   ;;
+            *.rar)       unrar x $1   ;;
+            *.gz)        gunzip $1    ;;
+            *.tar)       tar xf $1    ;;
+            *.tbz2)      tar xjf $1   ;;
+            *.tgz)       tar xzf $1   ;;
+            *.zip)       unzip $1     ;;
+            *.Z)         uncompress $1;;
+            *.7z)        7z x $1      ;;
+            *.deb)       ar x $1      ;;
+            *.tar.xz)    tar xf $1    ;;
+            *.tar.zst)   unzstd $1    ;;
+            *)           echo "'$1' cannot be extracted via ex()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+echo "Do you want to install cinnamon applets? [y/n]"
+read install
+if [[ $install == y ]]; then
+    cd ~/.local/share/cinnamon/applets
+    # SpicesUpdate
+    wget https://cinnamon-spices.linuxmint.com/files/applets/SpicesUpdate@claudiux.zip -P ~/.local/share/cinnamon/applets
+    ex SpicesUpdate@claudiux.zip
+    # Clean Show Desktop
+    wget https://cinnamon-spices.linuxmint.com/files/applets/clean-show-desktop@filipetorresbr.zip
+    ex clean-show-desktop@filipetorresbr.zip
+    # Weather
+    wget https://cinnamon-spices.linuxmint.com/files/applets/weather@mockturtl.zip
+    ex weather@mockturtl.zip
+    # Color-picker
+    wget https://cinnamon-spices.linuxmint.com/files/applets/color-picker@fmete.zip
+    ex color-picker@fmete.zip
+    # Drawer
+    https://cinnamon-spices.linuxmint.com/files/applets/show-hide-applets@mohammad-sn.zip
+    ex show-hide-applets@mohammad-sn.zip
+    # Force Quit
+    wget https://cinnamon-spices.linuxmint.com/files/applets/force-quit@cinnamon.org.zip
+    ex force-quit@cinnamon.org.zip
+    # Num Lock/Caps Lock indicators
+    wget https://cinnamon-spices.linuxmint.com/files/applets/betterlock.zip
+    ex betterlock.zip
+fi
