@@ -20,6 +20,7 @@ arch_install () {
     sudo pacman -S nemo-share
 
     # Terminal
+    sudo pacman -S wget
     sudo pacman -S svn
     sudo pacman -S base-devel            # AUR
     sudo pacman -S zsh                   # Zsh shell
