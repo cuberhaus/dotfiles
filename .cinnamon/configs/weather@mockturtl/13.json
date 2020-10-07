@@ -1,0 +1,433 @@
+{
+    "layout": {
+        "type": "layout",
+        "pages": [
+            "providers",
+            "presentation-section",
+            "units-section",
+            "info-section"
+        ],
+        "providers": {
+            "type": "page",
+            "title": "Weather",
+            "sections": [
+                "provider-options",
+                "weather-conditions"
+            ]
+        },
+        "presentation-section": {
+            "type": "page",
+            "title": "Presentation",
+            "sections": [
+                "panel-options",
+                "presentation"
+            ]
+        },
+        "units-section": {
+            "type": "page",
+            "title": "Units, Icons and Keys",
+            "sections": [
+                "units",
+                "icons",
+                "keybindings"
+            ]
+        },
+        "info-section": {
+            "type": "page",
+            "title": "Help",
+            "sections": [
+                "provider-info",
+                "location-info",
+                "more-info",
+                "submit-issue"
+            ]
+        },
+        "submit-issue": {
+            "type": "section",
+            "title": "Report an issue",
+            "keys": [
+                "issue-reporting-explanation",
+                "submitIssue",
+                "maintainer"
+            ]
+        },
+        "provider-info": {
+            "type": "section",
+            "title": "How to choose a weather provider",
+            "keys": [
+                "provider-explanation"
+            ]
+        },
+        "location-info": {
+            "type": "section",
+            "title": "Allowed location formats",
+            "keys": [
+                "loc-info"
+            ]
+        },
+        "more-info": {
+            "type": "section",
+            "title": "View additional information",
+            "keys": [
+                "more-info-label",
+                "getLocation"
+            ]
+        },
+        "provider-options": {
+            "type": "section",
+            "title": "Weather Provider Options",
+            "keys": [
+                "dataService",
+                "apiKey",
+                "manualLocation",
+                "location",
+                "saveLocation",
+                "deleteLocation",
+                "refreshInterval",
+                "forecastDays",
+                "forecastHours"
+            ]
+        },
+        "units": {
+            "type": "section",
+            "title": "Units",
+            "keys": [
+                "temperatureUnit",
+                "windSpeedUnit",
+                "pressureUnit",
+                "distanceUnit"
+            ]
+        },
+        "keybindings": {
+            "type": "section",
+            "title": "Keybindings",
+            "keys": [
+                "keybinding"
+            ]
+        },
+        "panel-options": {
+            "type": "section",
+            "title": "Panel (Taskbar)",
+            "keys": [
+                "showTextInPanel",
+                "showCommentInPanel",
+                "tempTextOverride"
+            ]
+        },
+        "presentation": {
+            "type": "section",
+            "title": "Popup menu",
+            "keys": [
+                "verticalOrientation",
+                "forecastColumns",
+                "forecastRows",
+                "showSunrise",
+                "show24Hours",
+                "temperatureHighFirst",
+                "tempRussianStyle",
+                "locationLabelOverride"
+            ]
+        },
+        "weather-conditions": {
+            "type": "section",
+            "title": "Weather conditions",
+            "keys": [
+                "translateCondition",
+                "shortConditions"
+            ]
+        },
+        "icons": {
+            "type": "section",
+            "title": "Icons",
+            "keys": [
+                "useSymbolicIcons",
+                "useCustomMenuIcons",
+                "useCustomAppletIcons"
+            ]
+        }
+    },
+    "keybinding": {
+        "type": "keybinding",
+        "description": "Set the keybinding to call the menu",
+        "default": "<Super><Shift>w",
+        "value": "<Super><Shift>w"
+    },
+    "dataService": {
+        "type": "radiogroup",
+        "default": "OpenWeatherMap",
+        "description": "Data service",
+        "options": {
+            "OpenWeatherMap": "OpenWeatherMap",
+            "DarkSky (key needed)": "DarkSky",
+            "MET Norway": "MetNorway",
+            "Weatherbit (key needed)": "Weatherbit",
+            "Yahoo": "Yahoo",
+            "Climacell (key needed)": "Climacell",
+            "Met Office UK (UK only)": "Met Office UK",
+            "US National Weather (US only)": "US Weather"
+        },
+        "value": "OpenWeatherMap"
+    },
+    "apiKey": {
+        "type": "entry",
+        "default": "",
+        "description": "API Key",
+        "tooltip": "Copy this from your account of the used Data service and paste it here.",
+        "value": ""
+    },
+    "manualLocation": {
+        "type": "checkbox",
+        "default": false,
+        "description": "Manual Location",
+        "tooltip": "Enable this if your location is not accurate",
+        "value": false
+    },
+    "location": {
+        "type": "entry",
+        "default": "London,UK",
+        "dependency": "manualLocation",
+        "description": "Location",
+        "tooltip": "Acceptable inputs are Latitude,Longitude. e.g.: 68.1932,17.1426 or an address.\nWaits for 3 seconds after you stop typing then refreshes the weather.",
+        "value": "41.3888,2.159"
+    },
+    "saveLocation": {
+        "type": "button",
+        "indent": true,
+        "description": "Save current location to storage",
+        "callback": "saveCurrentLocation",
+        "dependency": "manualLocation",
+        "tooltip": "Saves location information to file, so you can switch between them with buttons in the applet (what will appear if you have more than one)."
+    },
+    "deleteLocation": {
+        "type": "button",
+        "indent": true,
+        "description": "Delete current location from storage",
+        "callback": "deleteCurrentLocation",
+        "dependency": "manualLocation",
+        "tooltip": "Removes location information from storage file."
+    },
+    "getLocation": {
+        "type": "button",
+        "indent": true,
+        "description": "Weather Applet at Cinnamon Spices Website",
+        "callback": "locationLookup",
+        "tooltip": "Opens webpage guide"
+    },
+    "refreshInterval": {
+        "type": "spinbutton",
+        "default": 15,
+        "min": 5,
+        "max": 360,
+        "units": "minutes",
+        "step": 5,
+        "description": "Update interval",
+        "value": 15
+    },
+    "forecastDays": {
+        "type": "spinbutton",
+        "default": 3,
+        "min": 2,
+        "max": 16,
+        "units": "days",
+        "step": 1,
+        "description": "Forecast length",
+        "value": 3
+    },
+    "forecastHours": {
+        "type": "spinbutton",
+        "default": 12,
+        "min": 3,
+        "max": 48,
+        "units": "hours",
+        "step": 1,
+        "description": "Hourly Forecast length",
+        "value": 12
+    },
+    "temperatureUnit": {
+        "type": "radiogroup",
+        "default": "celsius",
+        "description": "Temperature unit",
+        "options": {
+            "celsius": "celsius",
+            "fahrenheit": "fahrenheit"
+        },
+        "value": "celsius"
+    },
+    "windSpeedUnit": {
+        "type": "combobox",
+        "default": "kph",
+        "description": "Wind speed unit",
+        "options": {
+            "kph": "kph",
+            "mph": "mph",
+            "m/s": "m/s",
+            "knots": "Knots",
+            "Beaufort": "Beaufort"
+        },
+        "value": "kph"
+    },
+    "pressureUnit": {
+        "type": "combobox",
+        "default": "hPa",
+        "description": "Atmospheric pressure unit",
+        "options": {
+            "hPa": "hPa",
+            "in Hg": "in Hg",
+            "mm Hg": "mm Hg",
+            "psi": "psi",
+            "at": "at",
+            "atm": "atm",
+            "Pa": "Pa"
+        },
+        "value": "atm"
+    },
+    "distanceUnit": {
+        "type": "combobox",
+        "default": "metric",
+        "description": "Distance unit",
+        "options": {
+            "Metric": "metric",
+            "Imperial": "imperial"
+        },
+        "value": "metric"
+    },
+    "showTextInPanel": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Display current temperature in panel",
+        "value": true
+    },
+    "showCommentInPanel": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Show the weather condition (e.g., \"Windy\", \"Clear\") in the panel",
+        "tooltip": "Only works with horizontal panels",
+        "value": false
+    },
+    "tempTextOverride": {
+        "type": "entry",
+        "default": "",
+        "description": "Override label on panel",
+        "tooltip": "Available values are: {c} is condition, {t} is temperature and {u} is unit.\nCan be used if label does not fit on vertical panel, among other smart things.",
+        "value": ""
+    },
+    "useCustomAppletIcons": {
+        "type": "checkbox",
+        "default": false,
+        "tooltip": "Iconset is weather-icons by Erik Flowers",
+        "description": "Use custom icons on the panel",
+        "value": false
+    },
+    "verticalOrientation": {
+        "type": "checkbox",
+        "default": false,
+        "tooltip": "Displaying forecasts from top to bottom instead from left to right.",
+        "description": "Show forecast vertically",
+        "value": false
+    },
+    "forecastColumns": {
+        "type": "spinbutton",
+        "default": 5,
+        "min": 1,
+        "max": 16,
+        "units": "columns",
+        "step": 1,
+        "description": "Maximum number of columns for forecast",
+        "value": 5
+    },
+    "forecastRows": {
+        "type": "spinbutton",
+        "default": 4,
+        "min": 1,
+        "max": 16,
+        "units": "rows",
+        "step": 1,
+        "description": "Maximum number of rows for forecast",
+        "value": 4
+    },
+    "showSunrise": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Show sunrise / sunset times",
+        "value": true
+    },
+    "show24Hours": {
+        "type": "checkbox",
+        "default": false,
+        "description": "Display time in 24 hour format",
+        "value": false
+    },
+    "temperatureHighFirst": {
+        "type": "checkbox",
+        "default": false,
+        "description": "Show high temperature first in forecast",
+        "value": false
+    },
+    "tempRussianStyle": {
+        "type": "checkbox",
+        "default": false,
+        "description": "Show temperature Russian style",
+        "value": false
+    },
+    "locationLabelOverride": {
+        "type": "entry",
+        "default": "",
+        "description": "Override location label",
+        "value": ""
+    },
+    "translateCondition": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Translate conditions",
+        "value": true
+    },
+    "shortConditions": {
+        "type": "checkbox",
+        "default": false,
+        "description": "Less verbose conditions",
+        "tooltip": "Currently only used with DarkSky ",
+        "value": false
+    },
+    "useSymbolicIcons": {
+        "type": "checkbox",
+        "default": false,
+        "tooltip": "Does not apply to custom iconset, that is symbolic by default",
+        "description": "Use symbolic icons throughout the applet",
+        "value": false
+    },
+    "useCustomMenuIcons": {
+        "type": "checkbox",
+        "tooltip": "Iconset is weather-icons by Erik Flowers",
+        "default": false,
+        "description": "Use custom icons in the popup menu",
+        "value": false
+    },
+    "more-info-label": {
+        "type": "label",
+        "description": "For more information go to the Spices Website by clicking the button below. You can also comment and ask a questions to the community at this page by logging in with your Github account."
+    },
+    "submitIssue": {
+        "type": "button",
+        "indent": true,
+        "description": "Submit an Issue",
+        "callback": "submitIssue",
+        "tooltip": "Opens webpage where you can fill out a new issue for the applet, needs a GitHub account.\n Please make sure that the issue is not already submitted."
+    },
+    "maintainer": {
+        "type": "label",
+        "description": "Current maintainer: Gr3q"
+    },
+    "issue-reporting-explanation": {
+        "type": "label",
+        "description": "If you find an issue with this applet please make a report by clicking on the button below and login in with your Github account. Don't forget to write weather@mockturtl in the top Title field to make it easier for everyone to know that the issue is about the weather applet (the form is for all Cinnamon applets)."
+    },
+    "provider-explanation": {
+        "type": "label",
+        "description": "You can use several different weather forecast providers that you choose under the first Weather Tab in this Configuration panel. Some providers require a API key to work, some have regional limits, differ in forecast length, and they all need a functional internet connection to the chosen service. The options are described in detail on the Cinnamon Spices Website, what you can access with the button further down."
+    },
+    "loc-info": {
+        "type": "label",
+        "description": "Your location in most cases work automatically but you can enter it manually by coordinates 'Latitude,Longitude' (e.g. 51.5085,-0.1257) or use 'City,Country-code' (e.g. London,UK) or try to enter {House number} {Street} {City/Town} {Postcode} {Country}. The search algorithm is very flexible with the format. After 3 seconds without typing the address you entered is replaced automatically for validating your choice."
+    },
+    "__md5__": "f9d73591abb5742dfb86c8b18c5cf532"
+}
