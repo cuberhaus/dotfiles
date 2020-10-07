@@ -1,5 +1,5 @@
 [/]
-applet-cache-updated=1602018746
+applet-cache-updated=1602109747
 command-history=['r']
 enabled-applets=['panel1:left:0:menu@cinnamon.org:0', 'panel1:left:1:show-desktop@cinnamon.org:1', 'panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:8:systray@cinnamon.org:3', 'panel1:right:10:xapp-status@cinnamon.org:4', 'panel1:right:11:notifications@cinnamon.org:5', 'panel1:right:3:printers@cinnamon.org:6', 'panel1:right:12:removable-drives@cinnamon.org:7', 'panel1:right:13:network@cinnamon.org:9', 'panel1:right:14:sound@cinnamon.org:10', 'panel1:right:15:power@cinnamon.org:11', 'panel1:right:17:calendar@cinnamon.org:12', 'panel1:right:9:weather@mockturtl:13', 'panel1:right:7:workspace-switcher@cinnamon.org:25', 'panel1:right:18:clean-show-desktop@filipetorresbr:31', 'panel1:right:4:recent@cinnamon.org:40', 'panel1:right:6:force-quit@cinnamon.org:45', 'panel1:right:5:show-hide-applets@mohammad-sn:48', 'panel1:right:2:color-picker@fmete:51', 'panel1:right:1:SpicesUpdate@claudiux:52', 'panel1:right:16:betterlock:53']
 enabled-extensions=@as []
@@ -103,4 +103,4 @@ map-enabled=false
 
 [theme]
 name='Arc-Dark'
-theme-cache-updated=1601160593
+theme-cache-updated=1602100457

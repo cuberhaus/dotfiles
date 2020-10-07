@@ -313,7 +313,7 @@ locations=@av []
 locations=@av []
 
 [software]
-check-timestamp=int64 1601757944
+check-timestamp=int64 1602102548
 first-run=false
 
 [terminal/legacy]
