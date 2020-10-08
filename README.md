@@ -286,6 +286,7 @@ git remote set-url origin https://hostname/USERNAME/REPOSITORY.git
 
 > About [OVA][OVA] files:  
 > An OVA file is an Open Virtualization Appliance that contains a compressed, "installable" version of a virtual machine. When you open an OVA file it extracts the VM and imports it into whatever virtualization software you have installed on your computer.
+
 [Rclone_icon]: https://i.imgur.com/2S75O8C.png?1
 [SSH icon2]: https://i.imgur.com/RY2Xk5O.png?1
 [SSH icon]: https://i.imgur.com/Jtz8Dma.png?1
