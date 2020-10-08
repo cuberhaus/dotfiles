@@ -49,6 +49,21 @@ git gc --aggressive --prune=all     # remove the old files
 ```
 > Doing this didn't reduce the repo size at all
 
+# ![Rclone_icon](Rclone) Rclone
+#### To sync a local folder to a remote:
+> REMOTENAME: drive:
+```
+rclone sync SOURCEDIRECTORY drive:DIRECTORYBEINGCOPIEDTO
+```
+#### Quota about a remote:
+```
+rclone about drive:
+```
+#### To list remotes:
+```
+rclone listremotes
+
+```
 # ![Arch icon][Arch_icon] Arch
 ## Pacman
 
@@ -271,7 +286,7 @@ git remote set-url origin https://hostname/USERNAME/REPOSITORY.git
 
 > About [OVA][OVA] files:  
 > An OVA file is an Open Virtualization Appliance that contains a compressed, "installable" version of a virtual machine. When you open an OVA file it extracts the VM and imports it into whatever virtualization software you have installed on your computer.
-
+[Rclone_icon]: https://i.imgur.com/2S75O8C.png?1
 [SSH icon2]: https://i.imgur.com/RY2Xk5O.png?1
 [SSH icon]: https://i.imgur.com/Jtz8Dma.png?1
 [GNU icon]: https://i.imgur.com/dc4F2u2.png?1
