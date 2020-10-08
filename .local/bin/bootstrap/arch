@@ -109,6 +109,12 @@ arch_install () {
     sudo pacman -S noto-fonts-emoji       # Classic Emoji
     sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts
 
+    # Printers
+    # https://wiki.archlinux.org/index.php/CUPS
+    sudo pacman -S cups system-config-printer hplip
+    sudo systemctl enable org.cups.cupsd.service
+    sudo systemctl start org.cups.cupsd.service
+
     # Bluetooth
     sudo pacman -S bluez bluez-utils
     sudo pacman -S blueberry              # Linux Mint spin-off of GNOME Bluetooth
