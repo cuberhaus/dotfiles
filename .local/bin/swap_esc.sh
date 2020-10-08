@@ -1,4 +1,4 @@
-#!bin/sh
+#!/bin/sh
 # Swap escape with caps lock
 xmodmap -e "clear lock"
 xmodmap -e "keycode 9 = Caps_Lock NoSymbol Caps_Lock"
