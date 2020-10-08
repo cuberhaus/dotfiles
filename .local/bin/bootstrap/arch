@@ -53,6 +53,8 @@ arch_install () {
     #sudo pacman -S zsh-completions       # Zsh completions
     #sudo pacman -S bash-completion       # Better bash completion
     # GUI
+    sudo pacman -S gparted               # Manage partitions
+    sudo pacman -S gnome-calculator      # Calculator
     sudo pacman -S remmina               # Remote conexions
     sudo pacman -S dbeaver               # Base de dades
     sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"

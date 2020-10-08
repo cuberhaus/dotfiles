@@ -6,4 +6,5 @@
 if [[ "$DISTRO" == "arch" ]]; then
     # xss-lock displays betterlockscreen when lid is closed
     exec xss-lock -- betterlockscreen -l &
+    exec betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
 fi

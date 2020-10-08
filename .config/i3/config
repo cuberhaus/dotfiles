@@ -372,7 +372,7 @@ bindsym $mod+Pause mode "$mode_system"
 #exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
 
 # Caches a random wallpaper in my repository and sets it up as a lockscreen
-exec betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
+#exec betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
 # Wallpaper
 exec dwall -s room &
 # Bluetooth "blueman"

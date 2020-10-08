@@ -36,7 +36,8 @@
             "vlc",
             "rhythmbox",
             "chromium-browser",
-            "spotify"
+            "spotify",
+            "org.gnome.Lollypop"
         ]
     },
     "section2": {
