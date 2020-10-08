@@ -5,13 +5,13 @@ selected-color=(true, 0.32156862745098042, 0.58039215686274515, 0.88627450980392
 [settings/file-chooser]
 date-format='regular'
 location-mode='path-bar'
-show-hidden=false
+show-hidden=true
 show-size-column=true
 show-type-column=true
 sidebar-width=163
-sort-column='name'
+sort-column='type'
 sort-directories-first=false
 sort-order='ascending'
 type-format='category'
-window-position=(0, 46)
+window-position=(344, 110)
 window-size=(1231, 902)
