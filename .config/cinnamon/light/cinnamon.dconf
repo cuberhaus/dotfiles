@@ -40,16 +40,16 @@ exec-arg='-e'
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///home/pol/dotfiles/dotfiles/.local/xdg/wallpapers/landscapes/michelle-spollen-c9MFM8rSMsQ-unsplash.jpg'
+picture-uri='file:///home/pol/dotfiles/dotfiles/.local/xdg/wallpapers/landscapes/eric-welch-eRwWGWkh0vU-unsplash.jpg'
 
 [desktop/background/slideshow]
 delay=15
-image-source='xml:///usr/share/gnome-background-properties/linuxmint-ulyana.xml'
+image-source='directory:///home/pol/dotfiles/dotfiles/.local/xdg/wallpapers/landscapes'
 
 [desktop/interface]
 cursor-blink-time=1200
 font-name='Verdana 11'
-gtk-theme='Arc'
+gtk-theme='Arc-Lighter'
 icon-theme='Papirus'
 scaling-factor=uint32 0
 text-scaling-factor=1.0
@@ -77,7 +77,7 @@ event-sounds=false
 
 [desktop/wm/preferences]
 resize-with-right-button=true
-theme='Arc'
+theme='Arc-Lighter'
 titlebar-font='Verdana Bold 12'
 
 [muffin]
