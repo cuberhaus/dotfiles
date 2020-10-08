@@ -5,7 +5,6 @@
 # video makes backlight work and wheel gives you sudo privilege
 # usermod -a -G wheel video input
 # Configure nvidia nvidia-xconfig
-
 arch_install () {
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
     mkdir ~/.cache/zsh
@@ -18,18 +17,15 @@ arch_install () {
     sudo pacman -S nemo-preview
     sudo pacman -S nemo-seahorse
     sudo pacman -S nemo-share
-
     # Terminal
     sudo pacman -S wget
     sudo pacman -S svn
     sudo pacman -S base-devel            # AUR
     sudo pacman -S zsh                   # Zsh shell
-    #sudo pacman -S zsh-completions       # Zsh completions
     sudo pacman -S fortune-mod           # Random quote
     sudo pacman -S termite               # Terminal emulator
     sudo pacman -S gvim                  # Vim version with extra features
     sudo pacman -S exa                   # "ls" on steroids
-    #sudo pacman -S bash-completion       # Better bash completion
     sudo pacman -S htop                  # Show system resources
     sudo pacman -S the_silver_searcher   # Better and faster ack (and grep)
     sudo pacman -S fzf                   # Fuzzy finder
@@ -39,9 +35,9 @@ arch_install () {
     sudo pacman -S gcc                   # Cpp
     sudo pacman -S git python3 stow      # To deploy dotfiles and more
     sudo pacman -S github-cli            # Github from terminal, create issues...
-    sudo pacman -S dhcpcd 
+    sudo pacman -S dhcpcd
     sudo pacman -S ruby
-    sudo pacman -S laptop-detect         # Detect if using a laptop 
+    sudo pacman -S laptop-detect         # Detect if using a laptop
     sudo pacman -S npm
     sudo pacman -S cmatrix               # Bloat
     sudo pacman -S xdg-user-dirs         # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
@@ -54,10 +50,11 @@ arch_install () {
     sudo pacman -S udiskie               # Automater
     sudo pacman -S ranger                # Ranger
     sudo pacman -S w3m                   # Preview images on ranger
-
+    #sudo pacman -S zsh-completions       # Zsh completions
+    #sudo pacman -S bash-completion       # Better bash completion
     # GUI
     sudo pacman -S remmina               # Remote conexions
-	sudo pacman -S dbeaver				 # Base de dades
+    sudo pacman -S dbeaver               # Base de dades
     sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"
     sudo pacman -S gimp                  # Image editor
     sudo pacman -S audacity              # Audio editor
@@ -80,7 +77,6 @@ arch_install () {
     #sudo pacman -S qbittorrent           # Torrent Downloader
     #sudo pacman -S tor tor-browser       # Tor private browser
     #sudo pacman -S claws-mail           # Alternative mail
-
     # IRC APPS
     sudo pacman -S hexchat               # Graphical
     sudo pacman -S weechat               # Terminal-based
@@ -99,7 +95,7 @@ arch_install () {
     # Apps
     sudo pacman -S tumbler ffmpegthumbnailer raw-thumbnailer
     # Theme
-    sudo pacman -S lxappearance 
+    sudo pacman -S lxappearance
     sudo pacman -S gtk2 gtk3
     sudo pacman -S arc-gtk-theme arc-icon-theme # Arc theme and its icon's
     sudo pacman -S adapta-gtk-theme       # Alternative theme
@@ -108,13 +104,13 @@ arch_install () {
     sudo pacman -S gnome-font-viewer      # Font viewer
     sudo pacman -S noto-fonts-emoji       # Classic Emoji
     sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts
-
     # Printers
     # https://wiki.archlinux.org/index.php/CUPS
     sudo pacman -S cups system-config-printer hplip
-    sudo systemctl enable org.cups.cupsd.service
-    sudo systemctl start org.cups.cupsd.service
-
+    if [[ $FirstRun == y || $FirstRun == Y ]]; then
+        sudo systemctl enable org.cups.cupsd.service
+        sudo systemctl start org.cups.cupsd.service
+    fi
     # Bluetooth
     sudo pacman -S bluez bluez-utils
     sudo pacman -S blueberry              # Linux Mint spin-off of GNOME Bluetooth
@@ -132,11 +128,7 @@ arch_install () {
         systemctl enable systemd-timesyncd.service
         systemctl disable ntpd.service
     fi
-    #systemctl stop ntpd.service
-    #systemctl start systemd-timesyncd.service
-    #systemctl enable systemd-timesyncd.service
     # https://wiki.archlinux.org/index.php/USB_storage_devices
-
     # Network Manager and enable daemon on startup
     sudo pacman -S networkmanager
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
@@ -147,7 +139,6 @@ arch_install () {
     # Applet
     sudo pacman -S nm-applet
 }
-
 yay_install() {
     cd ~/
     git clone https://aur.archlinux.org/yay.git
@@ -155,11 +146,10 @@ yay_install() {
     makepkg -si
     sudo rm -r /home/pol/yay
 }
-
 apps_AUR_install () {
-	# f5fpc -s -x -t https://upclink.upc.edu
-	# f5fpc --stop
-	yay -S f5fpc						# Connexio a UPClink
+    # f5fpc -s -x -t https://upclink.upc.edu
+    # f5fpc --stop
+    yay -S f5fpc                        # Connexio a UPClink
     sudo pacman -S r                    # Probabilitat i estadística
     yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
     # GUI
@@ -186,7 +176,6 @@ apps_AUR_install () {
     # Office / Word compatible
     #yay -S freeoffice
 }
-
 vim_install () {
     sudo pacman -S neovim
     cd ~/
@@ -198,7 +187,6 @@ vim_install () {
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
 }
-
 # Best Tiling Window Manager
 i3_install () {
     sudo pacman -S i3-gaps   # i3 with gaps
@@ -213,26 +201,24 @@ i3_install () {
     sudo pacman -S yad xdotool               # calendar
     sudo pacman -S pulseaudio alsa-utils     # Audio
 }
-
-# Best Desktop 
+# Best Desktop
 cinnamon_install() {
     sudo pacman -S cinnamon                  # Desktop
     yay -S cinnamon-sound-effects            # Sound effects
     yay -S mint-themes mint-y-icons mint-backgrounds # Themes
     gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
-    sudo pacman -S gnome-screenshot          # Take screenshots with impr pant 
+    sudo pacman -S gnome-screenshot          # Take screenshots with impr pant
     yay -S xviewer                           # Image viewer
     sudo pacman -S xreader                   # Document viewer
     yay -S pix                               # Image viewer
     # Fallback mode in case cinnamon crashes
-    sudo pacman -S metacity 
+    sudo pacman -S metacity
     sudo pacman -S gnome-shell               # To have a taskbar
     #color pick applet
     sudo pacman -S python-numpy python-xlib
 }
-
 bloat_install () {
-    sudo pacman -S lolcat 
+    sudo pacman -S lolcat
     sudo pacman -S cowsay    # A cow displaying text
     sudo pacman -S ponysay asciiquarium
     sudo pacman -S sl        # Steam locomotor, (Did you mean to type ls?)
@@ -240,13 +226,10 @@ bloat_install () {
     yay -S figlet toilet     # Cool letters
     yay -S cava # https://github.com/karlstav/cava
 }
-
 virtualbox_install() {
     sudo pacman -S virtualbox
     sudo pacman -S virtualbox-host-modules-arch
 }
-
-
 # do this but i dont know exactly how
 #do_once () {
 #    sudo echo 'Section "InputClass"
@@ -257,16 +240,13 @@ virtualbox_install() {
 #    Option "NaturalScrolling" "true"
 #    EndSection'  >> /etc/X11/xorg.conf.d/30-touchpad.conf
 #}
-
 games_install () {
     sudo pacman -S steam lutris
 }
-
 laptop_install() {
     sudo pacman -S tlp
     sudo systemctl enable tlp.service
 }
-
 DWall() {
     cd $HOME
     git clone https://github.com/adi1090x/dynamic-wallpaper.git
@@ -284,8 +264,8 @@ read FirstRun
 cd ~/
 # Distro variable
 if [[ $FirstRun == y || $FirstRun == Y ]]; then
-    echo "#! /bin/sh 
-export DISTRO=arch" >> ~/.config/distro
+    echo "#! /bin/sh
+    export DISTRO=arch" >> ~/.config/distro
 fi
 sudo pacman -Syu # Update
 arch_install
@@ -297,10 +277,9 @@ if [[ $FirstRun == y || $FirstRun == Y ]]; then
     apps_AUR_install
     laptop_install
     games_install
-    cava_install 
+    cava_install
     applets             # Installs Cinnamon applets
     #bloat_install
     DWall
 fi
-
 chsh -s $(which zsh) # Change default shell to zsh
