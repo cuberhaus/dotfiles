@@ -62,7 +62,7 @@ alias gm="git merge"
 alias gc="git commit -m "
 alias gp="git push"
 alias gsu="git submodule update --recursive --remote"
-alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"'
+alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
 
 # Lock screen
 LockScreens=('pipes.sh' 'cmatrix')
