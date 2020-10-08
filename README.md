@@ -49,7 +49,7 @@ git gc --aggressive --prune=all     # remove the old files
 ```
 > Doing this didn't reduce the repo size at all
 
-# ![Rclone_icon](Rclone) Rclone
+# ![Rclone_icon](Rclone_icon) Rclone
 #### To sync a local folder to a remote:
 > REMOTENAME: drive:
 ```
