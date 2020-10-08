@@ -1,5 +1,9 @@
 [desktop]
+computer-icon-visible=true
 font='Verdana 11'
+home-icon-visible=true
+trash-icon-visible=true
+volumes-visible=true
 
 [extensions/nemo-terminal]
 terminal-position='bottom'

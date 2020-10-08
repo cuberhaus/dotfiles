@@ -1,9 +1,11 @@
 [/]
-applet-cache-updated=1601164600
+applet-cache-updated=1602161983
 command-history=['r']
-enabled-applets=['panel1:left:0:menu@cinnamon.org:0', 'panel1:left:1:show-desktop@cinnamon.org:1', 'panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:9:systray@cinnamon.org:3', 'panel1:right:11:xapp-status@cinnamon.org:4', 'panel1:right:12:notifications@cinnamon.org:5', 'panel1:right:3:printers@cinnamon.org:6', 'panel1:right:13:removable-drives@cinnamon.org:7', 'panel1:right:14:network@cinnamon.org:9', 'panel1:right:15:sound@cinnamon.org:10', 'panel1:right:16:power@cinnamon.org:11', 'panel1:right:17:calendar@cinnamon.org:12', 'panel1:right:10:weather@mockturtl:13', 'panel1:right:8:workspace-switcher@cinnamon.org:25', 'panel1:right:18:clean-show-desktop@filipetorresbr:31', 'panel1:right:4:recent@cinnamon.org:40', 'panel1:right:6:force-quit@cinnamon.org:45', 'panel1:right:5:show-hide-applets@mohammad-sn:48', 'panel1:right:0:color-picker@fmete:51']
-favorite-apps=['chromium.desktop', 'firefox.desktop', 'cinnamon-settings.desktop', 'nemo.desktop', 'termite.desktop']
-next-applet-id=52
+enabled-applets=['panel1:left:0:menu@cinnamon.org:0', 'panel1:left:1:show-desktop@cinnamon.org:1', 'panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:7:systray@cinnamon.org:3', 'panel1:right:9:xapp-status@cinnamon.org:4', 'panel1:right:10:notifications@cinnamon.org:5', 'panel1:right:13:printers@cinnamon.org:6', 'panel1:right:11:removable-drives@cinnamon.org:7', 'panel1:right:12:network@cinnamon.org:9', 'panel1:right:14:sound@cinnamon.org:10', 'panel1:right:15:power@cinnamon.org:11', 'panel1:right:17:calendar@cinnamon.org:12', 'panel1:right:8:weather@mockturtl:13', 'panel1:right:6:workspace-switcher@cinnamon.org:25', 'panel1:right:18:clean-show-desktop@filipetorresbr:31', 'panel1:right:3:recent@cinnamon.org:40', 'panel1:right:5:force-quit@cinnamon.org:45', 'panel1:right:4:show-hide-applets@mohammad-sn:48', 'panel1:right:1:color-picker@fmete:51', 'panel1:right:0:SpicesUpdate@claudiux:52', 'panel1:right:16:betterlock:53']
+enabled-extensions=@as []
+extension-cache-updated=1602088012
+favorite-apps=['firefox.desktop', 'cinnamon-settings.desktop', 'nemo.desktop', 'termite.desktop', 'visual-studio-code.desktop', 'thunderbird.desktop']
+next-applet-id=54
 panel-edit-mode=false
 panel-launchers=['DEPRECATED']
 panel-zone-symbolic-icon-sizes='[{"panelId": 1, "left": 28, "center": 28, "right": 16}]'
@@ -18,6 +20,13 @@ prefer-hybrid-sleep=false
 screen-keyboard-enabled=false
 screen-reader-enabled=false
 
+[desktop/a11y/keyboard]
+bouncekeys-delay=300
+mousekeys-accel-time=300
+mousekeys-init-delay=300
+mousekeys-max-speed=10
+slowkeys-delay=300
+
 [desktop/a11y/mouse]
 dwell-click-enabled=false
 dwell-threshold=10
@@ -31,17 +40,17 @@ exec-arg='-e'
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///home/pol/dotfiles/dotfiles/.local/xdg/wallpapers/landscapes/pineapple-supply-co-IQ0jqC0Jjuk-unsplash.jpg'
+picture-uri='file:///home/pol/dotfiles/dotfiles/.local/xdg/wallpapers/landscapes/michelle-spollen-c9MFM8rSMsQ-unsplash.jpg'
 
 [desktop/background/slideshow]
 delay=15
-image-source='xml:///usr/share/gnome-background-properties/linuxmint-qiana.xml'
+image-source='xml:///usr/share/gnome-background-properties/linuxmint-ulyana.xml'
 
 [desktop/interface]
 cursor-blink-time=1200
 font-name='Verdana 11'
 gtk-theme='Arc-Lighter'
-icon-theme='Papirus-Dark'
+icon-theme='Papirus-Light'
 scaling-factor=uint32 0
 text-scaling-factor=1.0
 toolkit-accessibility=false
@@ -94,4 +103,4 @@ map-enabled=false
 
 [theme]
 name='Arc'
-theme-cache-updated=1601160593
+theme-cache-updated=1602113200
