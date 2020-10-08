@@ -111,6 +111,7 @@ arch_install () {
 
     # Bluetooth
     sudo pacman -S bluez bluez-utils
+    sudo pacman -S blueberry              # Linux Mint spin-off of GNOME Bluetooth
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
     fi
