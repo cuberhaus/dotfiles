@@ -210,7 +210,7 @@ cinnamon_install() {
     yay -S mint-themes mint-y-icons mint-backgrounds # Themes
     gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
     sudo pacman -S gnome-screenshot          # Take screenshots with impr pant
-    yay -S xviewer                           # Image viewer
+    # Doesnt open properly yay -S xviewer                           # Image viewer
     sudo pacman -S xreader                   # Document viewer
     yay -S pix                               # Image viewer
     # Fallback mode in case cinnamon crashes
