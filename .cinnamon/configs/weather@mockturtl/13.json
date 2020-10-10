@@ -390,7 +390,7 @@
     },
     "useSymbolicIcons": {
         "type": "checkbox",
-        "default": false,
+        "default": true,
         "tooltip": "Does not apply to custom iconset, that is symbolic by default",
         "description": "Use symbolic icons throughout the applet",
         "value": false
@@ -429,5 +429,5 @@
         "type": "label",
         "description": "Your location in most cases work automatically but you can enter it manually by coordinates 'Latitude,Longitude' (e.g. 51.5085,-0.1257) or use 'City,Country-code' (e.g. London,UK) or try to enter {House number} {Street} {City/Town} {Postcode} {Country}. The search algorithm is very flexible with the format. After 3 seconds without typing the address you entered is replaced automatically for validating your choice."
     },
-    "__md5__": "f9d73591abb5742dfb86c8b18c5cf532"
+    "__md5__": "ed82272dbf321bcc51e02f64f5b5a7c4"
 }

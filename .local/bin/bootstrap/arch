@@ -256,7 +256,9 @@ virtualbox_install() {
     sudo pacman -S virtualbox-host-modules-arch
 }
 games_install () {
-    sudo pacman -S steam lutris
+    sudo pacman -S steam 
+    sudo pacman -S lutris
+    sudo pacman -S minecraft
 }
 laptop_install() {
     sudo pacman -S tlp
