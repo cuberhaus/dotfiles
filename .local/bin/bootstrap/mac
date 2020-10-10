@@ -1,5 +1,4 @@
 #!/bash/sh
-
 app_store_install() {
     brew install mas
     mas install 1444383602 # GoodNotes
@@ -12,16 +11,14 @@ app_store_install() {
     mas install 409203825 # Numbers 
     mas install 409183694 # Keynote
 }
-
 brew_install() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 }
-
 mac_install () {
-    # Avoid terminal prompts
-    touch ~/.hushlogin
-    brew install r                      # Probabilitat i estadística
-    brew install rstudio                # Probabilitat i estadística IDE
+    ### Avoid some error messages
+    mkdir ~/.cache/zsh
+    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
+    touch ~/.hushlogin # Avoid terminal prompts
     ### Terminal stuff
     brew install exa                    # "ls" on steroids
     brew install git                    # Git
@@ -55,20 +52,14 @@ mac_install () {
     brew install ripgrep
     brew install sox
     brew install swig
-    #brew install bash-completion
-    #brew install bash-git-prompt    
-
-    ### Avoid some error messages
-    mkdir ~/.cache/zsh
-    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
-
     ### Terminal Font
     brew tap homebrew/cask-fonts
     brew cask install font-inconsolata-nerd-font # Change iTerm font to this one
-    
-    brew cask install dbeaver-community # BD
-
     ### GUI Applications
+    brew cask install dbeaver-community # BD
+    brew install r                      # Probabilitat i estadística
+    brew install rstudio                # Probabilitat i estadística IDE
+    brew cask install thunderbird
     brew cask install ccleaner          # CleanUp
     brew cask install calibre           # Book manager
     brew cask install spotify           # Music player
@@ -89,7 +80,6 @@ mac_install () {
     #brew cask install chromium          # Open source web browser
     #brew cask install qbittorrent
 }
-
 doom_emacs_install() {
     # required dependencies
     brew install git ripgrep
@@ -101,12 +91,10 @@ doom_emacs_install() {
     brew install emacs-plus --with-modern-cg433n-icon
     ln -s /usr/local/opt/emacs-plus/Emacs.app /Applications/Emacs.app
 }
-
 bloat_install() {
     brew install cowsay fortune coreutils # Cows
     brew install cmatrix            # Matrix
 }
-
 vim_install () {
     brew install macvim             # Vim
     brew install neovim             # NeoVim
@@ -118,7 +106,7 @@ vim_install () {
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
 }
-
+### Installation starts here
 brew_install
 mac_install
 vim_install
