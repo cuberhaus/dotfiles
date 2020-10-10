@@ -17,14 +17,6 @@ PATH=".:$PATH"
 ### SET VIM AS MANPAGER ###
 export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
 
-#if [ -d "/usr/local/sbin" ] ; then
-#        PATH="/usr/local/sbin:$PATH"
-#fi
-#PATH_ARRAY=($HOME/.local/bin 
-#    $HOME/.config/i3/i3-layout-manager 
-#    $HOME/.gem/ruby/2.7.0/bin 
-#    /usr/local/sbin)
-#
 # Zsh files:
 export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 # For more information RTFM
