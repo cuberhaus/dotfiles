@@ -47,20 +47,11 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="robbyrussell"
-
-# Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME=random will cause zsh to load
-# a theme from this variable instead of looking in $ZSH/themes/
-# If set to an empty array, this variable will have no effect.
-# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -91,7 +82,7 @@ ZSH_THEME="robbyrussell"
 ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
-#COMPLETION_WAITING_DOTS="true"
+COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
 # under VCS as dirty. This makes repository status check for large repositories
@@ -154,7 +145,7 @@ source ~/.config/powerlevel10k/powerlevel10k.zsh-theme
 ###############################################################
 # => Alias
 ###############################################################
-source $ZDOTDIR/.aliases
+source $ZDOTDIR/aliases
 ###############################################################
 # => Options
 ###############################################################
@@ -163,14 +154,6 @@ source $ZDOTDIR/.aliases
 HISTSIZE=32768
 SAVEHIST=32768
 HISTFILE=~/.cache/zsh/history
-
-## Basic auto/tab complete:
-#autoload -U compinit -d ~/.cache/zsh/zcompdump-$ZSH_VERSION
-#zstyle ':completion:*' menu select
-#zmodload zsh/complist
-#compinit -d ~/.cache/zsh/zcompdump-$ZSH_VERSION
-#_comp_options+=(globdots)		# Include hidden files.
-#zstyle ':completion:*:(cd|mv|cp):*' ignore-parents parent pwd # Ignores current directory and previous
 
 # vi mode
 bindkey -v

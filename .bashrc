@@ -58,11 +58,6 @@ GIT_PROMPT_THEME_FILE=~/.config/.git-prompt-colors.sh
 GIT_PROMPT_THEME=Custom # use theme optimized for solarized color scheme
 source ~/.config/bash-git-prompt/gitprompt.sh
 
-#if [[ $TERM != linux && ! $PROMPT_COMMAND =~ _update_ps1 ]]; then
-#    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
-#fi
-## Powerline ends
-
 ###############################################################
 # => Config
 ###############################################################
@@ -106,19 +101,12 @@ shopt -s checkwinsize
 # match all files and zero or more directories and subdirectories.
 #shopt -s globstar
 
-
-###############################################################
-# => Variables
-###############################################################
-
- # echo "" >> $HOME/.bashrc && echo "export XAUTHORITY=$HOME/.Xauthority" >> $HOME/.bashrc && cd $HOME && . .bashrc
-
 ###############################################################
 # => Alias
 ###############################################################
 
 if [ -f $ZDOTDIR/.aliases ]; then
-    source $ZDOTDIR/.aliases
+    source $ZDOTDIR/aliases
 fi
 
 ###############################################################

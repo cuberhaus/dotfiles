@@ -44,7 +44,6 @@ alias qt='fortune -c | cowthink -f $(find /usr/share/cows -type f | shuf -n 1)'
 
 # root privileges
 alias doas="doas --"
-#alias sudo='sudo '
 
 # adding flags
 alias cp="cp -i"                          # confirm before overwriting something
@@ -89,20 +88,20 @@ alias eda++="g++ -std=c++11"
 alias p1++="g++ -ansi -O2 -DNDEBUG -D_GLIBCXX_DEBUG -Wall -Wextra -Werror -Wno-uninitialized -Wno-sign-compare -Wshadow"
 alias p2++="g++ -D GLIBCXX_DEBUG -O2 -Wall -Wextra -Werror -Wno-sign-compare -std=c++11"
 
-#userlist
+# Userlist
 alias userlist="cut -d: -f1 /etc/passwd"
 
-#switch between bash and zsh
+# Switch between bash and zsh
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
 
-#get the error messages from journalctl
+# Get the error messages from journalctl
 alias jctl="journalctl -p 3 -xb"
 
-#check vulnerabilities microcode
+# Check vulnerabilities microcode
 alias microcode='grep . /sys/devices/system/cpu/vulnerabilities/*'
 
-#youtube-dl
+# youtube-dl
 alias yta-aac="youtube-dl --extract-audio --audio-format aac "
 alias yta-best="youtube-dl --extract-audio --audio-format best "
 alias yta-flac="youtube-dl --extract-audio --audio-format flac "
@@ -111,7 +110,6 @@ alias yta-mp3="youtube-dl --extract-audio --audio-format mp3 "
 alias yta-opus="youtube-dl --extract-audio --audio-format opus "
 alias yta-vorbis="youtube-dl --extract-audio --audio-format vorbis "
 alias yta-wav="youtube-dl --extract-audio --audio-format wav "
-
 alias ytv-best="youtube-dl -f bestvideo+bestaudio "
 
 # # ex = EXtractor for all kinds of archives
@@ -147,21 +145,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     alias o='open . > /dev/null 2>&1 &'
     # Show active network interfaces
     alias ifactive="ifconfig | pcregrep -M -o '^[^\t:]+:([^\n]|\n\t)*status: active'"
-
     # Clean up LaunchServices to remove duplicates in the “Open With” menu
     alias lscleanup="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder"
-
     # Flush Directory Service cache
     alias flush="dscacheutil -flushcache && killall -HUP mDNSResponder"
-
     # Recursively delete `.DS_Store` files
     alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
-
     # Empty the Trash on all mounted volumes and the main HDD.
     # Also, clear Apple’s System Logs to improve shell startup speed.
     # Finally, clear download history from quarantine. https://mths.be/bum
     alias emptytrash="sudo rm -rfv /Volumes/*/.Trashes; sudo rm -rfv ~/.Trash; sudo rm -rfv /private/var/log/asl/*.asl; sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* 'delete from LSQuarantineEvent'"
-
     # Show/hide hidden files in Finder
     alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
     alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
@@ -176,7 +169,6 @@ if [[ "$DISTRO" == "arch" ]]; then
     alias mirrord="sudo reflector --latest 50 --number 20 --sort delay --save /etc/pacman.d/mirrorlist"
     alias mirrors="sudo reflector --latest 50 --number 20 --sort score --save /etc/pacman.d/mirrorlist"
     alias mirrora="sudo reflector --latest 50 --number 20 --sort age --save /etc/pacman.d/mirrorlist"
-
     alias pacman='sudo pacman --color auto'
     #pacman unlock
     alias unlock="sudo rm /var/lib/pacman/db.lck"
