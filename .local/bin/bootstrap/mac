@@ -74,11 +74,12 @@ mac_install () {
     brew cask install slack             # Work
     brew cask install iterm2            # Best terminal emulator
     brew cask install karabiner-elements # Swap Esc with Caps_lock
-    brew cask install google-chrome     # Web browser
     brew cask install the-unarchiver    # Archiver "faster"
+    brew cask install google-chrome     # Web browser
+    #brew cask install chromium          # Open source web browser
+    #brew cask install firefox           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
     #brew cask install keka              # Archiver open source
     #brew cask install unetbootin        # Burn iso's (or use dd command)
-    #brew cask install chromium          # Open source web browser
     #brew cask install qbittorrent
 }
 doom_emacs_install() {

@@ -6,9 +6,11 @@
 # usermod -a -G wheel video input
 # Configure nvidia nvidia-xconfig
 arch_install () {
-    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
+    # Fix some errors and cleanup
+    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
     mkdir ~/.cache/zsh
     mkdir ~/.cache/vlc
+
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
     gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg -e # Termite execute argument is -e in gnome-terminal its -x
@@ -17,6 +19,7 @@ arch_install () {
     sudo pacman -S nemo-preview
     sudo pacman -S nemo-seahorse
     sudo pacman -S nemo-share
+
     # Terminal
     sudo pacman -S wget
     sudo pacman -S svn
@@ -50,8 +53,7 @@ arch_install () {
     sudo pacman -S udiskie               # Automater
     sudo pacman -S ranger                # Ranger
     sudo pacman -S w3m                   # Preview images on ranger
-    #sudo pacman -S zsh-completions       # Zsh completions
-    #sudo pacman -S bash-completion       # Better bash completion
+
     # GUI
     sudo pacman -S gparted               # Manage partitions
     sudo pacman -S gnome-calculator      # Calculator
@@ -72,40 +74,75 @@ arch_install () {
     sudo pacman -S thunderbird           # Email
     sudo pacman -S calibre               # Book manager
     sudo pacman -S libreoffice-still     # Office
+    yay -S google-chrome                 # Best web browser
     #sudo pacman -S chromium              # Web browser
-    sudo pacman -S firefox               # Open source browser
+    #sudo pacman -S firefox               # Open source browser
+    sudo pacman -S tor tor-browser       # Tor private browser
+    yay -S tor-browser
     sudo pacman -S transmission-gtk      # A simpler Torrent D.
     sudo pacman -S vlc                   # Video player
     #sudo pacman -S qbittorrent           # Torrent Downloader
-    #sudo pacman -S tor tor-browser       # Tor private browser
-    #sudo pacman -S claws-mail           # Alternative mail
+    sudo pacman -S r                    # Probabilitat i estadística
+    yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
+    yay -S visual-studio-code-bin       # Microsoft's Visual Code
+    yay -S birdtray                     # Thunderbird tray
+    yay -S whatsapp-nativefier          # Whatsapp client
+    yay -S spotify                      # Spotify
+    yay -S ttf-ms-win10
+    yay -S ttf-ms-fonts                 # Microsoft fonts ##deprecated
+    yay -S emoji-keyboard               # Emoji
+    yay -S skypeforlinux-stable-bin     # Skype
+    yay -S slack-desktop                # Slack
+    yay -S android-studio               # Android Studio
+    yay -S youtube-dl                   # Download youtube videos
+    #yay -S typora                       # Markdown editor
+    # f5fpc -s -x -t https://upclink.upc.edu
+    # f5fpc --stop
+    yay -S f5fpc                        # Connexio a UPClink
+
+    # Lockscreen
+    yay -S betterlockscreen
+    sudo pacman -S xss-lock
+
+    # Backups
+    yay -S timeshift  #  sudo timeshift-gtk
+    sudo pacman -S cron
+
     # IRC APPS
     sudo pacman -S hexchat               # Graphical
     sudo pacman -S weechat               # Terminal-based
+
     # Drivers
     sudo pacman -S nvidia nvidia-utils   # Nvidia
     sudo pacman -S xf86-video-intel mesa lib32-mesa    # Intel
     sudo pacman -S lib32-nvidia-utils    # Requires adding multilib libraries
     sudo pacman -S nvidia-settings       # Add force composition pipeline in nvidia-settings
+
     # Pdf viewer
     sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
+
     # Calendar
     sudo pacman -S gnome-calendar gnome-keyring libsecret seahorse
+
     # Audio | Equalizer qpaeq
     sudo pacman -S playerctl
     sudo pacman -S pulseaudio pulseaudio-equalizer pulseaudio-bluetooth
+
     # Apps
     sudo pacman -S tumbler ffmpegthumbnailer raw-thumbnailer
+
     # Theme
     sudo pacman -S lxappearance
     sudo pacman -S gtk2 gtk3
     sudo pacman -S arc-gtk-theme arc-icon-theme # Arc theme and its icon's
     sudo pacman -S adapta-gtk-theme       # Alternative theme
     sudo pacman -S papirus-icon-theme     # Best icon theme!
+
     # Fonts
     sudo pacman -S gnome-font-viewer      # Font viewer
     sudo pacman -S noto-fonts-emoji       # Classic Emoji
     sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts
+
     # Printers
     # https://wiki.archlinux.org/index.php/CUPS
     sudo pacman -S cups system-config-printer hplip
@@ -113,12 +150,14 @@ arch_install () {
         sudo systemctl enable org.cups.cupsd.service
         sudo systemctl start org.cups.cupsd.service
     fi
+
     # Bluetooth
     sudo pacman -S bluez bluez-utils
     sudo pacman -S blueberry              # Linux Mint spin-off of GNOME Bluetooth
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
     fi
+
     # Display manager
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable lightdm.service
@@ -148,36 +187,19 @@ yay_install() {
     makepkg -si
     sudo rm -r /home/pol/yay
 }
-apps_AUR_install () {
-    # f5fpc -s -x -t https://upclink.upc.edu
-    # f5fpc --stop
-    yay -S f5fpc                        # Connexio a UPClink
-    sudo pacman -S r                    # Probabilitat i estadística
-    yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
-    # GUI
-    yay -S visual-studio-code-bin       # Microsoft's Visual Code
-    yay -S birdtray                     # Thunderbird tray
-    yay -S whatsapp-nativefier          # Whatsapp client
-    yay -S spotify                      # Spotify
-    yay -S ttf-ms-win10
-    yay -S ttf-ms-fonts                 # Microsoft fonts ##deprecated
-    yay -S emoji-keyboard               # Emoji
-    yay -S skypeforlinux-stable-bin     # Skype
-    yay -S slack-desktop                # Slack
-    yay -S android-studio               # Android Studio
-    #yay -S typora                       # Markdown editor
-    yay -S youtube-dl                   # Download youtube videos
-    # Backups
-    yay -S timeshift  #  sudo timeshift-gtk
-    sudo pacman -S cron
-    # Lockscreen
-    yay -S betterlockscreen
-    sudo pacman -S xss-lock
-    # Terminal
-    #yay -S autojump                     # Smart jumping through terminal
-    # Office / Word compatible
-    #yay -S freeoffice
-}
+# Office / Word compatible
+#yay -S freeoffice
+
+# do this but i dont know exactly how
+#do_once () {
+#    sudo echo 'Section "InputClass"
+#    Identifier "libinput touchpad catchall"
+#    MatchIsTouchpad "on"
+#    MatchDevicePath "/dev/input/event*"
+#    Driver "libinput"
+#    Option "NaturalScrolling" "true"
+#    EndSection'  >> /etc/X11/xorg.conf.d/30-touchpad.conf
+#}
 vim_install () {
     sudo pacman -S neovim
     cd ~/
@@ -206,17 +228,18 @@ i3_install () {
 # Best Desktop
 cinnamon_install() {
     sudo pacman -S cinnamon                  # Desktop
+    sudo pacman -S gnome-screenshot          # Take screenshots with impr pant
+    sudo pacman -S xreader                   # Document viewer
     yay -S cinnamon-sound-effects            # Sound effects
     yay -S mint-themes mint-y-icons mint-backgrounds # Themes
-    gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
-    sudo pacman -S gnome-screenshot          # Take screenshots with impr pant
-    # Doesnt open properly yay -S xviewer                           # Image viewer
-    sudo pacman -S xreader                   # Document viewer
     yay -S pix                               # Image viewer
+    gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
+
     # Fallback mode in case cinnamon crashes
     sudo pacman -S metacity
     sudo pacman -S gnome-shell               # To have a taskbar
-    #color pick applet
+
+    # Color pick applet
     sudo pacman -S python-numpy python-xlib
 }
 bloat_install () {
@@ -232,16 +255,6 @@ virtualbox_install() {
     sudo pacman -S virtualbox
     sudo pacman -S virtualbox-host-modules-arch
 }
-# do this but i dont know exactly how
-#do_once () {
-#    sudo echo 'Section "InputClass"
-#    Identifier "libinput touchpad catchall"
-#    MatchIsTouchpad "on"
-#    MatchDevicePath "/dev/input/event*"
-#    Driver "libinput"
-#    Option "NaturalScrolling" "true"
-#    EndSection'  >> /etc/X11/xorg.conf.d/30-touchpad.conf
-#}
 games_install () {
     sudo pacman -S steam lutris
 }
