@@ -15,8 +15,7 @@
 ###############################################################
 # Sections:
 #   -> Theme
-#   -> Config
-#   -> Variables
+#   -> Configuration
 #   -> Alias
 #   -> Runtime
 #
@@ -44,7 +43,7 @@ GIT_PROMPT_THEME=Custom # use theme optimized for solarized color scheme
 source ~/.config/bash-git-prompt/gitprompt.sh
 
 ###############################################################
-# => Config
+# => Configuration
 ###############################################################
 
 # Enable Readline not waiting for additional input when a key is pressed.
