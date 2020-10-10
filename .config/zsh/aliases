@@ -2,7 +2,7 @@
 
 # Config Files
 alias arch="vim ~/.local/bin/bootstrap/arch"
-alias aliases="vim $ZDOTDIR/.aliases"
+alias aliases="vim $ZDOTDIR/aliases"
 alias zshenv="vim ~/.zshenv"
 alias zshrc="vim $ZDOTDIR/.zshrc"
 alias zprofile="vim $ZDOTDIR/.zprofile"
@@ -46,9 +46,9 @@ alias qt='fortune -c | cowthink -f $(find /usr/share/cows -type f | shuf -n 1)'
 alias doas="doas --"
 
 # adding flags
-alias cp="cp -i"                          # confirm before overwriting something
-alias df="df -h"                          # human-readable sizes
-alias free="free -m"                      # show sizes in MB
+alias cp="cp -i"          # confirm before overwriting something
+alias df="df -h"          # human-readable sizes
+alias free="free -m"      # show sizes in MB
 
 # Clear
 alias c="clear"
