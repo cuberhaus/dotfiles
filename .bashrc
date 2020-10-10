@@ -36,7 +36,7 @@ BASE16_SHELL="$HOME/.config/base16-shell/"
 
 ### Prompt
 # For more info: https://github.com/magicmonty/bash-git-prompt
-GIT_PROMPT_ONLY_IN_REPO=1 # Set config variables first
+GIT_PROMPT_ONLY_IN_REPO=0 # Set config variables first
 # It has to go here, cant go inside the repo
 GIT_PROMPT_THEME_FILE=~/.config/.git-prompt-colors.sh
 GIT_PROMPT_THEME=Custom # use theme optimized for solarized color scheme
