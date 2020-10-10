@@ -77,7 +77,7 @@ arch_install () {
     yay -S google-chrome                 # Best web browser
     #sudo pacman -S chromium              # Web browser
     #sudo pacman -S firefox               # Open source browser
-    sudo pacman -S tor tor-browser       # Tor private browser
+    sudo pacman -S tor                   # Tor private browser
     yay -S tor-browser
     sudo pacman -S transmission-gtk      # A simpler Torrent D.
     sudo pacman -S vlc                   # Video player
