@@ -60,6 +60,7 @@ mac_install () {
     brew cask install dbeaver-community # BD
     brew install r                      # Probabilitat i estadística
     brew install rstudio                # Probabilitat i estadística IDE
+    brew cask install adobe-acrobat-reader # Pdf reader
     brew cask install ccleaner          # CleanUp
     brew cask install calibre           # Book manager
     brew cask install spotify           # Music player
