@@ -3,12 +3,12 @@ app_store_install() {
     brew install mas
     mas install 1444383602 # GoodNotes
     mas install 736189492 # Notability
-    mas install 1147396723 # WhatsApp 
-    mas install 497799835 # Xcode 
+    mas install 1147396723 # WhatsApp
+    mas install 497799835 # Xcode
     mas install 441258766 # Magnet
-    mas install 1274495053 # Microsoft To Do 
+    mas install 1274495053 # Microsoft To Do
     mas install 409201541 # Pages
-    mas install 409203825 # Numbers 
+    mas install 409203825 # Numbers
     mas install 409183694 # Keynote
 }
 brew_install() {
@@ -20,6 +20,7 @@ mac_install () {
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
     touch ~/.hushlogin # Avoid terminal prompts
     ### Terminal stuff
+    brew install rclone
     brew install exa                    # "ls" on steroids
     brew install git                    # Git
     brew install htop                   # Resource viewer
@@ -35,14 +36,14 @@ mac_install () {
     brew install ranger w3m             # Ranger and previews
     brew install autojump               # Autojump obsolete?
     brew install ncdu                   # Storage manager
-    ## Extract function 
+    ## Extract function
     brew install unrar
     brew install p7zip
     # Dependancies
     brew install ack
     brew install astyle
     brew install bison
-    brew install cmake          
+    brew install cmake
     brew install flex
     brew install go
     brew install graphviz
@@ -59,7 +60,6 @@ mac_install () {
     brew cask install dbeaver-community # BD
     brew install r                      # Probabilitat i estadística
     brew install rstudio                # Probabilitat i estadística IDE
-    brew cask install thunderbird
     brew cask install ccleaner          # CleanUp
     brew cask install calibre           # Book manager
     brew cask install spotify           # Music player
