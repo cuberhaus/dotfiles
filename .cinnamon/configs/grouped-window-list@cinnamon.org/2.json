@@ -166,6 +166,7 @@
         "value": [
             "nemo.desktop",
             "firefox.desktop",
+            "google-chrome.desktop",
             "whatsapp-nativefier.desktop",
             "termite.desktop",
             "visual-studio-code.desktop",
