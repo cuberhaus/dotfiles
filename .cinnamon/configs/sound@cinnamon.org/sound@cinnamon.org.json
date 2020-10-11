@@ -37,7 +37,8 @@
             "rhythmbox",
             "chromium-browser",
             "spotify",
-            "org.gnome.Lollypop"
+            "org.gnome.Lollypop",
+            "google-chrome"
         ]
     },
     "section2": {
