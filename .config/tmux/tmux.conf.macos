@@ -1,5 +1,5 @@
 # Without spotify
-set -g status-right '#{battery_status_bg} #{battery_icon} #{battery_percentage} #{prefix_highlight} | %a %Y-%m-%d %H:%M'
+set -g status-right '#{prefix_highlight} #{battery_status_bg} #{battery_icon} #{battery_percentage} | %a %Y-%m-%d %H:%M'
 
 set -g @continuum-boot-options 'iterm,fullscreen'
 
