@@ -378,7 +378,7 @@ map <C-j> <C-W>j
 map <C-k> <C-W>k
 map <C-h> <C-W>h
 map <C-l> <C-W>l
-" Close a window (with c we run into inconsistencies and problems thats the reason it's an x)
+" Close a window
 map <leader>c <C-W>c
 " Vertical split
 map <leader>v <C-W>v
