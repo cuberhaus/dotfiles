@@ -141,7 +141,8 @@ ex ()
 
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    alias update="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask; brew cleanup; python3 -m pip install --user --upgrade pynvim; sudo gem update"
+    alias update="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask; brew cleanup"
+    alias updateall="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask; brew cleanup; python3 -m pip install --user --upgrade pynvim; sudo gem update"
     alias o='open . > /dev/null 2>&1 &'
     # Show active network interfaces
     alias ifactive="ifconfig | pcregrep -M -o '^[^\t:]+:([^\n]|\n\t)*status: active'"
