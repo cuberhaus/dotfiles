@@ -434,7 +434,6 @@ nmap <leader>hp <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
-
 "Press Enter to jump to the subject (topic) under the cursor.
 "Press Backspace to return from the last jump.
 "This breaks some stuff
