@@ -26,11 +26,7 @@
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-
-
 "" Requires YCM install
-
-
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
@@ -50,6 +46,12 @@ if has('unix') || has('macunix')
 endif
 "set runtimepath=$XDG_CONFIG_HOME/vim,$VIMRUNTIME,$XDG_CONFIG_HOME/vim/after
 " Launch without anything: vim --clean
+
+" With a map leader it's possible to do extra key combinations
+" like <leader>w saves the current file
+nnoremap <SPACE> <Nop>
+let mapleader=" "
+
 " Sets how many lines of history VIM has to remember
 set history=500
 
@@ -70,16 +72,6 @@ filetype plugin indent on
 set autoread
 au FocusGained,BufEnter * checktime
 
-" With a map leader it's possible to do extra key combinations
-" like <leader>w saves the current file
-nnoremap <SPACE> <Nop>
-let mapleader=" "
-
-" Fast saving
-nmap <leader>w :w!<cr>
-
-" :W sudo saves the file (useful for handling the permission-denied error)
-command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 "Fa que el escape sigui instantani
 set timeoutlen=1000 ttimeoutlen=0
 
@@ -111,6 +103,7 @@ endif
 call plug#begin('~/.vim/plugged')
 " Plugins, make sure you use single quotes
 call plug#begin()
+Plug 'lambdalisue/vim-fullscreen'
 Plug 'lambdalisue/suda.vim'
 Plug 'mattn/emmet-vim'
 Plug 'morhetz/gruvbox'
@@ -357,13 +350,46 @@ vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
 vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Moving around, tabs, windows and buffers
+" => Keybindings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Press Enter to jump to the subject (topic) under the cursor.
-"Press Backspace to return from the last jump.
-"This breaks some stuff
-"map <buffer> <CR> <C-]>
-"map <buffer> <BS> <C-T>
+"Per comentar una linea gcc per comentar gc per fer moviments
+
+" Press ctrl+m to toggle markdown preview
+nmap <C-m> <Plug>MarkdownPreviewToggle
+
+" Toggle fullscreen
+noremap <M-f> :FullscreenToggle<CR>
+
+"Autoformat
+noremap <F3> :Autoformat<CR>
+
+"Toggle nerd Tree ctrl-spacebar
+nmap <C-Space> :NERDTreeToggle <CR>
+
+"Open bufexplorer to see and manage the current buffers (<leader>o):
+map <leader>o :BufExplorer<cr>
+
+" Ctrlp Quickly find and open a file in the current working directory
+let g:ctrlp_map = '<C-f>'
+
+" FZF
+map <leader>f :Files ~/<cr>
+
+" Vimroom
+nnoremap <silent> <leader>z :Goyo<cr>
+
+" YankStack
+nmap <C-p> <Plug>yankstack_substitute_older_paste
+nmap <C-n> <Plug>yankstack_substitute_newer_paste
+
+" Git gutter toggle
+nnoremap <silent> <leader>d :GitGutterToggle<cr>
+
+" Fast saving
+nmap <leader>w :w!<cr>
+
+" :W sudo saves the file (useful for handling the permission-denied error)
+command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 
 map <C-down> <C-E>
 map <C-up> <C-Y>
@@ -408,7 +434,17 @@ nmap <leader>hp <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
+
+"Press Enter to jump to the subject (topic) under the cursor.
+"Press Backspace to return from the last jump.
+"This breaks some stuff
+"map <buffer> <CR> <C-]>
+"map <buffer> <BS> <C-T>
 " Specify the behavior when switching between buffers
+
+""""""""""""""""""""""""""""""
+" => Moving around
+""""""""""""""""""""""""""""""
 try
     set switchbuf=useopen,usetab,newtab
     set stal=2
@@ -654,13 +690,6 @@ autocmd BufRead *.twig set syntax=html filetype=html
 " => Markdown
 """"""""""""""""""""""""""""""
 let vim_markdown_folding_disabled = 1
-" Press ctrl+m to toggle markdown preview
-nmap <C-m> <Plug>MarkdownPreviewToggle
-
-"Per comentar una linea gcc per comentar gc per fer moviments
-
-"Autoformat
-noremap <F3> :Autoformat<CR>
 
 " PLUGINS
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -671,9 +700,6 @@ let NERDTreeShowHidden=0
 let NERDTreeIgnore = ['\.pyc$', '__pycache__']
 let g:NERDTreeWinSize=35
 
-"Toggle nerd Tree ctrl-spacebar
-nmap <C-Space> :NERDTreeToggle <CR>
-
 """"""""""""""""""""""""""""""
 " => bufExplorer plugin
 """"""""""""""""""""""""""""""
@@ -681,27 +707,18 @@ let g:bufExplorerDefaultHelp=0
 let g:bufExplorerShowRelativePath=1
 let g:bufExplorerFindActive=1
 let g:bufExplorerSortBy='name'
-"Open bufexplorer to see and manage the current buffers (<leader>o):
-map <leader>o :BufExplorer<cr>
-
 
 """"""""""""""""""""""""""""""
 " => CTRL-P
 """"""""""""""""""""""""""""""
 let g:ctrlp_working_path_mode = 0
-
 let g:ctrlp_show_hidden = 1
-
-" Quickly find and open a file in the current working directory
-let g:ctrlp_map = '<C-f>'
-
 let g:ctrlp_max_height = 20
 let g:ctrlp_custom_ignore = 'node_modules\|^\.DS_Store\|^\.git\|^\.coffee'
 
 """"""""""""""""""""""""""""""
 " => FZF
 """"""""""""""""""""""""""""""
-map <leader>f :Files ~/<cr>
 "map <C-f> :Files <cr>
 
 """"""""""""""""""""""""""""""
@@ -716,18 +733,13 @@ let g:user_zen_mode='a'
 let g:goyo_width=100
 let g:goyo_margin_top = 2
 let g:goyo_margin_bottom = 2
-nnoremap <silent> <leader>z :Goyo<cr>
 
 """"""""""""""""""""""""""""""
 " => YankStack
 """"""""""""""""""""""""""""""
 let g:yankstack_yank_keys = ['y', 'd']
 
-nmap <C-p> <Plug>yankstack_substitute_older_paste
-nmap <C-n> <Plug>yankstack_substitute_newer_paste
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Git gutter (Git diff)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:gitgutter_enabled=1
-nnoremap <silent> <leader>d :GitGutterToggle<cr>
