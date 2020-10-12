@@ -35,8 +35,8 @@ export QT_QPA_PLATFORMTHEME="qt5ct"
 #OBJECTES=/Users/$USER/assig/pro2/objectes
 
 # ~/ Clean-up:
-export GEM_HOME="$XDG_DATA_HOME"/gem
-export GEM_SPEC_CACHE="$XDG_CACHE_HOME"/gem
+#export GEM_HOME="$XDG_DATA_HOME"/gem
+#export GEM_SPEC_CACHE="$XDG_CACHE_HOME"/gem
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"

@@ -106,3 +106,6 @@ pfetch
 #    exec tmux attach
 #fi
 [[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
+
+## Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+#export PATH="$PATH:$HOME/.rvm/bin"

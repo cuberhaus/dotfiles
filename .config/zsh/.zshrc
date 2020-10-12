@@ -135,3 +135,6 @@ bindkey '^ ' autosuggest-accept
 source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh 
 # Syntax highlight
 source ~/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+## Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+#export PATH="$PATH:$HOME/.rvm/bin"
