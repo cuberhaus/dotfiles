@@ -352,6 +352,9 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 " " ysiw" to add " to a word
 " " ds" to remove surround
 
+" :Obsess to start recording vim session
+" vim -S to source the session
+
 " Press ctrl+m to toggle markdown preview
 nmap <C-m> <Plug>MarkdownPreviewToggle
 
@@ -426,8 +429,10 @@ map <leader>tc :tabclose<cr>
 map <leader>t<leader> :tabnext <cr>
 
 " Git Gutter
-nmap [c <Plug>(GitGutterNextHunk)
-nmap ]c <Plug>(GitGutterPrevHunk)
+"nmap [c <Plug>(GitGutterNextHunk)
+"nmap ]c <Plug>(GitGutterPrevHunk)
+nmap -c <Plug>(GitGutterNextHunk)
+nmap _c <Plug>(GitGutterPrevHunk)
 nmap <leader>hp <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
