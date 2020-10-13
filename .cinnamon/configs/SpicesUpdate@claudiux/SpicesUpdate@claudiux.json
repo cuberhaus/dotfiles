@@ -220,6 +220,11 @@
                 "requestnewdownload": false
             },
             {
+                "name": "collapsible-systray@feuerfuchs.eu",
+                "isunprotected": true,
+                "requestnewdownload": false
+            },
+            {
                 "name": "color-picker@fmete",
                 "isunprotected": true,
                 "requestnewdownload": false
@@ -230,17 +235,17 @@
                 "requestnewdownload": false
             },
             {
+                "name": "hideable-applets@cardsurf",
+                "isunprotected": true,
+                "requestnewdownload": false
+            },
+            {
                 "name": "show-hide-applets@mohammad-sn",
                 "isunprotected": true,
                 "requestnewdownload": false
             },
             {
                 "name": "SpicesUpdate@claudiux",
-                "isunprotected": true,
-                "requestnewdownload": false
-            },
-            {
-                "name": "temperature@fevimu",
                 "isunprotected": true,
                 "requestnewdownload": false
             },

@@ -95,16 +95,11 @@ if has('unix') || has('macunix')
       autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
   endif
 endif
-" vim repeat cs'" to change surround from ' to "
-" " ysiw" to add " to a word
-" " ds" to remove surround
 " tabular comes before vim markdown
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 " Plugins, make sure you use single quotes
 call plug#begin()
-Plug 'lambdalisue/vim-fullscreen'
-Plug 'lambdalisue/suda.vim'
 Plug 'mattn/emmet-vim'
 Plug 'morhetz/gruvbox'
 Plug 'godlygeek/tabular'
@@ -353,12 +348,15 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 " => Keybindings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Per comentar una linea gcc per comentar gc per fer moviments
+" vim repeat cs'" to change surround from ' to "
+" " ysiw" to add " to a word
+" " ds" to remove surround
 
 " Press ctrl+m to toggle markdown preview
 nmap <C-m> <Plug>MarkdownPreviewToggle
 
 " Toggle fullscreen
-noremap <M-f> :FullscreenToggle<CR>
+"noremap <M-f> :FullscreenToggle<CR>
 
 "Autoformat
 noremap <F3> :Autoformat<CR>
