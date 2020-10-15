@@ -216,6 +216,11 @@
                 "requestnewdownload": false
             },
             {
+                "name": "Cinnamenu@json",
+                "isunprotected": true,
+                "requestnewdownload": false
+            },
+            {
                 "name": "clean-show-desktop@filipetorresbr",
                 "isunprotected": true,
                 "requestnewdownload": false
@@ -237,11 +242,6 @@
             },
             {
                 "name": "SpicesUpdate@claudiux",
-                "isunprotected": true,
-                "requestnewdownload": false
-            },
-            {
-                "name": "temperature@fevimu",
                 "isunprotected": true,
                 "requestnewdownload": false
             },

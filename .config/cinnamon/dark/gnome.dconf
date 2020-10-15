@@ -206,6 +206,16 @@ y=0
 y-bottom=-1
 y-centered=false
 
+[gnome-system-monitor]
+maximized=false
+show-dependencies=false
+show-whose-processes='user'
+window-state=(700, 500, 50, 50)
+
+[gnome-system-monitor/disktreenew]
+col-6-visible=true
+col-6-width=0
+
 [libgnomekbd/desktop]
 load-extra-items=false
 
@@ -320,7 +330,7 @@ locations=@av []
 locations=@av []
 
 [software]
-check-timestamp=int64 1601757944
+check-timestamp=int64 1602735368
 first-run=false
 
 [terminal/legacy]
