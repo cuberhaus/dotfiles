@@ -246,6 +246,11 @@
                 "requestnewdownload": false
             },
             {
+                "name": "temperature@fevimu",
+                "isunprotected": true,
+                "requestnewdownload": false
+            },
+            {
                 "name": "weather@mockturtl",
                 "isunprotected": true,
                 "requestnewdownload": false
