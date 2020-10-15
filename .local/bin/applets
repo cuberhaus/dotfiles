@@ -48,4 +48,7 @@ if [[ $install == y ]]; then
     # Num Lock/Caps Lock indicators
     wget https://cinnamon-spices.linuxmint.com/files/applets/betterlock.zip
     ex betterlock.zip
+    # Cinnamenu
+    wget https://cinnamon-spices.linuxmint.com/files/applets/Cinnamenu@json.zip
+    ex Cinnamenu@json.zip
 fi
