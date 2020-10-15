@@ -49,7 +49,7 @@ fi
 export UPDATE_ZSH_DAYS=7
 
 # Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="true"
+#ENABLE_CORRECTION="true"
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
