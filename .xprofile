@@ -3,7 +3,7 @@
 # If you use startx/xinit like a Chad, this file will also be sourced.
 [[ -f ~/.zshenv ]] && source ~/.zshenv
 # Has to go before i3 for some stupid reason?
-if [[ "$DISTRO" == "arch" ]]; then
+if [[ "$DESKTOP_SESSION" == "i3" ]]; then
     # xss-lock displays betterlockscreen when lid is closed
     exec xss-lock -- betterlockscreen -l &
     exec betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
