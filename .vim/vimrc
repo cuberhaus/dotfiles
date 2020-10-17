@@ -100,6 +100,7 @@ endif
 call plug#begin('~/.vim/plugged')
 " Plugins, make sure you use single quotes
 call plug#begin()
+Plug 'NLKNguyen/papercolor-theme'
 Plug 'mattn/emmet-vim'
 Plug 'morhetz/gruvbox'
 Plug 'godlygeek/tabular'
@@ -271,11 +272,14 @@ if filereadable(expand("~/.vimrc_background"))
 endif
 " TRUECOLOR SCHEMES uncheck to enable
 "autocmd vimenter * colorscheme gruvbox
-colorscheme onedark
-
-" fixes glitch? in colors when using vim with tmux
-set background=dark
 set t_Co=256
+" Dark truecolor
+set background=dark
+colorscheme onedark
+" Light truecolor
+"set background=light
+"colorscheme PaperColor
+
 
 " This is what sets vim to use 24-bit colors. It will also work for any version of neovim
 set termguicolors
