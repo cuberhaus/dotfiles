@@ -267,7 +267,7 @@
         "default": false,
         "description": "Check regularly whether your desklets are up to date",
         "tooltip": "If desklets updates do not concern you, uncheck this box.",
-        "value": false
+        "value": true
     },
     "check_new_desklets": {
         "type": "switch",
@@ -313,7 +313,13 @@
         ],
         "default": [],
         "show-buttons": false,
-        "value": []
+        "value": [
+            {
+                "name": "googleCalendar@javahelps.com",
+                "isunprotected": true,
+                "requestnewdownload": false
+            }
+        ]
     },
     "btn_cs_desklets": {
         "type": "button",
@@ -322,7 +328,7 @@
     },
     "was_empty_desklets": {
         "type": "generic",
-        "value": true,
+        "value": false,
         "default": false
     },
     "check_extensions": {
