@@ -315,6 +315,16 @@
         "show-buttons": false,
         "value": [
             {
+                "name": "calendar@deeppradhan",
+                "isunprotected": true,
+                "requestnewdownload": false
+            },
+            {
+                "name": "diskspace@schorschii",
+                "isunprotected": true,
+                "requestnewdownload": false
+            },
+            {
                 "name": "googleCalendar@javahelps.com",
                 "isunprotected": true,
                 "requestnewdownload": false

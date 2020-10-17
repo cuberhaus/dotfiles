@@ -38,7 +38,7 @@
             "Open Partition Manager": "partitionmanager",
             "Nothing": "nothing"
         },
-        "value": "filemanager"
+        "value": "nothing"
     },
     "head2": {
         "type": "header",
@@ -71,7 +71,7 @@
         "type": "checkbox",
         "description": "Hide decorations",
         "default": false,
-        "value": false
+        "value": true
     },
     "draw-free-space": {
         "type": "checkbox",
@@ -83,14 +83,14 @@
         "type": "checkbox",
         "default": false,
         "description": "Use a custom circle color",
-        "value": false
+        "value": true
     },
     "circle-color": {
         "type": "colorchooser",
         "default": "rgba(83,199,160,1.0)",
         "description": "Circle color",
         "dependency": "use-own-circle-color",
-        "value": "rgba(83,199,160,1.0)"
+        "value": "rgb(254,204,102)"
     },
     "text-color": {
         "type": "colorchooser",
@@ -107,7 +107,7 @@
         "units": "scale factor",
         "description": "Desklet size",
         "tooltip": "Increase or decrease the size of this desklet using this scale factor.",
-        "value": 1
+        "value": 0.8
     },
     "head3": {
         "type": "header",
@@ -137,12 +137,12 @@
     "random-circle-color-r": {
         "type": "generic",
         "default": 1,
-        "value": 0.23364974216007917
+        "value": 0.13838573136889043
     },
     "random-circle-color-g": {
         "type": "generic",
         "default": 1,
-        "value": 0.37624515398265845
+        "value": 0.23369159737404188
     },
     "random-circle-color-b": {
         "type": "generic",

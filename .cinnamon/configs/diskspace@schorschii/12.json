@@ -83,14 +83,14 @@
         "type": "checkbox",
         "default": false,
         "description": "Use a custom circle color",
-        "value": false
+        "value": true
     },
     "circle-color": {
         "type": "colorchooser",
         "default": "rgba(83,199,160,1.0)",
         "description": "Circle color",
         "dependency": "use-own-circle-color",
-        "value": "rgba(83,199,160,1.0)"
+        "value": "rgb(82,148,226)"
     },
     "text-color": {
         "type": "colorchooser",
