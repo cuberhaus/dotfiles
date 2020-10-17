@@ -4,7 +4,7 @@
         "pages": [
             "providers",
             "presentation-section",
-            "units-section",
+            "units-page",
             "info-section"
         ],
         "providers": {
@@ -429,5 +429,5 @@
         "type": "label",
         "description": "Your location in most cases work automatically but you can enter it manually by coordinates 'Latitude,Longitude' (e.g. 51.5085,-0.1257) or use 'City,Country-code' (e.g. London,UK) or try to enter {House number} {Street} {City/Town} {Postcode} {Country}. The search algorithm is very flexible with the format. After 3 seconds without typing the address you entered is replaced automatically for validating your choice."
     },
-    "__md5__": "015ea22667d0f669bd2bce174a778c2e"
+    "__md5__": "9d3a79cf785a4d458d60bcb0964c7a7b"
 }
