@@ -51,4 +51,10 @@ if [[ $install == y ]]; then
     # Cinnamenu
     wget https://cinnamon-spices.linuxmint.com/files/applets/Cinnamenu@json.zip
     ex Cinnamenu@json.zip
+    # Calendar
+    wget https://cinnamon-spices.linuxmint.com/files/desklets/calendar@deeppradhan.zip
+    ex calendar@deeppradhan.zip
+    # Disk Space
+    wget https://cinnamon-spices.linuxmint.com/files/desklets/diskspace@schorschii.zip
+    ex diskspace@schorschii.zip
 fi
