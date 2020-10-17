@@ -38,7 +38,7 @@
             "Open Partition Manager": "partitionmanager",
             "Nothing": "nothing"
         },
-        "value": "nothing"
+        "value": "filemanager"
     },
     "head2": {
         "type": "header",
@@ -71,13 +71,13 @@
         "type": "checkbox",
         "description": "Hide decorations",
         "default": false,
-        "value": true
+        "value": false
     },
     "draw-free-space": {
         "type": "checkbox",
         "description": "Draw free/unused space (gray)",
         "default": true,
-        "value": false
+        "value": true
     },
     "use-own-circle-color": {
         "type": "checkbox",
@@ -107,7 +107,7 @@
         "units": "scale factor",
         "description": "Desklet size",
         "tooltip": "Increase or decrease the size of this desklet using this scale factor.",
-        "value": 0.8
+        "value": 1
     },
     "head3": {
         "type": "header",
@@ -137,12 +137,12 @@
     "random-circle-color-r": {
         "type": "generic",
         "default": 1,
-        "value": 0.02017429818250327
+        "value": 0.23364974216007917
     },
     "random-circle-color-g": {
         "type": "generic",
         "default": 1,
-        "value": 0.523044851045322
+        "value": 0.37624515398265845
     },
     "random-circle-color-b": {
         "type": "generic",

@@ -17,7 +17,7 @@
             "RAM": "ram",
             "Swap": "swap"
         },
-        "value": "filesystem"
+        "value": "ram"
     },
     "filesystem": {
         "type": "filechooser",
@@ -77,7 +77,7 @@
         "type": "checkbox",
         "description": "Draw free/unused space (gray)",
         "default": true,
-        "value": false
+        "value": true
     },
     "use-own-circle-color": {
         "type": "checkbox",
@@ -137,12 +137,12 @@
     "random-circle-color-r": {
         "type": "generic",
         "default": 1,
-        "value": 0.02017429818250327
+        "value": 0.2581211758728026
     },
     "random-circle-color-g": {
         "type": "generic",
         "default": 1,
-        "value": 0.523044851045322
+        "value": 0.011497858581060338
     },
     "random-circle-color-b": {
         "type": "generic",
