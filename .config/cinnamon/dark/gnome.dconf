@@ -104,7 +104,7 @@ notify-window-paned-position=73
 notify-window-width=533
 notify-window-x=0
 notify-window-y=0
-reminders-past=@as []
+reminders-past=['a4f1c956304aff27bcdca266d4eb90271658ccc1\n92420f352516298ef1f4ec445503644cc631d8e4\n1602925200\n1603065600\n1603152000\nBEGIN:VEVENT\r\nDTSTART;VALUE=DATE:20201019\r\nDTEND;VALUE=DATE:20201020\r\nDTSTAMP:20201002T073818Z\r\nUID:9C046F93-AA26-4DEC-8724-09B0DE49A7EA\r\nCREATED:20201002T073818Z\r\nX-LIC-ERROR;X-LIC-ERRORTYPE=VALUE-PARSE-ERROR:No value for DESCRIPTION \r\n property. Removing entire property:\r\nLAST-MODIFIED:20201002T073818Z\r\nX-LIC-ERROR;X-LIC-ERRORTYPE=VALUE-PARSE-ERROR:No value for LOCATION \r\n property. Removing entire property:\r\nSEQUENCE:0\r\nSTATUS:CONFIRMED\r\nSUMMARY:PE B2 acaba\r\nTRANSP:OPAQUE\r\nX-EVOLUTION-CALDAV-ETAG:63737307498\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:This is an event reminder\r\nTRIGGER:-P1DT15H\r\nX-EVOLUTION-ALARM-UID:92420f352516298ef1f4ec445503644cc631d8e4\r\nEND:VALARM\r\nEND:VEVENT\r\n']
 
 [file-roller/dialogs/extract]
 recreate-folders=true
@@ -336,7 +336,36 @@ first-run=false
 [terminal/legacy]
 default-show-menubar=false
 
+[terminal/legacy/profiles:]
+list=['5e9777be-fa9a-4bd8-80e1-f2e09dda0023', 'b231088a-bd42-4891-ad7e-b310c1e2b211']
+
+[terminal/legacy/profiles:/:5e9777be-fa9a-4bd8-80e1-f2e09dda0023]
+background-color='#f3f3f3'
+bold-color='#4d4d4c'
+bold-color-same-as-fg=true
+font='UbuntuMono Nerd Font Mono 1'
+foreground-color='#4d4d4c'
+palette='#f3f3f3:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#d0d0d0:#808080:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#262626'
+scrollbar-policy='never'
+use-system-font=false
+use-theme-background=false
+use-theme-colors=false
+visible-name='Base 16 PaperColor-Light Light'
+
 [terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9]
 font='UbuntuMono Nerd Font Mono 1'
 scrollbar-policy='never'
 use-system-font=false
+
+[terminal/legacy/profiles:/:b231088a-bd42-4891-ad7e-b310c1e2b211]
+background-color='#f3f3f3'
+bold-color='#4d4d4c'
+bold-color-same-as-fg=true
+font='UbuntuMono Nerd Font Mono 1'
+foreground-color='#4d4d4c'
+palette='#f3f3f3:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#d0d0d0:#808080:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#262626'
+scrollbar-policy='never'
+use-system-font=false
+use-theme-background=false
+use-theme-colors=false
+visible-name='Base 16 PaperColor-Light Light'
