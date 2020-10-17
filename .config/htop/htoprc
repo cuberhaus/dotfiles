@@ -25,5 +25,5 @@ enable_mouse=1
 delay=15
 left_meters=LeftCPUs Memory Swap
 left_meter_modes=1 1 1
-right_meters=RightCPUs Tasks LoadAverage Uptime
-right_meter_modes=1 2 2 2
+right_meters=RightCPUs Tasks Uptime
+right_meter_modes=1 2 2
