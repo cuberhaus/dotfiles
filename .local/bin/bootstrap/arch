@@ -64,7 +64,6 @@ arch_install () {
     sudo pacman -S audacity              # Audio editor
     sudo pacman -S discord
     sudo pacman -S xorg-xinit            # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
-    #sudo pacman -S code                  # Visual code (settings sync plugin req.) ### USE REAL VISUAL STUDIO NOT THIS
     sudo pacman -S yarn                  # Package installer
     sudo pacman -S texstudio             # Latex text editor
     sudo pacman -S file-roller           # Archive Manager
@@ -84,6 +83,7 @@ arch_install () {
     #sudo pacman -S qbittorrent           # Torrent Downloader
     sudo pacman -S r                    # Probabilitat i estadística
     yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
+    #sudo pacman -S code                  # Visual code (settings sync plugin req.) ### USE REAL VISUAL STUDIO NOT THIS
     yay -S visual-studio-code-bin       # Microsoft's Visual Code
     yay -S birdtray                     # Thunderbird tray
     yay -S whatsapp-nativefier          # Whatsapp client
@@ -179,6 +179,11 @@ arch_install () {
     sudo pacman -S nm-connection-editor
     # Applet
     sudo pacman -S nm-applet
+
+    # Arduino
+    usermod -aG uucp,lock pol
+    sudo pacman -S arduino-avr-core
+    sudo pacman -S arduino
 }
 yay_install() {
     cd ~/
