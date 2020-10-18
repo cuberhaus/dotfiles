@@ -8,4 +8,4 @@ dconf load /org/nemo/ < ~/.config/cinnamon/light/nemo.dconf
 dconf load /org/gtk/ < ~/.config/cinnamon/light/gtk.dconf
 dconf load /org/gnome/ < ~/.config/cinnamon/light/gnome.dconf
 
-#base16_one-light
+base16_atelier-cave-light
