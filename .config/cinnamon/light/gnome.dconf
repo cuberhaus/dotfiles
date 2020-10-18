@@ -9,6 +9,11 @@ window-size=[632, 993]
 [books]
 window-maximized=true
 
+[boxes]
+first-run=false
+view='icon-view'
+window-maximized=true
+
 [calculator]
 accuracy=9
 angle-units='degrees'
@@ -93,6 +98,14 @@ sort-order=['org.gnome.Contacts.desktop', 'org.gnome.Documents.desktop', 'org.gn
 
 [desktop/wm/preferences]
 button-layout='icon:minimize,maximize,close'
+
+[epiphany]
+ask-for-default=false
+
+[epiphany/state]
+is-maximized=false
+window-position=(-1, -1)
+window-size=(1024, 768)
 
 [evolution-data-server]
 migrated=true

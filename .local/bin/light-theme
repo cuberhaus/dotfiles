@@ -8,4 +8,7 @@ dconf load /org/nemo/ < ~/.config/cinnamon/light/nemo.dconf
 dconf load /org/gtk/ < ~/.config/cinnamon/light/gtk.dconf
 dconf load /org/gnome/ < ~/.config/cinnamon/light/gnome.dconf
 
-base16_atelier-cave-light
+# Change folder colors to teal
+papirus-folders -C green --theme Papirus-Dark
+# Change termian color to a light one, similar to base16_classic-light
+base16_mexico-light

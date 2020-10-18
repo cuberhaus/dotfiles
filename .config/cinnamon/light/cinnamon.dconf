@@ -56,8 +56,8 @@ image-source='xml:///usr/share/gnome-background-properties/linuxmint-ulyana.xml'
 [desktop/interface]
 cursor-blink-time=1200
 font-name='Verdana 11'
-gtk-theme='Arc-Lighter'
-icon-theme='Papirus-Dark'
+gtk-theme='Mint-Y'
+icon-theme='Papirus-Light'
 scaling-factor=uint32 0
 text-scaling-factor=1.0
 toolkit-accessibility=false
@@ -87,7 +87,7 @@ event-sounds=false
 
 [desktop/wm/preferences]
 resize-with-right-button=true
-theme='Arc-Lighter'
+theme='Mint-Y'
 titlebar-font='Verdana Bold 12'
 
 [muffin]
@@ -113,5 +113,5 @@ login-enabled=true
 map-enabled=false
 
 [theme]
-name='Arc'
+name='Mint-Y'
 theme-cache-updated=1602113200
