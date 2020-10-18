@@ -10,5 +10,6 @@ dconf load /org/gnome/ < ~/.config/cinnamon/light/gnome.dconf
 
 # Change folder colors to teal
 papirus-folders -C green --theme Papirus-Dark
-# Change termian color to a light one, similar to base16_classic-light
-base16_mexico-light
+# Change termian color to a light one, similar to 
+base16_classic-light
+#base16_mexico-light
