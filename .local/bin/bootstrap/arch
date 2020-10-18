@@ -291,6 +291,7 @@ if [[ $FirstRun == y || $FirstRun == Y ]]; then
 fi
 sudo pacman -Syu # Update
 arch_install
+wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
 i3_install
 cinnamon_install
 if [[ $FirstRun == y || $FirstRun == Y ]]; then
