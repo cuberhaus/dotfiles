@@ -28,6 +28,7 @@ selection-menu-make-link=true
 [window-state]
 geometry='1117x551+392+242'
 maximized=false
+my-computer-expanded=true
 side-pane-view='places'
 sidebar-bookmark-breakpoint=1
 sidebar-width=171
