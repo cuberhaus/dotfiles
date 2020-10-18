@@ -25,6 +25,7 @@ alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
 
 # Use NeoVim
 alias vim="nvim"
+alias lvim="nvim +'call Light()' "
 
 # Easier navigation: .., ..., ...., ....., ~ and -
 alias ..="cd .."
