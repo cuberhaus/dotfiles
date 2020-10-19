@@ -4,7 +4,7 @@
         "pages": [
             "providers",
             "presentation-section",
-            "units-section",
+            "units-page",
             "info-section"
         ],
         "providers": {
@@ -23,11 +23,11 @@
                 "presentation"
             ]
         },
-        "units-section": {
+        "units-page": {
             "type": "page",
             "title": "Units, Icons and Keys",
             "sections": [
-                "units",
+                "units-section",
                 "icons",
                 "keybindings"
             ]
@@ -40,37 +40,6 @@
                 "location-info",
                 "more-info",
                 "submit-issue"
-            ]
-        },
-        "submit-issue": {
-            "type": "section",
-            "title": "Report an issue",
-            "keys": [
-                "issue-reporting-explanation",
-                "submitIssue",
-                "maintainer"
-            ]
-        },
-        "provider-info": {
-            "type": "section",
-            "title": "How to choose a weather provider",
-            "keys": [
-                "provider-explanation"
-            ]
-        },
-        "location-info": {
-            "type": "section",
-            "title": "Allowed location formats",
-            "keys": [
-                "loc-info"
-            ]
-        },
-        "more-info": {
-            "type": "section",
-            "title": "View additional information",
-            "keys": [
-                "more-info-label",
-                "getLocation"
             ]
         },
         "provider-options": {
@@ -88,21 +57,12 @@
                 "forecastHours"
             ]
         },
-        "units": {
+        "weather-conditions": {
             "type": "section",
-            "title": "Units",
+            "title": "Weather conditions",
             "keys": [
-                "temperatureUnit",
-                "windSpeedUnit",
-                "pressureUnit",
-                "distanceUnit"
-            ]
-        },
-        "keybindings": {
-            "type": "section",
-            "title": "Keybindings",
-            "keys": [
-                "keybinding"
+                "translateCondition",
+                "shortConditions"
             ]
         },
         "panel-options": {
@@ -128,12 +88,14 @@
                 "locationLabelOverride"
             ]
         },
-        "weather-conditions": {
+        "units-section": {
             "type": "section",
-            "title": "Weather conditions",
+            "title": "Units",
             "keys": [
-                "translateCondition",
-                "shortConditions"
+                "temperatureUnit",
+                "windSpeedUnit",
+                "pressureUnit",
+                "distanceUnit"
             ]
         },
         "icons": {
@@ -143,6 +105,44 @@
                 "useSymbolicIcons",
                 "useCustomMenuIcons",
                 "useCustomAppletIcons"
+            ]
+        },
+        "keybindings": {
+            "type": "section",
+            "title": "Keybindings",
+            "keys": [
+                "keybinding"
+            ]
+        },
+        "provider-info": {
+            "type": "section",
+            "title": "How to choose a weather provider",
+            "keys": [
+                "provider-explanation"
+            ]
+        },
+        "location-info": {
+            "type": "section",
+            "title": "Allowed location formats",
+            "keys": [
+                "loc-info"
+            ]
+        },
+        "more-info": {
+            "type": "section",
+            "title": "View additional information",
+            "keys": [
+                "more-info-label",
+                "getLocation"
+            ]
+        },
+        "submit-issue": {
+            "type": "section",
+            "title": "Report an issue",
+            "keys": [
+                "issue-reporting-explanation",
+                "submitIssue",
+                "maintainer"
             ]
         }
     },
@@ -390,7 +390,7 @@
     },
     "useSymbolicIcons": {
         "type": "checkbox",
-        "default": false,
+        "default": true,
         "tooltip": "Does not apply to custom iconset, that is symbolic by default",
         "description": "Use symbolic icons throughout the applet",
         "value": false
@@ -429,5 +429,5 @@
         "type": "label",
         "description": "Your location in most cases work automatically but you can enter it manually by coordinates 'Latitude,Longitude' (e.g. 51.5085,-0.1257) or use 'City,Country-code' (e.g. London,UK) or try to enter {House number} {Street} {City/Town} {Postcode} {Country}. The search algorithm is very flexible with the format. After 3 seconds without typing the address you entered is replaced automatically for validating your choice."
     },
-    "__md5__": "f9d73591abb5742dfb86c8b18c5cf532"
+    "__md5__": "9d3a79cf785a4d458d60bcb0964c7a7b"
 }
