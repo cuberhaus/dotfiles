@@ -80,23 +80,32 @@ git gc --aggressive --prune=all     # remove the old files
 ```
 rclone sync SOURCEDIRECTORY drive:DIRECTORYBEINGCOPIEDTO
 ```
+
 #### To sync a folder to a remote
+
 > folder = remote
 ```
 rclone sync drive:DIRECTORYBEINGCOPIEDTO SOURCEDIRECTORY 
 ```
+
 #### Quota about a remote:
+
 ```
 rclone about drive:
 ```
+
 #### To list remotes:
-```
-rclone listremotes
 
 ```
+rclone listremotes
+```
+
 #### Flags
+
 - -P Shows progress in real time
+
 # ![Arch icon][Arch_icon] Arch
+
 ## Pacman
 
 Print all environment variables:
@@ -123,7 +132,9 @@ Remove cache:
 ```
 yay -Sc
 ```
+
 ## Usb
+
 Remove Usb safely: 
 
 _Option 1_:
@@ -202,45 +213,60 @@ chgrp $group $file
 ```
 
 ## Disk Partition
+
 Use cfdisk instead of fdisk
 ```
 cfdisk
 ```
+
 ## Pacstrap:
+
 ```
 pacstrap /mnt base linux linux-firmware man-db man-pages texinfo vim sudo
 ```
 
 # ![Mac][MacOS_icon] MacOS
+
 ## Brew
+
 #### Fix brew
+
 ```
 brew doctor
 ```
+
 #### Update
+
 ```
 brew update
 brew upgrade
 ```
 
 # ![Ubuntu][Ubuntu_icon] Ubuntu
+
 #### Update
+
 ```
 sudo apt-get update
 sudo apt-get full-upgrade
 ```
+
 #### CleanUp
+
 ```
 sudo apt-get autoclean
 sudo apt-get clean
 sudo apt-get autoremove
 ```
+
 #### Print out manually installed packages
+
 ```
 comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)
 ```
 
 ## ![GNU icon][GNU icon] Stow 
+
 #### Adding files to stow symlink:
 
 1. Create files with the same name of those we want to add to the repo
@@ -256,7 +282,9 @@ comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-
     stow --adopt -nvt ~ dotfiles/ 
 
     ```
+
 #### Flags: 
+
 * -n Do nothing, just to see the effects of the command beforehand
 * -v Verbose 
 * -t Target folder where links will be created "~"
@@ -274,15 +302,20 @@ stow -nvt ~ dotfiles/
 ```
 
 ## ![SSH icon2][SSH icon2] SSH
+
 [Github](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
+
 #### Create the key
+
 ```
 ssh-keygen -t rsa -b 2048 -C "some name"
 ```
+
 #### Open the program that holds private keys and then add the key
 
 Do not add the .pub (public key)  
 [Source](https://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent)
+
 ```
 eval `ssh-agent -s`
 ssh-add KEYFILE
