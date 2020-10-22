@@ -35,8 +35,14 @@ window-maximized=true
 window-position=(0, 0)
 window-size=(1920, 1015)
 
+[charmap]
+last-char=uint32 229
+
+[charmap/window-state]
+size=(1080, 585)
+
 [control-center]
-last-panel='online-accounts'
+last-panel='universal-access'
 
 [desktop/a11y/applications]
 screen-keyboard-enabled=false
@@ -140,6 +146,27 @@ sidebar-width=200
 window-height=997
 window-width=960
 
+[gedit/plugins]
+active-plugins=['docinfo', 'modelines', 'sort', 'filebrowser', 'spell']
+
+[gedit/plugins/filebrowser]
+root='file:///'
+tree-view=true
+virtual-root='file:///home/pol/Downloads'
+
+[gedit/preferences/editor]
+wrap-last-split-mode='word'
+
+[gedit/preferences/ui]
+show-tabs-mode='auto'
+
+[gedit/state/window]
+bottom-panel-size=140
+side-panel-active-page='GeditWindowDocumentsPanel'
+side-panel-size=200
+size=(900, 700)
+state=87168
+
 [gnome-panel/layout]
 object-id-list=['menu-bar', 'clock', 'notification-area', 'show-destkop', 'user-menu', 'window-list', 'workspace-switcher']
 toplevel-id-list=['top-panel', 'bottom-panel']
@@ -233,7 +260,14 @@ col-6-width=0
 load-extra-items=false
 
 [libgnomekbd/keyboard]
+layouts=['us\tintl', 'us']
 options=['caps\tcaps:swapescape']
+
+[libgnomekbd/preview]
+height=605
+width=1464
+x=240
+y=135
 
 [meld]
 wrap-mode='none'
@@ -343,7 +377,7 @@ locations=@av []
 locations=@av []
 
 [software]
-check-timestamp=int64 1602735368
+check-timestamp=int64 1603340136
 first-run=false
 
 [terminal/legacy]
