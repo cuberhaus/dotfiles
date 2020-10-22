@@ -154,7 +154,8 @@
             "type": "section",
             "title": "Display",
             "keys": [
-                "general_hide"
+                "general_hide",
+                "tooltip_max_width_screen_percentage"
             ]
         }
     },
@@ -562,10 +563,21 @@
         "tooltip": "By checking this box, as long as nothing is to report the icon of Spices Update does not appear on the panel.",
         "value": false
     },
+    "tooltip_max_width_screen_percentage": {
+        "type": "scale",
+        "default": 25,
+        "min": 20,
+        "max": 80,
+        "step": 1,
+        "units": "% of screen width",
+        "description": "Tooltip: Maximum width",
+        "tooltip": "What is the maximum percentage of your screen width that the tooltip can occupy?",
+        "value": 25
+    },
     "first_time": {
         "type": "generic",
         "value": false,
         "default": true
     },
-    "__md5__": "dfe7a123061a52010e563a8256217c1e"
+    "__md5__": "e72454e4803f8ca77f49b6a48ff9ec28"
 }

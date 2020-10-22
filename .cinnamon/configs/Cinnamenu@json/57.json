@@ -179,7 +179,7 @@
         "description": "Custom menu height",
         "tooltip": "Custom menu height",
         "dependency": "enable-custom-menu-height",
-        "value": 650.0
+        "value": 650
     },
     "apps-grid-column-count": {
         "type": "spinbutton",
@@ -202,7 +202,7 @@
     "enable-bookmarks": {
         "type": "checkbox",
         "default": false,
-        "description": "Show web bookmarks",
+        "description": "Show Chrome/Chromium bookmarks",
         "tooltip": "Show your browser's web bookmarks in the menu",
         "value": false
     },
@@ -244,7 +244,7 @@
         "step": 50,
         "units": "milliseconds",
         "description": "Menu hover delay",
-        "value": 0.0
+        "value": 50
     },
     "enable-animation": {
         "type": "checkbox",
@@ -328,7 +328,7 @@
         "units": "pixels",
         "description": "Category icon size",
         "tooltip": "Category icon size",
-        "value": 24.0
+        "value": 24
     },
     "apps-list-icon-size": {
         "indent": true,
@@ -340,7 +340,7 @@
         "units": "pixels",
         "description": "Applications list icon size",
         "tooltip": "Applications list icon size",
-        "value": 24.0
+        "value": 24
     },
     "apps-grid-icon-size": {
         "indent": true,
@@ -352,7 +352,7 @@
         "units": "pixels",
         "description": "Applications grid icon size",
         "tooltip": "Applications grid icon size",
-        "value": 55.0
+        "value": 55
     },
     "session-icon-size": {
         "indent": true,
@@ -364,7 +364,7 @@
         "units": "pixels",
         "description": "Session buttons icon size",
         "tooltip": "Session buttons icon size",
-        "value": 40.0
+        "value": 40
     },
     "use-box-style": {
         "type": "checkbox",
@@ -373,5 +373,5 @@
         "tooltip": "Use session buttons box style",
         "value": true
     },
-    "__md5__": "f650c46b09f0ffb4657927ab36cbc7bd"
+    "__md5__": "071b1eeaa40c6eff393e4bfe9dcf3dc7"
 }

@@ -55,6 +55,7 @@ arch_install () {
     sudo pacman -S w3m                   # Preview images on ranger
 
     # GUI
+    sudo pacman -S gucharmap             # Characters keyboard
     sudo pacman -S gparted               # Manage partitions
     sudo pacman -S gnome-calculator      # Calculator
     sudo pacman -S remmina               # Remote conexions
