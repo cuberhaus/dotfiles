@@ -100,11 +100,12 @@ endif
 call plug#begin('~/.vim/plugged')
 " Plugins, make sure you use single quotes
 call plug#begin()
+Plug 'ryanoasis/vim-devicons'
 Plug 'easymotion/vim-easymotion'
 Plug 'jiangmiao/auto-pairs'
 Plug 'NLKNguyen/papercolor-theme'
-Plug 'mattn/emmet-vim'
-Plug 'morhetz/gruvbox'
+"Plug 'mattn/emmet-vim'
+"Plug 'morhetz/gruvbox'
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
@@ -115,8 +116,8 @@ Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
 Plug 'amix/vim-zenroom2'
 Plug 'chriskempson/base16-vim'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
+"Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+"Plug 'junegunn/fzf.vim'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'junegunn/goyo.vim'
 Plug 'maxbrunsfeld/vim-yankstack'
@@ -381,9 +382,10 @@ map <leader>o :BufExplorer<cr>
 
 " Ctrlp Quickly find and open a file in the current working directory
 let g:ctrlp_map = '<C-f>'
+let g:ctrlp_cmd = 'CtrlP'
 
 " FZF
-map <leader>f :Files ~/<cr>
+"map <leader>f :Files ~/<cr>
 
 " Vimroom
 nnoremap <silent> <leader>z :Goyo<cr>
