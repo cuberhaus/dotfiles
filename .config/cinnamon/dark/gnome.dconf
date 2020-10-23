@@ -123,7 +123,7 @@ notify-window-paned-position=73
 notify-window-width=533
 notify-window-x=0
 notify-window-y=0
-reminders-past=['a4f1c956304aff27bcdca266d4eb90271658ccc1\n92420f352516298ef1f4ec445503644cc631d8e4\n1602925200\n1603065600\n1603152000\nBEGIN:VEVENT\r\nDTSTART;VALUE=DATE:20201019\r\nDTEND;VALUE=DATE:20201020\r\nDTSTAMP:20201002T073818Z\r\nUID:9C046F93-AA26-4DEC-8724-09B0DE49A7EA\r\nCREATED:20201002T073818Z\r\nX-LIC-ERROR;X-LIC-ERRORTYPE=VALUE-PARSE-ERROR:No value for DESCRIPTION \r\n property. Removing entire property:\r\nLAST-MODIFIED:20201002T073818Z\r\nX-LIC-ERROR;X-LIC-ERRORTYPE=VALUE-PARSE-ERROR:No value for LOCATION \r\n property. Removing entire property:\r\nSEQUENCE:0\r\nSTATUS:CONFIRMED\r\nSUMMARY:PE B2 acaba\r\nTRANSP:OPAQUE\r\nX-EVOLUTION-CALDAV-ETAG:63737307498\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:This is an event reminder\r\nTRIGGER:-P1DT15H\r\nX-EVOLUTION-ALARM-UID:92420f352516298ef1f4ec445503644cc631d8e4\r\nEND:VALARM\r\nEND:VEVENT\r\n']
+reminders-past=@as []
 
 [file-roller/dialogs/extract]
 recreate-folders=true
@@ -260,7 +260,7 @@ col-6-width=0
 load-extra-items=false
 
 [libgnomekbd/keyboard]
-layouts=['us\tintl', 'es\twinkeys']
+layouts=['us', 'us\talt-intl']
 options=['caps\tcaps:swapescape', 'grp\tgrp:shift_caps_toggle']
 
 [libgnomekbd/preview]
@@ -377,7 +377,7 @@ locations=@av []
 locations=@av []
 
 [software]
-check-timestamp=int64 1603340136
+check-timestamp=int64 1603458428
 first-run=false
 
 [terminal/legacy]
