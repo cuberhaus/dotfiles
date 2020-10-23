@@ -260,8 +260,8 @@ col-6-width=0
 load-extra-items=false
 
 [libgnomekbd/keyboard]
-layouts=['us\tintl', 'us']
-options=['caps\tcaps:swapescape']
+layouts=['us\tintl', 'es\twinkeys']
+options=['caps\tcaps:swapescape', 'grp\tgrp:shift_caps_toggle']
 
 [libgnomekbd/preview]
 height=605
