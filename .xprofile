@@ -3,6 +3,9 @@
 # If you use startx/xinit like a Chad, this file will also be sourced.
 [[ -f ~/.zshenv ]] && source ~/.zshenv
 
+# altgr to type á
+setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+
 # Has to go before i3 for some stupid reason?
 # Screensavers
 if [[ "$DESKTOP_SESSION" == "i3" ]]; then
