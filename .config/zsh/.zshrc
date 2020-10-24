@@ -143,11 +143,13 @@ pfetch
 #  exec tmux attach
 #fi
 
+# zsh-completions
+fpath=(.config/zsh/zsh-completions/src $fpath)
 # Autojump
 [[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
 # Accept suggestion ctrl+space
 bindkey '^ ' autosuggest-accept
-# This one is a submodule
+# zsh-autosuggestions
 source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh 
 # Syntax highlight
 source ~/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
