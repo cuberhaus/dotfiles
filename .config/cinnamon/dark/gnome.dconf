@@ -260,8 +260,8 @@ col-6-width=0
 load-extra-items=false
 
 [libgnomekbd/keyboard]
-layouts=['us', 'us\talt-intl']
-options=['caps\tcaps:swapescape', 'grp\tgrp:shift_caps_toggle']
+layouts=@as []
+options=@as []
 
 [libgnomekbd/preview]
 height=605
