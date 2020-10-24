@@ -103,9 +103,6 @@ bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
 autoload edit-command-line; zle -N edit-command-line
 bindkey '^e' edit-command-line
 
-bindkey -v
-export KEYTIMEOUT=1
-
 # Change cursor with support for inside/outside tmux
 function _set_cursor() {
     if [[ $TMUX = '' ]]; then
