@@ -3,8 +3,10 @@
 # If you use startx/xinit like a Chad, this file will also be sourced.
 [[ -f ~/.zshenv ]] && source ~/.zshenv
 
+if !laptop-detect ; then
 # altgr to type á
 setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+fi
 
 # Has to go before i3 for some stupid reason?
 # Screensavers

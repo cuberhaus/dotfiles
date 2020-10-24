@@ -12,7 +12,7 @@
 #   -> Alias
 #   -> Options	
 #   -> Runtime
-
+#
 ###############################################################
 
 # Info:
@@ -54,7 +54,17 @@ export UPDATE_ZSH_DAYS=7
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
-plugins=(git alias-finder sudo zsh_reload)
+plugins=(git 
+    systemd
+    alias-finder 
+    zsh_reload
+    archlinux
+    copyfile
+    command-not-found)
+# fuck
+# dirhistory // https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/dirhistory
+# copyfile <file> // copia un archivo al clipboard
+# command-not-found // Si no existe un comando da sugerencias
 ZSH_ALIAS_FINDER_AUTOMATIC=true
 source $ZSH/oh-my-zsh.sh
 
@@ -82,29 +92,9 @@ SAVEHIST=32768
 HISTFILE=~/.cache/zsh/history
 
 # vi mode
+# https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/vi-mode
 bindkey -v
 export KEYTIMEOUT=1
-
-## Change cursor shape for different vi modes.
-#function zle-keymap-select {
-#  if [[ ${KEYMAP} == vicmd ]] ||
-#     [[ $1 = 'block' ]]; then
-#    echo -ne '\e[1 q'
-#  elif [[ ${KEYMAP} == main ]] ||
-#       [[ ${KEYMAP} == viins ]] ||
-#       [[ ${KEYMAP} = '' ]] ||
-#       [[ $1 = 'beam' ]]; then
-#    echo -ne '\e[5 q'
-#  fi
-#}
-#zle -N zle-keymap-select
-#zle-line-init() {
-#    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
-#    echo -ne "\e[5 q"
-#}
-#zle -N zle-line-init
-#echo -ne '\e[5 q' # Use beam shape cursor on startup.
-#preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 
 # ctrl-f Search a file and cd into its directory
 bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
@@ -164,6 +154,3 @@ bindkey '^ ' autosuggest-accept
 source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh 
 # Syntax highlight
 source ~/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-## Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-#export PATH="$PATH:$HOME/.rvm/bin"
