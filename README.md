@@ -132,6 +132,15 @@ Remove cache:
 ```
 yay -Sc
 ```
+Identify which package owns a file
+```
+pacman -Qo /path/to/file
+```
+Pacman failed to commit transaction:
+[source](https://forum.manjaro.org/t/update-or-package-installation-returns-failed-to-commit-transaction-conflicting-files-filename-exists-in-filesystem/3598)
+```
+sudo pacman -S $PACKAGE --overwrite '*'
+```
 
 ## Usb
 
