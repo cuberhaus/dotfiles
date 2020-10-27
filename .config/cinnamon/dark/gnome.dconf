@@ -113,6 +113,12 @@ is-maximized=false
 window-position=(-1, -1)
 window-size=(1024, 768)
 
+[evince]
+document-directory=@ms 'file:///home/pol/Downloads'
+
+[evince/default]
+window-ratio=(1.0084033613445378, 0.71258907363420432)
+
 [evolution-data-server]
 migrated=true
 network-monitor-gio-name=''
@@ -377,7 +383,7 @@ locations=@av []
 locations=@av []
 
 [software]
-check-timestamp=int64 1603458428
+check-timestamp=int64 1603823880
 first-run=false
 
 [terminal/legacy]
