@@ -202,8 +202,8 @@
     "enable-bookmarks": {
         "type": "checkbox",
         "default": false,
-        "description": "Show Chrome/Chromium bookmarks",
-        "tooltip": "Show your browser's web bookmarks in the menu",
+        "description": "Show web bookmarks",
+        "tooltip": "Show your browser's web bookmarks in the menu.\nNote: Install package gir1.2-gda-5.0 to read firefox bookmarks.",
         "value": false
     },
     "privacy-settings-button": {
@@ -373,5 +373,5 @@
         "tooltip": "Use session buttons box style",
         "value": true
     },
-    "__md5__": "071b1eeaa40c6eff393e4bfe9dcf3dc7"
+    "__md5__": "2e357f404c431a1f648918236c9920c8"
 }
