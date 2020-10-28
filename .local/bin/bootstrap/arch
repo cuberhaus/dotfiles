@@ -21,6 +21,11 @@ arch_install () {
     sudo pacman -S nemo-share
 
     # Terminal
+    sudo pacman -S linux-lts
+    #sudo pacman -S linux-lts-headers
+    #sudo pacman -S linux-headers
+    sudo pacman -S nvidia-lts 
+    sudo pacman -S nvidia-dkms
     sudo pacman -S wget
     sudo pacman -S svn
     sudo pacman -S base-devel            # AUR
