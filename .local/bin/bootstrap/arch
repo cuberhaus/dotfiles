@@ -22,8 +22,8 @@ arch_install () {
 
     # Terminal
     sudo pacman -S linux-lts
-    #sudo pacman -S linux-lts-headers
-    #sudo pacman -S linux-headers
+    sudo pacman -S linux-lts-headers
+    sudo pacman -S linux-headers
     sudo pacman -S nvidia-lts 
     sudo pacman -S nvidia-dkms
     sudo pacman -S wget
