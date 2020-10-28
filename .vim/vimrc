@@ -514,7 +514,7 @@ endif
 map <leader>q :e ~/buffer<cr>
 
 " Toggle paste mode on and off
-map <leader>p :setlocal paste!<cr>
+map <leader>pp :setlocal paste!<cr>
 
 " Quickly open a markdown buffer for scribble
 "map <leader>pm :e ~/buffer.md<cr>
