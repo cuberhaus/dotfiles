@@ -164,7 +164,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 ### Arch
-if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro"]]; then
+if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
     alias o='nemo . > /dev/null 2>&1 &'
     alias update='sudo pacman -Syu'
     alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall'
