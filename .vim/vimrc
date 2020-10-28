@@ -443,12 +443,13 @@ map <leader>t<leader> :tabnext <cr>
 " Git Gutter
 "nmap [c <Plug>(GitGutterNextHunk)
 "nmap ]c <Plug>(GitGutterPrevHunk)
-nmap -c <Plug>(GitGutterNextHunk)
-nmap _c <Plug>(GitGutterPrevHunk)
+nmap -h <Plug>(GitGutterNextHunk)
+nmap _h <Plug>(GitGutterPrevHunk)
 nmap <leader>hp <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
-
+" :help updatetime 
+set updatetime=100
 "Press Enter to jump to the subject (topic) under the cursor.
 "Press Backspace to return from the last jump.
 "This breaks some stuff
