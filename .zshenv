@@ -79,6 +79,12 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     #xmodmap -e "keycode 66 = Escape NoSymbol Escape"
 fi 
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
+    export CPPFLAGS="-I/usr/local/opt/llvm/include"
+    PATH="/usr/local/opt/llvm/bin:$PATH"
+fi
+
 # Homebrew env variables
 if [[ "$DISTRO" == "ubuntu"* ]]; then
     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
