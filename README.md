@@ -413,7 +413,7 @@ git remote set-url origin https://hostname/USERNAME/REPOSITORY.git
 -   ![Gentoo_icon][gentoo_icon]Gentoo
 -   Openbox
 
-#### Other comments
+Other comments
 
 > In Unix-like operating systems, a device file or special file is an interface to a device driver that appears in a file system as if it were an ordinary file.  
 > On Linux they are in the /dev directory, according to the Filesystem Hierarchy Standard.
