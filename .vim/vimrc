@@ -106,6 +106,7 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'NLKNguyen/papercolor-theme'
 "Plug 'mattn/emmet-vim'
 "Plug 'morhetz/gruvbox'
+Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
@@ -442,11 +443,16 @@ map <leader>t<leader> :tabnext <cr>
 " Git Gutter
 "nmap [c <Plug>(GitGutterNextHunk)
 "nmap ]c <Plug>(GitGutterPrevHunk)
-nmap -c <Plug>(GitGutterNextHunk)
-nmap _c <Plug>(GitGutterPrevHunk)
+nmap -h <Plug>(GitGutterNextHunk)
+nmap _h <Plug>(GitGutterPrevHunk)
 nmap <leader>hp <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
+
+" :help updatetime 
+set updatetime=100
+
+" PlugInstall, PlugUpdate, PlugClean PlugUpgrade
 
 "Press Enter to jump to the subject (topic) under the cursor.
 "Press Backspace to return from the last jump.
@@ -513,7 +519,7 @@ endif
 map <leader>q :e ~/buffer<cr>
 
 " Toggle paste mode on and off
-map <leader>p :setlocal paste!<cr>
+map <leader>pp :setlocal paste!<cr>
 
 " Quickly open a markdown buffer for scribble
 "map <leader>pm :e ~/buffer.md<cr>

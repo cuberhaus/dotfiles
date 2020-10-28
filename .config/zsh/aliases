@@ -143,7 +143,8 @@ ex ()
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias update="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask; brew cleanup"
-    alias updateall="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask; brew cleanup; python3 -m pip install --user --upgrade pynvim; sudo gem update"
+    alias updateall="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask; brew cleanup; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall"
+    #sudo gem update;
     alias o='open . > /dev/null 2>&1 &'
     # Show active network interfaces
     alias ifactive="ifconfig | pcregrep -M -o '^[^\t:]+:([^\n]|\n\t)*status: active'"
@@ -163,10 +164,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 ### Arch
-if [[ "$DISTRO" == "arch" ]]; then
+if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
     alias o='nemo . > /dev/null 2>&1 &'
     alias update='sudo pacman -Syu'
-    alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim'
+    alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall'
     # sudo npm install -g npm; sudo gem update;
     #get fastest mirrors in your neighborhood
     alias mirror="sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist"
@@ -186,6 +187,6 @@ fi
 ### Ubuntu
 if [[ "$DISTRO" == "ubuntu" ]]; then
     alias o='nautilus . > /dev/null 2>&1 &'
-    alias update="sudo apt-get update; sudo apt-get full-upgrade; brew update; brew upgrade; sudo apt-get autoclean; sudo apt-get clean; sudo apt-get autoremove"
+    alias update="sudo apt-get update; sudo apt-get full-upgrade; brew update; brew upgrade; sudo apt-get autoclean; sudo apt-get clean; sudo apt-get autoremove; vim +PlugUpgrade +PlugUpdate +qall"
     alias tmux="tmux -f ~/.config/tmux/tmux.conf"
 fi

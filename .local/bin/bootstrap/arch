@@ -125,8 +125,8 @@ arch_install () {
     sudo pacman -S nvidia-settings       # Add force composition pipeline in nvidia-settings
 
     # Pdf viewer
-    sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
-
+    #sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
+    sudo pacman -S okular
     # Calendar
     sudo pacman -S gnome-calendar gnome-keyring libsecret seahorse
 
@@ -267,7 +267,7 @@ virtualbox_install() {
     sudo pacman -S virtualbox-host-modules-arch
 }
 games_install () {
-    sudo pacman -S steam 
+    sudo pacman -S steam
     sudo pacman -S lutris
     sudo pacman -S minecraft
 }
@@ -293,7 +293,7 @@ cd ~/
 # Distro variable
 if [[ $FirstRun == y || $FirstRun == Y ]]; then
     echo "#! /bin/sh
-    export DISTRO=arch" >> ~/.config/distro
+    export DISTRO=arch" > ~/.config/distro
 fi
 sudo pacman -Syu # Update
 arch_install

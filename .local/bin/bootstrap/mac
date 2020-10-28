@@ -19,6 +19,7 @@ mac_install () {
     mkdir ~/.cache/zsh
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
     touch ~/.hushlogin # Avoid terminal prompts
+
     ### Terminal stuff
     brew install rclone
     brew install exa                    # "ls" on steroids
@@ -36,9 +37,11 @@ mac_install () {
     brew install ranger w3m             # Ranger and previews
     brew install autojump               # Autojump obsolete?
     brew install ncdu                   # Storage manager
+
     ## Extract function
     brew install unrar
     brew install p7zip
+
     # Dependancies
     brew install ack
     brew install astyle
@@ -53,9 +56,11 @@ mac_install () {
     brew install ripgrep
     brew install sox
     brew install swig
+
     ### Terminal Font
     brew tap homebrew/cask-fonts
     brew cask install font-inconsolata-nerd-font # Change iTerm font to this one
+
     ### GUI Applications
     brew cask install dbeaver-community # BD
     brew install r                      # Probabilitat i estadística

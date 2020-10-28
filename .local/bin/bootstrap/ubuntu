@@ -7,45 +7,46 @@ ubuntu_minimal_install () {
     sudo apt-get update; sudo apt-get full-upgrade
     # System tools
     sudo apt-get install git build-essential file python3 python3-pip npm samba-common-bin fonts-powerline  curl gnome-screensaver arc-theme autoconf automake sassc optipng inkscape gnome-shell libgtk-3-dev pkg-config yarn nodejs
-    sudo apt-get install chromium-browser 	    # Web browser
+    sudo apt-get install chromium-browser       # Web browser
     sudo apt-get install texlive-full doxygen   # Doxygen
     sudo apt-get install ruby-dev
+
     # Terminal
     sudo apt-get install stow
-    sudo apt-get install subversion		        # To download repos
-    sudo apt-get install neovim		            # Neovim
+    sudo apt-get install subversion             # To download repos
+    sudo apt-get install neovim                 # Neovim
     sudo apt-get install zsh
-    sudo apt-get install htop			        # Show system resources
-    sudo apt-get install ranger w3m		        # Ranger
-    sudo apt-get install vim-gtk 		        # Vim with full functionality
+    sudo apt-get install htop                   # Show system resources
+    sudo apt-get install ranger w3m             # Ranger
+    sudo apt-get install vim-gtk                # Vim with full functionality
     sudo apt-get install silversearcher-ag      # Better and faster ack (and grep)
     sudo apt-get install fzf                    # Fuzzy finder
     sudo apt-get install bat                    # Better cat
+
     # Tmux
-    sudo apt-get install tmux  		            # Terminal multiplexer
-    # Manage storage 
-    sudo apt-get install ncdu 		            # Manage storage
-    # Apps	
-    sudo apt-get install thunderbird 		    # Email
-    sudo apt-get install transmission 	        # A simpler Torrent D.
-    sudo apt-get install timeshift 		        # Backups
-    sudo apt-get install gparted 		        # Manage partitions
-    sudo apt-get install vlc 			        # Media player
-    sudo apt-get install pavucontrol	    	# Audio
-    sudo apt-get install virtualbox-qt	        # Virtual machines
+    sudo apt-get install tmux                   # Terminal multiplexer
+    # Manage storage
+    sudo apt-get install ncdu                   # Manage storage
+
+    # Apps
+    sudo apt-get install thunderbird            # Email
+    sudo apt-get install transmission           # A simpler Torrent D.
+    sudo apt-get install timeshift              # Backups
+    sudo apt-get install gparted                # Manage partitions
+    sudo apt-get install vlc                    # Media player
+    sudo apt-get install pavucontrol            # Audio
+    sudo apt-get install virtualbox-qt          # Virtual machines
     sudo apt-get install cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
-    
+
     mkdir ~/.cache/vlc
-    # sudo pip3 install spotify-cli-linux	    # Spotify
-    sudo apt-get install LXAppearance		    # Theme
-    
+    # sudo pip3 install spotify-cli-linux       # Spotify
+    sudo apt-get install LXAppearance           # Theme
+
     sudo mkdir /var/lib/samba/usershares
     if [[ $FirstRun == y ]]; then
         sudo adduser `id -un` libvirt
         sudo adduser `id -un` kvm
-      
     fi
-  
 }
 
 brew_install () {
@@ -54,8 +55,8 @@ brew_install () {
     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
     brew update
     brew upgrade
-    brew install gcc patchelf graphviz 
-    brew install exa				             # "ls" on steroids
+    brew install gcc patchelf graphviz
+    brew install exa                             # "ls" on steroids
 }
 
 chrome_install () {
@@ -94,8 +95,8 @@ albert_install () {
 bloat_install () {
     brew install pipes-sh
     sudo apt-get install neofetch cmatrix
-    sudo apt-get install cowsay		            # A cow displaying text
-    sudo apt-get install fortune		        # Random quotes
+    sudo apt-get install cowsay                 # A cow displaying text
+    sudo apt-get install fortune                # Random quotes
 }
 
 i3_install () {
@@ -116,7 +117,7 @@ i3_install () {
 }
 
 emacs_install () {
-    sudo apt-get install emacs-gtk 
+    sudo apt-get install emacs-gtk
     # Doom
 
     # required dependencies
@@ -144,8 +145,8 @@ echo "Do you want to play Games? [y/n]"
 read Games
 
 if [[ $FirstRun == y ]]; then
-    echo "#! /bin/sh 
-export DISTRO=ubuntu" >> ~/.config/distro
+    echo "#! /bin/sh
+    export DISTRO=ubuntu" > ~/.config/distro
 fi
 
 # Start installation
@@ -178,34 +179,34 @@ options=(1 "Spotify" on
     6 "atom" off
     7 "slack" off
     8 "Android Studio" on)
-snap_choices=$("${snaps[@]}" "${options[@]}" 2>&1 >/dev/tty)
-clear
-for choice in $snap_choices
-do
-    case $choice in
-        1)
-            sudo snap install spotify
-            ;;
-        2)
-            sudo snap install discord
-            ;;
-        3)
-            sudo snap install walc
-            ;;
-        4)
-            sudo snap install ao
-            ;;
-        5)
-            sudo snap install android-studio --classic
-            ;;
-        6)
-            sudo snap install skype --classic
-            ;;
-        7)
-            sudo snap install atom --classic
-            ;;
-        8)
-            sudo snap install slack --classic
-            ;;
-    esac
-done
+    snap_choices=$("${snaps[@]}" "${options[@]}" 2>&1 >/dev/tty)
+    clear
+    for choice in $snap_choices
+    do
+        case $choice in
+            1)
+                sudo snap install spotify
+                ;;
+            2)
+                sudo snap install discord
+                ;;
+            3)
+                sudo snap install walc
+                ;;
+            4)
+                sudo snap install ao
+                ;;
+            5)
+                sudo snap install android-studio --classic
+                ;;
+            6)
+                sudo snap install skype --classic
+                ;;
+            7)
+                sudo snap install atom --classic
+                ;;
+            8)
+                sudo snap install slack --classic
+                ;;
+        esac
+    done

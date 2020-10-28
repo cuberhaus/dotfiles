@@ -27,7 +27,7 @@ echo "Do you want to install cinnamon desklets? [y/n]"
 read install
 if [[ $install == y ]]; then
     cd ~/.local/share/cinnamon/desklets
-        # Calendar
+    # Calendar
     wget https://cinnamon-spices.linuxmint.com/files/desklets/calendar@deeppradhan.zip
     ex calendar@deeppradhan.zip
     # Disk Space
