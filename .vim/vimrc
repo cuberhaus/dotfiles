@@ -106,6 +106,7 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'NLKNguyen/papercolor-theme'
 "Plug 'mattn/emmet-vim'
 "Plug 'morhetz/gruvbox'
+Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
