@@ -2,7 +2,7 @@
 
 BASE16_SHELL=$HOME/.config/base16-shell/
 [ -s $BASE16_SHELL/profile_helper.sh ] && \
-              eval "$($BASE16_SHELL/profile_helper.sh)"
+    eval "$($BASE16_SHELL/profile_helper.sh)"
 
 dconf load /org/cinnamon/ < ~/.config/cinnamon/dark/cinnamon.dconf
 dconf load /org/nemo/ < ~/.config/cinnamon/dark/nemo.dconf

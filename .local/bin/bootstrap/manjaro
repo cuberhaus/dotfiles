@@ -4,9 +4,9 @@ manjaro_install() {
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
     mkdir ~/.cache/zsh
     mkdir ~/.cache/vlc
-	# Terminal
+    # Terminal
     sudo pacman -S svn
-	sudo pacman -S base-devel
+    sudo pacman -S base-devel
     sudo pacman -S zsh                   # Zsh shell
     sudo pacman -S fortune-mod           # Random quote
     sudo pacman -S termite               # Terminal emulator
@@ -22,19 +22,19 @@ manjaro_install() {
     sudo pacman -S git python3 stow      # To deploy dotfiles and more
     sudo pacman -S github-cli            # Github from terminal, create issues...
     sudo pacman -S ruby
-    sudo pacman -S laptop-detect         # Detect if using a laptop 
+    sudo pacman -S laptop-detect         # Detect if using a laptop
     sudo pacman -S npm
     sudo pacman -S cmatrix               # Bloat
     sudo pacman -S reflector             # Update Arch mirrors
     sudo pacman -S dnsutils              # Ip
     sudo pacman -S net-tools             # Ips
-	sudo pacman -S ncdu                  # Manage storage
+    sudo pacman -S ncdu                  # Manage storage
     sudo pacman -S xclip                 # Clipboard
     sudo pacman -S ranger                # Ranger
     sudo pacman -S w3m                   # Preview images on ranger
 
-	# GUI
-	sudo pacman -S dbeaver				 # Base de dades
+    # GUI
+    sudo pacman -S dbeaver               # Base de dades
     sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"
     sudo pacman -S gimp                  # Image editor
     sudo pacman -S audacity              # Audio editor
@@ -45,13 +45,14 @@ manjaro_install() {
     sudo pacman -S file-roller           # Archive Manager
     sudo pacman -S thunderbird           # Email
     sudo pacman -S calibre               # Book manager
-	sudo pacman -S chromium
+    sudo pacman -S chromium
     sudo pacman -S transmission-gtk      # A simpler Torrent D.
     sudo pacman -S vlc                   # Media Player
     # IRC APPS
     sudo pacman -S hexchat               # Graphical
     # Pdf viewer
-    sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
+    #sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
+    sudo pacman -S okular
 }
 
 vim_install () {
@@ -75,9 +76,9 @@ yay_install() {
 }
 
 apps_AUR_install () {
-	# f5fpc -s -x -t https://upclink.upc.edu
-	# f5fpc --stop
-	yay -S f5fpc						# Connexio a UPClink
+    # f5fpc -s -x -t https://upclink.upc.edu
+    # f5fpc --stop
+    yay -S f5fpc                        # Connexio a UPClink
     sudo pacman -S r                    # Probabilitat i estadística
     yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
     # GUI
@@ -102,15 +103,15 @@ echo "Is it the first time you run this script? [y/n]"
 read FirstRun
 cd ~/
 if [[ $FirstRun == y ]]; then
-    echo "#! /bin/sh 
-export DISTRO=manjaro" >> ~/.config/distro
+    echo "#! /bin/sh
+    export DISTRO=manjaro" > ~/.config/distro
 fi
 cd ~/
 sudo pacman -Syu
 manjaro_install
 vim_install
 if [[ $FirstRun == y ]]; then
-	yay_install
-	apps_AUR_install
+    yay_install
+    apps_AUR_install
 fi
 
