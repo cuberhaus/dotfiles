@@ -190,7 +190,7 @@
         "units": "columns",
         "description": "Number of columns in apps grid",
         "tooltip": "Number of columns in apps grid",
-        "value": 3.0
+        "value": 4
     },
     "show-places": {
         "type": "switch",
