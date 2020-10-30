@@ -32,10 +32,13 @@ BASE16_SHELL="$HOME/.config/base16-shell/"
 # CONFIGURATION
 ADOTDIR=~/.config/antigen/
 ANTIGEN_CHECK_FILES=(~/.config/zsh/.zshrc)
+
 # START ANTIGEN
 source ~/.config/antigen/antigen.zsh
+
 # Load the oh-my-zsh's library.
 antigen use oh-my-zsh
+
 # Bundles from the default repo (robbyrussell's oh-my-zsh).
 antigen bundle systemd
 antigen bundle zsh_reload
@@ -43,16 +46,18 @@ antigen bundle archlinux
 antigen bundle copyfile
 antigen bundle command-not-found
 antigen bundle alias-finder 
-# Load the theme.
 
+# Load the theme.
 #antigen bundle mafredri/zsh-async # Pure
 #antigen bundle sindresorhus/pure # Pure
 #antigen theme denysdovhan/spaceship-prompt # Spaceship
+
 # Load bundles from external repos.
 antigen bundle zsh-users/zsh-completions
 antigen bundle zsh-users/zsh-autosuggestions
 antigen bundle zsh-users/zsh-syntax-highlighting
 antigen bundle zsh-users/zsh-history-substring-search # syntax first
+
 # Tell Antigen that you're done.
 antigen apply
 
