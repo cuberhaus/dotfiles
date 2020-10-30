@@ -44,7 +44,9 @@ antigen bundle copyfile
 antigen bundle command-not-found
 antigen bundle alias-finder 
 # Load the theme.
-antigen theme denysdovhan/spaceship-prompt
+antigen bundle mafredri/zsh-async
+antigen bundle sindresorhus/pure
+#antigen theme denysdovhan/spaceship-prompt
 # Load bundles from external repos.
 antigen bundle zsh-users/zsh-completions
 antigen bundle zsh-users/zsh-autosuggestions
