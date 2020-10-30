@@ -5,21 +5,16 @@
 #  |_|   \___/|_|   \____|
 #
 ###############################################################
+
 ###############################################################
 # Sections:
 #   -> Theme
 #   -> Oh My Zsh
-#   -> Alias
+#   -> Aliases
 #   -> Options	
 #   -> Runtime
 #
 ###############################################################
-
-# Info:
-# alias="" Is created during shell startup and won't change
-# alias='' Is created during runtime and will evaluate every time it's called
-# $RANDOM will generate a random number from 0 through 32767
-# array=('Element1' 'Element2')
 
 ###############################################################
 # => Theme
@@ -77,7 +72,7 @@ source ~/.config/powerlevel10k/powerlevel10k.zsh-theme
 [[ ! -f ~/.config/.p10k.zsh ]] || source ~/.config/.p10k.zsh
 
 ###############################################################
-# => Alias
+# => Aliases
 ###############################################################
 if [ -f $ZDOTDIR/aliases ]; then
     source $ZDOTDIR/aliases
@@ -145,11 +140,20 @@ pfetch
 
 # zsh-completions
 fpath=(.config/zsh/zsh-completions/src $fpath)
+
 # Autojump
 [[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
+
 # Accept suggestion ctrl+space
 bindkey '^ ' autosuggest-accept
+
 # zsh-autosuggestions
 source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh 
+
 # Syntax highlight
 source ~/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# History substring search  //Source syntax highlight first
+source ~/.config/oh-my-zsh/custom/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
