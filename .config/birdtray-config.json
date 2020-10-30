@@ -15,6 +15,7 @@
     "advanced/notificationfontmaxsize": 512,
     "advanced/notificationfontminsize": 4,
     "advanced/onlyShowIconOnUnreadMessages": false,
+    "advanced/runProcessOnChange": "",
     "advanced/tbcmdline": [
         "/usr/bin/thunderbird"
     ],
@@ -28,6 +29,7 @@
     "common/borderwidth": 0,
     "common/defaultcolor": "#73d216",
     "common/exitthunderbirdonquit": true,
+    "common/forceIgnoreUnreadEmailsOnMinimize": false,
     "common/hidewhenminimized": true,
     "common/hidewhenrestarted": true,
     "common/hidewhenstarted": true,
