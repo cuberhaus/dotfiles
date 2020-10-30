@@ -1,10 +1,3 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.config/zsh/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 #   ____       _     ____
 #  |  _ \ ___ | |   / ___|
 #  | |_) / _ \| |  | |
@@ -93,14 +86,12 @@ ZSH_ALIAS_FINDER_AUTOMATIC=true
 # => Powerlevel10k
 ###############################################################
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-#if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-#  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-#fi
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
 
-#source ~/.config/powerlevel10k/powerlevel10k.zsh-theme
-# It has to go here, cant go inside the repo
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-#[[ ! -f ~/.config/.p10k.zsh ]] || source ~/.config/.p10k.zsh
+[[ ! -f ~/.config/.p10k.zsh ]] || source ~/.config/.p10k.zsh
 
 ###############################################################
 # => Aliases
@@ -167,19 +158,14 @@ zle-line-init() { zle -K viins; _set_beam_cursor }
 ###############################################################
 # Accept suggestion ctrl+space
 bindkey '^ ' autosuggest-accept
-# Pfetch (fast neofetch)
-pfetch
 
 # Autojump
 [[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
+
+# Pfetch (fast neofetch)
+pfetch
 
 # Tmux
 #if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
 #  exec tmux attach
 #fi
-
-# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
-[[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
-
-# To customize prompt, run `p10k configure` or edit ~/dotfiles/dotfiles/.config/zsh/.p10k.zsh.
-[[ ! -f ~/dotfiles/dotfiles/.config/zsh/.p10k.zsh ]] || source ~/dotfiles/dotfiles/.config/zsh/.p10k.zsh
