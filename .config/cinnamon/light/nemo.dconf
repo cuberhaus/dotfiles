@@ -13,6 +13,8 @@ disabled-actions=['add-desklets.nemo_action']
 disabled-extensions=['NemoTerminalProvider+NemoPython', 'SeahorseNemo']
 
 [preferences]
+enable-delete=false
+last-server-connect-method=5
 show-computer-icon-toolbar=true
 show-hidden-files=true
 show-home-icon-toolbar=false
@@ -26,7 +28,7 @@ show-show-thumbnails-toolbar=false
 selection-menu-make-link=true
 
 [window-state]
-geometry='1117x550+694+185'
+geometry='1117x551+392+242'
 maximized=false
 my-computer-expanded=true
 side-pane-view='places'

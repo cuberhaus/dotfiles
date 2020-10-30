@@ -35,6 +35,12 @@ window-maximized=true
 window-position=(0, 0)
 window-size=(1920, 1015)
 
+[charmap]
+last-char=uint32 229
+
+[charmap/window-state]
+size=(1080, 585)
+
 [control-center]
 last-panel='universal-access'
 
@@ -107,6 +113,12 @@ is-maximized=false
 window-position=(-1, -1)
 window-size=(1024, 768)
 
+[evince]
+document-directory=@ms 'file:///home/pol/Downloads'
+
+[evince/default]
+window-ratio=(1.0084033613445378, 0.71258907363420432)
+
 [evolution-data-server]
 migrated=true
 network-monitor-gio-name=''
@@ -115,8 +127,8 @@ network-monitor-gio-name=''
 notify-window-height=155
 notify-window-paned-position=73
 notify-window-width=533
-notify-window-x=250
-notify-window-y=155
+notify-window-x=0
+notify-window-y=0
 reminders-past=@as []
 
 [file-roller/dialogs/extract]
@@ -139,6 +151,27 @@ sort-type='ascending'
 sidebar-width=200
 window-height=997
 window-width=960
+
+[gedit/plugins]
+active-plugins=['docinfo', 'modelines', 'sort', 'filebrowser', 'spell']
+
+[gedit/plugins/filebrowser]
+root='file:///'
+tree-view=true
+virtual-root='file:///home/pol/Downloads'
+
+[gedit/preferences/editor]
+wrap-last-split-mode='word'
+
+[gedit/preferences/ui]
+show-tabs-mode='auto'
+
+[gedit/state/window]
+bottom-panel-size=140
+side-panel-active-page='GeditWindowDocumentsPanel'
+side-panel-size=200
+size=(900, 700)
+state=87168
 
 [gnome-panel/layout]
 object-id-list=['menu-bar', 'clock', 'notification-area', 'show-destkop', 'user-menu', 'window-list', 'workspace-switcher']
@@ -233,7 +266,14 @@ col-6-width=0
 load-extra-items=false
 
 [libgnomekbd/keyboard]
+layouts=@as []
 options=['caps\tcaps:swapescape']
+
+[libgnomekbd/preview]
+height=605
+width=1464
+x=240
+y=135
 
 [meld]
 wrap-mode='none'
@@ -343,7 +383,7 @@ locations=@av []
 locations=@av []
 
 [software]
-check-timestamp=int64 1602735368
+check-timestamp=int64 1603823880
 first-run=false
 
 [terminal/legacy]

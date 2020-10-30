@@ -267,7 +267,7 @@ load-extra-items=false
 
 [libgnomekbd/keyboard]
 layouts=@as []
-options=@as []
+options=['caps\tcaps:swapescape']
 
 [libgnomekbd/preview]
 height=605
