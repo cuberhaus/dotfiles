@@ -27,15 +27,37 @@ BASE16_SHELL="$HOME/.config/base16-shell/"
         eval "$("$BASE16_SHELL/profile_helper.sh")"
 
 ###############################################################
+# => Antigen
+###############################################################
+# CONFIGURATION
+ADOTDIR=~/.config/antigen/
+ANTIGEN_CHECK_FILES=(~/.config/zsh/.zshrc)
+# START ANTIGEN
+source ~/.config/antigen/antigen.zsh
+# Load the oh-my-zsh's library.
+antigen use oh-my-zsh
+# Bundles from the default repo (robbyrussell's oh-my-zsh).
+antigen bundle systemd
+antigen bundle zsh_reload
+antigen bundle archlinux
+antigen bundle copyfile
+antigen bundle command-not-found
+antigen bundle alias-finder 
+# Load the theme.
+antigen theme denysdovhan/spaceship-prompt
+# Load bundles from external repos.
+antigen bundle zsh-users/zsh-completions
+antigen bundle zsh-users/zsh-autosuggestions
+antigen bundle zsh-users/zsh-syntax-highlighting
+antigen bundle zsh-users/zsh-history-substring-search # syntax first
+# Tell Antigen that you're done.
+antigen apply
+
+###############################################################
 # => Oh My Zsh
 ###############################################################
 # For more info: https://github.com/ohmyzsh/ohmyzsh/blob/master/templates/zshrc.zsh-template
 # https://github.com/romkatv/powerlevel10k
-
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -46,27 +68,20 @@ export UPDATE_ZSH_DAYS=7
 # Uncomment the following line to enable command auto-correction.
 #ENABLE_CORRECTION="true"
 
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-plugins=(git 
-    systemd
-    alias-finder 
-    zsh_reload
-    archlinux
-    copyfile
-    command-not-found)
-# fuck
 # dirhistory // https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/dirhistory
 # copyfile <file> // copia un archivo al clipboard
 # command-not-found // Si no existe un comando da sugerencias
 ZSH_ALIAS_FINDER_AUTOMATIC=true
-source $ZSH/oh-my-zsh.sh
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+###############################################################
+# => Powerlevel10k
+###############################################################
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+#if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+#  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+#fi
 
-source ~/.config/powerlevel10k/powerlevel10k.zsh-theme
+#source ~/.config/powerlevel10k/powerlevel10k.zsh-theme
 # It has to go here, cant go inside the repo
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.config/.p10k.zsh ]] || source ~/.config/.p10k.zsh
@@ -86,13 +101,24 @@ HISTSIZE=32768
 SAVEHIST=32768
 HISTFILE=~/.cache/zsh/history
 
-# vi mode
-# https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/vi-mode
-bindkey -v
-export KEYTIMEOUT=1
+# Accept suggestion ctrl+space
+bindkey '^ ' autosuggest-accept
+
+# History substring search
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
+
+#Don't show message
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 # ctrl-f Search a file and cd into its directory
 bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
+###############################################################
+# => Vim
+###############################################################
+# vi mode
+bindkey -v
+export KEYTIMEOUT=1
 
 # Edit line in vim with ctrl-e:
 autoload edit-command-line; zle -N edit-command-line
@@ -126,34 +152,13 @@ zle-line-init() { zle -K viins; _set_beam_cursor }
 ###############################################################
 # => Runtime
 ###############################################################
-
-#Don't show message
-typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
-
 # Pfetch (fast neofetch)
 pfetch
+
+# Autojump
+[[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
 
 # Tmux
 #if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
 #  exec tmux attach
 #fi
-
-# zsh-completions
-fpath=(.config/zsh/zsh-completions/src $fpath)
-
-# Autojump
-[[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
-
-# Accept suggestion ctrl+space
-bindkey '^ ' autosuggest-accept
-
-# zsh-autosuggestions
-source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh 
-
-# Syntax highlight
-source ~/.config/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-# History substring search  //Source syntax highlight first
-source ~/.config/oh-my-zsh/custom/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
-bindkey -M vicmd 'k' history-substring-search-up
-bindkey -M vicmd 'j' history-substring-search-down
