@@ -45,8 +45,8 @@ antigen bundle command-not-found
 antigen bundle alias-finder 
 # Load the theme.
 
-antigen bundle mafredri/zsh-async # Pure
-antigen bundle sindresorhus/pure # Pure
+#antigen bundle mafredri/zsh-async # Pure
+#antigen bundle sindresorhus/pure # Pure
 #antigen theme denysdovhan/spaceship-prompt # Spaceship
 # Load bundles from external repos.
 antigen bundle zsh-users/zsh-completions
@@ -80,11 +80,11 @@ ZSH_ALIAS_FINDER_AUTOMATIC=true
 # => Powerlevel10k
 ###############################################################
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-#if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-#  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-#fi
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
 
-#source ~/.config/powerlevel10k/powerlevel10k.zsh-theme
+source ~/.config/powerlevel10k/powerlevel10k.zsh-theme
 # It has to go here, cant go inside the repo
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.config/.p10k.zsh ]] || source ~/.config/.p10k.zsh
@@ -103,9 +103,6 @@ fi
 HISTSIZE=32768
 SAVEHIST=32768
 HISTFILE=~/.cache/zsh/history
-
-# Accept suggestion ctrl+space
-bindkey '^ ' autosuggest-accept
 
 # History substring search
 bindkey -M vicmd 'k' history-substring-search-up
@@ -155,6 +152,8 @@ zle-line-init() { zle -K viins; _set_beam_cursor }
 ###############################################################
 # => Runtime
 ###############################################################
+# Accept suggestion ctrl+space
+bindkey '^ ' autosuggest-accept
 # Pfetch (fast neofetch)
 pfetch
 
