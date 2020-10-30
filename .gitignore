@@ -3,7 +3,7 @@
 .config/antigen/init.zsh
 .config/antigen/init.zsh.zwc
 .config/antigen/bundles/
-.config/antigen/resources
+.config/antigen/.resources
 .config/antigen/.zcompdump
 .config/antigen/.zcompdump.zwc
 
