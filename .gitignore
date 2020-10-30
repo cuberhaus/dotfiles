@@ -3,9 +3,9 @@
 .config/antigen/init.zsh
 .config/antigen/init.zsh.zwc
 .config/antigen/bundles/
-.config/antigen/esources
-.config/antigen/zcompdump
-.config/antigen/zcompdump.zwc
+.config/antigen/resources
+.config/antigen/.zcompdump
+.config/antigen/.zcompdump.zwc
 
 .config/zsh/.zshrc.zwc
 .config/zsh/.zcompdump-Cuberhaus-5.8
