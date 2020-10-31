@@ -6,6 +6,7 @@
 .config/antigen/.resources
 .config/antigen/.zcompdump
 .config/antigen/.zcompdump.zwc
+.config/antigen/revert-info
 
 .config/zsh/.zshrc.zwc
 .config/zsh/.zcompdump-Cuberhaus-5.8
