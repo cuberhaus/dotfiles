@@ -76,7 +76,8 @@ arch_install () {
     sudo pacman -S xorg                  # Display server
     sudo pacman -S dunst                 # Notifications
     sudo pacman -S nomacs                # Image viewer
-    sudo pacman -S thunderbird           # Email
+    #sudo pacman -S thunderbird           # Email
+    yay -S thunderbird-bin               # Might have to manually enter PGP key
     sudo pacman -S calibre               # Book manager
     sudo pacman -S libreoffice-still     # Office
     yay -S google-chrome                 # Best web browser
