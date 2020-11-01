@@ -443,9 +443,9 @@ map <leader>t<leader> :tabnext <cr>
 " Git Gutter
 "nmap [c <Plug>(GitGutterNextHunk)
 "nmap ]c <Plug>(GitGutterPrevHunk)
-nmap -h <Plug>(GitGutterNextHunk)
-nmap _h <Plug>(GitGutterPrevHunk)
-nmap <leader>hp <Plug>(GitGutterPreviewHunk)
+nmap <leader>hn <Plug>(GitGutterNextHunk)
+nmap <leader>hp <Plug>(GitGutterPrevHunk)
+nmap <leader>hv <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
