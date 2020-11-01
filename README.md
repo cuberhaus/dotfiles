@@ -26,18 +26,15 @@ Update all submodules:
 git submodule update --recursive --remote
 ```
 
-Clone newly added submodules:
-
-[Source 1](https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules), [Source 2](https://stackoverflow.com/questions/38208748/how-do-i-clone-a-local-repo-with-submodules)
+Clone newly added submodules  
+_See:_ [1](https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules) and [2](https://stackoverflow.com/questions/38208748/how-do-i-clone-a-local-repo-with-submodules)
 
 ```
 git submodule sync
 git submodule update --init --recursive
 ```
 
-Move Submodule
-
-[Explanation](https://stackoverflow.com/questions/4604486/how-do-i-move-an-existing-git-submodule-within-a-git-repository)
+[Move Submodule](https://stackoverflow.com/questions/4604486/how-do-i-move-an-existing-git-submodule-within-a-git-repository)
 
 ```
 git mv old/submod new/submod
@@ -152,8 +149,7 @@ Identify which package owns a file
 pacman -Qo /path/to/file
 ```
 
-Pacman failed to commit transaction:
-[source](https://forum.manjaro.org/t/update-or-package-installation-returns-failed-to-commit-transaction-conflicting-files-filename-exists-in-filesystem/3598)
+[Pacman failed to commit transaction:](https://forum.manjaro.org/t/update-or-package-installation-returns-failed-to-commit-transaction-conflicting-files-filename-exists-in-filesystem/3598)
 
 ```
 sudo pacman -S $PACKAGE --overwrite '*'
@@ -285,8 +281,7 @@ pacstrap /mnt base linux linux-firmware man-db man-pages texinfo vim sudo
 
 ## GPG keys
 
-example:
-[source](https://www.reddit.com/r/linuxquestions/comments/9fxddu/please_help_me_resolve_aur_signing_key_issue/)
+Install a [key](https://www.reddit.com/r/linuxquestions/comments/9fxddu/please_help_me_resolve_aur_signing_key_issue/)
 
 ```
 gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys CB9387521E1EE0127DA804843FDBB55084CC5D84
@@ -404,27 +399,21 @@ stow -nvt ~ dotfiles/
 
 ## ![SSH icon2][ssh icon2] SSH
 
-[Github](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
-
-Create the key
+Create the [key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
 
 ```
 ssh-keygen -t rsa -b 2048 -C "some name"
 ```
 
-Open the program that holds private keys and then add the key
-
-Do not add the .pub (public key)  
-[Source](https://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent)
+[Open the program that holds private keys and then add the key](https://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent)  
+_Tip:_ Do not add the .pub (public key)
 
 ```
 eval `ssh-agent -s`
 ssh-add KEYFILE
 ```
 
-List remotes to see their protocol
-
-[Source](https://help.github.jp/enterprise/2.11/user/articles/changing-a-remote-s-url/)
+List [remotes](https://help.github.jp/enterprise/2.11/user/articles/changing-a-remote-s-url/) to see their protocol
 
 ```
 git remote -v
