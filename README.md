@@ -283,6 +283,13 @@ cfdisk
 pacstrap /mnt base linux linux-firmware man-db man-pages texinfo vim sudo
 ```
 
+## GPG keys
+example:
+[source](https://www.reddit.com/r/linuxquestions/comments/9fxddu/please_help_me_resolve_aur_signing_key_issue/)
+```
+gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys CB9387521E1EE0127DA804843FDBB55084CC5D84
+```
+
 # ![Mac][macos_icon] MacOS
 
 ## Brew
