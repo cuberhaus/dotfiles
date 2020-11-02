@@ -3,7 +3,7 @@ app_store_install() {
     brew install mas
     mas install 1444383602 # GoodNotes
     mas install 736189492 # Notability
-    mas install 1147396723 # WhatsApp
+    #mas install 1147396723 # WhatsApp
     mas install 497799835 # Xcode
     mas install 441258766 # Magnet
     mas install 1274495053 # Microsoft To Do
@@ -62,6 +62,7 @@ mac_install () {
     brew cask install font-inconsolata-nerd-font # Change iTerm font to this one
 
     ### GUI Applications
+    brew cask install whatsapp
     brew cask install dbeaver-community # BD
     brew install r                      # Probabilitat i estadística
     brew install rstudio                # Probabilitat i estadística IDE
