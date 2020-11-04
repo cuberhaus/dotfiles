@@ -73,6 +73,7 @@
                 "open-on-favorites",
                 "enable-autoscroll",
                 "web-search-option",
+                "emoji-search",
                 "enable-search-providers"
             ]
         },
@@ -190,7 +191,7 @@
         "units": "columns",
         "description": "Number of columns in apps grid",
         "tooltip": "Number of columns in apps grid",
-        "value": 4
+        "value": 3.0
     },
     "show-places": {
         "type": "switch",
@@ -288,6 +289,13 @@
         "tooltip": "Show an internet search option in search results",
         "value": 0
     },
+    "emoji-search": {
+        "type": "checkbox",
+        "default": true,
+        "description": "Enable emoji search",
+        "tooltip": "Show emojis in search results",
+        "value": false
+    },
     "enable-search-providers": {
         "type": "checkbox",
         "default": false,
@@ -373,5 +381,5 @@
         "tooltip": "Use session buttons box style",
         "value": true
     },
-    "__md5__": "2e357f404c431a1f648918236c9920c8"
+    "__md5__": "5c922f5ba1cf112c6786b6e233201e44"
 }
