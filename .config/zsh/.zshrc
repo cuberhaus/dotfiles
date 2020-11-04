@@ -101,6 +101,8 @@ fi
 # => Options
 ###############################################################
 
+eval $(thefuck --alias)
+
 # History in cache directory:
 HISTSIZE=32768
 SAVEHIST=32768

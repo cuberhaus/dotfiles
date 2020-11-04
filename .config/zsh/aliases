@@ -8,6 +8,8 @@
 # array=('Element1' 'Element2')
 ###############################################################
 
+alias fck="fuck"
+
 # Config Files
 alias arch="vim ~/.local/bin/bootstrap/arch"
 alias aliases="vim $ZDOTDIR/aliases"
