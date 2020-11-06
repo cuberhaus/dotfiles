@@ -287,6 +287,11 @@ Install a [key](https://www.reddit.com/r/linuxquestions/comments/9fxddu/please_h
 gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys CB9387521E1EE0127DA804843FDBB55084CC5D84
 ```
 
+- hkp://pgp.mit.edu:80
+- hkps://pgp.mit.edu
+- hkps://keyserver.ubuntu.com
+- hkp://p80.pool.sks-keyservers.net:80
+
 ### Jobs
 
 View all background jobs
