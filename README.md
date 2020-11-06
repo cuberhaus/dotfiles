@@ -84,7 +84,7 @@ To sync a folder to a remote
 > folder = remote
 
 ```bash
-rclone sync drive:DIRECTORYBEINGCOPIEDTO SOURCEDIRECTORY
+rclone sync drive:SOURCEDIRECTORY DIRECTORYBEINGCOPIEDTO 
 ```
 
 Quota about a remote:

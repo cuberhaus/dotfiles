@@ -21,6 +21,7 @@ arch_install () {
     sudo pacman -S nemo-share
 
     # Terminal
+    sudo pacman -S rclone
     sudo pacman -S thefuck
     sudo pacman -S wget
     sudo pacman -S svn
