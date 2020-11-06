@@ -101,7 +101,7 @@ rclone listremotes
 
 ### Flags
 
--   -P Shows progress in real time
+- -P Shows progress in real time
 
 ## ![Arch icon][arch_icon] Arch
 
@@ -366,10 +366,10 @@ Adding files to stow symlink:
 1.  Create files with the same name of those we want to add to the repo
     (_in ~/dotfiles/dotfiles_)
 
-        ```bash
-        mkdir folder_structure_that_contains_the_file     # skip if it's inside ~/
-        touch file_name
-        ```
+    ```bash
+    mkdir folder_structure_that_contains_the_file     # skip if it's inside ~/
+    touch file_name
+    ```
 
 2.  Move files with the same name than those we created with "touch" to our dotfiles folder replacing our "touch" files and create links that replace mgces from the home directory
 
@@ -380,10 +380,10 @@ Adding files to stow symlink:
 
 Flags:
 
--   -n Do nothing, just to see the effects of the command beforehand
--   -v Verbose
--   -t Target folder where links will be created "~"
--   --adopt Moves the existing files to the -d "destination" folder, without it, just links will be created
+- -n Do nothing, just to see the effects of the command beforehand
+- -v Verbose
+- -t Target folder where links will be created "~"
+- --adopt Moves the existing files to the -d "destination" folder, without it, just links will be created
 
 Cloning the repo and creating symlinks to the files
 
@@ -433,15 +433,15 @@ git remote set-url origin https://hostname/USERNAME/REPOSITORY.git
 
 ### WORKING
 
--   ![Arch_icon][arch_icon] Arch
--   ![Manjaro_icon][manjaro_icon] Manjaro
--   ![Ubuntu_icon][ubuntu_icon] Ubuntu
--   ![MacOS_icon][macos_icon] MacOS
+- ![Arch_icon][arch_icon] Arch
+- ![Manjaro_icon][manjaro_icon] Manjaro
+- ![Ubuntu_icon][ubuntu_icon] Ubuntu
+- ![MacOS_icon][macos_icon] MacOS
 
 ### WIP
 
--   ![Gentoo_icon][gentoo_icon]Gentoo
--   Openbox
+- ![Gentoo_icon][gentoo_icon]Gentoo
+- Openbox
 
 Other comments
 
