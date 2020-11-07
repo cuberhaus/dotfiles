@@ -87,6 +87,12 @@ To sync a folder to a remote
 rclone sync drive:SOURCEDIRECTORY DIRECTORYBEINGCOPIEDTO 
 ```
 
+Configure rclone:
+
+```bash
+rclone config
+```
+
 Quota about a remote:
 
 ```bash
