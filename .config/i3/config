@@ -13,7 +13,6 @@
 #
 # Should you change your keyboard layout some time, delete
 # this file and re-run i3-config-wizard(1).
-#
 
 # i3 config file (v4)
 #
@@ -109,9 +108,6 @@ mode "$mode_gaps_outer" {
 # Bindings to change to next and previous workspaces, based on vim keybindings
 bindsym $mod+p workspace prev
 bindsym $mod+n workspace next
-
-# Custom Rofi | change with ctrl tab
-bindsym $mod+d exec "rofi -modi window,drun,run -show drun -show-icons"
 
 # start a terminal
 bindsym $mod+Return exec termite
@@ -225,13 +221,16 @@ bindsym $mod+r mode "resize"
 bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3blocks
 bindsym --release Num_Lock  exec pkill -SIGRTMIN+11 i3blocks
 
-#bindsym $mod+shift+x exec i3lock
+# Custom Rofi | change with ctrl tab
+bindsym $mod+d exec "rofi -modi window,drun,run -show drun -show-icons"
 
 # Custom rofi
 #bindsym $mod+d exec "rofi -modi window,drun,run -show drun -sidebar-mode -terminal termite -color-window '#000000, #000000, #000000' -color-normal '#000000, #b3e774, #000000, #b3e774, #000000' -color-active '#000000, #b3e774, #000000, #b3e774, #000000' -color-urgent '#000000, #b3e774, #000000, #b3e774, #000000'"
 
 # focus the child container
-#bindsym $mod+d focus child
+bindsym $mod+c focus child
+
+#bindsym $mod+shift+x exec i3lock
 
 ###############################################################
 # => Workspaces
