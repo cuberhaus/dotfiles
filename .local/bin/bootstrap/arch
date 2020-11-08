@@ -255,6 +255,14 @@ cinnamon_install() {
 
     # Color pick applet
     sudo pacman -S python-numpy python-xlib
+
+    # Uninstall  xf86-video-intel
+    #https://wiki.archlinux.org/index.php/cinnamon
+
+    # To fix laggy animations
+    #https://www.reddit.com/r/linuxmint/comments/7v2jt6/laggy_cinnamon_animations/
+    # Edit animation time (0.05)/usr/share/cinnamon/js/ui/expo.js 
+    # and /usr/share/cinnamon/js/ui/overview.js
 }
 bloat_install () {
     sudo pacman -S lolcat
