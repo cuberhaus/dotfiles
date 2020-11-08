@@ -331,6 +331,7 @@ mode "$mode_system" {
 }
 
 bindsym $mod+Pause mode "$mode_system"
+
 ###############################################################
 # => Runtime
 ###############################################################
@@ -338,6 +339,10 @@ bindsym $mod+Pause mode "$mode_system"
 # xss-lock displays betterlockscreen when lid is closed
 exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &
 exec betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
+
+# NetworkManager is the most popular way to manage wireless networks on Linux,
+# and nm-applet is a desktop environment-independent system tray GUI for it.
+exec --no-startup-id nm-applet
 
 # Wallpaper
 exec dwall -s room &
@@ -350,10 +355,6 @@ exec picom &
 
 # Mounts external disks automatically
 exec udiskie > /dev/null 2>&1 &
-
-# NetworkManager is the most popular way to manage wireless networks on Linux,
-# and nm-applet is a desktop environment-independent system tray GUI for it.
-exec --no-startup-id nm-applet
 
 # Wallpaper
 #exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
