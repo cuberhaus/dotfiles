@@ -1,28 +1,28 @@
 [submodule "i3blocks-contrib"]
-	path = .config/i3blocks/i3blocks-contrib
-	url = https://github.com/vivien/i3blocks-contrib
+    path = .config/i3blocks/i3blocks-contrib
+    url = https://github.com/vivien/i3blocks-contrib
 [submodule "i3blocks-spotify"]
-	path = .config/i3blocks/scripts/i3blocks-spotify
-	url = https://github.com/firatakandere/i3blocks-spotify
+    path = .config/i3blocks/scripts/i3blocks-spotify
+    url = https://github.com/firatakandere/i3blocks-spotify
 [submodule "bash-git-prompt"]
-	path = .config/bash-git-prompt
-	url = https://github.com/magicmonty/bash-git-prompt
+    path = .config/bash-git-prompt
+    url = https://github.com/magicmonty/bash-git-prompt
 [submodule "ranger_devicons"]
-	path = .config/ranger/plugins/ranger_devicons
-	url = https://github.com/alexanderjeurissen/ranger_devicons
+    path = .config/ranger/plugins/ranger_devicons
+    url = https://github.com/alexanderjeurissen/ranger_devicons
 [submodule "base16-xfce4-terminal"]
-	path = .local/share/xfce4/terminal/base16-xfce4-terminal
-	url = https://github.com/afq984/base16-xfce4-terminal
+    path = .local/share/xfce4/terminal/base16-xfce4-terminal
+    url = https://github.com/afq984/base16-xfce4-terminal
 [submodule "i3-layout-manager"]
-	path = .config/i3/i3-layout-manager
-	url = https://github.com/klaxalk/i3-layout-manager
+    path = .config/i3/i3-layout-manager
+    url = https://github.com/klaxalk/i3-layout-manager
 [submodule "wallpapers"]
-	path = .local/xdg/wallpapers
-	url = https://github.com/Pol-Gil/wallpapers
+    path = .local/xdg/wallpapers
+    url = https://github.com/Pol-Gil/wallpapers
 [submodule "base16-shell"]
-	path = .config/base16-shell
-	url = https://github.com/chriskempson/base16-shell.git
+    path = .config/base16-shell
+    url = https://github.com/chriskempson/base16-shell.git
 [submodule "tpm"]
-	path = .tmux/plugins/tpm
-	url = https://github.com/tmux-plugins/tpm
+    path = .tmux/plugins/tpm
+    url = https://github.com/tmux-plugins/tpm
     ignore = dirty
