@@ -346,6 +346,7 @@ exec --no-startup-id nm-applet
 
 # Wallpaper
 exec dwall -s room &
+#exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
 
 # Bluetooth "blueman"
 exec blueman-applet &
@@ -355,6 +356,3 @@ exec picom &
 
 # Mounts external disks automatically
 exec udiskie > /dev/null 2>&1 &
-
-# Wallpaper
-#exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
