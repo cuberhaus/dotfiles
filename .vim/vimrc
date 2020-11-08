@@ -39,9 +39,21 @@ if has('unix') || has('macunix')
     set directory=$XDG_DATA_HOME/vim/swap
     set backupdir=$XDG_DATA_HOME/vim/backup
     set viewdir=$XDG_DATA_HOME/vim/view
-    set viminfo+='1000,n$XDG_DATA_HOME/vim/viminfo
+    if has('nvim')
+        set viminfo+='1000,n$XDG_DATA_HOME/vim/viminfo
+    endif
     if !has('nvim')
-        set viminfo+=~/.vim/viminfo
+        set nocompatible
+        " if (cannot open viminfo file for reading) create a cache folder and viminfo
+        set viminfo=%,<800,'10,/50,:100,h,f0,n~/.vim/cache/viminfo
+"                   | |    |   |   |    | |  + viminfo file path
+"                   | |    |   |   |    | + file marks 0-9,A-Z 0=NOT stored
+"                   | |    |   |   |    + disable 'hlsearch' loading viminfo
+"                   | |    |   |   + command-line history saved
+"                   | |    |   + search history saved
+"                   | |    + files marks saved
+"                   | + lines saved each register (old name for <, vi6.2)
+"                   + save/restore buffer list
     endif
 endif
 "set runtimepath=$XDG_CONFIG_HOME/vim,$VIMRUNTIME,$XDG_CONFIG_HOME/vim/after
@@ -152,9 +164,48 @@ if has('macunix')
 endif
 
 let g:ycm_autoclose_preview_window_after_insertion = 1
-let g:ycm_add_preview_to_completeopt = 0
+let g:ycm_add_preview_to_completeopt = 1
 
-let g:suda_smart_edit = 1
+if !has('nvim')
+    set completeopt+=popup
+endif
+
+function s:Hover()
+    " get the doc string from YCM
+    let response = youcompleteme#GetCommandResponse('GetDoc')
+    if response == ''
+        return
+    endif
+    " set the width
+    let s:width = min([winwidth('%') * 9 / 10, 100])
+    " calculate the height to show the whole doc with wrap enabled
+    let lines = split(response, '\n')
+    let s:height = len(lines) + 1
+    for s:line in lines
+        let s:height = s:height + len(s:line) / s:width
+    endfor
+    " nvim floating window interface
+    let buf = nvim_create_buf(v:false, v:true)
+    call nvim_buf_set_lines(buf, 0, -1, v:true, lines)
+    let opts = {'relative': 'cursor', 'width': s:width, 'height': len(lines) + 1, 'col': 1,
+                \ 'row': 0, 'anchor': 'SW', 'style': 'minimal'}
+    let s:win = nvim_open_win(buf, 0, opts)
+    " set the window option
+    call nvim_win_set_option(s:win, 'winhl', 'Normal:NormalFloat')
+    call nvim_win_set_option(s:win, 'wrap', v:true)
+    call nvim_win_set_option(s:win, 'linebreak', v:true)
+    " close the window once the cursor moved
+    autocmd CursorMoved <buffer> ++once call nvim_win_close(s:win, v:false)
+endfunction
+
+command YcmGetDocFloatWin :call <SID>Hover()
+autocmd FileType c,cpp,h,hpp nmap <leader>k :YcmGetDocFloatWin<cr>
+
+"let g:suda_smart_edit = 1
+
+"let g:ycm_auto_hover = "CursorHold"
+"nmap <leader>D <plug>(YCMHover)
+set guifont="SauceCodePro\ Nerd\ Font\ 13"
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

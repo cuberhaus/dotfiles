@@ -34,7 +34,7 @@ alias nvidia-settings="nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settin
 alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
 
 # Use NeoVim
-alias vim="nvim"
+#alias vim="nvim"
 alias lvim="nvim +'call Light()' "
 
 # Easier navigation: .., ..., ...., ....., ~ and -
