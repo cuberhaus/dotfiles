@@ -1,9 +1,3 @@
-#   ____       _     ____
-#  |  _ \ ___ | |   / ___|
-#  | |_) / _ \| |  | |
-#  |  __/ (_) | |  | |___
-#  |_|   \___/|_|   \____|
-#
 ###############################################################
 # Sections:
 #   -> Theme
@@ -27,6 +21,7 @@ BASE16_SHELL="$HOME/.config/base16-shell/"
 ###############################################################
 # => Antigen
 ###############################################################
+
 # CONFIGURATION
 ADOTDIR=~/.config/antigen/
 ANTIGEN_CHECK_FILES=(~/.config/zsh/.zshrc)
@@ -63,6 +58,7 @@ antigen apply
 ###############################################################
 # => Oh My Zsh
 ###############################################################
+
 # For more info: https://github.com/ohmyzsh/ohmyzsh/blob/master/templates/zshrc.zsh-template
 # https://github.com/romkatv/powerlevel10k
 
@@ -83,6 +79,7 @@ ZSH_ALIAS_FINDER_AUTOMATIC=true
 ###############################################################
 # => Powerlevel10k
 ###############################################################
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
@@ -94,9 +91,11 @@ fi
 ###############################################################
 # => Aliases
 ###############################################################
+
 if [ -f $ZDOTDIR/aliases ]; then
     source $ZDOTDIR/aliases
 fi
+
 ###############################################################
 # => Options
 ###############################################################
@@ -117,9 +116,11 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 # ctrl-f Search a file and cd into its directory
 bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
+
 ###############################################################
 # => Vim
 ###############################################################
+
 # vi mode
 bindkey -v
 export KEYTIMEOUT=1
@@ -156,6 +157,7 @@ zle-line-init() { zle -K viins; _set_beam_cursor }
 ###############################################################
 # => Runtime
 ###############################################################
+
 # Accept suggestion ctrl+space
 bindkey '^ ' autosuggest-accept
 
