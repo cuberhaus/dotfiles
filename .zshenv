@@ -1,4 +1,5 @@
 #!/bin/sh
+export TERMINAL="termite"
 # Add to path
 if [ -d "$HOME/.local/bin" ] ; then
         PATH="$HOME/.local/bin:$PATH"

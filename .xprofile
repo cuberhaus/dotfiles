@@ -8,16 +8,12 @@ if !laptop-detect ; then
     setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
 fi
 
-# Has to go before i3 for some stupid reason?
-# Screensavers
 if [[ "$DESKTOP_SESSION" == "i3" ]]; then
-    # xss-lock displays betterlockscreen when lid is closed
-    exec xss-lock -- betterlockscreen -l &
-    betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
+    # This runs before i3
 fi
 
 if [[ "$DESKTOP_SESSION" == "cinnamon" ]]; then
     # xss-lock displays betterlockscreen when lid is closed
-    exec xss-lock -- cinnamon-screensaver -l &
+    exec xss-lock --transfer-sleep-lock -- cinnamon-screensaver -l &
     cinnamon-screensaver &
 fi
