@@ -8,15 +8,20 @@
 .config/antigen/.zcompdump.zwc
 .config/antigen/revert-info
 
+# Zsh
 .config/zsh/.zshrc.zwc
 .config/zsh/.zcompdump-Cuberhaus-5.8
+
 # Distro
 .config/distro
+
 # Calibre
 Calibre Library/metadata_db_prefs_backup.json
+
 # Windows
 *.swp
 *~
+
 # Tmux
 .tmux/plugins/tmux-battery/
 .tmux/plugins/tmux-pain-control/
@@ -28,6 +33,7 @@ Calibre Library/metadata_db_prefs_backup.json
 .vim/autoload/
 .vim/plugged/
 .local/share/vim/
+
 # Fonts
 *.uuid
 #.local/share/fonts/Meslo/.uuid
@@ -36,34 +42,45 @@ Calibre Library/metadata_db_prefs_backup.json
 
 # Ubuntu
 .config/zsh/.zcompdump
+
 # Ranger
 .config/ranger/plugins/__init__.py
+
 # Zsh
 .config/zsh/.zcompdump-pol-5.8
+
 # Nvidia
 .config/nvidia/settings
+
 # Compiled Python files
 *.pyc
+
 # Folder view configuration files
 .DS_Store
 Desktop.ini
+
 # Thumbnail cache files
 ._*
 Thumbs.db
+
 # Files that might appear on external disks
 .Spotlight-V100
 .Trashes
+
 # Git merge files
 *orig
+
 # Albert files
 .config/albert/core.db
 .config/albert/org.albert*
 .config/albert/last_used_version
+
 # Vifm files
 .config/vifm/scripts
 .config/vifm/colors
 .config/vifm/vifminfo
 .config/vifm/vifm-help.txt
+
 # Stretchly
 .config/stretchly/Cache/
 .config/stretchly/Code Cache/
@@ -73,6 +90,7 @@ Thumbs.db
 .config/stretchly/Network Persistent State
 .config/stretchly/Session Storage/
 .config/stretchly/TransportSecurity
+
 # Transmission
 .config/transmission/dht.dat
 .config/transmission/resume/

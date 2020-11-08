@@ -4,8 +4,8 @@
 [[ -f ~/.zshenv ]] && source ~/.zshenv
 
 if !laptop-detect ; then
-# altgr to type á
-setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+    # altgr to type á
+    setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
 fi
 
 # Has to go before i3 for some stupid reason?
@@ -19,5 +19,5 @@ fi
 if [[ "$DESKTOP_SESSION" == "cinnamon" ]]; then
     # xss-lock displays betterlockscreen when lid is closed
     exec xss-lock -- cinnamon-screensaver -l &
-    cinnamon-screensaver & 
+    cinnamon-screensaver &
 fi

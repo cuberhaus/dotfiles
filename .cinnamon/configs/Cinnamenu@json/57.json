@@ -191,7 +191,7 @@
         "units": "columns",
         "description": "Number of columns in apps grid",
         "tooltip": "Number of columns in apps grid",
-        "value": 3.0
+        "value": 3
     },
     "show-places": {
         "type": "switch",
@@ -273,7 +273,7 @@
         "default": true,
         "description": "Enable autoscrolling",
         "tooltip": "Enable autoscrolling in application list",
-        "value": true
+        "value": false
     },
     "web-search-option": {
         "type": "combobox",

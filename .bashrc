@@ -1,28 +1,17 @@
-#   ____       _     ____ 
+#   ____       _     ____
 #  |  _ \ ___ | |   / ___|
-#  | |_) / _ \| |  | |    
-#  |  __/ (_) | |  | |___ 
+#  | |_) / _ \| |  | |
+#  |  __/ (_) | |  | |___
 #  |_|   \___/|_|   \____|
 #
-###############################################################
-
-# Info:
-# alias="" Is created during shell startup and won't change
-# alias='' Is created during runtime and will evaluate every time it's called
-# $RANDOM will generate a random number from 0 through 32767
-# array=('Element1' 'Element2')
-
 ###############################################################
 # Sections:
 #   -> Theme
 #   -> Configuration
-#   -> Alias
+#   -> Aliases
 #   -> Runtime
 #
 ###############################################################
-
-# ~/.bashrc: executed by bash(1) for non-login shells.
-# dash is the FASTEST SHELL
 
 ###############################################################
 # => Theme
@@ -32,7 +21,7 @@
 BASE16_SHELL="$HOME/.config/base16-shell/"
 [ -n "$PS1" ] && \
     [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
-        eval "$("$BASE16_SHELL/profile_helper.sh")"
+    eval "$("$BASE16_SHELL/profile_helper.sh")"
 
 ### Prompt
 # For more info: https://github.com/magicmonty/bash-git-prompt
@@ -86,7 +75,7 @@ shopt -s checkwinsize
 shopt -s globstar
 
 ###############################################################
-# => Alias
+# => Aliases
 ###############################################################
 
 if [ -f $ZDOTDIR/aliases ]; then
@@ -100,12 +89,9 @@ fi
 # Pfetch (fast neofetch)
 pfetch
 
-# TMUX
+# TMUX at startup
 # - The following tests to make sure that (1) tmux exists on the system, (2) we're in an interactive shell, and (3) tmux doesn't try to run within itself:
 #if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
 #    exec tmux attach
 #fi
 [[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
-
-## Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-#export PATH="$PATH:$HOME/.rvm/bin"

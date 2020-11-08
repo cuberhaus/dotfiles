@@ -407,7 +407,13 @@ cd dotfiles
 git clone https://github.com/Pol-Gil/ArchDotfiles
 stow -nvt ~ dotfiles/
 ```
+## Wine 
 
+Uninstall a wine application 
+
+```bash
+wine uninstaller
+```
 ## ![SSH icon2][ssh icon2] SSH
 
 Create the [key](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
