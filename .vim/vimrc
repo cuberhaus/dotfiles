@@ -20,6 +20,7 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 if has('unix') || has('macunix')
     "echo 'test'
     "autocmd VimEnter * echo 'test'
@@ -45,7 +46,6 @@ if has('unix') || has('macunix')
 "                   + save/restore buffer list
     endif
 endif
-"set runtimepath=$XDG_CONFIG_HOME/vim,$VIMRUNTIME,$XDG_CONFIG_HOME/vim/after
 " Launch without anything: vim --clean
 
 " With a map leader it's possible to do extra key combinations
@@ -99,47 +99,44 @@ endif
 " tabular comes before vim markdown
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
-" Plugins, make sure you use single quotes
 call plug#begin()
-Plug 'ryanoasis/vim-devicons'
-Plug 'easymotion/vim-easymotion'
-Plug 'jiangmiao/auto-pairs'
-Plug 'NLKNguyen/papercolor-theme'
 "Plug 'mattn/emmet-vim'
-"Plug 'morhetz/gruvbox'
-Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
-Plug 'godlygeek/tabular'
-Plug 'plasticboy/vim-markdown'
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
-Plug 'tpope/vim-repeat'
-Plug 'sheerun/vim-polyglot'
-Plug 'christoomey/vim-tmux-navigator'
 Plug 'Chiel92/vim-autoformat'
+Plug 'NLKNguyen/papercolor-theme'
 Plug 'airblade/vim-gitgutter'
 Plug 'amix/vim-zenroom2'
+Plug 'ap/vim-css-color'
 Plug 'chriskempson/base16-vim'
-"Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-"Plug 'junegunn/fzf.vim'
+Plug 'christoomey/vim-tmux-navigator'
 Plug 'ctrlpvim/ctrlp.vim'
+Plug 'dracula/vim', { 'as': 'dracula' }
+Plug 'easymotion/vim-easymotion'
+Plug 'godlygeek/tabular'
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
+Plug 'jiangmiao/auto-pairs'
+Plug 'joshdick/onedark.vim'
 Plug 'junegunn/goyo.vim'
 Plug 'maxbrunsfeld/vim-yankstack'
-Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'nathanaelkane/vim-indent-guides'
+Plug 'plasticboy/vim-markdown'
 Plug 'preservim/nerdtree'
+Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+Plug 'ryanoasis/vim-devicons'
+Plug 'sheerun/vim-polyglot'
 Plug 'tmux-plugins/vim-tmux'
 Plug 'tmux-plugins/vim-tmux-focus-events'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-obsession'
+Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'vim-scripts/bufexplorer.zip'
 Plug 'ycm-core/YouCompleteMe'
-Plug 'ap/vim-css-color'
-Plug 'joshdick/onedark.vim'
 call plug#end()
 "Acaben els plugins
+
 "Configuracions del plugin YouCompleteMe
 let g:ycm_confirm_extra_conf = 0 "Disables prompting for script every time
 let g:ycm_clangd_uses_ycmd_caching = 0
@@ -195,9 +192,11 @@ autocmd FileType c,cpp,h,hpp nmap <leader>k :YcmGetDocFloatWin<cr>
 "let g:ycm_auto_hover = "CursorHold"
 "nmap <leader>D <plug>(YCMHover)
 set guifont="SauceCodePro\ Nerd\ Font\ 13"
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 " Set 4 lines to the cursor - when moving vertically using j/k
 set so=4
 
@@ -286,6 +285,7 @@ endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Colors and Fonts
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 ""Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
 if (empty($TMUX))
   if (has("nvim"))
@@ -326,7 +326,6 @@ function! Light()
     set background=light
     colorscheme PaperColor
 endfunction
-
 
 " This is what sets vim to use 24-bit colors. It will also work for any version of neovim
 set termguicolors
