@@ -31,7 +31,9 @@ smart_gaps on
 hide_edge_borders smart_no_gaps
 
 # No titles but little borders that help see where next window will go, super + v, super + b
-default_border pixel 2
+default_border normal
+# No border, activate inactive-opacity in picom.conf
+#default_border pixel 2
 
 # Set windows key as mod
 set $mod Mod4
