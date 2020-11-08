@@ -42,6 +42,7 @@ antigen bundle command-not-found
 antigen bundle alias-finder 
 
 # Load the theme.
+# https://github.com/romkatv/powerlevel10k
 antigen theme romkatv/powerlevel10k
 #antigen bundle mafredri/zsh-async # Pure
 #antigen bundle sindresorhus/pure # Pure
@@ -61,7 +62,6 @@ antigen apply
 ###############################################################
 
 # For more info: https://github.com/ohmyzsh/ohmyzsh/blob/master/templates/zshrc.zsh-template
-# https://github.com/romkatv/powerlevel10k
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"
@@ -130,6 +130,9 @@ export KEYTIMEOUT=1
 autoload edit-command-line; zle -N edit-command-line
 bindkey '^e' edit-command-line
 
+# ctrl-f Search a file and cd into its directory
+bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
+
 # Change cursor with support for inside/outside tmux
 function _set_cursor() {
     if [[ $TMUX = '' ]]; then
@@ -162,13 +165,5 @@ zle-line-init() { zle -K viins; _set_beam_cursor }
 # Accept suggestion ctrl+space
 bindkey '^ ' autosuggest-accept
 
-# Autojump
-[[ -s /etc/profile.d/autojump.sh ]] && source /etc/profile.d/autojump.sh
-
 # Pfetch (fast neofetch)
 pfetch
-
-# Tmux
-#if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
-#  exec tmux attach
-#fi
