@@ -58,13 +58,16 @@ set history=500
 
 " Sets default yank register to same as linux system
 " Install vim-gtk
-if has('unix') || has('macunix')
-    set clipboard=unnamedplus
-endif
-
-if has('win32')
+if has('win32') 
     set clipboard=unnamed
 endif
+
+if system('uname -s') == "Darwin\n"
+  set clipboard=unnamed "OSX
+else
+  set clipboard=unnamedplus "Linux
+endif
+
 " Enable filetype plugins
 filetype plugin indent on
 " Same as this 3 commands together: filetype on | filetype plugin on | filetype indent on
