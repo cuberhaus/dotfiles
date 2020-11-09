@@ -340,29 +340,7 @@ Fix brew
 brew doctor
 ```
 
-Update
-
-```bash
-brew update
-brew upgrade
-```
-
 # ![Ubuntu][ubuntu_icon] Ubuntu
-
-Update
-
-```bash
-sudo apt-get update
-sudo apt-get full-upgrade
-```
-
-CleanUp
-
-```bash
-sudo apt-get autoclean
-sudo apt-get clean
-sudo apt-get autoremove
-```
 
 Print out manually installed packages
 

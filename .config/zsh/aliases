@@ -8,8 +8,6 @@
 # array=('Element1' 'Element2')
 ###############################################################
 
-alias fck="fuck"
-
 # Config Files
 alias arch="vim ~/.local/bin/bootstrap/arch"
 alias aliases="vim $ZDOTDIR/aliases"
@@ -33,6 +31,7 @@ alias Xres="xrdb -load ~/.config/X11/xresources"
 alias nvidia-settings="nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settings"
 alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
 
+alias fck="fuck"
 #alias vim="nvim"
 alias lvim="nvim +'call Light()' "
 
@@ -151,8 +150,9 @@ ex ()
 
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    alias update="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask; brew cleanup"
-    alias updateall="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask; brew cleanup; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update"
+    alias update="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask"
+    alias updateall="sudo softwareupdate -i -a; brew update; brew upgrade; brew update --cask; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update"
+    alias cleanup='brew cleanup; vim +PlugClean +qall'
     #sudo gem update;
     alias o='open . > /dev/null 2>&1 &'
     # Show active network interfaces
@@ -162,7 +162,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # Flush Directory Service cache
     alias flush="dscacheutil -flushcache && killall -HUP mDNSResponder"
     # Recursively delete `.DS_Store` files
-    alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
+    alias clean="find . -type f -name '*.DS_Store' -ls -delete"
     # Empty the Trash on all mounted volumes and the main HDD.
     # Also, clear Apple’s System Logs to improve shell startup speed.
     # Finally, clear download history from quarantine. https://mths.be/bum
@@ -186,9 +186,8 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         alias update='sudo pacman -Syu'
         alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update'
         # sudo npm install -g npm; sudo gem update;
-
         # Cleans pacman and AUR cache and vim no longer used plugins
-        alias cleanup='yay -Sc; vim +PlugClean'
+        alias cleanup='yay -Sc; vim +PlugClean +qall'
         # Get fastest mirrors in your neighborhood
         alias mirror="sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist"
         alias mirrord="sudo reflector --latest 50 --number 20 --sort delay --save /etc/pacman.d/mirrorlist"
@@ -201,7 +200,8 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
-        alias update="sudo apt-get update; sudo apt-get full-upgrade; brew update; brew upgrade; sudo apt-get autoclean; sudo apt-get clean; sudo apt-get autoremove; vim +PlugUpgrade +PlugUpdate +qall; antigen update"
+        alias update="sudo apt-get update; sudo apt-get full-upgrade; brew update; brew upgrade; vim +PlugUpgrade +PlugUpdate +qall; antigen update"
+        alias cleanup='sudo apt-get autoclean; sudo apt-get clean; sudo apt-get autoremove; brew cleanup; vim +PlugClean +qall'
         alias tmux="tmux -f ~/.config/tmux/tmux.conf"
     fi
 fi
