@@ -26,11 +26,6 @@ alias voblogout="sudo vim /etc/oblogout.conf"
 alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
 alias vconfgrub="sudo vim /boot/grub/grub.cfg"
 
-# Clean-up
-alias Xres="xrdb -load ~/.config/X11/xresources"
-alias nvidia-settings="nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settings"
-alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
-
 alias fck="fuck"
 #alias vim="nvim"
 alias lvim="nvim +'call Light()' "
@@ -46,11 +41,8 @@ alias grep='grep --color=auto'
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 
-#alias fz='vim $(fzf)'
-alias qt='fortune -c | cowthink -f $(find /usr/share/cows -type f | shuf -n 1)'
-
 # root privileges
-alias doas="doas --"
+#alias doas="doas --"
 
 # adding flags
 alias cp="cp -i"          # confirm before overwriting something
@@ -69,11 +61,6 @@ alias gc="git commit -m "
 alias gp="git push"
 alias gsu="git submodule update --recursive --remote"
 alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
-
-# Lock screen
-LockScreens=('pipes.sh' 'cmatrix')
-alias lock='${LockScreens[$RANDOM % 2]}'
-alias afk="betterlockscreen -l"
 
 # List files
 alias ls='exa -G -F --long --header --group --git  --group-directories-first'
@@ -104,12 +91,6 @@ alias userlist="cut -d: -f1 /etc/passwd"
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
 
-# Get the error messages from journalctl
-alias jctl="journalctl -p 3 -xb"
-
-# Check vulnerabilities microcode
-alias microcode='grep . /sys/devices/system/cpu/vulnerabilities/*'
-
 # youtube-dl
 alias yta-aac="youtube-dl --extract-audio --audio-format aac "
 alias yta-best="youtube-dl --extract-audio --audio-format best "
@@ -121,40 +102,12 @@ alias yta-vorbis="youtube-dl --extract-audio --audio-format vorbis "
 alias yta-wav="youtube-dl --extract-audio --audio-format wav "
 alias ytv-best="youtube-dl -f bestvideo+bestaudio "
 
-# # ex = EXtractor for all kinds of archives
-# # usage: ex <file>
-ex ()
-{
-    if [ -f $1 ] ; then
-        case $1 in
-            *.tar.bz2)   tar xjf $1   ;;
-            *.tar.gz)    tar xzf $1   ;;
-            *.bz2)       bunzip2 $1   ;;
-            *.rar)       unrar x $1   ;;
-            *.gz)        gunzip $1    ;;
-            *.tar)       tar xf $1    ;;
-            *.tbz2)      tar xjf $1   ;;
-            *.tgz)       tar xzf $1   ;;
-            *.zip)       unzip $1     ;;
-            *.Z)         uncompress $1;;
-            *.7z)        7z x $1      ;;
-            *.deb)       ar x $1      ;;
-            *.tar.xz)    tar xf $1    ;;
-            *.tar.zst)   unzstd $1    ;;
-            *)           echo "'$1' cannot be extracted via ex()" ;;
-        esac
-    else
-        echo "'$1' is not a valid file"
-    fi
-}
-
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias update="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask"
-    alias updateall="sudo softwareupdate -i -a; brew update; brew upgrade; brew update --cask; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update"
-    alias cleanup='brew cleanup; vim +PlugClean +qall'
+    alias updateall="sudo softwareupdate -i -a; brew update; brew upgrade; brew update --cask; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update; npm install npm -g; npm update -g"
     #sudo gem update;
-    alias o='open . > /dev/null 2>&1 &'
+    alias cleanup='brew cleanup; vim +PlugClean +qall'
     # Show active network interfaces
     alias ifactive="ifconfig | pcregrep -M -o '^[^\t:]+:([^\n]|\n\t)*status: active'"
     # Clean up LaunchServices to remove duplicates in the “Open With” menu
@@ -173,18 +126,18 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 if [[ "$OSTYPE" == "linux"* ]]; then
-    if [[ "$DESKTOP_SESSION" == "cinnamon"  ]]; then
-        alias o='nemo . > /dev/null 2>&1 &'
-    fi
-    # havent really tested this one
-    if [[ "$DESKTOP_SESSION" == "gnome"  ]]; then
-        alias o='nautilus . > /dev/null 2>&1 &'
-    fi
+    # Lock screen
+    LockScreens=('pipes.sh' 'cmatrix')
+    alias lock='${LockScreens[$RANDOM % 2]}'
+    # Get the error messages from journalctl
+    alias jctl="journalctl -p 3 -xb"
+    # Check vulnerabilities microcode
+    alias microcode='grep . /sys/devices/system/cpu/vulnerabilities/*'
 
     ### Arch
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
         alias update='sudo pacman -Syu'
-        alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update'
+        alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update; npm install npm -g; npm update -g'
         # sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         alias cleanup='yay -Sc; vim +PlugClean +qall'
@@ -205,3 +158,11 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         alias tmux="tmux -f ~/.config/tmux/tmux.conf"
     fi
 fi
+
+###############################################################
+# => Clean home directory
+###############################################################
+
+alias Xres="xrdb -load ~/.config/X11/xresources"
+alias nvidia-settings="nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settings"
+alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'

@@ -67,11 +67,15 @@ shopt -s checkwinsize
 shopt -s globstar
 
 ###############################################################
-# => Aliases
+# => Aliases and functions
 ###############################################################
 
 if [ -f $ZDOTDIR/aliases ]; then
     source $ZDOTDIR/aliases
+fi
+
+if [ -f $ZDOTDIR/functions ]; then
+    source $ZDOTDIR/functions
 fi
 
 ###############################################################

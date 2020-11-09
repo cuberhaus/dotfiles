@@ -1,6 +1,9 @@
 #!/bin/sh
-export TERMINAL="termite"
-# Add to path
+
+###############################################################
+# => Path
+###############################################################
+
 if [ -d "$HOME/.local/bin" ] ; then
         PATH="$HOME/.local/bin:$PATH"
 fi
@@ -16,25 +19,53 @@ fi
 # Better not add '.' to PATH
 #PATH=".:$PATH"
 
-### SET VIM AS MANPAGER ###
-export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
+###############################################################
+# => Variables
+###############################################################
 
 # Zsh files:
-export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
-# For more information RTFM
-# https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
-
-# Path to your oh-my-zsh installation.
-export ZSH="$HOME/.config/oh-my-zsh"
+export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh" # For more information RTFM https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
 export VISUAL=vim
 export EDITOR="$VISUAL"
+export DOTFILES="~/dotfiles/dotfiles"
+
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
 export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
-export QT_QPA_PLATFORMTHEME="qt5ct"
+
+### SET VIM AS MANPAGER ###
+export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
 #INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
 #OBJECTES=/Users/$USER/assig/pro2/objectes
 
-# ~/ Clean-up:
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    export TERMINAL="termite"
+    export QT_QPA_PLATFORMTHEME="qt5ct"
+    # DISTRO variable
+    source ~/.config/distro
+    if laptop-detect ; then
+        setxkbmap es 
+    fi
+    # Swap escape with caps lock
+    #xmodmap -e "clear lock"
+    #xmodmap -e "keycode 9 = Caps_Lock NoSymbol Caps_Lock"
+    #xmodmap -e "keycode 66 = Escape NoSymbol Escape"
+fi 
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
+    export CPPFLAGS="-I/usr/local/opt/llvm/include"
+    PATH="/usr/local/opt/llvm/bin:$PATH"
+fi
+
+# Homebrew env variables
+if [[ "$DISTRO" == "ubuntu"* ]]; then
+    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+fi
+
+###############################################################
+# => Clean home directory
+###############################################################
+
 #export GEM_HOME="$XDG_DATA_HOME"/gem
 #export GEM_SPEC_CACHE="$XDG_CACHE_HOME"/gem
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -67,26 +98,3 @@ export ADB_VENDOR_KEY="$XDG_CONFIG_HOME"/android
 # GTK
 export GTK_RC_FILES="$XDG_CONFIG_HOME"/gtk-1.0/gtkrc
 export GTK2_RC_FILES="$XDG_CONFIG_HOME"/gtk-2.0/gtkrc
-
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # DISTRO variable
-    source ~/.config/distro
-    if laptop-detect ; then
-        setxkbmap es 
-    fi
-    # Swap escape with caps lock
-    #xmodmap -e "clear lock"
-    #xmodmap -e "keycode 9 = Caps_Lock NoSymbol Caps_Lock"
-    #xmodmap -e "keycode 66 = Escape NoSymbol Escape"
-fi 
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
-    export CPPFLAGS="-I/usr/local/opt/llvm/include"
-    PATH="/usr/local/opt/llvm/bin:$PATH"
-fi
-
-# Homebrew env variables
-if [[ "$DISTRO" == "ubuntu"* ]]; then
-    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-fi

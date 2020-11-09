@@ -90,11 +90,15 @@ fi
 [[ ! -f ~/.config/.p10k.zsh ]] || source ~/.config/.p10k.zsh
 
 ###############################################################
-# => Aliases
+# => Aliases and functions
 ###############################################################
 
 if [ -f $ZDOTDIR/aliases ]; then
     source $ZDOTDIR/aliases
+fi
+
+if [ -f $ZDOTDIR/functions ]; then
+    source $ZDOTDIR/functions
 fi
 
 ###############################################################
