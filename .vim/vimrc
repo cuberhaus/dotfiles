@@ -18,6 +18,11 @@
 "    -> PLUGINS
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"
+" Launch without anything: vim --clean
+" Install vim-gtk
+"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -46,18 +51,17 @@ if has('unix') || has('macunix')
 "                   + save/restore buffer list
     endif
 endif
-" Launch without anything: vim --clean
 
 " With a map leader it's possible to do extra key combinations
 " like <leader>w saves the current file
-nnoremap <SPACE> <Nop>
+"nnoremap <SPACE> <Nop>
+"map <Space> <leader>
 let mapleader=" "
-
+set showcmd
 " Sets how many lines of history VIM has to remember
 set history=500
 
 " Sets default yank register to same as linux system
-" Install vim-gtk
 if has('win32') 
     set clipboard=unnamed
 endif
@@ -89,7 +93,7 @@ set timeoutlen=1000 ttimeoutlen=0
 :set mouse=a
 
 " Disable auto comments
-"autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 " Si plug.vim no existeix ho instala
 if has('unix') || has('macunix')
@@ -103,7 +107,6 @@ endif
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 call plug#begin()
-"Plug 'mattn/emmet-vim'
 Plug 'Chiel92/vim-autoformat'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'airblade/vim-gitgutter'
@@ -190,10 +193,6 @@ endfunction
 command YcmGetDocFloatWin :call <SID>Hover()
 autocmd FileType c,cpp,h,hpp nmap <leader>k :YcmGetDocFloatWin<cr>
 
-"let g:suda_smart_edit = 1
-
-"let g:ycm_auto_hover = "CursorHold"
-"nmap <leader>D <plug>(YCMHover)
 set guifont="SauceCodePro\ Nerd\ Font\ 13"
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -231,7 +230,8 @@ set hid
 
 " Configure backspace so it acts as it should act
 set backspace=eol,start,indent
-set whichwrap+=<,>,h,l
+" Move across lines with h and l
+"set whichwrap+=<,>,h,l
 
 " Ignore case when searching
 set ignorecase
@@ -257,11 +257,6 @@ set showmatch
 " How many tenths of a second to blink when matching brackets
 set mat=2
 
-" No annoying sound on errors
-set noerrorbells
-set novisualbell
-set t_vb=
-set tm=500
 "This one is the one that works
 set belloff=all
 
@@ -289,7 +284,7 @@ endif
 " => Colors and Fonts
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-""Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
+" Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
 if (empty($TMUX))
   if (has("nvim"))
     let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -320,9 +315,15 @@ endif
 " TRUECOLOR SCHEMES uncheck to enable
 "autocmd vimenter * colorscheme gruvbox
 set t_Co=256
+
 " Dark truecolor
 set background=dark
 colorscheme onedark
+function! Dark()
+    set background=dark
+    colorscheme onedark
+endfunction
+command Dark :call Dark()
 
 " Light truecolor
 function! Light()
@@ -330,6 +331,7 @@ function! Light()
     colorscheme PaperColor
 endfunction
 
+command Light :call Light()
 " This is what sets vim to use 24-bit colors. It will also work for any version of neovim
 set termguicolors
 
@@ -417,8 +419,12 @@ nmap <C-m> <Plug>MarkdownPreviewToggle
 "Autoformat
 noremap <F3> :Autoformat<CR>
 
-"Toggle nerd Tree ctrl-spacebar
-nmap <C-Space> :NERDTreeToggle <CR>
+if system('uname -s') == "Darwin\n"
+    "Toggle nerd Tree ctrl-spacebar
+    nmap <c-@> :NERDTreeToggle <CR>
+else
+    nmap <c-Space> :NERDTreeToggle <CR>
+endif
 
 "Open bufexplorer to see and manage the current buffers (<leader>o):
 map <leader>o :BufExplorer<cr>
