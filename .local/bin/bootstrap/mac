@@ -63,6 +63,7 @@ mac_install () {
 
     ### GUI Applications
     brew cask install whatsapp
+    brew cask install visual-studio-code
     brew cask install dbeaver-community # BD
     brew install r                      # Probabilitat i estadística
     brew install rstudio                # Probabilitat i estadística IDE
