@@ -6,6 +6,11 @@ window-maximized=false
 window-position=[644, 0]
 window-size=[632, 993]
 
+[baobab/ui]
+active-chart='rings'
+window-size=(960, 600)
+window-state=87168
+
 [books]
 window-maximized=true
 
@@ -17,8 +22,8 @@ window-maximized=true
 [calculator]
 accuracy=9
 angle-units='degrees'
-base=10
-button-mode='basic'
+base=16
+button-mode='programming'
 number-format='automatic'
 show-thousands=false
 show-zeroes=false
@@ -26,7 +31,7 @@ source-currency=''
 source-units='degree'
 target-currency=''
 target-units='radian'
-window-position=(785, 354)
+window-position=(295, 56)
 word-size=64
 
 [calendar]
@@ -129,7 +134,7 @@ notify-window-paned-position=73
 notify-window-width=533
 notify-window-x=0
 notify-window-y=0
-reminders-past=@as []
+reminders-past=['a4f1c956304aff27bcdca266d4eb90271658ccc1\na160aca043a6c8e819b3acbdbcb3d24a370eff3a\n1604739600\n1604880000\n1604966400\nBEGIN:VEVENT\r\nDTSTART;VALUE=DATE:20201109\r\nDTEND;VALUE=DATE:20201110\r\nDTSTAMP:20201002T073835Z\r\nUID:5982D45F-8540-46C3-8EAD-420E90472AD9\r\nCREATED:20201002T073835Z\r\nX-LIC-ERROR;X-LIC-ERRORTYPE=VALUE-PARSE-ERROR:No value for DESCRIPTION \r\n property. Removing entire property:\r\nLAST-MODIFIED:20201002T073835Z\r\nX-LIC-ERROR;X-LIC-ERRORTYPE=VALUE-PARSE-ERROR:No value for LOCATION \r\n property. Removing entire property:\r\nSEQUENCE:0\r\nSTATUS:CONFIRMED\r\nSUMMARY:PE B3 acaba\r\nTRANSP:OPAQUE\r\nX-EVOLUTION-CALDAV-ETAG:63737307515\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:This is an event reminder\r\nTRIGGER:-P1DT15H\r\nX-EVOLUTION-ALARM-UID:a160aca043a6c8e819b3acbdbcb3d24a370eff3a\r\nEND:VALARM\r\nEND:VEVENT\r\n']
 
 [file-roller/dialogs/extract]
 recreate-folders=true
