@@ -1,0 +1,1 @@
+dconf dump / > ~/.config/dconf-settings.ini
