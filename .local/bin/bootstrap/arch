@@ -21,13 +21,12 @@ arch_install () {
     sudo pacman -S nemo-share
 
     # Terminal
-    sudo pacman -S rclone
+    sudo pacman -S rclone                # Rsync to remote 
     sudo pacman -S thefuck
-    sudo pacman -S wget
+    sudo pacman -S wget                  # Download stuff
     sudo pacman -S svn
     sudo pacman -S base-devel            # AUR
     sudo pacman -S zsh                   # Zsh shell
-    sudo pacman -S fortune-mod           # Random quote
     sudo pacman -S termite               # Terminal emulator
     sudo pacman -S gvim                  # Vim version with extra features
     sudo pacman -S exa                   # "ls" on steroids
@@ -36,15 +35,12 @@ arch_install () {
     sudo pacman -S fzf                   # Fuzzy finder
     sudo pacman -S bat                   # "Cat" on steroids
     sudo pacman -S tmux                  # Terminal multiplexer
-    sudo pacman -S doxygen texlive-most graphviz # Doxygen
     sudo pacman -S gcc                   # Cpp
     sudo pacman -S git python3 stow      # To deploy dotfiles and more
-    sudo pacman -S github-cli            # Github from terminal, create issues...
     sudo pacman -S dhcpcd
     sudo pacman -S ruby
     sudo pacman -S laptop-detect         # Detect if using a laptop
     sudo pacman -S npm
-    sudo pacman -S cmatrix               # Bloat
     sudo pacman -S xdg-user-dirs         # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
     sudo pacman -S reflector             # Update Arch mirrors
     sudo pacman -S dnsutils              # Ip
@@ -55,54 +51,33 @@ arch_install () {
     sudo pacman -S udiskie               # Automater
     sudo pacman -S ranger                # Ranger
     sudo pacman -S w3m                   # Preview images on ranger
+    sudo pacman -S xorg-xinit            # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
+    sudo pacman -S xorg                  # Display server
 
     # GUI
     sudo pacman -S gucharmap             # Characters keyboard
     sudo pacman -S gparted               # Manage partitions
     sudo pacman -S gnome-calculator      # Calculator
-    sudo pacman -S remmina               # Remote conexions
-    sudo pacman -S dbeaver               # Base de dades
     sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"
-    sudo pacman -S gimp                  # Image editor
-    sudo pacman -S audacity              # Audio editor
     sudo pacman -S discord
-    sudo pacman -S xorg-xinit            # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
     sudo pacman -S yarn                  # Package installer
-    sudo pacman -S texstudio             # Latex text editor
     sudo pacman -S file-roller           # Archive Manager
-    sudo pacman -S xorg                  # Display server
     sudo pacman -S dunst                 # Notifications
-    sudo pacman -S nomacs                # Image viewer
-    #sudo pacman -S thunderbird           # Email
-    yay -S thunderbird-bin               # Might have to manually enter PGP key
     sudo pacman -S calibre               # Book manager
     sudo pacman -S libreoffice-still     # Office
-    yay -S google-chrome                 # Best web browser
-    #sudo pacman -S chromium              # Web browser
-    #sudo pacman -S firefox               # Open source browser
-    sudo pacman -S tor                   # Tor private browser
-    yay -S tor-browser
     sudo pacman -S transmission-gtk      # A simpler Torrent D.
     sudo pacman -S vlc                   # Video player
-    #sudo pacman -S qbittorrent           # Torrent Downloader
-    sudo pacman -S r                    # Probabilitat i estadística
-    yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
-    #sudo pacman -S code                  # Visual code (settings sync plugin req.) ### USE REAL VISUAL STUDIO NOT THIS
-    yay -S visual-studio-code-bin       # Microsoft's Visual Code
+
+    ### AUR
+    yay -S google-chrome                 # Best web browser
+    yay -S visual-studio-code-bin       # Microsoft's Visual Code /not #sudo pacman -S code 
     yay -S birdtray                     # Thunderbird tray
     yay -S whatsapp-nativefier          # Whatsapp client
     yay -S spotify                      # Spotify
     yay -S ttf-ms-win10
     yay -S ttf-ms-fonts                 # Microsoft fonts ##deprecated
-    yay -S emoji-keyboard               # Emoji
     yay -S skypeforlinux-stable-bin     # Skype
-    yay -S slack-desktop                # Slack
-    yay -S android-studio               # Android Studio
-    yay -S youtube-dl                   # Download youtube videos
-    #yay -S typora                       # Markdown editor
-    # f5fpc -s -x -t https://upclink.upc.edu
-    # f5fpc --stop
-    yay -S f5fpc                        # Connexio a UPClink
+    yay -S thunderbird-bin               # Might have to manually enter PGP key /not#sudo pacman -S thunderbird
 
     # Lockscreen
     yay -S betterlockscreen
@@ -112,26 +87,22 @@ arch_install () {
     yay -S timeshift  #  sudo timeshift-gtk
     sudo pacman -S cron
 
-    # IRC APPS
+    # IRC APP
     sudo pacman -S hexchat               # Graphical
-    sudo pacman -S weechat               # Terminal-based
 
     # Drivers
     sudo pacman -S linux-lts
     sudo pacman -S linux-lts-headers
     sudo pacman -S linux-headers
     sudo pacman -S nvidia-lts
-    ## sudo pacman -S nvidia-dkms
+    # sudo pacman -S nvidia-dkms #very slow
     sudo pacman -S nvidia nvidia-utils   # Nvidia
     sudo pacman -S xf86-video-intel mesa lib32-mesa    # Intel
     sudo pacman -S lib32-nvidia-utils    # Requires adding multilib libraries
     sudo pacman -S nvidia-settings       # Add force composition pipeline in nvidia-settings
 
     # Pdf viewer
-    #sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
-    sudo pacman -S okular
-    # Calendar
-    sudo pacman -S gnome-calendar gnome-keyring libsecret seahorse
+    sudo pacman -S okular # or  sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
 
     # Audio | Equalizer qpaeq
     sudo pacman -S playerctl
@@ -189,10 +160,6 @@ arch_install () {
     # Applet
     sudo pacman -S nm-applet
 
-    # Arduino
-    usermod -aG uucp,lock pol
-    sudo pacman -S arduino-avr-core
-    sudo pacman -S arduino
 }
 yay_install() {
     cd ~/
@@ -201,8 +168,6 @@ yay_install() {
     makepkg -si
     sudo rm -r /home/pol/yay
 }
-# Office / Word compatible
-#yay -S freeoffice
 
 # do this but i dont know exactly how
 #do_once () {
@@ -214,6 +179,7 @@ yay_install() {
 #    Option "NaturalScrolling" "true"
 #    EndSection'  >> /etc/X11/xorg.conf.d/30-touchpad.conf
 #}
+
 vim_install () {
     sudo pacman -S neovim
     cd ~/
@@ -225,6 +191,7 @@ vim_install () {
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
 }
+
 # Best Tiling Window Manager
 i3_install () {
     sudo pacman -S i3-gaps   # i3 with gaps
@@ -265,6 +232,8 @@ cinnamon_install() {
     # and /usr/share/cinnamon/js/ui/overview.js
 }
 bloat_install () {
+    sudo pacman -S fortune-mod           # Random quote
+    sudo pacman -S cmatrix               # Bloat
     sudo pacman -S lolcat
     sudo pacman -S cowsay    # A cow displaying text
     sudo pacman -S ponysay asciiquarium
@@ -295,6 +264,41 @@ DWall() {
     cd $HOME
     sudo rm -r ~/home/pol/dynamic-wallpaper
 }
+optional() {
+    # Terminal
+    sudo pacman -S doxygen texlive-most graphviz # Doxygen
+    sudo pacman -S github-cli            # Github from terminal, create issues...
+
+    # GUI
+    sudo pacman -S nomacs                # Image viewer
+    sudo pacman -S r                    # Probabilitat i estadística
+    sudo pacman -S dbeaver               # Base de dades
+    sudo pacman -S remmina               # Remote conexions
+    sudo pacman -S texstudio             # Latex text editor
+    sudo pacman -S gimp                  # Image editor
+    sudo pacman -S audacity              # Audio editor
+
+    # AUR
+    yay -S youtube-dl                   # Download youtube videos
+    yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
+    yay -S slack-desktop                # Slack
+    yay -S android-studio               # Android Studio
+    sudo pacman -S tor                   # Tor private browser
+    yay -S tor-browser
+    # f5fpc -s -x -t https://upclink.upc.edu
+    # f5fpc --stop
+    yay -S f5fpc                        # Connexio a UPClink
+
+    # Calendar
+    sudo pacman -S gnome-calendar gnome-keyring libsecret seahorse
+
+    # Arduino
+    if [[ $FirstRun == y || $FirstRun == Y ]]; then
+        usermod -aG uucp,lock pol
+    fi
+    sudo pacman -S arduino-avr-core
+    sudo pacman -S arduino
+}
 
 ### Installation starts here
 
@@ -308,15 +312,15 @@ if [[ $FirstRun == y || $FirstRun == Y ]]; then
 fi
 sudo pacman -Syu # Update
 arch_install
-wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
 i3_install
 cinnamon_install
 if [[ $FirstRun == y || $FirstRun == Y ]]; then
     yay_install
+    #optional
     vim_install
-    apps_AUR_install
+    wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
     laptop_install
-    games_install
+    #games_install
     cava_install
     applets             # Installs Cinnamon applets
     #bloat_install
