@@ -231,6 +231,10 @@ cinnamon_install() {
     # Edit animation time (0.05)/usr/share/cinnamon/js/ui/expo.js 
     # and /usr/share/cinnamon/js/ui/overview.js
 }
+gnome_install() {
+    sudo pacman -S chrome-gnome-shell 
+    # Install dash to dock, impatience 
+}
 bloat_install () {
     sudo pacman -S fortune-mod           # Random quote
     sudo pacman -S cmatrix               # Bloat
