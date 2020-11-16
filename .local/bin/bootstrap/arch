@@ -233,7 +233,7 @@ cinnamon_install() {
 }
 gnome_install() {
     sudo pacman -S chrome-gnome-shell 
-    # Install dash to dock, impatience 
+    # Install dash to dock, impatience, auto move windows
 }
 bloat_install () {
     sudo pacman -S fortune-mod           # Random quote
