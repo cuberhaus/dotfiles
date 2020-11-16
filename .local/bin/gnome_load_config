@@ -1,1 +1,1 @@
-dconf load / < dconf-settings.ini
+dconf load / < ~/.config/dconf-settings.ini
