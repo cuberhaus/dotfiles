@@ -112,11 +112,15 @@ arch_install () {
     sudo pacman -S tumbler ffmpegthumbnailer raw-thumbnailer
 
     # Theme
-    sudo pacman -S lxappearance
+    sudo pacman -S lxappearance           # Gtk configuration utility
     sudo pacman -S gtk2 gtk3
     sudo pacman -S arc-gtk-theme arc-icon-theme # Arc theme and its icon's
     sudo pacman -S adapta-gtk-theme       # Alternative theme
     sudo pacman -S papirus-icon-theme     # Best icon theme!
+    sudo pacman -S qt5ct                  # Qt5 configuration utility
+    sudo pacman -S kvantum-qt5            # Qt5 Custom themes
+    #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
+    #https://wiki.archlinux.org/index.php/qt
 
     # Fonts
     sudo pacman -S gnome-font-viewer      # Font viewer
@@ -210,7 +214,6 @@ i3_install () {
 cinnamon_install() {
     sudo pacman -S cinnamon                  # Desktop
     sudo pacman -S gnome-screenshot          # Take screenshots with impr pant
-    sudo pacman -S xreader                   # Document viewer
     yay -S cinnamon-sound-effects            # Sound effects
     yay -S mint-themes mint-y-icons mint-backgrounds # Themes
     yay -S pix                               # Image viewer
@@ -274,7 +277,7 @@ optional() {
     sudo pacman -S github-cli            # Github from terminal, create issues...
 
     # GUI
-    sudo pacman -S nomacs                # Image viewer
+    sudo pacman -S nomacs                # Image viewer / use pix instead
     sudo pacman -S r                    # Probabilitat i estadística
     sudo pacman -S dbeaver               # Base de dades
     sudo pacman -S remmina               # Remote conexions
