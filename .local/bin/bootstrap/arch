@@ -5,6 +5,7 @@
 # video makes backlight work and wheel gives you sudo privilege
 # usermod -a -G wheel video input
 # Configure nvidia nvidia-xconfig
+# g ctrl A vim
 arch_install () {
     # Fix some errors and cleanup
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
