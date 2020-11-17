@@ -119,6 +119,7 @@ arch_install () {
     sudo pacman -S papirus-icon-theme     # Best icon theme!
     sudo pacman -S qt5ct                  # Qt5 configuration utility
     sudo pacman -S kvantum-qt5            # Qt5 Custom themes
+    sudo pacman -S breeze                 # Theme
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
 
