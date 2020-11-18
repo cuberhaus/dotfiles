@@ -115,8 +115,9 @@ vim_install () {
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
 }
+# Get italics in terminal:
+# tic xterm-256color-italic.terminfo
+
 ### Installation starts here
 brew_install
 mac_install
-vim_install
-bloat_install
