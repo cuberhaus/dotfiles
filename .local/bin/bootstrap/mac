@@ -117,6 +117,7 @@ vim_install () {
 }
 # Get italics in terminal:
 # tic xterm-256color-italic.terminfo
+# https://alexpearce.me/2014/05/italics-in-iterm2-vim-tmux/
 
 ### Installation starts here
 brew_install
