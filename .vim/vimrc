@@ -25,7 +25,6 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 if has('unix') || has('macunix')
     "echo 'test'
     "autocmd VimEnter * echo 'test'
@@ -193,7 +192,7 @@ endfunction
 command YcmGetDocFloatWin :call <SID>Hover()
 autocmd FileType c,cpp,h,hpp nmap <leader>k :YcmGetDocFloatWin<cr>
 
-set guifont="SauceCodePro\ Nerd\ Font\ 13"
+"set guifont="SauceCodePro\ Nerd\ Font\ 13"
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
@@ -708,3 +707,6 @@ let g:yankstack_yank_keys = ['y', 'd']
 " => Git gutter (Git diff)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:gitgutter_enabled=1
+
+" Enable italics
+highlight Comment cterm=italic gui=italic
