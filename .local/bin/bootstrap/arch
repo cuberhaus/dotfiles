@@ -254,7 +254,11 @@ bloat_install () {
 }
 virtualbox_install() {
     sudo pacman -S virtualbox
+    # Need to activate virtualization in bios
+    # 'linux' kernel
     sudo pacman -S virtualbox-host-modules-arch
+    # other kernels including linux-lts
+    sudo pacman -S virtualbox-host-dkms
 }
 games_install () {
     sudo pacman -S steam
