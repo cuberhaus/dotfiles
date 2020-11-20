@@ -115,6 +115,9 @@ vim_install () {
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
 }
+#ctrl + space not working?  Disable change language shortcut
+#https://forum.sublimetext.com/t/os-x-control-space-not-working/2145/3
+
 # Get italics in terminal:
 # tic xterm-256color-italic.terminfo
 # https://alexpearce.me/2014/05/italics-in-iterm2-vim-tmux/
