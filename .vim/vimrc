@@ -306,11 +306,12 @@ set fileencoding=utf-8
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 
-" Tema
-if filereadable(expand("~/.vimrc_background"))
-    let base16colorspace=256
-    source ~/.vimrc_background
-endif
+"" Tema
+"if filereadable(expand("~/.vimrc_background"))
+"    let base16colorspace=256
+"    source ~/.vimrc_background
+"endif
+
 " TRUECOLOR SCHEMES uncheck to enable
 "autocmd vimenter * colorscheme gruvbox
 set t_Co=256
