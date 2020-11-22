@@ -292,6 +292,7 @@ optional() {
     sudo pacman -S nomacs                # Image viewer / use pix instead
     sudo pacman -S r                    # Probabilitat i estadística
     sudo pacman -S dbeaver               # Base de dades
+    sudo pacman -S jdk-openjdk # with dbeaver
     sudo pacman -S remmina               # Remote conexions
     sudo pacman -S texstudio             # Latex text editor
     sudo pacman -S gimp                  # Image editor
