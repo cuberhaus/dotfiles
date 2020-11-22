@@ -19,8 +19,12 @@ wallpaperplugin=org.kde.image
 DialogHeight=715
 DialogWidth=1125
 
+[Containments][20][General]
+ToolBoxButtonState=topcenter
+ToolBoxButtonX=659
+
 [Containments][20][Wallpaper][org.kde.image][General]
-Image=file:///usr/share/wallpapers/Grey/contents/images/1920x1080.jpg
+Image=file:///home/pol/.local/share/wallpapers/WhiteSur/contents/images/2560x1440.png
 SlidePaths=/usr/share/wallpapers
 
 [Containments][21]
@@ -61,7 +65,7 @@ immutability=1
 plugin=org.kde.plasma.systemtray
 
 [Containments][21][Applets][25][Configuration]
-PreloadWeight=75
+PreloadWeight=95
 SystrayContainmentId=26
 
 [Containments][21][Applets][34]
@@ -138,6 +142,13 @@ plugin=org.kde.plasma.bluetooth
 
 [Containments][26][Applets][38][Configuration]
 PreloadWeight=70
+
+[Containments][26][Applets][40]
+immutability=1
+plugin=org.kde.plasma.mediacontroller
+
+[Containments][26][Applets][40][Configuration]
+PreloadWeight=49
 
 [Containments][26][General]
 extraItems=org.kde.plasma.vault,org.kde.plasma.battery,org.kde.plasma.devicenotifier,org.kde.plasma.networkmanagement,org.kde.plasma.bluetooth,org.kde.plasma.volume,org.kde.plasma.nightcolorcontrol,org.kde.plasma.mediacontroller,org.kde.plasma.clipboard,org.kde.plasma.notifications,org.kde.plasma.keyboardindicator

@@ -66,7 +66,7 @@ MoveZoomRight=none,none,Move Zoomed Area to Right
 MoveZoomUp=none,none,Move Zoomed Area Upwards
 Setup Window Shortcut=none,none,Setup Window Shortcut
 Show Desktop=Meta+D,Meta+D,Show Desktop
-ShowDesktopGrid=Ctrl+F8,Ctrl+F8,Show Desktop Grid
+ShowDesktopGrid=Ctrl+F8\tMeta+Ctrl+Up,Ctrl+F8,Show Desktop Grid
 Suspend Compositing=Alt+Shift+F12,Alt+Shift+F12,Suspend Compositing
 Switch One Desktop Down=none,Meta+Ctrl+Down,Switch One Desktop Down
 Switch One Desktop Up=none,Meta+Ctrl+Up,Switch One Desktop Up
@@ -194,6 +194,15 @@ _k_friendly_name=KWin
 view_actual_size=,Meta+0,Actual Size
 view_zoom_in=Meta+=,Meta+=,Zoom In
 view_zoom_out=Meta+-,Meta+-,Zoom Out
+
+[mediacontrol]
+_k_friendly_name=Media Controller
+mediavolumedown=none,none,Media volume down
+mediavolumeup=none,none,Media volume up
+nextmedia=Media Next,Media Next,Media playback next
+playpausemedia=Media Play,Media Play,Play/Pause media playback
+previousmedia=Media Previous,Media Previous,Media playback previous
+stopmedia=Media Stop,Media Stop,Stop media playback
 
 [org.kde.plasma.emojier.desktop]
 _k_friendly_name=Emoji Selector
