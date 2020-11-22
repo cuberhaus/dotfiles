@@ -1,0 +1,30 @@
+[Desktop Entry]
+FullScreen=false
+
+[MainWindow]
+State=AAAA/wAAAAD9AAAAAAAAA5YAAAOXAAAABAAAAAQAAAAIAAAACPwAAAACAAAAAgAAAAEAAAAWAG0AYQBpAG4AVABvAG8AbABCAGEAcgEAAAAA/////wAAAAAAAAAAAAAAAgAAAAEAAAAiAGEAbgBuAG8AdABhAHQAaQBvAG4AVABvAG8AbABCAGEAcgEAAAAA/////wAAAAAAAAAA
+ToolBarsMovable=Disabled
+eDP-1 Height 1080=1025
+eDP-1 Width 1920=918
+eDP-1 XPosition=254
+eDP-1 YPosition=55
+eDP1 Height 1080=1012
+eDP1 Width 1920=960
+eDP1 XPosition=0
+eDP1 YPosition=28
+
+[Print Preview]
+eDP1 Height 1080=500
+eDP1 Width 1920=600
+
+[Recent Files]
+File1[$e]=$HOME/Desktop/Books/Living in the Light_ A guide to personal transformation ( PDFDrive.com ).pdf
+File2[$e]=$HOME/fib/SO/2013_2014Grup31/clab1_31_33.pdf
+File3[$e]=$HOME/fib/SO/ex2019/19-20Q1 - Examen de laboratori 1.pdf
+File4[$e]=$HOME/Downloads/clab-2021q1-sp.pdf
+File5[$e]=$HOME/Downloads/comandos.pdf
+Name1[$e]=Living in the Light_ A guide to personal transformation ( PDFDrive.com ).pdf
+Name2[$e]=clab1_31_33.pdf
+Name3[$e]=19-20Q1 - Examen de laboratori 1.pdf
+Name4[$e]=clab-2021q1-sp.pdf
+Name5[$e]=comandos.pdf
