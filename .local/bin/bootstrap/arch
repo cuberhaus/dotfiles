@@ -239,7 +239,12 @@ cinnamon_install() {
 }
 gnome_install() {
     sudo pacman -S chrome-gnome-shell 
-    # Install dash to dock, impatience, auto move windows
+    # Extensions
+    # dash to dock (add dock)
+    # impatience (faster animations)
+    # auto move windows (move apps to workspaces automatically)
+    # WinTile (tile quarter windows)
+    # cpu power manager (cpu management)
 }
 bloat_install () {
     sudo pacman -S fortune-mod           # Random quote

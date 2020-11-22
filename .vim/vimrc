@@ -326,6 +326,8 @@ endfunction
 command Dark :call Dark()
 
 " Light truecolor
+"set background=light
+"colorscheme PaperColor
 function! Light()
     set background=light
     colorscheme PaperColor
