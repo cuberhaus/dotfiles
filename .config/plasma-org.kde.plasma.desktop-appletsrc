@@ -6,7 +6,7 @@ wheel:Vertical;NoModifier=org.kde.switchdesktop
 [ActionPlugins][1]
 RightButton;NoModifier=org.kde.contextmenu
 
-[Containments][20]
+[Containments][100]
 activityId=21ddfb9d-9c95-4df5-a052-628a5b063d6d
 formfactor=0
 immutability=1
@@ -15,19 +15,22 @@ location=0
 plugin=org.kde.plasma.folder
 wallpaperplugin=org.kde.image
 
-[Containments][20][ConfigDialog]
-DialogHeight=715
-DialogWidth=1125
+[Containments][100][ConfigDialog]
+DialogHeight=540
+DialogWidth=720
 
-[Containments][20][General]
-ToolBoxButtonState=topcenter
-ToolBoxButtonX=659
+[Containments][100][Configuration]
+PreloadWeight=34
 
-[Containments][20][Wallpaper][org.kde.image][General]
+[Containments][100][General]
+positions=3,17,desktop:/table,0,8,desktop:/taula,0,9,desktop:/keyboard-shortcuts-windows.pdf,0,6,desktop:/Netflix.desktop,0,7,desktop:/algebrarelacional.sql,0,4,desktop:/DistribucionParcial.pdf,2,4,desktop:/avatar.png,0,5,desktop:/Elegoo The Super Starter Kit for UNO  V2.0.2020.8.27,0,2,desktop:/Material_Disparadors.pdf,2,2,desktop:/FIB,0,3,desktop:/Books,0,0,desktop:/EDA,0,1
+sortMode=-1
+
+[Containments][100][Wallpaper][org.kde.image][General]
 Image=file:///home/pol/.local/share/wallpapers/WhiteSur/contents/images/2560x1440.png
-SlidePaths=/usr/share/wallpapers
+SlidePaths=/home/pol/.local/share/wallpapers,/usr/share/wallpapers
 
-[Containments][21]
+[Containments][101]
 activityId=
 formfactor=2
 immutability=1
@@ -36,53 +39,59 @@ location=4
 plugin=org.kde.panel
 wallpaperplugin=org.kde.image
 
-[Containments][21][Applets][22]
+[Containments][101][Applets][102]
 immutability=1
 plugin=org.kde.plasma.kickoff
 
-[Containments][21][Applets][22][Configuration]
+[Containments][101][Applets][102][Configuration]
 PreloadWeight=100
 
-[Containments][21][Applets][22][Configuration][General]
+[Containments][101][Applets][102][Configuration][General]
 favoritesPortedToKAstats=true
 
-[Containments][21][Applets][22][Configuration][Shortcuts]
+[Containments][101][Applets][102][Configuration][Shortcuts]
 global=Alt+F1
 
-[Containments][21][Applets][22][Shortcuts]
+[Containments][101][Applets][102][Shortcuts]
 global=Alt+F1
 
-[Containments][21][Applets][23]
+[Containments][101][Applets][103]
 immutability=1
 plugin=org.kde.plasma.pager
 
-[Containments][21][Applets][24]
-immutability=1
-plugin=org.kde.plasma.icontasks
+[Containments][101][Applets][103][Configuration]
+PreloadWeight=34
 
-[Containments][21][Applets][25]
+[Containments][101][Applets][105]
 immutability=1
 plugin=org.kde.plasma.systemtray
 
-[Containments][21][Applets][25][Configuration]
-PreloadWeight=95
-SystrayContainmentId=26
+[Containments][101][Applets][105][Configuration]
+PreloadWeight=84
+SystrayContainmentId=106
 
-[Containments][21][Applets][34]
+[Containments][101][Applets][122]
+immutability=1
+plugin=org.kde.plasma.icontasks
+
+[Containments][101][Applets][124]
 immutability=1
 plugin=org.kde.plasma.digitalclock
 
-[Containments][21][Applets][34][Configuration]
+[Containments][101][Applets][124][Configuration]
 PreloadWeight=55
 
-[Containments][21][Applets][39]
+[Containments][101][Applets][125]
 immutability=1
 plugin=org.kde.plasma.minimizeall
 
-[Containments][21][General]
-AppletOrder=22;23;24;25;34;39
+[Containments][101][Configuration]
+PreloadWeight=34
 
-[Containments][26]
+[Containments][101][General]
+AppletOrder=102;103;122;105;124;125
+
+[Containments][106]
 activityId=
 formfactor=2
 immutability=1
@@ -91,69 +100,90 @@ location=4
 plugin=org.kde.plasma.private.systemtray
 wallpaperplugin=org.kde.image
 
-[Containments][26][Applets][27]
+[Containments][106][Applets][107]
 immutability=1
 plugin=org.kde.plasma.volume
 
-[Containments][26][Applets][27][Configuration]
-PreloadWeight=65
+[Containments][106][Applets][107][Configuration]
+PreloadWeight=34
 
-[Containments][26][Applets][28]
+[Containments][106][Applets][108]
 immutability=1
 plugin=org.kde.plasma.clipboard
 
-[Containments][26][Applets][29]
+[Containments][106][Applets][108][Configuration]
+PreloadWeight=34
+
+[Containments][106][Applets][109]
 immutability=1
 plugin=org.kde.plasma.devicenotifier
 
-[Containments][26][Applets][30]
+[Containments][106][Applets][109][Configuration]
+PreloadWeight=34
+
+[Containments][106][Applets][110]
 immutability=1
 plugin=org.kde.plasma.keyboardindicator
 
-[Containments][26][Applets][31]
+[Containments][106][Applets][110][Configuration]
+PreloadWeight=34
+
+[Containments][106][Applets][111]
 immutability=1
 plugin=org.kde.plasma.nightcolorcontrol
 
-[Containments][26][Applets][32]
+[Containments][106][Applets][111][Configuration]
+PreloadWeight=34
+
+[Containments][106][Applets][112]
 immutability=1
 plugin=org.kde.plasma.notifications
 
-[Containments][26][Applets][33]
+[Containments][106][Applets][112][Configuration]
+PreloadWeight=34
+
+[Containments][106][Applets][113]
 immutability=1
 plugin=org.kde.plasma.vault
 
-[Containments][26][Applets][36]
+[Containments][106][Applets][113][Configuration]
+PreloadWeight=34
+
+[Containments][106][Applets][116]
 immutability=1
 plugin=org.kde.plasma.battery
 
-[Containments][26][Applets][36][Configuration]
-PreloadWeight=60
+[Containments][106][Applets][116][Configuration]
+PreloadWeight=49
 
-[Containments][26][Applets][37]
+[Containments][106][Applets][117]
 immutability=1
 plugin=org.kde.plasma.networkmanagement
 
-[Containments][26][Applets][37][Configuration]
-PreloadWeight=55
+[Containments][106][Applets][117][Configuration]
+PreloadWeight=34
 
-[Containments][26][Applets][38]
+[Containments][106][Applets][118]
 immutability=1
 plugin=org.kde.plasma.bluetooth
 
-[Containments][26][Applets][38][Configuration]
-PreloadWeight=70
+[Containments][106][Applets][118][Configuration]
+PreloadWeight=34
 
-[Containments][26][Applets][40]
+[Containments][106][Applets][119]
 immutability=1
 plugin=org.kde.plasma.mediacontroller
 
-[Containments][26][Applets][40][Configuration]
-PreloadWeight=49
+[Containments][106][Applets][119][Configuration]
+PreloadWeight=57
 
-[Containments][26][General]
+[Containments][106][Configuration]
+PreloadWeight=34
+
+[Containments][106][General]
 extraItems=org.kde.plasma.vault,org.kde.plasma.battery,org.kde.plasma.devicenotifier,org.kde.plasma.networkmanagement,org.kde.plasma.bluetooth,org.kde.plasma.volume,org.kde.plasma.nightcolorcontrol,org.kde.plasma.mediacontroller,org.kde.plasma.clipboard,org.kde.plasma.notifications,org.kde.plasma.keyboardindicator
 knownItems=org.kde.plasma.vault,org.kde.plasma.battery,org.kde.plasma.devicenotifier,org.kde.plasma.networkmanagement,org.kde.plasma.bluetooth,org.kde.plasma.volume,org.kde.plasma.nightcolorcontrol,org.kde.plasma.mediacontroller,org.kde.plasma.clipboard,org.kde.plasma.notifications,org.kde.plasma.keyboardindicator
 
 [ScreenMapping]
 itemsOnDisabledScreens=
-screenMapping=desktop:/FIB,0,desktop:/table,0,desktop:/algebrarelacional.sql,0,desktop:/Netflix.desktop,0,desktop:/avatar.png,0,desktop:/Elegoo The Super Starter Kit for UNO  V2.0.2020.8.27,0,desktop:/Books,0,desktop:/taula,0,desktop:/EDA,0,desktop:/keyboard-shortcuts-windows.pdf,0
+screenMapping=desktop:/keyboard-shortcuts-windows.pdf,0,desktop:/EDA,0,desktop:/avatar.png,0,desktop:/table,0,desktop:/Netflix.desktop,0,desktop:/Material_Disparadors.pdf,0,desktop:/Elegoo The Super Starter Kit for UNO  V2.0.2020.8.27,0,desktop:/Books,0,desktop:/FIB,0,desktop:/taula,0,desktop:/algebrarelacional.sql,0,desktop:/DistribucionParcial.pdf,0

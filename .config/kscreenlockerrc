@@ -3,3 +3,7 @@ update_info=kscreenlocker.upd:0.1-autolock
 
 [Greeter]
 Theme=com.github.varlesh.arc-dark
+
+[Greeter][Wallpaper][org.kde.image][General]
+Image=/usr/share/wallpapers/Arc/
+SlidePaths=/home/pol/.local/share/wallpapers,/usr/share/wallpapers

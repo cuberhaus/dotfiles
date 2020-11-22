@@ -1,6 +1,9 @@
 # KDE
 .config/okularrc
 .config/plasmashellrc
+.config/kconf_updaterc
+.config/kde.org/
+.config/ksmserverrc
 
 # antigen
 .config/antigen/debug.log

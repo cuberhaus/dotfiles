@@ -10,6 +10,11 @@ Id_2=818bfe28-fb9f-42a0-b1ea-20b33a4f0cdd
 Number=2
 Rows=1
 
+[TabBox]
+DesktopLayout=org.kde.breeze.desktop
+DesktopListLayout=org.kde.breeze.desktop
+LayoutName=org.kde.breeze.desktop
+
 [org.kde.kdecoration2]
 library=org.kde.kwin.aurorae
 theme=__aurorae__svg__Arc-Dark
