@@ -7,7 +7,8 @@
 .config/kactivitymanagerd-statsrc
 .config/kactivitymanagerdrc
 .config/kded5rc
-.config/ksplashrc # idk about this one
+# idk about this one
+.config/ksplashrc
 .config/ktimezonedrc
 .config/kwalletrc
 .config/okularpartrc

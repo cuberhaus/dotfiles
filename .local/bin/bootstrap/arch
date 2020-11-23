@@ -246,6 +246,10 @@ gnome_install() {
     # WinTile (tile quarter windows)
     # cpu power manager (cpu management)
 }
+plasma_install() {
+    sudo pacman -S plasma # Check archwiki first
+    yay -S ocs-url # Easy install of kde store add-ons
+}
 bloat_install () {
     sudo pacman -S fortune-mod           # Random quote
     sudo pacman -S cmatrix               # Bloat
