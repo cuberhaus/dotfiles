@@ -9,7 +9,6 @@
 "    -> Moving around, tabs and buffers
 "    -> Status line
 "    -> Editing mappings
-"    -> vimgrep searching and cope displaying
 "    -> Spell checking
 "    -> Misc
 "    -> Helper functions
@@ -21,6 +20,13 @@
 "
 " Launch without anything: vim --clean
 " Install vim-gtk
+" Per comentar una linea gcc per comentar gc per fer moviments
+" vim repeat cs'" to change surround from ' to "
+" " ysiw" to add " to a word
+" " ds" to remove surround
+
+" :Obsess to start recording vim session
+" vim -S to source the session
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
@@ -56,6 +62,7 @@ endif
 "nnoremap <SPACE> <Nop>
 "map <Space> <leader>
 let mapleader=" "
+
 set showcmd
 " Sets how many lines of history VIM has to remember
 set history=500
@@ -106,16 +113,14 @@ endif
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 call plug#begin()
+"Plug 'easymotion/vim-easymotion'
 Plug 'Chiel92/vim-autoformat'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'airblade/vim-gitgutter'
-Plug 'amix/vim-zenroom2'
 Plug 'ap/vim-css-color'
-Plug 'chriskempson/base16-vim'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'dracula/vim', { 'as': 'dracula' }
-Plug 'easymotion/vim-easymotion'
 Plug 'godlygeek/tabular'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
 Plug 'jiangmiao/auto-pairs'
@@ -306,12 +311,6 @@ set fileencoding=utf-8
 let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
 let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
 
-"" Tema
-"if filereadable(expand("~/.vimrc_background"))
-"    let base16colorspace=256
-"    source ~/.vimrc_background
-"endif
-
 " TRUECOLOR SCHEMES uncheck to enable
 "autocmd vimenter * colorscheme gruvbox
 set t_Co=256
@@ -404,28 +403,22 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Keybindings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Per comentar una linea gcc per comentar gc per fer moviments
-" vim repeat cs'" to change surround from ' to "
-" " ysiw" to add " to a word
-" " ds" to remove surround
-
-" :Obsess to start recording vim session
-" vim -S to source the session
 
 " Press ctrl+m to toggle markdown preview
 nmap <C-m> <Plug>MarkdownPreviewToggle
-
-" Toggle fullscreen
-"noremap <M-f> :FullscreenToggle<CR>
 
 "Autoformat
 noremap <F3> :Autoformat<CR>
 
 if system('uname -s') == "Darwin\n"
     "Toggle nerd Tree ctrl-spacebar
-    nmap <c-@> :NERDTreeToggle <CR>
+    nmap <C-@> :NERDTreeToggle <CR>
 else
-    nmap <c-Space> :NERDTreeToggle <CR>
+    if has('nvim')
+        nmap <C-Space> :NERDTreeToggle <CR>
+    else 
+        nmap <NUL> :NERDTreeToggle <CR>
+    endif
 endif
 
 "Open bufexplorer to see and manage the current buffers (<leader>o):
@@ -446,7 +439,7 @@ nmap <C-p> <Plug>yankstack_substitute_older_paste
 nmap <C-n> <Plug>yankstack_substitute_newer_paste
 
 " Git gutter toggle
-nnoremap <silent> <leader>d :GitGutterToggle<cr>
+nnoremap <silent> <leader>g :GitGutterToggle<cr>
 
 " Fast saving
 nmap <leader>w :w!<cr>
@@ -456,6 +449,7 @@ command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 
 map <C-down> <C-E>
 map <C-up> <C-Y>
+
 " Disable highlight when <leader><cr> is pressed
 map <silent> <leader><cr> :noh<cr>
 
@@ -528,6 +522,22 @@ set laststatus=2
 
 " barra, amaga la barra antiga, set laststatus=2 ensenya la barra sempre
 set noshowmode
+
+""""""""""""""""""""""""""""""
+" => Status line
+""""""""""""""""""""""""""""""
+" Demana per descarregar el fixter corresponent
+let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
+"setlocal spell spelllang=en
+map <leader>ss :setlocal spell! spelllang=en<cr>
+map <leader>se :setlocal spell! spelllang=es<cr>
+map <leader>sc :setlocal spell! spelllang=ca<cr>
+
+map <leader>sn ]s
+map <leader>sp [s
+" zg accepts a word, zug undoes 
+"map <leader>sa zg
+map <leader>s? z=
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Editing mappings
@@ -688,18 +698,13 @@ let g:ctrlp_show_hidden = 1
 let g:ctrlp_max_height = 20
 let g:ctrlp_custom_ignore = 'node_modules\|^\.DS_Store\|^\.git\|^\.coffee'
 
-""""""""""""""""""""""""""""""
-" => ZenCoding
-""""""""""""""""""""""""""""""
-" Enable all functions in all modes
-let g:user_zen_mode='a'
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Vimroom
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:goyo_width=100
-let g:goyo_margin_top = 2
-let g:goyo_margin_bottom = 2
+"let g:goyo_height=100
+let g:goyo_margin_top = 0
+"let g:goyo_margin_bottom = 2
 
 """"""""""""""""""""""""""""""
 " => YankStack
