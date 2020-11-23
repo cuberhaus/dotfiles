@@ -2,7 +2,7 @@
 update_info=kscreenlocker.upd:0.1-autolock
 
 [Greeter]
-Theme=com.github.varlesh.arc-dark
+Theme=org.kde.breeze.desktop
 
 [Greeter][Wallpaper][org.kde.image][General]
 Image=/usr/share/wallpapers/Arc/

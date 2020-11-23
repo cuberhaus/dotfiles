@@ -1,6 +1,7 @@
 [ActivityManager]
 _k_friendly_name=Activity Manager
 switch-to-activity-21ddfb9d-9c95-4df5-a052-628a5b063d6d=none,none,Switch to activity "Default"
+switch-to-activity-b0d2be00-ae0e-41b4-bd6a-81dbdf3b07ea=none,none,Switch to activity "Default"
 
 [KDE Keyboard Layout Switcher]
 Switch keyboard layout to Spanish=none,none,Switch keyboard layout to Spanish
@@ -55,6 +56,8 @@ Decrease Opacity=none,none,Decrease Opacity of Active Window by 5 %
 Expose=Ctrl+F9,Ctrl+F9,Toggle Present Windows (Current desktop)
 ExposeAll=Ctrl+F10\tLaunch (C),Ctrl+F10\tLaunch (C),Toggle Present Windows (All desktops)
 ExposeClass=Ctrl+F7,Ctrl+F7,Toggle Present Windows (Window class)
+FlipSwitchAll=none,none,Toggle Flip Switch (All desktops)
+FlipSwitchCurrent=none,none,Toggle Flip Switch (Current desktop)
 Increase Opacity=none,none,Increase Opacity of Active Window by 5 %
 Invert Screen Colors=none,none,Invert Screen Colors
 Kill Window=Ctrl+Alt+Esc,Ctrl+Alt+Esc,Kill Window
@@ -237,10 +240,10 @@ activate task manager entry 6=Meta+6,Meta+6,Activate Task Manager Entry 6
 activate task manager entry 7=Meta+7,Meta+7,Activate Task Manager Entry 7
 activate task manager entry 8=Meta+8,Meta+8,Activate Task Manager Entry 8
 activate task manager entry 9=Meta+9,Meta+9,Activate Task Manager Entry 9
-activate widget 102=Alt+F1,none,Activate Application Launcher Widget
 activate widget 122=none,none,Activate Icons-only Task Manager Widget
 activate widget 124=none,none,Activate Digital Clock Widget
 activate widget 125=none,none,Activate Minimize all Windows Widget
+activate widget 141=Alt+F1,none,Activate Application Menu Widget
 activate widget 39=none,none,Activate Minimize all Windows Widget
 clear-history=none,none,Clear Clipboard History
 clipboard_action=Ctrl+Alt+X,Ctrl+Alt+X,Enable Clipboard Actions
