@@ -4,6 +4,23 @@
 .config/kconf_updaterc
 .config/kde.org/
 .config/ksmserverrc
+.config/kactivitymanagerd-statsrc
+.config/kactivitymanagerdrc
+.config/kded5rc
+.config/ksplashrc # idk about this one
+.config/ktimezonedrc
+.config/kwalletrc
+.config/okularpartrc
+.config/plasma-localerc
+.config/plasma-nm
+.config/plasma.emojierrc
+.config/plasmanotifyrc
+.config/powermanagementprofilesrc
+.config/kateschemarc
+.config/kcminputrc
+.config/kwinrulesrc
+.config/kxkbrc
+.config/plasmarc
 
 # antigen
 .config/antigen/debug.log
