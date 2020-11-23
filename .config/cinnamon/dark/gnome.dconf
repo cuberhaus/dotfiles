@@ -6,6 +6,11 @@ window-maximized=false
 window-position=[644, 0]
 window-size=[632, 993]
 
+[baobab/ui]
+active-chart='rings'
+window-size=(960, 600)
+window-state=87168
+
 [books]
 window-maximized=true
 
@@ -41,6 +46,14 @@ last-char=uint32 229
 [charmap/window-state]
 size=(1080, 585)
 
+[clocks]
+world-clocks=@aa{sv} []
+
+[clocks/state/window]
+panel-id='world'
+size=(870, 690)
+state=87168
+
 [control-center]
 last-panel='universal-access'
 
@@ -58,6 +71,10 @@ secondary-click-time=1.2
 [desktop/app-folders]
 folder-children=['Utilities', 'YaST']
 
+[desktop/app-folders/folders/11d353ae-c099-49b6-9e9d-97143f01d622]
+apps=['bvnc.desktop', 'bssh.desktop', 'avahi-discover.desktop', 'org.gnome.Boxes.desktop', 'org.gnome.Books.desktop', 'compton.desktop', 'electron5.desktop', 'arandr.desktop', 'cmake-gui.desktop', 'calibre-ebook-viewer.desktop', 'calibre-ebook-edit.desktop']
+name='Internet'
+
 [desktop/app-folders/folders/Utilities]
 apps=['gnome-abrt.desktop', 'gnome-system-log.desktop', 'gnome-system-monitor.desktop', 'gucharmap.desktop', 'nm-connection-editor.desktop', 'org.gnome.baobab.desktop', 'org.gnome.Calculator.desktop', 'org.gnome.DejaDup.desktop', 'org.gnome.Dictionary.desktop', 'org.gnome.DiskUtility.desktop', 'org.gnome.eog.desktop', 'org.gnome.Evince.desktop', 'org.gnome.FileRoller.desktop', 'org.gnome.fonts.desktop', 'org.gnome.Screenshot.desktop', 'org.gnome.seahorse.Application.desktop', 'org.gnome.Terminal.desktop', 'org.gnome.tweaks.desktop', 'org.gnome.Usage.desktop', 'simple-scan.desktop', 'vinagre.desktop', 'yelp.desktop']
 categories=['X-GNOME-Utilities']
@@ -69,6 +86,13 @@ categories=['X-SuSE-YaST']
 name='suse-yast.directory'
 translate=true
 
+[desktop/background]
+color-shading-type='solid'
+picture-options='zoom'
+picture-uri='file:///usr/share/backgrounds/linuxmint-petra/kennymatic_sunny.jpg'
+primary-color='#000000'
+secondary-color='#000000'
+
 [desktop/calendar]
 show-weekdate=false
 
@@ -77,6 +101,7 @@ sources=[('xkb', 'us')]
 xkb-options=@as []
 
 [desktop/interface]
+cursor-size=24
 cursor-theme='breeze_cursors'
 document-font-name='Sans 11'
 enable-animations=true
@@ -90,20 +115,53 @@ toolkit-accessibility=false
 [desktop/notifications]
 application-children=['skypeforlinux', 'org-gnome-books']
 
+[desktop/notifications/application/gnome-power-panel]
+application-id='gnome-power-panel.desktop'
+
 [desktop/notifications/application/org-gnome-books]
 application-id='org.gnome.Books.desktop'
+
+[desktop/notifications/application/org-gnome-evolution-alarm-notify]
+application-id='org.gnome.Evolution-alarm-notify.desktop'
+
+[desktop/notifications/application/org-gnome-nautilus]
+application-id='org.gnome.Nautilus.desktop'
+
+[desktop/notifications/application/org-gnome-shell-extensions]
+application-id='org.gnome.Shell.Extensions.desktop'
 
 [desktop/notifications/application/skypeforlinux]
 application-id='skypeforlinux.desktop'
 
+[desktop/notifications/application/spotify]
+application-id='spotify.desktop'
+
 [desktop/peripherals/touchpad]
+click-method='areas'
 two-finger-scrolling-enabled=true
+
+[desktop/privacy]
+disable-microphone=false
+
+[desktop/screensaver]
+color-shading-type='solid'
+picture-options='zoom'
+picture-uri='file:///usr/share/backgrounds/linuxmint-petra/kennymatic_sunny.jpg'
+primary-color='#000000'
+secondary-color='#000000'
 
 [desktop/search-providers]
 sort-order=['org.gnome.Contacts.desktop', 'org.gnome.Documents.desktop', 'org.gnome.Nautilus.desktop']
 
+[desktop/wm/keybindings]
+maximize=['<Control><Shift><Super>Up']
+unmaximize=['<Control><Shift><Super>Down', '<Alt>F5']
+
 [desktop/wm/preferences]
 button-layout='icon:minimize,maximize,close'
+
+[documents]
+window-maximized=true
 
 [epiphany]
 ask-for-default=false
@@ -282,6 +340,13 @@ wrap-mode='none'
 height=1058
 width=1920
 
+[mutter]
+edge-tiling=false
+
+[mutter/keybindings]
+toggle-tiled-left=['<Control><Shift><Super>Left']
+toggle-tiled-right=['<Control><Shift><Super>Right']
+
 [nautilus/compression]
 default-compression-format='zip'
 
@@ -295,6 +360,7 @@ default-visible-columns=['name', 'size', 'date_modified', 'starred']
 [nautilus/preferences]
 default-folder-viewer='icon-view'
 search-filter-time-type='last_modified'
+search-view='list-view'
 
 [nautilus/window-state]
 initial-size=(949, 967)
@@ -372,8 +438,32 @@ antialiasing='grayscale'
 hinting='slight'
 
 [shell]
+app-picker-layout=[{'arduino.desktop': <{'position': <0>}>, 'audacity.desktop': <{'position': <1>}>, '11d353ae-c099-49b6-9e9d-97143f01d622': <{'position': <2>}>, 'com.ulduzsoft.Birdtray.desktop': <{'position': <3>}>, 'org.gnome.Calendar.desktop': <{'position': <4>}>, 'calibre-gui.desktop': <{'position': <5>}>, 'org.gnome.Cheese.desktop': <{'position': <6>}>, 'org.gnome.clocks.desktop': <{'position': <7>}>, 'conky.desktop': <{'position': <8>}>, 'org.gnome.Contacts.desktop': <{'position': <9>}>, 'dbeaver.desktop': <{'position': <10>}>, 'discord.desktop': <{'position': <11>}>, 'xreader.desktop': <{'position': <12>}>, 'org.gnome.Documents.desktop': <{'position': <13>}>}, {'org.gnome.Extensions.desktop': <{'position': <0>}>, 'org.gnome.Nautilus.desktop': <{'position': <1>}>, 'galculator.desktop': <{'position': <2>}>, 'gimp.desktop': <{'position': <3>}>, 'google-chrome.desktop': <{'position': <4>}>, 'gparted.desktop': <{'position': <5>}>, 'gvim.desktop': <{'position': <6>}>, 'lstopo.desktop': <{'position': <7>}>, 'io.github.Hexchat.desktop': <{'position': <8>}>, 'hplip.desktop': <{'position': <9>}>, 'hp-uiscan.desktop': <{'position': <10>}>, 'htop.desktop': <{'position': <11>}>, 'yad-icon-browser.desktop': <{'position': <12>}>, 'libreoffice-startcenter.desktop': <{'position': <13>}>, 'libreoffice-base.desktop': <{'position': <14>}>, 'libreoffice-calc.desktop': <{'position': <15>}>, 'libreoffice-draw.desktop': <{'position': <16>}>, 'libreoffice-impress.desktop': <{'position': <17>}>, 'libreoffice-math.desktop': <{'position': <18>}>, 'libreoffice-writer.desktop': <{'position': <19>}>, 'lightdm-gtk-greeter-settings.desktop': <{'position': <20>}>, 'org.gnome.Lollypop.desktop': <{'position': <21>}>, 'calibre-lrfviewer.desktop': <{'position': <22>}>, 'cups.desktop': <{'position': <23>}>}, {'org.gnome.Maps.desktop': <{'position': <0>}>, 'org.gnome.meld.desktop': <{'position': <1>}>, 'org.gnome.Music.desktop': <{'position': <2>}>, 'nemo.desktop': <{'position': <3>}>, 'nvim.desktop': <{'position': <4>}>, 'org.nomacs.ImageLounge.desktop': <{'position': <5>}>, 'nvidia-settings.desktop': <{'position': <6>}>, 'org.kde.okular.desktop': <{'position': <7>}>, 'obconf.desktop': <{'position': <8>}>, 'org.freedesktop.MalcontentControl.desktop': <{'position': <9>}>, 'org.gnome.Photos.desktop': <{'position': <10>}>, 'picom.desktop': <{'position': <11>}>, 'pix.desktop': <{'position': <12>}>, 'system-config-printer.desktop': <{'position': <13>}>, 'org.qbittorrent.qBittorrent.desktop': <{'position': <14>}>, 'assistant.desktop': <{'position': <15>}>, 'designer.desktop': <{'position': <16>}>, 'linguist.desktop': <{'position': <17>}>, 'qdbusviewer.desktop': <{'position': <18>}>, 'qv4l2.desktop': <{'position': <19>}>, 'qvidcap.desktop': <{'position': <20>}>, 'r.desktop': <{'position': <21>}>, 'ranger.desktop': <{'position': <22>}>, 'org.remmina.Remmina.desktop': <{'position': <23>}>}, {'rstudio.desktop': <{'position': <0>}>, 'gnome-control-center.desktop': <{'position': <1>}>, 'skypeforlinux.desktop': <{'position': <2>}>, 'org.gnome.Software.desktop': <{'position': <3>}>, 'spotify.desktop': <{'position': <4>}>, 'wine-Programs-Steam-Steam.desktop': <{'position': <5>}>, 'steam.desktop': <{'position': <6>}>, 'termite.desktop': <{'position': <7>}>, 'texstudio.desktop': <{'position': <8>}>, 'org.gnome.gedit.desktop': <{'position': <9>}>, 'thunderbird.desktop': <{'position': <10>}>, 'timeshift-gtk.desktop': <{'position': <11>}>, 'torbrowser.desktop': <{'position': <12>}>, 'torbrowser-settings.desktop': <{'position': <13>}>, 'transmission-gtk.desktop': <{'position': <14>}>, 'Utilities': <{'position': <15>}>, 'org.gnome.Totem.desktop': <{'position': <16>}>, 'vim.desktop': <{'position': <17>}>, 'visual-studio-code.desktop': <{'position': <18>}>, 'vlc.desktop': <{'position': <19>}>, 'org.gnome.Weather.desktop': <{'position': <20>}>, 'org.gnome.Epiphany.desktop': <{'position': <21>}>, 'whatsapp-nativefier.desktop': <{'position': <22>}>}, {'winetricks.desktop': <{'position': <0>}>, 'xdvi.desktop': <{'position': <1>}>, 'xfce4-terminal.desktop': <{'position': <2>}>, 'qt5ct.desktop': <{'position': <3>}>, 'kvantummanager.desktop': <{'position': <4>}>}]
 enabled-extensions=@as []
+favorite-apps=['termite.desktop', 'spotify.desktop', 'visual-studio-code.desktop', 'google-chrome.desktop', 'nemo.desktop', 'org.gnome.Nautilus.desktop', 'Alacritty.desktop', 'org.gnome.FileRoller.desktop']
 had-bluetooth-devices-setup=true
+
+[shell/extensions/auto-move-windows]
+application-list=['spotify.desktop:2']
+
+[shell/extensions/cpupower]
+default-ac-profile='3014119435'
+default-battery-profile='1577488486'
+profiles=[(0, 10, false, 'Energy Saver', '2360015851'), (0, 30, false, 'Quiet', '610342367'), (20, 80, true, 'Multimedia', '1577488486'), (50, 100, true, 'High Performance', '3014119435')]
+show-arrow-in-taskbar=true
+show-freq-in-taskbar=false
+show-icon-in-taskbar=true
+taskbar-freq-unit-ghz=true
+
+[shell/extensions/dash-to-dock]
+animate-show-apps=true
+dock-fixed=true
+
+[shell/extensions/net/gfxmonk/impatience]
+speed-factor=0.29999999999999999
+
+[shell/overrides]
+edge-tiling=false
 
 [shell/weather]
 automatic-location=true
@@ -383,7 +473,7 @@ locations=@av []
 locations=@av []
 
 [software]
-check-timestamp=int64 1603823880
+check-timestamp=int64 1606168856
 first-run=false
 
 [terminal/legacy]

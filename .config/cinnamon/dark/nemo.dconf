@@ -31,6 +31,7 @@ selection-menu-make-link=true
 geometry='1117x551+463+587'
 maximized=false
 my-computer-expanded=true
+network-expanded=true
 side-pane-view='places'
 sidebar-bookmark-breakpoint=1
 sidebar-width=171

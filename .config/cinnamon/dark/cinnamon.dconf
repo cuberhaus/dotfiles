@@ -49,7 +49,7 @@ exec-arg='-e'
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///home/pol/dotfiles/dotfiles/.local/xdg/wallpapers/landscapes/michelle-spollen-c9MFM8rSMsQ-unsplash.jpg'
+picture-uri='file:///usr/share/backgrounds/linuxmint-ulyana/jheston_beach.jpg'
 
 [desktop/background/slideshow]
 delay=15
