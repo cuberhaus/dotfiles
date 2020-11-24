@@ -28,6 +28,7 @@ alias vconfgrub="sudo vim /boot/grub/grub.cfg"
 
 alias fck="fuck"
 #alias vim="nvim"
+alias n="nvim"
 alias lvim="nvim +'call Light()' "
 
 # Easier navigation: .., ..., ...., ....., ~ and -

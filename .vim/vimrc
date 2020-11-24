@@ -17,6 +17,9 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" With a map leader it's possible to do extra key combinations
+let mapleader=" "
+
 if has('unix') || has('macunix')
     " Clean-up
     set undodir=$XDG_DATA_HOME/vim/undo
@@ -41,39 +44,6 @@ if has('unix') || has('macunix')
     endif
 endif
 
-" With a map leader it's possible to do extra key combinations
-let mapleader=" "
-set showcmd
-
-" Sets how many lines of history VIM has to remember
-set history=500
-
-" Sets default yank register to same as linux system
-if has('win32') 
-    set clipboard=unnamed
-endif
-
-if system('uname -s') == "Darwin\n"
-  set clipboard=unnamed "OSX
-else
-  set clipboard=unnamedplus "Linux
-endif
-
-" Enable filetype plugins
-filetype plugin indent on
-
-"Fa que el escape sigui instantani
-set timeoutlen=1000 ttimeoutlen=0
-
-" Número relatiu a la teva posició en la barra de l'esquerra
-set number relativenumber
-
-"activa suport de mouse
-set mouse=a
-
-" Disable auto comments 
-autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
-
 " Si plug.vim no existeix ho instala
 if has('unix') || has('macunix')
   if empty(glob('~/.vim/autoload/plug.vim'))
@@ -85,12 +55,6 @@ endif
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 call plug#begin()
-"Plug 'christoomey/vim-tmux-navigator'
-"Plug 'tmux-plugins/vim-tmux'
-"Plug 'tmux-plugins/vim-tmux-focus-events'
-"Plug 'tpope/vim-fugitive'
-"Plug 'ctrlpvim/ctrlp.vim'
-"Plug 'NLKNguyen/papercolor-theme'
 Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
 Plug 'ap/vim-css-color'
@@ -101,13 +65,11 @@ Plug 'joshdick/onedark.vim'
 Plug 'junegunn/goyo.vim'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'nathanaelkane/vim-indent-guides'
-Plug 'plasticboy/vim-markdown'
 Plug 'preservim/nerdtree'
 Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'ryanoasis/vim-devicons'
 Plug 'sheerun/vim-polyglot'
 Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
@@ -134,22 +96,44 @@ if !has('nvim')
     set completeopt+=popup
 endif
 
-"set guifont="SauceCodePro\ Nerd\ Font\ 13"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => General
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+set showcmd
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => VIM user interface
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Sets how many lines of history VIM has to remember
+set history=500
+
+" Sets default yank register to same as linux system
+if has('win32')
+    set clipboard=unnamed
+endif
+
+if system('uname -s') == "Darwin\n"
+  set clipboard=unnamed "OSX
+else
+  set clipboard=unnamedplus "Linux
+endif
+
+" Enable filetype plugins
+filetype plugin indent on
+
+"Fa que el escape sigui instantani
+set timeoutlen=1000 ttimeoutlen=0
+
+" Número relatiu a la teva posició en la barra de l'esquerra
+set number relativenumber
+
+"activa suport de mouse
+set mouse=a
+
+" Disable auto comments
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 " Set 4 lines to the cursor - when moving vertically using j/k
 set so=4
 
-" Avoid garbled characters in Chinese language windows OS
-"let $LANG='en'
-"set langmenu=en
-"source $VIMRUNTIME/delmenu.vim
-"source $VIMRUNTIME/menu.vim
-
-" Turn on the Wild menu
+" Turn on the Wild menu, better autocompletion
 set wildmenu
 
 " Ignore compiled files
@@ -166,13 +150,8 @@ set ruler
 " Height of the command bar
 set cmdheight=1
 
-" A buffer becomes hidden when it is abandoned
-set hid
-
 " Configure backspace so it acts as it should act
-set backspace=eol,start,indent
-" Move across lines with h and l
-"set whichwrap+=<,>,h,l
+"set backspace=eol,start,indent
 
 " Ignore case when searching
 set ignorecase
@@ -200,9 +179,6 @@ set mat=2
 
 "This one is the one that works
 set belloff=all
-
-" Add a bit extra margin to the left
-set foldcolumn=1
 
 " Change cursor to a vertical thin line while in insert mode and underscore while replacing
 
@@ -240,7 +216,6 @@ endif
 " Changes current directory for new files
 set autochdir
 
-
 " Set utf8 as standard encoding and en_US as the standard language
 set encoding=utf8
 set fileencoding=utf-8
@@ -248,17 +223,10 @@ set fileencoding=utf-8
 set t_Co=256
 
 " Dark truecolor
-"set background=dark
+set background=dark
 colorscheme onedark
-function! Dark()
-    set background=dark
-    colorscheme onedark
-endfunction
-command Dark :call Dark()
-
-" Configuració per a vim-airline 
+" Configuració per a vim-airline
 let g:airline#extensions#tabline#enabled = 1 "fica automaticament els buffers a la barreta
-
 
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
@@ -316,7 +284,7 @@ if system('uname -s') == "Darwin\n"
 else
     if has('nvim')
         nmap <C-Space> :NERDTreeToggle <CR>
-    else 
+    else
         nmap <NUL> :NERDTreeToggle <CR>
     endif
 endif
@@ -345,9 +313,6 @@ map <C-up> <C-Y>
 
 " Disable highlight when <leader><cr> is pressed
 map <silent> <leader><cr> :noh<cr>
-
-" Edit file |   DO NOT take out the trailing whitespace on this line
-map <leader>e :e
 
 " Smart way to move between windows
 map <C-j> <C-W>j
@@ -386,7 +351,7 @@ nmap <leader>hv <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
-" :help updatetime 
+" :help updatetime
 set updatetime=1000
 
 "Press Enter to jump to the subject (topic) under the cursor.
@@ -399,7 +364,7 @@ set updatetime=1000
 " => Moving around
 """"""""""""""""""""""""""""""
 " Return to last edit position when opening files (You want this!)
-"au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
 """"""""""""""""""""""""""""""
 " => Status line
@@ -422,7 +387,7 @@ map <leader>sc :setlocal spell! spelllang=ca<cr>
 
 map <leader>sn ]s
 map <leader>sp [s
-" zg accepts a word, zug undoes 
+" zg accepts a word, zug undoes
 "map <leader>sa zg
 map <leader>s? z=
 
@@ -436,25 +401,8 @@ map <leader>s? z=
 " Remap VIM 0 to first non-blank character
 map 0 ^
 
-" Delete trailing white space on save, useful for some filetypes ;)
-fun! CleanExtraSpaces()
-    let save_cursor = getpos(".")
-    let old_query = getreg('/')
-    silent! %s/\s\+$//e
-    call setpos('.', save_cursor)
-    call setreg('/', old_query)
-endfun
-
-if has("autocmd")
-    autocmd BufWritePre *.txt,*.js,*.py,*.wiki,*.sh,*.coffee :call CleanExtraSpaces()
-endif
-
-
-" EXTENDED
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Turn persistent undo on
-"    means that you can undo even when you close a buffer/VIM
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Turn persistent undo on
+" means that you can undo even when you close a buffer/VIM
 try
     set undodir=~/.vim_runtime/temp_dirs/undodir
     set undofile
@@ -468,7 +416,6 @@ endtry
 let g:NERDTreeWinPos = "right"
 let NERDTreeShowHidden=0
 let g:NERDTreeWinSize=35
-
 """"""""""""""""""""""""""""""
 " => bufExplorer plugin
 """"""""""""""""""""""""""""""
@@ -476,22 +423,19 @@ let g:bufExplorerDefaultHelp=0
 let g:bufExplorerShowRelativePath=1
 let g:bufExplorerFindActive=1
 let g:bufExplorerSortBy='name'
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Vimroom
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let g:goyo_margin_top = 0
 let g:goyo_margin_bottom = 0
-
 """"""""""""""""""""""""""""""
 " => YankStack
 """"""""""""""""""""""""""""""
 let g:yankstack_yank_keys = ['y', 'd']
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Git gutter (Git diff)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:gitgutter_enabled=1
+let g:gitgutter_enabled=0
 
 " Enable italics
 "highlight Comment cterm=italic gui=italic
