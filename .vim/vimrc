@@ -17,14 +17,13 @@
 "    -> PLUGINS
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"
 " Launch without anything: vim --clean
 " Install vim-gtk
 " Per comentar una linea gcc per comentar gc per fer moviments
 " vim repeat cs'" to change surround from ' to "
 " " ysiw" to add " to a word
 " " ds" to remove surround
-
+" gv (re-select last visual select)
 " :Obsess to start recording vim session
 " vim -S to source the session
 "
