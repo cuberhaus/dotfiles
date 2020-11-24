@@ -327,7 +327,7 @@ map <leader>v <C-W>v
 map <leader>s <C-W>s
 
 " Close the current buffer :bd will close a buffer
-map <leader>bd :Bclose<cr>
+map <leader>bd :bd<cr>
 " Close all the buffers
 map <leader>ba :bufdo bd<cr>
 " Previous buffer
@@ -352,7 +352,7 @@ nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
 " :help updatetime
-set updatetime=1000
+set updatetime=1500
 
 "Press Enter to jump to the subject (topic) under the cursor.
 "Press Backspace to return from the last jump.
@@ -438,4 +438,4 @@ let g:yankstack_yank_keys = ['y', 'd']
 let g:gitgutter_enabled=0
 
 " Enable italics
-"highlight Comment cterm=italic gui=italic
+highlight Comment cterm=italic gui=italic
