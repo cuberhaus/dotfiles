@@ -343,7 +343,7 @@ exec betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
 
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
-exec --no-startup-id nm-applet
+exec --no-startup-id nm-applet &
 
 # Wallpaper
 exec dwall -s room &
@@ -356,4 +356,7 @@ exec blueman-applet &
 exec picom &
 
 # Mounts external disks automatically
-exec udiskie > /dev/null 2>&1 &
+exec udiskie &
+
+# Thunderbird applet
+exec birdtray &
