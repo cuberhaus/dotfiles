@@ -1,3 +1,8 @@
+.config/antigen/.zcompdump.pol.2391
+.config/nvim/autoload/
+.config/nvim/plugged/
+.local/bin/bootstrap/profile.log
+
 # KDE
 .config/okularrc
 .config/plasmashellrc

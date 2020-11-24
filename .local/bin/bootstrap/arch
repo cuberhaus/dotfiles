@@ -9,6 +9,7 @@
 # Wallpaper error when background is set in desktop, it will also be used by
 # LightDM unless the picture isn't coming from /usr/share/backgrounds
 
+# Neovim is much faster than vim
 arch_install () {
     # Fix some errors and cleanup
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
@@ -293,10 +294,10 @@ DWall() {
 optional() {
     # Terminal
     sudo pacman -S doxygen texlive-most graphviz # Doxygen
-    sudo pacman -S github-cli            # Github from terminal, create issues...
+    #sudo pacman -S github-cli            # Github from terminal, create issues...
 
     # GUI
-    sudo pacman -S nomacs                # Image viewer / use pix instead
+    #sudo pacman -S nomacs                # Image viewer / use pix instead
     sudo pacman -S r                    # Probabilitat i estadística
     sudo pacman -S dbeaver               # Base de dades
     sudo pacman -S jdk-openjdk # with dbeaver
@@ -317,14 +318,14 @@ optional() {
     yay -S f5fpc                        # Connexio a UPClink
 
     # Calendar
-    sudo pacman -S gnome-calendar gnome-keyring libsecret seahorse
+    #sudo pacman -S gnome-calendar gnome-keyring libsecret seahorse
 
     # Arduino
-    if [[ $FirstRun == y || $FirstRun == Y ]]; then
-        usermod -aG uucp,lock pol
-    fi
-    sudo pacman -S arduino-avr-core
-    sudo pacman -S arduino
+    #if [[ $FirstRun == y || $FirstRun == Y ]]; then
+    #    usermod -aG uucp,lock pol
+    #fi
+    #sudo pacman -S arduino-avr-core
+    #sudo pacman -S arduino
 }
 
 ### Installation starts here

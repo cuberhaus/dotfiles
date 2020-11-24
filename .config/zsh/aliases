@@ -9,14 +9,14 @@
 ###############################################################
 
 # Config Files
-alias arch="vim ~/.local/bin/bootstrap/arch"
-alias aliases="vim $ZDOTDIR/aliases"
-alias zshenv="vim ~/.zshenv"
-alias zshrc="vim $ZDOTDIR/.zshrc"
-alias zprofile="vim $ZDOTDIR/.zprofile"
-alias vimrc="vim ~/.vim/vimrc"
-alias bashrc="vim ~/.bashrc"
-alias tmux.conf="vim ~/.config/tmux/tmux.conf"
+alias arch="nvim ~/.local/bin/bootstrap/arch"
+alias aliases="nvim $ZDOTDIR/aliases"
+alias zshenv="nvim ~/.zshenv"
+alias zshrc="nvim $ZDOTDIR/.zshrc"
+alias zprofile="nvim $ZDOTDIR/.zprofile"
+alias vimrc="nvim ~/.vim/vimrc"
+alias bashrc="nvim ~/.bashrc"
+alias tmux.conf="nvim ~/.config/tmux/tmux.conf"
 alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
 alias vpacman="sudo vim /etc/pacman.conf"
 alias vgrub="sudo vim /etc/default/grub"
