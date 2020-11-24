@@ -5,7 +5,10 @@
 # video makes backlight work and wheel gives you sudo privilege
 # usermod -a -G wheel video input
 # Configure nvidia nvidia-xconfig
-# g ctrl A vim
+
+# Wallpaper error when background is set in desktop, it will also be used by
+# LightDM unless the picture isn't coming from /usr/share/backgrounds
+
 arch_install () {
     # Fix some errors and cleanup
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
