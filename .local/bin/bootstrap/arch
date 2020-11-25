@@ -180,16 +180,17 @@ yay_install() {
     sudo rm -r /home/pol/yay
 }
 
-# do this but i dont know exactly how
-#do_once () {
-#    sudo echo 'Section "InputClass"
-#    Identifier "libinput touchpad catchall"
-#    MatchIsTouchpad "on"
-#    MatchDevicePath "/dev/input/event*"
-#    Driver "libinput"
-#    Option "NaturalScrolling" "true"
-#    EndSection'  >> /etc/X11/xorg.conf.d/30-touchpad.conf
-#}
+### DO ONCE
+trackpad_scrolling () {
+    sudo touch /etc/X11/xorg.conf.d/30-touchpad.conf
+    echo 'Section "InputClass"
+    Identifier "libinput touchpad catchall"
+    MatchIsTouchpad "on"
+    MatchDevicePath "/dev/input/event*"
+    Driver "libinput"
+    Option "NaturalScrolling" "true"
+EndSection' | sudo tee -a /etc/X11/xorg.conf.d/30-touchpad.conf
+}
 
 vim_install () {
     sudo pacman -S neovim
@@ -282,6 +283,7 @@ games_install () {
 laptop_install() {
     sudo pacman -S tlp
     sudo systemctl enable tlp.service
+    trackpad_scrolling
 }
 DWall() {
     cd $HOME
