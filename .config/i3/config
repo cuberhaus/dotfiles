@@ -50,6 +50,14 @@ floating_modifier $mod
 # Layout Scripts
 #bindsym $mod+g exec /home/pol/.config/i3/i3-layout-manager/layout_manager.sh
 
+# Screen Printing
+# scrot & gimp - root
+#bindsym Print exec scrot -e 'mv $f /tmp/ && gimp /tmp/$f'
+bindsym Print exec gnome-screenshot
+# scrot & gimp - select window or rectangle
+#bindsym $mod+Print exec scrot -s -e 'mv $f /tmp/ && gimp /tmp/$f'
+bindsym $mod+Print exec gnome-screenshot -a
+
 # Google Chrome
 bindsym $mod+g exec google-chrome-stable
 

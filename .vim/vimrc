@@ -7,6 +7,9 @@
 " " ysiw" to add " to a word
 " " ds" to remove surround
 
+"Jump to category under the cursor<C-]>
+"Jump back <C-T>
+
 " gv (re-select last visual select)
 
 " g ctrl A (increase i+1)
