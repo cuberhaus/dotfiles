@@ -205,6 +205,7 @@ vim_install () {
 
 # Best Tiling Window Manager
 i3_install () {
+    sudo pacman -S gnome-screenshot          # Take screenshots with impr pant
     sudo pacman -S i3-gaps   # i3 with gaps
     sudo pacman -S rofi      # App menu Super+d
     sudo pacman -S i3blocks  # Bottom bar
