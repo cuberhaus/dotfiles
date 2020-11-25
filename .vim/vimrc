@@ -96,9 +96,6 @@ if !has('nvim')
     set completeopt+=popup
 endif
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => General
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 set showcmd
 
 " Sets how many lines of history VIM has to remember
@@ -193,6 +190,13 @@ else
     let &t_EI = "\<Esc>[2 q"
 endif
 
+" Changes current directory for new files
+set autochdir
+
+" Return to last edit position when opening files (You want this!)
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Colors and Fonts
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -213,9 +217,6 @@ endif
 "Activar sintàxis de programació
 "syntax on
 
-" Changes current directory for new files
-set autochdir
-
 " Set utf8 as standard encoding and en_US as the standard language
 set encoding=utf8
 set fileencoding=utf-8
@@ -230,6 +231,9 @@ let g:airline#extensions#tabline#enabled = 1 "fica automaticament els buffers a 
 
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
+
+" :help updatetime
+set updatetime=1500
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Files, backups and undo
@@ -351,20 +355,11 @@ nmap <leader>hv <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
-" :help updatetime
-set updatetime=1500
-
 "Press Enter to jump to the subject (topic) under the cursor.
 "Press Backspace to return from the last jump.
 "This breaks some stuff
 "map <buffer> <CR> <C-]>
 "map <buffer> <BS> <C-T>
-
-""""""""""""""""""""""""""""""
-" => Moving around
-""""""""""""""""""""""""""""""
-" Return to last edit position when opening files (You want this!)
-au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
 """"""""""""""""""""""""""""""
 " => Status line
@@ -376,7 +371,7 @@ set laststatus=2
 set noshowmode
 
 """"""""""""""""""""""""""""""
-" => Status line
+" => Spelling
 """"""""""""""""""""""""""""""
 " Demana per descarregar el fixter corresponent
 let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
