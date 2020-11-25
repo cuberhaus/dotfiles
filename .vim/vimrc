@@ -382,7 +382,7 @@ map <leader>sn ]s
 map <leader>sp [s
 " zg accepts a word, zug undoes
 "map <leader>sa zg
-map <leader>s? z=
+map <leader>? z=
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "" => Editing mappings
