@@ -42,9 +42,6 @@ alias grep='grep --color=auto'
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 
-# root privileges
-#alias doas="doas --"
-
 # adding flags
 alias cp="cp -i"          # confirm before overwriting something
 alias df="df -h"          # human-readable sizes

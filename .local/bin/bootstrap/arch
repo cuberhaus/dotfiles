@@ -26,7 +26,7 @@ arch_install () {
     sudo pacman -S nemo-share
 
     # Terminal
-    sudo pacman -S rclone                # Rsync to remote 
+    sudo pacman -S rclone                # Rsync to remote
     sudo pacman -S thefuck
     sudo pacman -S wget                  # Download stuff
     sudo pacman -S svn
@@ -75,7 +75,7 @@ arch_install () {
 
     ### AUR
     yay -S google-chrome                 # Best web browser
-    yay -S visual-studio-code-bin       # Microsoft's Visual Code /not #sudo pacman -S code 
+    yay -S visual-studio-code-bin       # Microsoft's Visual Code /not #sudo pacman -S code
     yay -S birdtray                     # Thunderbird tray
     yay -S whatsapp-nativefier          # Whatsapp client
     yay -S spotify                      # Spotify
@@ -239,11 +239,11 @@ cinnamon_install() {
 
     # To fix laggy animations
     #https://www.reddit.com/r/linuxmint/comments/7v2jt6/laggy_cinnamon_animations/
-    # Edit animation time (0.05)/usr/share/cinnamon/js/ui/expo.js 
+    # Edit animation time (0.05)/usr/share/cinnamon/js/ui/expo.js
     # and /usr/share/cinnamon/js/ui/overview.js
 }
 gnome_install() {
-    sudo pacman -S chrome-gnome-shell 
+    sudo pacman -S chrome-gnome-shell
     # Extensions
     # dash to dock (add dock)
     # impatience (faster animations)
