@@ -88,7 +88,6 @@ export GOPATH="${XDG_DATA_HOME:-$HOME/.local/share}/go"
 export ANSIBLE_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/ansible/ansible.cfg"
 export UNISON="${XDG_DATA_HOME:-$HOME/.local/share}/unison"
 export HISTFILE="$XDG_DATA_HOME"/bash/.bash_history
-#export VIMINIT='source "$XDG_CONFIG_HOME/vim/vimrc"'
 export ATOM_HOME="$XDG_DATA_HOME"/atom
 # Android sdk
 export ANDROID_SDK_HOME="$XDG_CONFIG_HOME"/android

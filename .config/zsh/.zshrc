@@ -35,11 +35,11 @@ antigen use oh-my-zsh
 
 # Bundles from the default repo (robbyrussell's oh-my-zsh).
 antigen bundle systemd
-antigen bundle zsh_reload
 antigen bundle archlinux
-antigen bundle copyfile
 antigen bundle command-not-found
 antigen bundle alias-finder 
+#antigen bundle zsh_reload
+#antigen bundle copyfile
 
 # Load the theme.
 # https://github.com/romkatv/powerlevel10k
@@ -68,9 +68,6 @@ antigen apply
 
 # Uncomment the following line to change how often to auto-update (in days).
 export UPDATE_ZSH_DAYS=7
-
-# Uncomment the following line to enable command auto-correction.
-#ENABLE_CORRECTION="true"
 
 # dirhistory // https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/dirhistory
 # copyfile <file> // copia un archivo al clipboard
