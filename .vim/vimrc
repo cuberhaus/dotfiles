@@ -11,6 +11,8 @@
 
 " g ctrl A (increase i+1)
 
+" Visual select then press S (and whatever you want to surround with)
+
 " :Obsess to start recording vim session
 " vim -S to source the session
 
@@ -235,6 +237,10 @@ set ffs=unix,dos,mac
 " :help updatetime
 set updatetime=1500
 
+" Set font for gvim
+if has("gui_running")
+    set guifont=SauceCodePro\ Nerd\ Font\ 13
+endif
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Files, backups and undo
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
