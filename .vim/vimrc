@@ -347,8 +347,6 @@ map <leader>tc :tabclose<cr>
 map <leader>t<leader> :tabnext <cr>
 
 " Git Gutter
-"nmap [c <Plug>(GitGutterNextHunk)
-"nmap ]c <Plug>(GitGutterPrevHunk)
 nmap <leader>hn <Plug>(GitGutterNextHunk)
 nmap <leader>hp <Plug>(GitGutterPrevHunk)
 nmap <leader>hv <Plug>(GitGutterPreviewHunk)
