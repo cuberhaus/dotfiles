@@ -9,9 +9,14 @@
 (setq user-full-name "Pol Casacuberta"
       user-mail-address "polcg@hotmail.es")
 
-;; these are the defaults (before I changed them)
-(setq company-idle-delay 0.2
-      company-minimum-prefix-length 2)
+(after! company
+  (setq company-idle-delay 0.5
+        company-minimum-prefix-length 2)
+  (setq company-show-numbers t)
+  (add-hook 'evil-normal-state-entry-hook #'company-abort)) ;; make aborting less annoying.
+;;;;
+;;(setq company-idle-delay 0.2
+;;      company-minimum-prefix-length 2)
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
