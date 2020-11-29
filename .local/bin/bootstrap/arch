@@ -52,6 +52,7 @@ arch_install () {
     sudo pacman -S net-tools             # Ips
     sudo pacman -S ncdu                  # Manage storage
     sudo pacman -S xclip                 # Clipboard
+    sudo pacman -S xfce4-clipman-plugin # Clipboard manager (persistant clip even when application is closed)
     sudo pacman -S udisks2               # Daemon to manipulate storage devices
     sudo pacman -S udiskie               # Automater
     sudo pacman -S ranger                # Ranger

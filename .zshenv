@@ -22,8 +22,11 @@ fi
 ###############################################################
 # => Variables
 ###############################################################
+
+export DICPATH="$HOME/Dictionary"
 # DOOM emacs "bring the pain"
-export PATH=”$HOME/.emacs.d/bin:$PATH
+export PATH="$HOME/.emacs.d/bin:$PATH"
+
 # Zsh files:
 export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh" # For more information RTFM https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
 export VISUAL=vim

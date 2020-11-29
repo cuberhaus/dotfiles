@@ -358,18 +358,22 @@ exec betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet &
 
-# Wallpaper
-exec dwall -s room &
-#exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
+# Some kind of window manager ??
+exec picom &
 
 # Bluetooth "blueman"
 exec blueman-applet &
 
-# Some kind of window manager ??
-exec picom &
-
 # Mounts external disks automatically
 exec udiskie &
+
+# Clipboard manager
+xfce4-clipman-plugin &
+
+# Wallpaper
+exec dwall -s room &
+
+#exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
 
 # Thunderbird applet
 exec birdtray &
