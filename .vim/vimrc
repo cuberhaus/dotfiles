@@ -1,6 +1,6 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Launch without anything: vim --clean
-
+" :messages per veure els errors per pantalla
 " Per comentar una linea gcc per comentar gc per fer moviments
 
 " vim repeat cs'" to change surround from ' to "

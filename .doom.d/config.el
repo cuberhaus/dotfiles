@@ -13,8 +13,9 @@
 (setq ispell-aspell-dict-dir ispell-aspell-data-dir)
 ;;(setq ispell-aspell-dictionary-alist '())
 (add-to-list 'ispell-aspell-dictionary-alist (ispell-aspell-find-dictionary "es_ES"))
-;;(add-to-list 'ispell-aspell-dictionary-alist (ispell-aspell-find-dictionary "ca"))
+(add-to-list 'ispell-aspell-dictionary-alist (ispell-aspell-find-dictionary "ca"))
 
+;; flyspell to activate spell checking
 (after! company
   (setq company-idle-delay 0.5
         company-minimum-prefix-length 2)
