@@ -368,7 +368,7 @@ exec blueman-applet &
 exec udiskie &
 
 # Clipboard manager
-xfce4-clipman-plugin &
+exec xfce4-clipman-plugin &
 
 # Wallpaper
 exec dwall -s room &
