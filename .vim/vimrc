@@ -63,6 +63,7 @@ call plug#begin()
 Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
 Plug 'ap/vim-css-color'
+Plug 'ctrlpvim/ctrlp.vim'
 Plug 'godlygeek/tabular'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
 Plug 'jiangmiao/auto-pairs'
@@ -281,6 +282,8 @@ set breakindent "Indent after line wrapped
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Keybindings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"ctrlp
+let g:ctrlp_map = '<c-f>'
 
 " Toggle paste mode on and off
 map <leader>pp :setlocal paste!<cr>
