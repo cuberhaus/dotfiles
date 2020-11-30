@@ -13,9 +13,11 @@
 arch_install () {
     # Fix some errors and cleanup
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
+    touch ~/.vim/cache/viminfo # viminfo
+    touch $XDG_DATA_HOME/vim/viminfo # viminfo
+    mkdir -p "~/.vim/cache/viminfo" # vim viminfo
     mkdir ~/.cache/zsh
     mkdir ~/.cache/vlc
-
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
     gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg -e # Termite execute argument is -e in gnome-terminal its -x
