@@ -2,6 +2,12 @@
 .config/nvim/autoload/
 .config/nvim/plugged/
 .local/bin/bootstrap/profile.log
+# Py
+.local/bin/epylint
+.local/bin/isort
+.local/bin/pylint
+.local/bin/pyreverse
+.local/bin/symilar
 
 # KDE
 .config/okularrc
@@ -62,7 +68,7 @@ Calibre Library/metadata_db_prefs_backup.json
 # Vim
 .vim/autoload/
 .vim/plugged/
-.local/share/vim/
+#.local/share/vim/
 
 # Fonts
 *.uuid
