@@ -285,7 +285,7 @@ set breakindent "Indent after line wrapped
 
 nnoremap <leader>r :YcmCompleter RefactorRename<Space>
 nnoremap <leader>d :YcmCompleter GoToDefinition<cr>
-nnoremap <leader>t :YcmCompleter GetType<cr>
+nnoremap <leader>T :YcmCompleter GetType<cr>
 
 "ctrlp
 let g:ctrlp_map = '<c-f>'
