@@ -136,7 +136,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     ### Arch
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
         alias update='sudo pacman -Syu'
-        alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update'
+        alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update; sudo npm install -g npm'
         # sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         alias cleanup='yay -Sc; vim +PlugClean +qall'
