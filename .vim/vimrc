@@ -178,7 +178,7 @@ set magic
 set showmatch
 
 " How many tenths of a second to blink when matching brackets
-set mat=2
+"set mat=2
 
 "This one is the one that works
 set belloff=all
@@ -285,6 +285,7 @@ set breakindent "Indent after line wrapped
 
 nnoremap <leader>r :YcmCompleter RefactorRename<Space>
 nnoremap <leader>d :YcmCompleter GoToDefinition<cr>
+nnoremap <leader>t :YcmCompleter GetType<cr>
 
 "ctrlp
 let g:ctrlp_map = '<c-f>'
