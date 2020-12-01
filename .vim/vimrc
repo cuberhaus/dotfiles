@@ -282,14 +282,18 @@ set breakindent "Indent after line wrapped
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Keybindings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+nnoremap <leader>r :YcmCompleter RefactorRename<Space>
+nnoremap <leader>d :YcmCompleter GoToDefinition<cr>
+
 "ctrlp
 let g:ctrlp_map = '<c-f>'
 
 " Toggle paste mode on and off
-map <leader>pp :setlocal paste!<cr>
+nnoremap <leader>pp :setlocal paste!<cr>
 
 " Press ctrl+m to toggle markdown preview
-nmap <C-m> <Plug>MarkdownPreviewToggle
+nnoremap <C-m> <Plug>MarkdownPreviewToggle
 
 "Autoformat
 noremap <F3> :Autoformat<CR>
@@ -306,20 +310,20 @@ else
 endif
 
 "Open bufexplorer to see and manage the current buffers (<leader>o):
-map <leader>o :BufExplorer<cr>
+nnoremap <leader>o :BufExplorer<cr>
 
 " Vimroom
 nnoremap <silent> <leader>z :Goyo<cr>
 
 " YankStack
-nmap <C-p> <Plug>yankstack_substitute_older_paste
-nmap <C-n> <Plug>yankstack_substitute_newer_paste
+nnoremap <C-p> <Plug>yankstack_substitute_older_paste
+nnoremap <C-n> <Plug>yankstack_substitute_newer_paste
 
 " Git gutter toggle
 nnoremap <silent> <leader>g :GitGutterToggle<cr>
 
 " Fast saving
-nmap <leader>w :w!<cr>
+nnoremap <leader>w :w!<cr>
 
 " :W sudo saves the file (useful for handling the permission-denied error)
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
@@ -359,11 +363,11 @@ map <leader>tc :tabclose<cr>
 map <leader>t<leader> :tabnext <cr>
 
 " Git Gutter
-nmap <leader>hn <Plug>(GitGutterNextHunk)
-nmap <leader>hp <Plug>(GitGutterPrevHunk)
-nmap <leader>hv <Plug>(GitGutterPreviewHunk)
-nmap <leader>hs <Plug>(GitGutterStageHunk)
-nmap <leader>hu <Plug>(GitGutterUndoHunk)
+nnoremap <leader>hn <Plug>(GitGutterNextHunk)
+nnoremap <leader>hp <Plug>(GitGutterPrevHunk)
+nnoremap <leader>hv <Plug>(GitGutterPreviewHunk)
+nnoremap <leader>hs <Plug>(GitGutterStageHunk)
+nnoremap <leader>hu <Plug>(GitGutterUndoHunk)
 
 "Press Enter to jump to the subject (topic) under the cursor.
 "Press Backspace to return from the last jump.
