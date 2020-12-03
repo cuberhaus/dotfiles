@@ -99,10 +99,12 @@ arch_install () {
     sudo pacman -S hexchat               # Graphical
 
     # Drivers
-    sudo pacman -S linux-lts
-    sudo pacman -S linux-lts-headers
+    sudo pacman -S linux
     sudo pacman -S linux-headers
-    sudo pacman -S nvidia-lts
+    # LTS release
+    #sudo pacman -S linux-lts
+    #sudo pacman -S linux-lts-headers
+    #sudo pacman -S nvidia-lts
     # sudo pacman -S nvidia-dkms #very slow
     sudo pacman -S nvidia nvidia-utils   # Nvidia
     sudo pacman -S xf86-video-intel mesa lib32-mesa    # Intel
@@ -202,9 +204,11 @@ vim_install () {
     # Vim YouCompleteMe plugin install
     bash ~/scripts/ycm.sh
     sudo pacman -S python2 python-pip
+    pip install wheel
     sudo npm install -g neovim
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
+    
 }
 
 # Best Tiling Window Manager

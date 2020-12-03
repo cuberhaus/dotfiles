@@ -8,6 +8,9 @@
 # array=('Element1' 'Element2')
 ###############################################################
 
+# Recompile ycm
+alias ycm="python3 ~/.vim/plugged/YouCompleteMe/install.py"
+
 # Config Files
 alias arch="nvim ~/.local/bin/bootstrap/arch"
 alias aliases="nvim $ZDOTDIR/aliases"

@@ -364,11 +364,11 @@ map <leader>tc :tabclose<cr>
 map <leader>t<leader> :tabnext <cr>
 
 " Git Gutter
-nnoremap <leader>hn <Plug>(GitGutterNextHunk)
-nnoremap <leader>hp <Plug>(GitGutterPrevHunk)
-nnoremap <leader>hv <Plug>(GitGutterPreviewHunk)
-nnoremap <leader>hs <Plug>(GitGutterStageHunk)
-nnoremap <leader>hu <Plug>(GitGutterUndoHunk)
+nmap <leader>hn <Plug>(GitGutterNextHunk)
+nmap <leader>hp <Plug>(GitGutterPrevHunk)
+nmap <leader>hv <Plug>(GitGutterPreviewHunk)
+nmap <leader>hs <Plug>(GitGutterStageHunk)
+nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
 "Press Enter to jump to the subject (topic) under the cursor.
 "Press Backspace to return from the last jump.
