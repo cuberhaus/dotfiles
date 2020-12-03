@@ -1,8 +1,15 @@
 #! /usr/bin/env bash
 
-ubuntu_minimal_install () {
-    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
+base_install () {
+    # Fix some errors and cleanup
+    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
+    touch ~/.vim/cache/viminfo # viminfo
+    touch $XDG_DATA_HOME/vim/viminfo # viminfo
+    mkdir -p "~/.vim/cache/viminfo" # vim viminfo
     mkdir ~/.cache/zsh
+    mkdir ~/.cache/vlc
+    sudo mkdir /var/lib/samba/usershares
+
     # Update
     sudo apt-get update; sudo apt-get full-upgrade
     # System tools
@@ -38,11 +45,11 @@ ubuntu_minimal_install () {
     sudo apt-get install virtualbox-qt          # Virtual machines
     sudo apt-get install cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
 
-    mkdir ~/.cache/vlc
     # sudo pip3 install spotify-cli-linux       # Spotify
     sudo apt-get install LXAppearance           # Theme
 
-    sudo mkdir /var/lib/samba/usershares
+}
+ubuntu_install() {
     if [[ $FirstRun == y ]]; then
         sudo adduser `id -un` libvirt
         sudo adduser `id -un` kvm
@@ -119,7 +126,6 @@ i3_install () {
 emacs_install () {
     sudo apt-get install emacs-gtk
     # Doom
-
     # required dependencies
     sudo apt-get install git ripgrep
     # optional dependencies
@@ -128,46 +134,23 @@ emacs_install () {
 
 
 ### MAIN
-# Ask for variables
-echo "Are you sure you want to bootstrap your machine? [y/n]"
-read BootStrap
-if [[ $BootStrap == n ]]; then
-    exit
-fi
-
 echo "Is it the first time you run this script? [y/n]"
 read FirstRun
-
-echo "Do you want bloat? [y/n]"
-read Bloat
-
-echo "Do you want to play Games? [y/n]"
-read Games
-
 if [[ $FirstRun == y ]]; then
     echo "#! /bin/sh
     export DISTRO=ubuntu" > ~/.config/distro
 fi
-
-# Start installation
 ubuntu_minimal_install
 if [[ $FirstRun == y ]]; then
     brew_install
     #chrome_install
+    #steam_install
+    #albert_install
+    #vim_install
+    #i3_install
 fi
-vim_install
-#albert_install
-if [[ $Bloat == y ]]; then
-    bloat_install
-fi
-
-if [[ $Games == y ]]; then
-    steam_install
-fi
-
+#bloat_install
 chsh -s $(which zsh) # Change default shell to zsh
-
-#i3_install
 
 ### SNAPS
 snaps=(dialog --separate-output --checklist "Select which snaps you would like to install" 22 76 16)
