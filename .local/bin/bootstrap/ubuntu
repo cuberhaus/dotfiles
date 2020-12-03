@@ -13,13 +13,13 @@ base_install
 #bloat_install
 ubuntu_install
 if [[ $FirstRun == y ]]; then
-    albert_install
+    #albert_install
     brew_install
     chrome_install
-    emacs_install
+    #emacs_install
     i3_install
     snap_install
-    steam_install
+    #steam_install
     vim_install
 fi
 chsh -s $(which zsh) # Change default shell to zsh
