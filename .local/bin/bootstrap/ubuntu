@@ -132,6 +132,16 @@ emacs_install () {
     sudo apt-get install tar fd-find clang
 }
 
+snaps_install() {
+    sudo snap install spotify
+    sudo snap install discord
+    sudo snap install walc
+    #sudo snap install ao
+    sudo snap install android-studio --classic
+    sudo snap install skype --classic
+    #sudo snap install atom --classic
+    sudo snap install slack --classic
+}
 
 ### MAIN
 echo "Is it the first time you run this script? [y/n]"
@@ -143,6 +153,7 @@ fi
 ubuntu_minimal_install
 if [[ $FirstRun == y ]]; then
     brew_install
+    snap_install
     #chrome_install
     #steam_install
     #albert_install
@@ -151,45 +162,3 @@ if [[ $FirstRun == y ]]; then
 fi
 #bloat_install
 chsh -s $(which zsh) # Change default shell to zsh
-
-### SNAPS
-snaps=(dialog --separate-output --checklist "Select which snaps you would like to install" 22 76 16)
-options=(1 "Spotify" on
-    2 "Discord" on
-    3 "Whatsapp" on
-    4 "To-do list" off
-    5 "Skype" on
-    6 "atom" off
-    7 "slack" off
-    8 "Android Studio" on)
-    snap_choices=$("${snaps[@]}" "${options[@]}" 2>&1 >/dev/tty)
-    clear
-    for choice in $snap_choices
-    do
-        case $choice in
-            1)
-                sudo snap install spotify
-                ;;
-            2)
-                sudo snap install discord
-                ;;
-            3)
-                sudo snap install walc
-                ;;
-            4)
-                sudo snap install ao
-                ;;
-            5)
-                sudo snap install android-studio --classic
-                ;;
-            6)
-                sudo snap install skype --classic
-                ;;
-            7)
-                sudo snap install atom --classic
-                ;;
-            8)
-                sudo snap install slack --classic
-                ;;
-        esac
-    done
