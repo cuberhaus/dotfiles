@@ -1,7 +1,8 @@
 #! /usr/bin/env bash
+# Include functions
+source ~/.local/bin/bootstrap/arch_functions
 
 ### Installation starts here
-source ~/.local/bin/bootstrap/arch
 
 echo "Is it the first time you run this script? [y/n]"
 read FirstRun
