@@ -16,8 +16,12 @@ brew_install() {
 }
 mac_install () {
     ### Avoid some error messages
+    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
+    touch ~/.vim/cache/viminfo # viminfo
+    touch $XDG_DATA_HOME/vim/viminfo # viminfo
+    mkdir -p "~/.vim/cache/viminfo" # vim viminfo
     mkdir ~/.cache/zsh
-    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes some vim bugs and clean-up
+    mkdir ~/.cache/vlc
     touch ~/.hushlogin # Avoid terminal prompts
 
     ### Terminal stuff
@@ -37,12 +41,8 @@ mac_install () {
     brew install ranger w3m             # Ranger and previews
     brew install autojump               # Autojump obsolete?
     brew install ncdu                   # Storage manager
-
-    ## Extract function
-    brew install unrar
-    brew install p7zip
-
-    # Dependancies
+    brew install unrar                  # Extract function
+    brew install p7zip                  # Extract function
     brew install ack
     brew install astyle
     brew install bison
@@ -123,5 +123,9 @@ vim_install () {
 # https://alexpearce.me/2014/05/italics-in-iterm2-vim-tmux/
 
 ### Installation starts here
+app_store_install
 brew_install
 mac_install
+doom_emacs_install
+#bloat_install
+vim_install
