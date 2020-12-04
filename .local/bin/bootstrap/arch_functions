@@ -293,6 +293,15 @@ dwall() {
     sudo rm -r ~/home/pol/dynamic-wallpaper
 }
 
+emacs_install () {
+    sudo pacman -S emacs
+    sudo pacman -S ripgrep
+    sudo pacman -S fd
+    # DOOM
+    git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
+    ~/.emacs.d/bin/doom install
+}
+
 optional() {
     # Terminal
     #sudo pacman -S github-cli            # Github from terminal, create issues...
