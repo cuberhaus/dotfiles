@@ -59,6 +59,12 @@ Calibre Library/metadata_db_prefs_backup.json
 *~
 
 # Tmux
+.config/tmux/plugins/tmux-battery/
+.config/tmux/plugins/tmux-continuum/
+.config/tmux/plugins/tmux-pain-control/
+.config/tmux/plugins/tmux-prefix-highlight/
+.config/tmux/plugins/tmux-resurrect/
+.config/tmux/plugins/tmux-sensible/
 
 # Vim
 .vim/autoload/
