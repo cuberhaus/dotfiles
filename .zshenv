@@ -23,7 +23,7 @@ fi
 # => Variables
 ###############################################################
 
-export DICPATH="$HOME/Dictionary"
+export DICPATH="$XDG_CONFIG_HOME/Dictionary"
 # DOOM emacs "bring the pain"
 export PATH="$HOME/.emacs.d/bin:$PATH"
 
