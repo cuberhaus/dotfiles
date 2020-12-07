@@ -319,8 +319,11 @@ optional() {
     sudo pacman -S r                    # Probabilitat i estadística
     sudo pacman -S remmina               # Remote conexions
     sudo pacman -S texstudio             # Latex text editor
+    #sudo pacman -S intellij-idea-community-edition # BD free version (no SQL)
+    yay -S intellij-idea-ultimate-edition # BD paid IntelliJ 
 
     # AUR
+    #yay -S eclipse-java                 # BD
     yay -S android-studio               # Android Studio
     yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
     yay -S slack-desktop                # Slack
