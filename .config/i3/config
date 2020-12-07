@@ -117,11 +117,6 @@ mode "$mode_gaps_outer" {
         bindsym Escape mode "default"
 }
 
-# Bindings to change to next and previous workspaces, based on vim keybindings
-#bindsym $mod+p workspace prev
-#bindsym $mod+n workspace next
-
-
 # start a terminal
 bindsym $mod+Return exec termite
 
@@ -235,15 +230,13 @@ bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3blocks
 bindsym --release Num_Lock  exec pkill -SIGRTMIN+11 i3blocks
 
 # Custom Rofi | change with ctrl tab
-bindsym $mod+d exec "rofi -modi window,drun,run -show drun -show-icons"
+bindsym $mod+d exec "rofi -modi window,drun,run -show drun -show-icons -sidebar-mode -terminal termite "
 
-# Custom rofi
-#bindsym $mod+d exec "rofi -modi window,drun,run -show drun -sidebar-mode -terminal termite -color-window '#000000, #000000, #000000' -color-normal '#000000, #b3e774, #000000, #b3e774, #000000' -color-active '#000000, #b3e774, #000000, #b3e774, #000000' -color-urgent '#000000, #b3e774, #000000, #b3e774, #000000'"
-
-# focus the child container
+# Focus the child container
 bindsym $mod+c focus child
 
-#bindsym $mod+shift+x exec i3lock
+# Lock screen
+bindsym $mod+shift+x exec betterlockscreen -l
 
 ###############################################################
 # => Workspaces
