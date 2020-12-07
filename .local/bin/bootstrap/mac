@@ -66,6 +66,8 @@ mac_install () {
     brew install --cask visual-studio-code
     brew install --cask dbeaver-community # BD
     brew install --cask eclipse-java    # BD
+    brew install --cask intellij-idea-ce # Free version
+    brew install --cask intellij-idea # Paid, better java SQL IDE
     brew install --cask r                      # Probabilitat i estadística
     brew install --cask rstudio                # Probabilitat i estadística IDE
     brew install --cask adobe-acrobat-reader # Pdf reader
