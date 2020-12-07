@@ -197,6 +197,8 @@ vim_install () {
 # Best Tiling Window Manager
 i3_install () {
     sudo pacman -S acpi
+    yay -S kbdd-git          # i3blocks keyboard layout
+    sudo pacman -S zenity    # i3blocks poweroff menu
     sudo pacman -S awk bc upower             # battery plus
     sudo pacman -S feh       # Wallpaper
     sudo pacman -S gnome-screenshot          # Take screenshots with impr pant
