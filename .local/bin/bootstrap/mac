@@ -59,30 +59,31 @@ mac_install () {
 
     ### Terminal Font
     brew tap homebrew/cask-fonts
-    brew cask install font-inconsolata-nerd-font # Change iTerm font to this one
+    brew install --cask font-inconsolata-nerd-font # Change iTerm font to this one
 
     ### GUI Applications
-    brew cask install whatsapp
-    brew cask install visual-studio-code
-    brew cask install dbeaver-community # BD
-    brew install r                      # Probabilitat i estadística
-    brew install rstudio                # Probabilitat i estadística IDE
-    brew cask install adobe-acrobat-reader # Pdf reader
-    brew cask install ccleaner          # CleanUp
-    brew cask install calibre           # Book manager
-    brew cask install spotify           # Music player
-    brew cask install skype             # Videocalls
-    brew cask install vlc               # Media Player
-    brew cask install transmission      # Torrent Downloader
-    brew cask install tomighty          # Pomodoro timer
-    brew cask install alfred            # Better Spotlight
-    brew cask install telegram          # Quickly transfer files
-    brew cask install discord           # Group calls
-    brew cask install slack             # Work
-    brew cask install iterm2            # Best terminal emulator
-    brew cask install karabiner-elements # Swap Esc with Caps_lock
-    brew cask install the-unarchiver    # Archiver "faster"
-    brew cask install google-chrome     # Web browser
+    brew install --cask whatsapp
+    brew install --cask visual-studio-code
+    brew install --cask dbeaver-community # BD
+    brew install --cask eclipse-java    # BD
+    brew install --cask r                      # Probabilitat i estadística
+    brew install --cask rstudio                # Probabilitat i estadística IDE
+    brew install --cask adobe-acrobat-reader # Pdf reader
+    brew install --cask ccleaner          # CleanUp
+    brew install --cask calibre           # Book manager
+    brew install --cask spotify           # Music player
+    brew install --cask skype             # Videocalls
+    brew install --cask vlc               # Media Player
+    brew install --cask transmission      # Torrent Downloader
+    brew install --cask tomighty          # Pomodoro timer
+    brew install --cask alfred            # Better Spotlight
+    brew install --cask telegram          # Quickly transfer files
+    brew install --cask discord           # Group calls
+    brew install --cask slack             # Work
+    brew install --cask iterm2            # Best terminal emulator
+    brew install --cask karabiner-elements # Swap Esc with Caps_lock
+    brew install --cask the-unarchiver    # Archiver "faster"
+    brew install --cask google-chrome     # Web browser
     #brew cask install chromium          # Open source web browser
     #brew cask install firefox           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
     #brew cask install keka              # Archiver open source
