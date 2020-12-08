@@ -59,7 +59,11 @@ mac_install () {
 
     ### Terminal Font
     brew tap homebrew/cask-fonts
-    brew install --cask font-inconsolata-nerd-font # Change iTerm font to this one
+    # Open sauce has to be installed manually
+    brew install font-fira-code-nerd-font
+    brew install font-inconsolata-nerd-font
+    brew install font-iosevka-nerd-font
+    brew install font-meslo-lg-nerd-font
 
     ### GUI Applications
     brew install --cask whatsapp
