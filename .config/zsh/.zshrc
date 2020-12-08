@@ -167,4 +167,4 @@ zle-line-init() { zle -K viins; _set_beam_cursor }
 bindkey '^ ' autosuggest-accept
 
 # Pfetch (fast neofetch)
-pfetch
+#pfetch
