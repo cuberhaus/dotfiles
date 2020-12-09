@@ -1,15 +1,15 @@
 #!/bash/sh
 app_store_install() {
     brew install mas
-    mas install 1444383602 # GoodNotes
-    mas install 736189492 # Notability
-    #mas install 1147396723 # WhatsApp
-    mas install 497799835 # Xcode
-    mas install 441258766 # Magnet
     mas install 1274495053 # Microsoft To Do
+    mas install 1444383602 # GoodNotes
+    mas install 409183694 # Keynote
     mas install 409201541 # Pages
     mas install 409203825 # Numbers
-    mas install 409183694 # Keynote
+    mas install 441258766 # Magnet
+    mas install 497799835 # Xcode
+    mas install 736189492 # Notability
+    #mas install 1147396723 # WhatsApp
 }
 brew_install() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
@@ -25,37 +25,37 @@ mac_install () {
     touch ~/.hushlogin # Avoid terminal prompts
 
     ### Terminal stuff
-    brew install rclone
-    brew install exa                    # "ls" on steroids
-    brew install git                    # Git
-    brew install htop                   # Resource viewer
-    brew install neofetch               # System info
-    brew install pipes-sh               # Pipes wallpaper
-    brew install stow                   # Stow dotfiles
-    brew install tmux                   # Terminal multiplexer
-    brew install wget                   # Download from command line
-    brew install yarn                   # Package manager
-    brew install fzf                    # Fuzzy Finder
-    brew install bat                    # Cat on steroids
-    brew install the_silver_searcher    # Grep on steroids
-    brew install ranger w3m             # Ranger and previews
-    brew install autojump               # Autojump obsolete?
-    brew install ncdu                   # Storage manager
-    brew install unrar                  # Extract function
-    brew install p7zip                  # Extract function
     brew install ack
     brew install astyle
+    brew install autojump               # Autojump obsolete?
+    brew install bat                    # Cat on steroids
     brew install bison
     brew install cmake
+    brew install exa                    # "ls" on steroids
     brew install flex
+    brew install fzf                    # Fuzzy Finder
+    brew install git                    # Git
     brew install go
     brew install graphviz
+    brew install htop                   # Resource viewer
     brew install llvm
     brew install mono
+    brew install ncdu                   # Storage manager
+    brew install neofetch               # System info
+    brew install p7zip                  # Extract function
+    brew install pipes-sh               # Pipes wallpaper
     brew install pkg-config
+    brew install ranger w3m             # Ranger and previews
+    brew install rclone
     brew install ripgrep
     brew install sox
+    brew install stow                   # Stow dotfiles
     brew install swig
+    brew install the_silver_searcher    # Grep on steroids
+    brew install tmux                   # Terminal multiplexer
+    brew install unrar                  # Extract function
+    brew install wget                   # Download from command line
+    brew install yarn                   # Package manager
 
     ### Terminal Font
     brew tap homebrew/cask-fonts
@@ -66,35 +66,36 @@ mac_install () {
     brew install font-meslo-lg-nerd-font
 
     ### GUI Applications
-    brew install --cask whatsapp
-    brew install --cask visual-studio-code
-    brew install --cask dbeaver-community # BD
-    brew install --cask eclipse-java    # BD
-    brew install --cask intellij-idea-ce # Free version
-    brew install --cask intellij-idea # Paid, better java SQL IDE
-    brew install --cask r                      # Probabilitat i estadística
-    brew install --cask rstudio                # Probabilitat i estadística IDE
     brew install --cask adobe-acrobat-reader # Pdf reader
-    brew install --cask ccleaner          # CleanUp
-    brew install --cask calibre           # Book manager
-    brew install --cask spotify           # Music player
-    brew install --cask skype             # Videocalls
-    brew install --cask vlc               # Media Player
-    brew install --cask transmission      # Torrent Downloader
-    brew install --cask tomighty          # Pomodoro timer
     brew install --cask alfred            # Better Spotlight
-    brew install --cask telegram          # Quickly transfer files
+    brew install --cask calibre           # Book manager
+    brew install --cask ccleaner          # CleanUp
+    brew install --cask dbeaver-community # BD
     brew install --cask discord           # Group calls
-    brew install --cask slack             # Work
+    brew install --cask eclipse-java    # BD
+    brew install --cask google-chrome     # Web browser
+    brew install --cask intellij-idea # Paid, better java SQL IDE
+    brew install --cask intellij-idea-ce # Free version
     brew install --cask iterm2            # Best terminal emulator
     brew install --cask karabiner-elements # Swap Esc with Caps_lock
+    brew install --cask r                      # Probabilitat i estadística
+    brew install --cask rstudio                # Probabilitat i estadística IDE
+    brew install --cask skype             # Videocalls
+    brew install --cask slack             # Work
+    brew install --cask spotify           # Music player
+    brew install --cask telegram          # Quickly transfer files
     brew install --cask the-unarchiver    # Archiver "faster"
-    brew install --cask google-chrome     # Web browser
+    brew install --cask tomighty          # Pomodoro timer
+    brew install --cask transmission      # Torrent Downloader
+    brew install --cask visual-studio-code
+    brew install --cask vlc               # Media Player
+    brew install --cask whatsapp
+    # brew install --cask obs                # Screen recorder //very complicated on mac
     #brew cask install chromium          # Open source web browser
     #brew cask install firefox           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
     #brew cask install keka              # Archiver open source
-    #brew cask install unetbootin        # Burn iso's (or use dd command)
     #brew cask install qbittorrent
+    #brew cask install unetbootin        # Burn iso's (or use dd command)
 }
 doom_emacs_install() {
     # required dependencies
