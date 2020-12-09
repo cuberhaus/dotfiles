@@ -294,7 +294,7 @@ let g:ctrlp_map = '<c-f>'
 nnoremap <leader>pp :setlocal paste!<cr>
 
 " Press ctrl+m to toggle markdown preview
-nnoremap <C-m> <Plug>MarkdownPreviewToggle
+nmap <C-m> <Plug>MarkdownPreviewToggle
 
 "Autoformat
 noremap <F3> :Autoformat<CR>
@@ -317,8 +317,8 @@ nnoremap <leader>o :BufExplorer<cr>
 nnoremap <silent> <leader>z :Goyo<cr>
 
 " YankStack
-nnoremap <C-p> <Plug>yankstack_substitute_older_paste
-nnoremap <C-n> <Plug>yankstack_substitute_newer_paste
+nmap <C-p> <Plug>yankstack_substitute_older_paste
+nmap <C-n> <Plug>yankstack_substitute_newer_paste
 
 " Git gutter toggle
 nnoremap <silent> <leader>g :GitGutterToggle<cr>
