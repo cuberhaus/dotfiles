@@ -19,6 +19,7 @@ base_install () {
     sudo pacman -S nemo-share
 
     # Terminal
+    sudo pacman -S perl-file-mimeinfo    # mimeopen -d $file and type whatever app you want to open that with
     sudo pacman -S base-devel            # AUR
     sudo pacman -S bat                   # "Cat" on steroids
     sudo pacman -S dhcpcd
