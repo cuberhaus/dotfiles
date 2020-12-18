@@ -97,6 +97,7 @@ base_install () {
     yay -S ttf-ms-win10
     yay -S ttf-ms-fonts                  # Microsoft fonts ##deprecated
     yay -S skypeforlinux-stable-bin      # Skype
+    #sudo pacman -S thunderbird           # Check if its the same version as thunderbird-bin
     yay -S thunderbird-bin               # Might have to manually enter PGP key /not#sudo pacman -S thunderbird
 
     # Lockscreen
