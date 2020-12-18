@@ -12,7 +12,7 @@
 alias ycm="python3 ~/.vim/plugged/YouCompleteMe/install.py"
 
 # Config Files
-alias arch="nvim ~/.local/bin/bootstrap/arch"
+alias arch="nvim ~/.local/bin/bootstrap/arch_functions"
 alias aliases="nvim $ZDOTDIR/aliases"
 alias zshenv="nvim ~/.zshenv"
 alias zshrc="nvim $ZDOTDIR/.zshrc"
