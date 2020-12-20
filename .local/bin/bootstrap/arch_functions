@@ -189,7 +189,7 @@ vim_install () {
     cd ~/
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
-    bash ~/scripts/ycm.sh
+    bash $DOTFILES/.local/bin/ycm.sh
     sudo pacman -S python2 python-pip
     pip install wheel
     sudo npm install -g neovim

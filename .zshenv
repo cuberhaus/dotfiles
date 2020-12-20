@@ -31,7 +31,7 @@ export PATH="$HOME/.emacs.d/bin:$PATH"
 export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh" # For more information RTFM https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
 export VISUAL=vim
 export EDITOR="$VISUAL"
-export DOTFILES="~/dotfiles/dotfiles"
+export DOTFILES="$HOME/dotfiles/dotfiles"
 
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
 export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
