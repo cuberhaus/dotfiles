@@ -19,7 +19,6 @@ base_install () {
     sudo pacman -S nemo-share
 
     # Terminal
-    sudo pacman -S perl-file-mimeinfo    # mimeopen -d $file and type whatever app you want to open that with
     sudo pacman -S base-devel            # AUR
     sudo pacman -S bat                   # "Cat" on steroids
     sudo pacman -S dhcpcd
@@ -34,6 +33,9 @@ base_install () {
     sudo pacman -S ncdu                  # Manage storage
     sudo pacman -S net-tools             # Ips
     sudo pacman -S npm
+    sudo pacman -S perl-file-mimeinfo    # mimeopen -d $file and type whatever app you want to open that with
+    sudo pacman -S polkit
+    sudo pacman -S polkit-gnome          # https://wiki.archlinux.org/index.php/Polkit
     sudo pacman -S ranger                # Ranger
     sudo pacman -S rclone                # Rsync to remote
     sudo pacman -S reflector             # Update Arch mirrors
@@ -89,16 +91,17 @@ base_install () {
     #https://wiki.archlinux.org/index.php/qt
 
     ### AUR
-    yay -S google-chrome                 # Best web browser
-    yay -S visual-studio-code-bin        # Microsoft's Visual Code /not #sudo pacman -S code
+    yay -S balena-etcher                 # "Rufus" on linux
     yay -S birdtray                      # Thunderbird tray
-    yay -S whatsapp-nativefier           # Whatsapp client
-    yay -S spotify                       # Spotify
-    yay -S ttf-ms-win10
-    yay -S ttf-ms-fonts                  # Microsoft fonts ##deprecated
+    yay -S google-chrome                 # Best web browser
     yay -S skypeforlinux-stable-bin      # Skype
-    #sudo pacman -S thunderbird           # Check if its the same version as thunderbird-bin
+    yay -S spotify                       # Spotify
     yay -S thunderbird-bin               # Might have to manually enter PGP key /not#sudo pacman -S thunderbird
+    yay -S ttf-ms-fonts                  # Microsoft fonts ##deprecated
+    yay -S ttf-ms-win10
+    yay -S visual-studio-code-bin        # Microsoft's Visual Code /not #sudo pacman -S code
+    yay -S whatsapp-nativefier           # Whatsapp client
+    #sudo pacman -S thunderbird           # Check if its the same version as thunderbird-bin
 
     # Lockscreen
     yay -S betterlockscreen
