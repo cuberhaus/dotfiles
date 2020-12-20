@@ -18,18 +18,20 @@ source ~/.local/bin/bootstrap/arch_functions
 echo "Is it the first time you run this script? [y/n]"
 read FirstRun
 cd ~/
+sudo pacman -Syu # Update
 # Distro variable
 if [[ $FirstRun == y || $FirstRun == Y ]]; then
     echo "#! /bin/sh
     export DISTRO=arch" > ~/.config/distro
+    yay_install # Needed to install AUR packages
 fi
-sudo pacman -Syu # Update
+
+### Only change from here
 base_install
 arch_install
 i3_install
 #cinnamon_install
 if [[ $FirstRun == y || $FirstRun == Y ]]; then
-    yay_install
     #optional
     vim_install
     wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
@@ -39,5 +41,5 @@ if [[ $FirstRun == y || $FirstRun == Y ]]; then
     applets             # Installs Cinnamon applets
     #bloat_install
     DWall
+    chsh -s $(which zsh) # Change default shell to zsh
 fi
-chsh -s $(which zsh) # Change default shell to zsh

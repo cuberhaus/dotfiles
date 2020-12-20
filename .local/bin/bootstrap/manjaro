@@ -7,18 +7,18 @@ source ~/.local/bin/bootstrap/arch_functions
 echo "Is it the first time you run this script? [y/n]"
 read FirstRun
 cd ~/
-if [[ $FirstRun == y ]]; then
+sudo pacman -Syu
+if [[ $FirstRun == y || $FirstRun == Y ]]; then
     echo "#! /bin/sh
     export DISTRO=manjaro" > ~/.config/distro
+    yay_install # Needed to install AUR packages
 fi
+
+### Only change from here
 cd ~/
-sudo pacman -Syu
-if [[ $FirstRun == y ]]; then
-	yay_install
-fi
 base_install
 vim_install
-if [[ $FirstRun == y ]]; then
+if [[ $FirstRun == y || $FirstRun == Y ]]; then
     apps_AUR_install
     i3_install
     wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
@@ -30,5 +30,5 @@ if [[ $FirstRun == y ]]; then
     #games_install
     dwall
     #optional
+    chsh -s $(which zsh) # Change default shell to zsh
 fi
-

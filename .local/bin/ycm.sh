@@ -13,6 +13,7 @@ mac_install () {
 }
 
 ycm_install () {
+    cd ~
     mkdir ycm_build
     cd ycm_build
     cmake -G "Unix Makefiles" . ~/.vim/plugged/YouCompleteMe/third_party/ycmd/cpp
@@ -32,6 +33,5 @@ elif [[ "$DISTRO" == "manjaro" ]]; then
     arch_based_install
 fi
 # Start
-cd ~
 ycm_install # Builds
 rm -r ~/ycm_build # Cleanup
