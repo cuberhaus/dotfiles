@@ -13,10 +13,12 @@ if [[ $FirstRun == y ]]; then
 fi
 cd ~/
 sudo pacman -Syu
+if [[ $FirstRun == y ]]; then
+	yay_install
+fi
 base_install
 vim_install
 if [[ $FirstRun == y ]]; then
-    yay_install
     apps_AUR_install
     i3_install
     wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
