@@ -96,12 +96,12 @@ base_install () {
     yay -S google-chrome                 # Best web browser
     yay -S skypeforlinux-stable-bin      # Skype
     yay -S spotify                       # Spotify
-    yay -S thunderbird-bin               # Might have to manually enter PGP key /not#sudo pacman -S thunderbird
+    #yay -S thunderbird-bin               # Might have to manually enter PGP key /not#sudo pacman -S thunderbird
     yay -S ttf-ms-fonts                  # Microsoft fonts ##deprecated
     yay -S ttf-ms-win10
     yay -S visual-studio-code-bin        # Microsoft's Visual Code /not #sudo pacman -S code
     yay -S whatsapp-nativefier           # Whatsapp client
-    #sudo pacman -S thunderbird           # Check if its the same version as thunderbird-bin
+    sudo pacman -S thunderbird           # Check if its the same version as thunderbird-bin
 
     # Lockscreen
     yay -S betterlockscreen
