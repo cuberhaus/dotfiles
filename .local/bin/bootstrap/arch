@@ -15,6 +15,7 @@
 source ~/.local/bin/bootstrap/arch_functions
 
 ### Installation starts here
+
 echo "Is it the first time you run this script? [y/n]"
 read FirstRun
 cd ~/
