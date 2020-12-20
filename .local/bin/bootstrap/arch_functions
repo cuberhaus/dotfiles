@@ -96,10 +96,12 @@ base_install () {
     yay -S google-chrome                 # Best web browser
     yay -S skypeforlinux-stable-bin      # Skype
     yay -S spotify                       # Spotify
-    #yay -S thunderbird-bin               # Might have to manually enter PGP key /not#sudo pacman -S thunderbird
     yay -S ttf-ms-fonts                  # Microsoft fonts ##deprecated
     yay -S visual-studio-code-bin        # Microsoft's Visual Code /not #sudo pacman -S code
     yay -S whatsapp-nativefier           # Whatsapp client
+    
+    # Thunderbird
+    #yay -S thunderbird-bin               # Might have to manually enter PGP key /not#sudo pacman -S thunderbird
     sudo pacman -S thunderbird           # Check if its the same version as thunderbird-bin
 
     # Lockscreen
@@ -318,12 +320,10 @@ optional() {
     #sudo pacman -S nomacs                # Image viewer / use pix instead
     sudo pacman -S audacity              # Audio editor
     sudo pacman -S dbeaver               # Base de dades
-    sudo pacman -S freerdp               # more remmina
     sudo pacman -S gimp                  # Image editor
     sudo pacman -S jdk-openjdk # with dbeaver
-    sudo pacman -S libvncserver          # remmina
     sudo pacman -S r                    # Probabilitat i estadística
-    sudo pacman -S remmina               # Remote conexions
+    sudo pacman -S remmina freerdp libvncserver     # Remote conexions
     sudo pacman -S texstudio             # Latex text editor
     #sudo pacman -S intellij-idea-community-edition # BD free version (no SQL)
     yay -S intellij-idea-ultimate-edition # BD paid IntelliJ 

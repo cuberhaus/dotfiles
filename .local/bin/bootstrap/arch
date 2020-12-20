@@ -28,18 +28,26 @@ fi
 
 ### Only change from here
 base_install
-arch_install
-i3_install
-#cinnamon_install
 if [[ $FirstRun == y || $FirstRun == Y ]]; then
-    #optional
-    vim_install
-    wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
-    laptop_install
-    #games_install
-    cava_install
-    applets             # Installs Cinnamon applets
+    arch_install
+fi
+i3_install
+if [[ $FirstRun == y || $FirstRun == Y ]]; then
+    ### FUNCTIONS
+    #applets             # Installs Cinnamon applets # implement pending
     #bloat_install
-    DWall
+    #cinnamon_install
+    #games_install
+    #gnome_install
+    #optional
+    #plasma_install
+    #virtualbox_install
+    apps_AUR_install
+    cava_install
+    dwall
+    laptop_install
+    vim_install
+
+    wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
     chsh -s $(which zsh) # Change default shell to zsh
 fi
