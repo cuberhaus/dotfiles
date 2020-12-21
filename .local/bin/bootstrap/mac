@@ -78,6 +78,8 @@ mac_install () {
     brew install --cask intellij-idea-ce # Free version
     brew install --cask iterm2            # Best terminal emulator
     brew install --cask karabiner-elements # Swap Esc with Caps_lock
+    brew install --cask meld              # Best Diff software
+    brew install --cask obs              # Screen recorder //very complicated on mac
     brew install --cask r                      # Probabilitat i estadística
     brew install --cask rstudio                # Probabilitat i estadística IDE
     brew install --cask skype             # Videocalls
@@ -90,12 +92,10 @@ mac_install () {
     brew install --cask visual-studio-code
     brew install --cask vlc               # Media Player
     brew install --cask whatsapp
-    # brew install --cask obs                # Screen recorder //very complicated on mac
-    #brew cask install chromium          # Open source web browser
-    #brew cask install firefox           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
-    #brew cask install keka              # Archiver open source
-    #brew cask install qbittorrent
-    #brew cask install unetbootin        # Burn iso's (or use dd command)
+    #brew cask install firefox --cask           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
+    #brew cask install keka --cask              # Archiver open source
+    #brew cask install qbittorrent --cask
+    #brew cask install unetbootin --cask        # Burn iso's (or use dd command)
 }
 doom_emacs_install() {
     # required dependencies
