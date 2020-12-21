@@ -12,133 +12,133 @@ base_install () {
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
     gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg -e # Termite execute argument is -e in gnome-terminal its -x
-    sudo pacman -S nemo
-    sudo pacman -S nemo-fileroller
-    sudo pacman -S nemo-preview
-    sudo pacman -S nemo-seahorse
-    sudo pacman -S nemo-share
+    sudo pacman -S nemo --noconfirm
+    sudo pacman -S nemo-fileroller --noconfirm
+    sudo pacman -S nemo-preview --noconfirm
+    sudo pacman -S nemo-seahorse --noconfirm
+    sudo pacman -S nemo-share --noconfirm
 
     # Terminal
-    sudo pacman -S base-devel            # AUR
-    sudo pacman -S bat                   # "Cat" on steroids
-    sudo pacman -S dhcpcd
-    sudo pacman -S dnsutils              # Ip
-    sudo pacman -S exa                   # "ls" on steroids
-    sudo pacman -S fzf                   # Fuzzy finder
-    sudo pacman -S gcc                   # Cpp
-    sudo pacman -S git python3 stow      # To deploy dotfiles and more
-    sudo pacman -S gvim                  # Vim version with extra features
-    sudo pacman -S htop                  # Show system resources
-    sudo pacman -S laptop-detect         # Detect if using a laptop
-    sudo pacman -S ncdu                  # Manage storage
-    sudo pacman -S net-tools             # Ips
-    sudo pacman -S npm
-    sudo pacman -S perl-file-mimeinfo    # mimeopen -d $file and type whatever app you want to open that with
-    sudo pacman -S polkit
-    sudo pacman -S polkit-gnome          # https://wiki.archlinux.org/index.php/Polkit
-    sudo pacman -S ranger                # Ranger
-    sudo pacman -S rclone                # Rsync to remote
-    sudo pacman -S reflector             # Update Arch mirrors
-    sudo pacman -S ruby
-    sudo pacman -S svn
-    sudo pacman -S termite               # Terminal emulator
-    sudo pacman -S the_silver_searcher   # Better and faster ack (and grep)
-    sudo pacman -S tmux                  # Terminal multiplexer
-    sudo pacman -S udiskie               # Automater
-    sudo pacman -S udisks2               # Daemon to manipulate storage devices
-    sudo pacman -S w3m                   # Preview images on ranger
-    sudo pacman -S wget                  # Download stuff
-    sudo pacman -S xclip                 # Clipboard
-    sudo pacman -S xdg-user-dirs         # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
-    sudo pacman -S xfce4-clipman-plugin # Clipboard manager (persistant clip even when application is closed)
-    sudo pacman -S xorg                  # Display server
-    sudo pacman -S xorg-xinit            # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
-    sudo pacman -S yarn                  # Package installer
-    sudo pacman -S zsh                   # Zsh shell
+    sudo pacman -S base-devel --noconfirm            # AUR
+    sudo pacman -S bat --noconfirm                   # "Cat" on steroids
+    sudo pacman -S dhcpcd --noconfirm
+    sudo pacman -S dnsutils --noconfirm              # Ip
+    sudo pacman -S exa --noconfirm                   # "ls" on steroids
+    sudo pacman -S fzf --noconfirm                   # Fuzzy finder
+    sudo pacman -S gcc --noconfirm                   # Cpp
+    sudo pacman -S git python3 stow --noconfirm       # To deploy dotfiles and more
+    sudo pacman -S gvim --noconfirm                  # Vim version with extra features
+    sudo pacman -S htop --noconfirm                  # Show system resources
+    sudo pacman -S laptop-detect --noconfirm         # Detect if using a laptop
+    sudo pacman -S ncdu --noconfirm                  # Manage storage
+    sudo pacman -S net-tools --noconfirm             # Ips
+    sudo pacman -S npm --noconfirm
+    sudo pacman -S perl-file-mimeinfo --noconfirm    # mimeopen -d $file and type whatever app you want to open that with
+    sudo pacman -S polkit --noconfirm
+    sudo pacman -S polkit-gnome --noconfirm          # https://wiki.archlinux.org/index.php/Polkit
+    sudo pacman -S ranger --noconfirm                # Ranger
+    sudo pacman -S rclone --noconfirm                # Rsync to remote
+    sudo pacman -S reflector --noconfirm             # Update Arch mirrors
+    sudo pacman -S ruby --noconfirm
+    sudo pacman -S svn --noconfirm
+    sudo pacman -S termite --noconfirm               # Terminal emulator
+    sudo pacman -S the_silver_searcher --noconfirm   # Better and faster ack (and grep)
+    sudo pacman -S tmux --noconfirm                  # Terminal multiplexer
+    sudo pacman -S udiskie --noconfirm               # Automater
+    sudo pacman -S udisks2 --noconfirm               # Daemon to manipulate storage devices
+    sudo pacman -S w3m --noconfirm                   # Preview images on ranger
+    sudo pacman -S wget --noconfirm                  # Download stuff
+    sudo pacman -S xclip --noconfirm                 # Clipboard
+    sudo pacman -S xdg-user-dirs --noconfirm         # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
+    sudo pacman -S xfce4-clipman-plugin --noconfirm # Clipboard manager (persistant clip even when application is closed)
+    sudo pacman -S xorg --noconfirm                  # Display server
+    sudo pacman -S xorg-xinit --noconfirm            # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
+    sudo pacman -S yarn --noconfirm                  # Package installer
+    sudo pacman -S zsh --noconfirm                   # Zsh shell
 
     # GUI
-    sudo pacman -S calibre               # Book manager
-    sudo pacman -S discord
-    sudo pacman -S dunst                 # Notifications
-    sudo pacman -S file-roller           # Archive Manager
-    sudo pacman -S gnome-calculator      # Calculator
-    sudo pacman -S gnome-font-viewer      # Font viewer
-    sudo pacman -S gparted               # Manage partitions
-    sudo pacman -S gucharmap             # Characters keyboard
-    sudo pacman -S hexchat # IRC APP
-    sudo pacman -S libreoffice-still     # Office
-    sudo pacman -S meld                  # Best diff viewer "kompare pulls a lot of kde dependencies"
-    sudo pacman -S noto-fonts-emoji       # Classic Emoji
-    sudo pacman -S okular # or  sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
-    sudo pacman -S playerctl # Audio
-    sudo pacman -S pulseaudio pulseaudio-equalizer pulseaudio-bluetooth # Audio
-    sudo pacman -S transmission-gtk      # A simpler Torrent D.
-    sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts # Fonts
-    sudo pacman -S tumbler ffmpegthumbnailer raw-thumbnailer # IDK
-    sudo pacman -S vlc                   # Video player
+    sudo pacman -S calibre --noconfirm               # Book manager
+    sudo pacman -S discord --noconfirm
+    sudo pacman -S dunst --noconfirm                 # Notifications
+    sudo pacman -S file-roller --noconfirm           # Archive Manager
+    sudo pacman -S gnome-calculator --noconfirm      # Calculator
+    sudo pacman -S gnome-font-viewer --noconfirm      # Font viewer
+    sudo pacman -S gparted --noconfirm               # Manage partitions
+    sudo pacman -S gucharmap --noconfirm             # Characters keyboard
+    sudo pacman -S hexchat --noconfirm # IRC APP
+    sudo pacman -S libreoffice-still --noconfirm     # Office
+    sudo pacman -S meld --noconfirm                  # Best diff viewer "kompare pulls a lot of kde dependencies"
+    sudo pacman -S noto-fonts-emoji --noconfirm       # Classic Emoji
+    sudo pacman -S okular --noconfirm # or  sudo pacman -S zathura zathura-pdf-mupdf zathura-cb
+    sudo pacman -S playerctl --noconfirm # Audio
+    sudo pacman -S pulseaudio pulseaudio-equalizer pulseaudio-bluetooth --noconfirm # Audio
+    sudo pacman -S transmission-gtk --noconfirm      # A simpler Torrent D.
+    sudo pacman -S ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts --noconfirm # Fonts
+    sudo pacman -S tumbler ffmpegthumbnailer raw-thumbnailer --noconfirm # IDK
+    sudo pacman -S vlc --noconfirm                   # Video player
 
     # Theme
-    #sudo pacman -S breeze                 # Theme
-    sudo pacman -S adapta-gtk-theme       # Alternative theme
-    sudo pacman -S arc-gtk-theme arc-icon-theme # Arc theme and its icon's
-    sudo pacman -S dconf-editor           # Edit gnome configuration
-    sudo pacman -S gtk2 gtk3
-    sudo pacman -S kvantum-qt5            # Qt5 Custom themes
-    sudo pacman -S lxappearance           # Gtk configuration utility
-    sudo pacman -S papirus-icon-theme     # Best icon theme!
-    sudo pacman -S qt5ct                  # Qt5 configuration utility
+    #sudo pacman -S breeze --noconfirm                 # Theme
+    sudo pacman -S adapta-gtk-theme --noconfirm       # Alternative theme
+    sudo pacman -S arc-gtk-theme arc-icon-theme --noconfirm  # Arc theme and its icon's
+    sudo pacman -S dconf-editor --noconfirm           # Edit gnome configuration
+    sudo pacman -S gtk2 gtk3 --noconfirm
+    sudo pacman -S kvantum-qt5 --noconfirm            # Qt5 Custom themes
+    sudo pacman -S lxappearance --noconfirm           # Gtk configuration utility
+    sudo pacman -S papirus-icon-theme --noconfirm     # Best icon theme!
+    sudo pacman -S qt5ct --noconfirm                  # Qt5 configuration utility
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
 
     ### AUR
-    yay -S balena-etcher                 # "Rufus" on linux
-    yay -S birdtray                      # Thunderbird tray
-    yay -S google-chrome                 # Best web browser
-    yay -S skypeforlinux-stable-bin      # Skype
-    yay -S spotify                       # Spotify
-    yay -S ttf-ms-fonts                  # Microsoft fonts ##deprecated
-    yay -S visual-studio-code-bin        # Microsoft's Visual Code /not #sudo pacman -S code
-    yay -S whatsapp-nativefier           # Whatsapp client
-    
+    yay -S balena-etcher --noconfirm                 # "Rufus" on linux
+    yay -S birdtray --noconfirm                      # Thunderbird tray
+    yay -S google-chrome --noconfirm                 # Best web browser
+    yay -S skypeforlinux-stable-bin --noconfirm      # Skype
+    yay -S spotify --noconfirm                       # Spotify
+    yay -S ttf-ms-fonts --noconfirm                  # Microsoft fonts ##deprecated
+    yay -S visual-studio-code-bin --noconfirm        # Microsoft's Visual Code /not #sudo pacman -S code
+    yay -S whatsapp-nativefier --noconfirm           # Whatsapp client
+
     # Thunderbird
-    #yay -S thunderbird-bin               # Might have to manually enter PGP key /not#sudo pacman -S thunderbird
-    sudo pacman -S thunderbird           # Check if its the same version as thunderbird-bin
+    #yay -S thunderbird-bin --noconfirm               # Might have to manually enter PGP key /not#sudo pacman -S thunderbird
+    sudo pacman -S thunderbird --noconfirm           # Check if its the same version as thunderbird-bin
 
     # Lockscreen
-    yay -S betterlockscreen
-    sudo pacman -S xss-lock
+    yay -S betterlockscreen --noconfirm
+    sudo pacman -S xss-lock --noconfirm
 
     # Backups
-    yay -S timeshift  #  sudo timeshift-gtk
-    sudo pacman -S cron
+    yay -S timeshift --noconfirm  #  sudo timeshift-gtk
+    sudo pacman -S cron --noconfirm
 
 }
 
 arch_install() {
     # Drivers
-    sudo pacman -S linux
-    sudo pacman -S linux-headers
+    sudo pacman -S linux --noconfirm
+    sudo pacman -S linux-headers --noconfirm
     # LTS release
     #sudo pacman -S linux-lts
     #sudo pacman -S linux-lts-headers
     #sudo pacman -S nvidia-lts
     # sudo pacman -S nvidia-dkms #very slow
-    sudo pacman -S nvidia nvidia-utils   # Nvidia
-    sudo pacman -S xf86-video-intel mesa lib32-mesa    # Intel
-    sudo pacman -S lib32-nvidia-utils    # Requires adding multilib libraries
-    sudo pacman -S nvidia-settings       # Add force composition pipeline in nvidia-settings
+    sudo pacman -S nvidia nvidia-utils --noconfirm    # Nvidia
+    sudo pacman -S xf86-video-intel mesa lib32-mesa --noconfirm    # Intel
+    sudo pacman -S lib32-nvidia-utils --noconfirm    # Requires adding multilib libraries
+    sudo pacman -S nvidia-settings --noconfirm       # Add force composition pipeline in nvidia-settings
 
     # Printers
     # https://wiki.archlinux.org/index.php/CUPS
-    sudo pacman -S cups system-config-printer hplip
+    sudo pacman -S cups system-config-printer hplip --noconfirm
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         sudo systemctl enable org.cups.cupsd.service
         sudo systemctl start org.cups.cupsd.service
     fi
 
     # Bluetooth
-    sudo pacman -S bluez bluez-utils
-    sudo pacman -S blueberry              # Linux Mint spin-off of GNOME Bluetooth
+    sudo pacman -S bluez bluez-utils --noconfirm
+    sudo pacman -S blueberry --noconfirm              # Linux Mint spin-off of GNOME Bluetooth
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
     fi
@@ -147,7 +147,7 @@ arch_install() {
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable lightdm.service
     fi
-    sudo pacman -S lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings
+    sudo pacman -S lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings --noconfirm
     # Ntp for time syncro
     #https://wiki.archlinux.org/index.php/Systemd-timesyncd
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
@@ -156,11 +156,11 @@ arch_install() {
     fi
     # https://wiki.archlinux.org/index.php/USB_storage_devices
     # Network Manager and enable daemon on startup
-    sudo pacman -S networkmanager
+    sudo pacman -S networkmanager --noconfirm
     # Gui
-    sudo pacman -S nm-connection-editor
+    sudo pacman -S nm-connection-editor --noconfirm
     # Applet
-    sudo pacman -S nm-applet
+    sudo pacman -S nm-applet --noconfirm
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable NetworkManager.service
     fi
@@ -183,56 +183,55 @@ trackpad_scrolling () {
     MatchDevicePath "/dev/input/event*"
     Driver "libinput"
     Option "NaturalScrolling" "true"
-EndSection' | sudo tee -a /etc/X11/xorg.conf.d/30-touchpad.conf
+    EndSection' | sudo tee -a /etc/X11/xorg.conf.d/30-touchpad.conf
 }
 
 vim_install () {
-    sudo pacman -S neovim
+    sudo pacman -S neovim --noconfirm
     cd ~/
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
     bash $DOTFILES/.local/bin/ycm.sh
-    sudo pacman -S python2 python-pip
+    sudo pacman -S python2 python-pip --noconfirm
     pip install wheel
     sudo npm install -g neovim
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
-
 }
 
 # Best Tiling Window Manager
 i3_install () {
-    sudo pacman -S acpi
-    yay -S kbdd-git          # i3blocks keyboard layout
-    sudo pacman -S zenity    # i3blocks poweroff menu
-    sudo pacman -S awk bc upower             # battery plus
-    sudo pacman -S feh       # Wallpaper
-    sudo pacman -S gnome-screenshot          # Take screenshots with impr pant
-    sudo pacman -S i3-gaps   # i3 with gaps
-    sudo pacman -S i3blocks  # Bottom bar
-    sudo pacman -S light     # Brightness
-    sudo pacman -S perl-anyevent-i3 python-dbus
-    sudo pacman -S picom     # Compositor, for transparencies
-    sudo pacman -S pulseaudio alsa-utils     # Audio
-    sudo pacman -S rofi      # App menu Super+d
-    sudo pacman -S yad xdotool               # calendar
+    sudo pacman -S acpi --noconfirm
+    yay -S kbdd-git --noconfirm          # i3blocks keyboard layout
+    sudo pacman -S zenity --noconfirm    # i3blocks poweroff menu
+    sudo pacman -S awk bc upower --noconfirm             # battery plus
+    sudo pacman -S feh --noconfirm       # Wallpaper
+    sudo pacman -S gnome-screenshot --noconfirm          # Take screenshots with impr pant
+    sudo pacman -S i3-gaps --noconfirm   # i3 with gaps
+    sudo pacman -S i3blocks --noconfirm  # Bottom bar
+    sudo pacman -S light --noconfirm     # Brightness
+    sudo pacman -S perl-anyevent-i3 python-dbus --noconfirm
+    sudo pacman -S picom --noconfirm     # Compositor, for transparencies
+    sudo pacman -S pulseaudio alsa-utils --noconfirm     # Audio
+    sudo pacman -S rofi --noconfirm      # App menu Super+d
+    sudo pacman -S yad xdotool --noconfirm               # calendar
 }
 
 # Best Desktop
 cinnamon_install() {
-    sudo pacman -S cinnamon                  # Desktop
-    sudo pacman -S gnome-screenshot          # Take screenshots with impr pant
-    yay -S cinnamon-sound-effects            # Sound effects
-    yay -S mint-themes mint-y-icons mint-backgrounds # Themes
-    yay -S pix                               # Image viewer
+    sudo pacman -S cinnamon --noconfirm                  # Desktop
+    sudo pacman -S gnome-screenshot --noconfirm          # Take screenshots with impr pant
+    yay -S cinnamon-sound-effects --noconfirm            # Sound effects
+    yay -S mint-themes mint-y-icons mint-backgrounds  --noconfirm # Themes
+    yay -S pix --noconfirm                               # Image viewer
     gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
 
     # Fallback mode in case cinnamon crashes
-    sudo pacman -S gnome-shell               # To have a taskbar
-    sudo pacman -S metacity
+    sudo pacman -S gnome-shell --noconfirm               # To have a taskbar
+    sudo pacman -S metacity --noconfirm
 
     # Color pick applet
-    sudo pacman -S python-numpy python-xlib
+    sudo pacman -S python-numpy python-xlib --noconfirm
 
     # Uninstall  xf86-video-intel
     #https://wiki.archlinux.org/index.php/cinnamon
@@ -244,7 +243,7 @@ cinnamon_install() {
 }
 
 gnome_install() {
-    sudo pacman -S chrome-gnome-shell
+    sudo pacman -S chrome-gnome-shell --noconfirm
     # Extensions
     # dash to dock (add dock)
     # impatience (faster animations)
@@ -254,39 +253,39 @@ gnome_install() {
 }
 
 plasma_install() {
-    sudo pacman -S plasma # Check archwiki first
-    yay -S ocs-url # Easy install of kde store add-ons
+    sudo pacman -S plasma --noconfirm # Check archwiki first
+    yay -S ocs-url --noconfirm # Easy install of kde store add-ons
 }
 
 bloat_install () {
-    sudo pacman -S cmatrix               # Bloat
-    sudo pacman -S cowsay    # A cow displaying text
-    sudo pacman -S fortune-mod           # Random quote
-    sudo pacman -S lolcat
-    sudo pacman -S ponysay asciiquarium
-    sudo pacman -S sl        # Steam locomotor, (Did you mean to type ls?)
-    yay -S cava # https://github.com/karlstav/cava
-    yay -S figlet toilet     # Cool letters
-    yay -S pipes.sh          # Lockscreens
+    sudo pacman -S cmatrix --noconfirm               # Bloat
+    sudo pacman -S cowsay --noconfirm    # A cow displaying text
+    sudo pacman -S fortune-mod --noconfirm           # Random quote
+    sudo pacman -S lolcat --noconfirm
+    sudo pacman -S ponysay asciiquarium --noconfirm
+    sudo pacman -S sl --noconfirm        # Steam locomotor, (Did you mean to type ls?)
+    yay -S cava --noconfirm # https://github.com/karlstav/cava
+    yay -S figlet toilet --noconfirm     # Cool letters
+    yay -S pipes.sh --noconfirm          # Lockscreens
 }
 
 virtualbox_install() {
-    sudo pacman -S virtualbox
+    sudo pacman -S virtualbox --noconfirm
     # Need to activate virtualization in bios
     # 'linux' kernel
-    sudo pacman -S virtualbox-host-modules-arch
+    sudo pacman -S virtualbox-host-modules-arch --noconfirm
     # other kernels including linux-lts
-    sudo pacman -S virtualbox-host-dkms
+    sudo pacman -S virtualbox-host-dkms --noconfirm
 }
 
 games_install () {
-    sudo pacman -S lutris
-    sudo pacman -S minecraft
-    sudo pacman -S steam
+    sudo pacman -S lutris --noconfirm
+    sudo pacman -S minecraft --noconfirm
+    sudo pacman -S steam --noconfirm
 }
 
 laptop_install() {
-    sudo pacman -S tlp
+    sudo pacman -S tlp --noconfirm
     sudo systemctl enable tlp.service
     trackpad_scrolling
 }
@@ -302,9 +301,9 @@ dwall() {
 }
 
 emacs_install () {
-    sudo pacman -S emacs
-    sudo pacman -S ripgrep
-    sudo pacman -S fd
+    sudo pacman -S emacs --noconfirm
+    sudo pacman -S ripgrep --noconfirm
+    sudo pacman -S fd --noconfirm
     # DOOM
     git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
     ~/.emacs.d/bin/doom install
@@ -314,31 +313,31 @@ optional() {
     # Terminal
     #sudo pacman -S github-cli            # Github from terminal, create issues...
     #sudo pacman -S thefuck
-    sudo pacman -S doxygen texlive-most graphviz # Doxygen
+    sudo pacman -S doxygen texlive-most graphviz --noconfirm # Doxygen
 
     # GUI
-    #sudo pacman -S nomacs                # Image viewer / use pix instead
-    sudo pacman -S audacity              # Audio editor
-    sudo pacman -S dbeaver               # Base de dades
-    sudo pacman -S gimp                  # Image editor
-    sudo pacman -S jdk-openjdk # with dbeaver
-    sudo pacman -S r                    # Probabilitat i estadística
-    sudo pacman -S remmina freerdp libvncserver     # Remote conexions
-    sudo pacman -S texstudio             # Latex text editor
+    #sudo pacman -S nomacs --noconfirm                # Image viewer / use pix instead
+    sudo pacman -S audacity --noconfirm              # Audio editor
+    sudo pacman -S dbeaver --noconfirm               # Base de dades
+    sudo pacman -S gimp --noconfirm                  # Image editor
+    sudo pacman -S jdk-openjdk --noconfirm # with dbeaver
+    sudo pacman -S r --noconfirm                     # Probabilitat i estadística
+    sudo pacman -S remmina freerdp libvncserver --noconfirm      # Remote conexions
+    sudo pacman -S texstudio --noconfirm             # Latex text editor
     #sudo pacman -S intellij-idea-community-edition # BD free version (no SQL)
-    yay -S intellij-idea-ultimate-edition # BD paid IntelliJ 
+    yay -S intellij-idea-ultimate-edition --noconfirm # BD paid IntelliJ
 
     # AUR
-    #yay -S eclipse-java                 # BD
-    yay -S android-studio               # Android Studio
-    yay -S rstudio-desktop-bin          # Probabilitat i estadística IDE
-    yay -S slack-desktop                # Slack
-    yay -S youtube-dl                   # Download youtube videos
-    #sudo pacman -S tor                   # Tor private browser
-    #yay -S tor-browser
+    #yay -S eclipse-java --noconfirm                 # BD
+    yay -S android-studio --noconfirm               # Android Studio
+    yay -S rstudio-desktop-bin --noconfirm          # Probabilitat i estadística IDE
+    yay -S slack-desktop --noconfirm                # Slack
+    yay -S youtube-dl --noconfirm                   # Download youtube videos
+    #sudo pacman -S tor --noconfirm                    # Tor private browser
+    #yay -S tor-browser --noconfirm
     # f5fpc -s -x -t https://upclink.upc.edu
     # f5fpc --stop
-    yay -S f5fpc                        # Connexio a UPClink
+    yay -S f5fpc --noconfirm                        # Connexio a UPClink
 
     # Calendar
     #sudo pacman -S gnome-calendar gnome-keyring libsecret seahorse
