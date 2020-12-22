@@ -201,6 +201,7 @@ vim_install () {
 
 # Best Tiling Window Manager
 i3_install () {
+    yay -S cava --noconfirm              # https://github.com/karlstav/cava
     sudo pacman -S acpi --noconfirm
     yay -S kbdd-git --noconfirm          # i3blocks keyboard layout
     sudo pacman -S zenity --noconfirm    # i3blocks poweroff menu
@@ -264,7 +265,6 @@ bloat_install () {
     sudo pacman -S lolcat --noconfirm
     sudo pacman -S ponysay asciiquarium --noconfirm
     sudo pacman -S sl --noconfirm        # Steam locomotor, (Did you mean to type ls?)
-    yay -S cava --noconfirm # https://github.com/karlstav/cava
     yay -S figlet toilet --noconfirm     # Cool letters
     yay -S pipes.sh --noconfirm          # Lockscreens
 }
@@ -328,7 +328,7 @@ optional() {
     yay -S intellij-idea-ultimate-edition --noconfirm # BD paid IntelliJ
 
     # AUR
-    #yay -S eclipse-java --noconfirm                 # BD
+    yay -S eclipse-java --noconfirm                 # BD
     yay -S android-studio --noconfirm               # Android Studio
     yay -S rstudio-desktop-bin --noconfirm          # Probabilitat i estadística IDE
     yay -S slack-desktop --noconfirm                # Slack

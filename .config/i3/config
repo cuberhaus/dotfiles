@@ -70,8 +70,8 @@ set $layout Layout: (s)  Spotify, (w)  Work
 bindsym $mod+space mode "$layout"
 
 mode "$layout" {
-    bindsym s exec /home/pol/.config/i3-layout-manager/layouts/spotify.sh
-    bindsym w exec /home/pol/.config/i3-layout-manager/layouts/work.sh
+    bindsym s exec $HOME/.config/i3-layout-manager/layouts/spotify.sh
+    bindsym w exec $HOME/.config/i3-layout-manager/layouts/work.sh
     # back to normal: Enter or Escape or $mod+r
     bindsym Return mode "default"
     bindsym Escape mode "default"
