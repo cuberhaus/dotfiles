@@ -48,7 +48,7 @@ floating_modifier $mod
 ###############################################################
 
 # Layout Scripts
-#bindsym $mod+g exec /home/pol/.config/i3/i3-layout-manager/layout_manager.sh
+bindsym $mod+shift+m exec $HOME/.config/i3/i3-layout-manager/layout_manager.sh
 
 # Screen Printing
 # scrot & gimp - root

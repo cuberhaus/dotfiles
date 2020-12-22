@@ -202,20 +202,21 @@ vim_install () {
 # Best Tiling Window Manager
 i3_install () {
     yay -S cava --noconfirm              # https://github.com/karlstav/cava
-    sudo pacman -S acpi --noconfirm
     yay -S kbdd-git --noconfirm          # i3blocks keyboard layout
-    sudo pacman -S zenity --noconfirm    # i3blocks poweroff menu
+    sudo pacman -S acpi --noconfirm
     sudo pacman -S awk bc upower --noconfirm             # battery plus
     sudo pacman -S feh --noconfirm       # Wallpaper
     sudo pacman -S gnome-screenshot --noconfirm          # Take screenshots with impr pant
     sudo pacman -S i3-gaps --noconfirm   # i3 with gaps
     sudo pacman -S i3blocks --noconfirm  # Bottom bar
+    sudo pacman -S jq xdotool indent perl-anyevent-i3 --noconfirm # cava dependancies
     sudo pacman -S light --noconfirm     # Brightness
     sudo pacman -S perl-anyevent-i3 python-dbus --noconfirm
     sudo pacman -S picom --noconfirm     # Compositor, for transparencies
     sudo pacman -S pulseaudio alsa-utils --noconfirm     # Audio
     sudo pacman -S rofi --noconfirm      # App menu Super+d
     sudo pacman -S yad xdotool --noconfirm               # calendar
+    sudo pacman -S zenity --noconfirm    # i3blocks poweroff menu
 }
 
 # Best Desktop
