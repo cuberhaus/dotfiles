@@ -78,6 +78,9 @@ mode "$layout" {
     bindsym $mod+r mode "default"
 }
 
+# Toggle borders
+bindsym $mod+Shift+b border toggle
+
 # Gaps MANAGEMENT WIN+shift+g
 set $mode_gaps Gaps: (o) outer, (i) inner
 set $mode_gaps_outer Outer Gaps: +|-|0 (local), Shift + +|-|0 (global)
