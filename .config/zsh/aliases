@@ -8,11 +8,13 @@
 # array=('Element1' 'Element2')
 ###############################################################
 
+scripts=$HOME/.local/scripts
+
 # Recompile ycm
 alias ycm="python3 ~/.vim/plugged/YouCompleteMe/install.py"
 
 # Config Files
-alias arch="nvim ~/.local/bin/bootstrap/arch_functions"
+alias arch="nvim $scripts/bootstrap/arch_functions"
 alias aliases="nvim $ZDOTDIR/aliases"
 alias zshenv="nvim ~/.zshenv"
 alias zshrc="nvim $ZDOTDIR/.zshrc"
@@ -20,19 +22,18 @@ alias zprofile="nvim $ZDOTDIR/.zprofile"
 alias vimrc="nvim ~/.vim/vimrc"
 alias bashrc="nvim ~/.bashrc"
 alias tmux.conf="nvim ~/.config/tmux/tmux.conf"
-alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
-alias vpacman="sudo vim /etc/pacman.conf"
-alias vgrub="sudo vim /etc/default/grub"
-alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
-alias vslim="sudo vim /etc/slim.conf"
-alias voblogout="sudo vim /etc/oblogout.conf"
-alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
-alias vconfgrub="sudo vim /boot/grub/grub.cfg"
+#alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
+#alias vpacman="sudo vim /etc/pacman.conf"
+#alias vgrub="sudo vim /etc/default/grub"
+#alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
+#alias vslim="sudo vim /etc/slim.conf"
+#alias voblogout="sudo vim /etc/oblogout.conf"
+#alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
+#alias vconfgrub="sudo vim /boot/grub/grub.cfg"
 
-alias fck="fuck"
 #alias vim="nvim"
 alias n="nvim"
-alias lvim="nvim +'call Light()' "
+#alias lvim="nvim +'call Light()' "
 
 # Easier navigation: .., ..., ...., ....., ~ and -
 alias ..="cd .."
@@ -67,8 +68,6 @@ alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.
 # List files
 # using -a -a will show '.' and ".."
 # --git causes to crash when symbolic link is gone
-#alias ls='exa -F --long --header --group --git  --group-directories-first'
-#alias la='exa -a -F --long --header --group --git  --group-directories-first'
 alias ls='exa -F --long --header --links --group --group-directories-first'
 alias la='exa -a -F --long --header --links --group --group-directories-first'
 alias lsd='exa -D -a'
@@ -84,7 +83,7 @@ alias reload='exec ${SHELL} -l'
 alias path='echo -e ${PATH//:/\\n}'
 
 # Cpp
-alias eda++="g++ -std=c++11"
+#alias eda++="g++ -std=c++11"
 alias p1++="g++ -ansi -O2 -DNDEBUG -D_GLIBCXX_DEBUG -Wall -Wextra -Werror -Wno-uninitialized -Wno-sign-compare -Wshadow"
 alias p2++="g++ -D GLIBCXX_DEBUG -O2 -Wall -Wextra -Werror -Wno-sign-compare -std=c++11"
 
@@ -94,17 +93,6 @@ alias userlist="cut -d: -f1 /etc/passwd"
 # Switch between bash and zsh
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
-
-# youtube-dl
-alias yta-aac="youtube-dl --extract-audio --audio-format aac "
-alias yta-best="youtube-dl --extract-audio --audio-format best "
-alias yta-flac="youtube-dl --extract-audio --audio-format flac "
-alias yta-m4a="youtube-dl --extract-audio --audio-format m4a "
-alias yta-mp3="youtube-dl --extract-audio --audio-format mp3 "
-alias yta-opus="youtube-dl --extract-audio --audio-format opus "
-alias yta-vorbis="youtube-dl --extract-audio --audio-format vorbis "
-alias yta-wav="youtube-dl --extract-audio --audio-format wav "
-alias ytv-best="youtube-dl -f bestvideo+bestaudio "
 
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -168,5 +156,5 @@ fi
 ###############################################################
 
 alias Xres="xrdb -load ~/.config/X11/xresources"
-alias nvidia-settings="nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settings"
+#alias nvidia-settings="nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settings"
 alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
