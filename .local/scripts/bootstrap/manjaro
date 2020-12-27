@@ -1,6 +1,9 @@
 #! /usr/bin/env bash
+### VARIABLES
+scripts=$HOME/.local/scripts
+
 # Include functions
-source ~/.local/bin/bootstrap/arch_functions
+source $scripts/bootstrap/arch_install
 
 ### Installation starts here
 
