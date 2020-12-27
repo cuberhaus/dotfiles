@@ -70,7 +70,7 @@ git gc --aggressive --prune=all     # remove the old files
 
 Remove file from all [commits](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/removing-sensitive-data-from-a-repository):
 
-```
+```bash
 bfg --delete-files FILE_WITH_SENSITIVE_DATA PATH_TO_REPO
 cd some-big-repo.git
 git reflog expire --expire=now --all && git gc --prune=now --aggressive
@@ -79,7 +79,7 @@ git push
 
 Remove [folder](https://rtyley.github.io/bfg-repo-cleaner/) from all commits:
 
-```
+```bash
 bfg --delete-folders FOLDER_WITH_DATA PATH_TO_REPO
 cd some-big-repo.git
 git reflog expire --expire=now --all && git gc --prune=now --aggressive
@@ -121,6 +121,11 @@ To list remotes:
 
 ```bash
 rclone listremotes
+```
+
+Look for [ changes ](https://rclone.org/commands/rclone_check/) between remote and local:
+```bash
+rclone check SOURCEDIRECTORY drive:DIRECTORYBEINGCOPIEDTO
 ```
 
 ### Flags
