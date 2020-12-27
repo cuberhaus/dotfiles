@@ -2,6 +2,10 @@
 .config/nvim/autoload/
 .config/nvim/plugged/
 .local/bin/bootstrap/profile.log
+
+# bin
+.local/bin/wheel
+
 # Py
 .local/bin/epylint
 .local/bin/isort
@@ -18,7 +22,6 @@
 .config/kactivitymanagerd-statsrc
 .config/kactivitymanagerdrc
 .config/kded5rc
-# idk about this one
 .config/ksplashrc
 .config/ktimezonedrc
 .config/kwalletrc
