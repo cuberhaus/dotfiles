@@ -3,9 +3,9 @@
 base_install () { ## For windows install it's good to have this
     # Fix some errors and cleanup
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
-    touch ~/.vim/cache/viminfo # viminfo
-    touch $XDG_DATA_HOME/vim/viminfo # viminfo
-    mkdir -p "~/.vim/cache/viminfo" # vim viminfo
+    touch ~/.vim/cache/viminfo                  # viminfo
+    touch $XDG_DATA_HOME/vim/viminfo            # viminfo
+    mkdir -p "~/.vim/cache/viminfo"             # vim viminfo
     mkdir ~/.cache/zsh
     mkdir ~/.cache/vlc
     sudo mkdir /var/lib/samba/usershares
@@ -13,7 +13,7 @@ base_install () { ## For windows install it's good to have this
     # Update
     sudo apt-get update; sudo apt-get full-upgrade
     # System tools
-    sudo apt-get install git build-essential file python3 python3-pip npm samba-common-bin fonts-powerline  curl gnome-screensaver arc-theme autoconf automake sassc optipng inkscape gnome-shell libgtk-3-dev pkg-config yarn nodejs
+    sudo apt-get install git build-essential file python3 python3-pip npm samba-common-bin fonts-powerline curl arc-theme autoconf automake sassc optipng inkscape gnome-shell libgtk-3-dev pkg-config yarn nodejs
     sudo apt-get install texlive-full doxygen   # Doxygen
     sudo apt-get install ruby-dev
 
@@ -30,7 +30,6 @@ base_install () { ## For windows install it's good to have this
     sudo apt-get install bat                    # Better cat
     sudo apt-get install tmux                   # Terminal multiplexer
     sudo apt-get install ncdu                   # Manage storage
-
 }
 
 bloat_install () {
@@ -42,6 +41,7 @@ bloat_install () {
 
 ubuntu_install() {
     # GUI
+    sudo apt-get install gnome-screensaver      # Screensaver
     sudo apt-get install thunderbird            # Email
     sudo apt-get install transmission           # A simpler Torrent D.
     sudo apt-get install timeshift              # Backups
@@ -62,7 +62,7 @@ ubuntu_install() {
 
 albert_install () {
     if ! command -v albert 2>/dev/null; then
-        cd ~/
+        cd $HOME
         curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
         echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_20.04/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
         sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_20.04/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
@@ -72,7 +72,7 @@ albert_install () {
 }
 
 brew_install () {
-    cd ~/
+    cd $HOME
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
     brew update
@@ -80,18 +80,6 @@ brew_install () {
     brew install gcc patchelf graphviz
     brew install exa                             # "ls" on steroids
 }
-
-# brew_install () {
-#     test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
-#     test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-#     test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
-#     echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile
-#     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-#     brew update
-#     brew upgrade
-#     brew install gcc patchelf graphviz
-#     brew install exa                             # "ls" on steroids
-# }
 
 chrome_install () {
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb

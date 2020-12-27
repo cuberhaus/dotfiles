@@ -8,10 +8,10 @@
 # LightDM unless the picture isn't coming from /usr/share/backgrounds
 
 ### VARIABLES
-scripts=$HOME/.local/scripts/
+scripts=$HOME/.local/scripts
 
 # Include functions
-source $scripts/arch_functions
+source $scripts/bootstrap/arch_install
 
 ### INSTALLATION 
 

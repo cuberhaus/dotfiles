@@ -1,8 +1,10 @@
 #! /usr/bin/env bash
 ### First deploy dotfiles with stow, then execute scripts
 
+### VARIABLES
+scripts=$HOME/.local/scripts
 # Include functions
-source ~/.local/bin/bootstrap/ubuntu_functions
+source $scripts/bootstrap/ubuntu_functions
 
 ### MAIN
 echo "Is it the first time you run this script? [y/n]"
@@ -10,9 +12,20 @@ read FirstRun
 if [[ $FirstRun == y ]]; then
     echo "#! /bin/sh
     export DISTRO=ubuntu" > ~/.config/distro
+    brew_install
 fi
 
 base_install
-brew_install
 vim_install
+#ubuntu_install
+if [[ $FirstRun == y ]]; then
+    #albert_install
+    #bloat_install
+    #chrome_install
+    #emacs_install
+    #i3_install
+    #snap_install
+    #steam_install
+    vim_install
+fi
 chsh -s $(which zsh) # Change default shell to zsh

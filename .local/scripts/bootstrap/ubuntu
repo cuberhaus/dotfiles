@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
+### VARIABLES
+scripts=$HOME/.local/scripts
 # Include functions
-source ~/.local/bin/ubuntu_functions
+source $scripts/bootstrap/ubuntu_functions
 
 ### MAIN
 echo "Is it the first time you run this script? [y/n]"
@@ -8,13 +10,13 @@ read FirstRun
 if [[ $FirstRun == y ]]; then
     echo "#! /bin/sh
     export DISTRO=ubuntu" > ~/.config/distro
+    brew_install
 fi
 base_install
 #bloat_install
 ubuntu_install
 if [[ $FirstRun == y ]]; then
     #albert_install
-    brew_install
     chrome_install
     #emacs_install
     i3_install
