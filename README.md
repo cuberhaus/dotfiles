@@ -471,6 +471,7 @@ Other comments
 
 > About [OVA][ova] files:  
 > An OVA file is an Open Virtualization Appliance that contains a compressed, "installable" version of a virtual machine. When you open an OVA file it extracts the VM and imports it into whatever virtualization software you have installed on your computer.
+> Neovim is much faster than vim
 
 [rclone_icon]: https://i.imgur.com/2S75O8C.png?1
 [ssh icon2]: https://i.imgur.com/RY2Xk5O.png?1

@@ -1,20 +1,19 @@
 #! /usr/bin/env bash
-# User name should be pol
-# df "check for disk space"
+### COMMENTS
 # YOU NEED TO ADD YOURSELF TO WHEEL AND TO VIDEO
 # video makes backlight work and wheel gives you sudo privilege
 # usermod -a -G wheel video input
 # Configure nvidia nvidia-xconfig
-
 # Wallpaper error when background is set in desktop, it will also be used by
 # LightDM unless the picture isn't coming from /usr/share/backgrounds
 
-# Neovim is much faster than vim
+### VARIABLES
+scripts=$HOME/.local/scripts/
 
 # Include functions
-source ~/.local/bin/bootstrap/arch_functions
+source $scripts/arch_functions
 
-### Installation starts here
+### INSTALLATION 
 
 echo "Is it the first time you run this script? [y/n]"
 read FirstRun

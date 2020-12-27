@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
+### VARIABLES
+scripts=$HOME/.local/scripts
 
+### FUNCTIONS
 base_install () {
     # Fix some errors and cleanup
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
@@ -188,10 +191,10 @@ trackpad_scrolling () {
 
 vim_install () {
     sudo pacman -S neovim --noconfirm
-    cd ~/
+    cd $HOME
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
-    bash $DOTFILES/.local/bin/ycm.sh
+    bash $scripts/ycm.sh
     sudo pacman -S python2 python-pip --noconfirm
     pip install wheel
     sudo npm install -g neovim
@@ -298,7 +301,7 @@ dwall() {
     chmod +x install.sh
     ./install.sh
     cd $HOME
-    sudo rm -r ~/home/pol/dynamic-wallpaper
+    sudo rm -r $HOME/dynamic-wallpaper
 }
 
 emacs_install () {
@@ -306,8 +309,8 @@ emacs_install () {
     sudo pacman -S ripgrep --noconfirm
     sudo pacman -S fd --noconfirm
     # DOOM
-    git clone --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
-    ~/.emacs.d/bin/doom install
+    git clone --depth 1 https://github.com/hlissner/doom-emacs $HOME/.emacs.d
+    $HOME/.emacs.d/bin/doom install
 }
 
 optional() {
