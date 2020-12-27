@@ -68,6 +68,24 @@ git gc --aggressive --prune=all     # remove the old files
 
 > Doing this didn't reduce the repo size at all
 
+Remove file from all [commits](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/removing-sensitive-data-from-a-repository):
+
+```
+bfg --delete-files FILE_WITH_SENSITIVE_DATA PATH_TO_REPO
+cd some-big-repo.git
+git reflog expire --expire=now --all && git gc --prune=now --aggressive
+git push
+```
+
+Remove [folder](https://rtyley.github.io/bfg-repo-cleaner/) from all commits:
+
+```
+bfg --delete-folders FOLDER_WITH_DATA PATH_TO_REPO
+cd some-big-repo.git
+git reflog expire --expire=now --all && git gc --prune=now --aggressive
+git push
+```
+
 ## ![Rclone_icon][rclone_icon] Rclone
 
 To sync a remote to a local folder
