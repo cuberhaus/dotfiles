@@ -1,5 +1,6 @@
 [user]
-    email = pol@gmail.com
+    email = pol@hotmail.es
+    name = pol
 [diff]
     tool = meld
 [difftool]
