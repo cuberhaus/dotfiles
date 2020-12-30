@@ -300,7 +300,15 @@ noremap <F3> :Autoformat<CR>
 
 if system('uname -s') == "Darwin\n"
     "Toggle nerd Tree ctrl-spacebar
-    nmap <C-@> :NERDTreeToggle <CR>
+    if has('gui_running')
+        nmap <C-Space> :NERDTreeToggle <CR>
+    else 
+        if has('nvim')
+            nmap <C-Space> :NERDTreeToggle <CR>
+        else
+            nmap <C-@> :NERDTreeToggle <CR>
+        endif
+    endif
 else
     if has('nvim')
         nmap <C-Space> :NERDTreeToggle <CR>
