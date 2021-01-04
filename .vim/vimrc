@@ -19,6 +19,11 @@
 " :Obsess to start recording vim session
 " vim -S to source the session
 
+"Press Enter to jump to the subject (topic) under the cursor.
+"Press Backspace to return from the last jump.
+"map <buffer> <CR> <C-]>
+"map <buffer> <BS> <C-T>
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -183,7 +188,6 @@ set showmatch
 set belloff=all
 
 " Change cursor to a vertical thin line while in insert mode and underscore while replacing
-
 if system('uname -s') == "Darwin\n"
     "Mode Settings
     let &t_SI.="\e[5 q" "SI = INSERT mode
@@ -200,7 +204,6 @@ set autochdir
 
 " Return to last edit position when opening files (You want this!)
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Colors and Fonts
@@ -376,21 +379,6 @@ nmap <leader>hp <Plug>(GitGutterPrevHunk)
 nmap <leader>hv <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
-
-"Press Enter to jump to the subject (topic) under the cursor.
-"Press Backspace to return from the last jump.
-"This breaks some stuff
-"map <buffer> <CR> <C-]>
-"map <buffer> <BS> <C-T>
-
-""""""""""""""""""""""""""""""
-" => Status line
-""""""""""""""""""""""""""""""
-" Always show the status line
-set laststatus=2
-
-" barra, amaga la barra antiga, set laststatus=2 ensenya la barra sempre
-set noshowmode
 
 """"""""""""""""""""""""""""""
 " => Spelling
