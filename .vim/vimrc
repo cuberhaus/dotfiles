@@ -231,6 +231,10 @@ set fileencoding=utf-8
 
 set t_Co=256
 
+if (has("nvim")) 
+    set termguicolors " Nvim colors look good on tmux with this
+endif
+
 " Dark truecolor
 set background=dark
 colorscheme onedark
