@@ -231,10 +231,6 @@ set fileencoding=utf-8
 
 set t_Co=256
 
-if (has("nvim")) 
-    set termguicolors " Nvim colors look good on tmux with this
-endif
-
 " Dark truecolor
 set background=dark
 colorscheme onedark
@@ -246,6 +242,13 @@ set ffs=unix,dos,mac
 
 " :help updatetime
 set updatetime=1500
+
+if exists('$TMUX')
+    if (has("nvim")) 
+        set termguicolors " Nvim colors look good on tmux with this
+    else
+    endif
+endif
 
 " Set font for gvim
 if has("gui_running")
