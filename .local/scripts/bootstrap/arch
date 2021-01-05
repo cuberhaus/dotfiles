@@ -9,45 +9,35 @@
 
 ### VARIABLES
 scripts=$HOME/.local/scripts
+source $scripts/bootstrap/arch_install # Include functions
 
-# Include functions
-source $scripts/bootstrap/arch_install
-
-### INSTALLATION 
-
-echo "Is it the first time you run this script? [y/n]"
-read FirstRun
+### INSTALLATION
 cd ~/
 sudo pacman -Syu # Update
+
 # Distro variable
-if [[ $FirstRun == y || $FirstRun == Y ]]; then
-    echo "#! /bin/sh
-    export DISTRO=arch" > ~/.config/distro
-    yay_install # Needed to install AUR packages
-fi
+echo "#! /bin/sh
+export DISTRO=arch" > ~/.config/distro
+yay_install # Needed to install AUR packages
 
-### Only change from here
+### ONLY CHANGE FROM HERE ON
 base_install
-if [[ $FirstRun == y || $FirstRun == Y ]]; then
-    arch_install
-fi
+arch_install
 i3_install
-if [[ $FirstRun == y || $FirstRun == Y ]]; then
-    ### FUNCTIONS
-    #applets             # Installs Cinnamon applets # implement pending
-    #bloat_install
-    #cinnamon_install
-    #games_install
-    #gnome_install
-    #optional
-    #plasma_install
-    #virtualbox_install
-    apps_AUR_install
-    cava_install
-    dwall
-    laptop_install
-    vim_install
 
-    wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
-    chsh -s $(which zsh) # Change default shell to zsh
-fi
+### FUNCTIONS
+#applets             # Installs Cinnamon applets # implement pending
+#bloat_install
+#cinnamon_install
+#games_install
+#gnome_install
+#optional
+#plasma_install
+#virtualbox_install
+apps_AUR_install
+cava_install
+dwall
+laptop_install
+vim_install
+wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
+chsh -s $(which zsh) # Change default shell to zsh
