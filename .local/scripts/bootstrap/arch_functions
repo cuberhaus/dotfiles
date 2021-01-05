@@ -1,4 +1,8 @@
 #! /usr/bin/env bash
+### Comments
+# Format as exFAT for most compatibility with every OS and over 4GB files compatible
+# https://www.howtogeek.com/73178/what-file-system-should-i-use-for-my-usb-drive/#:~:text=File%20systems%20are%20the%20sort,run%20into%20others%20on%20occasion.
+
 ### VARIABLES
 scripts=$HOME/.local/scripts
 
@@ -36,6 +40,7 @@ base_install () {
     sudo pacman -S ncdu --noconfirm                  # Manage storage
     sudo pacman -S net-tools --noconfirm             # Ips
     sudo pacman -S npm --noconfirm
+    sudo pacman -S ntfs-3g --noconfirm               # Read/write support for ntfs https://wiki.archlinux.org/index.php/NTFS-3G
     sudo pacman -S perl-file-mimeinfo --noconfirm    # mimeopen -d $file and type whatever app you want to open that with
     sudo pacman -S polkit --noconfirm
     sudo pacman -S polkit-gnome --noconfirm          # https://wiki.archlinux.org/index.php/Polkit
