@@ -234,7 +234,8 @@ cinnamon_install() {
     sudo pacman -S gnome-screenshot --noconfirm          # Take screenshots with impr pant
     yay -S cinnamon-sound-effects --noconfirm            # Sound effects
     yay -S mint-themes mint-y-icons mint-backgrounds  --noconfirm # Themes
-    yay -S pix --noconfirm                               # Image viewer
+    #yay -S pix --noconfirm                               # Image viewer
+    sudo pacman -S shotwell --noconfirm                   # Image viewer
     gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
 
     # Fallback mode in case cinnamon crashes
