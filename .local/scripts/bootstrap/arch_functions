@@ -41,6 +41,7 @@ base_install () {
     sudo pacman -S net-tools --noconfirm             # Ips
     sudo pacman -S npm --noconfirm
     sudo pacman -S ntfs-3g --noconfirm               # Read/write support for ntfs https://wiki.archlinux.org/index.php/NTFS-3G
+    sudo pacman -S exfat-utils --noconfirm           # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     sudo pacman -S perl-file-mimeinfo --noconfirm    # mimeopen -d $file and type whatever app you want to open that with
     sudo pacman -S polkit --noconfirm
     sudo pacman -S polkit-gnome --noconfirm          # https://wiki.archlinux.org/index.php/Polkit
