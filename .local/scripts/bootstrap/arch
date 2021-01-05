@@ -9,7 +9,7 @@
 
 ### VARIABLES
 scripts=$HOME/.local/scripts
-source $scripts/bootstrap/arch_install # Include functions
+source $scripts/bootstrap/arch_functions # Include functions
 
 ### INSTALLATION
 cd ~/
