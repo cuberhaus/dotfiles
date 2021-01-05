@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 arch_based_install () {
-    sudo pacman -S patchelf go npm mono python python3 cmake llvm
+    sudo pacman -S patchelf go npm mono python python3 cmake llvm --noconfirm
 }
 
 ubuntu_based_install () {
