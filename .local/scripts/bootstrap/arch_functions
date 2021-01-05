@@ -31,6 +31,7 @@ base_install () {
     sudo pacman -S dhcpcd --noconfirm
     sudo pacman -S dnsutils --noconfirm              # Ip
     sudo pacman -S exa --noconfirm                   # "ls" on steroids
+    sudo pacman -S exfat-utils --noconfirm           # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     sudo pacman -S fzf --noconfirm                   # Fuzzy finder
     sudo pacman -S gcc --noconfirm                   # Cpp
     sudo pacman -S git python3 stow --noconfirm       # To deploy dotfiles and more
@@ -41,7 +42,6 @@ base_install () {
     sudo pacman -S net-tools --noconfirm             # Ips
     sudo pacman -S npm --noconfirm
     sudo pacman -S ntfs-3g --noconfirm               # Read/write support for ntfs https://wiki.archlinux.org/index.php/NTFS-3G
-    sudo pacman -S exfat-utils --noconfirm           # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     sudo pacman -S perl-file-mimeinfo --noconfirm    # mimeopen -d $file and type whatever app you want to open that with
     sudo pacman -S polkit --noconfirm
     sudo pacman -S polkit-gnome --noconfirm          # https://wiki.archlinux.org/index.php/Polkit
@@ -326,7 +326,7 @@ optional() {
     sudo pacman -S doxygen texlive-most graphviz --noconfirm # Doxygen
 
     # GUI
-    #sudo pacman -S nomacs --noconfirm                # Image viewer / use pix instead
+    sudo pacman -S obs-studio --noconfirm            # Video recording
     sudo pacman -S audacity --noconfirm              # Audio editor
     sudo pacman -S dbeaver --noconfirm               # Base de dades
     sudo pacman -S gimp --noconfirm                  # Image editor
