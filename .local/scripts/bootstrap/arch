@@ -2,7 +2,9 @@
 ### COMMENTS
 # YOU NEED TO ADD YOURSELF TO WHEEL AND TO VIDEO
 # video makes backlight work and wheel gives you sudo privilege
-# usermod -a -G wheel video input
+# usermod -a -G video pol
+# usermod -a -G wheel pol
+# usermod -a -G input pol
 # Configure nvidia nvidia-xconfig
 # Wallpaper error when background is set in desktop, it will also be used by
 # LightDM unless the picture isn't coming from /usr/share/backgrounds

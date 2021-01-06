@@ -127,8 +127,8 @@ bindsym $mod+Return exec termite
 bindsym $mod+Shift+q kill
 
 # Screen brightness controls
-bindsym XF86MonBrightnessUp exec light -A 5
-bindsym XF86MonBrightnessDown exec light -U 5
+bindsym XF86MonBrightnessUp exec light -A 5 && pkill -SIGRTMIN+2 i3blocks
+bindsym XF86MonBrightnessDown exec light -U 5 && pkill -SIGRTMIN+2 i3blocks
 
 # Touchpad controls
 bindsym XF86TouchpadToggle exec ./toggletouchpad.sh # toggle touchpad
