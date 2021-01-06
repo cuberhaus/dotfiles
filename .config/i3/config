@@ -192,7 +192,16 @@ bindsym $mod+Shift+space floating toggle
 bindsym $mod+t focus mode_toggle
 
 # focus the parent container
-bindsym $mod+a focus parent
+bindsym $mod+p focus parent
+
+# Focus the child container
+bindsym $mod+c focus child
+
+# Custom Rofi | change with ctrl tab
+bindsym $mod+d exec "rofi -modi window,drun,run -show drun -show-icons -sidebar-mode -terminal termite "
+
+# Lock screen
+bindsym $mod+shift+x exec betterlockscreen -l
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
@@ -231,15 +240,6 @@ mode "resize" {
 bindsym $mod+r mode "resize"
 bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3blocks
 bindsym --release Num_Lock  exec pkill -SIGRTMIN+11 i3blocks
-
-# Custom Rofi | change with ctrl tab
-bindsym $mod+d exec "rofi -modi window,drun,run -show drun -show-icons -sidebar-mode -terminal termite "
-
-# Focus the child container
-bindsym $mod+c focus child
-
-# Lock screen
-bindsym $mod+shift+x exec betterlockscreen -l
 
 ###############################################################
 # => Workspaces
