@@ -88,6 +88,7 @@ mac_install () {
     brew install --cask telegram          # Quickly transfer files
     brew install --cask the-unarchiver    # Archiver "faster"
     brew install --cask tomighty          # Pomodoro timer
+    brew install --cask tor-browser       # Private and uncensored browsing
     brew install --cask transmission      # Torrent Downloader
     brew install --cask visual-studio-code
     brew install --cask vlc               # Media Player
