@@ -376,3 +376,6 @@ exec dwall -s room &
 
 # Thunderbird applet
 exec birdtray &
+
+# Printer service
+exec hplip & 
