@@ -1,4 +1,7 @@
 #! /usr/bin/env bash
+### COMMENTS
+# if using xfce add /usr/bin/setxkbmap -option "caps:swapescape" to the startup applications to swap keys
+
 ### VARIABLES
 scripts=$HOME/.local/scripts
 source $scripts/bootstrap/arch_functions # Include functions

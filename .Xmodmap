@@ -1,4 +1,6 @@
-clear Lock
+! Swap caps lock and escape
+!clear Lock
+remove Lock = Caps_Lock
 keysym Caps_Lock = Escape
 keysym Escape = Caps_Lock
 add Lock = Caps_Lock
