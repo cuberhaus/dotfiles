@@ -34,6 +34,7 @@ base_install () {
     sudo pacman -S exfat-utils --noconfirm           # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     sudo pacman -S fzf --noconfirm                   # Fuzzy finder
     sudo pacman -S gcc --noconfirm                   # Cpp
+    sudo pacman -S gdb                               # debugging c++
     sudo pacman -S git python3 stow --noconfirm       # To deploy dotfiles and more
     sudo pacman -S gvim --noconfirm                  # Vim version with extra features
     sudo pacman -S htop --noconfirm                  # Show system resources
