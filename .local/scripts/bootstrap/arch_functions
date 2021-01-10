@@ -291,6 +291,8 @@ virtualbox_install() {
 }
 
 games_install () {
+    #sudo pacman -S dnsmasq --noconfirm       # fixes download speed problem
+    sudo pacman -S vulkan-tools --noconfirm   # for gaming
     sudo pacman -S lutris --noconfirm
     sudo pacman -S minecraft --noconfirm
     sudo pacman -S steam --noconfirm
