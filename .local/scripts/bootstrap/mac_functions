@@ -1,0 +1,138 @@
+#!/bash/sh
+### COMMENTS
+#ctrl + space not working?  Disable change language shortcut
+#https://forum.sublimetext.com/t/os-x-control-space-not-working/2145/3
+
+# Get italics in terminal:
+# tic xterm-256color-italic.terminfo
+# https://alexpearce.me/2014/05/italics-in-iterm2-vim-tmux/
+app_store_install() {
+    brew install mas
+    mas install 1274495053 # Microsoft To Do
+    mas install 1444383602 # GoodNotes
+    mas install 409183694 # Keynote
+    mas install 409201541 # Pages
+    mas install 409203825 # Numbers
+    mas install 441258766 # Magnet
+    mas install 497799835 # Xcode
+    mas install 736189492 # Notability
+    #mas install 1147396723 # WhatsApp
+}
+
+brew_install() {
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+}
+
+mac_install () {
+    ### Avoid some error messages
+    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
+    touch ~/.vim/cache/viminfo # viminfo
+    touch $XDG_DATA_HOME/vim/viminfo # viminfo
+    mkdir -p "~/.vim/cache/viminfo" # vim viminfo
+    mkdir ~/.cache/zsh
+    mkdir ~/.cache/vlc
+    touch ~/.hushlogin # Avoid terminal prompts
+
+    ### Terminal stuff
+    brew install ack
+    brew install astyle
+    brew install autojump               # Autojump obsolete?
+    brew install bat                    # Cat on steroids
+    brew install bison
+    brew install cmake
+    brew install exa                    # "ls" on steroids
+    brew install flex
+    brew install fzf                    # Fuzzy Finder
+    brew install git                    # Git
+    brew install go
+    brew install graphviz
+    brew install htop                   # Resource viewer
+    brew install llvm
+    brew install mono
+    brew install ncdu                   # Storage manager
+    brew install neofetch               # System info
+    brew install p7zip                  # Extract function
+    brew install pipes-sh               # Pipes wallpaper
+    brew install pkg-config
+    brew install ranger w3m             # Ranger and previews
+    brew install rclone
+    brew install ripgrep
+    brew install sox
+    brew install stow                   # Stow dotfiles
+    brew install swig
+    brew install the_silver_searcher    # Grep on steroids
+    brew install tmux                   # Terminal multiplexer
+    brew install unrar                  # Extract function
+    brew install wget                   # Download from command line
+    brew install yarn                   # Package manager
+
+    ### Terminal Font
+    brew tap homebrew/cask-fonts
+    # Open sauce has to be installed manually
+    brew install font-fira-code-nerd-font
+    brew install font-inconsolata-nerd-font
+    brew install font-iosevka-nerd-font
+    brew install font-meslo-lg-nerd-font
+
+    ### GUI Applications
+    brew install --cask adobe-acrobat-reader # Pdf reader
+    brew install --cask alfred            # Better Spotlight
+    brew install --cask calibre           # Book manager
+    brew install --cask ccleaner          # CleanUp
+    brew install --cask dbeaver-community # BD
+    brew install --cask discord           # Group calls
+    brew install --cask eclipse-java    # BD
+    brew install --cask google-chrome     # Web browser
+    brew install --cask intellij-idea # Paid, better java SQL IDE
+    brew install --cask intellij-idea-ce # Free version
+    brew install --cask iterm2            # Best terminal emulator
+    brew install --cask karabiner-elements # Swap Esc with Caps_lock
+    brew install --cask meld              # Best Diff software
+    brew install --cask obs              # Screen recorder //very complicated on mac
+    brew install --cask r                      # Probabilitat i estadística
+    brew install --cask rstudio                # Probabilitat i estadística IDE
+    brew install --cask skype             # Videocalls
+    brew install --cask slack             # Work
+    brew install --cask spotify           # Music player
+    brew install --cask telegram          # Quickly transfer files
+    brew install --cask the-unarchiver    # Archiver "faster"
+    brew install --cask tomighty          # Pomodoro timer
+    brew install --cask tor-browser       # Private and uncensored browsing
+    brew install --cask transmission      # Torrent Downloader
+    brew install --cask visual-studio-code
+    brew install --cask vlc               # Media Player
+    brew install --cask whatsapp
+    #brew cask install firefox --cask           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
+    #brew cask install keka --cask              # Archiver open source
+    #brew cask install qbittorrent --cask
+    #brew cask install unetbootin --cask        # Burn iso's (or use dd command)
+}
+
+doom_emacs_install() {
+    # required dependencies
+    brew install git ripgrep
+    # optional dependencies
+    brew install coreutils fd
+    # Installs clang
+    xcode-select --install
+    brew tap d12frosted/emacs-plus
+    brew install emacs-plus --with-modern-cg433n-icon
+    ln -s /usr/local/opt/emacs-plus/Emacs.app /Applications/Emacs.app
+}
+
+bloat_install() {
+    brew install cowsay fortune coreutils # Cows
+    brew install cmatrix            # Matrix
+}
+
+vim_install () {
+    brew install macvim             # Vim
+    brew install neovim             # NeoVim
+    cd ~/
+    vim +PlugInstall +qall
+    # Vim YouCompleteMe plugin install
+    bash ~/scripts/ycm.sh
+    sudo npm install -g neovim
+    python3 -m pip install --user --upgrade pynvim
+    sudo gem install neovim
+}
