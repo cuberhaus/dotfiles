@@ -1,30 +1,4 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Launch without anything: vim --clean
-" :messages per veure els errors per pantalla
-" Per comentar una linea gcc per comentar gc per fer moviments
-
-" vim repeat cs'" to change surround from ' to "
-" " ysiw" to add " to a word
-" " ds" to remove surround
-
-"Jump to category under the cursor<C-]>
-"Jump back <C-T>
-
-" gv (re-select last visual select)
-
-" g ctrl A (increase i+1)
-
-" Visual select then press S (and whatever you want to surround with)
-
-" :Obsess to start recording vim session
-" vim -S to source the session
-
-"Press Enter to jump to the subject (topic) under the cursor.
-"Press Backspace to return from the last jump.
-"map <buffer> <CR> <C-]>
-"map <buffer> <BS> <C-T>
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => General
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " With a map leader it's possible to do extra key combinations
@@ -181,9 +155,6 @@ set magic
 " Show matching brackets when text indicator is over them
 set showmatch
 
-" How many tenths of a second to blink when matching brackets
-"set mat=2
-
 "This one is the one that works
 set belloff=all
 
@@ -291,7 +262,7 @@ set breakindent "Indent after line wrapped
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Keybindings
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
+" YouCompleteMe
 nnoremap <leader>r :YcmCompleter RefactorRename<Space>
 nnoremap <leader>d :YcmCompleter GoToDefinition<cr>
 nnoremap <leader>T :YcmCompleter GetType<cr>
