@@ -1,14 +1,24 @@
 #! /usr/bin/env bash
-### Comments
+### COMMENTS
+# YOU NEED TO ADD YOURSELF TO WHEEL AND TO VIDEO
+# video makes backlight work and wheel gives you sudo privilege
+# usermod -a -G video pol
+# usermod -a -G wheel pol
+# usermod -a -G input pol
+# Configure nvidia nvidia-xconfig
+# Wallpaper error when background is set in desktop, it will also be used by
+# LightDM unless the picture isn't coming from /usr/share/backgrounds
 # f5fpc -s -x -t https://upclink.upc.edu
 # f5fpc --stop
 # Format as exFAT for most compatibility with every OS and over 4GB files compatible
 # https://www.howtogeek.com/73178/what-file-system-should-i-use-for-my-usb-drive/#:~:text=File%20systems%20are%20the%20sort,run%20into%20others%20on%20occasion.
+# if using xfce add /usr/bin/setxkbmap -option "caps:swapescape" to the startup applications to swap keys
 
 ### VARIABLES
 scripts=$HOME/.local/scripts
 
 ### FUNCTIONS
+## Invariant: be at $HOME dir
 base_install () {
     # Fix some errors and cleanup
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
@@ -55,7 +65,7 @@ base_install () {
     sudo pacman -S reflector --noconfirm             # Update Arch mirrors
     sudo pacman -S ruby --noconfirm
     sudo pacman -S stow --noconfirm                  # To deploy dotfiles
-    sudo pacman -S svn --noconfirm
+    sudo pacman -S svn --noconfirm                   # Similar to git
     sudo pacman -S termite --noconfirm               # Terminal emulator
     sudo pacman -S the_silver_searcher --noconfirm   # Better and faster ack (and grep)
     sudo pacman -S tmux --noconfirm                  # Terminal multiplexer
@@ -126,7 +136,6 @@ base_install () {
     # Backups
     yay -S timeshift --noconfirm  #  sudo timeshift-gtk
     sudo pacman -S cron --noconfirm
-
 }
 
 arch_install() {
@@ -216,15 +225,17 @@ vim_install () {
 
 # Best Tiling Window Manager
 i3_install () {
+    # AUR
     yay -S cava --noconfirm              # https://github.com/karlstav/cava
     yay -S kbdd-git --noconfirm          # i3blocks keyboard layout
+
+    # GUI/Terminal
     sudo pacman -S acpi --noconfirm
     sudo pacman -S awk bc upower --noconfirm             # battery plus
     sudo pacman -S feh --noconfirm       # Wallpaper
     sudo pacman -S gnome-screenshot --noconfirm          # Take screenshots with impr pant
     sudo pacman -S i3-gaps --noconfirm   # i3 with gaps
     sudo pacman -S i3blocks --noconfirm  # Bottom bar
-    sudo pacman -S jq xdotool indent perl-anyevent-i3 --noconfirm # cava dependancies
     sudo pacman -S light --noconfirm     # Brightness
     sudo pacman -S perl-anyevent-i3 python-dbus --noconfirm
     sudo pacman -S picom --noconfirm     # Compositor, for transparencies
@@ -232,28 +243,27 @@ i3_install () {
     sudo pacman -S rofi --noconfirm      # App menu Super+d
     sudo pacman -S yad xdotool --noconfirm               # calendar
     sudo pacman -S zenity --noconfirm    # i3blocks poweroff menu
+    #yay installs this: sudo pacman -S jq xdotool indent perl-anyevent-i3 --noconfirm # cava dependancies
 }
 
 # Best Desktop
 cinnamon_install() {
+    # GUI
     sudo pacman -S cinnamon --noconfirm                  # Desktop
     sudo pacman -S gnome-screenshot --noconfirm          # Take screenshots with impr pant
+    sudo pacman -S gnome-shell --noconfirm # Fallback mode in case cinnamon crashes, to have a taskbar
+    sudo pacman -S metacity --noconfirm # Fallback mode in case cinnamon crashes
+    sudo pacman -S python-numpy python-xlib --noconfirm  # Color pick applet
+    sudo pacman -S shotwell --noconfirm                   # Image viewer
+    
+    # AUR
     yay -S cinnamon-sound-effects --noconfirm            # Sound effects
     yay -S mint-themes mint-y-icons mint-backgrounds  --noconfirm # Themes
     #yay -S pix --noconfirm                               # Image viewer
-    sudo pacman -S shotwell --noconfirm                   # Image viewer
+
     gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
-
-    # Fallback mode in case cinnamon crashes
-    sudo pacman -S gnome-shell --noconfirm               # To have a taskbar
-    sudo pacman -S metacity --noconfirm
-
-    # Color pick applet
-    sudo pacman -S python-numpy python-xlib --noconfirm
-
     # Uninstall  xf86-video-intel
     #https://wiki.archlinux.org/index.php/cinnamon
-
     # To fix laggy animations
     #https://www.reddit.com/r/linuxmint/comments/7v2jt6/laggy_cinnamon_animations/
     # Edit animation time (0.05)/usr/share/cinnamon/js/ui/expo.js
@@ -297,10 +307,10 @@ virtualbox_install() {
 
 games_install () {
     #sudo pacman -S dnsmasq --noconfirm       # fixes download speed problem
-    sudo pacman -S vulkan-tools --noconfirm   # for gaming
     sudo pacman -S lutris --noconfirm
     sudo pacman -S minecraft --noconfirm
     sudo pacman -S steam --noconfirm
+    sudo pacman -S vulkan-tools --noconfirm   # for gaming
 }
 
 laptop_install() {
@@ -331,7 +341,7 @@ emacs_install () {
 ### All packages in here should be handpicked
 optional() {
     # Terminal
-    #sudo pacman -S github-cli            # Github from terminal, create issues...
+    #sudo pacman -S github-cli --noconfirm       # Github from terminal, create issues...
     sudo pacman -S doxygen texlive-most graphviz --noconfirm # Doxygen
 
     # GUI
@@ -361,6 +371,6 @@ optional() {
 
     # Arduino
     #usermod -aG uucp,lock pol
-    sudo pacman -S arduino-avr-core
-    sudo pacman -S arduino
+    sudo pacman -S arduino-avr-core --noconfirm
+    sudo pacman -S arduino --noconfirm
 }

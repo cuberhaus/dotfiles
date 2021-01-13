@@ -1,20 +1,15 @@
 #! /usr/bin/env bash
-### COMMENTS
-# if using xfce add /usr/bin/setxkbmap -option "caps:swapescape" to the startup applications to swap keys
-
 ### VARIABLES
 scripts=$HOME/.local/scripts
 source $scripts/bootstrap/arch_functions # Include functions
 
-### Installation starts here
-cd ~/
+### INSTALLATION
 sudo pacman -Syu
 echo "#! /bin/sh
-export DISTRO=manjaro" > ~/.config/distro
+export DISTRO=manjaro" > $HOME/.config/distro # Distro variable
 yay_install # Needed to install AUR packages
 
 ### ONLY CHANGE FROM HERE ON
-cd ~/
 base_install
 i3_install
 
