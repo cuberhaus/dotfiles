@@ -1,15 +1,4 @@
 ###############################################################
-# Sections:
-#   -> Theme
-#   -> Antigen
-#   -> Oh My Zsh
-#   -> Powerlevel10k
-#   -> Aliases
-#   -> Options	
-#   -> Vim
-#   -> Runtime
-#
-###############################################################
 # => Theme
 ###############################################################
 
@@ -102,8 +91,6 @@ fi
 # => Options
 ###############################################################
 
-#eval $(thefuck --alias)
-
 # History in cache directory:
 HISTSIZE=32768
 SAVEHIST=32768
@@ -159,12 +146,5 @@ precmd_functions+=(_set_beam_cursor) #
 # ensure insert mode and beam cursor when exiting vim
 zle-line-init() { zle -K viins; _set_beam_cursor }
 
-###############################################################
-# => Runtime
-###############################################################
-
-# Accept suggestion ctrl+space
+# Accept suggestion ctrl+space HAS TO BE AT THE END
 bindkey '^ ' autosuggest-accept
-
-# Pfetch (fast neofetch)
-#pfetch

@@ -23,6 +23,8 @@ fi
 # => Variables
 ###############################################################
 
+#INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
+#OBJECTES=/Users/$USER/assig/pro2/objectes
 export DICPATH="$XDG_CONFIG_HOME/Dictionary"
 # DOOM emacs "bring the pain"
 export PATH="$HOME/.emacs.d/bin:$PATH"
@@ -38,14 +40,12 @@ export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-ra
 
 ### SET VIM AS MANPAGER ###
 export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
-#INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
-#OBJECTES=/Users/$USER/assig/pro2/objectes
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export TERMINAL="termite"
     export QT_QPA_PLATFORMTHEME="qt5ct"
     # DISTRO variable
-    source ~/.config/distro
+    source $HOME/.config/distro
     if laptop-detect ; then
         setxkbmap es 
     fi

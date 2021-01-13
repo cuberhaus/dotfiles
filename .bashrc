@@ -70,10 +70,3 @@ fi
 if [ -f $ZDOTDIR/functions ]; then
     source $ZDOTDIR/functions
 fi
-
-###############################################################
-# => Runtime
-###############################################################
-
-# Pfetch (fast neofetch)
-#pfetch
