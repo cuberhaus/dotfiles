@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 ### Comments
+# f5fpc -s -x -t https://upclink.upc.edu
+# f5fpc --stop
 # Format as exFAT for most compatibility with every OS and over 4GB files compatible
 # https://www.howtogeek.com/73178/what-file-system-should-i-use-for-my-usb-drive/#:~:text=File%20systems%20are%20the%20sort,run%20into%20others%20on%20occasion.
 
@@ -323,10 +325,10 @@ emacs_install () {
     $HOME/.emacs.d/bin/doom install
 }
 
+### All packages in here should be handpicked
 optional() {
     # Terminal
     #sudo pacman -S github-cli            # Github from terminal, create issues...
-    #sudo pacman -S thefuck
     sudo pacman -S doxygen texlive-most graphviz --noconfirm # Doxygen
 
     # GUI
@@ -347,19 +349,15 @@ optional() {
     yay -S rstudio-desktop-bin --noconfirm          # Probabilitat i estadística IDE
     yay -S slack-desktop --noconfirm                # Slack
     yay -S youtube-dl --noconfirm                   # Download youtube videos
-    #sudo pacman -S tor --noconfirm                    # Tor private browser
-    #yay -S tor-browser --noconfirm
-    # f5fpc -s -x -t https://upclink.upc.edu
-    # f5fpc --stop
+    sudo pacman -S tor --noconfirm                    # Tor private browser
+    yay -S tor-browser --noconfirm
     yay -S f5fpc --noconfirm                        # Connexio a UPClink
 
     # Calendar
     #sudo pacman -S gnome-calendar gnome-keyring libsecret seahorse
 
     # Arduino
-    #if [[ $FirstRun == y || $FirstRun == Y ]]; then
-    #    usermod -aG uucp,lock pol
-    #fi
-    #sudo pacman -S arduino-avr-core
-    #sudo pacman -S arduino
+    #usermod -aG uucp,lock pol
+    sudo pacman -S arduino-avr-core
+    sudo pacman -S arduino
 }
