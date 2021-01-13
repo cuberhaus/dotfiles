@@ -12,11 +12,11 @@ scripts=$HOME/.local/scripts
 base_install () {
     # Fix some errors and cleanup
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
-    touch ~/.vim/cache/viminfo # viminfo
+    touch $HOME/.vim/cache/viminfo # viminfo
     touch $XDG_DATA_HOME/vim/viminfo # viminfo
     mkdir -p "~/.vim/cache/viminfo" # vim viminfo
-    mkdir ~/.cache/zsh
-    mkdir ~/.cache/vlc
+    mkdir $HOME/.cache/zsh
+    mkdir $HOME/.cache/vlc
 
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
@@ -37,7 +37,7 @@ base_install () {
     sudo pacman -S fzf --noconfirm                   # Fuzzy finder
     sudo pacman -S gcc --noconfirm                   # Cpp
     sudo pacman -S gdb                               # debugging c++
-    sudo pacman -S git python3 stow --noconfirm       # To deploy dotfiles and more
+    sudo pacman -S git --noconfirm
     sudo pacman -S gvim --noconfirm                  # Vim version with extra features
     sudo pacman -S htop --noconfirm                  # Show system resources
     sudo pacman -S laptop-detect --noconfirm         # Detect if using a laptop
@@ -48,10 +48,13 @@ base_install () {
     sudo pacman -S perl-file-mimeinfo --noconfirm    # mimeopen -d $file and type whatever app you want to open that with
     sudo pacman -S polkit --noconfirm
     sudo pacman -S polkit-gnome --noconfirm          # https://wiki.archlinux.org/index.php/Polkit
+    sudo pacman -S python --noconfirm
+    sudo pacman -S python3 --noconfirm
     sudo pacman -S ranger --noconfirm                # Ranger
     sudo pacman -S rclone --noconfirm                # Rsync to remote
     sudo pacman -S reflector --noconfirm             # Update Arch mirrors
     sudo pacman -S ruby --noconfirm
+    sudo pacman -S stow --noconfirm                  # To deploy dotfiles
     sudo pacman -S svn --noconfirm
     sudo pacman -S termite --noconfirm               # Terminal emulator
     sudo pacman -S the_silver_searcher --noconfirm   # Better and faster ack (and grep)
@@ -183,7 +186,7 @@ yay_install() {
     git clone https://aur.archlinux.org/yay.git
     cd yay
     makepkg -si
-    sudo rm -r /home/pol/yay
+    sudo rm -r $HOME/yay
 }
 
 ### DO ONCE

@@ -1,7 +1,9 @@
 #! /usr/bin/env bash
 
 arch_based_install () {
-    sudo pacman -S patchelf go npm mono python python3 cmake llvm --noconfirm
+    sudo pacman -S patchelf go mono cmake llvm --noconfirm
+    ### This ones are already on the main install (faster!)
+    #sudo pacman -S npm python3 python 
 }
 
 ubuntu_based_install () {
@@ -13,16 +15,18 @@ mac_install () {
 }
 
 ycm_install () {
-    cd ~
+    cd $HOME
     mkdir ycm_build
     cd ycm_build
-    cmake -G "Unix Makefiles" . ~/.vim/plugged/YouCompleteMe/third_party/ycmd/cpp
+    cmake -G "Unix Makefiles" . $HOME/.vim/plugged/YouCompleteMe/third_party/ycmd/cpp
     cmake --build . --target ycm_core --config Release
-    cd ~/.vim/plugged/YouCompleteMe
+    cd $HOME/.vim/plugged/YouCompleteMe
     python3 install.py --all
-    rm -r ycm_build
+    cd $HOME
+    sudo rm -r ycm_build # Clean Up
 }
 
+# Install dependancies
 if [[ "$OSTYPE" == "darwin"* ]]; then
     mac_install
 elif [[ "$DISTRO" == "arch" ]]; then
@@ -32,6 +36,5 @@ elif [[ "$DISTRO" == "ubuntu" ]]; then
 elif [[ "$DISTRO" == "manjaro" ]]; then
     arch_based_install
 fi
-# Start
 ycm_install # Builds
-rm -r ~/ycm_build # Cleanup
+rm -r $HOME/ycm_build # Cleanup
