@@ -1,27 +1,25 @@
 #! /usr/bin/env bash
 ### VARIABLES
 scripts=$HOME/.local/scripts
-# Include functions
-source $scripts/bootstrap/ubuntu_functions
+source $scripts/bootstrap/ubuntu_functions # Include functions
 
-### MAIN
-echo "Is it the first time you run this script? [y/n]"
-read FirstRun
-if [[ $FirstRun == y ]]; then
-    echo "#! /bin/sh
-    export DISTRO=ubuntu" > ~/.config/distro
-    brew_install
-fi
+### INSTALLATION
+sudo apt-get update; sudo apt-get full-upgrade
+echo "#! /bin/sh
+export DISTRO=ubuntu" > $HOME/.config/distro
+
+### ONLY CHANGE FROM HERE ON
+brew_install
 base_install
+
+#albert_install
 #bloat_install
+#emacs_install
+#steam_install
+
+chrome_install
+i3_install
+snap_install
 ubuntu_install
-if [[ $FirstRun == y ]]; then
-    #albert_install
-    chrome_install
-    #emacs_install
-    i3_install
-    snap_install
-    #steam_install
-    vim_install
-fi
+vim_install
 chsh -s $(which zsh) # Change default shell to zsh

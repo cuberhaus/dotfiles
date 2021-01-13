@@ -10,8 +10,6 @@ base_install () { ## For windows install it's good to have this
     mkdir ~/.cache/vlc
     sudo mkdir /var/lib/samba/usershares
 
-    # Update
-    sudo apt-get update; sudo apt-get full-upgrade
     # System tools
     sudo apt-get install git build-essential file python3 python3-pip npm samba-common-bin fonts-powerline curl arc-theme autoconf automake sassc optipng inkscape gnome-shell libgtk-3-dev pkg-config yarn nodejs
     sudo apt-get install texlive-full doxygen   # Doxygen

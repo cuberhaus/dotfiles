@@ -14,7 +14,6 @@ base_install
 arch_install
 i3_install
 
-### FUNCTIONS
 #applets             # Installs Cinnamon applets # implement pending
 #bloat_install
 #cinnamon_install

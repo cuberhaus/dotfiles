@@ -13,7 +13,6 @@ yay_install # Needed to install AUR packages
 base_install
 i3_install
 
-### FUNCTIONS
 #applets             # Installs Cinnamon applets # implement pending
 #bloat_install
 #cinnamon_install
@@ -22,6 +21,7 @@ i3_install
 #optional
 #plasma_install
 #virtualbox_install
+
 apps_AUR_install
 cava_install
 dwall
