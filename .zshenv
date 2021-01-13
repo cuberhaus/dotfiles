@@ -23,36 +23,27 @@ fi
 # => Variables
 ###############################################################
 
-#INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
-#OBJECTES=/Users/$USER/assig/pro2/objectes
-export DICPATH="$XDG_CONFIG_HOME/Dictionary"
-# DOOM emacs "bring the pain"
-export PATH="$HOME/.emacs.d/bin:$PATH"
-
 # Zsh files:
 export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh" # For more information RTFM https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
 export VISUAL=vim
 export EDITOR="$VISUAL"
 export DOTFILES="$HOME/dotfiles/dotfiles"
 
-export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+#INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
+#OBJECTES=/Users/$USER/assig/pro2/objectes
+export DICPATH="$XDG_CONFIG_HOME/Dictionary"
+export PATH="$HOME/.emacs.d/bin:$PATH" # DOOM emacs "bring the pain"
+export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""' 
 export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
-
-### SET VIM AS MANPAGER ###
-export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
+export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\"" # SET VIM AS MANPAGER
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export TERMINAL="termite"
     export QT_QPA_PLATFORMTHEME="qt5ct"
-    # DISTRO variable
-    source $HOME/.config/distro
+    source $HOME/.config/distro     # DISTRO variable
     if laptop-detect ; then
         setxkbmap es 
     fi
-    # Swap escape with caps lock
-    #xmodmap -e "clear lock"
-    #xmodmap -e "keycode 9 = Caps_Lock NoSymbol Caps_Lock"
-    #xmodmap -e "keycode 66 = Escape NoSymbol Escape"
 fi 
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
