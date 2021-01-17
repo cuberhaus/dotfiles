@@ -7,11 +7,17 @@ vim --clean
 :messages
 ```
 ## Comment line
-gcc per comentar gc per fer moviments
+gc - toggles line comment. For example gcc to toggle line comment for current line and gc2j to toggle line comments for the current line and the next two lines.  
+- VS CODE  
+gC - toggles block comment. For example gCi) to comment out everything within parentheses.
 ## Change/Delete/Add surrounding like " " ' ' ( ) [ ] etc
-vim repeat cs'" to change surround from ' to "  
-" ysiw" to add " to a word  
-" ds" to remove surround  
+| Surround Command	Description| |
+|--|--|
+| d s < existing char > |	Delete existing surround
+| c s < existing char > < desired char >	| Change surround existing to desired
+| y s < motion > < desired char >	|Surround something with something using motion (as in "you surround")
+|S < desired char >	| Surround when in visual modes (surrounds full selection)
+  
 ## Jump around
 Jump to category under the cursor<C-]>  
 Jump back <C-T>
@@ -45,5 +51,14 @@ to source the session
 ```
 vim -S
 ```
+
+🎩 VSCodeVim tricks!
+VS Code has a lot of nifty tricks and we try to preserve some of them:
+
+gd - jump to definition.  
+gq - on a visual selection reflow and wordwrap blocks of text, preserving commenting style. Great for formatting documentation comments.  
+gb - adds another cursor on the next word it finds which is the same as the word under the cursor.  
+af - visual mode command which selects increasingly large blocks of text. For example, if you had "blah (foo [bar 'ba|z'])" then it would select 'baz' first. If you pressed af again, it'd then select [bar 'baz'], and if you did it a third time it would select "(foo [bar 'baz'])".  
+gh - equivalent to hovering your mouse over wherever the cursor is. Handy for seeing types and error messages without reaching for the mouse!  
 
 
