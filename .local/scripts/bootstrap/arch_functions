@@ -119,6 +119,7 @@ base_install () {
     yay -S balena-etcher --noconfirm                 # "Rufus" on linux
     yay -S birdtray --noconfirm                      # Thunderbird tray
     yay -S google-chrome --noconfirm                 # Best web browser
+    yay -S pix --noconfirm                               # Image viewer
     yay -S skypeforlinux-stable-bin --noconfirm      # Skype
     yay -S spotify --noconfirm                       # Spotify
     yay -S ttf-ms-fonts --noconfirm                  # Microsoft fonts ##deprecated
@@ -254,12 +255,10 @@ cinnamon_install() {
     sudo pacman -S gnome-shell --noconfirm # Fallback mode in case cinnamon crashes, to have a taskbar
     sudo pacman -S metacity --noconfirm # Fallback mode in case cinnamon crashes
     sudo pacman -S python-numpy python-xlib --noconfirm  # Color pick applet
-    sudo pacman -S shotwell --noconfirm                   # Image viewer
     
     # AUR
     yay -S cinnamon-sound-effects --noconfirm            # Sound effects
     yay -S mint-themes mint-y-icons mint-backgrounds  --noconfirm # Themes
-    #yay -S pix --noconfirm                               # Image viewer
 
     gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
     # Uninstall  xf86-video-intel
