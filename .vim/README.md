@@ -52,7 +52,7 @@ to source the session
 vim -S
 ```
 
-🎩 VSCodeVim tricks!
+## 🎩 VSCodeVim tricks!
 VS Code has a lot of nifty tricks and we try to preserve some of them:
 
 gd - jump to definition.  
