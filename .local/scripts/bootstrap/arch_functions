@@ -176,7 +176,8 @@ arch_install() {
     # Ntp for time syncro
     #https://wiki.archlinux.org/index.php/Systemd-timesyncd
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
-        systemctl enable systemd-timesyncd.service
+        systemctl enable systemd-timesyncd.service # systemd time service
+        sudo timedatectl set-ntp true # Enable ntp
         systemctl disable ntpd.service
     fi
     # https://wiki.archlinux.org/index.php/USB_storage_devices

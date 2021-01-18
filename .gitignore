@@ -1,3 +1,6 @@
+#XFCE
+.local/share/xfce4/helpers/
+
 .config/antigen/.zcompdump.pol.2391
 .config/nvim/autoload/
 .config/nvim/plugged/
