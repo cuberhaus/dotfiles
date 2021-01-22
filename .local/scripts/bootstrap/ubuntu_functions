@@ -3,11 +3,11 @@
 base_install () { ## For windows install it's good to have this
     # Fix some errors and cleanup
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
-    touch ~/.vim/cache/viminfo                  # viminfo
+    touch $HOME/.vim/cache/viminfo              # viminfo
     touch $XDG_DATA_HOME/vim/viminfo            # viminfo
     mkdir -p "~/.vim/cache/viminfo"             # vim viminfo
-    mkdir ~/.cache/zsh
-    mkdir ~/.cache/vlc
+    mkdir $HOME/.cache/zsh
+    mkdir $HOME/.cache/vlc
     sudo mkdir /var/lib/samba/usershares
 
     # System tools
@@ -76,7 +76,7 @@ brew_install () {
     brew update
     brew upgrade
     brew install gcc patchelf graphviz
-    brew install exa                             # "ls" on steroids
+    brew install exa                            # "ls" on steroids
 }
 
 chrome_install () {
@@ -86,12 +86,11 @@ chrome_install () {
 }
 
 emacs_install () {
-    sudo apt-get install emacs-gtk
+    
+    sudo apt-get install emacs-gtk              # Emacs
     # Doom
-    # required dependencies
-    sudo apt-get install git ripgrep
-    # optional dependencies
-    sudo apt-get install tar fd-find clang
+    sudo apt-get install git ripgrep            # required dependencies
+    sudo apt-get install tar fd-find clang      # optional dependencies
 }
 
 i3_install () {
@@ -129,11 +128,10 @@ steam_install () {
 }
 
 vim_install () {
-    cd ~/
-    vim +PlugInstall +qall
-    # Vim YouCompleteMe plugin install
-    bash ~/scripts/ycm
-    sudo npm install -g neovim
-    python3 -m pip install --user --upgrade pynvim
-    sudo gem install neovim
+    cd $HOME 
+    vim +PlugInstall +qall                      # Update plugins
+    bash $HOME/scripts/ycm                      # Vim YouCompleteMe plugin install
+    sudo npm install -g neovim                  # npm on neovim
+    python3 -m pip install --user --upgrade pynvim # Python for neovim
+    sudo gem install neovim                     # Gem for neovim
 }

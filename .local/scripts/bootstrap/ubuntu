@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 ### VARIABLES
 scripts=$HOME/.local/scripts
-source $scripts/bootstrap/ubuntu_functions # Include functions
+source $scripts/bootstrap/ubuntu_functions  # Include functions
 
 ### INSTALLATION
 sudo apt-get update; sudo apt-get full-upgrade
@@ -22,4 +22,4 @@ i3_install
 snap_install
 ubuntu_install
 vim_install
-chsh -s $(which zsh) # Change default shell to zsh
+chsh -s $(which zsh)                        # Change default shell to zsh

@@ -1,19 +1,19 @@
 #! /usr/bin/env bash
 ### VARIABLES
 scripts=$HOME/.local/scripts
-source $scripts/bootstrap/arch_functions # Include functions
+source $scripts/bootstrap/arch_functions        # Include functions
 
 ### INSTALLATION
 sudo pacman -Syu
 echo "#! /bin/sh
-export DISTRO=manjaro" > $HOME/.config/distro # Distro variable
+export DISTRO=manjaro" > $HOME/.config/distro   # Distro variable
 yay_install # Needed to install AUR packages
 
 ### ONLY CHANGE FROM HERE ON
 base_install
 i3_install
 
-#applets             # Installs Cinnamon applets # implement pending
+#applets                                        # Installs Cinnamon applets # implement pending
 #bloat_install
 #cinnamon_install
 #games_install
@@ -28,4 +28,4 @@ dwall
 laptop_install
 vim_install
 wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
-chsh -s $(which zsh) # Change default shell to zsh
+chsh -s $(which zsh)                            # Change default shell to zsh
