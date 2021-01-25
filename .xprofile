@@ -3,9 +3,12 @@
 # If you use startx/xinit like a Chad, this file will also be sourced.
 [[ -f ~/.zshenv ]] && source ~/.zshenv
 
+setxkbmap es # Teclat español
+
 if !laptop-detect ; then
+    ## USE ONLY WITH US KEYBOARD
     # altgr to type á
-    setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+    # setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
 fi
 
 if [[ "$DESKTOP_SESSION" == "i3" ]]; then

@@ -20,9 +20,6 @@ if [ -f "$userresources" ]; then
     xrdb -merge "$userresources"
 fi
 
-# altgr to type á
-setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
-
 if [ -f "$usermodmap" ]; then
     xmodmap "$usermodmap"
 fi
@@ -35,7 +32,6 @@ if [ -d /etc/X11/xinit/xinitrc.d ]; then
     unset f
 fi
 
-
 # Set environmental variables before starting i3
 # .xprofile just sources .zshenv, sourcing it from here just to be consistent with LightDM
 [ -f /etc/xprofile ] && . /etc/xprofile
@@ -43,37 +39,5 @@ fi
 
 # i3 will open apps itself, no need to start them from .zshenv or .xprofile,
 if [[ "$DISTRO" == "arch" ]]; then
-    ## Starts i3
-    i3
+    i3 # Starts i3
 fi
-
-if [[ "$DISTRO" == "manjaro" ]]; then
-    DEFAULT_SESSION=gnome-session
-    get_session(){
-        local dbus_args=(--sh-syntax --exit-with-session)
-        case $1 in
-            awesome) dbus_args+=(awesome) ;;
-            bspwm) dbus_args+=(bspwm-session) ;;
-            budgie) dbus_args+=(budgie-desktop) ;;
-            cinnamon) dbus_args+=(cinnamon-session) ;;
-            deepin) dbus_args+=(startdde) ;;
-            enlightenment) dbus_args+=(enlightenment_start) ;;
-            fluxbox) dbus_args+=(startfluxbox) ;;
-            gnome) dbus_args+=(gnome-session) ;;
-            i3|i3wm) dbus_args+=(i3 --shmlog-size 0) ;;
-            jwm) dbus_args+=(jwm) ;;
-            kde) dbus_args+=(startkde) ;;
-            lxde) dbus_args+=(startlxde) ;;
-            lxqt) dbus_args+=(lxqt-session) ;;
-            mate) dbus_args+=(mate-session) ;;
-            xfce) dbus_args+=(xfce4-session) ;;
-            openbox) dbus_args+=(openbox-session) ;;
-            *) dbus_args+=($DEFAULT_SESSION) ;;
-        esac
-
-        echo "dbus-launch ${dbus_args[*]}"
-    }
-#exec dbus-launch --sh-syntax --exit-with-session gnome-session
-exec $(get_session)
-fi
-
