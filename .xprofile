@@ -11,6 +11,7 @@ if !laptop-detect ; then
     # setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
 fi
 
+# After changing keyboard layout restart i3blocks
 if [[ "$DESKTOP_SESSION" == "i3" ]]; then
     # This runs before i3
 fi
