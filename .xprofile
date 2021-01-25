@@ -3,6 +3,8 @@
 # If you use startx/xinit like a Chad, this file will also be sourced.
 [[ -f ~/.zshenv ]] && source ~/.zshenv
 
+# https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration
+# https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
 setxkbmap es # Teclat español
 
 if !laptop-detect ; then
