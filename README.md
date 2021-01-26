@@ -6,7 +6,17 @@
 git clone --recurse-submodules https://github.com/cuberhaus/dotfiles ~/dotfiles/dotfiles
 ```
 
-### Supported:
+Install scripts are located within .local/scripts/bootstrap/
+> Tip: read script before executing 
+```bash
+bash .local/scripts/arch
+```
+
+### Recommendations
+- Read this repo's wiki
+- That's pretty much all
+
+## Supported:
 
 - ![Arch_icon][arch_icon] Arch
 - ![Manjaro_icon][manjaro_icon] Manjaro
