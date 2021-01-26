@@ -13,7 +13,7 @@ git clone --recurse-submodules https://github.com/cuberhaus/dotfiles ~/dotfiles/
 - ![Ubuntu_icon][ubuntu_icon] Ubuntu
 - ![MacOS_icon][macos_icon] MacOS
 
-### ![Imgur](https://i.imgur.com/ORHMjm1.png?1) WIP 
+### WIP ![Imgur](https://i.imgur.com/ORHMjm1.png?1) 
 - ![Gentoo_icon][gentoo_icon]Gentoo
 - Openbox
 
