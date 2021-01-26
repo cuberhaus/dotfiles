@@ -120,8 +120,10 @@ mode "$mode_gaps_outer" {
         bindsym Escape mode "default"
 }
 
-# start a terminal
+# Start a terminal
 bindsym $mod+Return exec termite
+# Alternative (Use Base16-OneDark not 16 bits):
+# bindsym $mod+Return exec xfce4-terminal
 
 # kill focused window
 bindsym $mod+Shift+q kill
