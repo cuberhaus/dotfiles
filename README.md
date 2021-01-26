@@ -1,13 +1,19 @@
 # Cuberhaus's dotfiles
 
-### WORKING
+## Install this repo:
+
+```bash
+git clone --recurse-submodules https://github.com/cuberhaus/dotfiles ~/dotfiles/dotfiles
+```
+
+### Supported:
 
 - ![Arch_icon][arch_icon] Arch
 - ![Manjaro_icon][manjaro_icon] Manjaro
 - ![Ubuntu_icon][ubuntu_icon] Ubuntu
 - ![MacOS_icon][macos_icon] MacOS
 
-### WIP
+### ![Imgur](https://imgur.com/fyNpstX) WIP 
 
 - ![Gentoo_icon][gentoo_icon]Gentoo
 - Openbox
