@@ -11,7 +11,7 @@
     path = .config/ranger/plugins/ranger_devicons
     url = https://github.com/alexanderjeurissen/ranger_devicons
 [submodule "base16-xfce4-terminal"]
-    path = .local/share/xfce4/terminal/base16-xfce4-terminal
+    path = .local/share/xfce4/terminal
     url = https://github.com/afq984/base16-xfce4-terminal
 [submodule "i3-layout-manager"]
     path = .config/i3/i3-layout-manager
