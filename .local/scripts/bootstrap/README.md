@@ -1,7 +1,7 @@
 # Arch Install
 
-## Commands to execute
-- video makes backlight work and wheel gives you sudo privileges
+## To do:
+- Video makes backlight work and wheel gives you sudo privileges.
 
 
 ```bash
@@ -9,12 +9,13 @@ usermod -a -G video pol
 usermod -a -G wheel pol
 usermod -a -G input pol
 ```
+- Activate [REISUB](https://forum.manjaro.org/t/howto-reboot-turn-off-your-frozen-computer-reisub-reisuo/3855) for safe reboots if computer freezes.
+
 ## Video Card
-Configure nvidia nvidia-xconfig
+Configure nvidia nvidia-xconfig.
 
 ## Wallpaper error
-Wallpaper error when background is set in desktop, it will also be used by
-LightDM unless the picture isn't coming from /usr/share/backgrounds
+Wallpaper error when background is set in desktop, it will also be used by LightDM unless the picture isn't coming from /usr/share/backgrounds.
 
 ## Connect to upclink
 ```bash
