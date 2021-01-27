@@ -1,19 +1,4 @@
 #! /usr/bin/env bash
-### COMMENTS
-# YOU NEED TO ADD YOURSELF TO WHEEL AND TO VIDEO
-# video makes backlight work and wheel gives you sudo privilege
-# usermod -a -G video pol
-# usermod -a -G wheel pol
-# usermod -a -G input pol
-# Configure nvidia nvidia-xconfig
-# Wallpaper error when background is set in desktop, it will also be used by
-# LightDM unless the picture isn't coming from /usr/share/backgrounds
-# f5fpc -s -x -t https://upclink.upc.edu
-# f5fpc --stop
-# Format as exFAT for most compatibility with every OS and over 4GB files compatible
-# https://www.howtogeek.com/73178/what-file-system-should-i-use-for-my-usb-drive/#:~:text=File%20systems%20are%20the%20sort,run%20into%20others%20on%20occasion.
-# if using xfce add /usr/bin/setxkbmap -option "caps:swapescape" to the startup applications to swap keys
-
 ### VARIABLES
 scripts=$HOME/.local/scripts
 flags="-S --noconfirm"
