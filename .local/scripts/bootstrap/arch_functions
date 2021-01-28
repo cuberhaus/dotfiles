@@ -2,6 +2,8 @@
 ### VARIABLES
 scripts=$HOME/.local/scripts
 flags="-S --noconfirm"
+# To use commands on terminal first type: 
+# export flags="-S --noconfirm"
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
