@@ -339,9 +339,8 @@ optional() {
     # GUI
     sudo pacman obs-studio $flags              # Video recording
     sudo pacman audacity $flags                # Audio editor
-    sudo pacman dbeaver $flags                 # Base de dades
+    sudo pacman dbeaver jdk-openjdk $flags     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
     sudo pacman gimp $flags                    # Image editor
-    sudo pacman jdk-openjdk $flags             # with dbeaver
     sudo pacman r $flags                       # Probabilitat i estadística
     sudo pacman remmina freerdp libvncserver $flags   # Remote conexions
     sudo pacman texstudio $flags               # Latex text editor
