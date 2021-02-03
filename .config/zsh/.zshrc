@@ -27,8 +27,6 @@ antigen bundle systemd
 antigen bundle archlinux
 antigen bundle command-not-found
 antigen bundle alias-finder 
-#antigen bundle zsh_reload
-#antigen bundle copyfile
 
 # Load the theme.
 # https://github.com/romkatv/powerlevel10k
