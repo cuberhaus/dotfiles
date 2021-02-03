@@ -56,7 +56,6 @@ antigen apply
 # Uncomment the following line to change how often to auto-update (in days).
 export UPDATE_ZSH_DAYS=7
 
-# dirhistory // https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/dirhistory
 # copyfile <file> // copia un archivo al clipboard
 # command-not-found // Si no existe un comando da sugerencias
 ZSH_ALIAS_FINDER_AUTOMATIC=true
