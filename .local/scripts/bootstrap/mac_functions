@@ -79,7 +79,7 @@ mac_install () {
     brew install --cask alfred                  # Better Spotlight
     brew install --cask calibre                 # Book manager
     brew install --cask ccleaner                # CleanUp
-    brew install --cask dbeaver-community       # BD
+    brew install --cask dbeaver-community adoptopenjdk       # BD
     brew install --cask discord                 # Group calls
     brew install --cask eclipse-java            # BD
     brew install --cask google-chrome           # Web browser
