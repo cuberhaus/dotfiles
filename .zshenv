@@ -16,8 +16,7 @@ fi
 if [ -d "/usr/local/sbin" ] ; then
     PATH="/usr/local/sbin:$PATH"
 fi
-# Better not add '.' to PATH
-#PATH=".:$PATH"
+#PATH=".:$PATH" # Better not add '.' to PATH 
 
 ###############################################################
 # => Variables
