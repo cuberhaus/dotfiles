@@ -333,19 +333,16 @@ emacs_install () {
 ### All packages in here should be handpicked
 optional() {
     # Terminal
-    #sudo pacman  github-cli $flags             # Github from terminal, create issues...
+    #sudo pacman  github-cli $flags             # Github for terminal, create issues...
     sudo pacman doxygen texlive-most graphviz $flags # Doxygen
 
     # GUI
     sudo pacman obs-studio $flags              # Video recording
     sudo pacman audacity $flags                # Audio editor
-    sudo pacman dbeaver jdk-openjdk $flags     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
     sudo pacman gimp $flags                    # Image editor
     sudo pacman r $flags                       # Probabilitat i estadística
     sudo pacman remmina freerdp libvncserver $flags   # Remote conexions
     sudo pacman texstudio $flags               # Latex text editor
-    #sudo pacman  intellij-idea-community-edition  # BD free version (no SQL)
-    yay intellij-idea-ultimate-edition $flags  # BD paid IntelliJ
 
     # AUR
     yay eclipse-java $flags                    # BD
@@ -364,4 +361,10 @@ optional() {
     #usermod -aG uucp,lock pol
     sudo pacman arduino-avr-core $flags
     sudo pacman arduino $flags
+
+    # Bases de dades
+    sudo pacman pgadmin4 $flags
+    yay intellij-idea-ultimate-edition $flags  # BD paid IntelliJ
+    sudo pacman dbeaver jdk-openjdk $flags     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
+    #sudo pacman  intellij-idea-community-edition  # BD free version (no SQL)
 }
