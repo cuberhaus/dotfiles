@@ -128,21 +128,30 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     # Check vulnerabilities microcode
     alias microcode='grep . /sys/devices/system/cpu/vulnerabilities/*'
 
-    ### Arch
+    ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
         alias update='sudo pacman -Syu'
         alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update;'
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         alias cleanup='yay -Sc; vim +PlugClean +qall'
+        #pacman unlock
+        alias unlock="sudo rm /var/lib/pacman/db.lck"
+    fi
+
+    ### Arch
+    if [[ "$DISTRO" == "arch" ]]; then
         # Get fastest mirrors in your neighborhood
         alias mirror="sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist"
         alias mirrord="sudo reflector --latest 50 --number 20 --sort delay --save /etc/pacman.d/mirrorlist"
         alias mirrors="sudo reflector --latest 50 --number 20 --sort score --save /etc/pacman.d/mirrorlist"
         alias mirrora="sudo reflector --latest 50 --number 20 --sort age --save /etc/pacman.d/mirrorlist"
-        alias pacman='sudo pacman --color auto'
-        #pacman unlock
-        alias unlock="sudo rm /var/lib/pacman/db.lck"
+    fi
+
+    ### Manjaro
+    if [[ "$DISTRO" == "manjaro" ]]; then
+        # Update mirrors and update
+        alias mirror="sudo pacman-mirrors -f && sudo pacman -Syu"
     fi
 
     ### Ubuntu
