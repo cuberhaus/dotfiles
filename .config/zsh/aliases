@@ -75,8 +75,8 @@ alias la='exa -a -F --long --header --links --group --group-directories-first'
 alias lsd='exa -D -a'
 
 # IP adresses
-alias ip='dig +short myip.opendns.com @resolver1.opendns.com'
-alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
+#alias ip='dig +short myip.opendns.com @resolver1.opendns.com'
+#alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
 
 # Reload the shell (i.e. invoke as a login shell)
 alias reload='exec ${SHELL} -l'
