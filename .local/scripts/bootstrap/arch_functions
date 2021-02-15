@@ -114,6 +114,7 @@ base_install () {
     yay pix $flags                             # Image viewer
     yay skypeforlinux-stable-bin $flags        # Skype
     yay spotify $flags                         # Spotify
+    yay tomighty $flags                        # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     yay ttf-ms-fonts $flags                    # Microsoft fonts ##deprecated
     yay visual-studio-code-bin $flags          # Microsoft's Visual Code /not #sudo pacman  code
     yay whatsapp-nativefier $flags             # Whatsapp client
