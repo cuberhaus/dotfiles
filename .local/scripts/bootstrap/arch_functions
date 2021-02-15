@@ -362,6 +362,9 @@ optional() {
     sudo pacman arduino-avr-core $flags
     sudo pacman arduino $flags
 
+    # IDI
+    sudo pacman qtcreator $flags
+
     # Bases de dades
     sudo pacman pgadmin4 $flags
     yay intellij-idea-ultimate-edition $flags  # BD paid IntelliJ
