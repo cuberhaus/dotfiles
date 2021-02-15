@@ -347,13 +347,14 @@ bindsym $mod+Pause mode "$mode_system"
 ###############################################################
 # => Runtime
 ###############################################################
+### REMINDER: always start applications in background to start programs simultaneously otherwise they wait until the last program opens, which is noticeably slower (Add '&' at the end)
 
 # xss-lock displays betterlockscreen when lid is closed
 exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &
 exec betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
 
 # https://wiki.archlinux.org/index.php/Polkit
-exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
@@ -374,10 +375,13 @@ exec xfce4-clipman &
 # Wallpaper
 exec dwall -s room &
 
-#exec_always feh --bg-scale ~/wallpapers/Arc_arch.png
+#exec feh --bg-scale ~/wallpapers/Arc_arch.png &
 
 # Thunderbird applet
 exec birdtray &
 
 # Printer service
 exec hplip & 
+
+# Pomodoro Timer
+exec tomighty &

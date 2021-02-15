@@ -1,10 +1,8 @@
-#XFCE
+# XFCE
 .local/share/xfce4/helpers/
 
+# Antigen
 .config/antigen/.zcompdump.pol.2391
-.config/nvim/autoload/
-.config/nvim/plugged/
-.local/bin/bootstrap/profile.log
 
 # bin
 .local/bin/wheel
@@ -75,6 +73,9 @@ Calibre Library/metadata_db_prefs_backup.json
 # Vim
 .vim/autoload/
 .vim/plugged/
+.vim/spell/
+.config/nvim/autoload/
+.config/nvim/plugged/
 #.local/share/vim/
 
 # Fonts
@@ -139,3 +140,5 @@ Thumbs.db
 .config/transmission/resume/
 .config/transmission/stats.json
 .config/transmission/torrents/
+
+.local/bin/bootstrap/profile.log
