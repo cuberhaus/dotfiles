@@ -1,5 +1,8 @@
 .local/share/icons/hicolor/
 
+# Tomighty
+.tomighty/cache/
+
 # XFCE
 .local/share/xfce4/helpers/
 
