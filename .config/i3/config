@@ -381,7 +381,7 @@ exec dwall -s room &
 exec birdtray &
 
 # Printer service
-exec hplip & 
+exec hp-systray & 
 
 # Pomodoro Timer
 exec tomighty &
