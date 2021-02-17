@@ -12,6 +12,9 @@ Install scripts are located within .local/scripts/bootstrap/
 bash .local/scripts/arch
 ```
 
+## Shortcuts
+Shortcuts to applications are stored in /usr/share/applications/
+
 ### Recommendations
 - Read this repo's wiki
 - That's pretty much all
