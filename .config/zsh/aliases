@@ -68,9 +68,10 @@ alias gc="git commit -m "
 alias gp="git push"
 alias gitsync="git submodule sync; git submodule update --init --recursive"
 alias gsu="git submodule update --recursive --remote"
-alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
-## Alternative
-#alias yolo='git add -A; git commit -m "This is an automated commit message"; git push'
+## Fun commit
+#alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
+## Alternative (makes it easier to find out which commits have no message)
+alias yolo='git add -A; git commit -m "This is a placeholder"; git push'
 
 # List files
 # using -a -a will show '.' and ".."
