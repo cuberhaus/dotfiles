@@ -16,6 +16,12 @@ if [[ "$DESKTOP_SESSION" == "cinnamon" ]]; then
             PATH="$HOME/.local/scripts/cinnamon_path:$PATH"
     fi
 fi
+## WIP (do not know if this will work, check if $DESKTOP_SESSION on gnome actually becomes "gnome" on a gnome DE)
+if [[ "$DESKTOP_SESSION" == "gnome" ]]; then
+    if [ -d "$HOME/.local/scripts/gnome_path" ] ; then
+            PATH="$HOME/.local/scripts/gnome_path:$PATH"
+    fi
+fi
 
 if [ -d "$HOME/.config/i3/i3-layout-manager" ] ; then
         PATH="$HOME/.config/i3/i3-layout-manager:$PATH" 
