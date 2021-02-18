@@ -9,6 +9,7 @@ setxkbmap es # Teclat español
 # Swap caps and escape with setxbkmap
 setxkbmap -option caps:swapescape
 # Swap caps and escape with xmodmap to really make sure they swap! (xmodmap HAS to go after setxbkmap)
+# https://wiki.archlinux.org/index.php/Xmodmap
 if [ -f "$HOME/.Xmodmap" ]; then
     xmodmap "$HOME/.Xmodmap"
 fi
