@@ -1,0 +1,14 @@
+# INCORRECT
+# Swap caps and escape with setxbkmap
+#setxkbmap -option caps:swapescape
+# Swap caps and escape with xmodmap to really make sure they swap! (xmodmap HAS to go after setxbkmap)
+# https://wiki.archlinux.org/index.php/Xmodmap
+
+# xmodmap -e 'keycode 9 = Escape'
+# If executed twice xmodmap will revert changes to keys
+#xmodmap -e "remove Lock = Caps_Lock"
+#xmodmap -e "keysym Caps_Lock = Escape"
+#xmodmap -e "keysym Escape = Caps_Lock"
+#xmodmap -e "add Lock = Caps_Lock"
+# INCORRECT 
+
