@@ -33,11 +33,11 @@ if [ -d /etc/X11/xinit/xinitrc.d ]; then
 fi
 
 # Set environmental variables before starting i3
-# .xprofile just sources .zshenv, sourcing it from here just to be consistent with LightDM
+# .xprofile sources .zshenv and starts apps, sourcing it from here just to be consistent with LightDM
 [ -f /etc/xprofile ] && . /etc/xprofile
 [ -f ~/.xprofile ] && . ~/.xprofile
 
-# i3 will open apps itself, no need to start them from .zshenv or .xprofile,
+# i3 will open apps itself, no need to start them from .xinitrc or .xprofile
 if [[ "$DISTRO" == "arch" ]]; then
     i3 # Starts i3
 fi

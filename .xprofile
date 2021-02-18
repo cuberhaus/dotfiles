@@ -7,10 +7,9 @@
 # https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
 setxkbmap es # Teclat español
 
-# Load Xmodmap just in case .xinitrc doesn't take effect
-if [ -f "$HOME/.Xmodmap" ]; then
-    xmodmap "$HOME/.Xmodmap"
-fi
+# if [ -f "$HOME/.Xmodmap" ]; then
+#     xmodmap "$HOME/.Xmodmap"
+# fi
 
 if !laptop-detect ; then
     ## USE ONLY WITH US KEYBOARD
