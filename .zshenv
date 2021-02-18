@@ -7,6 +7,16 @@
 if [ -d "$HOME/.local/bin" ] ; then
         PATH="$HOME/.local/bin:$PATH"
 fi
+
+if [[ "$DESKTOP_SESSION" == "i3" ]]; then
+fi
+
+if [[ "$DESKTOP_SESSION" == "cinnamon" ]]; then
+    if [ -d "$HOME/.local/scripts/cinnamon_path" ] ; then
+            PATH="$HOME/.local/scripts/cinnamon_path:$PATH"
+    fi
+fi
+
 if [ -d "$HOME/.config/i3/i3-layout-manager" ] ; then
         PATH="$HOME/.config/i3/i3-layout-manager:$PATH" 
 fi
