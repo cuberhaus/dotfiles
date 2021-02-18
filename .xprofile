@@ -5,9 +5,9 @@
 
 # https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration
 # https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
+setxkbmap es # Teclat español
 # Swap caps and escape with setxbkmap
 setxkbmap -option caps:swapescape
-setxkbmap es # Teclat español
 # Swap caps and escape with xmodmap to really make sure they swap!
 if [ -f "$HOME/.Xmodmap" ]; then
     xmodmap "$HOME/.Xmodmap"
