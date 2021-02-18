@@ -49,7 +49,10 @@ alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 
 # adding flags
-alias cp="cp -i"          # confirm before overwriting something
+alias cp="cp -iv"          # confirm before overwriting something
+alias mv="mv -iv"
+alias mkd="mkdir -pv"
+alias rm="rm -vI"
 alias df="df -h"          # human-readable sizes
 alias free="free -m"      # show sizes in MB
 
@@ -75,13 +78,6 @@ alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.
 alias ls='exa -F --long --header --links --group --group-directories-first'
 alias la='exa -a -F --long --header --links --group --group-directories-first'
 alias lsd='exa -D -a'
-
-# IP adresses
-#alias ip='dig +short myip.opendns.com @resolver1.opendns.com'
-#alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
-
-# Reload the shell (i.e. invoke as a login shell)
-alias reload='exec ${SHELL} -l'
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
