@@ -103,9 +103,6 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 # ctrl-f Search a file and cd into its directory
 bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
 
-#remaps & 
-#xmodmap ~/.Xmodmap &
-
 ###############################################################
 # => Vim
 ###############################################################
