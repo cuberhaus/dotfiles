@@ -6,17 +6,17 @@
 # https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration
 # https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
 setxkbmap es # Teclat español
-# Swap caps and escape with setxbkmap
-#setxkbmap -option caps:swapescape
-
-# INCORRECT just do not write anything inside .Xmodmap
-# Swap caps and escape with xmodmap to really make sure they swap! (xmodmap HAS to go after setxbkmap)
-# https://wiki.archlinux.org/index.php/Xmodmap
-
-# Load Xmodmap just in case .xinitrc doesn't take effect
+# Load Xmodmap
 if [ -f "$HOME/.Xmodmap" ]; then
     xmodmap "$HOME/.Xmodmap"
 fi
+
+# INCORRECT
+# Swap caps and escape with setxbkmap
+#setxkbmap -option caps:swapescape
+# Swap caps and escape with xmodmap to really make sure they swap! (xmodmap HAS to go after setxbkmap)
+# https://wiki.archlinux.org/index.php/Xmodmap
+
 # xmodmap -e 'keycode 9 = Escape'
 # If executed twice xmodmap will revert changes to keys
 #xmodmap -e "remove Lock = Caps_Lock"
