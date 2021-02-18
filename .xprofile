@@ -5,11 +5,9 @@
 
 # https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration
 # https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
-setxkbmap es # Teclat español
-# Load Xmodmap
-if [ -f "$HOME/.Xmodmap" ]; then
-    xmodmap "$HOME/.Xmodmap"
-fi
+
+#setxkbmap es # Teclat español
+remaps &
 
 if !laptop-detect ; then
     ## USE ONLY WITH US KEYBOARD
