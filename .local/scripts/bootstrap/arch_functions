@@ -26,6 +26,7 @@ base_install () {
     sudo pacman nemo-share $flags
 
     # Terminal
+    sudo pacman inotify-tools $flags           # inotifywatch -r $file (to watch if those files have been accessed)
     sudo pacman base-devel $flags              # AUR
     sudo pacman bat $flags                     # "Cat" on steroids
     sudo pacman dhcpcd $flags                  # Internet
