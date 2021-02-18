@@ -10,9 +10,14 @@ setxkbmap es # Teclat español
 setxkbmap -option caps:swapescape
 # Swap caps and escape with xmodmap to really make sure they swap! (xmodmap HAS to go after setxbkmap)
 # https://wiki.archlinux.org/index.php/Xmodmap
-if [ -f "$HOME/.Xmodmap" ]; then
-    xmodmap "$HOME/.Xmodmap"
-fi
+#if [ -f "$HOME/.Xmodmap" ]; then
+#    xmodmap "$HOME/.Xmodmap"
+#fi
+
+xmodmap -e remove Lock = Caps_Lock
+xmodmap -e keysym Caps_Lock = Escape
+xmodmap -e keysym Escape = Caps_Lock
+xmodmap -e add Lock = Caps_Lock
 
 if !laptop-detect ; then
     ## USE ONLY WITH US KEYBOARD
