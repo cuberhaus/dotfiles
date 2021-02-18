@@ -1,15 +1,12 @@
 #!/bin/sh
 # This file runs when a DM logs you into a graphical session.
-# If you use startx/xinit like a Chad, this file will also be sourced.
+# If you use startx/xinit like a Chad, this file will also be sourced. (from xinitrc)
 [[ -f ~/.zshenv ]] && source ~/.zshenv
 
 # https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration
 # https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
 setxkbmap es # Teclat español
-
-# if [ -f "$HOME/.Xmodmap" ]; then
-#     xmodmap "$HOME/.Xmodmap"
-# fi
+setxkbmap -option caps:swapescape
 
 if !laptop-detect ; then
     ## USE ONLY WITH US KEYBOARD
