@@ -7,9 +7,12 @@
 # https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
 
 #setxkbmap es # Teclat español
-remaps &
+# # Load Xmodmap
+#[[ -f "$HOME/.Xmodmap" ]] && xmodmap $HOME/.Xmodmap && echo "hi"
+#remaps &
+setxkbmap -option caps:swapescape
 
-if !laptop-detect ; then
+if ! laptop-detect ; then
     ## USE ONLY WITH US KEYBOARD
     # altgr to type á
     # setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
