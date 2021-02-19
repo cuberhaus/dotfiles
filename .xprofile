@@ -7,6 +7,8 @@ if [[ "$DESKTOP_SESSION" == "i3" ]]; then
     # This runs before i3
 fi
 
+setxkbmap -option caps:swapescape
+
 if [[ "$DESKTOP_SESSION" == "cinnamon" ]]; then
     # xss-lock displays betterlockscreen when lid is closed
     exec xss-lock --transfer-sleep-lock -- cinnamon-screensaver -l &
