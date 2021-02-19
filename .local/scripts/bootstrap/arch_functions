@@ -3,6 +3,8 @@
 scripts=$HOME/.local/scripts
 # --needed https://superuser.com/questions/568967/prevent-pacman-from-reinstalling-packages-that-were-already-installed
 flags="-S --noconfirm --needed"
+pac="sudo pacman $flags"
+yay="yay -S $flags"
 # To use commands on terminal first type: 
 # export flags="-S --noconfirm --needed"
 
@@ -21,146 +23,146 @@ base_install () {
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
     gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg -e # Termite execute argument is -e in gnome-terminal its -x
-    sudo pacman nemo $flags
-    sudo pacman nemo-fileroller $flags
-    sudo pacman nemo-preview $flags
-    sudo pacman nemo-seahorse $flags
-    sudo pacman nemo-share $flags
+    $pac nemo       
+    $pac nemo-fileroller       
+    $pac nemo-preview       
+    $pac nemo-seahorse       
+    $pac nemo-share       
 
     # Terminal
-    sudo pacman hardinfo cpu-x                 # pc information
-    sudo pacman inotify-tools $flags           # inotifywatch -r $file (to watch if those files have been accessed)
-    sudo pacman base-devel $flags              # AUR
-    sudo pacman bat $flags                     # "Cat" on steroids
-    sudo pacman dhcpcd $flags                  # Internet
-    sudo pacman dnsutils $flags                # Ip
-    sudo pacman exa $flags                     # "ls" on steroids
-    sudo pacman exfat-utils $flags             # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
-    sudo pacman fzf $flags                     # Fuzzy finder
-    sudo pacman gcc $flags                     # Cpp
-    sudo pacman gdb $flags                     # debugging c++
-    sudo pacman git $flags                     # It's git bro
-    sudo pacman gvim $flags                    # Vim version with extra features
-    sudo pacman htop $flags                    # Show system resources
-    sudo pacman laptop-detect $flags           # Detect if using a laptop
-    sudo pacman ncdu $flags                    # Manage storage
-    sudo pacman net-tools $flags               # Ips
-    sudo pacman npm $flags                     # Package manager
-    sudo pacman ntfs-3g $flags                 # Read/write support for ntfs https://wiki.archlinux.org/index.php/NTFS-3G
-    sudo pacman perl-file-mimeinfo $flags      # mimeopen -d $file and type whatever app you want to open that with
-    sudo pacman polkit $flags                  # Policy kit
-    sudo pacman polkit-gnome $flags            # https://wiki.archlinux.org/index.php/Polkit
-    sudo pacman python $flags
-    sudo pacman python3 $flags
-    sudo pacman ranger $flags                  # Ranger
-    sudo pacman rclone $flags                  # Rsync to remote
-    sudo pacman reflector $flags               # Update Arch mirrors
-    sudo pacman ruby $flags                    # Package manager
-    sudo pacman stow $flags                    # To deploy dotfiles
-    sudo pacman svn $flags                     # Similar to git
-    sudo pacman termite $flags                 # Terminal emulator
-    sudo pacman the_silver_searcher $flags     # Better and faster ack (and grep)
-    sudo pacman tmux $flags                    # Terminal multiplexer
-    sudo pacman udiskie $flags                 # Automater
-    sudo pacman udisks2 $flags                 # Daemon to manipulate storage devices
-    sudo pacman w3m $flags                     # Preview images on ranger
-    sudo pacman wget $flags                    # Download stuff
-    sudo pacman xclip $flags                   # Clipboard
-    sudo pacman xdg-user-dirs $flags           # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
-    sudo pacman xfce4-clipman-plugin $flags    # Clipboard manager (persistant clip even when application is closed)
-    sudo pacman xorg $flags                    # Display server
-    sudo pacman xorg-xinit $flags              # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
-    sudo pacman yarn $flags                    # Package installer
-    sudo pacman zsh $flags                     # Zsh shell
+    $pac hardinfo cpu-x                 # pc information
+    $pac inotify-tools                  # inotifywatch -r $file (to watch if those files have been accessed)
+    $pac base-devel                     # AUR
+    $pac bat                            # "Cat" on steroids
+    $pac dhcpcd                         # Internet
+    $pac dnsutils                       # Ip
+    $pac exa                            # "ls" on steroids
+    $pac exfat-utils                    # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
+    $pac fzf                            # Fuzzy finder
+    $pac gcc                            # Cpp
+    $pac gdb                            # debugging c++
+    $pac git                            # It's git bro
+    $pac gvim                           # Vim version with extra features
+    $pac htop                           # Show system resources
+    $pac laptop-detect                  # Detect if using a laptop
+    $pac ncdu                           # Manage storage
+    $pac net-tools                      # Ips
+    $pac npm                            # Package manager
+    $pac ntfs-3g                        # Read/write support for ntfs https://wiki.archlinux.org/index.php/NTFS-3G
+    $pac perl-file-mimeinfo             # mimeopen -d $file and type whatever app you want to open that with
+    $pac polkit                         # Policy kit
+    $pac polkit-gnome                   # https://wiki.archlinux.org/index.php/Polkit
+    $pac python       
+    $pac python3       
+    $pac ranger                         # Ranger
+    $pac rclone                         # Rsync to remote
+    $pac reflector                      # Update Arch mirrors
+    $pac ruby                           # Package manager
+    $pac stow                           # To deploy dotfiles
+    $pac svn                            # Similar to git
+    $pac termite                        # Terminal emulator
+    $pac the_silver_searcher            # Better and faster ack (and grep)
+    $pac tmux                           # Terminal multiplexer
+    $pac udiskie                        # Automater
+    $pac udisks2                        # Daemon to manipulate storage devices
+    $pac w3m                            # Preview images on ranger
+    $pac wget                           # Download stuff
+    $pac xclip                          # Clipboard
+    $pac xdg-user-dirs                  # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
+    $pac xfce4-clipman-plugin           # Clipboard manager (persistant clip even when application is closed)
+    $pac xorg                           # Display server
+    $pac xorg-xinit                     # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
+    $pac yarn                           # Package installer
+    $pac zsh                            # Zsh shell
 
     # GUI
-    sudo pacman calibre $flags                 # Book manager
-    sudo pacman discord $flags
-    sudo pacman dunst $flags                   # Notifications
-    sudo pacman file-roller $flags             # Archive Manager
-    sudo pacman gnome-calculator $flags        # Calculator
-    sudo pacman gnome-font-viewer $flags       # Font viewer
-    sudo pacman gucharmap $flags               # Characters keyboard
-    sudo pacman hexchat $flags                 # IRC APP
-    sudo pacman libreoffice-still $flags       # Office
-    sudo pacman meld $flags                    # Best diff viewer "kompare pulls a lot of kde dependencies"
-    sudo pacman nilfs-utils $flags             # Manage partitions 
-    sudo pacman noto-fonts-emoji $flags        # Classic Emoji
-    sudo pacman okular $flags                  # Best pdf viewer
-    sudo pacman playerctl $flags               # Audio
-    sudo pacman pulseaudio pulseaudio-equalizer pulseaudio-bluetooth $flags # Audio
-    sudo pacman transmission-gtk $flags        # A simpler Torrent D.
-    sudo pacman ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts $flags # Fonts
-    sudo pacman tumbler ffmpegthumbnailer raw-thumbnailer $flags # IDK
-    sudo pacman udftools $flags                # Manage partitions
-    sudo pacman vlc $flags                     # Video player
-    sudo pacman gnome-disk-utility $flags       # Partition manager by gnome
-    sudo pacman partitionmanager $flags         # Partition manager for KDE
-    # sudo pacman  gparted $flags                 # Manage partitions (doesn't work with ex-fat)
+    $pac calibre                        # Book manager
+    $pac discord       
+    $pac dunst                          # Notifications
+    $pac file-roller                    # Archive Manager
+    $pac gnome-calculator               # Calculator
+    $pac gnome-font-viewer              # Font viewer
+    $pac gucharmap                      # Characters keyboard
+    $pac hexchat                        # IRC APP
+    $pac libreoffice-still              # Office
+    $pac meld                           # Best diff viewer "kompare pulls a lot of kde dependencies"
+    $pac nilfs-utils                    # Manage partitions 
+    $pac noto-fonts-emoji               # Classic Emoji
+    $pac okular                         # Best pdf viewer
+    $pac playerctl                      # Audio
+    $pac pulseaudio pulseaudio-equalizer pulseaudio-bluetooth        # Audio
+    $pac transmission-gtk               # A simpler Torrent D.
+    $pac ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts        # Fonts
+    $pac tumbler ffmpegthumbnailer raw-thumbnailer        # IDK
+    $pac udftools                       # Manage partitions
+    $pac vlc                            # Video player
+    $pac gnome-disk-utility              # Partition manager by gnome
+    $pac partitionmanager                # Partition manager for KDE
+    # $pac  gparted                        # Manage partitions (doesn't work with ex-fat)
 
     # Theme
-    #sudo pacman  breeze $flags                 # Theme
-    sudo pacman adapta-gtk-theme $flags        # Alternative theme
-    sudo pacman arc-gtk-theme arc-icon-theme $flags  # Arc theme and its icon's
-    sudo pacman dconf-editor $flags            # Edit gnome configuration
-    sudo pacman gtk2 gtk3 $flags
-    sudo pacman kvantum-qt5 $flags             # Qt5 Custom themes
-    sudo pacman lxappearance $flags            # Gtk configuration utility
-    sudo pacman papirus-icon-theme $flags      # Best icon theme!
-    sudo pacman qt5ct $flags                   # Qt5 configuration utility
+    #$pac  breeze                        # Theme
+    $pac adapta-gtk-theme               # Alternative theme
+    $pac arc-gtk-theme arc-icon-theme         # Arc theme and its icon's
+    $pac dconf-editor                   # Edit gnome configuration
+    $pac gtk2 gtk3       
+    $pac kvantum-qt5                    # Qt5 Custom themes
+    $pac lxappearance                   # Gtk configuration utility
+    $pac papirus-icon-theme             # Best icon theme!
+    $pac qt5ct                          # Qt5 configuration utility
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
 
     ### AUR
-    yay balena-etcher $flags                   # "Rufus" on linux
-    yay birdtray $flags                        # Thunderbird tray
-    yay google-chrome $flags                   # Best web browser
-    yay pix $flags                             # Image viewer
-    yay skypeforlinux-stable-bin $flags        # Skype
-    yay spotify $flags                         # Spotify
-    yay tomighty $flags                        # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
-    yay ttf-ms-fonts $flags                    # Microsoft fonts ##deprecated
-    yay visual-studio-code-bin $flags          # Microsoft's Visual Code /not #sudo pacman  code
-    yay whatsapp-nativefier $flags             # Whatsapp client
+    $yay balena-etcher                          # "Rufus" on linux
+    $yay birdtray                               # Thunderbird tray
+    $yay google-chrome                          # Best web browser
+    $yay pix                                    # Image viewer
+    $yay skypeforlinux-stable-bin               # Skype
+    $yay spotify                                # Spotify
+    $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
+    $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
+    $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
+    $yay whatsapp-nativefier                    # Whatsapp client
 
     # Thunderbird
-    #yay  thunderbird-bin $flags                # Might have to manually enter PGP key /not#sudo pacman  thunderbird
-    sudo pacman thunderbird $flags             # Check if its the same version as thunderbird-bin
+    #$yay  thunderbird-bin                       # Might have to manually enter PGP key /not#$pac  thunderbird
+    $pac thunderbird                    # Check if its the same version as thunderbird-bin
 
     # Lockscreen
-    yay betterlockscreen $flags
-    sudo pacman xss-lock $flags
+    $yay betterlockscreen       
+    $pac xss-lock       
 
     # Backups
-    yay timeshift $flags                       # Tip: sudo timeshift-gtk
-    sudo pacman cron $flags
+    $yay timeshift                              # Tip: sudo timeshift-gtk
+    $pac cron       
 }
 
 arch_install() {
     # Drivers
-    sudo pacman linux $flags
-    sudo pacman linux-headers $flags
+    $pac linux       
+    $pac linux-headers       
     # LTS release
-    #sudo pacman linux-lts
-    #sudo pacman linux-lts-headers
-    #sudo pacman nvidia-lts
-    # sudo pacman nvidia-dkms #very slow
-    sudo pacman nvidia nvidia-utils $flags     # Nvidia
-    sudo pacman xf86-video-intel mesa lib32-mesa $flags    # Intel
-    sudo pacman lib32-nvidia-utils $flags      # Requires adding multilib libraries
-    sudo pacman nvidia-settings $flags         # Add force composition pipeline in nvidia-settings
+    #$pac linux-lts
+    #$pac linux-lts-headers
+    #$pac nvidia-lts
+    # $pac nvidia-dkms #very slow
+    $pac nvidia nvidia-utils            # Nvidia
+    $pac xf86-video-intel mesa lib32-mesa           # Intel
+    $pac lib32-nvidia-utils             # Requires adding multilib libraries
+    $pac nvidia-settings                # Add force composition pipeline in nvidia-settings
 
     # Printers
     # https://wiki.archlinux.org/index.php/CUPS
-    sudo pacman  cups system-config-printer hplip $flags
+    $pac  cups system-config-printer hplip       
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         sudo systemctl enable org.cups.cupsd.service
         sudo systemctl start org.cups.cupsd.service
     fi
 
     # Bluetooth
-    sudo pacman  bluez bluez-utils $flags
-    sudo pacman  blueberry $flags               # Linux Mint spin-off of GNOME Bluetooth
+    $pac  bluez bluez-utils       
+    $pac  blueberry                      # Linux Mint spin-off of GNOME Bluetooth
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
     fi
@@ -169,7 +171,7 @@ arch_install() {
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable lightdm.service
     fi
-    sudo pacman  lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings $flags
+    $pac  lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings       
     # Ntp for time syncro
     #https://wiki.archlinux.org/index.php/Systemd-timesyncd
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
@@ -179,11 +181,11 @@ arch_install() {
     fi
     # https://wiki.archlinux.org/index.php/USB_storage_devices
     # Network Manager and enable daemon on startup
-    sudo pacman networkmanager $flags
+    $pac networkmanager       
     # Gui
-    sudo pacman nm-connection-editor $flags
+    $pac nm-connection-editor       
     # Applet
-    sudo pacman nm-applet $flags
+    $pac nm-applet       
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable NetworkManager.service
     fi
@@ -210,12 +212,12 @@ trackpad_scrolling () {
 }
 
 vim_install () {
-    sudo pacman  neovim $flags
+    $pac  neovim       
     cd $HOME
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
     bash $scripts/ycm.sh
-    sudo pacman python2 python-pip $flags
+    $pac python2 python-pip       
     pip install wheel
     sudo npm install -g neovim
     python3 -m pip install --user --upgrade pynvim
@@ -225,38 +227,38 @@ vim_install () {
 # Best Tiling Window Manager
 i3_install () {
     # AUR
-    yay cava $flags                            # https://github.com/karlstav/cava
-    yay kbdd-git $flags                        # i3blocks keyboard layout
+    $yay cava                                   # https://github.com/karlstav/cava
+    $yay kbdd-git                               # i3blocks keyboard layout
 
     # GUI/Terminal
-    sudo pacman acpi $flags
-    sudo pacman awk bc upower $flags           # Battery plus
-    sudo pacman feh $flags                     # Wallpaper
-    sudo pacman gnome-screenshot $flags        # Take screenshots with impr pant
-    sudo pacman i3-gaps $flags                 # i3 with gaps
-    sudo pacman i3blocks $flags                # Bottom bar
-    sudo pacman light $flags                   # Brightness
-    sudo pacman perl-anyevent-i3 python-dbus $flags
-    sudo pacman picom $flags                   # Compositor, for transparencies
-    sudo pacman pulseaudio alsa-utils $flags   # Audio
-    sudo pacman rofi $flags                    # App menu Super+d
-    sudo pacman yad xdotool $flags             # Calendar
-    sudo pacman zenity $flags                  # Poweroff menu i3blocks
-    #yay installs this: sudo pacman  jq xdotool indent perl-anyevent-i3 $flags # cava dependancies
+    $pac acpi       
+    $pac awk bc upower                  # Battery plus
+    $pac feh                            # Wallpaper
+    $pac gnome-screenshot               # Take screenshots with impr pant
+    $pac i3-gaps                        # i3 with gaps
+    $pac i3blocks                       # Bottom bar
+    $pac light                          # Brightness
+    $pac perl-anyevent-i3 python-dbus       
+    $pac picom                          # Compositor, for transparencies
+    $pac pulseaudio alsa-utils          # Audio
+    $pac rofi                           # App menu Super+d
+    $pac yad xdotool                    # Calendar
+    $pac zenity                         # Poweroff menu i3blocks
+    #$yay installs this: $pac  jq xdotool indent perl-anyevent-i3        # cava dependancies
 }
 
 # Best Desktop
 cinnamon_install() {
     # GUI
-    sudo pacman cinnamon $flags                # Desktop
-    sudo pacman gnome-screenshot $flags        # Take screenshots with impr pant
-    sudo pacman gnome-shell $flags             # Fallback mode in case cinnamon crashes, to have a taskbar
-    sudo pacman metacity $flags                # Fallback mode in case cinnamon crashes
-    sudo pacman python-numpy python-xlib $flags  # Color pick applet
+    $pac cinnamon                       # Desktop
+    $pac gnome-screenshot               # Take screenshots with impr pant
+    $pac gnome-shell                    # Fallback mode in case cinnamon crashes, to have a taskbar
+    $pac metacity                       # Fallback mode in case cinnamon crashes
+    $pac python-numpy python-xlib         # Color pick applet
     
     # AUR
-    yay cinnamon-sound-effects $flags          # Sound effects
-    yay mint-themes mint-y-icons mint-backgrounds $flags # Themes
+    $yay cinnamon-sound-effects                 # Sound effects
+    $yay mint-themes mint-y-icons mint-backgrounds        # Themes
 
     gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
     # Uninstall  xf86-video-intel
@@ -268,7 +270,7 @@ cinnamon_install() {
 }
 
 gnome_install() {
-    sudo pacman chrome-gnome-shell $flags
+    $pac chrome-gnome-shell       
     # Extensions
     # dash to dock (add dock)
     # impatience (faster animations)
@@ -278,40 +280,40 @@ gnome_install() {
 }
 
 plasma_install() {
-    sudo pacman  plasma $flags                  # Check archwiki first
-    yay  ocs-url $flags                         # Easy install of kde store add-ons
+    $pac  plasma                         # Check archwiki first
+    $yay  ocs-url                                # Easy install of kde store add-ons
 }
 
 bloat_install () {
-    sudo pacman cmatrix $flags                 # Bloat
-    sudo pacman cowsay $flags                  # A cow displaying text
-    sudo pacman fortune-mod $flags             # Random quote
-    sudo pacman lolcat $flags
-    sudo pacman ponysay asciiquarium $flags
-    sudo pacman sl $flags                      # Steam locomotor, (Did you mean to type ls?)
-    yay figlet toilet $flags                   # Cool letters
-    yay pipes.sh $flags                        # Lockscreens
+    $pac cmatrix                        # Bloat
+    $pac cowsay                         # A cow displaying text
+    $pac fortune-mod                    # Random quote
+    $pac lolcat       
+    $pac ponysay asciiquarium       
+    $pac sl                             # Steam locomotor, (Did you mean to type ls?)
+    $yay figlet toilet                          # Cool letters
+    $yay pipes.sh                               # Lockscreens
 }
 
 virtualbox_install() {
-    sudo pacman virtualbox $flags
+    $pac virtualbox       
     # Need to activate virtualization in bios
     # 'linux' kernel
-    sudo pacman virtualbox-host-modules-arch $flags
+    $pac virtualbox-host-modules-arch       
     # other kernels including linux-lts
-    sudo pacman virtualbox-host-dkms $flags
+    $pac virtualbox-host-dkms       
 }
 
 games_install () {
-    #sudo pacman  dnsmasq $flags                # fixes download speed problem
-    sudo pacman lutris $flags
-    sudo pacman minecraft $flags
-    sudo pacman steam $flags
-    sudo pacman vulkan-tools $flags            # for gaming
+    #$pac  dnsmasq                       # fixes download speed problem
+    $pac lutris       
+    $pac minecraft       
+    $pac steam       
+    $pac vulkan-tools                   # for gaming
 }
 
 laptop_install() {
-    sudo pacman tlp $flags
+    $pac tlp       
     sudo systemctl enable tlp.service
     trackpad_scrolling
 }
@@ -327,9 +329,9 @@ dwall() {
 }
 
 emacs_install () {
-    sudo pacman emacs $flags
-    sudo pacman ripgrep $flags
-    sudo pacman fd $flags
+    $pac emacs       
+    $pac ripgrep       
+    $pac fd       
     # DOOM
     git clone --depth 1 https://github.com/hlissner/doom-emacs $HOME/.emacs.d
     $HOME/.emacs.d/bin/doom install
@@ -338,41 +340,41 @@ emacs_install () {
 ### All packages in here should be handpicked
 optional() {
     # Terminal
-    #sudo pacman  github-cli $flags             # Github for terminal, create issues...
-    sudo pacman doxygen texlive-most graphviz $flags # Doxygen
+    #$pac  github-cli                    # Github for terminal, create issues...
+    $pac doxygen texlive-most graphviz        # Doxygen
 
     # GUI
-    sudo pacman obs-studio $flags              # Video recording
-    sudo pacman audacity $flags                # Audio editor
-    sudo pacman gimp $flags                    # Image editor
-    sudo pacman r $flags                       # Probabilitat i estadística
-    sudo pacman remmina freerdp libvncserver $flags   # Remote conexions
-    sudo pacman texstudio $flags               # Latex text editor
+    $pac obs-studio                     # Video recording
+    $pac audacity                       # Audio editor
+    $pac gimp                           # Image editor
+    $pac r                              # Probabilitat i estadística
+    $pac remmina freerdp libvncserver          # Remote conexions
+    $pac texstudio                      # Latex text editor
 
     # AUR
-    yay eclipse-java $flags                    # BD
-    yay android-studio $flags                  # Android Studio
-    yay rstudio-desktop-bin $flags             # Probabilitat i estadística IDE
-    yay slack-desktop $flags                   # Slack
-    yay youtube-dl $flags                      # Download youtube videos
-    sudo pacman tor $flags                     # Tor private browser
-    yay tor-browser $flags                     # Tor private browser
-    yay f5fpc $flags                           # Connexio a UPClink
+    $yay eclipse-java                           # BD
+    $yay android-studio                         # Android Studio
+    $yay rstudio-desktop-bin                    # Probabilitat i estadística IDE
+    $yay slack-desktop                          # Slack
+    $yay youtube-dl                             # Download youtube videos
+    $pac tor                            # Tor private browser
+    $yay tor-browser                            # Tor private browser
+    $yay f5fpc                                  # Connexio a UPClink
 
     # Calendar
-    #sudo pacman  gnome-calendar gnome-keyring libsecret seahorse
+    #$pac  gnome-calendar gnome-keyring libsecret seahorse
 
     # Arduino
     #usermod -aG uucp,lock pol
-    sudo pacman arduino-avr-core $flags
-    sudo pacman arduino $flags
+    $pac arduino-avr-core       
+    $pac arduino       
 
     # IDI
-    sudo pacman qtcreator $flags
+    $pac qtcreator       
 
     # Bases de dades
-    sudo pacman pgadmin4 $flags
-    yay intellij-idea-ultimate-edition $flags  # BD paid IntelliJ
-    sudo pacman dbeaver jdk-openjdk $flags     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
-    #sudo pacman  intellij-idea-community-edition  # BD free version (no SQL)
+    $pac pgadmin4       
+    $yay intellij-idea-ultimate-edition         # BD paid IntelliJ
+    $pac dbeaver jdk-openjdk            # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
+    #$pac  intellij-idea-community-edition  # BD free version (no SQL)
 }
