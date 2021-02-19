@@ -1,20 +1,23 @@
 #! /usr/bin/env bash
 ### VARIABLES
 scripts=$HOME/.local/scripts
-flags="-S --noconfirm"
+# --needed https://superuser.com/questions/568967/prevent-pacman-from-reinstalling-packages-that-were-already-installed
+flags="-S --noconfirm --needed"
 # To use commands on terminal first type: 
-# export flags="-S --noconfirm"
+# export flags="-S --noconfirm --needed"
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
 base_install () {
     # Fix some errors and cleanup
+    # mkdir always before touch
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
-    touch $HOME/.vim/cache/viminfo # viminfo
-    touch $XDG_DATA_HOME/vim/viminfo # viminfo
-    mkdir -p "~/.vim/cache/viminfo" # vim viminfo
+    mkdir -p "$HOME/.vim/cache/viminfo" # vim viminfo
     mkdir $HOME/.cache/zsh
     mkdir $HOME/.cache/vlc
+
+    touch $HOME/.vim/cache/viminfo # viminfo
+    touch $XDG_DATA_HOME/vim/viminfo # viminfo
 
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
