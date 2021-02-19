@@ -81,6 +81,7 @@ Calibre Library/metadata_db_prefs_backup.json
 .vim/spell/
 .config/nvim/autoload/
 .config/nvim/plugged/
+.vim/cache/
 #.local/share/vim/
 
 # Fonts

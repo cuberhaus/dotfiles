@@ -12,7 +12,6 @@ base_install () {
     # Fix some errors and cleanup
     # mkdir always before touch
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
-    mkdir -p "$HOME/.vim/cache/viminfo" # vim viminfo
     mkdir $HOME/.cache/zsh
     mkdir $HOME/.cache/vlc
 
