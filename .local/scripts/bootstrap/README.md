@@ -26,5 +26,31 @@ f5fpc --stop
 ## How to format USB
 Format as [exFAT](https://www.howtogeek.com/73178/what-file-system-should-i-use-for-my-usb-drive/#:~:text=File%20systems%20are%20the%20sort,run%20into%20others%20on%20occasion.) for most compatibility with every OS and over 4GB files compatible.
 
-## Swap escape and bloq mayus on xfce
-If using xfce add /usr/bin/setxkbmap -option "caps:swapescape" to the startup applications to swap keys.
+## Swap escape and caps
+
+View file:
+```
+vim /etc/X11/xorg.conf.d/00-keyboard.conf
+```
+
+https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration#Frequently_used_XKB_options
+See mappings:
+```bash
+setxkbmap -print -verbose 10
+```
+
+https://man.archlinux.org/man/xkeyboard-config.7
+https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration#Using_localectl
+Swap caps spanish keyboard:
+```bash
+localectl --no-convert set-x11-keymap es pc104 cat caps:swapescape
+localectl --no-convert set-x11-keymap es pc105 "" caps:swapescape
+```
+
+https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration
+https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
+USE ONLY WITH US KEYBOARD  
+altgr to type á
+```
+setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+```
