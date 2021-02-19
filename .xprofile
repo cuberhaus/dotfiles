@@ -5,9 +5,9 @@
 
 # https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration
 # https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration
-
 setxkbmap es # Teclat español
-setxkbmap -option caps:swapescape
+#setxkbmap -option caps:swapescape
+remaps & 
 
 if ! laptop-detect ; then
     ## USE ONLY WITH US KEYBOARD

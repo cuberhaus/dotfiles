@@ -1,4 +1,4 @@
 ! This config changes caps_lock for escape and viceversa it does NOT however swap them meaning it won't revert back if this file is loaded twice
-clear Lock 
-keycode   9 = Caps_Lock 
-keycode  66 = Escape
+!clear Lock 
+!keycode   9 = Caps_Lock 
+!keycode  66 = Escape
