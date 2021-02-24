@@ -34,7 +34,7 @@ base_install () {
     $pac inotify-tools                  # inotifywatch -r $file (to watch if those files have been accessed)
     $pac base-devel                     # AUR
     $pac bat                            # "Cat" on steroids
-    $pac dhcpcd                         # Internet
+    # $pac dhcpcd                         # Internet
     $pac dnsutils                       # Ip
     $pac exa                            # "ls" on steroids
     $pac exfat-utils                    # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
