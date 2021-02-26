@@ -30,12 +30,11 @@ base_install () {
     $pac nemo-share       
 
     # Terminal
-    $pac hardinfo cpu-x                 # pc information
-    $pac inotify-tools                  # inotifywatch -r $file (to watch if those files have been accessed)
+    # $pac dhcpcd                         # Internet
     $pac base-devel                     # AUR
     $pac bat                            # "Cat" on steroids
-    # $pac dhcpcd                         # Internet
     $pac dnsutils                       # Ip
+    $pac doxygen texlive-most graphviz        # Doxygen
     $pac exa                            # "ls" on steroids
     $pac exfat-utils                    # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     $pac fzf                            # Fuzzy finder
@@ -43,7 +42,9 @@ base_install () {
     $pac gdb                            # debugging c++
     $pac git                            # It's git bro
     $pac gvim                           # Vim version with extra features
+    $pac hardinfo cpu-x                 # pc information
     $pac htop                           # Show system resources
+    $pac inotify-tools                  # inotifywatch -r $file (to watch if those files have been accessed)
     $pac laptop-detect                  # Detect if using a laptop
     $pac ncdu                           # Manage storage
     $pac net-tools                      # Ips
@@ -81,33 +82,35 @@ base_install () {
     $pac dunst                          # Notifications
     $pac file-roller                    # Archive Manager
     $pac gnome-calculator               # Calculator
+    $pac gnome-disk-utility              # Partition manager by gnome
     $pac gnome-font-viewer              # Font viewer
     $pac gucharmap                      # Characters keyboard
     $pac hexchat                        # IRC APP
+    $pac kdiff3                         # Another diff viewer 
     $pac libreoffice-still              # Office
-    $pac meld                           # Best diff viewer "kompare pulls a lot of kde dependencies"
+    $pac meld                           # Best diff viewer
     $pac nilfs-utils                    # Manage partitions 
-    $pac noto-fonts-emoji               # Classic Emoji
     $pac okular                         # Best pdf viewer
+    $pac partitionmanager                # Partition manager for KDE
     $pac playerctl                      # Audio
     $pac pulseaudio pulseaudio-equalizer pulseaudio-bluetooth        # Audio
+    $pac remmina freerdp libvncserver          # Remote conexions
+    $pac thunderbird                            # $yay  thunderbird-bin
     $pac transmission-gtk               # A simpler Torrent D.
     $pac ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts        # Fonts
     $pac tumbler ffmpegthumbnailer raw-thumbnailer        # IDK
     $pac udftools                       # Manage partitions
     $pac vlc                            # Video player
-    $pac gnome-disk-utility              # Partition manager by gnome
-    $pac partitionmanager                # Partition manager for KDE
     # $pac  gparted                        # Manage partitions (doesn't work with ex-fat)
 
     # Theme
-    #$pac  breeze                        # Theme
     $pac adapta-gtk-theme               # Alternative theme
     $pac arc-gtk-theme arc-icon-theme         # Arc theme and its icon's
     $pac dconf-editor                   # Edit gnome configuration
     $pac gtk2 gtk3       
     $pac kvantum-qt5                    # Qt5 Custom themes
     $pac lxappearance                   # Gtk configuration utility
+    $pac noto-fonts-emoji               # Classic Emoji
     $pac papirus-icon-theme             # Best icon theme!
     $pac qt5ct                          # Qt5 configuration utility
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
@@ -115,27 +118,22 @@ base_install () {
 
     ### AUR
     $yay balena-etcher                          # "Rufus" on linux
+    $yay betterlockscreen; $pac xss-lock # Lockscreen
     $yay birdtray                               # Thunderbird tray
+    $yay f5fpc                                  # Connexio a UPClink
     $yay google-chrome                          # Best web browser
     $yay pix                                    # Image viewer
     $yay skypeforlinux-stable-bin               # Skype
     $yay spotify                                # Spotify
+    $yay timeshift; $pac cron  # Backups (sudo timeshift-gtk)
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
     $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
     $yay whatsapp-nativefier                    # Whatsapp client
+}
 
-    # Thunderbird
-    #$yay  thunderbird-bin                       # Might have to manually enter PGP key /not#$pac  thunderbird
-    $pac thunderbird                    # Check if its the same version as thunderbird-bin
+manjaro_install() {
 
-    # Lockscreen
-    $yay betterlockscreen       
-    $pac xss-lock       
-
-    # Backups
-    $yay timeshift                              # Tip: sudo timeshift-gtk
-    $pac cron       
 }
 
 arch_install() {
@@ -161,8 +159,7 @@ arch_install() {
     fi
 
     # Bluetooth
-    $pac  bluez bluez-utils       
-    $pac  blueberry                      # Linux Mint spin-off of GNOME Bluetooth
+    $pac  bluez bluez-utils $pac  blueberry # Linux Mint GNOME Bluetooth
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
     fi
@@ -171,7 +168,8 @@ arch_install() {
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable lightdm.service
     fi
-    $pac  lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings       
+    $pac lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings       
+
     # Ntp for time syncro
     #https://wiki.archlinux.org/index.php/Systemd-timesyncd
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
@@ -180,12 +178,11 @@ arch_install() {
         systemctl disable ntpd.service
     fi
     # https://wiki.archlinux.org/index.php/USB_storage_devices
+
     # Network Manager and enable daemon on startup
     $pac networkmanager       
-    # Gui
-    $pac nm-connection-editor       
-    # Applet
-    $pac nm-applet       
+    $pac nm-connection-editor # Gui
+    $pac nm-applet # Applet
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable NetworkManager.service
     fi
@@ -296,20 +293,17 @@ bloat_install () {
 }
 
 virtualbox_install() {
-    $pac virtualbox       
-    # Need to activate virtualization in bios
-    # 'linux' kernel
-    $pac virtualbox-host-modules-arch       
-    # other kernels including linux-lts
-    $pac virtualbox-host-dkms       
+    $pac virtualbox # Need to activate virtualization in bios
+    $pac virtualbox-host-modules-arch # 'linux' kernel
+    $pac virtualbox-host-dkms # other kernels including linux-lts
 }
 
 games_install () {
-    #$pac  dnsmasq                       # fixes download speed problem
+    $pac dnsmasq
     $pac lutris       
     $pac minecraft       
     $pac steam       
-    $pac vulkan-tools                   # for gaming
+    $pac vulkan-tools
 }
 
 laptop_install() {
@@ -341,14 +335,13 @@ emacs_install () {
 optional() {
     # Terminal
     #$pac  github-cli                    # Github for terminal, create issues...
-    $pac doxygen texlive-most graphviz        # Doxygen
 
     # GUI
-    $pac obs-studio                     # Video recording
     $pac audacity                       # Audio editor
     $pac gimp                           # Image editor
+    $pac obs-studio                     # Video recording
+    $pac qtcreator                      # IDI
     $pac r                              # Probabilitat i estadística
-    $pac remmina freerdp libvncserver          # Remote conexions
     $pac texstudio                      # Latex text editor
 
     # AUR
@@ -357,24 +350,16 @@ optional() {
     $yay rstudio-desktop-bin                    # Probabilitat i estadística IDE
     $yay slack-desktop                          # Slack
     $yay youtube-dl                             # Download youtube videos
-    $pac tor                            # Tor private browser
-    $yay tor-browser                            # Tor private browser
-    $yay f5fpc                                  # Connexio a UPClink
-
-    # Calendar
-    #$pac  gnome-calendar gnome-keyring libsecret seahorse
+    $pac tor; $yay tor-browser
 
     # Arduino
     #usermod -aG uucp,lock pol
-    $pac arduino-avr-core       
-    $pac arduino       
-
-    # IDI
-    $pac qtcreator       
+    $pac arduino-avr-core arduino       
 
     # Bases de dades
     $pac pgadmin4       
     $yay intellij-idea-ultimate-edition         # BD paid IntelliJ
-    $pac dbeaver jdk-openjdk            # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
+    $pac dbeaver jdk-openjdk           
+    # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
     #$pac  intellij-idea-community-edition  # BD free version (no SQL)
 }
