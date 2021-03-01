@@ -85,8 +85,11 @@ if [ -f $ZDOTDIR/functions ]; then
 fi
 
 ###############################################################
-# => Options
+# => Configurations
 ###############################################################
+
+# Make sure we swap keys (doesn't really slow down termite that much)
+setxkbmap -option caps:swapescape > /dev/null 2>&1
 
 # History in cache directory:
 HISTSIZE=32768
@@ -102,9 +105,6 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 # ctrl-f Search a file and cd into its directory
 bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
-
-# Make sure we swap keys (doesn't really slow down termite that much)
-setxkbmap -option caps:swapescape > /dev/null 2>&1
 
 ###############################################################
 # => Vim
