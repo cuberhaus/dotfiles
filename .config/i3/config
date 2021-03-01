@@ -17,6 +17,21 @@
 # i3 config file (v4)
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
+###############################################################
+# => Workspace Variables
+###############################################################
+# Define names for default workspaces for which we configure key bindings later on.
+# We use variables to avoid repeating the names in multiple places.
+set $ws1 "1: Home"
+set $ws2 "2: Work"
+set $ws3 "3: Spotify"
+set $ws4 "4: Chat"
+set $ws5 "5:5"
+set $ws6 "6:6"
+set $ws7 "7:7"
+set $ws8 "8:8"
+set $ws9 "9:9"
+set $ws10 "10: Games"
 
 ###############################################################
 # => Config
@@ -66,12 +81,14 @@ bindsym $mod+g exec google-chrome-stable
 bindsym $mod+n exec nemo
 
 # Chmod +x to make work.sh executable
-set $layout Layout: (s)  Spotify, (w)  Work
+set $layout Layout: (s)  Spotify, (w)  Whatsapp 
+
 bindsym $mod+space mode "$layout"
 
 mode "$layout" {
     bindsym s exec $HOME/.config/i3-layout-manager/layouts/spotify.sh
-    bindsym w exec $HOME/.config/i3-layout-manager/layouts/work.sh
+    bindsym w exec whatsapp-nativefier
+    #bindsym w exec $HOME/.config/i3-layout-manager/layouts/work.sh
     # back to normal: Enter or Escape or $mod+r
     bindsym Return mode "default"
     bindsym Escape mode "default"
@@ -246,19 +263,6 @@ bindsym --release Num_Lock  exec pkill -SIGRTMIN+11 i3blocks
 ###############################################################
 # => Workspaces
 ###############################################################
-
-# Define names for default workspaces for which we configure key bindings later on.
-# We use variables to avoid repeating the names in multiple places.
-set $ws1 "1: Home"
-set $ws2 "2: Work"
-set $ws3 "3: Spotify"
-set $ws4 "4: Chat"
-set $ws5 "5:5"
-set $ws6 "6:6"
-set $ws7 "7:7"
-set $ws8 "8:8"
-set $ws9 "9:9"
-set $ws10 "10: Games"
 
 # switch to workspace
 bindsym $mod+1 workspace $ws1
