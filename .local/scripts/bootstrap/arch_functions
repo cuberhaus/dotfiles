@@ -5,8 +5,6 @@ scripts=$HOME/.local/scripts
 flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
 yay="yay -S $flags"
-# To use commands on terminal first type: 
-# export flags="-S --noconfirm --needed"
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
