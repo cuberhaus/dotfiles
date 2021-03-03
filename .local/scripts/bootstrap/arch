@@ -25,7 +25,8 @@ i3_install
 apps_AUR_install
 cava_install
 dwall
-laptop_install
+laptop_install # DO ONLY ONCE
+activate_reisub # DO ONLY ONCE
 vim_install
 wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
 chsh -s $(which zsh)                        # Change default shell to zsh

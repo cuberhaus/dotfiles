@@ -21,11 +21,11 @@ base_install () {
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec # Tell Nemo to use Termite instead of gnome-terminal
     gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg -e # Termite execute argument is -e in gnome-terminal its -x
-    $pac nemo       
-    $pac nemo-fileroller       
-    $pac nemo-preview       
-    $pac nemo-seahorse       
-    $pac nemo-share       
+    $pac nemo
+    $pac nemo-fileroller
+    $pac nemo-preview
+    $pac nemo-seahorse
+    $pac nemo-share
 
     # Terminal
     # $pac dhcpcd                         # Internet
@@ -51,8 +51,8 @@ base_install () {
     $pac perl-file-mimeinfo             # mimeopen -d $file and type whatever app you want to open that with
     $pac polkit                         # Policy kit
     $pac polkit-gnome                   # https://wiki.archlinux.org/index.php/Polkit
-    $pac python       
-    $pac python3       
+    $pac python
+    $pac python3
     $pac ranger                         # Ranger
     $pac rclone                         # Rsync to remote
     $pac reflector                      # Update Arch mirrors
@@ -76,7 +76,7 @@ base_install () {
 
     # GUI
     $pac calibre                        # Book manager
-    $pac discord       
+    $pac discord
     $pac dunst                          # Notifications
     $pac file-roller                    # Archive Manager
     $pac gnome-calculator               # Calculator
@@ -84,10 +84,10 @@ base_install () {
     $pac gnome-font-viewer              # Font viewer
     $pac gucharmap                      # Characters keyboard
     $pac hexchat                        # IRC APP
-    $pac kdiff3                         # Another diff viewer 
+    $pac kdiff3                         # Another diff viewer
     $pac libreoffice-still              # Office
     $pac meld                           # Best diff viewer
-    $pac nilfs-utils                    # Manage partitions 
+    $pac nilfs-utils                    # Manage partitions
     $pac okular                         # Best pdf viewer
     $pac partitionmanager                # Partition manager for KDE
     $pac playerctl                      # Audio
@@ -105,7 +105,7 @@ base_install () {
     $pac adapta-gtk-theme               # Alternative theme
     $pac arc-gtk-theme arc-icon-theme         # Arc theme and its icon's
     $pac dconf-editor                   # Edit gnome configuration
-    $pac gtk2 gtk3       
+    $pac gtk2 gtk3
     $pac kvantum-qt5                    # Qt5 Custom themes
     $pac lxappearance                   # Gtk configuration utility
     $pac noto-fonts-emoji               # Classic Emoji
@@ -130,14 +130,10 @@ base_install () {
     $yay whatsapp-nativefier                    # Whatsapp client
 }
 
-manjaro_install() {
-
-}
-
 arch_install() {
     # Drivers
-    $pac linux       
-    $pac linux-headers       
+    $pac linux
+    $pac linux-headers
     # LTS release
     #$pac linux-lts
     #$pac linux-lts-headers
@@ -150,7 +146,7 @@ arch_install() {
 
     # Printers
     # https://wiki.archlinux.org/index.php/CUPS
-    $pac  cups system-config-printer hplip       
+    $pac  cups system-config-printer hplip
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         sudo systemctl enable org.cups.cupsd.service
         sudo systemctl start org.cups.cupsd.service
@@ -166,7 +162,7 @@ arch_install() {
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable lightdm.service
     fi
-    $pac lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings       
+    $pac lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings
 
     # Ntp for time syncro
     #https://wiki.archlinux.org/index.php/Systemd-timesyncd
@@ -178,7 +174,7 @@ arch_install() {
     # https://wiki.archlinux.org/index.php/USB_storage_devices
 
     # Network Manager and enable daemon on startup
-    $pac networkmanager       
+    $pac networkmanager
     $pac nm-connection-editor # Gui
     $pac nm-applet # Applet
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
@@ -194,25 +190,13 @@ yay_install() {
     sudo rm -r $HOME/yay
 }
 
-### DO ONCE
-trackpad_scrolling () {
-    sudo touch /etc/X11/xorg.conf.d/30-touchpad.conf
-    echo 'Section "InputClass"
-    Identifier "libinput touchpad catchall"
-    MatchIsTouchpad "on"
-    MatchDevicePath "/dev/input/event*"
-    Driver "libinput"
-    Option "NaturalScrolling" "true"
-    EndSection' | sudo tee -a /etc/X11/xorg.conf.d/30-touchpad.conf
-}
-
 vim_install () {
-    $pac  neovim       
+    $pac  neovim
     cd $HOME
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
     bash $scripts/ycm.sh
-    $pac python2 python-pip       
+    $pac python2 python-pip
     pip install wheel
     sudo npm install -g neovim
     python3 -m pip install --user --upgrade pynvim
@@ -226,14 +210,14 @@ i3_install () {
     $yay kbdd-git                               # i3blocks keyboard layout
 
     # GUI/Terminal
-    $pac acpi       
+    $pac acpi
     $pac awk bc upower                  # Battery plus
     $pac feh                            # Wallpaper
     $pac gnome-screenshot               # Take screenshots with impr pant
     $pac i3-gaps                        # i3 with gaps
     $pac i3blocks                       # Bottom bar
     $pac light                          # Brightness
-    $pac perl-anyevent-i3 python-dbus       
+    $pac perl-anyevent-i3 python-dbus
     $pac picom                          # Compositor, for transparencies
     $pac pulseaudio alsa-utils          # Audio
     $pac rofi                           # App menu Super+d
@@ -250,7 +234,7 @@ cinnamon_install() {
     $pac gnome-shell                    # Fallback mode in case cinnamon crashes, to have a taskbar
     $pac metacity                       # Fallback mode in case cinnamon crashes
     $pac python-numpy python-xlib         # Color pick applet
-    
+
     # AUR
     $yay cinnamon-sound-effects                 # Sound effects
     $yay mint-themes mint-y-icons mint-backgrounds        # Themes
@@ -265,7 +249,7 @@ cinnamon_install() {
 }
 
 gnome_install() {
-    $pac chrome-gnome-shell       
+    $pac chrome-gnome-shell
     # Extensions
     # dash to dock (add dock)
     # impatience (faster animations)
@@ -283,8 +267,8 @@ bloat_install () {
     $pac cmatrix                        # Bloat
     $pac cowsay                         # A cow displaying text
     $pac fortune-mod                    # Random quote
-    $pac lolcat       
-    $pac ponysay asciiquarium       
+    $pac lolcat
+    $pac ponysay asciiquarium
     $pac sl                             # Steam locomotor, (Did you mean to type ls?)
     $yay figlet toilet                          # Cool letters
     $yay pipes.sh                               # Lockscreens
@@ -298,14 +282,31 @@ virtualbox_install() {
 
 games_install () {
     $pac dnsmasq
-    $pac lutris       
-    $pac minecraft       
-    $pac steam       
+    $pac lutris
+    $pac minecraft
+    $pac steam
     $pac vulkan-tools
 }
 
+### DO ONCE
+trackpad_scrolling () {
+    sudo touch /etc/X11/xorg.conf.d/30-touchpad.conf
+    echo 'Section "InputClass"
+    Identifier "libinput touchpad catchall"
+    MatchIsTouchpad "on"
+    MatchDevicePath "/dev/input/event*"
+    Driver "libinput"
+    Option "NaturalScrolling" "true"
+    EndSection' | sudo tee -a /etc/X11/xorg.conf.d/30-touchpad.conf
+}
+
+activate_reisub () {
+    echo kernel.sysrq=1 | sudo tee --append /etc/sysctl.d/99-sysctl.conf
+    sudo update-grub
+}
+
 laptop_install() {
-    $pac tlp       
+    $pac tlp
     sudo systemctl enable tlp.service
     trackpad_scrolling
 }
@@ -321,9 +322,9 @@ dwall() {
 }
 
 emacs_install () {
-    $pac emacs       
-    $pac ripgrep       
-    $pac fd       
+    $pac emacs
+    $pac ripgrep
+    $pac fd
     # DOOM
     git clone --depth 1 https://github.com/hlissner/doom-emacs $HOME/.emacs.d
     $HOME/.emacs.d/bin/doom install
@@ -352,12 +353,12 @@ optional() {
 
     # Arduino
     #usermod -aG uucp,lock pol
-    $pac arduino-avr-core arduino       
+    $pac arduino-avr-core arduino
 
     # Bases de dades
-    $pac pgadmin4       
+    $pac pgadmin4
     $yay intellij-idea-ultimate-edition         # BD paid IntelliJ
-    $pac dbeaver jdk-openjdk           
+    $pac dbeaver jdk-openjdk
     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
     #$pac  intellij-idea-community-edition  # BD free version (no SQL)
 }

@@ -3,7 +3,6 @@
 ## To do:
 - Video makes backlight work and wheel gives you sudo privileges.
 
-
 ```bash
 usermod -a -G video pol
 usermod -a -G wheel pol
