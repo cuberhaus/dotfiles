@@ -37,7 +37,7 @@ base_install () {
     $pac exfat-utils                    # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     $pac fzf                            # Fuzzy finder
     $pac gcc                            # Cpp
-    $pac gdb                            # debugging c++
+    $pac gdb; $yay ddd                  # debugging c++
     $pac git                            # It's git bro
     $pac gvim                           # Vim version with extra features
     $pac hardinfo cpu-x                 # pc information
