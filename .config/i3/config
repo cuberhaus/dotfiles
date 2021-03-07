@@ -76,18 +76,20 @@ bindsym $mod+Print exec gnome-screenshot -a
 # Google Chrome
 bindsym $mod+g exec google-chrome-stable
 
+# Whatsapp
+bindsym $mod+shift+w exec whatsapp-nativefier 
+
 # File manager
 #bindsym $mod+Shift+f exec nemo
 bindsym $mod+n exec nemo
 
 # Chmod +x to make work.sh executable
-set $layout Layout: (s)  Spotify, (w)  Whatsapp 
+set $layout Layout:  Spotify (s)
 
 bindsym $mod+space mode "$layout"
 
 mode "$layout" {
     bindsym s exec $HOME/.config/i3-layout-manager/layouts/spotify.sh
-    bindsym w exec whatsapp-nativefier
     #bindsym w exec $HOME/.config/i3-layout-manager/layouts/work.sh
     # back to normal: Enter or Escape or $mod+r
     bindsym Return mode "default"
