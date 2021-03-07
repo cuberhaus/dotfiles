@@ -79,6 +79,9 @@ bindsym $mod+g exec google-chrome-stable
 # Whatsapp
 bindsym $mod+shift+w exec whatsapp-nativefier 
 
+# Discord
+bindsym $mod+shift+d exec discord 
+
 # File manager
 #bindsym $mod+Shift+f exec nemo
 bindsym $mod+n exec nemo

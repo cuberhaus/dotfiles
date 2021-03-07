@@ -21,6 +21,10 @@ gC - toggles block comment. For example gCi) to comment out everything within pa
 Open { or [ to add spaces in between and closing ] }  for no spaces: cs]{  
 { Hello } world!
 ## Jump around
+
+Press Ctrl-O to jump back to the previous (older) location.
+Press Ctrl-I (same as Tab) to jump forward to the next (newer) location.
+
 Jump to category under the cursor<C-]>  
 Jump back <C-T>
   
