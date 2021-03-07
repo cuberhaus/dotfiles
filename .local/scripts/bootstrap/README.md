@@ -13,7 +13,7 @@ usermod -a -G input pol
 ## Video Card
 Configure nvidia nvidia-xconfig.
 
-## Wallpaper error
+## LightDM permissions "Wallpaper error"
 Wallpaper error when background is set in desktop, it will also be used by LightDM unless the picture isn't coming from /usr/share/backgrounds.
 
 ## Connect to upclink VPN
