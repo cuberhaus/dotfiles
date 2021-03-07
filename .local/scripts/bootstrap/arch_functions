@@ -85,7 +85,6 @@ base_install () {
     $pac gucharmap                      # Characters keyboard
     $pac hexchat                        # IRC APP
     $pac kdiff3                         # Another diff viewer
-    $pac libreoffice-still              # Office
     $pac meld                           # Best diff viewer
     $pac nilfs-utils                    # Manage partitions
     $pac okular                         # Best pdf viewer
@@ -100,6 +99,11 @@ base_install () {
     $pac udftools                       # Manage partitions
     $pac vlc                            # Video player
     # $pac  gparted                        # Manage partitions (doesn't work with ex-fat)
+
+    # Office (install plugins located on .local)
+    $pac libreoffice-still              # Office
+    $pac libmythes mythes-en mythes-es  # Synonyms
+    $yay libreoffice-extension-languagetool # Grammar
 
     # Theme
     $pac adapta-gtk-theme               # Alternative theme
