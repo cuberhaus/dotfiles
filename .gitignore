@@ -6,9 +6,6 @@
 # XFCE
 .local/share/xfce4/helpers/
 
-# Antigen
-.config/antigen/.zcompdump.pol.2391
-
 # bin
 .local/bin/wheel
 
@@ -43,19 +40,18 @@
 .config/kxkbrc
 .config/plasmarc
 
-# antigen
+# Antigen
+.config/antigen/.zcompdump*
 .config/antigen/debug.log
 .config/antigen/init.zsh
 .config/antigen/init.zsh.zwc
 .config/antigen/bundles/
 .config/antigen/.resources
-.config/antigen/.zcompdump
-.config/antigen/.zcompdump.zwc
 .config/antigen/revert-info
 
 # Zsh
 .config/zsh/.zshrc.zwc
-.config/zsh/.zcompdump-Cuberhaus-5.8
+.config/zsh/.zcompdump*
 
 # Distro
 .config/distro
@@ -90,14 +86,8 @@ Calibre Library/metadata_db_prefs_backup.json
 #.local/share/fonts/fontawesome/.uuid
 #.local/share/fonts/.uuid
 
-# Ubuntu
-.config/zsh/.zcompdump
-
 # Ranger
 .config/ranger/plugins/__init__.py
-
-# Zsh
-.config/zsh/.zcompdump-pol-5.8
 
 # Nvidia
 .config/nvidia/settings
