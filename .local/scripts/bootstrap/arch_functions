@@ -101,9 +101,10 @@ base_install () {
     # $pac  gparted                        # Manage partitions (doesn't work with ex-fat)
 
     # Office (install plugins located on .local)
-    $pac libreoffice-still              # Office
     $pac libmythes mythes-en mythes-es  # Synonyms
+    $pac libreoffice-fresh libreoffice-fresh-ca
     $yay libreoffice-extension-languagetool # Grammar
+    # $pac libreoffice-still libreoffice-still-ca
 
     # Theme
     $pac adapta-gtk-theme               # Alternative theme
