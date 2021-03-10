@@ -1,0 +1,2 @@
+if(window.WeakMap&&window.Promise)try{(new WeakMap).has(0)}catch(w){window.unsupportedBrowser=!0}else window.unsupportedBrowser=!0;
+//# sourceMappingURL=/assets/browser-detect-115ab5953de1b5bb122bfb26b757f5391dd8d1d2aef2b81baf7b59aee99d9f34.js.map
