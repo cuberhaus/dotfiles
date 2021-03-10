@@ -4,7 +4,7 @@ source $HOME/config/distro
 
 # Set environmental variables before starting i3
 # .xprofile sources .zshenv and starts apps
-[ -f $HOME/xprofile ] && . $HOME/xprofile
+[ -f $HOME/.xprofile ] && source $HOME/.xprofile
 
 # Start i3 on arch
 if [[ "$DISTRO" == "arch" ]]; then
