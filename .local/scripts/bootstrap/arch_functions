@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 ### VARIABLES
 scripts=$HOME/.local/scripts
-# --needed https://superuser.com/questions/568967/prevent-pacman-from-reinstalling-packages-that-were-already-installed
 flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
 yay="yay -S $flags"
