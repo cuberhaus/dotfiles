@@ -5,34 +5,36 @@
 ###############################################################
 
 if [ -d "$HOME/.local/bin" ] ; then
-        PATH="$HOME/.local/bin:$PATH"
+    PATH="$HOME/.local/bin:$PATH"
 fi
 
-if [[ "$DESKTOP_SESSION" == "i3" ]]; then
-fi
+# if [[ "$DESKTOP_SESSION" == "i3" ]]; then
+# DO NOT EVER LEAVE AN IF EMPTY OR IT WILL CAUSE APPS TO NOT HAVE PATH STUFF BEWARE
+# TO CHECK IF PATH FOR APPS WORK OPEN OKULAR OR QT5 SETTINGS
+# fi
 
 if [[ "$DESKTOP_SESSION" == "cinnamon" ]]; then
     if [ -d "$HOME/.local/scripts/cinnamon_path" ] ; then
-            PATH="$HOME/.local/scripts/cinnamon_path:$PATH"
+        PATH="$HOME/.local/scripts/cinnamon_path:$PATH"
     fi
 fi
 ## WIP (do not know if this will work, check if $DESKTOP_SESSION on gnome actually becomes "gnome" on a gnome DE)
 if [[ "$DESKTOP_SESSION" == "gnome" ]]; then
     if [ -d "$HOME/.local/scripts/gnome_path" ] ; then
-            PATH="$HOME/.local/scripts/gnome_path:$PATH"
+        PATH="$HOME/.local/scripts/gnome_path:$PATH"
     fi
 fi
 
 if [ -d "$HOME/.config/i3/i3-layout-manager" ] ; then
-        PATH="$HOME/.config/i3/i3-layout-manager:$PATH" 
+    PATH="$HOME/.config/i3/i3-layout-manager:$PATH"
 fi
 if [ -d "$HOME/.gem/ruby/2.7.0/bin" ] ; then
-        PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
+    PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
 fi
 if [ -d "/usr/local/sbin" ] ; then
     PATH="/usr/local/sbin:$PATH"
 fi
-#PATH=".:$PATH" # Better not add '.' to PATH 
+#PATH=".:$PATH" # Better not add '.' to PATH
 
 ###############################################################
 # => Variables
@@ -48,7 +50,7 @@ export DOTFILES="$HOME/dotfiles/dotfiles"
 #OBJECTES=/Users/$USER/assig/pro2/objectes
 export DICPATH="$XDG_CONFIG_HOME/Dictionary"
 export PATH="$HOME/.emacs.d/bin:$PATH" # DOOM emacs "bring the pain"
-export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""' 
+export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
 export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
 export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\"" # SET VIM AS MANPAGER
 
@@ -57,9 +59,9 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export QT_QPA_PLATFORMTHEME="qt5ct"
     source $HOME/.config/distro     # DISTRO variable
     if laptop-detect ; then
-        setxkbmap es 
+        setxkbmap es
     fi
-fi 
+fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
@@ -102,7 +104,7 @@ export ATOM_HOME="$XDG_DATA_HOME"/atom
 # Android sdk
 export ANDROID_SDK_HOME="$XDG_CONFIG_HOME"/android
 export ANDROID_AVD_HOME="$XDG_DATA_HOME"/android/
-export ANDROID_EMULATOR_HOME="$XDG_DATA_HOME"/android/ 
+export ANDROID_EMULATOR_HOME="$XDG_DATA_HOME"/android/
 export ADB_VENDOR_KEY="$XDG_CONFIG_HOME"/android
 # GTK
 export GTK_RC_FILES="$XDG_CONFIG_HOME"/gtk-1.0/gtkrc
