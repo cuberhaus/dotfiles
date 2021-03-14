@@ -262,6 +262,7 @@ mode "resize" {
 }
 
 bindsym $mod+r mode "resize"
+# Update i3blocks when pressing caps or num_lock
 bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3blocks
 bindsym --release Num_Lock  exec pkill -SIGRTMIN+11 i3blocks
 
