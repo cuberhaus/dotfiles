@@ -279,6 +279,7 @@ bloat_install () {
     $yay pipes.sh                               # Lockscreens
 }
 
+#https://wiki.manjaro.org/index.php/VirtualBox
 virtualbox_install() {
     $pac virtualbox # Need to activate virtualization in bios
     $pac virtualbox-host-modules-arch # 'linux' kernel
