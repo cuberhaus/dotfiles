@@ -395,3 +395,6 @@ exec hp-systray &
 
 # Pomodoro Timer
 exec tomighty &
+
+# Screenshots
+exec flameshot &
