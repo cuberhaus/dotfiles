@@ -216,7 +216,6 @@ i3_install () {
     $pac acpi
     $pac awk bc upower                  # Battery plus
     $pac feh                            # Wallpaper
-    $pac gnome-screenshot               # Take screenshots with impr pant
     $pac flameshot                      # Screenshots
     $pac i3-gaps                        # i3 with gaps
     $pac i3blocks                       # Bottom bar
