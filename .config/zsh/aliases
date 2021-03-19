@@ -153,6 +153,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     if [[ "$DISTRO" == "manjaro" ]]; then
         # Update mirrors and update
         alias mirror="sudo pacman-mirrors -f && sudo pacman -Syu"
+        # or -Syyu ?
     fi
 
     ### Ubuntu
