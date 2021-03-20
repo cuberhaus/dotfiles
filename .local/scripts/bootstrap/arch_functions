@@ -118,6 +118,7 @@ base_install () {
     #https://wiki.archlinux.org/index.php/qt
 
     ### AUR
+    $yay electron9-bin
     $yay balena-etcher                          # "Rufus" on linux
     $yay betterlockscreen; $pac xss-lock # Lockscreen
     $yay birdtray                               # Thunderbird tray
