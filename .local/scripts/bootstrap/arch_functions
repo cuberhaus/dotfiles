@@ -61,6 +61,7 @@ base_install () {
     $pac termite                        # Terminal emulator
     $pac the_silver_searcher            # Better and faster ack (and grep)
     $pac tmux                           # Terminal multiplexer
+    $pac trash-cli                      # https://wiki.archlinux.org/index.php/Trash_management
     $pac udiskie                        # Automater
     $pac udisks2                        # Daemon to manipulate storage devices
     $pac w3m                            # Preview images on ranger
