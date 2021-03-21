@@ -369,4 +369,7 @@ optional() {
     $pac dbeaver jdk-openjdk
     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
     #$pac  intellij-idea-community-edition  # BD free version (no SQL)
+
+    #XC read this to install
+    # https://wiki.archlinux.org/index.php/PacketTracer
 }
