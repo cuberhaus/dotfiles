@@ -162,6 +162,7 @@ arch_install() {
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
     fi
+    $yay pulseaudio-modules-bt  # High quality audio codecs
 
     # Display manager
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
