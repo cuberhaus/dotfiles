@@ -33,9 +33,7 @@ alias tmux.conf="nvim ~/.config/tmux/tmux.conf"
 #alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
 #alias vconfgrub="sudo vim /boot/grub/grub.cfg"
 
-#alias vim="nvim"
 alias n="nvim"
-#alias lvim="nvim +'call Light()' "
 
 # Easier navigation: .., ..., ...., ....., ~ and -
 alias ..="cd .."
