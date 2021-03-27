@@ -1,11 +1,4 @@
 #!/bash/sh
-### COMMENTS
-#ctrl + space not working?  Disable change language shortcut
-#https://forum.sublimetext.com/t/os-x-control-space-not-working/2145/3
-
-# Get italics in terminal:
-# tic xterm-256color-italic.terminfo
-# https://alexpearce.me/2014/05/italics-in-iterm2-vim-tmux/
 app_store_install() {
     brew install mas
     mas install 1274495053                      # Microsoft To Do
