@@ -15,16 +15,16 @@ set $mod Mod4
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $ws1 "1: Home"
-set $ws2 "2: Work"
-set $ws3 "3: Spotify"
-set $ws4 "4: Chat"
-set $ws5 "5:5"
-set $ws6 "6:6"
-set $ws7 "7:7"
-set $ws8 "8:8"
-set $ws9 "9:9"
-set $ws10 "10: Games"
+set $ws1 "1: 1"
+set $ws2 "2: 2"
+set $ws3 "3: 3"
+set $ws4 "4: 4"
+set $ws5 "5: 5"
+set $ws6 "6: 6"
+set $ws7 "7: 7"
+set $ws8 "8: 8"
+set $ws9 "9: 9"
+set $ws10 "10: 10"
 set $term termite
 #set $term "xfce4-terminal" # Alternative (Use Base16-OneDark not 16 bits):
 set $browser google-chrome-stable
