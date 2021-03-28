@@ -1,6 +1,6 @@
 ###############################################################
 # Sections:
-#   -> Workspace Variables
+#   -> Workspace
 #   -> Config
 #   -> Shortcuts
 #   -> Workspaces
@@ -8,8 +8,11 @@
 #   -> Runtime
 #
 ###############################################################
-# => Workspace Variables
+# => Variables
 ###############################################################
+# Set windows key as mod
+set $mod Mod4
+
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
 set $ws1 "1: Home"
@@ -22,6 +25,30 @@ set $ws7 "7:7"
 set $ws8 "8:8"
 set $ws9 "9:9"
 set $ws10 "10: Games"
+set $term termite
+#set $term "xfce4-terminal" # Alternative (Use Base16-OneDark not 16 bits):
+set $browser google-chrome-stable
+set $filemanager nemo 
+set $Locker "betterlockscreen -l"
+set $ScreenshotFast "flameshot full -p $HOME/Pictures"
+set $ScreenshotOptions "flameshot gui -p $HOME/Pictures"
+set $applauncher "rofi -modi window,drun,run -show drun -show-icons -sidebar-mode -terminal $term "
+
+# i3blocks specific
+set $BrightUp "light -A 5 && pkill -SIGRTMIN+2 i3blocks"
+set $BrightDown "light -U 5 && pkill -SIGRTMIN+2 i3blocks"
+set $VolumeUp  "pactl set-sink-volume @DEFAULT_SINK@ +5% && pkill -SIGRTMIN+1 i3blocks"
+set $VolumeDown  "pactl set-sink-volume @DEFAULT_SINK@ -5% && pkill -SIGRTMIN+1 i3blocks"
+set $AudioMute  "pactl set-sink-mute @DEFAULT_SINK@ toggle && pkill -SIGRTMIN+1 i3blocks"
+set $MicMute "pactl set-source-mute @DEFAULT_SOURCE@ toggle && pkill -SIGRTMIN+1 i3blocks"
+#https://wiki.archlinux.org/index.php/MPRIS how to use bluetooth media controls
+set $play "playerctl play-pause"
+set $pause "playerctl pause"
+set $next "playerctl next"
+set $prev "playerctl previous"
+set $caps "pkill -SIGRTMIN+11 i3blocks"
+set $NumLock  "pkill -SIGRTMIN+11 i3blocks"
+set $exit "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 ###############################################################
 # => Config
@@ -42,9 +69,6 @@ default_border normal
 # No border, activate inactive-opacity in picom.conf
 #default_border pixel 2
 
-# Set windows key as mod
-set $mod Mod4
-
 # Font for window titles. Will also be used by the bar unless a different font is used in the bar {} block below.
 font pango:FontAwesome 12
 
@@ -54,26 +78,24 @@ floating_modifier $mod
 ###############################################################
 # => Shorcuts
 ###############################################################
-
-# Layout Scripts
-bindsym $mod+shift+n exec $HOME/.config/i3/i3-layout-manager/layout_manager.sh
-
-# Screen Printing
-bindsym Print exec flameshot full -p $HOME/Pictures
-bindsym $mod+Print exec flameshot gui -p $HOME/Pictures
-
-# Google Chrome
-bindsym $mod+g exec google-chrome-stable
-
 # Whatsapp
 bindsym $mod+shift+w exec whatsapp-nativefier 
 
 # Discord
 bindsym $mod+shift+d exec discord 
 
+# Google Chrome
+bindsym $mod+g exec $browser
+
+# Layout Scripts
+bindsym $mod+shift+n exec $HOME/.config/i3/i3-layout-manager/layout_manager.sh
+
+# Screen Printing
+bindsym Print exec $ScreenshotFast
+bindsym $mod+Print exec $ScreenshotOptions
+
 # File manager
-#bindsym $mod+Shift+f exec nemo
-bindsym $mod+n exec nemo
+bindsym $mod+n exec $filemanager
 
 # Chmod +x to make work.sh executable
 set $layout Layout:  Spotify (s)
@@ -132,33 +154,29 @@ mode "$mode_gaps_outer" {
 }
 
 # Start a terminal
-bindsym $mod+Return exec termite
-# Alternative (Use Base16-OneDark not 16 bits):
-# bindsym $mod+Return exec xfce4-terminal
+bindsym $mod+Return exec $term
 
 # kill focused window
 bindsym $mod+Shift+q kill
 
 # Screen brightness controls
-bindsym XF86MonBrightnessUp exec light -A 5 && pkill -SIGRTMIN+2 i3blocks
-bindsym XF86MonBrightnessDown exec light -U 5 && pkill -SIGRTMIN+2 i3blocks
+bindsym XF86MonBrightnessUp $BrightUp
+bindsym XF86MonBrightnessDown $BrightDown
 
 # Touchpad controls
 bindsym XF86TouchpadToggle exec ./toggletouchpad.sh # toggle touchpad
 
 # Media player controls
-# Use pactl to adjust volume in PulseAudio.
-set $refresh_i3status killall -SIGUSR1 i3status
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && pkill -SIGRTMIN+1 i3blocks
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && pkill -SIGRTMIN+1 i3blocks
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && pkill -SIGRTMIN+1 i3blocks
-bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && pkill -SIGRTMIN+1 i3blocks
+bindsym XF86AudioRaiseVolume exec --no-startup-id $VolumeUp
+bindsym XF86AudioLowerVolume exec --no-startup-id $VolumeDown
+bindsym XF86AudioMute exec --no-startup-id $AudioMute
+bindsym XF86AudioMicMute exec --no-startup-id $MicMute
 
 # Play/pause next/previous
-bindsym XF86AudioPlay exec playerctl play-pause
-bindsym XF86AudioPause exec playerctl pause
-bindsym XF86AudioNext exec playerctl next
-bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86AudioPlay exec $play
+bindsym XF86AudioPause exec $pause
+bindsym XF86AudioNext exec $next
+bindsym XF86AudioPrev exec $prev
 
 # change focus
 bindsym $mod+h focus left
@@ -207,11 +225,11 @@ bindsym $mod+t focus mode_toggle
 # sticky window toggle
 bindsym $mod+Shift+s sticky toggle
 
-# read 1 character and mark the current window with this character
-bindsym $mod+Shift+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
+# # read 1 character and mark the current window with this character
+# bindsym $mod+Shift+m exec i3-input -F 'mark %s' -l 1 -P 'Mark: '
 
-# read 1 character and go to the window with the character
-bindsym $mod+m exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
+# # read 1 character and go to the window with the character
+# bindsym $mod+m exec i3-input -F '[con_mark="%s"] focus' -l 1 -P 'Goto: '
 
 # focus the parent container
 bindsym $mod+p focus parent
@@ -220,10 +238,10 @@ bindsym $mod+p focus parent
 bindsym $mod+c focus child
 
 # Custom Rofi | change with ctrl tab
-bindsym $mod+d exec "rofi -modi window,drun,run -show drun -show-icons -sidebar-mode -terminal termite "
+bindsym $mod+d exec $applauncher
 
 # Lock screen
-bindsym $mod+shift+x exec betterlockscreen -l
+bindsym $mod+shift+x exec $Locker
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
@@ -232,7 +250,7 @@ bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 
 # exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+bindsym $mod+Shift+e exec $exit
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -261,8 +279,8 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 # Update i3blocks when pressing caps or num_lock
-bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3blocks
-bindsym --release Num_Lock  exec pkill -SIGRTMIN+11 i3blocks
+bindsym --release Caps_Lock exec $caps
+bindsym --release Num_Lock  exec $NumLock
 
 ###############################################################
 # => Workspaces
@@ -334,7 +352,6 @@ bar {
                 urgent_workspace   $urgent-bg-color   $urgent-bg-color   $text-color
         }
 }
-set $Locker i3lock && sleep 1
 
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
 mode "$mode_system" {
@@ -368,7 +385,7 @@ exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet &
 
-# Some kind of window manager ??
+# Compositor for Xorg
 exec picom &
 
 # Bluetooth "blueman"
@@ -382,7 +399,6 @@ exec xfce4-clipman &
 
 # Wallpaper
 exec dwall -s room &
-
 #exec feh --bg-scale ~/wallpapers/Arc_arch.png &
 
 # Thunderbird applet

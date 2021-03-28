@@ -146,7 +146,7 @@ bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
 # precmd_functions+=(_set_beam_cursor) #
 # # ensure insert mode and beam cursor when exiting vim
 # zle-line-init() { zle -K viins; _set_beam_cursor }
-SPACESHIP_USER_SHOW=always
+# SPACESHIP_USER_SHOW=always
 eval spaceship_vi_mode_enable
 # Accept suggestion ctrl+space HAS TO BE AT THE END
 bindkey '^ ' autosuggest-accept
