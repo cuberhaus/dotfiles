@@ -27,8 +27,8 @@ set $ws10 "10: Games"
 # => Config
 ###############################################################
 # Focus windows (Urgent won't switch focus for no goddamn reason)
-# focus_on_window_activation smart
-focus_on_window_activation urgent
+focus_on_window_activation smart
+# focus_on_window_activation urgent
 
 # Window gaps
 gaps inner 6
