@@ -160,8 +160,8 @@ bindsym $mod+Return exec $term
 bindsym $mod+Shift+q kill
 
 # Screen brightness controls
-bindsym XF86MonBrightnessUp $BrightUp
-bindsym XF86MonBrightnessDown $BrightDown
+bindsym XF86MonBrightnessUp exec $BrightUp
+bindsym XF86MonBrightnessDown exec $BrightDown
 
 # Touchpad controls
 bindsym XF86TouchpadToggle exec ./toggletouchpad.sh # toggle touchpad
