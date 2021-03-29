@@ -36,6 +36,7 @@ antigen bundle alias-finder
 antigen theme denysdovhan/spaceship-prompt # Spaceship
 
 # Load bundles from external repos.
+#antigen bundle jeffreytse/zsh-vi-mode # Better keybindings and solves zsh+vim issues like starting vim with wrong cursor
 antigen bundle zsh-users/zsh-completions
 antigen bundle zsh-users/zsh-autosuggestions
 antigen bundle zsh-users/zsh-syntax-highlighting
@@ -111,12 +112,12 @@ bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
 ###############################################################
 
 # vi mode
-bindkey -v
-export KEYTIMEOUT=1
+# bindkey -v
+# export KEYTIMEOUT=1
 
-# Edit line in vim with ctrl-e:
-autoload edit-command-line; zle -N edit-command-line
-bindkey '^e' edit-command-line
+# Edit line in vim with ctrl-e (it's vv now):
+# autoload edit-command-line; zle -N edit-command-line
+# bindkey '^e' edit-command-line
 
 # ctrl-f Search a file and cd into its directory
 bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
@@ -147,6 +148,7 @@ bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
 # # ensure insert mode and beam cursor when exiting vim
 # zle-line-init() { zle -K viins; _set_beam_cursor }
 # SPACESHIP_USER_SHOW=always
+
 eval spaceship_vi_mode_enable
 # Accept suggestion ctrl+space HAS TO BE AT THE END
 bindkey '^ ' autosuggest-accept
