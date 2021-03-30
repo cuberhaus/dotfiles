@@ -8,6 +8,9 @@
 #    [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
 #        eval "$("$BASE16_SHELL/profile_helper.sh")"
 
+SPACESHIP_EXIT_CODE_SHOW=true
+# SPACESHIP_USER_SHOW=always
+
 ###############################################################
 # => Antigen
 ###############################################################
@@ -104,53 +107,20 @@ bindkey -M vicmd 'j' history-substring-search-down
 #Don't show message
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
-# ctrl-f Search a file and cd into its directory
-bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
-
 ###############################################################
 # => Vim
 ###############################################################
 
 # vi mode
 # bindkey -v
-# export KEYTIMEOUT=1
+export KEYTIMEOUT=1
+eval spaceship_vi_mode_enable
 
-# Edit line in vim with ctrl-e (it's vv now):
-# autoload edit-command-line; zle -N edit-command-line
-# bindkey '^e' edit-command-line
-
+#HAS TO BE AT THE END
+# Edit line in vim with ctrl-e (it's vv with zsh-vim extension):
+autoload edit-command-line; zle -N edit-command-line
+bindkey '^e' edit-command-line
 # ctrl-f Search a file and cd into its directory
 bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
-
-# # Change cursor with support for inside/outside tmux
-# function _set_cursor() {
-#     if [[ $TMUX = '' ]]; then
-#       echo -ne $1
-#     else
-#       echo -ne "\ePtmux;\e\e$1\e\\"
-#     fi
-# }
-
-# function _set_block_cursor() { _set_cursor '\e[2 q' }
-# function _set_beam_cursor() { _set_cursor '\e[6 q' }
-
-# function zle-keymap-select {
-#   if [[ ${KEYMAP} == vicmd ]] || [[ $1 = 'block' ]]; then
-#       _set_block_cursor
-#   else
-#       _set_beam_cursor
-#   fi
-#   zle reset-prompt ; zle -R
-# }
-# zle -N zle-keymap-select
-# # ensure beam cursor when starting new terminal
-# precmd_functions+=(_set_beam_cursor) #
-# # ensure insert mode and beam cursor when exiting vim
-# zle-line-init() { zle -K viins; _set_beam_cursor }
-# SPACESHIP_USER_SHOW=always
-
-eval spaceship_vi_mode_enable
-# Accept suggestion ctrl+space HAS TO BE AT THE END
+# Accept suggestion ctrl+space
 bindkey '^ ' autosuggest-accept
-# THEME
-SPACESHIP_EXIT_CODE_SHOW=true
