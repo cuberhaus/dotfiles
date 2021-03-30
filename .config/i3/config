@@ -1,13 +1,4 @@
 ###############################################################
-# Sections:
-#   -> Workspace
-#   -> Config
-#   -> Shortcuts
-#   -> Workspaces
-#   -> Theme
-#   -> Runtime
-#
-###############################################################
 # => Variables
 ###############################################################
 # Set windows key as mod
@@ -32,7 +23,7 @@ set $filemanager nemo
 set $Locker "betterlockscreen -l"
 set $ScreenshotFast "flameshot full -p $HOME/Pictures"
 set $ScreenshotOptions "flameshot gui -p $HOME/Pictures"
-set $applauncher "rofi -modi window,drun,run -show drun -show-icons -sidebar-mode -terminal $term "
+set $applauncher "rofi -modi window,drun,run -show drun -show-icons -terminal $term "
 
 # i3blocks specific
 set $BrightUp "light -A 5 && pkill -SIGRTMIN+2 i3blocks"
