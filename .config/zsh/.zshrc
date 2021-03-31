@@ -107,14 +107,15 @@ bindkey -M vicmd 'j' history-substring-search-down
 #Don't show message
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
+eval spaceship_vi_mode_enable
+
 ###############################################################
 # => Vim
 ###############################################################
 
 # vi mode
-# bindkey -v
+bindkey -v
 export KEYTIMEOUT=1
-eval spaceship_vi_mode_enable
 
 #HAS TO BE AT THE END
 # Edit line in vim with ctrl-e (it's vv with zsh-vim extension):
