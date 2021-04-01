@@ -294,6 +294,7 @@ games_install () {
     $pac lutris
     $pac minecraft
     $pac steam
+    #$pac steam-manjaro
     $pac vulkan-tools
 }
 
