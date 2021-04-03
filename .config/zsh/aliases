@@ -78,9 +78,9 @@ alias yolo='git add -A; git commit -m "This is a placeholder"; git push'
 # List files
 # using -a -a will show '.' and ".."
 # --git causes to crash when symbolic link is gone
-alias ls='exa -F --long --header --links --group --group-directories-first'
-alias la='exa -a -F --long --header --links --group --group-directories-first'
-alias lsd='exa -D -a'
+alias ls="exa -F --long --header --links --group --group-directories-first"
+alias la="exa -a -F --long --header --links --group --group-directories-first"
+alias lsd="exa -D -a"
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
@@ -100,10 +100,23 @@ alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -vi"
-    alias update="sudo softwareupdate -i -a; brew update; brew upgrade ; brew update --cask"
-    alias updateall="sudo softwareupdate -i -a; brew update; brew upgrade; brew update --cask; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update; npm install npm -g; xcode-select --install; pip install --upgrade pip"
+    alias update="sudo softwareupdate -i -a; 
+    brew update; 
+    brew upgrade ; 
+    brew update --cask"
+    alias updateall="sudo softwareupdate -i -a; 
+    brew update; 
+    brew upgrade; 
+    brew update --cask; 
+    python3 -m pip install --user --upgrade pynvim;
+    vim +PlugUpgrade +PlugUpdate +qall; 
+    antigen update; 
+    npm install npm -g; 
+    xcode-select --install; 
+    pip install --upgrade pip"
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
-    alias cleanup='brew cleanup; vim +PlugClean +qall'
+    alias cleanup="brew cleanup; 
+    vim +PlugClean +qall"
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
 fi
@@ -117,15 +130,19 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     # Get the error messages from journalctl
     alias jctl="journalctl -p 3 -xb"
     # Check vulnerabilities microcode
-    alias microcode='grep . /sys/devices/system/cpu/vulnerabilities/*'
+    alias microcode="grep . /sys/devices/system/cpu/vulnerabilities/*"
 
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        alias update='sudo pacman -Syu'
-        alias updateall='yay -Syu; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update;'
+        alias update="sudo pacman -Syu"
+        alias updateall="yay -Syu; 
+        python3 -m pip install --user --upgrade pynvim; 
+        vim +PlugUpgrade +PlugUpdate +qall; 
+        antigen update;"
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
-        alias cleanup='yay -Sc; vim +PlugClean +qall'
+        alias cleanup="yay -Sc; 
+        vim +PlugClean +qall"
         #pacman unlock
         alias unlock="sudo rm /var/lib/pacman/db.lck"
     fi
@@ -139,14 +156,22 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     ### Manjaro
     if [[ "$DISTRO" == "manjaro" ]]; then
         # Update mirrors and update
-        alias mirror="sudo pacman-mirrors -f && sudo pacman -Syu"
-        # or -Syyu ?
+        alias mirror="sudo pacman-mirrors -f && sudo pacman -Syyu"
     fi
 
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
-        alias update="sudo apt-get update; sudo apt-get full-upgrade; brew update; brew upgrade; vim +PlugUpgrade +PlugUpdate +qall; antigen update"
-        alias cleanup='sudo apt-get autoclean; sudo apt-get clean; sudo apt-get autoremove; brew cleanup; vim +PlugClean +qall'
+        alias update="sudo apt-get update; 
+        sudo apt-get full-upgrade; 
+        brew update; 
+        brew upgrade; 
+        vim +PlugUpgrade +PlugUpdate +qall; 
+        antigen update"
+        alias cleanup="sudo apt-get autoclean; 
+        sudo apt-get clean; 
+        sudo apt-get autoremove; 
+        brew cleanup; 
+        vim +PlugClean +qall"
         alias tmux="tmux -f ~/.config/tmux/tmux.conf"
     fi
 fi
