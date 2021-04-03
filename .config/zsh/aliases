@@ -11,7 +11,12 @@
 scripts=$HOME/.local/scripts
 
 # Recompile ycm
-alias ycm="python3 ~/.vim/plugged/YouCompleteMe/install.py"
+alias ycminstall="python3 ~/.vim/plugged/YouCompleteMe/install.py"
+# Rclone (be careful!)
+alias rclonepull="rclone -P sync drive:Thunderbird ~/thunderbird ;
+rclone -P sync drive:Calibre/Calibre\ Library ~/Calibre\ Library"
+alias rclonepush="rclone -P sync ~/thunderbird drive:Thunderbird ;
+rclone -P sync ~/Calibre\ Library drive:Calibre/Calibre\ Library"
 
 # Config Files
 alias arch="nvim $scripts/bootstrap/arch_functions"
@@ -99,21 +104,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     alias updateall="sudo softwareupdate -i -a; brew update; brew upgrade; brew update --cask; python3 -m pip install --user --upgrade pynvim; vim +PlugUpgrade +PlugUpdate +qall; antigen update; npm install npm -g; xcode-select --install; pip install --upgrade pip"
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     alias cleanup='brew cleanup; vim +PlugClean +qall'
-    # Show active network interfaces
-    alias ifactive="ifconfig | pcregrep -M -o '^[^\t:]+:([^\n]|\n\t)*status: active'"
-    # Clean up LaunchServices to remove duplicates in the “Open With” menu
-    alias lscleanup="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -kill -r -domain local -domain system -domain user && killall Finder"
-    # Flush Directory Service cache
-    alias flush="dscacheutil -flushcache && killall -HUP mDNSResponder"
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
-    # Empty the Trash on all mounted volumes and the main HDD.
-    # Also, clear Apple’s System Logs to improve shell startup speed.
-    # Finally, clear download history from quarantine. https://mths.be/bum
-    alias emptytrash="sudo rm -rfv /Volumes/*/.Trashes; sudo rm -rfv ~/.Trash; sudo rm -rfv /private/var/log/asl/*.asl; sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* 'delete from LSQuarantineEvent'"
-    # Show/hide hidden files in Finder
-    alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
-    alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
 fi
 
 if [[ "$OSTYPE" == "linux"* ]]; then
