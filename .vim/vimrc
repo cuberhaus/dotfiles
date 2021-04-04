@@ -39,11 +39,12 @@ endif
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 call plug#begin()
+" Plug 'ctrlpvim/ctrlp.vim'
+" Plug 'godlygeek/tabular'
+" Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
 Plug 'ap/vim-css-color'
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'godlygeek/tabular'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
 Plug 'jiangmiao/auto-pairs'
 Plug 'joshdick/onedark.vim'
@@ -51,7 +52,6 @@ Plug 'junegunn/goyo.vim'
 Plug 'maxbrunsfeld/vim-yankstack'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'preservim/nerdtree'
-Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 Plug 'ryanoasis/vim-devicons'
 Plug 'sheerun/vim-polyglot'
 Plug 'tpope/vim-commentary'
@@ -275,8 +275,11 @@ function! GotoJump()
   endif
 endfunction
 
+let g:AutoPairsShortcutToggle = '<leader><leader>p'
+
 nmap <Leader>j :call GotoJump()<CR>
 
+" ctrl-p autocompletes stuff
 " YouCompleteMe
 nnoremap <leader>r :YcmCompleter RefactorRename<Space>
 nnoremap <leader>d :YcmCompleter GoToDefinition<cr>

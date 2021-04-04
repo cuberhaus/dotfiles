@@ -9,7 +9,8 @@
 ###############################################################
 
 scripts=$HOME/.local/scripts
-
+# Fix discord long calls
+alias discord="discord --no-sandbox"
 # Recompile ycm
 alias ycminstall="python3 ~/.vim/plugged/YouCompleteMe/install.py"
 # Rclone (be careful!)
