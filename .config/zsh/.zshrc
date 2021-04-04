@@ -2,11 +2,11 @@
 # => Theme
 ###############################################################
 
-## Base16 Shell
-#BASE16_SHELL="$HOME/.config/base16-shell/"
-#[ -n "$PS1" ] && \
-#    [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
-#        eval "$("$BASE16_SHELL/profile_helper.sh")"
+# Base16 Shell
+BASE16_SHELL="$HOME/.config/base16-shell/"
+[ -n "$PS1" ] && \
+    [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
+        eval "$("$BASE16_SHELL/profile_helper.sh")"
 
 SPACESHIP_EXIT_CODE_SHOW=true
 # SPACESHIP_USER_SHOW=always
