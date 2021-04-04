@@ -42,11 +42,11 @@ call plug#begin()
 " Plug 'ctrlpvim/ctrlp.vim'
 " Plug 'godlygeek/tabular'
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+" Plug 'jiangmiao/auto-pairs'
 Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
 Plug 'ap/vim-css-color'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
-Plug 'jiangmiao/auto-pairs'
 Plug 'joshdick/onedark.vim'
 Plug 'junegunn/goyo.vim'
 Plug 'maxbrunsfeld/vim-yankstack'
@@ -274,8 +274,6 @@ function! GotoJump()
     endif
   endif
 endfunction
-
-let g:AutoPairsShortcutToggle = '<leader><leader>p'
 
 nmap <Leader>j :call GotoJump()<CR>
 
