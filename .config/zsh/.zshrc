@@ -91,6 +91,9 @@ fi
 ###############################################################
 # => Configurations
 ###############################################################
+# This can be used to specify that SIGHUP should not be sent to the jobs in the jobs table when the shell exits.
+#https://superuser.com/questions/178587/how-do-i-detach-a-process-from-terminal-entirely
+setopt NOHUP
 
 # Make sure we swap keys (doesn't really slow down termite that much)
 setxkbmap -option caps:swapescape > /dev/null 2>&1

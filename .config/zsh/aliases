@@ -2,6 +2,10 @@
 
 ###############################################################
 # Info:
+# & send a process to background. Example: discord &
+# ! disown a process. Example: discord ! 
+# </dev/null &>/dev/null completely silence a process.
+# Combinations are possible. Example: discord &!
 # alias="" Is created during shell startup and won't change
 # alias='' Is created during runtime and will evaluate every time it's called
 # $RANDOM will generate a random number from 0 through 32767
@@ -10,7 +14,8 @@
 
 scripts=$HOME/.local/scripts
 # Fix discord long calls
-alias discord="discord --no-sandbox"
+# alias discord="discord --no-sandbox </dev/null &>/dev/null &"
+alias discord="discord --no-sandbox &"
 # Recompile ycm
 alias ycminstall="python3 ~/.vim/plugged/YouCompleteMe/install.py"
 # Rclone (be careful!)
