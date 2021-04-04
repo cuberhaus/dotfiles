@@ -17,6 +17,7 @@ set $ws8 "8: 8"
 set $ws9 "9: 9"
 set $ws10 "10: 10"
 set $term termite
+set $discord "discord --no-sandbox"
 #set $term "xfce4-terminal" # Alternative (Use Base16-OneDark not 16 bits):
 set $browser google-chrome-stable
 set $filemanager nemo 
@@ -24,6 +25,7 @@ set $Locker "betterlockscreen -l"
 set $ScreenshotFast "flameshot full -p $HOME/Pictures"
 set $ScreenshotOptions "flameshot gui -p $HOME/Pictures"
 set $applauncher "rofi -modi window,drun,run -show drun -show-icons -terminal $term "
+set $commandlauncher "rofi -modi window,drun,run -show run -show-icons -terminal $term "
 
 # i3blocks specific
 set $BrightUp "light -A 5 && pkill -SIGRTMIN+2 i3blocks"
@@ -70,10 +72,10 @@ floating_modifier $mod
 # => Shorcuts
 ###############################################################
 # Whatsapp
-bindsym $mod+shift+w exec whatsapp-nativefier 
+bindsym $mod+ctrl+w exec whatsapp-nativefier 
 
 # Discord
-bindsym $mod+shift+d exec discord 
+bindsym $mod+ctrl+d exec $discord
 
 # Google Chrome
 bindsym $mod+g exec $browser
@@ -230,6 +232,7 @@ bindsym $mod+c focus child
 
 # Custom Rofi | change with ctrl tab
 bindsym $mod+d exec $applauncher
+bindsym $mod+shift+d exec $commandlauncher
 
 # Lock screen
 bindsym $mod+shift+x exec $Locker
