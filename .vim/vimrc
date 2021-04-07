@@ -204,7 +204,7 @@ set fileencoding=utf-8
 set t_Co=256
 
 " Dark truecolor
-set background=dark
+set background=light
 " solarized8_high is also good
 colorscheme solarized8
 

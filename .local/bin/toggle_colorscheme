@@ -10,10 +10,10 @@ function update_vim {
     if [ "$1" == "light" ]; then
         # command sed -i "$@"
         sed -i "s/set background=dark/set background=light/" $VIM_CONFIG
-        sed -i "s/colorscheme onedark/colorscheme solarized/" $VIM_CONFIG
+        sed -i "s/colorscheme onedark/colorscheme solarized8/" $VIM_CONFIG
     elif [ "$1" == "dark" ]; then
         sed -i "s/set background=light/set background=dark/" $VIM_CONFIG
-        sed -i "s/colorscheme PaperColor/colorscheme onedark/" $VIM_CONFIG
+        sed -i "s/colorscheme solarized8/colorscheme onedark/" $VIM_CONFIG
     fi
 }
 
