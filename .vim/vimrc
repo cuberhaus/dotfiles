@@ -43,6 +43,7 @@ call plug#begin()
 " Plug 'godlygeek/tabular'
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 " Plug 'jiangmiao/auto-pairs'
+Plug 'lifepillar/vim-solarized8'
 Plug 'Chiel92/vim-autoformat'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'airblade/vim-gitgutter'
@@ -203,9 +204,9 @@ set fileencoding=utf-8
 set t_Co=256
 
 " Dark truecolor
-set background=light
-"colorscheme PaperColor
-colorscheme PaperColor
+set background=dark
+" solarized8_high is also good
+colorscheme solarized8
 
 " Configuració per a vim-airline
 let g:airline#extensions#tabline#enabled = 1 "fica automaticament els buffers a la barreta
