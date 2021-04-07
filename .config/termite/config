@@ -49,52 +49,99 @@ scrollback_lines = -1
 # "off", "left" or "right"
 scrollbar = right
 
-[colors]
-# Base16 Solarized Light
-# Author: Ethan Schoonover (modified by aramisgithub)
+#[colors]
+# If both of these are unset, cursor falls back to the foreground color,
+# and cursor_foreground falls back to the background color.
+#cursor = #dcdccc
+#cursor_foreground = #dcdccc
 
-foreground          = #586e75
-foreground_bold     = #586e75
-cursor              = #586e75
-cursor_foreground   = #fdf6e3
-background          = #fdf6e3
+#foreground = #dcdccc
+#foreground_bold = #ffffff
+#background = #3f3f3f
+
+# 20% background transparency (requires a compositor)
+#background = rgba(63, 63, 63, 0.8)
+
+# If unset, will reverse foreground and background
+#highlight = #2f2f2f
+
+# Colors from color0 to color254 can be set
+#color0 = #3f3f3f
+#color1 = #705050
+#color2 = #60b48a
+#color3 = #dfaf8f
+#color4 = #506070
+#color5 = #dc8cc3
+#color6 = #8cd0d3
+#color7 = #dcdccc
+#color8 = #709080
+#color9 = #dca3a3
+#color10 = #c3bf9f
+#color11 = #f0dfaf
+#color12 = #94bff3
+#color13 = #ec93d3
+#color14 = #93e0e3
+#color15 = #ffffff
+
+[hints]
+#font = Monospace 12
+#foreground = #dcdccc
+#background = #3f3f3f
+#active_foreground = #e68080
+#active_background = #3f3f3f
+#padding = 2
+#border = #3f3f3f
+#border_width = 0.5
+#roundness = 2.0
+
+# vim: ft=dosini cms=#%s
+[colors]
+# Base16 OneDark
+# Author: Lalit Magant (http://github.com/tilal6991)
+
+foreground          = #abb2bf
+foreground_bold     = #abb2bf
+cursor              = #abb2bf
+cursor_foreground   = #282c34
+background          = #282c34
 
 # 16 color space
 
 # Black, Gray, Silver, White
-color0  = #fdf6e3
-color8  = #839496
-color7  = #586e75
-color15 = #002b36
+color0  = #282c34
+color8  = #545862
+color7  = #abb2bf
+color15 = #c8ccd4
 
 # Red
-color1  = #dc322f
-color9  = #dc322f
+color1  = #e06c75
+color9  = #e06c75
 
 # Green
-color2  = #859900
-color10 = #859900
+color2  = #98c379
+color10 = #98c379
 
 # Yellow
-color3  = #b58900
-color11 = #b58900
+color3  = #e5c07b
+color11 = #e5c07b
 
 # Blue
-color4  = #268bd2
-color12 = #268bd2
+color4  = #61afef
+color12 = #61afef
 
 # Purple
-color5  = #6c71c4
-color13 = #6c71c4
+color5  = #c678dd
+color13 = #c678dd
 
 # Teal
-color6  = #2aa198
-color14 = #2aa198
+color6  = #56b6c2
+color14 = #56b6c2
 
 # Extra colors
-color16 = #cb4b16
-color17 = #d33682
-color18 = #eee8d5
-color19 = #93a1a1
-color20 = #657b83
-color21 = #073642
+color16 = #d19a66
+color17 = #be5046
+color18 = #353b45
+color19 = #3e4451
+color20 = #565c64
+color21 = #b6bdca
+# https://github.com/khamer/base16-termite
