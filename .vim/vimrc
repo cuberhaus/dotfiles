@@ -44,6 +44,7 @@ call plug#begin()
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 " Plug 'jiangmiao/auto-pairs'
 Plug 'Chiel92/vim-autoformat'
+Plug 'NLKNguyen/papercolor-theme'
 Plug 'airblade/vim-gitgutter'
 Plug 'ap/vim-css-color'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
@@ -202,8 +203,10 @@ set fileencoding=utf-8
 set t_Co=256
 
 " Dark truecolor
-set background=dark
-colorscheme onedark
+set background=light
+"colorscheme PaperColor
+colorscheme PaperColor
+
 " Configuració per a vim-airline
 let g:airline#extensions#tabline#enabled = 1 "fica automaticament els buffers a la barreta
 

@@ -1,0 +1,50 @@
+#!/usr/bin/env sh
+# Author: https://github.com/cuberhaus
+# Inspired by: https://github.com/gquittet
+
+VIM_CONFIG="$HOME/.vim/vimrc"
+TERMITE_CONFIG="$HOME/.config/termite/config"
+TERMITE_FOLDER="$HOME/.config/termite"
+
+function update_vim {
+    if [ "$1" == "light" ]; then
+        # command sed -i "$@"
+        sed -i "s/set background=dark/set background=light/" $VIM_CONFIG
+        sed -i "s/colorscheme onedark/colorscheme PaperColor/" $VIM_CONFIG
+    elif [ "$1" == "dark" ]; then
+        sed -i "s/set background=light/set background=dark/" $VIM_CONFIG
+        sed -i "s/colorscheme PaperColor/colorscheme onedark/" $VIM_CONFIG
+    fi
+}
+
+function update_termite {
+    local TERMITE_THEMES="$TERMITE_FOLDER/themes"
+    cp "$TERMITE_FOLDER/options" "$TERMITE_CONFIG"
+
+    if [ "$1" == "light" ]; then
+        cat "$TERMITE_THEMES/onelight" >> "$TERMITE_CONFIG"
+    elif [ "$1" == "dark" ]; then
+        cat "$TERMITE_THEMES/onedark" >> "$TERMITE_CONFIG"
+    fi
+
+    # killall -USR1 termite
+}
+
+function change_theme {
+    [ -f "$VIM_CONFIG" ] && update_vim $1
+
+    if [ "$(uname)" == "Linux" ]; then
+        [ -d "$TERMITE_FOLDER" ] && update_termite $1
+    fi
+    wait
+}
+
+case "$1" in
+    light)
+        change_theme light
+        ;;
+    dark)
+        change_theme dark
+        ;;
+esac
+
