@@ -1,5 +1,6 @@
 .local/share/icons/hicolor/
 
+.config/termite/config
 # Tomighty
 .tomighty/cache/
 

@@ -2,11 +2,13 @@
 # => Theme
 ###############################################################
 
-# Base16 Shell
-BASE16_SHELL="$HOME/.config/base16-shell/"
-[ -n "$PS1" ] && \
-    [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Base16 Shell
+    BASE16_SHELL="$HOME/.config/base16-shell/"
+    [ -n "$PS1" ] && \
+        [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
         eval "$("$BASE16_SHELL/profile_helper.sh")"
+fi
 
 SPACESHIP_EXIT_CODE_SHOW=true
 # SPACESHIP_USER_SHOW=always
@@ -29,7 +31,7 @@ antigen use oh-my-zsh
 antigen bundle systemd
 antigen bundle archlinux
 antigen bundle command-not-found
-antigen bundle alias-finder 
+antigen bundle alias-finder
 
 # Load the theme.
 # https://github.com/romkatv/powerlevel10k
@@ -70,7 +72,7 @@ ZSH_ALIAS_FINDER_AUTOMATIC=true
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
