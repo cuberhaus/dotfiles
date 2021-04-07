@@ -203,10 +203,8 @@ set fileencoding=utf-8
 
 set t_Co=256
 
-" Dark truecolor
-set background=dark
-" solarized8_high is also good
-colorscheme onedark
+"Theme
+source $HOME/.vim/theme
 
 " Configuració per a vim-airline
 let g:airline#extensions#tabline#enabled = 1 "fica automaticament els buffers a la barreta
