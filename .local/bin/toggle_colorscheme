@@ -6,6 +6,10 @@ VIM_CONFIG="$HOME/.vim/vimrc"
 VIM_FOLDER="$HOME/.vim"
 TERMITE_CONFIG="$HOME/.config/termite/config"
 TERMITE_FOLDER="$HOME/.config/termite"
+GTK_CONFIG="$HOME/.gtkrc-2.0.mine"
+# LIGHT_GTK_THEME="Adwaita"
+LIGHT_GTK_THEME="Matcha-sea"
+DARK_GTK_THEME="Matcha-dark-sea"
 
 function update_vim {
     if [ "$1" == "light" ]; then
@@ -20,6 +24,20 @@ colorscheme solarized8" > $VIM_FOLDER/theme
 colorscheme onedark" > $VIM_FOLDER/theme
         # sed -i "s/set background=light/set background=dark/" $VIM_CONFIG
         # sed -i "s/colorscheme solarized8/colorscheme onedark/" $VIM_CONFIG
+    fi
+}
+
+function update_gtk_theme {
+    if [ "$1" == "light" ]; then
+        # Commas around $LIGHT_GTK_THEME have to be escaped
+        # https://stackoverflow.com/questions/13799789/expansion-of-variables-inside-single-quotes-in-a-command-in-bash
+        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$LIGHT_GTK_THEME\"/" $GTK_CONFIG
+        # .* match any character till the end of line
+        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$LIGHT_GTK_THEME/" $XDG_CONFIG_HOME/gtk-3.0/settings.ini
+    elif [ "$1" == "dark" ]; then
+        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$DARK_GTK_THEME\"/" $GTK_CONFIG
+
+        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$DARK_GTK_THEME/" $XDG_CONFIG_HOME/gtk-3.0/settings.ini
     fi
 }
 
@@ -38,6 +56,12 @@ function update_termite {
 
 function change_theme {
     [ -f "$VIM_CONFIG" ] && update_vim $1
+
+    if [ -f "$GTK_CONFIG" ]; then 
+        update_gtk_theme $1
+    else 
+        echo "gtk-theme-name=""" > $GTK_CONFIG
+    fi
 
     if [ "$(uname)" == "Linux" ]; then
         [ -d "$TERMITE_FOLDER" ] && update_termite $1
