@@ -45,6 +45,7 @@ function change_theme {
     wait
 }
 
+# Switch
 case "$1" in
     light)
         change_theme light
