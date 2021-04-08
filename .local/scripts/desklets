@@ -1,4 +1,6 @@
 #!/bin/sh
+# Author: https://github.com/cuberhaus
+
 ex ()
 {
     if [ -f $1 ] ; then

@@ -1,4 +1,6 @@
 #! /usr/bin/env bash
+# Author: https://github.com/cuberhaus
+
 ### First deploy dotfiles with stow, then execute scripts
 
 ### VARIABLES

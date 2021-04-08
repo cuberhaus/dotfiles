@@ -1,4 +1,6 @@
 #!/bash/sh
+# Author: https://github.com/cuberhaus
+
 ### VARIABLES
 scripts=$HOME/.local/scripts
 source $scripts/bootstrap/mac_functions # Include functions

@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+# Author: https://github.com/cuberhaus
 
 arch_based_install () {
     sudo pacman -S patchelf go mono cmake llvm --noconfirm

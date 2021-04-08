@@ -1,4 +1,6 @@
 #!/bash/sh
+# Author: https://github.com/cuberhaus
+ 
 app_store_install() {
     brew install mas
     mas install 1274495053                      # Microsoft To Do

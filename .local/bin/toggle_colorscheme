@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 # Author: https://github.com/cuberhaus
-# Inspired by: https://github.com/gquittet
 
 VIM_CONFIG="$HOME/.vim/vimrc"
 VIM_FOLDER="$HOME/.vim"
@@ -27,6 +26,7 @@ colorscheme onedark" > $VIM_FOLDER/theme
     fi
 }
 
+# Pre: There has to be a $GTK_CONFIG file with a gtk-theme-name="" sentence
 function update_gtk_theme {
     if [ "$1" == "light" ]; then
         # Commas around $LIGHT_GTK_THEME have to be escaped
@@ -60,7 +60,9 @@ function change_theme {
     if [ -f "$GTK_CONFIG" ]; then 
         update_gtk_theme $1
     else 
+        # Create the config file to satisfy pre condition
         echo "gtk-theme-name=""" > $GTK_CONFIG
+        update_gtk_theme $1
     fi
 
     if [ "$(uname)" == "Linux" ]; then

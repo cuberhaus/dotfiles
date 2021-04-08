@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+# Author: https://github.com/cuberhaus
 
 base_install () { ## For windows install it's good to have this
     # Fix some errors and cleanup
