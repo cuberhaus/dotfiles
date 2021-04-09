@@ -6,9 +6,12 @@ VIM_FOLDER="$HOME/.vim"
 TERMITE_CONFIG="$HOME/.config/termite/config"
 TERMITE_FOLDER="$HOME/.config/termite"
 GTK_CONFIG="$HOME/.gtkrc-2.0.mine"
+GTK3_CONFIG="$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
 # LIGHT_GTK_THEME="Adwaita"
 LIGHT_GTK_THEME="Matcha-sea"
 DARK_GTK_THEME="Matcha-dark-sea"
+ICON_THEME_LIGHT="Papirus-Adapta-Maia"
+ICON_THEME_DARK="Papirus-Adapta-Nokto-Maia"
 
 function update_vim {
     if [ "$1" == "light" ]; then
@@ -31,13 +34,26 @@ function update_gtk_theme {
     if [ "$1" == "light" ]; then
         # Commas around $LIGHT_GTK_THEME have to be escaped
         # https://stackoverflow.com/questions/13799789/expansion-of-variables-inside-single-quotes-in-a-command-in-bash
-        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$LIGHT_GTK_THEME\"/" $GTK_CONFIG
         # .* match any character till the end of line
+
+        # GTK 3
         sed -i "s/gtk-theme-name=.*/gtk-theme-name=$LIGHT_GTK_THEME/" $XDG_CONFIG_HOME/gtk-3.0/settings.ini
+        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=Papirus-Adapta-Maia/" $GTK3_CONFIG
+
+        # GTK 2
+        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$LIGHT_GTK_THEME\"/" $GTK_CONFIG
+        sed -i "s/gtk-icon-theme-name=\"[^\"]*\"/gtk-icon-theme-name=\"$ICON_THEME_LIGHT\"/" $GTK_CONFIG
+
     elif [ "$1" == "dark" ]; then
+        # GTK 3
+        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$DARK_GTK_THEME/" $XDG_CONFIG_HOME/gtk-3.0/settings.ini
+
+        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=Papirus-Adapta-Nokto-Maia/" $GTK3_CONFIG
+
+        # GTK 2
         sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$DARK_GTK_THEME\"/" $GTK_CONFIG
 
-        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$DARK_GTK_THEME/" $XDG_CONFIG_HOME/gtk-3.0/settings.ini
+        sed -i "s/gtk-icon-theme-name=\"[^\"]*\"/gtk-icon-theme-name=\"$ICON_THEME_DARK\"/" $GTK_CONFIG
     fi
 }
 
@@ -61,7 +77,8 @@ function change_theme {
         update_gtk_theme $1
     else 
         # Create the config file to satisfy pre condition
-        echo "gtk-theme-name=""" > $GTK_CONFIG
+        echo 'gtk-theme-name="" 
+        gtk-icon-theme-name="" ' > $GTK_CONFIG
         update_gtk_theme $1
     fi
 
