@@ -71,6 +71,11 @@ function change_theme {
     wait
 }
 
+function Usage {
+    echo "Usage: toggle_theme [OPTION]"
+    echo "Options: light | dark"
+}
+
 # Switch
 case "$1" in
     light)
@@ -79,5 +84,7 @@ case "$1" in
     dark)
         change_theme dark
         ;;
+    *)
+        Usage
+        ;;
 esac
-
