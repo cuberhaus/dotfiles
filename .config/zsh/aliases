@@ -148,7 +148,8 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         alias cleanup="yay -Sc; 
-        vim +PlugClean +qall"
+        vim +PlugClean +qall
+        sudo pacman -R $(pacman -Qdtq)"
         #pacman unlock
         alias unlock="sudo rm /var/lib/pacman/db.lck"
     fi

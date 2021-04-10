@@ -392,8 +392,9 @@ exec udiskie &
 exec xfce4-clipman &
 
 # Wallpaper
-exec dwall -s room &
+#exec dwall -s room &
 #exec feh --bg-scale ~/wallpapers/Arc_arch.png &
+exec feh --bg-scale ~/.local/xdg/wallpapers/galaxy.jpg &
 
 # Thunderbird applet
 exec birdtray &
