@@ -19,9 +19,9 @@ alias discord="discord --no-sandbox &"
 # Recompile ycm (if autocompletion stops working execute this)
 alias ycminstall="python3 ~/.vim/plugged/YouCompleteMe/install.py"
 # Rclone (be careful!)
-alias rclonepull="rclone -P sync drive:Thunderbird ~/thunderbird ;
+alias rclonepull="rclone -P sync drive:Thunderbird ~/.thunderbird ;
 rclone -P sync drive:Calibre/Calibre\ Library ~/Calibre\ Library"
-alias rclonepush="rclone -P sync ~/thunderbird drive:Thunderbird ;
+alias rclonepush="rclone -P sync ~/.thunderbird drive:Thunderbird ;
 rclone -P sync ~/Calibre\ Library drive:Calibre/Calibre\ Library"
 
 # Config Files
