@@ -10,7 +10,7 @@
 import XMonad
 import Data.Monoid
 import System.Exit
-import Xmonad.Util.SpawnOnce
+import XMonad.Util.SpawnOnce
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -64,7 +64,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [ ((modm,  xK_Return), spawn $ XMonad.terminal conf)
 
     -- launch dmenu
-    , ((modm,               xK_d     ), spawn "rofi -modi window,drun,run -show drun -show-icons -terminal myTerminal ")
+    , ((modm,               xK_p     ), spawn "dmenu_run")
 
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
