@@ -28,10 +28,14 @@ base_install () {
     $pac nemo-seahorse
     $pac nemo-share
 
-    # Terminal
-    # $pac dhcpcd                         # Internet
+    # xmonad
     $pac trayer                         #xmonad add a tray for apps
     $pac xorg-xmessage                  # xmonad send messages
+    $pac xmonad-contrib
+    $pac xmobar
+
+    # Terminal
+    # $pac dhcpcd                         # Internet
     $pac base-devel                     # AUR
     $pac bat                            # "Cat" on steroids
     $pac dnsutils                       # Ip
