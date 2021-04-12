@@ -9,13 +9,18 @@
 -- IMPORTS
 import XMonad
 import XMonad.Config.Desktop
-import XMonad.Layout.Tabbed
-import Data.Monoid
-import System.Exit
-import XMonad.Util.SpawnOnce
-import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.ManageDocks
+import XMonad.Layout.Tabbed
 import XMonad.Util.EZConfig
+import XMonad.Util.Run
+import XMonad.Util.SpawnOnce
+
+import Data.Monoid
+
+import System.Exit
+import System.IO
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -242,7 +247,7 @@ myEventHook = mempty
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
-myLogHook = return ()
+-- myLogHook = return ()
 
 ------------------------------------------------------------------------
 -- Startup hook
@@ -270,26 +275,32 @@ myStartupHook = do
 
 -- Run xmonad with the settings you specify. No need to modify this.
 --
-main = xmonad $ desktopConfig  {
+main = do 
+    xmproc <- spawnPipe "xmobar $HOME/.xmobarrc"
+    xmonad $ docks desktopConfig  {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
         clickJustFocuses   = myClickJustFocuses,
-        borderWidth        = myBorderWidth,
+        -- borderWidth        = myBorderWidth,
         modMask            = myModMask,
-        workspaces         = myWorkspaces,
-        normalBorderColor  = myNormalBorderColor,
-        focusedBorderColor = myFocusedBorderColor,
+        -- workspaces         = myWorkspaces,
+        -- normalBorderColor  = myNormalBorderColor,
+        -- focusedBorderColor = myFocusedBorderColor,
 
       -- key bindings
         keys               = myKeys,
-        mouseBindings      = myMouseBindings,
+        -- mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = myLayout,
+        layoutHook         = avoidStruts   $    layoutHook defaultConfig,
         manageHook         = myManageHook,
         handleEventHook    = myEventHook,
-        logHook            = myLogHook,
+        logHook            = dynamicLogWithPP xmobarPP
+            { ppOutput = hPutStrLn xmproc,
+            ppTitle =xmobarColor "green"  "" . shorten 50
+            },
+
         startupHook        = myStartupHook
     }
 -- A structure containing your configuration settings, overriding
