@@ -290,6 +290,7 @@ myStartupHook = do
 -- Run xmonad with the settings you specify. No need to modify this.
 --
 main = do 
+    -- Execute xmobar with its config and pipe xmonad output to xmobar
     xmproc <- spawnPipe "xmobar $HOME/.xmobarrc"
     xmonad $ ewmh desktopConfig  {
       -- simple stuff
@@ -308,6 +309,7 @@ main = do
 
       -- hooks, layouts
         layoutHook         = smartBorders . avoidStruts   $    layoutHook defaultConfig,
+        -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
         manageHook         = manageDocks <+> myManageHook,
         handleEventHook    = myEventHook 
                             <+> fullscreenEventHook 
