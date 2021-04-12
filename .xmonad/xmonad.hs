@@ -308,7 +308,7 @@ main = do
 
       -- hooks, layouts
         layoutHook         = smartBorders . avoidStruts   $    layoutHook defaultConfig,
-        manageHook         = myManageHook,
+        manageHook         = manageDocks <+> myManageHook,
         handleEventHook    = myEventHook 
                             <+> fullscreenEventHook 
                             <+> docksEventHook
