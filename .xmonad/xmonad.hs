@@ -44,7 +44,7 @@ myClickJustFocuses = False
 
 -- Width of the window border in pixels.
 --
-myBorderWidth   = 1
+myBorderWidth   = 2
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -67,7 +67,7 @@ myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
 -- Border colors for unfocused and focused windows, respectively.
 --
 myNormalBorderColor  = "#dddddd"
-myFocusedBorderColor = "#ff0000"
+myFocusedBorderColor = "#7b68ee"
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -250,7 +250,7 @@ myManageHook = composeAll
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
--- myEventHook = mempty
+myEventHook = ewmhDesktopsEventHook
 
 ------------------------------------------------------------------------
 -- Status bars and logging
@@ -270,17 +270,19 @@ myManageHook = composeAll
 -- By default, do nothing.
 myStartupHook = do
     spawnOnce "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --transparent true --tint 0x191970 --height 16 &"
-    spawnOnce "picom &"
-    spawnOnce "udiskie &"
-    spawnOnce "nm-applet &"
+    spawnOnce "exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &"
+    spawnOnce "betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &"
     spawnOnce "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &"
+    spawnOnce "nm-applet &"
+    spawnOnce "picom &"
+    spawnOnce "blueman-applet &"
+    spawnOnce "udiskie &"
     spawnOnce "xfce4-clipman &"
+    spawnOnce "feh --bg-scale ~/.local/xdg/wallpapers/galaxy.jpg &"
     spawnOnce "birdtray &"
     spawnOnce "hp-systray &"
     spawnOnce "tomighty &"
     spawnOnce "flameshot &"
-    spawnOnce "blueman-applet &"
-    spawnOnce "feh --bg-scale ~/.local/xdg/wallpapers/galaxy.jpg &"
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
@@ -297,8 +299,8 @@ main = do
         -- borderWidth        = myBorderWidth,
         modMask            = myModMask,
         -- workspaces         = myWorkspaces,
-        -- normalBorderColor  = myNormalBorderColor,
-        -- focusedBorderColor = myFocusedBorderColor,
+        normalBorderColor  = myNormalBorderColor,
+        focusedBorderColor = myFocusedBorderColor,
 
       -- key bindings
         keys               = myKeys,
@@ -306,8 +308,8 @@ main = do
 
       -- hooks, layouts
         layoutHook         = smartBorders . avoidStruts   $    layoutHook defaultConfig,
-        -- manageHook         = myManageHook,
-        handleEventHook    = serverModeEventHookCmd 
+        manageHook         = myManageHook,
+        handleEventHook    = myEventHook 
                             <+> fullscreenEventHook 
                             <+> docksEventHook
                                  ,
