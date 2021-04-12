@@ -30,7 +30,8 @@ base_install () {
 
     # Terminal
     # $pac dhcpcd                         # Internet
-    $pac xorg-xmessage
+    $pac trayer                         #xmonad add a tray for apps
+    $pac xorg-xmessage                  # xmonad send messages
     $pac base-devel                     # AUR
     $pac bat                            # "Cat" on steroids
     $pac dnsutils                       # Ip

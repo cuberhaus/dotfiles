@@ -12,10 +12,14 @@ import XMonad.Config.Desktop
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
+import XMonad.Layout.MultiToggle
+import XMonad.Layout.MultiToggle.Instances
+import XMonad.Layout.NoBorders
 import XMonad.Layout.Tabbed
 import XMonad.Util.EZConfig
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
+import XMonad.Hooks.ServerMode
 
 import Data.Monoid
 
@@ -84,6 +88,12 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
      -- Rotate through the available layout algorithms
     , ((modm,               xK_space ), sendMessage NextLayout)
+
+    -- Apply mirror transformation
+    , ((modm,               xK_x     ), sendMessage $ Toggle MIRROR) 
+    
+    -- Toggle fullscreen ?
+    , ((modm, xK_Caps_Lock), sendMessage $ Toggle FULL)
 
     --  Reset the layouts on the current workspace to default
     , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
@@ -195,7 +205,8 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = tiled ||| Mirror tiled ||| Full
+-- myLayout = tiled ||| Mirror tiled ||| Full
+myLayout = mkToggle (single MIRROR) (tiled ||| Full)
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
@@ -239,7 +250,7 @@ myManageHook = composeAll
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
-myEventHook = mempty
+-- myEventHook = mempty
 
 ------------------------------------------------------------------------
 -- Status bars and logging
@@ -258,6 +269,7 @@ myEventHook = mempty
 --
 -- By default, do nothing.
 myStartupHook = do
+    spawnOnce "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --transparent true --tint 0x191970 --height 16 &"
     spawnOnce "picom &"
     spawnOnce "udiskie &"
     spawnOnce "nm-applet &"
@@ -277,7 +289,7 @@ myStartupHook = do
 --
 main = do 
     xmproc <- spawnPipe "xmobar $HOME/.xmobarrc"
-    xmonad $ docks desktopConfig  {
+    xmonad $ ewmh desktopConfig  {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
@@ -293,9 +305,12 @@ main = do
         -- mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = avoidStruts   $    layoutHook defaultConfig,
-        manageHook         = myManageHook,
-        handleEventHook    = myEventHook,
+        layoutHook         = smartBorders . avoidStruts   $    layoutHook defaultConfig,
+        -- manageHook         = myManageHook,
+        handleEventHook    = serverModeEventHookCmd 
+                            <+> fullscreenEventHook 
+                            <+> docksEventHook
+                                 ,
         logHook            = dynamicLogWithPP xmobarPP
             { ppOutput = hPutStrLn xmproc,
             ppTitle =xmobarColor "green"  "" . shorten 50
@@ -303,6 +318,7 @@ main = do
 
         startupHook        = myStartupHook
     }
+
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
 -- use the defaults defined in xmonad/XMonad/Config.hs
