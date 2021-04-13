@@ -18,12 +18,12 @@ function update_vim {
         # command sed -i "$@"
         # sed -i "s/set background=dark/set background=light/" $VIM_CONFIG
         # sed -i "s/colorscheme onedark/colorscheme solarized8/" $VIM_CONFIG
-        echo "set background=light
-colorscheme solarized8" > $VIM_FOLDER/theme
+        echo "colorscheme one
+set background=light" > $VIM_FOLDER/theme
 
     elif [ "$1" == "dark" ]; then
-        echo "set background=dark
-colorscheme onedark" > $VIM_FOLDER/theme
+        echo "colorscheme onedark
+set background=dark" > $VIM_FOLDER/theme
         # sed -i "s/set background=light/set background=dark/" $VIM_CONFIG
         # sed -i "s/colorscheme solarized8/colorscheme onedark/" $VIM_CONFIG
     fi
@@ -62,7 +62,7 @@ function update_termite {
     cp "$TERMITE_FOLDER/options" "$TERMITE_CONFIG"
 
     if [ "$1" == "light" ]; then
-        cat "$TERMITE_THEMES/solarized_light" >> "$TERMITE_CONFIG"
+        cat "$TERMITE_THEMES/onelight" >> "$TERMITE_CONFIG"
     elif [ "$1" == "dark" ]; then
         cat "$TERMITE_THEMES/onedark" >> "$TERMITE_CONFIG"
     fi
