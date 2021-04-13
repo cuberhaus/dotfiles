@@ -1,28 +1,41 @@
 #!/usr/bin/env sh
 # Author: https://github.com/cuberhaus
 
+# PATHS
 VIM_CONFIG="$HOME/.vim/vimrc"
 VIM_FOLDER="$HOME/.vim"
 TERMITE_CONFIG="$HOME/.config/termite/config"
 TERMITE_FOLDER="$HOME/.config/termite"
 GTK_CONFIG="$HOME/.gtkrc-2.0.mine"
 GTK3_CONFIG="$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
-# LIGHT_GTK_THEME="Adwaita"
-LIGHT_GTK_THEME="Matcha-sea"
-DARK_GTK_THEME="Matcha-dark-sea"
-ICON_THEME_LIGHT="Papirus-Adapta-Maia"
-ICON_THEME_DARK="Papirus-Adapta-Nokto-Maia"
+
+### Themes
+# GTK
+LIGHT_GTK_THEME="Arc"
+DARK_GTK_THEME="Arc-Dark"
+# LIGHT_GTK_THEME="Matcha-sea"
+# DARK_GTK_THEME="Matcha-dark-sea"
+# ICON_THEME_LIGHT="Papirus-Adapta-Maia"
+# ICON_THEME_DARK="Papirus-Adapta-Nokto-Maia"
+ICON_THEME_LIGHT="Adwaita"
+ICON_THEME_DARK="Adwaita"
+# Vim
+VIM_COLORSCHEME_DARK="onedark"
+VIM_COLORSCHEME_LIGHT="one"
+# Termite
+TERMITE_THEME_DARK="onedark"
+TERMITE_THEME_LIGHT="onelight"
 
 function update_vim {
     if [ "$1" == "light" ]; then
         # command sed -i "$@"
         # sed -i "s/set background=dark/set background=light/" $VIM_CONFIG
         # sed -i "s/colorscheme onedark/colorscheme solarized8/" $VIM_CONFIG
-        echo "colorscheme one
+        echo "colorscheme $VIM_COLORSCHEME_LIGHT
 set background=light" > $VIM_FOLDER/theme
 
     elif [ "$1" == "dark" ]; then
-        echo "colorscheme onedark
+        echo "colorscheme $VIM_COLORSCHEME_DARK
 set background=dark" > $VIM_FOLDER/theme
         # sed -i "s/set background=light/set background=dark/" $VIM_CONFIG
         # sed -i "s/colorscheme solarized8/colorscheme onedark/" $VIM_CONFIG
@@ -38,7 +51,7 @@ function update_gtk_theme {
 
         # GTK 3
         sed -i "s/gtk-theme-name=.*/gtk-theme-name=$LIGHT_GTK_THEME/" $XDG_CONFIG_HOME/gtk-3.0/settings.ini
-        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=Papirus-Adapta-Maia/" $GTK3_CONFIG
+        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME_LIGHT/" $GTK3_CONFIG
 
         # GTK 2
         sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$LIGHT_GTK_THEME\"/" $GTK_CONFIG
@@ -48,7 +61,7 @@ function update_gtk_theme {
         # GTK 3
         sed -i "s/gtk-theme-name=.*/gtk-theme-name=$DARK_GTK_THEME/" $XDG_CONFIG_HOME/gtk-3.0/settings.ini
 
-        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=Papirus-Adapta-Nokto-Maia/" $GTK3_CONFIG
+        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME_DARK/" $GTK3_CONFIG
 
         # GTK 2
         sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$DARK_GTK_THEME\"/" $GTK_CONFIG
@@ -62,9 +75,9 @@ function update_termite {
     cp "$TERMITE_FOLDER/options" "$TERMITE_CONFIG"
 
     if [ "$1" == "light" ]; then
-        cat "$TERMITE_THEMES/onelight" >> "$TERMITE_CONFIG"
+        cat "$TERMITE_THEMES/$TERMITE_THEME_LIGHT" >> "$TERMITE_CONFIG"
     elif [ "$1" == "dark" ]; then
-        cat "$TERMITE_THEMES/onedark" >> "$TERMITE_CONFIG"
+        cat "$TERMITE_THEMES/$TERMITE_THEME_LIGHT" >> "$TERMITE_CONFIG"
     fi
 
     # killall -USR1 termite
