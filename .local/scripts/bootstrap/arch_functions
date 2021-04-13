@@ -115,7 +115,8 @@ base_install () {
 
     # Theme
     $pac adapta-gtk-theme               # Alternative theme
-    $pac arc-gtk-theme arc-icon-theme         # Arc theme and its icon's
+    $pac arc-gtk-theme         # Arc theme and its icon's
+    $pac arc-icon-theme                 # Doesn't install in manjaro
     $pac dconf-editor                   # Edit gnome configuration
     $pac gtk2 gtk3
     $pac kvantum-qt5                    # Qt5 Custom themes
