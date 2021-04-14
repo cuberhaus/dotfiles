@@ -77,7 +77,7 @@ function update_termite {
     if [ "$1" == "light" ]; then
         cat "$TERMITE_THEMES/$TERMITE_THEME_LIGHT" >> "$TERMITE_CONFIG"
     elif [ "$1" == "dark" ]; then
-        cat "$TERMITE_THEMES/$TERMITE_THEME_LIGHT" >> "$TERMITE_CONFIG"
+        cat "$TERMITE_THEMES/$TERMITE_THEME_DARK" >> "$TERMITE_CONFIG"
     fi
 
     # killall -USR1 termite
