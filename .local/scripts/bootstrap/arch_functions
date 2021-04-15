@@ -35,6 +35,7 @@ base_install () {
     $pac xmobar
 
     # Terminal
+    $pac seahorse                       # Password keeper
     # $pac dhcpcd                         # Internet
     $pac base-devel                     # AUR
     $pac bat                            # "Cat" on steroids
