@@ -45,6 +45,7 @@ export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh" # For more information RT
 export VISUAL=vim
 export EDITOR="$VISUAL"
 export DOTFILES="$HOME/dotfiles/dotfiles"
+eval `ssh-agent -s`
 
 #INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
 #OBJECTES=/Users/$USER/assig/pro2/objectes
