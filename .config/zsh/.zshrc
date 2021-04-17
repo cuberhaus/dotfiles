@@ -12,6 +12,7 @@ fi
 
 SPACESHIP_EXIT_CODE_SHOW=true
 # SPACESHIP_USER_SHOW=always
+# eval $(keychain --eval dotfiles)
 
 ###############################################################
 # => Antigen
