@@ -42,9 +42,9 @@ fi
 # location
 function o() {
 	if [ $# -eq 0 ]; then
-		open . &;
+		open . &
 	else
-		open "$@" &;
+		open "$@" &
 	fi;
 }
 
