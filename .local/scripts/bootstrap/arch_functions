@@ -28,14 +28,7 @@ base_install () {
     $pac nemo-seahorse
     $pac nemo-share
 
-    # xmonad
-    $pac trayer                         #xmonad add a tray for apps
-    $pac xorg-xmessage                  # xmonad send messages
-    $pac xmonad-contrib
-    $pac xmobar
-
     # Terminal
-    $pac seahorse                       # Password keeper
     # $pac dhcpcd                         # Internet
     $pac base-devel                     # AUR
     $pac bat                            # "Cat" on steroids
@@ -65,6 +58,7 @@ base_install () {
     $pac rclone                         # Rsync to remote
     $pac reflector                      # Update Arch mirrors
     $pac ruby                           # Package manager
+    $pac seahorse                       # Password keeper
     $pac stow                           # To deploy dotfiles
     $pac svn                            # Similar to git
     $pac termite                        # Terminal emulator
@@ -242,6 +236,13 @@ i3_install () {
     $pac yad xdotool                    # Calendar
     $pac zenity                         # Poweroff menu i3blocks
     #$yay installs this: $pac  jq xdotool indent perl-anyevent-i3        # cava dependancies
+}
+
+xmonad_install () {
+    $pac trayer                         # xmonad add a tray for apps
+    $pac xorg-xmessage                  # xmonad send messages
+    $pac xmonad-contrib                 # Xmonad with extra plugins
+    $pac xmobar                         # Best bar for xmonad
 }
 
 # Best Desktop

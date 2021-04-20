@@ -14,6 +14,7 @@ yay_install # Needed to install AUR packages
 ### ONLY CHANGE FROM HERE ON
 base_install
 i3_install
+xmonad_install
 
 #applets                                        # Installs Cinnamon applets # implement pending
 #bloat_install
