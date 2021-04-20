@@ -407,3 +407,5 @@ exec tomighty &
 
 # Screenshots
 exec flameshot &
+
+exec conky --config=$HOME/.conky/helix/conky\ helix\ grey &
