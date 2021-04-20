@@ -78,7 +78,9 @@ base_install () {
     $pac zsh                            # Zsh shell
 
     # GUI
-    $pac conky                          # Desktop rice
+    # $pac conky                          # Desktop rice
+    $yay conky-cairo-no-nvidia          # fix lua
+    $yay conky-manager2-git
     $pac calibre                        # Book manager
     $pac discord
     $pac dunst                          # Notifications
