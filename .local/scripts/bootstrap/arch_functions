@@ -78,6 +78,7 @@ base_install () {
     $pac zsh                            # Zsh shell
 
     # GUI
+    $pac conky                          # Desktop rice
     $pac calibre                        # Book manager
     $pac discord
     $pac dunst                          # Notifications
