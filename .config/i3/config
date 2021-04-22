@@ -410,5 +410,6 @@ exec flameshot &
 
 ## Show day in a classy way
 exec conky --config=$HOME/.conky/helix/conky\ helix\ grey &
+
 ## Moar info
-exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &
+# exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &
