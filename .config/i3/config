@@ -47,7 +47,7 @@ set $exit "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really
 # => Config
 ###############################################################
 # Focus windows (Urgent won't switch focus for no goddamn reason)
-focus_on_window_activation smart
+# focus_on_window_activation smart 
 # focus_on_window_activation urgent
 
 # Window gaps
