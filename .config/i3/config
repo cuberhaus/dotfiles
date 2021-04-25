@@ -5,7 +5,7 @@
 set $mod Mod4
 
 # Paths
-set $conky_day "$HOME/.conky/helix/conky\ helix\ grey"
+set $conky_day "$HOME/.conky/helix/conky\ helix\ white"
 set $wallpaper "$HOME/.local/xdg/wallpapers/doggo.jpeg"
 
 # Define names for default workspaces for which we configure key bindings later on.
@@ -412,7 +412,7 @@ exec tomighty &
 exec flameshot &
 
 ## Show day in a classy way
-exec conky --config=$conky_day &
+exec conky --config="$conky_day" &
 
 ## Moar info
 # exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &
