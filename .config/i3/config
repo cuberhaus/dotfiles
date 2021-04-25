@@ -4,6 +4,10 @@
 # Set windows key as mod
 set $mod Mod4
 
+# Paths
+set $conky_day "$HOME/.conky/helix/conky\ helix\ grey"
+set $wallpaper "$HOME/.local/xdg/wallpapers/doggo.jpeg"
+
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
 set $ws1 "1: 1"
@@ -393,8 +397,7 @@ exec xfce4-clipman &
 
 # Wallpaper
 #exec dwall -s room &
-#exec feh --bg-scale ~/wallpapers/Arc_arch.png &
-exec feh --bg-scale ~/.local/xdg/wallpapers/doggo.jpeg &
+exec feh --bg-scale $wallpaper &
 
 # Thunderbird applet
 exec birdtray &
@@ -409,7 +412,7 @@ exec tomighty &
 exec flameshot &
 
 ## Show day in a classy way
-exec conky --config=$HOME/.conky/helix/conky\ helix\ grey &
+exec conky --config=$conky_day &
 
 ## Moar info
 # exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &
