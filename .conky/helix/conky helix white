@@ -33,11 +33,14 @@ conky.config = {
 	net_avg_samples = 2,
 	no_buffers = true,
 	override_utf8_locale = true,
-	own_window = true,
+    
+    own_window = true,
+    own_window_class = 'Conky',
+    own_window_type = 'override',
+
 	own_window_colour = '#000000',-- Black
 	own_window_hints = 'undecorated,below,sticky,skip_taskbar,skip_pager',
 	own_window_transparent = true,
-	own_window_type = 'normal',--# normal
 	pad_percents = 2,-- to co nizej, miejsc po przecinku
 	short_units = true,-- krotka wersja podawania wielkosci dyskow np. 612.21M/3.80G
 	stippled_borders = 3,
@@ -48,7 +51,7 @@ conky.config = {
 	use_spacer = 'right',
 	use_xft = true,
 	xftalpha = 1,
-	font = 'Freesans:pixelsize=9',
+	font = 'Freesans:pixelsize=20',
 
 	lua_load = '/home/didisoft/.conky/lua.lua',
 
@@ -59,7 +62,7 @@ conky.config = {
 };
 
 conky.text = [[
-${color white}${font ZegoeLight-U:pixelsize=40}${time %A}${font} 
+${color white}${font ZegoeLight-U:pixelsize=100}${time %A}${font} 
 _________________________
-${color white}${font ZegoeLight-U:pixelsize=15}${time %B %d, %Y}${font}	
+${color white}${font ZegoeLight-U:pixelsize=30}${time %B %d, %Y}${font}	
 ]];
