@@ -11,8 +11,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 SPACESHIP_EXIT_CODE_SHOW=true
-# SPACESHIP_USER_SHOW=always
-# eval $(keychain --eval dotfiles)
 
 ###############################################################
 # => Antigen
@@ -57,14 +55,9 @@ antigen apply
 
 # For more info: https://github.com/ohmyzsh/ohmyzsh/blob/master/templates/zshrc.zsh-template
 
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
 # Uncomment the following line to change how often to auto-update (in days).
 export UPDATE_ZSH_DAYS=7
 
-# copyfile <file> // copia un archivo al clipboard
-# command-not-found // Si no existe un comando da sugerencias
 ZSH_ALIAS_FINDER_AUTOMATIC=true
 
 ###############################################################
@@ -113,12 +106,11 @@ bindkey -M vicmd 'j' history-substring-search-down
 #Don't show message
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
-eval spaceship_vi_mode_enable
-
 ###############################################################
 # => Vim
 ###############################################################
 
+eval spaceship_vi_mode_enable
 # vi mode
 bindkey -v
 export KEYTIMEOUT=1
