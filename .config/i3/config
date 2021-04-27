@@ -38,7 +38,7 @@ set $VolumeUp  "changeVolume +2 unmute && pkill -SIGRTMIN+1 i3blocks"
 set $VolumeDown  "changeVolume -2 unmute && pkill -SIGRTMIN+1 i3blocks"
 # set $VolumeUp  "pactl set-sink-volume @DEFAULT_SINK@ +5% && pkill -SIGRTMIN+1 i3blocks"
 # set $VolumeDown  "pactl set-sink-volume @DEFAULT_SINK@ -5% && pkill -SIGRTMIN+1 i3blocks"
-set $AudioMute  "pactl set-sink-mute @DEFAULT_SINK@ toggle && pkill -SIGRTMIN+1 i3blocks"
+set $AudioMute  "pactl set-sink-mute @DEFAULT_SINK@ toggle && changeVolume && pkill -SIGRTMIN+1 i3blocks"
 set $MicMute "pactl set-source-mute @DEFAULT_SOURCE@ toggle && pkill -SIGRTMIN+1 i3blocks"
 #https://wiki.archlinux.org/index.php/MPRIS how to use bluetooth media controls
 set $play "playerctl play-pause"

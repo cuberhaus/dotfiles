@@ -8,7 +8,11 @@ msgId="991049"
 # amixer -c 0 set Master "$@" > /dev/null
 # echo "$@"
 # echo "$1"
-pactl set-sink-volume @DEFAULT_SINK@ "$1"% && pkill -SIGRTMIN+1 i3blocks
+if [ $# != 0 ]; then
+	pactl set-sink-volume @DEFAULT_SINK@ "$1"% && pkill -SIGRTMIN+1 i3blocks
+    # echo "No arguments provided"
+    # exit 1
+fi
 
 # Query amixer for the current volume and whether or not the speaker is muted
 # removes last character from string | sed 's/.$//'
