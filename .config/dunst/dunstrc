@@ -373,9 +373,9 @@
 #    summary = "*"
 #    script = dunst_espeak.sh
 
-#[script-test]
-#    summary = "*script*"
-#    script = dunst_test.sh
+# [script-test]
+#     appname = changeBrightness
+#     urgency = low
 
 #[ignore]
 #    # This notification will not be displayed
