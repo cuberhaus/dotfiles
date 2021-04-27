@@ -34,10 +34,10 @@ antigen bundle alias-finder
 
 # Load the theme.
 # https://github.com/romkatv/powerlevel10k
-#antigen theme romkatv/powerlevel10k
+antigen theme romkatv/powerlevel10k
 #antigen bundle mafredri/zsh-async # Pure
 #antigen bundle sindresorhus/pure # Pure
-antigen theme denysdovhan/spaceship-prompt # Spaceship
+#antigen theme denysdovhan/spaceship-prompt # Spaceship
 
 # Load bundles from external repos.
 #antigen bundle jeffreytse/zsh-vi-mode # Better keybindings and solves zsh+vim issues like starting vim with wrong cursor
@@ -110,7 +110,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 # => Vim
 ###############################################################
 
-eval spaceship_vi_mode_enable
+#eval spaceship_vi_mode_enable
 # vi mode
 bindkey -v
 export KEYTIMEOUT=1
