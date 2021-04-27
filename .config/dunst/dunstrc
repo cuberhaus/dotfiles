@@ -267,10 +267,10 @@
     # On the US keyboard layout "grave" is normally above TAB and left
     # of "1". Make sure this key actually exists on your keyboard layout,
     # e.g. check output of 'xmodmap -pke'
-    history = ctrl+grave
+    history = ctrl+masculine
 
     # Context menu.
-    context = ctrl+shift+period
+    context = ctrl+shift+masculine
 
 [urgency_low]
     # IMPORTANT: colors have to be defined in quotation marks.
