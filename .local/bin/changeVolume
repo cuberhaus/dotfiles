@@ -1,5 +1,6 @@
 #!/bin/bash
 # changeVolume
+# Author: https://github.com/cuberhaus/dotfiles
 
 # Arbitrary but unique message id
 msgId="991049"
@@ -8,10 +9,10 @@ msgId="991049"
 # amixer -c 0 set Master "$@" > /dev/null
 # echo "$@"
 # echo "$1"
+# Check number of arguments
 if [ $# != 0 ]; then
 	pactl set-sink-volume @DEFAULT_SINK@ "$1"% && pkill -SIGRTMIN+1 i3blocks
     # echo "No arguments provided"
-    # exit 1
 fi
 
 # Query amixer for the current volume and whether or not the speaker is muted
