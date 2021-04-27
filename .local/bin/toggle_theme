@@ -11,7 +11,7 @@ GTK3_CONFIG="$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
 
 ### Themes
 # GTK
-LIGHT_GTK_THEME="Arc"
+LIGHT_GTK_THEME="Adwaita"
 DARK_GTK_THEME="Arc-Dark"
 # LIGHT_GTK_THEME="Matcha-sea"
 # DARK_GTK_THEME="Matcha-dark-sea"
@@ -84,7 +84,7 @@ function update_termite {
 }
 
 function change_theme {
-    [ -f "$VIM_CONFIG" ] && update_vim $1
+    # [ -f "$VIM_CONFIG" ] && update_vim $1
 
     if [ -f "$GTK_CONFIG" ]; then 
         update_gtk_theme $1
@@ -95,9 +95,9 @@ function change_theme {
         update_gtk_theme $1
     fi
 
-    if [ "$(uname)" == "Linux" ]; then
-        [ -d "$TERMITE_FOLDER" ] && update_termite $1
-    fi
+    # if [ "$(uname)" == "Linux" ]; then
+    #     [ -d "$TERMITE_FOLDER" ] && update_termite $1
+    # fi
     wait
 }
 
