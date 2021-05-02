@@ -29,6 +29,10 @@ import System.IO
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
+-- Variables
+wallpaper :: String
+wallpaper = "$HOME/.local/xdg/wallpapers/doggo.jpeg"
+
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
@@ -278,11 +282,13 @@ myStartupHook = do
     spawnOnce "blueman-applet &"
     spawnOnce "udiskie &"
     spawnOnce "xfce4-clipman &"
-    spawnOnce "feh --bg-scale ~/.local/xdg/wallpapers/galaxy.jpg &"
+    spawnOnce "feh --bg-scale $HOME/.local/xdg/wallpapers/doggo.jpeg &"
     spawnOnce "birdtray &"
     spawnOnce "hp-systray &"
     spawnOnce "tomighty &"
     spawnOnce "flameshot &"
+    spawnOnce "conky --config=$HOME/.conky/helix/conky\\ helix\\ white & "
+-- escape needs to be double escaped in haskell
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
