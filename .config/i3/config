@@ -88,15 +88,15 @@ bindsym $mod+ctrl+d exec $discord
 # Google Chrome
 bindsym $mod+g exec $browser
 
+# File manager
+bindsym $mod+n exec $filemanager
+
 # Layout Scripts
 bindsym $mod+shift+n exec $HOME/.config/i3/i3-layout-manager/layout_manager.sh
 
 # Screen Printing
 bindsym Print exec $ScreenshotFast
 bindsym $mod+Print exec $ScreenshotOptions
-
-# File manager
-bindsym $mod+n exec $filemanager
 
 # Chmod +x to make work.sh executable
 set $layout Layout:  Spotify (s)

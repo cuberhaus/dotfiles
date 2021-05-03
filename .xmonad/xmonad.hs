@@ -42,9 +42,9 @@ whatsapp :: String
 whatsapp = "whatsapp-nativefier"
 -- Brightness
 brightUp :: String
-brightUp = "changeBrightness up && pkill -SIGRTMIN+2 i3blocks"
+brightUp = "changeBrightness 5 && pkill -SIGRTMIN+2 i3blocks"
 brightDown :: String
-brightDown = "changeBrightness down && pkill -SIGRTMIN+2 i3blocks"
+brightDown = "changeBrightness -5 && pkill -SIGRTMIN+2 i3blocks"
 -- Media
 volumeUp :: String
 volumeUp = "changeVolume +5 unmute && pkill -SIGRTMIN+1 i3blocks"
@@ -60,6 +60,13 @@ mediaNext :: String
 mediaNext = "playerctl next"
 mediaPrev :: String
 mediaPrev = "playerctl previous"
+
+screenShotFast :: String
+screenShotFast = "flameshot full -p $HOME/Pictures"
+screenShotOptions :: String
+screenShotOptions = "flameshot gui -p $HOME/Pictures"
+explorer :: String
+explorer = "nemo"
 
 
 -- The preferred terminal program, which is used in a binding below and by
@@ -369,7 +376,10 @@ main = do
         , ("<XF86AudioRaiseVolume>", spawn volumeUp)
         , ("<XF86MonBrightnessUp>", spawn brightUp)
         , ("<XF86MonBrightnessDown>", spawn brightDown)
+        , ("<Print>", spawn screenShotFast)
+        , ("M-<Print>", spawn screenShotOption)
         , (("M-g"), spawn browser) -- Windows + g (meta key is windows key)
+        , (("M-n"), spawn explorer)
         , (("M-C-w"), spawn whatsapp) -- Windows + ctrl + w
         ]
 
