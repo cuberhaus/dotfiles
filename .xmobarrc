@@ -1,15 +1,26 @@
-Config { font = "-*-Fixed-Bold-R-Normal-*-13-*-*-*-*-*-*-*"
-       , bgColor = "black"
-       , fgColor = "grey"
-       , position = TopW L 90
-       , commands = [ Run Weather "EGPF" ["-t"," <tempF>F","-L","64","-H","77","--normal","green","--high","red","--low","lightblue"] 36000
-                    , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
-                    , Run Memory ["-t","Mem: <usedratio>%"] 10
-                    , Run Swap [] 10
-                    , Run Date "%a %b %_d %l:%M" "date" 10
-                    , Run StdinReader
-                    ]
-       , sepChar = "%"
-       , alignSep = "}{"
-       , template = "%StdinReader% }{ %cpu% | %memory% * %swap%    <fc=#ee9a00>%date%</fc> | %EGPF%"
-       }
+Config {
+    font = "xft:Ubuntu:weight=bold:pixelsize=12:antialias=true:hinting=true"
+        , bgColor = "black"
+        , fgColor = "grey"
+        , position = TopW L 90
+        , commands = [ Run Weather "EGPF" ["-t"," <tempF>F","-L","64","-H","77","--normal","green","--high","red","--low","lightblue"] 36000
+            , Run Battery [
+            "-t", "<acstatus>: <left>% - <timeleft>",
+            "--",
+            --"-c", "charge_full",
+            "-O", "AC",
+            "-o", "Bat",
+            "-h", "green",
+            "-l", "red"
+            ] 10
+            , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
+            , Run Memory ["-t","Mem: <usedratio>%"] 10
+            , Run Swap [] 10
+            , Run Date "%a %b %_d %l:%M" "date" 10
+            , Run Com "/bin/bash" ["-c", "echo `light -G | grep -oE '^.[0-9]{0,3}'`%"]  "mybright" 1
+            , Run StdinReader
+        ]
+        , sepChar = "%"
+        , alignSep = "}{"
+        , template = "%StdinReader% }{ %battery% | Lum: %mybright% | %cpu% | %memory% * %swap%    <fc=#ee9a00>%date%</fc> | %EGPF%"
+}

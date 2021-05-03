@@ -377,7 +377,7 @@ main = do
         , ("<XF86MonBrightnessUp>", spawn brightUp)
         , ("<XF86MonBrightnessDown>", spawn brightDown)
         , ("<Print>", spawn screenShotFast)
-        , ("M-<Print>", spawn screenShotOption)
+        , ("M-<Print>", spawn screenShotOptions)
         , (("M-g"), spawn browser) -- Windows + g (meta key is windows key)
         , (("M-n"), spawn explorer)
         , (("M-C-w"), spawn whatsapp) -- Windows + ctrl + w
