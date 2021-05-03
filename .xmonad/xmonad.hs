@@ -13,10 +13,14 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ServerMode
+-- LAYOUTS
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Tabbed
+import XMonad.Layout.Spacing --add gaps
+import XMonad.Layout.Gaps
+
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
@@ -32,6 +36,31 @@ import qualified Data.Map        as M
 -- Variables
 wallpaper :: String
 wallpaper = "$HOME/.local/xdg/wallpapers/doggo.jpeg"
+browser :: String
+browser = "google-chrome-stable"
+whatsapp :: String
+whatsapp = "whatsapp-nativefier"
+-- Brightness
+brightUp :: String
+brightUp = "changeBrightness up && pkill -SIGRTMIN+2 i3blocks"
+brightDown :: String
+brightDown = "changeBrightness down && pkill -SIGRTMIN+2 i3blocks"
+-- Media
+volumeUp :: String
+volumeUp = "changeVolume +5 unmute && pkill -SIGRTMIN+1 i3blocks"
+volumeDown :: String
+volumeDown = "changeVolume -5 unmute && pkill -SIGRTMIN+1 i3blocks"
+audioMute :: String
+audioMute = "pactl set-sink-mute @DEFAULT_SINK@ toggle && changeVolume && pkill -SIGRTMIN+1 i3blocks"
+mediaPlay :: String
+mediaPlay = "playerctl play-pause"
+mediaPause :: String
+mediaPause = "playerctl pause"
+mediaNext :: String
+mediaNext = "playerctl next"
+mediaPrev :: String
+mediaPrev = "playerctl previous"
+
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
@@ -48,7 +77,7 @@ myClickJustFocuses = False
 
 -- Width of the window border in pixels.
 --
-myBorderWidth   = 2
+myBorderWidth   = 3
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -71,7 +100,7 @@ myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
 -- Border colors for unfocused and focused windows, respectively.
 --
 myNormalBorderColor  = "#dddddd"
-myFocusedBorderColor = "#7b68ee"
+myFocusedBorderColor = "#ff0000"
 
 ------------------------------------------------------------------------
     -- Key bindings. Add, modify or remove key bindings here.
@@ -315,7 +344,7 @@ main = do
         -- mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = smartBorders . avoidStruts   $    layoutHook defaultConfig,
+        layoutHook         = spacing 2 . smartBorders . avoidStruts   $    layoutHook defaultConfig,
         -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
         manageHook         = manageDocks <+> myManageHook,
         handleEventHook    = myEventHook
@@ -328,16 +357,21 @@ main = do
             },
 
         startupHook        = myStartupHook
-                                 } `additionalKeysP` [     
-
+                                 }
+        `additionalKeysP` [
         -- Multimedia Keys
-       ("<XF86AudioPlay>", spawn (myTerminal ++ "mocp --play"))
-       , ("<XF86AudioPrev>", spawn (myTerminal ++ "mocp --previous"))
-       , ("<XF86AudioNext>", spawn (myTerminal ++ "mocp --next"))
-        ,("<XF86AudioMute>", spawn "amixer set Master toggle")
-       , ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%- unmute")
-       , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+ unmute")
-                                                     ]
+        ("<XF86AudioPlay>", spawn mediaPlay)
+        , ("<XF86AudioPrev>", spawn mediaPrev)
+        , ("<XF86AudioNext>", spawn mediaNext)
+        , ("<XF86AudioStop>", spawn mediaPause)
+        , ("<XF86AudioMute>", spawn audioMute)
+        , ("<XF86AudioLowerVolume>", spawn volumeDown)
+        , ("<XF86AudioRaiseVolume>", spawn volumeUp)
+        , ("<XF86MonBrightnessUp>", spawn brightUp)
+        , ("<XF86MonBrightnessDown>", spawn brightDown)
+        , (("M-g"), spawn browser) -- Windows + g (meta key is windows key)
+        , (("M-C-w"), spawn whatsapp) -- Windows + ctrl + w
+        ]
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will

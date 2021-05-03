@@ -34,10 +34,10 @@ set $commandlauncher "rofi -modi window,drun,run -show run -show-icons -terminal
 # i3blocks specific
 # set $BrightUp "light -A 5 && pkill -SIGRTMIN+2 i3blocks"
 # set $BrightDown "light -U 5 && pkill -SIGRTMIN+2 i3blocks"
-set $BrightUp "changeBrightness up && pkill -SIGRTMIN+2 i3blocks"
-set $BrightDown "changeBrightness down && pkill -SIGRTMIN+2 i3blocks"
-set $VolumeUp  "changeVolume +2 unmute && pkill -SIGRTMIN+1 i3blocks"
-set $VolumeDown  "changeVolume -2 unmute && pkill -SIGRTMIN+1 i3blocks"
+set $BrightUp "changeBrightness 5 && pkill -SIGRTMIN+2 i3blocks"
+set $BrightDown "changeBrightness -5 down && pkill -SIGRTMIN+2 i3blocks"
+set $VolumeUp  "changeVolume +5 unmute && pkill -SIGRTMIN+1 i3blocks"
+set $VolumeDown  "changeVolume -5 unmute && pkill -SIGRTMIN+1 i3blocks"
 # set $VolumeUp  "pactl set-sink-volume @DEFAULT_SINK@ +5% && pkill -SIGRTMIN+1 i3blocks"
 # set $VolumeDown  "pactl set-sink-volume @DEFAULT_SINK@ -5% && pkill -SIGRTMIN+1 i3blocks"
 set $AudioMute  "pactl set-sink-mute @DEFAULT_SINK@ toggle && changeVolume && pkill -SIGRTMIN+1 i3blocks"
@@ -175,7 +175,7 @@ bindsym XF86AudioMicMute exec --no-startup-id $MicMute
 
 # Play/pause next/previous
 bindsym XF86AudioPlay exec $play
-bindsym XF86AudioPause exec $pause
+bindsym XF86AudioStop exec $pause
 bindsym XF86AudioNext exec $next
 bindsym XF86AudioPrev exec $prev
 
