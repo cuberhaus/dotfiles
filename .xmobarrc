@@ -2,7 +2,7 @@ Config {
     font = "xft:Ubuntu:weight=bold:pixelsize=12:antialias=true:hinting=true"
         , bgColor = "#2f343f"
         , fgColor = "#f3f4f5"
-        , position = TopW L 90
+        , position = BottomW L 90
         , commands = [ Run Weather "EGPF" ["-t"," <tempC>C","-L","64","-H","77","--normal","green","--high","red","--low","lightblue"] 36000
             , Run Battery [
             "-t", "<acstatus>: <left>%",
