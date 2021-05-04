@@ -22,11 +22,13 @@ Config {
                   "--normal", "grey50", "--high", "#a0522d",
                   "--low", "#2f4f4f"] 20
             , Run Com "/bin/bash" ["-c", "echo `light -G | grep -oE '^.[0-9]{0,3}'`%"]  "mybright" 1
+            , Run Locks
+            , Run Volume "default" "Master" [] 10
             , Run StdinReader
         ]
         , sepChar = "%"
         , alignSep = "}{"
-        , template = "%StdinReader% }{ %battery% | Free: %disku% | Lum: %mybright% |    <fc=#ee9a00>%date%</fc>"
+        , template = "%StdinReader% }{ %default:Master%  |  %battery%  |  Free: %disku%  |  Lum: %mybright% |    <fc=#ee9a00>%date%</fc>"
 
         -- , template = "%StdinReader% }{ %battery% | Lum: %mybright% | %cpu% | %memory% * %swap%    <fc=#ee9a00>%date%</fc> | %EGPF%"
 }
