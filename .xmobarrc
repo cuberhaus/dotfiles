@@ -1,11 +1,11 @@
 Config {
     font = "xft:Ubuntu:weight=bold:pixelsize=12:antialias=true:hinting=true"
-        , bgColor = "black"
-        , fgColor = "grey"
+        , bgColor = "#2f343f"
+        , fgColor = "#f3f4f5"
         , position = TopW L 90
         , commands = [ Run Weather "EGPF" ["-t"," <tempC>C","-L","64","-H","77","--normal","green","--high","red","--low","lightblue"] 36000
             , Run Battery [
-            "-t", "<acstatus>: <left>% - <timeleft>",
+            "-t", "<acstatus>: <left>%",
             "--",
             --"-c", "charge_full",
             "-O", "AC",
@@ -19,8 +19,8 @@ Config {
             , Run Date "%a %b %_d %l:%M" "date" 10
             , Run DiskU [("/", "<free>")]
                   ["-L", "20", "-H", "50", "-m", "1", "-p", "3",
-                  "--normal", "grey50", "--high", "#a0522d",
-                  "--low", "#2f4f4f"] 20
+                  "--normal", "#f3f4f5", "--high", "#f3f4f5",
+                  "--low", "#E53935"] 20
             , Run Com "/bin/bash" ["-c", "echo `light -G | grep -oE '^.[0-9]{0,3}'`%"]  "mybright" 1
             , Run Locks
             , Run Kbd  [("us(dvorak)", "DV"), ("us", "US")]
@@ -29,7 +29,7 @@ Config {
         ]
         , sepChar = "%"
         , alignSep = "}{"
-        , template = "%StdinReader% }{ %locks%   %kbd%   |  %battery%  |  Free: %disku%  |  %default:Master%|  Lum: %mybright% |    <fc=#ee9a00>%date%</fc>"
+        , template = "%StdinReader% }{ %locks%   |   %battery%   |   Free: %disku%  |   %default:Master%   |   Lum: %mybright%   |   %kbd%   |   <fc=#ee9a00>%date%</fc>"
 
         -- , template = "%StdinReader% }{ %battery% | Lum: %mybright% | %cpu% | %memory% * %swap%    <fc=#ee9a00>%date%</fc> | %EGPF%"
 }
