@@ -43,7 +43,7 @@ import XMonad.Util.SpawnOnce
 
 -- Variables
 wallpaper :: String
-wallpaper = "$HOME/.local/xdg/wallpapers/doggo.jpeg"
+wallpaper = "$HOME/.local/xdg/wallpapers/linux/1.png"
 browser :: String
 browser = "google-chrome-stable"
 whatsapp :: String
@@ -117,9 +117,11 @@ myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
 
 -- Border colors for unfocused and focused windows, respectively.
 --
-myNormalBorderColor  = "#dddddd"
-myFocusedBorderColor = "#ff0000"
+-- myNormalBorderColor  = "#dddddd"
+-- myFocusedBorderColor = "#ff0000"
 
+myNormalBorderColor  = "#2f343f"
+myFocusedBorderColor = "#bd93f9"
 ------------------------------------------------------------------------
     -- Key bindings. Add, modify or remove key bindings here.
 --
