@@ -43,7 +43,7 @@ import XMonad.Util.SpawnOnce
 
 -- Variables
 wallpaper :: String
-wallpaper = "$HOME/.local/xdg/wallpapers/linux/1.png"
+wallpaper = "$HOME/.local/xdg/wallpapers/doggo.jpeg"
 browser :: String
 browser = "google-chrome-stable"
 whatsapp :: String
