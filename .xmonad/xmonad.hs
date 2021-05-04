@@ -1,3 +1,5 @@
+-- My take on Xmonad WM
+-- Author: https://github.com/cuberhaus/dotfiles
 --
 -- xmonad example config file.
 --
@@ -14,6 +16,7 @@ import Data.Monoid
 import System.Exit
 import System.IO
 import XMonad
+import Data.Maybe (fromJust)
 -- Actions
 import XMonad.Actions.Promote
 import XMonad.Actions.RotSlaves (rotAllDown, rotSlavesDown)
@@ -132,8 +135,14 @@ myModMask = mod4Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+-- myWorkspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
+-- myWorkspaces = [" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ", " 9 "]
+myWorkspaces = [" dev ", " www ", " sys ", " doc ", " vbox ", " chat ", " mus ", " vid ", " gfx "]
+myWorkspaceIndices = M.fromList $ zipWith (,) myWorkspaces [1..] -- (,) == \x y -> (x,y)
+
+clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
+    where i = fromJust $ M.lookup ws myWorkspaceIndices
 -- Border colors for unfocused and focused windows, respectively.
 
 -- With transparency
@@ -389,12 +398,12 @@ main = do
           clickJustFocuses = myClickJustFocuses,
           borderWidth = myBorderWidth,
           modMask = myModMask,
-          -- workspaces         = myWorkspaces,
+          workspaces         = myWorkspaces,
           normalBorderColor = myNormalBorderColor,
           focusedBorderColor = myFocusedBorderColor,
           -- key bindings
           keys = myKeys,
-          -- mouseBindings      = myMouseBindings,
+          mouseBindings      = myMouseBindings,
 
           -- hooks, layouts
           layoutHook = myLayout,
@@ -407,8 +416,14 @@ main = do
           logHook =
             dynamicLogWithPP
               xmobarPP
-                { ppOutput = hPutStrLn xmproc,
-                  ppTitle = xmobarColor "#bd93f9" "" . shorten 50
+                { ppOutput = hPutStrLn xmproc
+                , ppCurrent = xmobarColor "#98be65" "" . wrap "[" "]"           -- Current workspace
+                 , ppVisible = xmobarColor "#98be65" "" . clickable              -- Visible but not current workspace
+                 , ppHidden = xmobarColor "#82AAFF" "" . wrap "*" "" . clickable -- Hidden workspaces
+                 , ppHiddenNoWindows = xmobarColor "#c792ea" ""  . clickable     -- Hidden workspaces (no windows)
+                , ppTitle = xmobarColor "#b3afc2" "" . shorten 60               -- Title of active window
+                , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"            -- Urgent workspace
+                , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]                    -- order of things in xmobar
                 },
           startupHook = myStartupHook
         }

@@ -25,11 +25,14 @@ Config {
             , Run Locks
             , Run Kbd  [("us(dvorak)", "DV"), ("us", "US")]
             , Run Volume "default" "Master" [] 10
-            , Run StdinReader
+            , Run UnsafeStdinReader
         ]
         , sepChar = "%"
         , alignSep = "}{"
-        , template = "%StdinReader% }{ %locks%   |   %battery%   |   Free: %disku%  |   %default:Master%   |   Lum: %mybright%   |   %kbd%   |   Time: <fc=#f3f4f5>%date%</fc>   "
+        , template = "%UnsafeStdinReader% }{ %locks%   |   %battery%   |   Free: %disku%  |   %default:Master%   |   Lum: %mybright%   |   %kbd%   |   Time: <fc=#f3f4f5>%date%</fc>   "
+
+}
+
 
         -- , template = "%StdinReader% }{ %battery% | Lum: %mybright% | %cpu% | %memory% * %swap%    <fc=#ee9a00>%date%</fc> | %EGPF%"
-}
+
