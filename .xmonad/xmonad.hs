@@ -44,13 +44,15 @@ import XMonad.Util.SpawnOnce
 -- Variables
 wallpaper :: String
 wallpaper = "$HOME/.local/xdg/wallpapers/doggo.jpeg"
+helix :: String
+helix = "$HOME/.conky/helix/conky\\ helix\\ white"
+-- Applications
 browser :: String
 browser = "google-chrome-stable"
 whatsapp :: String
 whatsapp = "whatsapp-nativefier"
-helix :: String
-helix = "$HOME/.conky/helix/conky\\ helix\\ white"
-
+explorer :: String
+explorer = "nemo"
 -- Brightness
 brightUp :: String
 brightUp = "changeBrightness 5 && pkill -SIGRTMIN+2 i3blocks"
@@ -71,13 +73,11 @@ mediaNext :: String
 mediaNext = "playerctl next"
 mediaPrev :: String
 mediaPrev = "playerctl previous"
--- 
+-- Screenshots
 screenShotFast :: String
 screenShotFast = "flameshot full -p $HOME/Pictures"
 screenShotOptions :: String
 screenShotOptions = "flameshot gui -p $HOME/Pictures"
-explorer :: String
-explorer = "nemo"
 
 
 -- The preferred terminal program, which is used in a binding below and by
@@ -127,7 +127,7 @@ myNormalBorderColor  = "#000000"
 ------------------------------------------------------------------------
     -- Key bindings. Add, modify or remove key bindings here.
 --
-myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
+myKeys conf@XConfig {XMonad.modMask = modm} = M.fromList $
 
     -- launch a terminal
     [ ((modm,  xK_Return), spawn $ XMonad.terminal conf)
@@ -224,18 +224,18 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 ------------------------------------------------------------------------
     -- Mouse bindings: default actions bound to mouse events
 --
-myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
+myMouseBindings XConfig {XMonad.modMask = modm} = M.fromList $
 
     -- mod-button1, Set the window to floating mode and move by dragging
-    [ ((modm, button1), (\w -> focus w >> mouseMoveWindow w
-                                       >> windows W.shiftMaster))
+    [ ((modm, button1), \w -> focus w >> mouseMoveWindow w
+                                       >> windows W.shiftMaster)
 
     -- mod-button2, Raise the window to the top of the stack
-      , ((modm, button2), (\w -> focus w >> windows W.shiftMaster))
+      , ((modm, button2), \w -> focus w >> windows W.shiftMaster)
 
     -- mod-button3, Set the window to floating mode and resize by dragging
-    , ((modm, button3), (\w -> focus w >> mouseResizeWindow w
-                                       >> windows W.shiftMaster))
+    , ((modm, button3), \w -> focus w >> mouseResizeWindow w
+                                       >> windows W.shiftMaster)
 
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
@@ -253,7 +253,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 --
 -- myLayout = tiled ||| Mirror tiled ||| Full
 
-myLayout = avoidStruts $ smartBorders $ spacingRaw True (Border 0 4 4 4) True (Border 4 4 4 4) True $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ (tiled ||| Accordion ||| spiral(6/7) ||| ThreeCol 1 (3/100) (1/2) ) 
+myLayout = avoidStruts $ smartBorders $ spacingRaw True (Border 0 4 4 4) True (Border 4 4 4 4) True $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ (tiled ||| Accordion ||| spiral(6/7) ||| ThreeCol 1 (3/100) (1/2) )
     where
         -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
@@ -395,9 +395,9 @@ main = do
           , ("<XF86MonBrightnessDown>", spawn brightDown)
           , ("<Print>", spawn screenShotFast)
           , ("M-<Print>", spawn screenShotOptions)
-          , (("M-g"), spawn browser) -- Windows + g (meta key is windows key)
-          , (("M-n"), spawn explorer)
-          , (("M-C-w"), spawn whatsapp) -- Windows + ctrl + w
+          , ("M-g", spawn browser) -- Windows + g (meta key is windows key)
+          , ("M-n", spawn explorer)
+          , ("M-C-w", spawn whatsapp) -- Windows + ctrl + w
                           ]
 
 -- A structure containing your configuration settings, overriding
