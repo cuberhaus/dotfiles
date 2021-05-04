@@ -116,12 +116,14 @@ myModMask       = mod4Mask
 myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
 
 -- Border colors for unfocused and focused windows, respectively.
---
--- myNormalBorderColor  = "#dddddd"
--- myFocusedBorderColor = "#ff0000"
 
-myNormalBorderColor  = "#2f343f"
-myFocusedBorderColor = "#bd93f9"
+-- With transparency
+myFocusedBorderColor = "#dddddd"
+myNormalBorderColor  = "#000000"
+
+-- No transparency
+--myNormalBorderColor  = "#2f343f"
+--myFocusedBorderColor = "#bd93f9"
 ------------------------------------------------------------------------
     -- Key bindings. Add, modify or remove key bindings here.
 --
