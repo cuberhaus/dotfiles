@@ -133,7 +133,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((modm,               xK_x     ), sendMessage $ Toggle MIRROR)
 
     -- Toggle fullscreen ?
-      , ((modm, xK_Caps_Lock), sendMessage $ Toggle FULL)
+      , ((modm, xK_f), sendMessage $ Toggle FULL)
 
     --  Reset the layouts on the current workspace to default
       , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
@@ -247,7 +247,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- which denotes layout choice.
 --
 -- myLayout = tiled ||| Mirror tiled ||| Full
-myLayout = avoidStruts $ spacing 2 $ smartBorders  $ mkToggle (single MIRROR) (tiled ||| Mirror tiled ||| Full)
+myLayout = avoidStruts $ spacing 2 $ smartBorders  $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ (tiled ||| Mirror tiled ||| Full)
     where
         -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
