@@ -47,6 +47,9 @@ browser :: String
 browser = "google-chrome-stable"
 whatsapp :: String
 whatsapp = "whatsapp-nativefier"
+helix :: String
+helix = "$HOME/.conky/helix/conky\\ helix\\ white"
+
 -- Brightness
 brightUp :: String
 brightUp = "changeBrightness 5 && pkill -SIGRTMIN+2 i3blocks"
@@ -67,7 +70,7 @@ mediaNext :: String
 mediaNext = "playerctl next"
 mediaPrev :: String
 mediaPrev = "playerctl previous"
-
+-- 
 screenShotFast :: String
 screenShotFast = "flameshot full -p $HOME/Pictures"
 screenShotOptions :: String
@@ -334,12 +337,12 @@ myStartupHook = do
     spawnOnce "blueman-applet &"
     spawnOnce "udiskie &"
     spawnOnce "xfce4-clipman &"
-    spawnOnce "feh --bg-scale $HOME/.local/xdg/wallpapers/doggo.jpeg &"
+    spawnOnce ("feh --bg-scale " ++ wallpaper ++ "& ")
     spawnOnce "birdtray &"
     spawnOnce "hp-systray &"
     spawnOnce "tomighty &"
     spawnOnce "flameshot &"
-    spawnOnce "conky --config=$HOME/.conky/helix/conky\\ helix\\ white & "
+    spawnOnce ("conky --config=" ++ helix ++ "& ")
 -- escape needs to be double escaped in haskell
 
 ------------------------------------------------------------------------
