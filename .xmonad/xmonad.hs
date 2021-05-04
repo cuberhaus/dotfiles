@@ -124,7 +124,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
 
     -- close focused window
-      , ((modm .|. shiftMask, xK_q     ), kill)
+    , ((modm .|. shiftMask, xK_q     ), kill)
 
      -- Rotate through the available layout algorithms
     , ((modm,               xK_space ), sendMessage NextLayout)
@@ -151,10 +151,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((modm,               xK_k     ), windows W.focusUp  )
 
     -- Move focus to the master window
-    , ((modm,               xK_m     ), windows W.focusMaster  )
+      , ((modm,               xK_m     ), windows W.focusMaster  )
 
     -- Swap the focused window and the master window
-      , ((modm .|. shiftMask, xK_Return), windows W.swapMaster)
+    , ((modm .|. shiftMask, xK_Return), windows W.swapMaster)
 
     -- Swap the focused window with the next window
       , ((modm .|. shiftMask, xK_j     ), windows W.swapDown  )
@@ -169,7 +169,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((modm,               xK_l     ), sendMessage Expand)
 
     -- Push window back into tiling
-      , ((modm,               xK_t     ), withFocused $ windows . W.sink)
+    , ((modm,               xK_t     ), withFocused $ windows . W.sink)
 
     -- Increment the number of windows in the master area
       , ((modm              , xK_comma ), sendMessage (IncMasterN 1))
@@ -201,7 +201,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     --
     [((m .|. modm, k), windows $ f i)
       | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
-    , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
+      , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
     ++
 
     --
@@ -229,7 +229,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((modm, button2), (\w -> focus w >> windows W.shiftMaster))
 
     -- mod-button3, Set the window to floating mode and resize by dragging
-      , ((modm, button3), (\w -> focus w >> mouseResizeWindow w
+    , ((modm, button3), (\w -> focus w >> mouseResizeWindow w
                                        >> windows W.shiftMaster))
 
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
@@ -277,10 +277,19 @@ myLayout = mkToggle (single MIRROR) (tiled ||| Full)
 -- 'className' and 'resource' are used below.
 --
 myManageHook = composeAll
-    [ className =? "MPlayer"        --> doFloat
-      , className =? "Gimp"           --> doFloat
-      , resource  =? "desktop_window" --> doIgnore
-      , resource  =? "kdesktop"       --> doIgnore ]
+    [ className =? "confirm"         --> doFloat
+    , className =? "Gimp"           --> doFloat
+    , className =? "MPlayer"        --> doFloat
+    , className =? "dialog"          --> doFloat
+    , className =? "download"        --> doFloat
+    , className =? "error"           --> doFloat
+    , className =? "file_progress"   --> doFloat
+    , className =? "notification"    --> doFloat
+    , className =? "pinentry-gtk-2"  --> doFloat
+    , className =? "splash"          --> doFloat
+    , className =? "toolbar"         --> doFloat
+    , resource  =? "desktop_window" --> doIgnore
+    , resource  =? "kdesktop"       --> doIgnore ]
 
 ------------------------------------------------------------------------
     -- Event handling
@@ -368,20 +377,20 @@ main = do
         `additionalKeysP` [
         -- Multimedia Keys
         ("<XF86AudioPlay>", spawn mediaPlay)
-        , ("<XF86AudioPrev>", spawn mediaPrev)
-        , ("<XF86AudioNext>", spawn mediaNext)
-        , ("<XF86AudioStop>", spawn mediaPause)
-        , ("<XF86AudioMute>", spawn audioMute)
-        , ("<XF86AudioLowerVolume>", spawn volumeDown)
-        , ("<XF86AudioRaiseVolume>", spawn volumeUp)
-        , ("<XF86MonBrightnessUp>", spawn brightUp)
-        , ("<XF86MonBrightnessDown>", spawn brightDown)
-        , ("<Print>", spawn screenShotFast)
-        , ("M-<Print>", spawn screenShotOptions)
-        , (("M-g"), spawn browser) -- Windows + g (meta key is windows key)
-        , (("M-n"), spawn explorer)
-        , (("M-C-w"), spawn whatsapp) -- Windows + ctrl + w
-        ]
+          , ("<XF86AudioPrev>", spawn mediaPrev)
+          , ("<XF86AudioNext>", spawn mediaNext)
+          , ("<XF86AudioStop>", spawn mediaPause)
+          , ("<XF86AudioMute>", spawn audioMute)
+          , ("<XF86AudioLowerVolume>", spawn volumeDown)
+          , ("<XF86AudioRaiseVolume>", spawn volumeUp)
+          , ("<XF86MonBrightnessUp>", spawn brightUp)
+          , ("<XF86MonBrightnessDown>", spawn brightDown)
+          , ("<Print>", spawn screenShotFast)
+          , ("M-<Print>", spawn screenShotOptions)
+          , (("M-g"), spawn browser) -- Windows + g (meta key is windows key)
+          , (("M-n"), spawn explorer)
+          , (("M-C-w"), spawn whatsapp) -- Windows + ctrl + w
+                          ]
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
