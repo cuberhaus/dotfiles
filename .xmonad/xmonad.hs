@@ -21,6 +21,7 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ServerMode
+import XMonad.Hooks.InsertPosition
 -- Layouts
 import XMonad.Layout.Accordion
 import XMonad.Layout.GridVariants (Grid(Grid))
@@ -30,7 +31,6 @@ import XMonad.Layout.Spiral
 import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
 -- Layout modifiers
-import XMonad.Layout.Gaps
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.NoBorders
@@ -143,7 +143,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       , ((modm,               xK_x     ), sendMessage $ Toggle MIRROR)
 
     -- Toggle fullscreen ?
-      , ((modm, xK_f), sendMessage $ Toggle FULL)
+      , ((modm, xK_f), sendMessage  (Toggle FULL)  >> sendMessage ToggleStruts  )
 
     --  Reset the layouts on the current workspace to default
       , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
@@ -180,7 +180,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- Push window back into tiling
     , ((modm,               xK_t     ), withFocused $ windows . W.sink)
-
+    ,((modm, xK_b     ), sendMessage ToggleStruts)
     -- Increment the number of windows in the master area
       , ((modm              , xK_comma ), sendMessage (IncMasterN 1))
 
@@ -256,7 +256,8 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- which denotes layout choice.
 --
 -- myLayout = tiled ||| Mirror tiled ||| Full
-myLayout = avoidStruts $ spacing 2 $ smartBorders  $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ (tiled ||| Accordion ||| spiral(6/7) ||| ThreeCol 1 (3/100) (1/2) ) 
+
+myLayout = avoidStruts $ smartBorders $ spacingRaw True (Border 0 4 4 4) True (Border 4 4 4 4) True $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ (tiled ||| Accordion ||| spiral(6/7) ||| ThreeCol 1 (3/100) (1/2) ) 
     where
         -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
@@ -372,7 +373,7 @@ main = do
       -- hooks, layouts
         layoutHook         = myLayout ,
         -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
-        manageHook         = myManageHook <+> manageDocks ,
+        manageHook         = insertPosition Below Newer <+> myManageHook <+> manageDocks ,
         handleEventHook    = myEventHook
                             <+> fullscreenEventHook
                             <+> docksEventHook
