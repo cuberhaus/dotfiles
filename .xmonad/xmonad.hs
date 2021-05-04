@@ -14,11 +14,13 @@ import Data.Monoid
 import System.Exit
 import System.IO
 import XMonad
--- Hooks
-
 -- Actions
+import XMonad.Actions.Promote
+import XMonad.Actions.RotSlaves (rotAllDown, rotSlavesDown)
 import XMonad.Actions.WithAll (killAll, sinkAll)
+-- Config
 import XMonad.Config.Desktop
+-- Hooks
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.FadeWindows
@@ -152,30 +154,8 @@ myKeys conf@XConfig {XMonad.modMask = modm} =
       -- -- Resize viewed windows to the correct size
       -- , ((modm,               xK_r     ), refresh)
 
-      -- Move focus to the next window
-      ((modm, xK_Tab), windows W.focusDown),
-      -- Move focus to the next window
-      ((modm, xK_j), windows W.focusDown),
-      -- Move focus to the previous window
-      ((modm, xK_k), windows W.focusUp),
-      -- Move focus to the master window
-      ((modm, xK_m), windows W.focusMaster),
-      -- Swap the focused window and the master window
-      ((modm .|. shiftMask, xK_Return), windows W.swapMaster),
-      -- Swap the focused window with the next window
-      ((modm .|. shiftMask, xK_j), windows W.swapDown),
-      -- Swap the focused window with the previous window
-      ((modm .|. shiftMask, xK_k), windows W.swapUp),
-      -- Shrink the master area
-      ((modm, xK_h), sendMessage Shrink),
-      -- Expand the master area
-      ((modm, xK_l), sendMessage Expand),
       -- Push window back into tiling
       ((modm, xK_t), withFocused $ windows . W.sink),
-      -- Increment the number of windows in the master area
-      ((modm, xK_comma), sendMessage (IncMasterN 1)),
-      -- Deincrement the number of windows in the master area
-      ((modm, xK_period), sendMessage (IncMasterN (-1))),
       -- Quit xmonad
       ((modm .|. shiftMask, xK_e), io exitSuccess),
       -- -- Restart xmonad
@@ -241,8 +221,7 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
 --
 -- myLayout = tiled ||| Mirror tiled ||| Full
 
--- ||| tiled (deprecated by resizableTall)
-myLayout = avoidStruts $ smartBorders $ spacingRaw True (Border 0 4 4 4) True (Border 4 4 4 4) True $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ (ResizableTall 1 (3/100) (1/2) [] ||| Accordion ||| spiral (6 / 7) ||| ThreeCol 1 (3 / 100) (1 / 2))
+myLayout = avoidStruts $ smartBorders $ spacingRaw True (Border 0 4 4 4) True (Border 4 4 4 4) True $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ (tiled ||| ResizableTall 1 (3 / 100) (1 / 2) [] ||| Accordion ||| spiral (6 / 7) ||| ThreeCol 1 (3 / 100) (1 / 2))
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled = Tall nmaster delta ratio
@@ -372,10 +351,29 @@ myEmacsKeys =
     ("M-x", sendMessage $ Toggle MIRROR), -- Mirror current layout
     ("M-f", sendMessage (Toggle FULL) >> sendMessage ToggleStruts), -- Toggle fullscreen
     -- Window resizing
+    ("M-M1-j", sendMessage MirrorShrink), -- Shrink vert window width
     ("M-h", sendMessage Shrink), -- Shrink horiz window width
     ("M-l", sendMessage Expand), -- Expand horiz window width
-    ("M-M1-j", sendMessage MirrorShrink), -- Shrink vert window width
-    ("M-M1-k", sendMessage MirrorExpand) -- Expand vert window width
+    ("M-M1-k", sendMessage MirrorExpand), -- Expand vert window width
+    -- Window navigation
+    ("M-m", windows W.focusMaster), -- Move focus to the master window
+    ("M-j", windows W.focusDown), -- Move focus to the next window
+    ("M-k", windows W.focusUp), -- Move focus to the prev window
+    ("M-S-m", windows W.swapMaster), -- Swap the focused window and the master window
+    ("M-S-j", windows W.swapDown), -- Swap focused window with next window
+    ("M-S-k", windows W.swapUp), -- Swap focused window with prev window
+    ("M-S-<Tab>", rotSlavesDown), -- Rotate all windows except master and keep focus in place
+    ("M-C-<Tab>", rotAllDown), -- Rotate all the windows in the current stack
+    -- Increase, decrease windows in stack
+    ("M-S-<Up>", sendMessage (IncMasterN 1)), -- Increase # of clients master pane
+    ("M-S-<Down>", sendMessage (IncMasterN (-1))), -- Decrease # of clients master pane
+    -- Increase, decrease window and screen spacing
+    ("M-C-j", decWindowSpacing 4), -- Decrease window spacing
+    ("M-C-k", incWindowSpacing 4), -- Increase window spacing
+    ("M-C-h", decScreenSpacing 4), -- Decrease screen spacing
+    ("M-C-l", incScreenSpacing 4) -- Increase screen spacing
+
+    -- ("M-<Backspace>", promote)      -- Moves focused window to master, others maintain order
   ]
 
 main :: IO ()
