@@ -310,7 +310,7 @@ myEventHook = ewmhDesktopsEventHook
 --
 -- By default, do nothing.
 myStartupHook = do
-    spawnOnce "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --transparent true --tint 0x191970 --height 16 &"
+    spawnOnce "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --alpha 0 --tint 0x2f343f --height 19 &"
     spawnOnce "exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &"
     spawnOnce "betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &"
     spawnOnce "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &"
