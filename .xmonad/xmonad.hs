@@ -360,7 +360,7 @@ main = do
                               ,
         logHook            = dynamicLogWithPP xmobarPP
             { ppOutput = hPutStrLn xmproc,
-            ppTitle =xmobarColor "green"  "" . shorten 50
+            ppTitle =xmobarColor "#bd93f9"  "" . shorten 50
             },
 
         startupHook        = myStartupHook
