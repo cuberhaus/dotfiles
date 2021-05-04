@@ -7,31 +7,38 @@
 -- Normally, you'd only override those defaults you care about.
 --
 -- IMPORTS
+-- Base
+import System.Exit
+import System.IO
 import XMonad
 import XMonad.Config.Desktop
+import qualified XMonad.StackSet as W
+-- Data
+import Data.Monoid
+import qualified Data.Map        as M
+-- Hooks
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ServerMode
--- LAYOUTS
+-- Layouts
+import XMonad.Layout.Accordion
+import XMonad.Layout.GridVariants (Grid(Grid))
+import XMonad.Layout.ResizableTile
+import XMonad.Layout.SimplestFloat
+import XMonad.Layout.Spiral
+import XMonad.Layout.Tabbed
+import XMonad.Layout.ThreeColumns
+-- Layout modifiers
+import XMonad.Layout.Gaps
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.NoBorders
-import XMonad.Layout.Tabbed
 import XMonad.Layout.Spacing --add gaps
-import XMonad.Layout.Gaps
-
+-- Utilities
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
-
-import Data.Monoid
-
-import System.Exit
-import System.IO
-
-import qualified XMonad.StackSet as W
-import qualified Data.Map        as M
 
 -- Variables
 wallpaper :: String
