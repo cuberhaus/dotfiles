@@ -22,6 +22,7 @@ import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ServerMode
 import XMonad.Hooks.InsertPosition
+import XMonad.Hooks.FadeWindows
 -- Layouts
 import XMonad.Layout.Accordion
 import XMonad.Layout.GridVariants (Grid(Grid))
@@ -351,6 +352,7 @@ myStartupHook = do
 
 -- Run xmonad with the settings you specify. No need to modify this.
 --
+
 main :: IO()
 main = do
     -- Execute xmobar with its config and pipe xmonad output to xmobar
