@@ -16,7 +16,7 @@ Config {
             , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
             , Run Memory ["-t","Mem: <usedratio>% (<free>M)"] 10
             , Run Swap [] 10
-            , Run Date "%a %b %_d %l:%M" "date" 10
+            , Run Date "%l:%M" "date" 10
             , Run DiskU [("/", "<free>")]
                   ["-L", "20", "-H", "50", "-m", "1", "-p", "3",
                   "--normal", "#f3f4f5", "--high", "#f3f4f5",
@@ -29,7 +29,7 @@ Config {
         ]
         , sepChar = "%"
         , alignSep = "}{"
-        , template = "%StdinReader% }{ %locks%   |   %battery%   |   Free: %disku%  |   %default:Master%   |   Lum: %mybright%   |   %kbd%   |   <fc=#ee9a00>%date%</fc>"
+        , template = "%StdinReader% }{ %locks%   |   %battery%   |   Free: %disku%  |   %default:Master%   |   Lum: %mybright%   |   %kbd%   |   Time: <fc=#f3f4f5>%date%</fc>"
 
         -- , template = "%StdinReader% }{ %battery% | Lum: %mybright% | %cpu% | %memory% * %swap%    <fc=#ee9a00>%date%</fc> | %EGPF%"
 }
