@@ -247,7 +247,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- which denotes layout choice.
 --
 -- myLayout = tiled ||| Mirror tiled ||| Full
-myLayout = mkToggle (single MIRROR) (tiled ||| Full)
+myLayout = avoidStruts $ spacing 2 $ smartBorders  $ mkToggle (single MIRROR) (tiled ||| Mirror tiled ||| Full)
     where
         -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
@@ -341,6 +341,7 @@ myStartupHook = do
 
 -- Run xmonad with the settings you specify. No need to modify this.
 --
+main :: IO()
 main = do
     -- Execute xmobar with its config and pipe xmonad output to xmobar
     xmproc <- spawnPipe "xmobar $HOME/.xmobarrc"
@@ -360,9 +361,9 @@ main = do
         -- mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = spacing 2 . smartBorders . avoidStruts   $    layoutHook defaultConfig,
+        layoutHook         = myLayout ,
         -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
-        manageHook         = manageDocks <+> myManageHook,
+        manageHook         = myManageHook <+> manageDocks ,
         handleEventHook    = myEventHook
                             <+> fullscreenEventHook
                             <+> docksEventHook
@@ -373,7 +374,7 @@ main = do
             },
 
         startupHook        = myStartupHook
-                                 }
+    }
         `additionalKeysP` [
         -- Multimedia Keys
         ("<XF86AudioPlay>", spawn mediaPlay)
