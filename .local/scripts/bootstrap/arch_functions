@@ -76,15 +76,16 @@ base_install () {
     $pac xorg-xinit                     # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
     $pac yarn                           # Package installer
     $pac zsh                            # Zsh shell
+    $yay electron9-bin
+    $yay f5fpc                                  # Connexio a UPClink
 
     # GUI
     # $pac conky                          # Desktop rice
-    $yay conky-cairo-no-nvidia          # fix lua
-    $yay conky-manager2-git
     $pac calibre                        # Book manager
     $pac discord
     $pac dunst                          # Notifications
     $pac file-roller                    # Archive Manager
+    $pac firefox                        # chrome doesn't redirect to wifi page's 
     $pac gnome-calculator               # Calculator
     $pac gnome-disk-utility              # Partition manager by gnome
     $pac gnome-font-viewer              # Font viewer
@@ -103,6 +104,19 @@ base_install () {
     $pac tumbler ffmpegthumbnailer raw-thumbnailer        # IDK
     $pac udftools                       # Manage partitions
     $pac vlc                            # Video player
+    $yay balena-etcher                          # "Rufus" on linux
+    $yay betterlockscreen; $pac xss-lock # Lockscreen
+    $yay birdtray                               # Thunderbird tray
+    $yay conky-cairo-no-nvidia          # fix lua
+    $yay conky-manager2-git
+    $yay google-chrome                          # Best web browser
+    $yay pix                                    # Image viewer
+    $yay skypeforlinux-stable-bin               # Skype
+    $yay spotify                                # Spotify
+    $yay timeshift; $pac cron  # Backups (sudo timeshift-gtk)
+    $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
+    $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
+    $yay whatsapp-nativefier                    # Whatsapp client
     # $pac  gparted                        # Manage partitions (doesn't work with ex-fat)
 
     # Office (install plugins located on .local)
@@ -122,24 +136,9 @@ base_install () {
     $pac noto-fonts-emoji               # Classic Emoji
     $pac papirus-icon-theme             # Best icon theme!
     $pac qt5ct                          # Qt5 configuration utility
+    $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
-
-    ### AUR
-    $yay electron9-bin
-    $yay balena-etcher                          # "Rufus" on linux
-    $yay betterlockscreen; $pac xss-lock # Lockscreen
-    $yay birdtray                               # Thunderbird tray
-    $yay f5fpc                                  # Connexio a UPClink
-    $yay google-chrome                          # Best web browser
-    $yay pix                                    # Image viewer
-    $yay skypeforlinux-stable-bin               # Skype
-    $yay spotify                                # Spotify
-    $yay timeshift; $pac cron  # Backups (sudo timeshift-gtk)
-    $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
-    $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
-    $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
-    $yay whatsapp-nativefier                    # Whatsapp client
 }
 
 arch_install() {
