@@ -1,8 +1,8 @@
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => General
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" General {{{
+
 " With a map leader it's possible to do extra key combinations
 let mapleader=" "
+set foldmethod=marker
 
 if has('unix') || has('macunix')
     " Clean-up
@@ -180,9 +180,9 @@ set autochdir
 " Return to last edit position when opening files (You want this!)
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Colors and Fonts
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+": }}}
+" Colors and Fonts {{{
+
 " Use 24-bit (true-color) mode in Vim/Neovim when outside tmux IN LINUX, ( do not remove. )
 if (empty($TMUX))
   if (has("nvim"))
@@ -228,17 +228,17 @@ endif
 if has("gui_running")
     set guifont=SauceCodePro\ Nerd\ Font\ 13
 endif
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Files, backups and undo
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" }}}
+" Files, backups and undo {{{
+
 " Turn backup off, since most stuff is in SVN, git etc. anyway...
 "set nobackup
 "set nowb
 "set noswapfile
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Text, tab and indent related
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"}}}
+" Text, tab and indent related {{{
+
 "Indent Guides
 let g:indent_guides_guide_size = 1
 let g:indent_guides_enable_on_vim_startup = 1
@@ -261,10 +261,9 @@ set ai "Auto indent
 set si "Smart indent
 set wrap "Wrap lines
 set breakindent "Indent after line wrapped
+"}}}
+" Keybindings {{{
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Keybindings
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! GotoJump()
   jumps
   let j = input("Please select your jump: ")
@@ -378,25 +377,8 @@ nmap <leader>hv <Plug>(GitGutterPreviewHunk)
 nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
-""""""""""""""""""""""""""""""
-" => Spelling
-""""""""""""""""""""""""""""""
-" Demana per descarregar el fixter corresponent
-let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
-"setlocal spell spelllang=en
-map <leader>ss :setlocal spell! spelllang=en<cr>
-map <leader>se :setlocal spell! spelllang=es<cr>
-map <leader>sc :setlocal spell! spelllang=ca<cr>
-
-map <leader>sn ]s
-map <leader>sp [s
-" zg accepts a word, zug undoes
-"map <leader>sa zg
-map <leader>? z=
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"" => Editing mappings
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"}}}
+" Editing mappings {{{
 
 " Press F5 to eliminate trailing whitespaces
 :nnoremap <silent> <F5> :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl <Bar> :unlet _s <CR>
@@ -411,8 +393,23 @@ try
     set undofile
 catch
 endtry
+"}}}
+" Spelling {{{
 
-" PLUGINS
+" Demana per descarregar el fixter corresponent
+let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
+"setlocal spell spelllang=en
+map <leader>ss :setlocal spell! spelllang=en<cr>
+map <leader>se :setlocal spell! spelllang=es<cr>
+map <leader>sc :setlocal spell! spelllang=ca<cr>
+
+map <leader>sn ]s
+map <leader>sp [s
+" zg accepts a word, zug undoes
+"map <leader>sa zg
+map <leader>? z=
+"}}}
+" PLUGINS / Need to be at the bottom {{{
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Nerd Tree
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -442,3 +439,4 @@ let g:gitgutter_enabled=0
 
 " Enable italics
 highlight Comment cterm=italic gui=italic
+"}}}
