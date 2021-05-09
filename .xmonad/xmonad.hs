@@ -48,6 +48,16 @@ import qualified XMonad.StackSet as W
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
+-- https://bbs.archlinux.org/viewtopic.php?id=120298>
+import XMonad.Util.Dmenu
+import System.Exit
+import Control.Monad
+
+quitWithWarning :: X ()
+quitWithWarning = do
+    let m = "confirm quit"
+    s <- dmenu [m]
+    when (m == s) (io exitSuccess)
 
 -- Variables
 wallpaper :: String
@@ -165,7 +175,7 @@ myKeys conf@XConfig {XMonad.modMask = modm} =
       -- Push window back into tiling
       ((modm, xK_t), withFocused $ windows . W.sink),
       -- Quit xmonad
-      ((modm .|. shiftMask, xK_e), io exitSuccess),
+      ((modm .|. shiftMask, xK_e), quitWithWarning),
       -- -- Restart xmonad
       ((modm .|. shiftMask, xK_r), spawn "xmonad --recompile; xmonad --restart"),
       -- Run xmessage with a summary of the default keybindings (useful for beginners)
