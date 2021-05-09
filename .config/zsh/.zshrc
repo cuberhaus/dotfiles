@@ -9,6 +9,7 @@ fi
 
 SPACESHIP_EXIT_CODE_SHOW=true
 # }}}
+
 # Antigen {{{
 
 # CONFIGURATION
@@ -44,6 +45,7 @@ antigen bundle zsh-users/zsh-history-substring-search # syntax first
 # Tell Antigen that you're done.
 antigen apply
 #}}}
+
 # Oh My Zsh {{{
 
 # For more info: https://github.com/ohmyzsh/ohmyzsh/blob/master/templates/zshrc.zsh-template
@@ -53,6 +55,7 @@ export UPDATE_ZSH_DAYS=7
 
 ZSH_ALIAS_FINDER_AUTOMATIC=true
 # }}}
+
 # Powerlevel10k {{{
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
@@ -63,6 +66,7 @@ fi
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.config/.p10k.zsh ]] || source ~/.config/.p10k.zsh
 #}}}
+
 # Aliases and functions {{{
 
 if [ -f $ZDOTDIR/aliases ]; then
@@ -73,6 +77,7 @@ if [ -f $ZDOTDIR/functions ]; then
     source $ZDOTDIR/functions
 fi
 #}}}
+
 # Configurations {{{
 
 # This can be used to specify that SIGHUP should not be sent to the jobs in the jobs table when the shell exits.
@@ -94,9 +99,11 @@ bindkey -M vicmd 'j' history-substring-search-down
 #Don't show message
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 #}}}
+
 # Vim / Has to be at the end of file {{{
 
 #eval spaceship_vi_mode_enable
+
 # vi mode
 bindkey -v
 export KEYTIMEOUT=1

@@ -17,7 +17,7 @@ scripts=$HOME/.local/scripts
 # alias discord="discord --no-sandbox </dev/null &>/dev/null &"
 alias discord="discord --no-sandbox &"
 # Recompile ycm (if autocompletion stops working execute this)
-alias ycminstall="python3 ~/.vim/plugged/YouCompleteMe/install.py"
+alias ycminstall="python3 $HOME/.vim/plugged/YouCompleteMe/install.py"
 # Rclone (be careful!)
 alias rclonepull="rclone -P sync drive:Thunderbird ~/.thunderbird ;
 rclone -P sync drive:Calibre/Calibre\ Library ~/Calibre\ Library"
@@ -27,14 +27,16 @@ rclone -P sync ~/Calibre\ Library drive:Calibre/Calibre\ Library"
 # Config Files
 alias arch="nvim $scripts/bootstrap/arch_functions"
 alias aliases="nvim $ZDOTDIR/aliases"
-alias zshenv="nvim ~/.zshenv"
+alias zshenv="nvim $HOME/.zshenv"
 alias zshrc="nvim $ZDOTDIR/.zshrc"
 alias zprofile="nvim $ZDOTDIR/.zprofile"
 alias xprofile="nvim $HOME/.xprofile"
 alias xinitrc="nvim $HOME/.xinitrc"
-alias vimrc="nvim ~/.vim/vimrc"
-alias bashrc="nvim ~/.bashrc"
-alias tmux.conf="nvim ~/.config/tmux/tmux.conf"
+alias vimrc="nvim $HOME/.vim/vimrc"
+alias bashrc="nvim $HOME/.bashrc"
+alias tmux.conf="nvim $HOME/.config/tmux/tmux.conf"
+alias kitty.conf="nvim $HOME/.config/kitty/kitty.conf"
+alias xmonad.hs="nvim $HOME/.xmonad/xmonad.hs"
 #alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
 #alias vpacman="sudo vim /etc/pacman.conf"
 #alias vgrub="sudo vim /etc/default/grub"
@@ -178,7 +180,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         sudo apt-get autoremove; 
         brew cleanup; 
         vim +PlugClean +qall"
-        alias tmux="tmux -f ~/.config/tmux/tmux.conf"
+        alias tmux="tmux -f $HOME/.config/tmux/tmux.conf"
     fi
 fi
 
@@ -186,6 +188,6 @@ fi
 # => Clean home directory
 ###############################################################
 
-alias Xres="xrdb -load ~/.config/X11/xresources"
+alias Xres="xrdb -load $HOME/.config/X11/xresources"
 #alias nvidia-settings="nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settings"
 alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
