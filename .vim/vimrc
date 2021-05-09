@@ -447,4 +447,3 @@ let g:gitgutter_enabled=0
 " Enable italics
 highlight Comment cterm=italic gui=italic
 "}}}
-
