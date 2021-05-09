@@ -1,38 +1,44 @@
 Config {
     font = "xft:Ubuntu:weight=bold:pixelsize=12:antialias=true:hinting=true"
+        , additionalFonts = [ "xft:Mononoki Nerd Font:pixelsize=11:antialias=true:hinting=true"
+        , "xft:Font Awesome 5 Free Solid:pixelsize=12"
+        , "xft:Font Awesome 5 Brands:pixelsize=12"
+        ]
+        , iconRoot = "/home/pol/.xmonad/xpm/"  -- default: "."
         , bgColor = "#2f343f"
         , fgColor = "#f3f4f5"
         , position = BottomW L 90
         , commands = [ Run Weather "EGPF" ["-t"," <tempC>C","-L","64","-H","77","--normal","green","--high","red","--low","lightblue"] 36000
-            , Run Battery [
-            "-t", "<acstatus>: <left>%",
-            "--",
-            --"-c", "charge_full",
-            "-O", "AC",
-            "-o", "Bat",
-            "-h", "green",
-            "-l", "red"
-            ] 10
-            , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
-            , Run Memory ["-t","Mem: <usedratio>% (<free>M)"] 10
-            , Run Swap [] 10
-            , Run Date "%l:%M" "date" 10
-            , Run DiskU [("/", "<free>")]
-                  ["-L", "20", "-H", "50", "-m", "1", "-p", "3",
-                  "--normal", "#f3f4f5", "--high", "#f3f4f5",
-                  "--low", "#E53935"] 20
+        , Run Battery [
+        "-t", "<acstatus>: <left>%",
+        "--",
+        --"-c", "charge_full",
+        "-O", "AC",
+        "-o", "Bat",
+        "-h", "green",
+        "-l", "red"
+        ] 10
+        , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
+        , Run Memory ["-t","Mem: <usedratio>% (<free>M)"] 10
+        , Run Swap [] 10
+        , Run Date "<fn=2>\xf017</fn>%l:%M" "date" 10
+        , Run DiskU [("/", "<fn=2>\xf0c7</fn> <free>")]
+        ["-L", "20", "-H", "50", "-m", "1", "-p", "3",
+        "--normal", "#c678dd", "--high", "#c678dd",
+        "--low", "#E53935"] 20
             , Run Com "/bin/bash" ["-c", "echo `light -G | grep -oE '^.[0-9]{0,3}'`%"]  "mybright" 1
             , Run Locks
             , Run Kbd  [("us(dvorak)", "DV"), ("us", "US")]
             , Run Volume "default" "Master" [] 10
+            -- , Run Com "/bin/bash" ["-c", "~/.config/i3blocks/i3blocks-contrib/volume-pulseaudio/volume-pulseaudio"]  "volumedat" 1
             , Run UnsafeStdinReader
-        ]
-        , sepChar = "%"
-        , alignSep = "}{"
-        , template = "%UnsafeStdinReader% }{ %locks%   |   %battery%   |   Free: %disku%  |   %default:Master%   |   Lum: %mybright%   |   %kbd%   |   Time: <fc=#f3f4f5>%date%</fc>   "
+            ]
+            , sepChar = "%"
+            , alignSep = "}{"
+            , template = "<icon=haskell_20.xpm/>   <fc=#666666>|</fc>   %UnsafeStdinReader% }{ %locks%   <fc=#666666>|</fc> <fc=#ecbe7b>  <fn=2></fn>  %mybright%   <fc=#666666>|</fc> </fc> <fc=#98be65> %battery%  </fc> <fc=#666666>|</fc> <fc=#c678dd>  %disku% free  </fc> <fc=#666666>|</fc> <fc=#51afef>  %default:Master%  </fc>  <fc=#666666>|</fc>  <fc=#ff6c6b> %kbd% </fc>  <fc=#666666>|</fc>   <fc=#f3f4f5>%date%</fc>   <fc=#666666>|</fc>"
 
 }
 
-
-        -- , template = "%StdinReader% }{ %battery% | Lum: %mybright% | %cpu% | %memory% * %swap%    <fc=#ee9a00>%date%</fc> | %EGPF%"
+--fn=2 fuente numero 2
+-- , template = "%StdinReader% }{ %battery% | Lum: %mybright% | %cpu% | %memory% * %swap%    <fc=#ee9a00>%date%</fc> | %EGPF%"
 
