@@ -181,6 +181,7 @@ set autochdir
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
 ": }}}
+
 " Colors and Fonts {{{
 
 " Use 24-bit (true-color) mode in Vim/Neovim when outside tmux IN LINUX, ( do not remove. )
@@ -229,6 +230,7 @@ if has("gui_running")
     set guifont=SauceCodePro\ Nerd\ Font\ 13
 endif
 " }}}
+
 " Files, backups and undo {{{
 
 " Turn backup off, since most stuff is in SVN, git etc. anyway...
@@ -237,6 +239,7 @@ endif
 "set noswapfile
 
 "}}}
+
 " Text, tab and indent related {{{
 
 "Indent Guides
@@ -262,6 +265,7 @@ set si "Smart indent
 set wrap "Wrap lines
 set breakindent "Indent after line wrapped
 "}}}
+
 " Keybindings {{{
 
 function! GotoJump()
@@ -378,6 +382,7 @@ nmap <leader>hs <Plug>(GitGutterStageHunk)
 nmap <leader>hu <Plug>(GitGutterUndoHunk)
 
 "}}}
+
 " Editing mappings {{{
 
 " Press F5 to eliminate trailing whitespaces
@@ -394,6 +399,7 @@ try
 catch
 endtry
 "}}}
+
 " Spelling {{{
 
 " Demana per descarregar el fixter corresponent
@@ -409,6 +415,7 @@ map <leader>sp [s
 "map <leader>sa zg
 map <leader>? z=
 "}}}
+
 " PLUGINS / Need to be at the bottom {{{
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Nerd Tree
