@@ -10,3 +10,4 @@ source $HOME/config/distro
 if [[ "$DISTRO" == "arch" ]]; then
     i3 # Starts i3
 fi
+xset r rate 660 25
