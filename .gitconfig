@@ -1,6 +1,7 @@
 [user]
-    email = pol@hotmail.es
+	email = 55292818+cuberhaus@users.noreply.github.com
     name = pol
+	signingkey = 8870DF9B
 [diff]
     tool = meld
 [difftool]
