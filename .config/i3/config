@@ -20,7 +20,7 @@ set $ws7 "7: 7"
 set $ws8 "8: 8"
 set $ws9 "9: 9"
 set $ws10 "10: 10"
-set $term termite
+set $term alacritty
 set $discord "discord --no-sandbox"
 #set $term "xfce4-terminal" # Alternative (Use Base16-OneDark not 16 bits):
 set $browser google-chrome-stable

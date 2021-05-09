@@ -105,7 +105,7 @@ screenShotOptions = "flameshot gui -p $HOME/Pictures"
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal = "termite"
+myTerminal = "alacritty"
 
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
@@ -146,13 +146,12 @@ clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
 -- Border colors for unfocused and focused windows, respectively.
 
 -- With transparency
-myFocusedBorderColor = "#dddddd"
-
-myNormalBorderColor = "#000000"
+-- myFocusedBorderColor = "#dddddd"
+-- myNormalBorderColor = "#000000"
 
 -- No transparency
---myNormalBorderColor  = "#2f343f"
---myFocusedBorderColor = "#bd93f9"
+myNormalBorderColor  = "#2f343f"
+myFocusedBorderColor = "#bd93f9"
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
