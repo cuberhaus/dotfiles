@@ -147,8 +147,8 @@ myModMask = mod4Mask
 --
 -- myWorkspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
--- myWorkspaces = [" 1 ", " 2 ", " 3 ", " 4 ", " 5 ", " 6 ", " 7 ", " 8 ", " 9 "]
-myWorkspaces = [" dev ", " www ", " spotify ", " chat ", " mail ", " doc ", " vbox ", " vid ", " game "]
+myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
+-- myWorkspaces = [" dev ", " www ", " spotify ", " chat ", " mail ", " doc ", " vbox ", " vid ", " game "]
 myWorkspaceIndices = M.fromList $ zipWith (,) myWorkspaces [1..] -- (,) == \x y -> (x,y)
 
 clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
