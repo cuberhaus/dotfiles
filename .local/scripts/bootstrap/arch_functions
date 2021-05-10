@@ -30,6 +30,7 @@ base_install () {
 
     # Terminal
     # $pac dhcpcd                         # Internet
+    $pac wmctrl                         #used for scripting 
     $pac base-devel                     # AUR
     $pac bat                            # "Cat" on steroids
     $pac dnsutils                       # Ip
@@ -61,7 +62,7 @@ base_install () {
     $pac seahorse                       # Password keeper
     $pac stow                           # To deploy dotfiles
     $pac svn                            # Similar to git
-    $pac termite                        # Terminal emulator
+    $pac kitty                          # Terminal emulator
     $pac the_silver_searcher            # Better and faster ack (and grep)
     $pac tmux                           # Terminal multiplexer
     $pac trash-cli                      # https://wiki.archlinux.org/index.php/Trash_management
