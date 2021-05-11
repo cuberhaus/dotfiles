@@ -30,86 +30,86 @@ base_install () {
 
     # Terminal
     # $pac dhcpcd                         # Internet
-    $pac base-devel                     # AUR
-    $pac bat                            # "Cat" on steroids
-    $pac dnsutils                       # Ip
-    $pac doxygen texlive-most graphviz        # Doxygen
-    $pac exa                            # "ls" on steroids
-    $pac exfat-utils                    # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
-    $pac fzf                            # Fuzzy finder
-    $pac gcc                            # Cpp
-    $pac gdb; $yay ddd                  # debugging c++
-    $pac git                            # It's git bro
-    $pac gvim                           # Vim version with extra features
-    $pac hardinfo cpu-x                 # pc information
-    $pac htop                           # Show system resources
-    $pac inotify-tools                  # inotifywatch -r $file (to watch if those files have been accessed)
-    $pac kitty                          # Terminal emulator
-    $pac laptop-detect                  # Detect if using a laptop
-    $pac ncdu                           # Manage storage
-    $pac net-tools                      # Ips
-    $pac npm                            # Package manager
-    $pac ntfs-3g                        # Read/write support for ntfs https://wiki.archlinux.org/index.php/NTFS-3G
-    $pac perl-file-mimeinfo             # mimeopen -d $file and type whatever app you want to open that with
-    $pac polkit                         # Policy kit
-    $pac polkit-gnome                   # https://wiki.archlinux.org/index.php/Polkit
+    $pac base-devel                             # AUR
+    $pac bat                                    # "Cat" on steroids
+    $pac dnsutils                               # Ip
+    $pac doxygen texlive-most graphviz          # Doxygen
+    $pac exa                                    # "ls" on steroids
+    $pac exfat-utils                            # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
+    $pac fzf                                    # Fuzzy finder
+    $pac gcc                                    # Cpp
+    $pac gdb; $yay ddd                          # debugging c++
+    $pac git                                    # It's git bro
+    $pac gvim                                   # Vim version with extra features
+    $pac hardinfo cpu-x                         # pc information
+    $pac htop                                   # Show system resources
+    $pac inotify-tools                          # inotifywatch -r $file (to watch if those files have been accessed)
+    $pac kitty                                  # Terminal emulator
+    $pac laptop-detect                          # Detect if using a laptop
+    $pac ncdu                                   # Manage storage
+    $pac net-tools                              # Ips
+    $pac npm                                    # Package manager
+    $pac ntfs-3g                                # Read/write support for ntfs https://wiki.archlinux.org/index.php/NTFS-3G
+    $pac perl-file-mimeinfo                     # mimeopen -d $file and type whatever app you want to open that with
+    $pac polkit                                 # Policy kit
+    $pac polkit-gnome                           # https://wiki.archlinux.org/index.php/Polkit
     $pac python
     $pac python3
-    $pac ranger                         # Ranger
-    $pac rclone                         # Rsync to remote
-    $pac reflector                      # Update Arch mirrors
-    $pac ruby                           # Package manager
-    $pac seahorse                       # Password keeper
-    $pac stow                           # To deploy dotfiles
-    $pac svn                            # Similar to git
-    $pac the_silver_searcher            # Better and faster ack (and grep)
-    $pac tmux                           # Terminal multiplexer
-    $pac trash-cli                      # https://wiki.archlinux.org/index.php/Trash_management
-    $pac udiskie                        # Automater
-    $pac udisks2                        # Daemon to manipulate storage devices
-    $pac w3m                            # Preview images on ranger
-    $pac wget                           # Download stuff
-    $pac wmctrl                         #used for scripting 
-    $pac xclip                          # Clipboard
-    $pac xdg-user-dirs                  # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
-    $pac xfce4-clipman-plugin           # Clipboard manager (persistant clip even when application is closed)
-    $pac xorg                           # Display server
-    $pac xorg-xinit                     # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
-    $pac yarn                           # Package installer
-    $pac zsh                            # Zsh shell
+    $pac ranger                                 # Ranger
+    $pac rclone                                 # Rsync to remote
+    $pac reflector                              # Update Arch mirrors
+    $pac ruby                                   # Package manager
+    $pac seahorse                               # Password keeper
+    $pac stow                                   # To deploy dotfiles
+    $pac svn                                    # Similar to git
+    $pac the_silver_searcher                    # Better and faster ack (and grep)
+    $pac tmux                                   # Terminal multiplexer
+    $pac trash-cli                              # https://wiki.archlinux.org/index.php/Trash_management
+    $pac udiskie                                # Automater
+    $pac udisks2                                # Daemon to manipulate storage devices
+    $pac w3m                                    # Preview images on ranger
+    $pac wget                                   # Download stuff
+    $pac wmctrl                                 #used for scripting 
+    $pac xclip                                  # Clipboard
+    $pac xdg-user-dirs                          # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
+    $pac xfce4-clipman-plugin                   # Clipboard manager (persistant clip even when application is closed)
+    $pac xorg                                   # Display server
+    $pac xorg-xinit                             # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
+    $pac yarn                                   # Package installer
+    $pac zsh                                    # Zsh shell
     $yay electron9-bin
-    $yay f5fpc                          # Connexio a UPClink
+    $yay f5fpc                                  # Connexio a UPClink
 
     # GUI
-    # $pac  gparted                        # Manage partitions (doesn't work with ex-fat)
+    # $pac  gparted                       # Manage partitions (doesn't work with ex-fat)
     # $pac conky                          # Desktop rice
-    # $pac gnome-disk-utility              # Partition manager by gnome
+    # $pac gnome-disk-utility             # Partition manager by gnome
     # $pac hexchat                        # IRC APP
-    $pac calibre                        # Book manager
+    $pac calibre                                # Book manager
     $pac discord
-    $pac dunst                          # Notifications
-    $pac file-roller                    # Archive Manager
-    $pac firefox                        # chrome doesn't redirect to wifi page's 
-    $pac gnome-calculator               # Calculator
-    $pac gnome-font-viewer              # Font viewer
-    $pac gucharmap                      # Characters keyboard
-    $pac kdiff3                         # Another diff viewer
-    $pac meld                           # Best diff viewer
-    $pac nilfs-utils                    # Manage partitions
-    $pac okular                         # Best pdf viewer
-    $pac partitionmanager                # Partition manager for KDE
-    $pac playerctl                      # Audio
-    $pac remmina freerdp libvncserver          # Remote conexions
+    $pac dunst                                  # Notifications
+    $pac file-roller                            # Archive Manager
+    $pac firefox                                # chrome doesn't redirect to wifi page's 
+    $pac gnome-calculator                       # Calculator
+    $pac gnome-font-viewer                      # Font viewer
+    $pac gucharmap                              # Characters keyboard
+    $pac kdiff3                                 # Another diff viewer
+    $pac meld                                   # Best diff viewer
+    $pac nilfs-utils                            # Manage partitions
+    $pac okular                                 # Best pdf viewer
+    $pac partitionmanager                       # Partition manager for KDE
+    $pac playerctl                              # Audio
+    $pac remmina freerdp libvncserver           # Remote conexions
     $pac thunderbird                            # $yay  thunderbird-bin
-    $pac transmission-gtk               # A simpler Torrent D.
+    $pac transmission-gtk                       # A simpler Torrent D.
     $pac ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts        # Fonts
     $pac tumbler ffmpegthumbnailer raw-thumbnailer        # IDK
-    $pac udftools                       # Manage partitions
-    $pac vlc                            # Video player
+    $pac udftools                               # Manage partitions
+    $pac vlc                                    # Video player
     $yay balena-etcher                          # "Rufus" on linux
-    $yay betterlockscreen; $pac xss-lock # Lockscreen
+    $yay betterlockscreen; $pac xss-lock        # Lockscreen
     $yay birdtray                               # Thunderbird tray
-    $yay conky-cairo-no-nvidia          # fix lua
+    $yay conky-cairo-no-nvidia                  # fix lua
     $yay conky-manager2-git
     $yay google-chrome                          # Best web browser
     $yay pix                                    # Image viewer
@@ -127,16 +127,16 @@ base_install () {
     # $pac libreoffice-still libreoffice-still-ca
 
     # Theme
-    $pac adapta-gtk-theme               # Alternative theme
-    $pac arc-gtk-theme         # Arc theme and its icon's
-    $pac arc-icon-theme                 # Doesn't install in manjaro
-    $pac dconf-editor                   # Edit gnome configuration
+    $pac adapta-gtk-theme                       # Alternative theme
+    $pac arc-gtk-theme                          # Arc theme and its icon's
+    $pac arc-icon-theme                         # Doesn't install in manjaro
+    $pac dconf-editor                           # Edit gnome configuration
     $pac gtk2 gtk3
-    $pac kvantum-qt5                    # Qt5 Custom themes
-    $pac lxappearance                   # Gtk configuration utility
-    $pac noto-fonts-emoji               # Classic Emoji
-    $pac papirus-icon-theme             # Best icon theme!
-    $pac qt5ct                          # Qt5 configuration utility
+    $pac kvantum-qt5                            # Qt5 Custom themes
+    $pac lxappearance                           # Gtk configuration utility
+    $pac noto-fonts-emoji                       # Classic Emoji
+    $pac papirus-icon-theme                     # Best icon theme!
+    $pac qt5ct                                  # Qt5 configuration utility
     $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
@@ -151,10 +151,10 @@ arch_install() {
     #$pac linux-lts-headers
     #$pac nvidia-lts
     # $pac nvidia-dkms #very slow
-    $pac nvidia nvidia-utils            # Nvidia
-    $pac xf86-video-intel mesa lib32-mesa           # Intel
-    $pac lib32-nvidia-utils             # Requires adding multilib libraries
-    $pac nvidia-settings                # Add force composition pipeline in nvidia-settings
+    $pac nvidia nvidia-utils                    # Nvidia
+    $pac xf86-video-intel mesa lib32-mesa       # Intel
+    $pac lib32-nvidia-utils                     # Requires adding multilib libraries
+    $pac nvidia-settings                        # Add force composition pipeline in nvidia-settings
 
     # Printers
     # https://wiki.archlinux.org/index.php/CUPS
@@ -165,7 +165,7 @@ arch_install() {
     fi
 
     # Bluetooth
-    $pac  bluez bluez-utils $pac  blueberry # Linux Mint GNOME Bluetooth
+    $pac  bluez bluez-utils $pac  blueberry     # Linux Mint GNOME Bluetooth
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
     fi
@@ -224,38 +224,38 @@ i3_install () {
 
     # GUI/Terminal
     $pac acpi
-    $pac awk bc upower                  # Battery plus
-    $pac feh                            # Wallpaper
-    $pac flameshot                      # Screenshots
-    $pac i3-gaps                        # i3 with gaps
-    $pac i3blocks                       # Bottom bar
-    $pac light                          # Brightness
+    $pac awk bc upower                          # Battery plus
+    $pac feh                                    # Wallpaper
+    $pac flameshot                              # Screenshots
+    $pac i3-gaps                                # i3 with gaps
+    $pac i3blocks                               # Bottom bar
+    $pac light                                  # Brightness
     $pac perl-anyevent-i3 python-dbus
-    $pac picom                          # Compositor, for transparencies
-    # $pac pipewire-pulse                 # New and improved sound, uses SBC and ACC out of the box (pulseaudio deprecated)
-    $pac pulseaudio alsa-utils          # Audio
-    $pac pulseaudio pulseaudio-equalizer pulseaudio-bluetooth        # Audio
-    $pac rofi                           # App menu Super+d
-    $pac yad xdotool                    # Calendar
-    $pac zenity                         # Poweroff menu i3blocks
+    $pac picom                                  # Compositor, for transparencies
+    # $pac pipewire-pulse                         # New and improved sound, uses SBC and ACC out of the box (pulseaudio deprecated)
+    $pac pulseaudio alsa-utils                  # Audio
+    $pac pulseaudio pulseaudio-equalizer         pulseaudio-bluetooth        # Audio
+    $pac rofi                                   # App menu Super+d
+    $pac yad xdotool                            # Calendar
+    $pac zenity                                 # Poweroff menu i3blocks
     #$yay installs this: $pac  jq xdotool indent perl-anyevent-i3        # cava dependancies
 }
 
 xmonad_install () {
-    $pac trayer                         # xmonad add a tray for apps
-    $pac xorg-xmessage                  # xmonad send messages
-    $pac xmonad-contrib                 # Xmonad with extra plugins
-    $pac xmobar                         # Best bar for xmonad
+    $pac trayer                                 # xmonad add a tray for apps
+    $pac xorg-xmessage                          # xmonad send messages
+    $pac xmonad-contrib                         # Xmonad with extra plugins
+    $pac xmobar                                 # Best bar for xmonad
 }
 
 # Best Desktop
 cinnamon_install() {
     # GUI
-    $pac cinnamon                       # Desktop
-    $pac gnome-screenshot               # Take screenshots with impr pant
-    $pac gnome-shell                    # Fallback mode in case cinnamon crashes, to have a taskbar
-    $pac metacity                       # Fallback mode in case cinnamon crashes
-    $pac python-numpy python-xlib         # Color pick applet
+    $pac cinnamon                               # Desktop
+    $pac gnome-screenshot                       # Take screenshots with impr pant
+    $pac gnome-shell                            # Fallback mode in case cinnamon crashes, to have a taskbar
+    $pac metacity                               # Fallback mode in case cinnamon crashes
+    $pac python-numpy python-xlib               # Color pick applet
 
     # AUR
     $yay cinnamon-sound-effects                 # Sound effects
@@ -281,17 +281,17 @@ gnome_install() {
 }
 
 plasma_install() {
-    $pac  plasma                         # Check archwiki first
-    $yay  ocs-url                                # Easy install of kde store add-ons
+    $pac  plasma                                # Check archwiki first
+    $yay  ocs-url                               # Easy install of kde store add-ons
 }
 
 bloat_install () {
-    $pac cmatrix                        # Bloat
-    $pac cowsay                         # A cow displaying text
-    $pac fortune-mod                    # Random quote
+    $pac cmatrix                                # Bloat
+    $pac cowsay                                 # A cow displaying text
+    $pac fortune-mod                            # Random quote
     $pac lolcat
     $pac ponysay asciiquarium
-    $pac sl                             # Steam locomotor, (Did you mean to type ls?)
+    $pac sl                                     # Steam locomotor, (Did you mean to type ls?)
     $yay figlet toilet                          # Cool letters
     $yay pipes.sh                               # Lockscreens
 }
@@ -361,12 +361,12 @@ optional() {
     #$pac  github-cli                    # Github for terminal, create issues...
 
     # GUI
-    $pac audacity                       # Audio editor
-    $pac gimp                           # Image editor
-    $pac obs-studio                     # Video recording
-    $pac qtcreator glm qt5-tools                     # IDI
-    $pac r                              # Probabilitat i estadística
-    $pac texstudio                      # Latex text editor
+    $pac audacity                               # Audio editor
+    $pac gimp                                   # Image editor
+    $pac obs-studio                             # Video recording
+    $pac qtcreator glm qt5-tools                             # IDI
+    $pac r                                      # Probabilitat i estadística
+    $pac texstudio                              # Latex text editor
 
     # AUR
     $pac tor; $yay tor-browser
