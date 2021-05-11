@@ -26,7 +26,7 @@ function Usage()
     echo "Example: changeBrightness -5"
 }
 
-if [ "$#" -ne 1 ]; then
+if [[ "$#" -ne 1 || $1 == "-h" ]]; then
     Usage
     exit
 fi
