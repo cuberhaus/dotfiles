@@ -10,9 +10,14 @@ msgId="991049"
 # echo "$@"
 # echo "$1"
 # Check number of arguments
-if [[ $# -eq 0 || $1 == "-h" ]]; then
+
+function Usage() {
     echo "Usage: changeVolume [INT] | [+/-] [INT]"
     echo "Example: changeVolume +5"
+}
+
+if [[ $# -eq 0 || $1 == "-h" ]]; then
+    Usage
     exit
 fi
 
