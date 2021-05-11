@@ -10,9 +10,14 @@ msgId="991049"
 # echo "$@"
 # echo "$1"
 # Check number of arguments
+if [ $# -eq 0 ]; then
+    echo "Usage: changeVolume [INT] | [+/-] [INT]"
+    echo "Example: changeVolume +5"
+    exit
+fi
+
 if [ $# != 0 ]; then
 	pactl set-sink-volume @DEFAULT_SINK@ "$1"% && pkill -SIGRTMIN+1 i3blocks
-    # echo "No arguments provided"
 fi
 
 # Query amixer for the current volume and whether or not the speaker is muted

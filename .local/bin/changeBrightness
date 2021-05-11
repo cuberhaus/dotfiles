@@ -20,6 +20,17 @@ function send_notification {
     dunstify  -r 5555 -u low "      $bar"
 }
 
+function Usage() 
+{
+    echo "Usage: changeBrightness [INT]"
+    echo "Example: changeBrightness -5"
+}
+
+if [ "$#" -ne 1 ]; then
+    Usage
+    exit
+fi
+
 if [[ $1 -ge 0 ]]; then
     # increase the backlight by 5%
     light -A $step
