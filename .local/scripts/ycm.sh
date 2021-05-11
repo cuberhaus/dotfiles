@@ -1,6 +1,11 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
 
+function Help () {
+    echo "This script installs YouCompleteMe and its dependancies "
+    echo "Usage: ycm.sh"
+}
+
 arch_based_install () {
     sudo pacman -S patchelf go mono cmake llvm --noconfirm
     ### This ones are already on the main install (faster!)
@@ -26,6 +31,11 @@ ycm_install () {
     cd $HOME
     sudo rm -r ycm_build # Clean Up
 }
+
+if [[ $1 == "-h" ]]; then
+    Help
+    exit
+fi
 
 # Install dependancies
 if [[ "$OSTYPE" == "darwin"* ]]; then

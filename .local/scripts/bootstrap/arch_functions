@@ -78,20 +78,21 @@ base_install () {
     $pac yarn                           # Package installer
     $pac zsh                            # Zsh shell
     $yay electron9-bin
-    $yay f5fpc                                  # Connexio a UPClink
+    $yay f5fpc                          # Connexio a UPClink
 
     # GUI
+    # $pac  gparted                        # Manage partitions (doesn't work with ex-fat)
     # $pac conky                          # Desktop rice
+    # $pac gnome-disk-utility              # Partition manager by gnome
+    # $pac hexchat                        # IRC APP
     $pac calibre                        # Book manager
     $pac discord
     $pac dunst                          # Notifications
     $pac file-roller                    # Archive Manager
     $pac firefox                        # chrome doesn't redirect to wifi page's 
     $pac gnome-calculator               # Calculator
-    $pac gnome-disk-utility              # Partition manager by gnome
     $pac gnome-font-viewer              # Font viewer
     $pac gucharmap                      # Characters keyboard
-    $pac hexchat                        # IRC APP
     $pac kdiff3                         # Another diff viewer
     $pac meld                           # Best diff viewer
     $pac nilfs-utils                    # Manage partitions
@@ -118,7 +119,6 @@ base_install () {
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
     $yay whatsapp-nativefier                    # Whatsapp client
-    # $pac  gparted                        # Manage partitions (doesn't work with ex-fat)
 
     # Office (install plugins located on .local)
     $pac libmythes mythes-en mythes-es  # Synonyms
@@ -313,6 +313,7 @@ games_install () {
 }
 
 ### DO ONCE
+# This function enables NaturalScrolling for the touchpad
 trackpad_scrolling () {
     sudo touch /etc/X11/xorg.conf.d/30-touchpad.conf
     echo 'Section "InputClass"
@@ -330,7 +331,7 @@ activate_reisub () {
 }
 
 laptop_install() {
-    $pac tlp
+    $pac tlp        # Manage resources to improve battery usage
     sudo systemctl enable tlp.service
     trackpad_scrolling
 }
@@ -368,12 +369,12 @@ optional() {
     $pac texstudio                      # Latex text editor
 
     # AUR
-    $yay eclipse-java                           # BD
+    $pac tor; $yay tor-browser
     $yay android-studio                         # Android Studio
+    $yay eclipse-java                           # BD
     $yay rstudio-desktop-bin                    # Probabilitat i estadística IDE
     $yay slack-desktop                          # Slack
     $yay youtube-dl                             # Download youtube videos
-    $pac tor; $yay tor-browser
 
     # Arduino
     #usermod -aG uucp,lock pol
