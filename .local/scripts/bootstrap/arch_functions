@@ -30,7 +30,6 @@ base_install () {
 
     # Terminal
     # $pac dhcpcd                         # Internet
-    $pac wmctrl                         #used for scripting 
     $pac base-devel                     # AUR
     $pac bat                            # "Cat" on steroids
     $pac dnsutils                       # Ip
@@ -45,6 +44,7 @@ base_install () {
     $pac hardinfo cpu-x                 # pc information
     $pac htop                           # Show system resources
     $pac inotify-tools                  # inotifywatch -r $file (to watch if those files have been accessed)
+    $pac kitty                          # Terminal emulator
     $pac laptop-detect                  # Detect if using a laptop
     $pac ncdu                           # Manage storage
     $pac net-tools                      # Ips
@@ -62,7 +62,6 @@ base_install () {
     $pac seahorse                       # Password keeper
     $pac stow                           # To deploy dotfiles
     $pac svn                            # Similar to git
-    $pac kitty                          # Terminal emulator
     $pac the_silver_searcher            # Better and faster ack (and grep)
     $pac tmux                           # Terminal multiplexer
     $pac trash-cli                      # https://wiki.archlinux.org/index.php/Trash_management
@@ -70,6 +69,7 @@ base_install () {
     $pac udisks2                        # Daemon to manipulate storage devices
     $pac w3m                            # Preview images on ranger
     $pac wget                           # Download stuff
+    $pac wmctrl                         #used for scripting 
     $pac xclip                          # Clipboard
     $pac xdg-user-dirs                  # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
     $pac xfce4-clipman-plugin           # Clipboard manager (persistant clip even when application is closed)

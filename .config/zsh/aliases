@@ -109,9 +109,9 @@ alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -vi"
     alias update="sudo softwareupdate -i -a; 
-    brew update &; 
-    brew upgrade &; 
-    brew update --cask &"
+    brew update; 
+    brew upgrade; 
+    brew update --cask"
     alias updateall="sudo softwareupdate -i -a; 
     brew update; 
     brew upgrade; 
