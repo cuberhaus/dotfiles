@@ -71,36 +71,39 @@ mac_install () {
 
     ### GUI Applications
     brew install --cask adobe-acrobat-reader    # Pdf reader
-    brew install --cask alfred                  # Better Spotlight
     brew install --cask calibre                 # Book manager
     brew install --cask ccleaner                # CleanUp
-    brew install --cask dbeaver-community adoptopenjdk       # BD
     brew install --cask discord                 # Group calls
-    brew install --cask eclipse-java            # BD
     brew install --cask google-chrome           # Web browser
-    brew install --cask intellij-idea           # Paid, better java SQL IDE
-    brew install --cask intellij-idea-ce        # Free version
     brew install --cask iterm2                  # Best terminal emulator
     brew install --cask karabiner-elements      # Swap Esc with Caps_lock
     brew install --cask meld                    # Best Diff software
-    brew install --cask obs                     # Screen recorder //very complicated on mac
     brew install --cask r                       # Probabilitat i estadística
     brew install --cask rstudio                 # Probabilitat i estadística IDE
     brew install --cask skype                   # Videocalls
-    brew install --cask slack                   # Work
     brew install --cask spotify                 # Music player
     brew install --cask telegram                # Quickly transfer files
     brew install --cask the-unarchiver          # Archiver "faster"
     brew install --cask tomighty                # Pomodoro timer
-    brew install --cask tor-browser             # Private and uncensored browsing
     brew install --cask transmission            # Torrent Downloader
     brew install --cask visual-studio-code      
     brew install --cask vlc                     # Media Player
     brew install --cask whatsapp
+}
+
+optional () {
     #brew cask install firefox --cask           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
     #brew cask install keka --cask              # Archiver open source
     #brew cask install qbittorrent --cask
     #brew cask install unetbootin --cask        # Burn iso's (or use dd command)
+    #brew install --cask alfred                  # Better Spotlight
+    #brew install --cask dbeaver-community adoptopenjdk       # BD
+    #brew install --cask eclipse-java            # BD
+    #brew install --cask intellij-idea           # Paid, better java SQL IDE
+    #brew install --cask intellij-idea-ce        # Free version
+    #brew install --cask obs                     # Screen recorder //very complicated on mac
+    #brew install --cask slack                   # Work
+    #brew install --cask tor-browser             # Private and uncensored browsing
 }
 
 doom_emacs_install() {

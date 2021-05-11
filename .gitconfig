@@ -18,7 +18,3 @@
     cmd = open -W -a Meld --args --auto-merge \"$LOCAL\" \"$BASE\" \"$REMOTE\" --output=\"$MERGED\"   name = cuberhaus
 [credential]
 	helper = store
-[commit]
-	gpgSign = true
-[tag]
-	gpgSign = true
