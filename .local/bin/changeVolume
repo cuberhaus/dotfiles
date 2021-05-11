@@ -13,10 +13,13 @@ msgId="991049"
 
 function Usage() {
     echo "Usage: changeVolume [INT] | [+/-] [INT]"
+    echo "Called without arguments will display current volume"
+    echo "Called with an INT will change volume to that number"
+    echo "Called with an INT preceded by +/- will increase or decrease current volume by that number"
     echo "Example: changeVolume +5"
 }
 
-if [[ $# -eq 0 || $1 == "-h" ]]; then
+if [[ $1 == "-h" ]]; then
     Usage
     exit
 fi
