@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+MIXER=${MIXER:-""}
+SCONTROL=${SCONTROL:-""}
+
+if [[ -z "$MIXER" ]] ; then
+    MIXER="default"
+    if amixer -D pulse info >/dev/null 2>&1 ; then
+        MIXER="pulse"
+    fi
+fi
+
+if [[ -z "$SCONTROL" ]] ; then
+    SCONTROL=$(amixer -D "$MIXER" scontrols | sed -n "s/Simple mixer control '\([^']*\)',0/\1/p" | head -n1)
+fi

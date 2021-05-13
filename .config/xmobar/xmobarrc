@@ -22,7 +22,7 @@ Config {
         , Run Memory ["-t","Mem: <usedratio>% (<free>M)"] 10
         , Run Swap [] 10
         , Run Date "<fn=2></fn> %b %d %Y - %H:%M " "date" 10
-        , Run Com "/bin/sh" ["-c","~/.local/scripts/spoti"] "music" 50
+        , Run Com "/bin/sh" ["-c","~/.config/i3blocks/scripts/i3blocks-spotify/spotify.py"] "music" 50
         , Run DiskU [("/", "<fn=2>\xf0c7</fn> <free>")]
         ["-L", "20", "-H", "50", "-m", "1", "-p", "3",
         "--normal", "#c678dd", "--high", "#c678dd",

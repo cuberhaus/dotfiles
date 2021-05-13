@@ -397,7 +397,7 @@ myEmacsKeys =
 main :: IO ()
 main = do
   -- Execute xmobar with its config and pipe xmonad output to xmobar
-  xmproc <- spawnPipe "xmobar .config/xmobar/.xmobarrc"
+  xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
   xmonad $
     ewmh
       desktopConfig
