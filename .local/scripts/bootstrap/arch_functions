@@ -158,6 +158,8 @@ arch_install() {
 
     # Printers
     # https://wiki.archlinux.org/index.php/CUPS
+    # https://wiki.archlinux.org/title/CUPS#Web_interface
+    # https://wiki.archlinux.org/title/Avahi#Hostname_resolution
     $pac  cups system-config-printer hplip
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         sudo systemctl enable org.cups.cupsd.service
