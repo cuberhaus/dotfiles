@@ -109,8 +109,8 @@ base_install () {
     $yay balena-etcher                          # "Rufus" on linux
     $yay betterlockscreen; $pac xss-lock        # Lockscreen
     $yay birdtray                               # Thunderbird tray
-    $yay conky-cairo-no-nvidia                  # fix lua
-    $yay conky-manager2-git
+    # $yay conky-cairo-no-nvidia                  # fix lua
+    # $yay conky-manager2-git
     $yay google-chrome                          # Best web browser
     $yay pix                                    # Image viewer
     $yay skypeforlinux-stable-bin               # Skype
@@ -122,7 +122,9 @@ base_install () {
 
     # Office (install plugins located on .local)
     $pac libmythes mythes-en mythes-es  # Synonyms
-    $pac libreoffice-fresh libreoffice-fresh-ca
+
+    $pac libreoffice-still
+    # $pac libreoffice-fresh libreoffice-fresh-ca # Do not ever use this as it can contain breaking bugs that may cause it to crash
     $yay libreoffice-extension-languagetool # Grammar
     # $pac libreoffice-still libreoffice-still-ca
 
