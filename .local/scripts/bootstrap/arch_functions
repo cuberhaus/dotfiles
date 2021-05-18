@@ -6,6 +6,7 @@ scripts=$HOME/.local/scripts
 flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
 yay="yay -S $flags"
+myTerminal="kitty"
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
@@ -20,8 +21,8 @@ base_install () {
     touch $XDG_DATA_HOME/vim/viminfo # viminfo
 
     # Nemo "best filemanager"
-    gsettings set org.cinnamon.desktop.default-applications.terminal exec termite # Tell Nemo to use Termite instead of gnome-terminal
-    gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg -e # Termite execute argument is -e in gnome-terminal its -x
+    gsettings set org.cinnamon.desktop.default-applications.terminal exec $myTerminal # Tell Nemo to use Termite instead of gnome-terminal
+    # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x
     $pac nemo
     $pac nemo-fileroller
     $pac nemo-preview
