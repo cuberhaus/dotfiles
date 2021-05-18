@@ -53,10 +53,6 @@ conky.config = {
 	xftalpha = 1,
 	font = 'Freesans:pixelsize=20',
 
-	lua_load = '/home/didisoft/.conky/lua.lua',
-
--- ${diskiograph /dev/sda 15,180 a7a7a7 a7a7a7} # wskaznik pracy dysku
--- ${image /home/didisoft/.conky/didisoft.jpg -p 0,80 -s 26x28} # obrazki w conky
 
 
 };
