@@ -1,8 +1,9 @@
-.config/Calibre Library/
+# Icons
 .local/share/icons/hicolor/
-.vim/theme
 
+# Termite
 .config/termite/config
+
 # Tomighty
 .tomighty/cache/
 
@@ -61,6 +62,7 @@
 
 # Calibre
 Calibre Library/metadata_db_prefs_backup.json
+.config/Calibre Library/
 
 # Windows
 *.swp
@@ -81,6 +83,7 @@ Calibre Library/metadata_db_prefs_backup.json
 .config/nvim/autoload/
 .config/nvim/plugged/
 .vim/cache/
+.vim/theme
 #.local/share/vim/
 
 # Fonts
