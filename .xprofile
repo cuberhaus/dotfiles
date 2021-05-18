@@ -3,9 +3,9 @@
 # If you use startx/xinit like a Chad, this file will also be sourced. (from xinitrc)
 [[ -f ~/.zshenv ]] && source ~/.zshenv
 
-if [[ "$DESKTOP_SESSION" == "i3" ]]; then
-    # This runs before i3
-fi
+# if [[ "$DESKTOP_SESSION" == "i3" ]]; then
+#     # This runs before i3
+# fi
 
 setxkbmap -option caps:swapescape > /dev/null 2>&1
 
