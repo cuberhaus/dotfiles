@@ -48,6 +48,7 @@ import qualified XMonad.StackSet as W
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
+
 -- https://bbs.archlinux.org/viewtopic.php?id=120298>
 import XMonad.Util.Dmenu
 import System.Exit
@@ -377,7 +378,8 @@ myEmacsKeys =
     ("M-m", windows W.focusMaster), -- Move focus to the master window
     ("M-j", windows W.focusDown), -- Move focus to the next window
     ("M-k", windows W.focusUp), -- Move focus to the prev window
-    ("M-S-m", windows W.swapMaster), -- Swap the focused window and the master window
+    ("M-S-m", promote),      -- Moves focused window to master, others maintain order
+    -- ("M-S-m", windows W.swapMaster), -- Swap the focused window and the master window
     ("M-S-j", windows W.swapDown), -- Swap focused window with next window
     ("M-S-k", windows W.swapUp), -- Swap focused window with prev window
     ("M-S-<Tab>", rotSlavesDown), -- Rotate all windows except master and keep focus in place
@@ -391,7 +393,6 @@ myEmacsKeys =
     ("M-C-h", decScreenSpacing 4), -- Decrease screen spacing
     ("M-C-l", incScreenSpacing 4) -- Increase screen spacing
 
-    -- ("M-<Backspace>", promote)      -- Moves focused window to master, others maintain order
   ]
 
 main :: IO ()
@@ -458,10 +459,15 @@ help =
       "mod-n            Launch Explorer",
       "mod-Ctrl-w       Launch Whatsapp",
       "mod-Shift-q      Close/kill the focused window",
+      "",
+      "-- layouts",
       "mod-Space        Rotate through the available layout algorithms",
       "mod-Shift-Space  Reset the layouts on the current workSpace to default",
       "mod-f            Toggle fullscreen",
       -- "mod-n            Resize/refresh viewed windows to the correct size",
+      "",
+      "-- floating layer support",
+      "mod-t  Push window back into tiling; unfloat and re-tile it",
       "",
       "-- move focus up or down the window stack",
       "mod-Tab          Move focus to the next window",
@@ -471,6 +477,7 @@ help =
       "mod-m            Move focus to the master window",
       "",
       "-- modifying the window order",
+      "mod-Shift-m        Swap focused window with master",
       "mod-Shift-Return   Swap the focused window and the master window",
       "mod-Shift-j  Swap the focused window with the next window",
       "mod-Shift-k  Swap the focused window with the previous window",
@@ -479,8 +486,9 @@ help =
       "mod-h  Shrink the master area",
       "mod-l  Expand the master area",
       "",
-      "-- floating layer support",
-      "mod-t  Push window back into tiling; unfloat and re-tile it",
+      "-- resizing a slave window in ResizableTall layout",
+      "mod-alt-j Decrease current focused slave window",
+      "mod-alt-k Increase current focused slave window",
       "",
       "-- increase or decrease number of windows in the master area",
       "mod-comma  (mod-,)   Increment the number of windows in the master area",
@@ -488,13 +496,13 @@ help =
       "",
       "-- quit, or restart",
       "mod-Shift-e  Quit xmonad",
-      "mod-q        Restart xmonad",
+      "mod-Shift-r        Restart xmonad",
       "mod-[1..9]   Switch to workSpace N",
       "",
       "-- Workspaces & screens",
       "mod-Shift-[1..9]   Move client to workspace N",
-      "mod-{w,e,r}        Switch to physical/Xinerama screens 1, 2, or 3",
-      "mod-Shift-{w,e,r}  Move client to screen 1, 2, or 3",
+      -- "mod-{w,e,r}        Switch to physical/Xinerama screens 1, 2, or 3",
+      -- "mod-Shift-{w}  Move client to screen 1, 2, or 3",
       "",
       "-- Mouse bindings: default actions bound to mouse events",
       "mod-button1  Set the window to floating mode and move by dragging",
@@ -503,11 +511,11 @@ help =
       "",
       "-- Screenshots",
       "print            Take a screenshot",
-      "mod+print        Open the screenshot application",
-      "",
-      "-- Multimedia keys",
-      "",
-      "-- Brightness keys",
-      "",
-      "-- Volume keys"
+      "mod+print        Open the screenshot application"
+      -- "",
+      -- "-- Multimedia keys",
+      -- "",
+      -- "-- Brightness keys",
+      -- "",
+      -- "-- Volume keys"
     ]
