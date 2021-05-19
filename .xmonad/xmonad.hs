@@ -496,7 +496,7 @@ help =
       "",
       "-- quit, or restart",
       "mod-Shift-e  Quit xmonad",
-      "mod-Shift-r        Restart xmonad",
+      "mod-Shift-r  Restart xmonad",
       "mod-[1..9]   Switch to workSpace N",
       "",
       "-- Workspaces & screens",
