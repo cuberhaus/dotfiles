@@ -15,7 +15,7 @@ if has('unix') || has('macunix')
     endif
     if !has('nvim')
         set nocompatible
-        " if (cannot open viminfo file for reading) create a cache folder and viminfo
+        " if cannot open viminfo file for reading create a cache folder and viminfo
         set viminfo=%,<800,'10,/50,:100,h,f0,n~/.vim/cache/viminfo
 "                   | |    |   |   |    | |  + viminfo file path
 "                   | |    |   |   |    | + file marks 0-9,A-Z 0=NOT stored
