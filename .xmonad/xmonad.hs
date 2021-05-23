@@ -34,15 +34,22 @@ import XMonad.Hooks.ServerMode
 import XMonad.Layout.Accordion
 import XMonad.Layout.GridVariants (Grid (Grid))
 -- Layout modifiers
+import XMonad.Actions.Navigation2D -- this treats tabs properly, each tab is not an independent window but a group
+import XMonad.Layout.Renamed
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
-import XMonad.Layout.NoBorders
+import XMonad.Layout.NoBorders -- removes borderlines from windows
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Spacing --add gaps
 -- Utilities
+import XMonad.Layout.Reflect -- move master to the other side
+import XMonad.Layout.WindowNavigation
+import XMonad.Layout.Simplest
+import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Spiral
 import XMonad.Layout.Tabbed
+import XMonad.Layout.SubLayouts
 import XMonad.Layout.ThreeColumns
 import qualified XMonad.StackSet as W
 import XMonad.Util.EZConfig (additionalKeysP)
@@ -59,8 +66,16 @@ quitWithWarning = do
     let m = "confirm quit"
     s <- dmenu [m]
     when (m == s) (io exitSuccess)
+closeAllWindows :: X ()
+closeAllWindows = do
+    let m = "confirm close all windows"
+    s <- dmenu [m]
+    when (m == s) (killAll)
 
 -- Variables
+myFont :: String
+myFont = "xft:SauceCodePro Nerd Font Mono:regular:size=9:antialias=true:hinting=true"
+
 wallpaper :: String
 wallpaper = "$HOME/.local/xdg/wallpapers/doggo.jpeg"
 
@@ -162,6 +177,8 @@ clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
 
 -- No transparency
 myNormalBorderColor  = "#2f343f"
+-- myNormalBorderColor  = "#282c34"
+
 myFocusedBorderColor = "#bd93f9"
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -240,7 +257,41 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
 --
 -- myLayout = tiled ||| Mirror tiled ||| Full
 -- tiled |||  deprecated by resizableTall
-myLayout = avoidStruts $ smartBorders $ spacingRaw True (Border 0 4 4 4) True (Border 4 4 4 4) True $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ (ResizableTall 1 (3 / 100) (1 / 2) [] ||| Accordion ||| spiral (6 / 7) ||| ThreeCol 1 (3 / 100) (1 / 2))
+myNav2DConf = def
+    { defaultTiledNavigation    = centerNavigation
+    , floatNavigation           = centerNavigation
+    , screenNavigation          = lineNavigation
+    , layoutNavigation          = [("Full",          centerNavigation)
+    -- line/center same results   ,("Simple Tabs", lineNavigation)
+    --                            ,("Simple Tabs", centerNavigation)
+                                  ]
+    , unmappedWindowRect        = [("Full", singleWindowRect)
+    -- works but breaks tab deco  ,("Simple Tabs", singleWindowRect)
+    -- doesn't work but deco ok   ,("Simple Tabs", fullScreenRect)
+                                  ]
+    }
+
+tall = renamed [Replace "tall"]
+    $ smartBorders
+    $ windowNavigation
+    $ addTabs shrinkText myTabTheme
+    $ subLayout [] (Simplest)
+    $ ResizableTall 1 (3/100) (1/2) []
+threeCol = renamed [Replace "threeCol"]
+    $ smartBorders
+    $ windowNavigation
+    $ addTabs shrinkText myTabTheme
+    $ subLayout [] (Simplest)
+    $ ThreeCol 1 (3 / 100) (1 / 2)
+
+spirals = renamed [Replace "spirals"]
+    $ smartBorders
+    $ spiral (6/7)
+
+tallAccordion = renamed [Replace "tallAccordion"]
+    $ Accordion
+
+myLayout = avoidStruts $ spacingRaw True (Border 0 4 4 4) True (Border 4 4 4 4) True $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ mkToggle (single REFLECTX) $ (tall ||| tallAccordion ||| spirals ||| threeCol)
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled = Tall nmaster delta ratio
@@ -253,6 +304,16 @@ myLayout = avoidStruts $ smartBorders $ spacingRaw True (Border 0 4 4 4) True (B
 
     -- Percent of screen to increment by when resizing panes
     delta = 3 / 100
+
+-- setting colors for tabs layout and tabs sublayout.
+myTabTheme = def { fontName            = myFont
+                 , activeColor         = "#46d9ff"
+                 , inactiveColor       = "#313846"
+                 , activeBorderColor   = "#46d9ff"
+                 , inactiveBorderColor = "#2f343f"
+                 , activeTextColor     = "#282c34"
+                 , inactiveTextColor   = "#d0d0d0"
+                 }
 
 ------------------------------------------------------------------------
 -- Window rules:
@@ -343,55 +404,83 @@ myStartupHook = do
 myEmacsKeys :: [(String, X ())]
 myEmacsKeys =
   [ -- Multimedia Keys
-    ("<XF86AudioPlay>", spawn mediaPlay),
-    ("<XF86AudioPrev>", spawn mediaPrev),
-    ("<XF86AudioNext>", spawn mediaNext),
-    ("<XF86AudioStop>", spawn mediaPause),
-    ("<XF86AudioMute>", spawn audioMute),
-    ("<XF86AudioLowerVolume>", spawn volumeDown),
-    ("<XF86AudioRaiseVolume>", spawn volumeUp),
+     ("<XF86AudioPlay>", spawn mediaPlay)
+     ,("<XF86AudioPrev>", spawn mediaPrev)
+     ,("<XF86AudioNext>", spawn mediaNext)
+     ,("<XF86AudioStop>", spawn mediaPause)
+     ,("<XF86AudioMute>", spawn audioMute)
+     ,("<XF86AudioLowerVolume>", spawn volumeDown)
+     ,("<XF86AudioRaiseVolume>", spawn volumeUp)
     -- Brightness keys
-    ("<XF86MonBrightnessUp>", spawn brightUp),
-    ("<XF86MonBrightnessDown>", spawn brightDown),
+     ,("<XF86MonBrightnessUp>", spawn brightUp)
+     ,("<XF86MonBrightnessDown>", spawn brightDown)
     -- Screenshots
-    ("<Print>", spawn screenShotFast), -- Take screenshot
-    ("M-<Print>", spawn screenShotOptions), -- Open screenshot app
+     ,("<Print>", spawn screenShotFast) -- Take screenshot
+     ,("M-<Print>", spawn screenShotOptions) -- Open screenshot app
     -- Open apps
-    ("M-g", spawn browser), -- Windows + g (meta key is windows key)
-    ("M-n", spawn explorer), -- open explorer
-    ("M-C-w", spawn whatsapp), -- Windows + ctrl + w
-    ("M-<Return>", spawn myTerminal), -- Spawn terminal
-    ("M-d", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal termite "),
+     ,("M-g", spawn browser) -- Windows + g (meta key is windows key)
+     ,("M-n", spawn explorer) -- open explorer
+     ,("M-C-w", spawn whatsapp) -- Windows + ctrl + w
+     ,("M-<Return>", spawn myTerminal) -- Spawn terminal
+     ,("M-d", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal termite ")
     -- Kill windows
-    ("M-S-q", kill), -- Kill Current window
-    ("M-S-a", killAll), -- Kill all windows on current workspace
+     ,("M-S-q", kill) -- Kill Current window
+     ,("M-S-a", closeAllWindows) -- Kill all windows on current workspace
     -- Layouts
-    ("M-<Space>", sendMessage NextLayout), -- Rotate through the available layout algorithms
-    ("M-x", sendMessage $ Toggle MIRROR), -- Mirror current layout
-    ("M-f", sendMessage (Toggle FULL) >> sendMessage ToggleStruts), -- Toggle fullscreen
+     ,("M-<Space>", sendMessage NextLayout) -- Rotate through the available layout algorithms
+     ,("M-x", sendMessage $ Toggle MIRROR) -- Mirror current layout
+     ,("M-z", sendMessage (XMonad.Layout.MultiToggle.Toggle REFLECTX))
+     ,("M-f", sendMessage (Toggle FULL) >> sendMessage ToggleStruts) -- Toggle fullscreen
     -- Window resizing
-    ("M-M1-j", sendMessage MirrorShrink), -- Shrink vert window width
-    ("M-h", sendMessage Shrink), -- Shrink horiz window width
-    ("M-l", sendMessage Expand), -- Expand horiz window width
-    ("M-M1-k", sendMessage MirrorExpand), -- Expand vert window width
+     ,("M-M1-j", sendMessage MirrorShrink) -- Shrink vert window width
+    
+     -- ,("M-h", sendMessage Shrink) -- Shrink horiz window width
+     -- ,("M-l", sendMessage Expand) -- Expand horiz window width
+
+     ,("M-M1-k", sendMessage MirrorExpand) -- Expand vert window width
     -- Window navigation
-    ("M-m", windows W.focusMaster), -- Move focus to the master window
-    ("M-j", windows W.focusDown), -- Move focus to the next window
-    ("M-k", windows W.focusUp), -- Move focus to the prev window
-    ("M-S-m", promote),      -- Moves focused window to master, others maintain order
+     ,("M-m", windows W.focusMaster) -- Move focus to the master window
+     -- ,("M-j", windows W.focusDown) -- Move focus to the next window
+     -- ,("M-k", windows W.focusUp) -- Move focus to the prev window
+   , ("M-l",                  windowGo R False)
+   , ("M-h",                  windowGo L False)
+   , ("M-k",                  windowGo U False)
+   , ("M-j",                  windowGo D False)
+
+     ,("M-S-m", promote)      -- Moves focused window to master, others maintain order
     -- ("M-S-m", windows W.swapMaster), -- Swap the focused window and the master window
-    ("M-S-j", windows W.swapDown), -- Swap focused window with next window
-    ("M-S-k", windows W.swapUp), -- Swap focused window with prev window
-    ("M-S-<Tab>", rotSlavesDown), -- Rotate all windows except master and keep focus in place
-    ("M-C-<Tab>", rotAllDown), -- Rotate all the windows in the current stack
+
+     -- ,("M-S-j", windows W.swapDown) -- Swap focused window with next window
+     -- ,("M-S-k", windows W.swapUp) -- Swap focused window with prev window
+
+        -- Swap adjacent windows
+   , ("M-S-l", windowSwap R False)
+   , ("M-S-h", windowSwap L False)
+   , ("M-S-k", windowSwap U False)
+   , ("M-S-j", windowSwap D False)
+     ,("M-S-<Tab>", rotSlavesDown) -- Rotate all windows except master and keep focus in place
+     ,("M-C-<Tab>", rotAllDown) -- Rotate all the windows in the current stack
     -- Increase, decrease windows in stack
-    ("M-S-<Up>", sendMessage (IncMasterN 1)), -- Increase # of clients master pane
-    ("M-S-<Down>", sendMessage (IncMasterN (-1))), -- Decrease # of clients master pane
+     ,("M-S-<Up>", sendMessage (IncMasterN 1)) -- Increase # of clients master pane
+     ,("M-S-<Down>", sendMessage (IncMasterN (-1))) -- Decrease # of clients master pane
     -- Increase, decrease window and screen spacing
-    ("M-C-j", decWindowSpacing 4), -- Decrease window spacing
-    ("M-C-k", incWindowSpacing 4), -- Increase window spacing
-    ("M-C-h", decScreenSpacing 4), -- Decrease screen spacing
-    ("M-C-l", incScreenSpacing 4) -- Increase screen spacing
+    -- ("M-C-j", decWindowSpacing 4), -- Decrease window spacing
+    -- ("M-C-k", incWindowSpacing 4), -- Increase window spacing
+    -- ("M-C-h", decScreenSpacing 4), -- Decrease screen spacing
+    -- ("M-C-l", incScreenSpacing 4) -- Increase screen spacing
+
+  -- Sublayouts
+    -- This is used to push windows to tabbed sublayouts, or pull them out of it.
+        , ("M-C-h", sendMessage $ pullGroup L)
+        , ("M-C-l", sendMessage $ pullGroup R)
+        , ("M-C-k", sendMessage $ pullGroup U)
+        , ("M-C-j", sendMessage $ pullGroup D)
+        , ("M-C-m", withFocused (sendMessage . MergeAll))
+        , ("M-C-u", withFocused (sendMessage . UnMerge))
+        , ("M-C-/", withFocused (sendMessage . UnMergeAll))
+        , ("M-.", onGroup W.focusUp')    -- Switch focus to next tab
+        , ("M-,", onGroup W.focusDown')  -- Switch focus to prev tab
+
 
   ]
 
@@ -399,7 +488,7 @@ main :: IO ()
 main = do
   -- Execute xmobar with its config and pipe xmonad output to xmobar
   xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
-  xmonad $
+  xmonad $  withNavigation2DConfig myNav2DConf $ 
     ewmh
       desktopConfig
         { -- simple stuff
