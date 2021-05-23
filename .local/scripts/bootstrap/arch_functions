@@ -82,10 +82,7 @@ base_install () {
     $yay f5fpc                                  # Connexio a UPClink
 
     # GUI
-    # $pac  gparted                       # Manage partitions (doesn't work with ex-fat)
     # $pac conky                          # Desktop rice
-    # $pac gnome-disk-utility             # Partition manager by gnome
-    # $pac hexchat                        # IRC APP
     $pac calibre                                # Book manager
     $pac discord
     $pac dunst                                  # Notifications
@@ -363,7 +360,10 @@ emacs_install () {
 
 ### All packages in here should be handpicked
 optional() {
-    # Terminal
+    # Trash
+    # $pac gnome-disk-utility             # Partition manager by gnome
+    # $pac hexchat                        # IRC APP
+    # $pac  gparted                       # Manage partitions (doesn't work with ex-fat)
     #$pac  github-cli                    # Github for terminal, create issues...
 
     # GUI
