@@ -329,6 +329,7 @@ bindsym $mod+m exec $HOME/.local/bin/program thunderbird,  [class="Thunderbird"]
 
 # for_window [title="New Event:"] floating enable
 for_window [class="Thunderbird"] floating enable
+# regex matches anything before that that ends in Mozilla Thunderbird
 for_window [title="^(.*?)\Mozilla Thunderbird"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 for_window [class="Spotify"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 for_window [class="whatsapp-nativefier-d40211"] floating enable, move scratchpad, resize set 70 ppt 70 ppt, move absolute position center
