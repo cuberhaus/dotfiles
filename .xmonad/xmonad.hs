@@ -44,6 +44,8 @@ import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Spacing --add gaps
 import XMonad.Util.NamedScratchpad
 -- Utilities
+import XMonad.Hooks.DynamicProperty
+import XMonad.Layout.SimpleFloat
 import XMonad.Layout.Reflect -- move master to the other side
 import XMonad.Layout.WindowNavigation
 import XMonad.Layout.Simplest
@@ -171,7 +173,7 @@ isSpotifyMusic = (className =? "Spotify")
 
 scratchpads =
     [
-       (NS "Spotify"  spotifyMusicCommand isSpotifyMusic defaultFloating)
+       (NS "Spotify"  spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3)) )
     ]
 
 myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
@@ -374,7 +376,9 @@ myManageHook =
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
-myEventHook = ewmhDesktopsEventHook
+myEventHook = ewmhDesktopsEventHook <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
+        where floating = customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6)
+-- To adjust rectangle had to increment first two numbers denominator to move screen upwards and change last two numbers nominator to scale up the window
 
 ------------------------------------------------------------------------
 -- Status bars and logging
