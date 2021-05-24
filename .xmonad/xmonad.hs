@@ -170,7 +170,8 @@ myModMask = mod4Mask
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
 -- myWorkspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-spotifyMusicCommand = "dex /usr/share/applications/spotify.desktop"
+-- spotifyMusicCommand = "dex /usr/share/applications/spotify.desktop"
+spotifyMusicCommand = "spotify"
 isSpotifyMusic = (className =? "Spotify")
 
 -- whatsappCommand ="dex /usr/share/applications/whatsapp-nativefier.desktop"
