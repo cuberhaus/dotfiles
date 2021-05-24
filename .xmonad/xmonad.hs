@@ -170,10 +170,13 @@ myModMask = mod4Mask
 -- myWorkspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 spotifyMusicCommand = "dex /usr/share/applications/spotify.desktop"
 isSpotifyMusic = (className =? "Spotify")
+whatsappCommand ="dex /usr/share/applications/whatsapp-nativefier.desktop"
+isWhatsapp = (className =? "whatsapp-nativefier-d40211" )
 
 scratchpads =
     [
        (NS "Spotify"  spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3)) )
+        ,(NS "WhatsApp"  whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1/6) (1/6) (4/6) (4/6)) )
     ]
 
 myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
@@ -376,8 +379,13 @@ myManageHook =
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
-myEventHook = ewmhDesktopsEventHook <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
-        where floating = customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6)
+myEventHook = ewmhDesktopsEventHook 
+        <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)  
+        <+>  dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
+        where 
+            floating = customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6)
+            floating2 = customFloating $ W.RationalRect (1/8) (1/8) (5/6) (5/6) 
+-- whatsapp isn't really needed here just put it here for completeness and demonstration of where with multiple variables
 -- To adjust rectangle had to increment first two numbers denominator to move screen upwards and change last two numbers nominator to scale up the window
 -- customFloating named scratchpad not floating, had to use this instead https://github.com/xmonad/xmonad/issues/214
 
@@ -503,6 +511,7 @@ myEmacsKeys =
         , ("M-.", onGroup W.focusUp')    -- Switch focus to next tab
         , ("M-,", onGroup W.focusDown')  -- Switch focus to prev tab
         , ("M-s", namedScratchpadAction scratchpads "Spotify")
+        , ("M-w", namedScratchpadAction scratchpads "WhatsApp")
 
   ]
 
