@@ -549,7 +549,7 @@ main = do
           layoutHook = myLayout,
           -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
         -- insertposition Above newer puts new windows on top
-          manageHook = insertPosition Above Newer <+> myManageHook <+>  namedScratchpadManageHook scratchpads <+> doCenterFloat <+> manageDocks,
+          manageHook = insertPosition Above Newer <+> myManageHook <+>  namedScratchpadManageHook scratchpads <+>  manageDocks,
           handleEventHook =
             myEventHook
               <+> fullscreenEventHook
