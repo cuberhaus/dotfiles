@@ -170,16 +170,20 @@ myModMask = mod4Mask
 -- myWorkspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 spotifyMusicCommand = "dex /usr/share/applications/spotify.desktop"
 isSpotifyMusic = (className =? "Spotify")
+
 -- whatsappCommand ="dex /usr/share/applications/whatsapp-nativefier.desktop"
 whatsappCommand ="whatsapp-nativefier"
 -- also works to write the name of the command
-
 isWhatsapp = (className =? "whatsapp-nativefier-d40211" )
+
+thunderbirdCommand = "thunderbird"
+isThunderbird = (className =? "Thunderbird" )
 
 scratchpads =
     [
-       (NS "Spotify"  spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3)) )
+       (NS "Spotify"  spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6)) )
         ,(NS "WhatsApp"  whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1/6) (1/6) (4/6) (4/6)) )
+        ,(NS "Thunderbird"  thunderbirdCommand isThunderbird (customFloating $ W.RationalRect (1/16) (1/16) (7/8) (7/8)) )
     ]
 
 myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
@@ -472,7 +476,7 @@ myEmacsKeys =
 
      ,("M-M1-k", sendMessage MirrorExpand) -- Expand vert window width
     -- Window navigation
-     ,("M-m", windows W.focusMaster) -- Move focus to the master window
+     -- ,("M-m", windows W.focusMaster) -- Move focus to the master window
      -- ,("M-j", windows W.focusDown) -- Move focus to the next window
      -- ,("M-k", windows W.focusUp) -- Move focus to the prev window
    , ("M-l",                  windowGo R False)
@@ -515,6 +519,7 @@ myEmacsKeys =
         , ("M-,", onGroup W.focusDown')  -- Switch focus to prev tab
         , ("M-s", namedScratchpadAction scratchpads "Spotify")
         , ("M-w", namedScratchpadAction scratchpads "WhatsApp")
+        , ("M-m", namedScratchpadAction scratchpads "Thunderbird")
 
   ]
 
