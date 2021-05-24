@@ -81,10 +81,10 @@ floating_modifier $mod
 # Shortcuts {{{
 
 # Whatsapp
-bindsym $mod+ctrl+w exec whatsapp-nativefier 
+# bindsym $mod+ctrl+w exec whatsapp-nativefier 
 
 # Discord
-bindsym $mod+ctrl+d exec $discord
+# bindsym $mod+ctrl+d exec $discord
 
 # Google Chrome
 bindsym $mod+g exec $browser
@@ -320,6 +320,13 @@ bindsym $mod+Shift+7 move container to workspace $ws7
 bindsym $mod+Shift+8 move container to workspace $ws8
 bindsym $mod+Shift+9 move container to workspace $ws9
 bindsym $mod+Shift+0 move container to workspace $ws10
+
+# Show spotify
+bindsym $mod+ctrl+s [class="Spotify"] scratchpad show
+bindsym $mod+ctrl+w [class="whatsapp-nativefier-d40211"] scratchpad show
+
+for_window [class="Spotify"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
+for_window [class="whatsapp-nativefier-d40211"] floating enable, move scratchpad, resize set 70 ppt 70 ppt, move absolute position center
 
 #}}}
 
