@@ -42,6 +42,7 @@ import XMonad.Layout.NoBorders -- removes borderlines from windows
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Spacing --add gaps
+import XMonad.Util.NamedScratchpad
 -- Utilities
 import XMonad.Layout.Reflect -- move master to the other side
 import XMonad.Layout.WindowNavigation
@@ -141,6 +142,9 @@ myFocusFollowsMouse = True
 myClickJustFocuses :: Bool
 myClickJustFocuses = False
 
+-- sizes
+gap         = 5
+
 -- Width of the window border in pixels.
 --
 myBorderWidth = 3
@@ -162,6 +166,13 @@ myModMask = mod4Mask
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
 -- myWorkspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+spotifyMusicCommand = "dex /usr/share/applications/spotify.desktop"
+isSpotifyMusic = (className =? "Spotify")
+
+scratchpads =
+    [
+       (NS "Spotify"  spotifyMusicCommand isSpotifyMusic defaultFloating)
+    ]
 
 myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
 -- myWorkspaces = [" dev ", " www ", " spotify ", " chat ", " mail ", " doc ", " vbox ", " vid ", " game "]
@@ -257,6 +268,8 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
 --
 -- myLayout = tiled ||| Mirror tiled ||| Full
 -- tiled |||  deprecated by resizableTall
+mySpacing           = spacing gap
+
 myNav2DConf = def
     { defaultTiledNavigation    = centerNavigation
     , floatNavigation           = centerNavigation
@@ -276,22 +289,26 @@ tall = renamed [Replace "tall"]
     $ windowNavigation
     $ addTabs shrinkText myTabTheme
     $ subLayout [] (Simplest)
+    $ mySpacing
     $ ResizableTall 1 (3/100) (1/2) []
 threeCol = renamed [Replace "threeCol"]
     $ smartBorders
     $ windowNavigation
     $ addTabs shrinkText myTabTheme
     $ subLayout [] (Simplest)
+    $ mySpacing
     $ ThreeCol 1 (3 / 100) (1 / 2)
 
 spirals = renamed [Replace "spirals"]
     $ smartBorders
+    $ mySpacing
     $ spiral (6/7)
 
 tallAccordion = renamed [Replace "tallAccordion"]
+    $ mySpacing
     $ Accordion
 
-myLayout = avoidStruts $ spacingRaw True (Border 0 4 4 4) True (Border 4 4 4 4) True $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ mkToggle (single REFLECTX) $ (tall ||| tallAccordion ||| spirals ||| threeCol)
+myLayout = avoidStruts $  mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ mkToggle (single REFLECTX) $ (tall ||| threeCol ||| spirals ||| tallAccordion )
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled = Tall nmaster delta ratio
@@ -310,7 +327,7 @@ myTabTheme = def { fontName            = myFont
                  , activeColor         = "#46d9ff"
                  , inactiveColor       = "#313846"
                  , activeBorderColor   = "#46d9ff"
-                 , inactiveBorderColor = "#2f343f"
+                 , inactiveBorderColor = "#282c34"
                  , activeTextColor     = "#282c34"
                  , inactiveTextColor   = "#d0d0d0"
                  }
@@ -434,8 +451,8 @@ myEmacsKeys =
     -- Window resizing
      ,("M-M1-j", sendMessage MirrorShrink) -- Shrink vert window width
     
-     -- ,("M-h", sendMessage Shrink) -- Shrink horiz window width
-     -- ,("M-l", sendMessage Expand) -- Expand horiz window width
+     ,("M-M1-h", sendMessage Shrink) -- Shrink horiz window width
+     ,("M-M1-l", sendMessage Expand) -- Expand horiz window width
 
      ,("M-M1-k", sendMessage MirrorExpand) -- Expand vert window width
     -- Window navigation
@@ -480,7 +497,7 @@ myEmacsKeys =
         , ("M-C-/", withFocused (sendMessage . UnMergeAll))
         , ("M-.", onGroup W.focusUp')    -- Switch focus to next tab
         , ("M-,", onGroup W.focusDown')  -- Switch focus to prev tab
-
+        , ("M-s", namedScratchpadAction scratchpads "Spotify")
 
   ]
 
@@ -507,7 +524,7 @@ main = do
           -- hooks, layouts
           layoutHook = myLayout,
           -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
-          manageHook = insertPosition Below Newer <+> myManageHook <+> manageDocks,
+          manageHook = insertPosition Below Newer <+> myManageHook <+>  namedScratchpadManageHook scratchpads <+> manageDocks,
           handleEventHook =
             myEventHook
               <+> fullscreenEventHook
@@ -523,6 +540,10 @@ main = do
                 , ppTitle = xmobarColor "#b3afc2" "" . shorten 60               -- Title of active window
                 , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"            -- Urgent workspace
                 , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]                    -- order of things in xmobar
+                , ppSort                = fmap 
+                                  (namedScratchpadFilterOutWorkspace.)
+                                  (ppSort def)
+                                  --(ppSort defaultPP)
                 },
           startupHook = myStartupHook
         }
