@@ -204,11 +204,6 @@ bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
-# split in horizontal orientation
-bindsym $mod+b split h
-
-# split in vertical orientation
-bindsym $mod+v split v
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
@@ -217,6 +212,12 @@ bindsym $mod+f fullscreen toggle
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
+
+# split in horizontal orientation
+bindsym $mod+b split h
+
+# split in vertical orientation
+bindsym $mod+v split v
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -322,9 +323,13 @@ bindsym $mod+Shift+9 move container to workspace $ws9
 bindsym $mod+Shift+0 move container to workspace $ws10
 
 # Show spotify
-bindsym $mod+ctrl+s [class="Spotify"] scratchpad show
-bindsym $mod+ctrl+w [class="whatsapp-nativefier-d40211"] scratchpad show
+bindsym $mod+ctrl+s exec $HOME/.local/bin/program spotify, [class="Spotify"] scratchpad show
+bindsym $mod+ctrl+w exec $HOME/.local/bin/program whatsapp-nativefier, [class="whatsapp-nativefier-d40211"] scratchpad show
 
+bindsym $mod+ctrl+m [class="Thunderbird"] scratchpad show
+
+for_window [title="New Event:"] floating enable
+for_window [title="Calendar - Mozilla Thunderbird"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 for_window [class="Spotify"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 for_window [class="whatsapp-nativefier-d40211"] floating enable, move scratchpad, resize set 70 ppt 70 ppt, move absolute position center
 
@@ -425,6 +430,12 @@ exec flameshot &
 
 ## Show day in a classy way
 exec conky --config="$conky_day" &
+
+# Music
+exec spotify &
+
+# Messages
+exec whatsapp-nativefier &
 
 ## Moar info
 # exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &

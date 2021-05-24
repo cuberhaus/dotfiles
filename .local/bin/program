@@ -1,0 +1,25 @@
+#!/bin/bash
+# Author: Serg Kolo
+# Description: A launcher script that checks whether
+#       or not a window of a particular program already exists
+#       If a window of such program is open, bring it to focus
+#       Otherwise - launch a new window
+#       Written for https://askubuntu.com/q/440142/295286
+# Date: April 6 , 2015
+#
+
+
+MYPROG=$1
+sleep 0.5
+wmctrl -lx | awk '{print $3}' | grep -i "$MYPROG"
+
+if [ $? -eq 0 ]; then
+    sleep 1         
+    wmctrl -xa $MYPROG
+   #as an alternative try the line bellow
+   #wmctrl -a $MYPROG
+    exit 1
+else 
+    $MYPROG &
+    exit 0
+fi
