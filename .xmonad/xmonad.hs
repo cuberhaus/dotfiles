@@ -391,6 +391,9 @@ myManageHook =
 myEventHook = ewmhDesktopsEventHook 
         <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)  
         <+>  dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
+        <+> fullscreenEventHook
+        <+> docksEventHook
+
         where 
             floating = customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6)
             floating2 = customFloating $ W.RationalRect (1/8) (1/8) (5/6) (5/6) 
@@ -533,28 +536,26 @@ main = do
     ewmh
       desktopConfig
         { -- simple stuff
-          terminal = myTerminal,
-          focusFollowsMouse = myFocusFollowsMouse,
-          clickJustFocuses = myClickJustFocuses,
-          borderWidth = myBorderWidth,
-          modMask = myModMask,
-          workspaces         = myWorkspaces,
-          normalBorderColor = myNormalBorderColor,
-          focusedBorderColor = myFocusedBorderColor,
-          -- key bindings
-          keys = myKeys,
-          mouseBindings      = myMouseBindings,
+          terminal = myTerminal 
+           ,focusFollowsMouse = myFocusFollowsMouse 
+           ,clickJustFocuses = myClickJustFocuses 
+           ,borderWidth = myBorderWidth 
+           ,modMask = myModMask 
+           ,workspaces         = myWorkspaces 
+           ,normalBorderColor = myNormalBorderColor 
+           ,focusedBorderColor = myFocusedBorderColor 
+           -- key bindings
+           ,keys = myKeys 
+           ,mouseBindings      = myMouseBindings 
 
           -- hooks, layouts
-          layoutHook = myLayout,
+            ,layoutHook = myLayout
           -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
-        -- insertposition Above newer puts new windows on top
-          manageHook = insertPosition Above Newer <+> myManageHook <+>  namedScratchpadManageHook scratchpads <+>  manageDocks,
-          handleEventHook =
-            myEventHook
-              <+> fullscreenEventHook
-              <+> docksEventHook,
-          logHook =
+        -- insertposition Above newer puts new windows on top (we want this for floating)
+        -- insertposition Below Newer puts new windows below (we want this for tiled)
+            ,manageHook = insertPosition Above Newer <+> myManageHook <+>  namedScratchpadManageHook scratchpads <+>  manageDocks
+        , handleEventHook = myEventHook
+            ,logHook =
             dynamicLogWithPP
               xmobarPP
                 { ppOutput = hPutStrLn xmproc
@@ -564,15 +565,19 @@ main = do
                  , ppHiddenNoWindows = xmobarColor "#c792ea" ""  . clickable     -- Hidden workspaces (no windows)
                 , ppTitle = xmobarColor "#b3afc2" "" . shorten 60               -- Title of active window
                 , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"            -- Urgent workspace
+                , ppLayout              = xmobarColor yellow ""
                 , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]                    -- order of things in xmobar
+                , ppWsSep               = " "
                 , ppSort                = fmap 
                                   (namedScratchpadFilterOutWorkspace.)
                                   (ppSort def)
+                , ppExtras              = []
                                   --(ppSort defaultPP)
-                },
-          startupHook = myStartupHook
+                }
+        ,startupHook = myStartupHook
         }
       `additionalKeysP` myEmacsKeys
+
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
