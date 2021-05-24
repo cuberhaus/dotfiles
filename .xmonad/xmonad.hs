@@ -527,6 +527,23 @@ myEmacsKeys =
         , ("M-m", namedScratchpadAction scratchpads "Thunderbird")
 
   ]
+base03  = "#002b36"
+base02  = "#073642"
+base01  = "#586e75"
+base00  = "#657b83"
+base0   = "#839496"
+base1   = "#93a1a1"
+base2   = "#eee8d5"
+base3   = "#fdf6e3"
+yellow  = "#b58900"
+orange  = "#cb4b16"
+red     = "#dc322f"
+magenta = "#d33682"
+violet  = "#6c71c4"
+blue    = "#268bd2"
+cyan    = "#2aa198"
+green       = "#859900"
+brightgrey ="#CCCCCC"
 
 main :: IO ()
 main = do
@@ -565,8 +582,10 @@ main = do
                  , ppHiddenNoWindows = xmobarColor "#c792ea" ""  . clickable     -- Hidden workspaces (no windows)
                 , ppTitle = xmobarColor "#b3afc2" "" . shorten 60               -- Title of active window
                 , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"            -- Urgent workspace
-                , ppLayout              = xmobarColor yellow ""
+                -- bright grey
+                , ppLayout              = xmobarColor brightgrey ""
                 , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]                    -- order of things in xmobar
+                , ppSep                 = xmobarColor "#98be65" myNormalBorderColor "  :  "
                 , ppWsSep               = " "
                 , ppSort                = fmap 
                                   (namedScratchpadFilterOutWorkspace.)
