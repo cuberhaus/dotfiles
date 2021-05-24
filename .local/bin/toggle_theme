@@ -26,6 +26,17 @@ VIM_COLORSCHEME_LIGHT="one"
 TERMITE_THEME_DARK="onedark"
 TERMITE_THEME_LIGHT="onelight"
 
+# WALLPAPER_LIGHT=""
+# WALLPAPER_DARK=""
+
+function update_wallpaper {
+    if [ "$1" == "light" ]; then
+        feh --bg-scale $WALLPAPER_LIGHT &
+    elif [ "$1" == "dark" ]; then
+        feh --bg-scale $WALLPAPER_DARK &
+    fi
+}
+
 function update_vim {
     if [ "$1" == "light" ]; then
         # command sed -i "$@"

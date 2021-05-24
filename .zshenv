@@ -45,6 +45,8 @@ export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh" # For more information RT
 export VISUAL=vim
 export EDITOR="$VISUAL"
 export DOTFILES="$HOME/dotfiles/dotfiles"
+export WALLPAPER_LIGHT="$HOME/.local/xdg/wallpapers/doggo.jpeg"
+export WALLPAPER_DARK="$HOME/Downloads/wallpapers/pexels-eberhard-grossgasteiger-1612351.jpg"
 
 #INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
 #OBJECTES=/Users/$USER/assig/pro2/objectes
