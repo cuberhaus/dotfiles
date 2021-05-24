@@ -105,6 +105,7 @@ function change_theme {
         gtk-icon-theme-name="" ' > $GTK_CONFIG
         update_gtk_theme $1
     fi
+    update_wallpaper $1
 
     # if [ "$(uname)" == "Linux" ]; then
     #     [ -d "$TERMITE_FOLDER" ] && update_termite $1
