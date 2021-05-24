@@ -379,6 +379,7 @@ myManageHook =
 myEventHook = ewmhDesktopsEventHook <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
         where floating = customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6)
 -- To adjust rectangle had to increment first two numbers denominator to move screen upwards and change last two numbers nominator to scale up the window
+-- customFloating named scratchpad not floating, had to use this instead https://github.com/xmonad/xmonad/issues/214
 
 ------------------------------------------------------------------------
 -- Status bars and logging
