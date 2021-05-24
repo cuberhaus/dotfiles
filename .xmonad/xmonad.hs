@@ -44,6 +44,8 @@ import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Spacing --add gaps
 import XMonad.Util.NamedScratchpad
 -- Utilities
+import XMonad.Hooks.ManageHelpers -- windows appear behind others
+import XMonad.Hooks.InsertPosition 
 import XMonad.Hooks.DynamicProperty
 import XMonad.Layout.SimpleFloat
 import XMonad.Layout.Reflect -- move master to the other side
@@ -546,7 +548,8 @@ main = do
           -- hooks, layouts
           layoutHook = myLayout,
           -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
-          manageHook = insertPosition Below Newer <+> myManageHook <+>  namedScratchpadManageHook scratchpads <+> manageDocks,
+        -- insertposition Above newer puts new windows on top
+          manageHook = insertPosition Above Newer <+> myManageHook <+>  namedScratchpadManageHook scratchpads <+> doCenterFloat <+> manageDocks,
           handleEventHook =
             myEventHook
               <+> fullscreenEventHook
