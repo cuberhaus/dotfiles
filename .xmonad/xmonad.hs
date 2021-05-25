@@ -585,7 +585,7 @@ main = do
                 , ppTitle = xmobarColor "#b3afc2" "" . shorten 60               -- Title of active window
                 , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"            -- Urgent workspace
                 -- bright grey
-                , ppLayout              = xmobarColor brightgrey ""
+                , ppLayout              = xmobarColor white ""
                 , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]                    -- order of things in xmobar
                 , ppSep                 = xmobarColor white myNormalBorderColor "  :  "
                 , ppWsSep               = " "
