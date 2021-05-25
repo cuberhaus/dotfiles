@@ -545,6 +545,7 @@ blue    = "#268bd2"
 cyan    = "#2aa198"
 green       = "#859900"
 brightgrey ="#CCCCCC"
+white   ="#FFFFFF"
 
 main :: IO ()
 main = do
@@ -586,7 +587,7 @@ main = do
                 -- bright grey
                 , ppLayout              = xmobarColor brightgrey ""
                 , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]                    -- order of things in xmobar
-                , ppSep                 = xmobarColor "#98be65" myNormalBorderColor "  :  "
+                , ppSep                 = xmobarColor white myNormalBorderColor "  :  "
                 , ppWsSep               = " "
                 , ppSort                = fmap 
                                   (namedScratchpadFilterOutWorkspace.)
