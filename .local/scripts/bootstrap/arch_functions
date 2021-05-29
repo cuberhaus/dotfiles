@@ -111,8 +111,8 @@ base_install () {
     # $yay conky-cairo-no-nvidia                  # fix lua
     # $yay conky-manager2-git
     $yay google-chrome                          # Best web browser
-    $yay pix                                    # Image browser
-    $pac nomacs                                 # Image viewer
+    # $yay pix                                    # Image browser
+    $pac nomacs                                 # Image viewer (da best)
     $yay skypeforlinux-stable-bin               # Skype
     $yay spotify                                # Spotify
     $yay timeshift; $pac cron  # Backups (sudo timeshift-gtk)
