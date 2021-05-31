@@ -89,7 +89,8 @@ helix = "$HOME/.conky/helix/conky\\ helix\\ white"
 
 -- Applications
 browser :: String
-browser = "google-chrome-stable"
+-- browser = "google-chrome-stable"
+browser = "firefox"
 
 whatsapp :: String
 whatsapp = "whatsapp-nativefier"
@@ -461,7 +462,7 @@ myEmacsKeys =
      ,("<Print>", spawn screenShotFast) -- Take screenshot
      ,("M-<Print>", spawn screenShotOptions) -- Open screenshot app
     -- Open apps
-     ,("M-g", spawn browser) -- Windows + g (meta key is windows key)
+     ,("M-b", spawn browser) -- Windows + g (meta key is windows key)
      ,("M-n", spawn explorer) -- open explorer
      ,("M-C-w", spawn whatsapp) -- Windows + ctrl + w
      ,("M-<Return>", spawn myTerminal) -- Spawn terminal
@@ -616,7 +617,7 @@ help =
       "-- launching and killing programs",
       "mod-Enter        Launch terminal",
       "mod-d            Launch dmenu",
-      "mod-g            Launch Chrome",
+      "mod-b            Launch browser",
       "mod-n            Launch Explorer",
       "mod-Ctrl-w       Launch Whatsapp",
       "mod-Shift-q      Close/kill the focused window",
