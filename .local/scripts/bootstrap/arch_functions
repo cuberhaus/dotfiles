@@ -87,7 +87,7 @@ base_install () {
     $pac calibre                                # Book manager
     $pac discord
     $pac dunst                                  # Notifications
-    $pac file-roller                            # Archive Manager
+    $pac file-roller                            # Archive Manager (extract, unzip...)
     $pac firefox                                # chrome doesn't redirect to wifi page's 
     $pac gnome-calculator                       # Calculator
     $pac gnome-font-viewer                      # Font viewer
