@@ -215,13 +215,13 @@ bindsym $mod+ctrl+w layout tabbed
 bindsym $mod+e layout toggle split
 
 # toggle split orientation
-bindsym $mod+v split toggle
+bindsym $mod+o split toggle
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym $mod+t focus mode_toggle
+# bindsym $mod+t focus mode_toggle
 
 # sticky window toggle
 bindsym $mod+Shift+s sticky toggle
