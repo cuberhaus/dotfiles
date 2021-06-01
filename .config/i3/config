@@ -103,7 +103,7 @@ bindsym $mod+Print exec $ScreenshotOptions
 # Chmod +x to make work.sh executable
 set $layout Layout:  Spotify (s)
 
-bindsym $mod+space mode "$layout"
+bindsym $mod+Shift+space mode "$layout"
 
 mode "$layout" {
     bindsym s exec $HOME/.config/i3-layout-manager/layouts/spotify.sh
@@ -218,7 +218,7 @@ bindsym $mod+e layout toggle split
 bindsym $mod+o split toggle
 
 # toggle tiling / floating
-bindsym $mod+Shift+space floating toggle
+bindsym $mod+space floating toggle
 
 # change focus between tiling / floating windows
 # bindsym $mod+t focus mode_toggle
