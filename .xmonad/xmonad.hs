@@ -89,8 +89,8 @@ helix = "$HOME/.conky/helix/conky\\ helix\\ white"
 
 -- Applications
 browser :: String
--- browser = "google-chrome-stable"
-browser = "firefox"
+browser = "google-chrome-stable"
+-- browser = "firefox"
 
 whatsapp :: String
 whatsapp = "whatsapp-nativefier"

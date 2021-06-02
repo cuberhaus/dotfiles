@@ -22,8 +22,8 @@ set $ws10 "10: 10"
 set $term kitty
 set $discord "discord --no-sandbox"
 #set $term "xfce4-terminal" # Alternative (Use Base16-OneDark not 16 bits):
-# set $browser "google-chrome-stable"
-set $browser "firefox"
+set $browser "google-chrome-stable"
+# set $browser "firefox"
 set $filemanager nemo 
 set $Locker "betterlockscreen -l"
 set $ScreenshotFast "flameshot full -p $HOME/Pictures"
