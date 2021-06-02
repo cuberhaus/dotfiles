@@ -32,7 +32,7 @@ if [[ "$#" -ne 1 || $1 == "-h" ]]; then
 fi
 
 # is the parameter an integer?
-re='^[0-9]+$'
+re="^[+-]?[0-9]+([.][0-9]+)?$"
 
 if ! [[ $1 =~ $re ]] ; then
     echo "error: Not a number" >&2
