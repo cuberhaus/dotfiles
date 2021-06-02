@@ -34,7 +34,7 @@ fi
 # https://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash
 # is the parameter an integer?
 re="^[+-]?[0-9]+([.][0-9]+)?$"
-
+# =~ is used when using a regexp expression
 if ! [[ $1 =~ $re ]] ; then
     echo "error: Not a number" >&2
     Usage
