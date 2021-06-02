@@ -320,7 +320,7 @@ bindsym $mod+Shift+8 move container to workspace $ws8
 bindsym $mod+Shift+9 move container to workspace $ws9
 bindsym $mod+Shift+0 move container to workspace $ws10
 
-# Show spotify
+# program script checks if the program is already running, if it isn't it launches a new instance
 bindsym $mod+s exec $HOME/.local/bin/program spotify, [class="Spotify"] scratchpad show
 bindsym $mod+w exec $HOME/.local/bin/program whatsapp-nativefier, [class="whatsapp-nativefier-d40211"] scratchpad show
 bindsym $mod+m exec $HOME/.local/bin/program thunderbird,  [class="Thunderbird"] scratchpad show
@@ -429,12 +429,6 @@ exec flameshot &
 
 ## Show day in a classy way
 exec conky --config="$conky_day" &
-
-# Music
-exec spotify &
-
-# Messages
-exec whatsapp-nativefier &
 
 ## Moar info
 # exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &
