@@ -20,13 +20,22 @@ function send_notification {
     dunstify  -r 5555 -u low "      $bar"
 }
 
-function Usage() 
+function Usage()
 {
     echo "Usage: changeBrightness [INT]"
     echo "Example: changeBrightness -5"
 }
 
 if [[ "$#" -ne 1 || $1 == "-h" ]]; then
+    Usage
+    exit
+fi
+
+# is the parameter an integer?
+re='^[0-9]+$'
+
+if ! [[ $1 =~ $re ]] ; then
+    echo "error: Not a number" >&2
     Usage
     exit
 fi

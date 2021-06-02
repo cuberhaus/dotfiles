@@ -103,7 +103,7 @@ bindsym $mod+Print exec $ScreenshotOptions
 # Chmod +x to make work.sh executable
 set $layout Layout:  Spotify (s)
 
-bindsym $mod+Shift+space mode "$layout"
+# bindsym $mod+Shift+space mode "$layout"
 
 mode "$layout" {
     bindsym s exec $HOME/.config/i3-layout-manager/layouts/spotify.sh
@@ -218,7 +218,7 @@ bindsym $mod+e layout toggle split
 bindsym $mod+o split toggle
 
 # toggle tiling / floating
-bindsym $mod+space floating toggle
+bindsym $mod+shift+space floating toggle
 
 # change focus between tiling / floating windows
 # bindsym $mod+t focus mode_toggle
@@ -239,7 +239,7 @@ bindsym $mod+p focus parent
 bindsym $mod+c focus child
 
 # Custom Rofi | change with ctrl tab
-bindsym $mod+d exec $applauncher
+bindsym $mod+space exec $applauncher
 bindsym $mod+shift+d exec $commandlauncher
 
 # Lock screen
@@ -324,7 +324,10 @@ bindsym $mod+Shift+0 move container to workspace $ws10
 bindsym $mod+s exec $HOME/.local/bin/program spotify, [class="Spotify"] scratchpad show
 bindsym $mod+w exec $HOME/.local/bin/program whatsapp-nativefier, [class="whatsapp-nativefier-d40211"] scratchpad show
 bindsym $mod+m exec $HOME/.local/bin/program thunderbird,  [class="Thunderbird"] scratchpad show
+bindsym $mod+d exec $HOME/.local/bin/program discord, [class="discord"] scratchpad show
 
+
+for_window [class="discord"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 # for_window [title="New Event:"] floating enable
 for_window [class="Thunderbird"] floating enable
 # regex matches anything before that that ends in Mozilla Thunderbird
@@ -416,7 +419,7 @@ exec xfce4-clipman &
 exec feh --bg-scale $wallpaper &
 
 # Thunderbird applet
-exec birdtray &
+# exec birdtray &
 
 # Printer service
 exec hp-systray & 
