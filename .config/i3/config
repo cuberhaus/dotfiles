@@ -35,7 +35,7 @@ set $commandlauncher "rofi -modi window,drun,run -show run -show-icons -terminal
 # set $BrightUp "light -A 5 && pkill -SIGRTMIN+2 i3blocks"
 # set $BrightDown "light -U 5 && pkill -SIGRTMIN+2 i3blocks"
 set $BrightUp "changeBrightness 5 && pkill -SIGRTMIN+2 i3blocks"
-set $BrightDown "changeBrightness -5 down && pkill -SIGRTMIN+2 i3blocks"
+set $BrightDown "changeBrightness -5 && pkill -SIGRTMIN+2 i3blocks"
 set $VolumeUp  "changeVolume +5 unmute && pkill -SIGRTMIN+1 i3blocks"
 set $VolumeDown  "changeVolume -5 unmute && pkill -SIGRTMIN+1 i3blocks"
 # set $VolumeUp  "pactl set-sink-volume @DEFAULT_SINK@ +5% && pkill -SIGRTMIN+1 i3blocks"
