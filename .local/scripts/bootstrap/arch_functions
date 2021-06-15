@@ -84,6 +84,7 @@ base_install () {
 
     # GUI
     # $pac conky                          # Desktop rice
+    $pac wireshark                              # View incoming/outgoing connections
     $pac calibre                                # Book manager
     $pac discord
     $pac dunst                                  # Notifications
