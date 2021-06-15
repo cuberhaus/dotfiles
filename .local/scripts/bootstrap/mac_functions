@@ -89,6 +89,7 @@ mac_install () {
     brew install --cask visual-studio-code      
     brew install --cask vlc                     # Media Player
     brew install --cask whatsapp
+    brew install sublime-text                   # Fastest editor, also looks nice
 }
 
 optional () {
