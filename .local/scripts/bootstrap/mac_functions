@@ -78,8 +78,6 @@ mac_install () {
     brew install --cask iterm2                  # Best terminal emulator
     brew install --cask karabiner-elements      # Swap Esc with Caps_lock
     brew install --cask meld                    # Best Diff software
-    brew install --cask r                       # Probabilitat i estadística
-    brew install --cask rstudio                 # Probabilitat i estadística IDE
     brew install --cask skype                   # Videocalls
     brew install --cask spotify                 # Music player
     brew install --cask telegram                # Quickly transfer files
@@ -102,6 +100,8 @@ optional () {
     #brew install --cask eclipse-java            # BD
     #brew install --cask intellij-idea           # Paid, better java SQL IDE
     #brew install --cask intellij-idea-ce        # Free version
+    # brew install --cask r                       # Probabilitat i estadística
+    # brew install --cask rstudio                 # Probabilitat i estadística IDE
     #brew install --cask obs                     # Screen recorder //very complicated on mac
     #brew install --cask slack                   # Work
     #brew install --cask tor-browser             # Private and uncensored browsing
