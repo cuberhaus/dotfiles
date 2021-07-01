@@ -2,15 +2,6 @@
 # Author: https://github.com/cuberhaus
 flags="-y"
 base_install () { ## For windows install it's good to have this
-    # Fix some errors and cleanup
-    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
-    touch $HOME/.vim/cache/viminfo              # viminfo
-    touch $XDG_DATA_HOME/vim/viminfo            # viminfo
-    mkdir -p "~/.vim/cache/viminfo"             # vim viminfo
-    mkdir $HOME/.cache/zsh
-    mkdir $HOME/.cache/vlc
-    sudo mkdir /var/lib/samba/usershares
-
     # System tools
     sudo apt-get $flags install git build-essential file python3 python3-pip npm samba-common-bin fonts-powerline curl arc-theme autoconf automake sassc optipng inkscape gnome-shell libgtk-3-dev pkg-config yarn nodejs
     sudo apt-get $flags install texlive-full doxygen   # Doxygen

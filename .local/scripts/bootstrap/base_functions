@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+
+install_preparation() {
+    echo "colorscheme onedark
+    set background=dark" > $HOME/.vim/theme
+
+    # Fix some errors and cleanup
+    # mkdir always before touch
+    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
+    mkdir $HOME/.cache/zsh
+    mkdir $HOME/.cache/vlc
+
+    touch $HOME/.vim/cache/viminfo # viminfo
+    touch $XDG_DATA_HOME/vim/viminfo # viminfo
+
+    sudo mkdir /var/lib/samba/usershares
+}
+

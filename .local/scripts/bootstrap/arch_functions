@@ -11,15 +11,6 @@ myTerminal="kitty"
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
 base_install () {
-    # Fix some errors and cleanup
-    # mkdir always before touch
-    mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
-    mkdir $HOME/.cache/zsh
-    mkdir $HOME/.cache/vlc
-
-    touch $HOME/.vim/cache/viminfo # viminfo
-    touch $XDG_DATA_HOME/vim/viminfo # viminfo
-
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec $myTerminal # Tell Nemo to use Termite instead of gnome-terminal
     # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x

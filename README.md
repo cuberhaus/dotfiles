@@ -1,11 +1,18 @@
 # Cuberhaus's dotfiles
 
 ## Install this repo:
-
+Clone repo and its submodules:
 ```bash
 git clone --recurse-submodules https://github.com/cuberhaus/dotfiles ~/dotfiles/dotfiles
 ```
-
+Use Stow to symlink files:
+```
+cd ~
+mkdir dotfiles
+cd dotfiles
+git clone https://github.com/cuberhaus/dotfiles
+stow -vt ~ dotfiles/
+```
 Install scripts are located within .local/scripts/bootstrap/
 > Tip: read script before executing 
 ```bash
