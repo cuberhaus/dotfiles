@@ -4,9 +4,11 @@
 ### VARIABLES
 scripts=$HOME/.local/scripts
 source $scripts/bootstrap/arch_functions        # Include functions
+source $scripts/bootstrap/base_functions # Include functions
 
 ### INSTALLATION
 sudo pacman -Syu
+install_preparation
 echo "#! /bin/sh
 export DISTRO=manjaro" > $HOME/.config/distro   # Distro variable
 yay_install # Needed to install AUR packages

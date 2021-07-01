@@ -1,8 +1,6 @@
 #! /usr/bin/env bash
 
 install_preparation() {
-    echo "#! /bin/sh
-    export DISTRO=arch" > $HOME/.config/distro  # Distro variable
     echo "colorscheme onedark
     set background=dark" > $HOME/.vim/theme
 }
