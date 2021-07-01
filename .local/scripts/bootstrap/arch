@@ -4,11 +4,11 @@
 ### VARIABLES
 scripts=$HOME/.local/scripts
 source $scripts/bootstrap/arch_functions    # Include functions
+source $scripts/bootstrap/base_functions
 
 ### INSTALLATION
 sudo pacman -Syu
-echo "#! /bin/sh
-export DISTRO=arch" > $HOME/.config/distro  # Distro variable
+install_preparation
 sudo mv $HOME/dotfiles/dotfiles/.local/share/icons/Avatar.jpg /usr/share/icons/Avatar.jpg # Move avatar picture so that LightDM can find it
 yay_install                                 # Needed to install AUR packages
 
