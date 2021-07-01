@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
 flags="-y"
+
 base_install () { ## For windows install it's good to have this
     # System tools
     sudo apt-get $flags install git build-essential file python3 python3-pip npm samba-common-bin fonts-powerline curl arc-theme autoconf automake sassc optipng inkscape gnome-shell libgtk-3-dev pkg-config yarn nodejs
@@ -8,6 +9,7 @@ base_install () { ## For windows install it's good to have this
     sudo apt-get $flags install ruby-dev
 
     # Terminal
+    sudo apt-get $flags install laptop-detect
     sudo apt-get $flags install stow
     sudo apt-get $flags install subversion             # To download repos
     sudo apt-get $flags install neovim                 # Neovim
