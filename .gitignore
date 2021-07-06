@@ -15,6 +15,7 @@
 
 # Py
 .local/include/
+.local/lib/python3.9/
 .local/bin/epylint
 .local/bin/isort
 .local/bin/pylint
