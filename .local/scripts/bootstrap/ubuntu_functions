@@ -4,47 +4,64 @@ flags="-y"
 
 base_install () { ## For windows install it's good to have this
     # System tools
-    sudo apt-get $flags install git build-essential file python3 python3-pip npm samba-common-bin fonts-powerline curl arc-theme autoconf automake sassc optipng inkscape gnome-shell libgtk-3-dev pkg-config yarn nodejs
-    sudo apt-get $flags install texlive-full doxygen   # Doxygen
-    sudo apt-get $flags install ruby-dev
-
-    # Terminal
+    sudo apt-get $flags install autoconf 
+    sudo apt-get $flags install automake 
+    sudo apt-get $flags install bat                    # Better cat
+    sudo apt-get $flags install build-essential 
+    sudo apt-get $flags install curl 
+    sudo apt-get $flags install file 
+    sudo apt-get $flags install fonts-powerline 
+    sudo apt-get $flags install fzf                    # Fuzzy finder
+    sudo apt-get $flags install git 
+    sudo apt-get $flags install gnome-shell 
+    sudo apt-get $flags install htop                   # Show system resources
+    sudo apt-get $flags install inkscape 
     sudo apt-get $flags install laptop-detect
+    sudo apt-get $flags install libgtk-3-dev 
+    sudo apt-get $flags install ncdu                   # Manage storage
+    sudo apt-get $flags install neovim                 # Neovim
+    sudo apt-get $flags install nodejs
+    sudo apt-get $flags install npm 
+    sudo apt-get $flags install optipng 
+    sudo apt-get $flags install pkg-config 
+    sudo apt-get $flags install python3 
+    sudo apt-get $flags install python3-pip 
+    sudo apt-get $flags install ranger w3m             # Ranger
+    sudo apt-get $flags install ruby-dev
+    sudo apt-get $flags install samba-common-bin 
+    sudo apt-get $flags install sassc 
+    sudo apt-get $flags install silversearcher-ag      # Better and faster ack (and grep)
     sudo apt-get $flags install stow
     sudo apt-get $flags install subversion             # To download repos
-    sudo apt-get $flags install neovim                 # Neovim
-    sudo apt-get $flags install zsh
-    sudo apt-get $flags install htop                   # Show system resources
-    sudo apt-get $flags install ranger w3m             # Ranger
-    sudo apt-get $flags install vim-gtk                # Vim with full functionality
-    sudo apt-get $flags install silversearcher-ag      # Better and faster ack (and grep)
-    sudo apt-get $flags install fzf                    # Fuzzy finder
-    sudo apt-get $flags install bat                    # Better cat
     sudo apt-get $flags install tmux                   # Terminal multiplexer
-    sudo apt-get $flags install ncdu                   # Manage storage
+    sudo apt-get $flags install vim-gtk                # Vim with full functionality
+    sudo apt-get $flags install yarn 
+    sudo apt-get $flags install zsh
 }
 
 bloat_install () {
     brew install pipes-sh
-    sudo apt-get $flags install neofetch cmatrix
+    sudo apt-get $flags install cmatrix
     sudo apt-get $flags install cowsay                 # A cow displaying text
     sudo apt-get $flags install fortune                # Random quotes
+    sudo apt-get $flags install neofetch 
 }
 
 ubuntu_install() {
     # GUI
-    sudo apt-get $flags install gnome-screensaver      # Screensaver
-    sudo apt-get $flags install thunderbird            # Email
-    sudo apt-get $flags install transmission           # A simpler Torrent D.
-    sudo apt-get $flags install timeshift              # Backups
-    sudo apt-get $flags install gparted                # Manage partitions
-    sudo apt-get $flags install vlc                    # Media player
-    sudo apt-get $flags install pavucontrol            # Audio
-    sudo apt-get $flags install virtualbox-qt          # Virtual machines
-    sudo apt-get $flags install cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
     # sudo pip3 install spotify-cli-linux       # Spotify
     sudo apt-get $flags install LXAppearance           # Theme
+    sudo apt-get $flags install arc-theme 
     sudo apt-get $flags install chromium-browser       # Web browser
+    sudo apt-get $flags install cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+    sudo apt-get $flags install gnome-screensaver      # Screensaver
+    sudo apt-get $flags install gparted                # Manage partitions
+    sudo apt-get $flags install pavucontrol            # Audio
+    sudo apt-get $flags install thunderbird            # Email
+    sudo apt-get $flags install timeshift              # Backups
+    sudo apt-get $flags install transmission           # A simpler Torrent D.
+    sudo apt-get $flags install virtualbox-qt          # Virtual machines
+    sudo apt-get $flags install vlc                    # Media player
 
     if [[ $FirstRun == y ]]; then
         sudo adduser `id -un` libvirt
@@ -91,7 +108,14 @@ i3_install () {
     sudo add-apt-repository ppa:kgilmer/speed-ricer
     sudo apt-get update
     sudo apt-get $flags install i3-gaps
-    sudo apt-get $flags install feh compton rofi i3blocks python-dbus player-ctl pulseaudio
+    # Dependancies
+    sudo apt-get $flags install compton 
+    sudo apt-get $flags install feh 
+    sudo apt-get $flags install i3blocks 
+    sudo apt-get $flags install player-ctl 
+    sudo apt-get $flags install pulseaudio
+    sudo apt-get $flags install python-dbus 
+    sudo apt-get $flags install rofi 
     # Add current user to group video, type groups to see which groups you are in
     sudo usermod -a -G video $LOGNAME
     # Light setup | Enables brightness controls
@@ -99,20 +123,19 @@ i3_install () {
     ./autogen.sh
     ./configure && make
     sudo make install
-
     ./configure --with-udev && make
     sudo make install
 }
 
 snaps_install() {
-    sudo snap install spotify
-    sudo snap install discord
-    sudo snap install walc
     #sudo snap install ao
-    sudo snap install android-studio --classic
-    sudo snap install skype --classic
     #sudo snap install atom --classic
+    sudo snap install android-studio --classic
+    sudo snap install discord
+    sudo snap install skype --classic
     sudo snap install slack --classic
+    sudo snap install spotify
+    sudo snap install walc
 }
 
 steam_install () {
@@ -128,4 +151,8 @@ vim_install () {
     sudo npm install -g neovim                  # npm on neovim
     python3 -m pip install --user --upgrade pynvim # Python for neovim
     sudo gem install neovim                     # Gem for neovim
+}
+
+optional() {
+    sudo apt-get $flags install texlive-full doxygen   # Doxygen
 }
