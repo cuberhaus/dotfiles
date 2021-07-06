@@ -14,6 +14,7 @@
 .local/bin/wheel
 
 # Py
+.local/include/
 .local/bin/epylint
 .local/bin/isort
 .local/bin/pylint
