@@ -10,7 +10,7 @@ app_store_install() {
     mas install 409203825                       # Numbers
     mas install 441258766                       # Magnet
     mas install 497799835                       # Xcode
-    mas install 736189492                       # Notability
+    # mas install 736189492                       # Notability
     #mas install 1147396723                     # WhatsApp
 }
 
