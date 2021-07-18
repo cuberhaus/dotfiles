@@ -22,11 +22,10 @@ base_install () {
 
     # Terminal
     # $pac dhcpcd                         # Internet
-    $pac dex
     $pac base-devel                             # AUR
     $pac bat                                    # "Cat" on steroids
+    $pac dex
     $pac dnsutils                               # Ip
-    $pac doxygen texlive-most graphviz          # Doxygen
     $pac exa                                    # "ls" on steroids
     $pac exfat-utils                            # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     $pac fzf                                    # Fuzzy finder
@@ -113,12 +112,10 @@ base_install () {
     $yay whatsapp-nativefier                    # Whatsapp client
 
     # Office (install plugins located on .local)
-    $pac libmythes mythes-en mythes-es  # Synonyms
-
-    $pac libreoffice-still
+    $pac libreoffice-still libreoffice-still-ca
     # $pac libreoffice-fresh libreoffice-fresh-ca # Do not ever use this as it can contain breaking bugs that may cause it to crash
+    $pac libmythes mythes-en mythes-es  # Synonyms
     $yay libreoffice-extension-languagetool # Grammar
-    # $pac libreoffice-still libreoffice-still-ca
 
     # Theme
     $pac adapta-gtk-theme                       # Alternative theme
@@ -342,7 +339,7 @@ dwall() {
     sudo rm -r $HOME/dynamic-wallpaper
 }
 
-emacs_install () {
+doom_emacs_install () {
     $pac emacs
     $pac ripgrep
     $pac fd
@@ -359,15 +356,14 @@ optional() {
     # $pac  gparted                       # Manage partitions (doesn't work with ex-fat)
     #$pac  github-cli                    # Github for terminal, create issues...
 
-    # GUI
+    # Apps
     $pac audacity                               # Audio editor
+    $pac doxygen texlive-most graphviz          # Doxygen
     $pac gimp                                   # Image editor
     $pac obs-studio                             # Video recording
-    $pac qtcreator glm qt5-tools                             # IDI
+    $pac qtcreator glm qt5-tools                # IDI
     $pac r                                      # Probabilitat i estadística
     $pac texstudio                              # Latex text editor
-
-    # AUR
     $pac tor; $yay tor-browser
     $yay android-studio                         # Android Studio
     $yay eclipse-java                           # BD
