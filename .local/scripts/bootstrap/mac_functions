@@ -25,8 +25,8 @@ mac_install () {
     ### Terminal stuff
     brew install ack
     brew install astyle
-    brew install autojump                       # Autojump obsolete?
-    brew install bat                            # Cat on steroids
+    # brew install autojump                       # Autojump obsolete?
+    brew install bat                            # Cat on steroids (for ranger)
     brew install bison
     brew install cmake
     brew install exa                            # "ls" on steroids
@@ -34,14 +34,13 @@ mac_install () {
     brew install fzf                            # Fuzzy Finder
     brew install git                            # Git
     brew install go
-    brew install graphviz
+    # brew install graphviz
     brew install htop                           # Resource viewer
     brew install llvm
     brew install mono
     brew install ncdu                           # Storage manager
     brew install neofetch                       # System info
     brew install p7zip                          # Extract function
-    brew install pipes-sh                       # Pipes wallpaper
     brew install pkg-config
     brew install ranger w3m                     # Ranger and previews
     brew install rclone
@@ -64,12 +63,12 @@ mac_install () {
     brew install font-meslo-lg-nerd-font
 
     ### GUI Applications
+    # brew install --cask iterm2                  # Best terminal emulator
     brew install --cask adobe-acrobat-reader    # Pdf reader
     brew install --cask calibre                 # Book manager
     brew install --cask ccleaner                # CleanUp
     brew install --cask discord                 # Group calls
     brew install --cask google-chrome           # Web browser
-    brew install --cask iterm2                  # Best terminal emulator
     brew install --cask karabiner-elements      # Swap Esc with Caps_lock
     brew install --cask meld                    # Best Diff software
     brew install --cask skype                   # Videocalls
@@ -81,6 +80,7 @@ mac_install () {
     brew install --cask visual-studio-code      
     brew install --cask vlc                     # Media Player
     brew install --cask whatsapp
+    brew install kitty
     brew install sublime-text                   # Fastest editor, also looks nice
 }
 
@@ -114,8 +114,8 @@ doom_emacs_install() {
 }
 
 bloat_install() {
-    brew install cowsay fortune coreutils       # Cows
-    brew install cmatrix                        # Matrix
+    # brew install cowsay fortune coreutils       # Cows
+    # brew install cmatrix                        # Matrix
 }
 
 vim_install () {
