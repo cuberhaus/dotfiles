@@ -98,7 +98,7 @@ base_install () {
     $pac vlc                                    # Video player
     $yay balena-etcher                          # "Rufus" on linux
     $yay betterlockscreen; $pac xss-lock        # Lockscreen
-    $yay birdtray                               # Thunderbird tray
+    # $yay birdtray                               # Thunderbird tray (obsolete with shortcuts)
     # $yay conky-cairo-no-nvidia                  # fix lua
     # $yay conky-manager2-git
     $yay google-chrome                          # Best web browser
@@ -109,6 +109,7 @@ base_install () {
     $yay timeshift; $pac cron  # Backups (sudo timeshift-gtk)
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
+    $yay visual-paradigm-community              # IES, PROP
     $yay whatsapp-nativefier                    # Whatsapp client
 
     # Office (install plugins located on .local)
