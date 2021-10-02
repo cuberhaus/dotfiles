@@ -1,6 +1,6 @@
 [user]
-	email = 55292818+cuberhaus@users.noreply.github.com
-    name = pol
+	email = pol.casacuberta@est.fib.upc.edu
+	name = Pol Casacuberta
 	signingkey = 8870DF9B
 [diff]
     tool = meld

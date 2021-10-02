@@ -24,7 +24,7 @@ set $discord "discord --no-sandbox"
 #set $term "xfce4-terminal" # Alternative (Use Base16-OneDark not 16 bits):
 set $browser "google-chrome-stable"
 # set $browser "firefox"
-set $filemanager dolphin 
+set $filemanager nemo 
 set $Locker "betterlockscreen -l"
 set $ScreenshotFast "flameshot full -p $HOME/Pictures"
 set $ScreenshotOptions "flameshot gui -p $HOME/Pictures"

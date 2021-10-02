@@ -372,6 +372,8 @@ optional() {
     $yay slack-desktop                          # Slack
     $yay youtube-dl                             # Download youtube videos
 
+    $yay swi-prolog-devel                       # Prolog programming language
+
     # Arduino
     #usermod -aG uucp,lock pol
     $pac arduino-avr-core arduino
