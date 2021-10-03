@@ -79,6 +79,7 @@ Calibre Library/metadata_db_prefs_backup.json
 .config/tmux/plugins/tmux-sensible/
 
 # Vim
+.local/share/vim/viminfo
 .vim/autoload/
 .vim/plugged/
 .vim/spell/
