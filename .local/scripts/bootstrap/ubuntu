@@ -22,8 +22,8 @@ base_install
 #steam_install
 
 chrome_install
-i3_install
-snap_install
+#i3_install # Installing i3 requires manual input
+snaps_install
 ubuntu_install
 vim_install
 chsh -s $(which zsh)                        # Change default shell to zsh

@@ -10,6 +10,7 @@ base_install () { ## For windows install it's good to have this
     $apt bat                    # Better cat
     $apt build-essential 
     $apt curl 
+    $apt cmake                  # To install ycm
     $apt file 
     $apt fonts-powerline 
     $apt fzf                    # Fuzzy finder
@@ -53,7 +54,6 @@ ubuntu_install() {
     # sudo pip3 install spotify-cli-linux       # Spotify
     $apt LXAppearance           # Theme
     $apt arc-theme 
-    $apt chromium-browser       # Web browser
     $apt cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
     $apt gnome-screensaver      # Screensaver
     $apt gparted                # Manage partitions
@@ -61,7 +61,6 @@ ubuntu_install() {
     $apt thunderbird            # Email
     $apt timeshift              # Backups
     $apt transmission           # A simpler Torrent D.
-    $apt virtualbox-qt          # Virtual machines
     $apt vlc                    # Media player
 
     if [[ $FirstRun == y ]]; then
@@ -120,7 +119,9 @@ i3_install () {
     # Add current user to group video, type groups to see which groups you are in
     sudo usermod -a -G video $LOGNAME
     # Light setup | Enables brightness controls
+    cd $HOME
     git clone https://github.com/haikarainen/light
+    cd light
     ./autogen.sh
     ./configure && make
     sudo make install
@@ -131,7 +132,7 @@ i3_install () {
 snaps_install() {
     #sudo snap install ao
     #sudo snap install atom --classic
-    sudo snap install android-studio --classic
+    #sudo snap install android-studio --classic
     sudo snap install discord
     sudo snap install skype --classic
     sudo snap install slack --classic
@@ -155,5 +156,7 @@ vim_install () {
 }
 
 optional() {
-    $apt texlive-full doxygen   # Doxygen
+    # $apt texlive-full doxygen   # Doxygen
+    # $apt chromium-browser       # Web browser
+    # $apt virtualbox-qt          # Virtual machines
 }

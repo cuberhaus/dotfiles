@@ -182,6 +182,9 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         brew cleanup; 
         vim +PlugClean +qall"
         alias tmux="tmux -f $HOME/.config/tmux/tmux.conf"
+        alias ls="ls -l"
+        alias la="ls -a"
+        alias lsd="exa -D -a"
     fi
 fi
 
