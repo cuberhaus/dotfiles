@@ -36,6 +36,13 @@ if [ -d "/usr/local/sbin" ] ; then
 fi
 #PATH=".:$PATH" # Better not add '.' to PATH
 
+# Homebrew env variables
+if [[ "$DISTRO" == "ubuntu"* ]]; then
+    if [ -d "/home/linuxbrew/.linuxbrew/bin" ] ; then
+        PATH="/home/linuxbrew/.linuxbrew/bin/:$PATH"
+        PATH="/home/linuxbrew/.linuxbrew/sbin/:$PATH"
+    fi
+fi
 ###############################################################
 # => Variables
 ###############################################################
@@ -51,7 +58,6 @@ export WALLPAPER_DARK="$HOME/Downloads/wallpapers/pexels-eberhard-grossgasteiger
 #INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
 #OBJECTES=/Users/$USER/assig/pro2/objectes
 export DICPATH="$XDG_CONFIG_HOME/Dictionary"
-export PATH="$HOME/.emacs.d/bin:$PATH" # DOOM emacs "bring the pain"
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
 export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
 export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\"" # SET VIM AS MANPAGER
@@ -69,11 +75,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
     export CPPFLAGS="-I/usr/local/opt/llvm/include"
     PATH="/usr/local/opt/llvm/bin:$PATH"
-fi
-
-# Homebrew env variables
-if [[ "$DISTRO" == "ubuntu"* ]]; then
-    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 fi
 
 ###############################################################
