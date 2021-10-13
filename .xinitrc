@@ -10,3 +10,5 @@ source $HOME/config/distro
 if [[ "$DISTRO" == "arch" ]]; then
     i3 # Starts i3
 fi
+# Repeat rate for keyboard
+xset r rate 660 25

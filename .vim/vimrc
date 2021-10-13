@@ -2,6 +2,7 @@
 
 " With a map leader it's possible to do extra key combinations
 let mapleader=" "
+" Activate folds
 set foldmethod=marker
 
 if has('unix') || has('macunix')

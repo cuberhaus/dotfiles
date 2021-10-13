@@ -47,7 +47,7 @@ alias i3config="nvim $HOME/.config/i3/config"
 #alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
 #alias vconfgrub="sudo vim /boot/grub/grub.cfg"
 
-alias n="nvim"
+alias vim="nvim"
 
 # Easier navigation: .., ..., ...., ....., ~ and -
 alias ..="cd .."
@@ -81,7 +81,7 @@ alias gitsync="git submodule sync; git submodule update --init --recursive"
 alias gsu="git submodule update --recursive --remote"
 ## Fun commit
 #alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
-## Alternative (makes it easier to find out which commits have no message)
+## Alternative (makes easier finding out which commits have no message)
 alias yolo='git add -A; git commit -m "This is a placeholder"; git push'
 
 # List files
@@ -96,8 +96,8 @@ alias path='echo -e ${PATH//:/\\n}'
 
 # Cpp
 #alias eda++="g++ -std=c++11"
-alias p1++="g++ -ansi -O2 -DNDEBUG -D_GLIBCXX_DEBUG -Wall -Wextra -Werror -Wno-uninitialized -Wno-sign-compare -Wshadow"
-alias p2++="g++ -D GLIBCXX_DEBUG -O2 -Wall -Wextra -Werror -Wno-sign-compare -std=c++11"
+# alias p1++="g++ -ansi -O2 -DNDEBUG -D_GLIBCXX_DEBUG -Wall -Wextra -Werror -Wno-uninitialized -Wno-sign-compare -Wshadow"
+# alias p2++="g++ -D GLIBCXX_DEBUG -O2 -Wall -Wextra -Werror -Wno-sign-compare -std=c++11"
 
 # Userlist
 alias userlist="cut -d: -f1 /etc/passwd"
@@ -184,7 +184,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         alias tmux="tmux -f $HOME/.config/tmux/tmux.conf"
         alias ls="ls -l"
         alias la="ls -a"
-        alias lsd="exa -D -a"
+        alias lsd=""
     fi
 fi
 
