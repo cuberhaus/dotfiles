@@ -170,7 +170,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
-        alias update="sudo apt-get update; 
+        alias updateall="sudo apt-get update; 
         sudo apt-get full-upgrade; 
         brew update; 
         brew upgrade; 
