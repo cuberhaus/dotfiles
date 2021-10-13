@@ -184,7 +184,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         alias tmux="tmux -f $HOME/.config/tmux/tmux.conf"
         alias ls="ls -l"
         alias la="ls -a"
-        alias lsd="exa -D -a"
+        alias lsd=""
     fi
 fi
 
