@@ -2,6 +2,7 @@
 	"color_scheme": "Monokai.sublime-color-scheme",
 	"ignored_packages":
 	[
+		"Package Control",
 	],
 	"vintage_ctrl_keys": false,
 }

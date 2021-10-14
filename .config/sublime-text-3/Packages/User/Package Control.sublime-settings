@@ -5,8 +5,9 @@
 	],
 	"installed_packages":
 	[
+		"ActualVim",
+
 		"Package Control",
-		"Vimprov",
 		"Vintage Surround",
 	],
 }
