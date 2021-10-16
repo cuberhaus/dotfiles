@@ -166,7 +166,7 @@ steam_install () {
 vim_install () {
     cd $HOME 
     vim +PlugInstall +qall                      # Update plugins
-    bash $HOME/scripts/ycm                      # Vim YouCompleteMe plugin install
+    bash $HOME/.local/scripts/ycm.sh                      # Vim YouCompleteMe plugin install
     sudo npm install -g neovim                  # npm on neovim
     python3 -m pip install --user --upgrade pynvim # Python for neovim
     sudo gem install neovim                     # Gem for neovim
