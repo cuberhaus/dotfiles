@@ -71,6 +71,8 @@ base_install () {
     $pac zsh                                    # Zsh shell
     $yay electron9-bin
     $yay f5fpc                                  # Connexio a UPClink
+    $pac gnome-keyring
+    # https://wiki.archlinux.org/title/GNOME/Keyring
 
     # GUI
     # $pac conky                          # Desktop rice

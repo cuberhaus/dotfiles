@@ -36,6 +36,11 @@ if [ -d "/usr/local/sbin" ] ; then
 fi
 #PATH=".:$PATH" # Better not add '.' to PATH
 
+if [ -n "$DESKTOP_SESSION" ];then
+    eval $(gnome-keyring-daemon --start)
+    export SSH_AUTH_SOCK
+fi
+
 # # Homebrew env variables
 # if [[ "$DISTRO" == "ubuntu"* ]]; then
 #     if [ -d "/home/linuxbrew/.linuxbrew/bin" ] ; then
