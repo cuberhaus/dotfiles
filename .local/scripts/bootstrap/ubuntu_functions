@@ -55,6 +55,7 @@ ubuntu_install() {
     # sudo pip3 install spotify-cli-linux       # Spotify
     $apt LXAppearance           # Theme
     $apt arc-theme 
+    $apt calibre
     $apt cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
     $apt gnome-screensaver      # Screensaver
     $apt gparted                # Manage partitions
