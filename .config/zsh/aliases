@@ -18,7 +18,8 @@ scripts=$HOME/.local/scripts
 alias discord="discord --no-sandbox &"
 # Recompile ycm (if autocompletion stops working execute this)
 alias ycminstall="python3 $HOME/.vim/plugged/YouCompleteMe/install.py"
-# Rclone (be careful!)
+# Rclone (be careful!) 
+# "rclone config" first
 alias rclonepull="rclone -P sync drive:Thunderbird ~/.thunderbird ;
 rclone -P sync drive:Calibre/Calibre\ Library ~/Calibre\ Library"
 alias rclonepush="rclone -P sync ~/.thunderbird drive:Thunderbird ;

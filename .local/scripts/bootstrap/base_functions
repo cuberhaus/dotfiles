@@ -9,6 +9,7 @@ install_preparation() {
     mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
     mkdir $HOME/.cache/zsh
     mkdir $HOME/.cache/vlc
+    mkdir $HOME/.vim/cache
 
     touch $HOME/.vim/cache/viminfo # viminfo
     touch $XDG_DATA_HOME/vim/viminfo # viminfo
