@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
+flags="-y"
+apt="sudo apt-get $flags install"
 
 function Help () {
     echo "This script installs YouCompleteMe and its dependancies "
@@ -13,11 +15,30 @@ arch_based_install () {
 }
 
 ubuntu_based_install () {
-    sudo apt-get install python3-dev python-dev python3-dev cmake build-essential golang-go npm mono-devel openjdk-8-jre clangd
+    $apt build-essential 
+    $apt clangd
+    $apt cmake 
+    $apt cmake 
+    $apt default-jdk 
+    $apt golang 
+    $apt golang-go 
+    $apt mono-complete 
+    $apt mono-devel 
+    $apt nodejs 
+    $apt npm 
+    $apt openjdk-8-jre 
+    $apt python-dev 
+    $apt python3-dev 
+    $apt vim-nox 
 }
 
 mac_install () {
     brew install macvim mono cmake python go nodejs llvm
+}
+
+ycm_ubuntu_install () {
+    cd ~/.vim/bundle/YouCompleteMe
+    python3 install.py --all
 }
 
 ycm_install () {
@@ -40,12 +61,15 @@ fi
 # Install dependancies
 if [[ "$OSTYPE" == "darwin"* ]]; then
     mac_install
+    ycm_install # Builds
 elif [[ "$DISTRO" == "arch" ]]; then
     arch_based_install
+    ycm_install # Builds
 elif [[ "$DISTRO" == "ubuntu" ]]; then
     ubuntu_based_install
+    ycm_install # Builds
 elif [[ "$DISTRO" == "manjaro" ]]; then
     arch_based_install
+    ycm_install # Builds
 fi
-ycm_install # Builds
 rm -r $HOME/ycm_build # Cleanup
