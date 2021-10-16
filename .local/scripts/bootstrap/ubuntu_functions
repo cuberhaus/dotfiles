@@ -8,6 +8,7 @@ base_install () { ## For windows install it's good to have this
     $apt autoconf 
     $apt automake 
     $apt bat                    # Better cat
+    $apt rclone
     $apt build-essential 
     $apt curl 
     $apt cmake                  # To install ycm
