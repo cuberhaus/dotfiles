@@ -36,13 +36,13 @@ if [ -d "/usr/local/sbin" ] ; then
 fi
 #PATH=".:$PATH" # Better not add '.' to PATH
 
-# Homebrew env variables
-if [[ "$DISTRO" == "ubuntu"* ]]; then
-    if [ -d "/home/linuxbrew/.linuxbrew/bin" ] ; then
-        PATH="/home/linuxbrew/.linuxbrew/bin/:$PATH"
-        PATH="/home/linuxbrew/.linuxbrew/sbin/:$PATH"
-    fi
-fi
+# # Homebrew env variables
+# if [[ "$DISTRO" == "ubuntu"* ]]; then
+#     if [ -d "/home/linuxbrew/.linuxbrew/bin" ] ; then
+#         PATH="/home/linuxbrew/.linuxbrew/bin/:$PATH"
+#         PATH="/home/linuxbrew/.linuxbrew/sbin/:$PATH"
+#     fi
+# fi
 ###############################################################
 # => Variables
 ###############################################################

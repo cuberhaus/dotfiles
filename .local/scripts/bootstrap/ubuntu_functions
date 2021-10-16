@@ -80,15 +80,15 @@ albert_install () {
     fi
 }
 
-brew_install () {
-    cd $HOME
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-    brew update
-    brew upgrade
-    brew install gcc patchelf graphviz
-    brew install exa                            # "ls" on steroids
-}
+# brew_install () {
+#     cd $HOME
+#     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+#     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+#     brew update
+#     brew upgrade
+#     brew install gcc patchelf graphviz
+#     brew install exa                            # "ls" on steroids
+# }
 
 chrome_install () {
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -109,13 +109,28 @@ i3_install () {
     sudo apt-get update
     $apt i3-gaps
     # Dependancies
+    $apt alsa-utils
     $apt compton 
+    $apt conky 
     $apt feh 
+    $apt flameshot 
     $apt i3blocks 
+    $apt kitty 
+    $apt picom
     $apt player-ctl 
     $apt pulseaudio
+    $apt pulseaudio 
+    $apt pulseaudio-equalizer
     $apt python-dbus 
     $apt rofi 
+    $apt udiskie
+    $apt xbacklight
+    $apt xdotool
+    $apt xfce4-clipman
+    $apt xss-lock
+    $apt yad
+    $apt zenity
+
     # Add current user to group video, type groups to see which groups you are in
     sudo usermod -a -G video $LOGNAME
     # Light setup | Enables brightness controls
