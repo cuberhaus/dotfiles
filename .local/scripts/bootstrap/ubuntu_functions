@@ -109,6 +109,7 @@ i3_install () {
     sudo apt-get update
     $apt i3-gaps
     # Dependancies
+    $apt alsa-utils
     $apt compton 
     $apt conky 
     $apt feh 
@@ -118,11 +119,18 @@ i3_install () {
     $apt picom
     $apt player-ctl 
     $apt pulseaudio
+    $apt pulseaudio 
+    $apt pulseaudio-equalizer
     $apt python-dbus 
     $apt rofi 
     $apt udiskie
+    $apt xbacklight
+    $apt xdotool
     $apt xfce4-clipman
     $apt xss-lock
+    $apt yad
+    $apt zenity
+
     # Add current user to group video, type groups to see which groups you are in
     sudo usermod -a -G video $LOGNAME
     # Light setup | Enables brightness controls
