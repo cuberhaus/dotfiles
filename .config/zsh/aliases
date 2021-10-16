@@ -87,8 +87,10 @@ alias yolo='git add -A; git commit -m "This is a placeholder"; git push'
 # List files
 # using -a -a will show '.' and ".."
 # --git causes to crash when symbolic link is gone
-alias ls="exa -F --long --header --links --group --group-directories-first --git"
-alias la="exa -a -F --long --header --links --group --group-directories-first --git"
+alias ls="exa --group-directories-first"
+alias la="exa --group-directories-first -a"
+alias lsl="exa -F --long --header --links --group --group-directories-first --git"
+alias l="exa -a -F --long --header --links --group --group-directories-first --git"
 alias lsd="exa -D -a"
 
 # Print each PATH entry on a separate line
