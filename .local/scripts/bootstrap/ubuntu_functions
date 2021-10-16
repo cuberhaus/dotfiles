@@ -9,10 +9,9 @@ base_install () { ## For windows install it's good to have this
     $apt autoconf 
     $apt automake 
     $apt bat                    # Better cat
-    $apt rclone
     $apt build-essential 
-    $apt curl 
     $apt cmake                  # To install ycm
+    $apt curl 
     $apt file 
     $apt fonts-powerline 
     $apt fzf                    # Fuzzy finder
@@ -31,6 +30,7 @@ base_install () { ## For windows install it's good to have this
     $apt python3 
     $apt python3-pip 
     $apt ranger w3m             # Ranger
+    $apt rclone
     $apt ruby-dev
     $apt samba-common-bin 
     $apt sassc 
