@@ -151,6 +151,8 @@ set hlsearch
 
 " Makes search act like search in modern browsers
 set incsearch
+" Same but for neovim
+set is hls
 
 " Don't redraw while executing macros (good performance config)
 set lazyredraw
