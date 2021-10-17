@@ -5,7 +5,7 @@
 scripts=$HOME/.local/scripts
 flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
-yay="yay -S $flags"
+yay="yay $flags"
 myTerminal="kitty"
 
 ### FUNCTIONS
@@ -28,7 +28,8 @@ base_install () {
     $pac firefox                                # chrome doesn't redirect to wifi page's 
     $pac fzf                                    # Fuzzy finder
     $pac gcc                                    # Cpp
-    $pac gdb; $yay ddd                          # debugging c++
+    $pac gdb                                    # debugging c++
+    $yay ddd                          # debugging c++
     $pac git                                    # It's git bro
     $pac gnome-calculator                       # Calculator
     $pac gnome-font-viewer                      # Font viewer
@@ -94,7 +95,8 @@ base_install () {
     $pac yarn                                   # Package installer
     $pac zsh                                    # Zsh shell
     $yay balena-etcher                          # "Rufus" on linux
-    $yay betterlockscreen; $pac xss-lock        # Lockscreen
+    $yay betterlockscreen                       # Lockscreen
+    $pac xss-lock                               # Lockscreen
     $yay conky-cairo-no-nvidia                  # fix lua
     $yay conky-manager2-git
     $yay electron9-bin
@@ -103,7 +105,8 @@ base_install () {
     $yay libreoffice-extension-languagetool # Libre office Grammar
     $yay skypeforlinux-stable-bin               # Skype
     $yay spotify                                # Spotify
-    $yay timeshift; $pac cron  # Backups (sudo timeshift-gtk)
+    $yay timeshift                              # Backups (sudo timeshift-gtk)
+    $pac cron                                   # Backups (sudo timeshift-gtk)
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     $yay visual-paradigm-community              # IES, PROP
     $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
@@ -181,7 +184,7 @@ arch_install() {
 }
 
 yay_install() {
-    cd ~/
+    cd $HOME/
     git clone https://aur.archlinux.org/yay.git
     cd yay
     makepkg -si
