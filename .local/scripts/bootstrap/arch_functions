@@ -15,9 +15,14 @@ base_install () {
     gsettings set org.cinnamon.desktop.default-applications.terminal exec $myTerminal # Tell Nemo to use Termite instead of gnome-terminal
     # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x
 
+    $pac adapta-gtk-theme                       # Alternative theme
+    $pac arc-gtk-theme                          # Arc theme and its icon's
+    $pac arc-icon-theme                         # Doesn't install in manjaro
     $pac base-devel                             # AUR
     $pac bat                                    # "Cat" on steroids
     $pac calibre                                # Book manager
+    $pac cron                                   # Backups (sudo timeshift-gtk)
+    $pac dconf-editor                           # Edit gnome configuration
     $pac dex
     $pac discord
     $pac dnsutils                               # Ip
@@ -29,11 +34,11 @@ base_install () {
     $pac fzf                                    # Fuzzy finder
     $pac gcc                                    # Cpp
     $pac gdb                                    # debugging c++
-    $yay ddd                          # debugging c++
     $pac git                                    # It's git bro
     $pac gnome-calculator                       # Calculator
     $pac gnome-font-viewer                      # Font viewer
     $pac gnome-keyring                          # https://wiki.archlinux.org/title/GNOME/Keyring
+    $pac gtk2 gtk3
     $pac gucharmap                              # Characters keyboard
     $pac gvim                                   # Vim version with extra features
     $pac hardinfo cpu-x                         # pc information
@@ -41,9 +46,11 @@ base_install () {
     $pac inotify-tools                          # inotifywatch -r $file (to watch if those files have been accessed)
     $pac kdiff3                                 # Another diff viewer
     $pac kitty                                  # Terminal emulator
+    $pac kvantum-qt5                            # Qt5 Custom themes
     $pac laptop-detect                          # Detect if using a laptop
     $pac libmythes mythes-en mythes-es  # Libre office Synonyms
     $pac libreoffice-still libreoffice-still-ca # (install plugins located on .local)
+    $pac lxappearance                           # Gtk configuration utility
     $pac meld                                   # Best diff viewer
     $pac ncdu                                   # Manage storage
     $pac nemo
@@ -54,9 +61,11 @@ base_install () {
     $pac net-tools                              # Ips
     $pac nilfs-utils                            # Manage partitions
     $pac nomacs                                 # Image viewer (da best)
+    $pac noto-fonts-emoji                       # Classic Emoji
     $pac npm                                    # Package manager
     $pac ntfs-3g                                # Read/write support for ntfs https://wiki.archlinux.org/index.php/NTFS-3G
     $pac okular                                 # Best pdf viewer
+    $pac papirus-icon-theme                     # Best icon theme!
     $pac partitionmanager                       # Partition manager for KDE
     $pac perl-file-mimeinfo                     # mimeopen -d $file and type whatever app you want to open that with
     $pac playerctl                              # Audio
@@ -64,6 +73,7 @@ base_install () {
     $pac polkit-gnome                           # https://wiki.archlinux.org/index.php/Polkit
     $pac python
     $pac python3
+    $pac qt5ct                                  # Qt5 configuration utility
     $pac ranger                                 # Ranger
     $pac rclone                                 # Rsync to remote
     $pac reflector                              # Update Arch mirrors
@@ -92,13 +102,14 @@ base_install () {
     $pac xfce4-clipman-plugin                   # Clipboard manager (persistant clip even when application is closed)
     $pac xorg                                   # Display server
     $pac xorg-xinit                             # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
+    $pac xss-lock                               # Lockscreen
     $pac yarn                                   # Package installer
     $pac zsh                                    # Zsh shell
     $yay balena-etcher                          # "Rufus" on linux
     $yay betterlockscreen                       # Lockscreen
-    $pac xss-lock                               # Lockscreen
     $yay conky-cairo-no-nvidia                  # fix lua
     $yay conky-manager2-git
+    $yay ddd                          # debugging c++
     $yay electron9-bin
     $yay f5fpc                                  # Connexio a UPClink
     $yay google-chrome                          # Best web browser
@@ -106,24 +117,12 @@ base_install () {
     $yay skypeforlinux-stable-bin               # Skype
     $yay spotify                                # Spotify
     $yay timeshift                              # Backups (sudo timeshift-gtk)
-    $pac cron                                   # Backups (sudo timeshift-gtk)
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
+    $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
     $yay visual-paradigm-community              # IES, PROP
     $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
     $yay whatsapp-nativefier                    # Whatsapp client
 
-    # Theme
-    $pac adapta-gtk-theme                       # Alternative theme
-    $pac arc-gtk-theme                          # Arc theme and its icon's
-    $pac arc-icon-theme                         # Doesn't install in manjaro
-    $pac dconf-editor                           # Edit gnome configuration
-    $pac gtk2 gtk3
-    $pac kvantum-qt5                            # Qt5 Custom themes
-    $pac lxappearance                           # Gtk configuration utility
-    $pac noto-fonts-emoji                       # Classic Emoji
-    $pac papirus-icon-theme                     # Best icon theme!
-    $pac qt5ct                                  # Qt5 configuration utility
-    $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
 }
