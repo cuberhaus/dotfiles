@@ -13,6 +13,10 @@
 ###############################################################
 
 scripts=$HOME/.local/scripts
+# Burn iso into usb
+# sudo lsblk to look for usb
+#sudo dd if=.iso of=/dev/sdb status=progress
+
 # Fix discord long calls
 # alias discord="discord --no-sandbox </dev/null &>/dev/null &"
 alias discord="discord --no-sandbox &"
