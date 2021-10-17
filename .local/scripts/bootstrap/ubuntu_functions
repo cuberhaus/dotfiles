@@ -190,10 +190,10 @@ optional() {
     # $apt chromium-browser       # Web browser
     # $apt virtualbox-qt          # Virtual machines
     # Qt G
-    $apt qt-creator
-    $apt qttools5-dev-tools
-    $apt qttools5-dev
-    $apt qt5-default
-    $apt mesa-common-dev
     $apt build-essential libgl1-mesa-dev libglu1-mesa-dev
+    $apt mesa-common-dev
+    $apt qt-creator
+    $apt qt5-default
+    $apt qttools5-dev
+    $apt qttools5-dev-tools
 }
