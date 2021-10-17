@@ -7,6 +7,8 @@ source $scripts/bootstrap/arch_functions        # Include functions
 source $scripts/bootstrap/base_functions # Include functions
 
 ### INSTALLATION
+# merge this two scripts in the future
+#echo "Run manjaro script with compilation?"
 sudo pacman -Syu
 install_preparation
 echo "#! /bin/sh
@@ -29,7 +31,6 @@ i3_install
 #dwall
 #cava_install
 
-apps_AUR_install
 laptop_install
 vim_install
 #wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
