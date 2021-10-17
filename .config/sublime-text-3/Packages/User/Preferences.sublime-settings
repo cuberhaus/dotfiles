@@ -1,8 +1,8 @@
 {
-	"color_scheme": "Monokai.sublime-color-scheme",
 	"ignored_packages":
 	[
-		"Package Control",
+		"Vintage",
 	],
-	"vintage_ctrl_keys": false,
+	"theme": "auto",
+	"color_scheme": "Mariana.sublime-color-scheme",
 }

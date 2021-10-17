@@ -5,9 +5,9 @@
 	],
 	"installed_packages":
 	[
-		"ActualVim",
-
+		"OpenGL Shading Language (GLSL)",
 		"Package Control",
-		"Vintage Surround",
+		"Prolog",
+		"VIM Navigation",
 	],
 }
