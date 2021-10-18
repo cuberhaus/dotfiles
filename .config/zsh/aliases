@@ -24,8 +24,8 @@ alias discord="discord --no-sandbox &"
 alias ycminstall="python3 $HOME/.vim/plugged/YouCompleteMe/install.py"
 # Rclone (be careful!) 
 # "rclone config" first
-alias rclonepullall="rclone -P sync drive:Thunderbird ~/.thunderbird ;
-rclone -P sync drive:Calibre/Calibre\ Library ~/Calibre\ Library"
+alias rclonepull_calibre="rclone -P sync drive:Calibre/Calibre\ Library ~/Calibre\ Library"
+alias rclonepull_thunderbird="rclone -P sync drive:Thunderbird ~/.thunderbird"
 alias rclonepush_calibre="rclone -P sync ~/Calibre\ Library drive:Calibre/Calibre\ Library"
 alias rclonepush_thunderbird="rclone -P sync ~/.thunderbird drive:Thunderbird"
 
