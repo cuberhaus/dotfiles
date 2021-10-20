@@ -355,6 +355,7 @@ optional() {
     # $pac libreoffice-fresh libreoffice-fresh-ca # Do not ever use this as it can contain breaking bugs that may cause it to crash
     # $yay birdtray                               # Thunderbird tray (obsolete with shortcuts)
     # $yay pix                                    # Image browser
+    # $yay eclipse-java                           # BD
 
     # Apps
     $pac audacity                               # Audio editor
@@ -366,7 +367,6 @@ optional() {
     $pac texstudio                              # Latex text editor
     $pac tor; $yay tor-browser
     $yay android-studio                         # Android Studio
-    $yay eclipse-java                           # BD
     $yay rstudio-desktop-bin                    # Probabilitat i estadística IDE
     $yay slack-desktop                          # Slack
     $yay swi-prolog-devel                       # Prolog programming language
@@ -380,8 +380,10 @@ optional() {
 
     # Bases de dades
     $pac pgadmin4
-    $yay intellij-idea-ultimate-edition         # BD paid IntelliJ
-    $pac dbeaver jdk-openjdk
+    # $yay intellij-idea-ultimate-edition         # BD paid IntelliJ
+    $yay intellij-idea-ultimate-edition-jre
+    $pac dbeaver 
+    $pac jdk-openjdk
     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
     #$pac  intellij-idea-community-edition  # BD free version (no SQL)
 
