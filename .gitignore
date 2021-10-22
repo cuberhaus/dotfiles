@@ -2,8 +2,6 @@
 .config/sublime-text-3/Installed Packages/
 .config/sublime-text-3/Local/
 
-*.uuid
-vim/
 # Icons
 .local/share/icons/hicolor/
 
@@ -18,8 +16,12 @@ vim/
 
 # bin
 .local/bin/wheel
-
-# Py
+.local/bin/autopep8
+.local/bin/f2py
+.local/bin/f2py3
+.local/bin/f2py3.9
+.local/bin/pbr
+.local/bin/pycodestyle
 .local/include/
 .local/lib/python3.9/
 .local/bin/epylint
@@ -85,6 +87,7 @@ Calibre Library/metadata_db_prefs_backup.json
 .config/tmux/plugins/tmux-sensible/
 
 # Vim
+vim/
 .local/share/vim/viminfo
 .vim/autoload/
 .vim/plugged/
@@ -97,9 +100,6 @@ Calibre Library/metadata_db_prefs_backup.json
 
 # Fonts
 *.uuid
-#.local/share/fonts/Meslo/.uuid
-#.local/share/fonts/fontawesome/.uuid
-#.local/share/fonts/.uuid
 
 # Ranger
 .config/ranger/plugins/__init__.py
