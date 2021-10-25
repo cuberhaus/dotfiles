@@ -1,3 +1,7 @@
+.local/bin/pip
+.local/bin/pip3
+.local/bin/pip3.9
+
 # Sublime Text
 .config/sublime-text-3/Installed Packages/
 .config/sublime-text-3/Local/

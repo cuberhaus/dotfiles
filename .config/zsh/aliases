@@ -153,6 +153,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
         alias update="sudo pacman -Syu"
         alias updateall="yay -Syu; 
+        sudo pip install --upgrade pip;
         python3 -m pip install --user --upgrade pynvim; 
         vim +PlugUpgrade +PlugUpdate +qall; 
         antigen update;"
