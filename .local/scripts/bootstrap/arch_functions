@@ -353,8 +353,8 @@ optional() {
     # $pac gparted                       # Manage partitions (doesn't work with ex-fat)
     # $pac hexchat                        # IRC APP
     # $pac libreoffice-fresh libreoffice-fresh-ca # Do not ever use this as it can contain breaking bugs that may cause it to crash
+    # $pac pix
     # $yay birdtray                               # Thunderbird tray (obsolete with shortcuts)
-    # $yay pix                                    # Image browser
     # $yay eclipse-java                           # BD
 
     # Apps
