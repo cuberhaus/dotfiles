@@ -313,7 +313,7 @@ bindsym $mod+Shift+0 move container to workspace $ws10
 # Scratchpad {{{
 
 # program script checks if the program is already running, if it isn't it launches a new instance
-bindsym $mod+t exec $HOME/.local/bin/program discord, [class="Sublime_text"] scratchpad show
+bindsym $mod+t exec $HOME/.local/bin/program subl, [class="Sublime_text"] scratchpad show
 bindsym $mod+d exec $HOME/.local/bin/program discord, [class="discord"] scratchpad show
 bindsym $mod+m exec $HOME/.local/bin/program thunderbird,  [class="Thunderbird"] scratchpad show
 bindsym $mod+s exec $HOME/.local/bin/program spotify, [class="Spotify"] scratchpad show
