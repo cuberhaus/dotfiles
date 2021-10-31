@@ -20,6 +20,7 @@ set $ws8 "8: 8"
 set $ws9 "9: 9"
 set $ws10 "10: 10"
 set $term kitty
+set $calc '$term -n "pythonCalc" -o font_size=20 python3' # kitty specific command
 set $discord "discord --no-sandbox"
 #set $term "xfce4-terminal" # Alternative (Use Base16-OneDark not 16 bits):
 set $browser "google-chrome-stable"
@@ -184,8 +185,8 @@ bindsym $mod+shift+d exec $commandlauncher
 # Lock screen
 bindsym $mod+shift+x exec $Locker
 
-# reload the configuration file
-bindsym $mod+Shift+c reload
+# # reload the configuration file
+# bindsym $mod+Shift+c reload
 
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
@@ -311,7 +312,7 @@ bindsym $mod+Shift+0 move container to workspace $ws10
 
 #}}}
 # Scratchpad {{{
-
+# /program only works if you are only using one instance of it, not very usefull for things like terminals
 # program script checks if the program is already running, if it isn't it launches a new instance
 bindsym $mod+t exec $HOME/.local/bin/program subl, [class="Sublime_text"] scratchpad show
 bindsym $mod+d exec $HOME/.local/bin/program discord, [class="discord"] scratchpad show
@@ -319,6 +320,13 @@ bindsym $mod+m exec $HOME/.local/bin/program thunderbird,  [class="Thunderbird"]
 bindsym $mod+s exec $HOME/.local/bin/program spotify, [class="Spotify"] scratchpad show
 bindsym $mod+w exec $HOME/.local/bin/program whatsapp-nativefier, [class="whatsapp-nativefier-d40211"] scratchpad show
 
+# bindsym $mod+y exec kitty -n "pythonCalc"
+bindsym $mod+Shift+p [class="pythonCalc"] scratchpad show
+
+#set $calc '$term -n "pythonCalc" -o font_size=20 python3' # kitty specific command
+exec --no-startup-id $calc 
+
+for_window [class="pythonCalc"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
 for_window [class="Sublime_text"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 for_window [class="discord"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 # for_window [title="New Event:"] floating enable
