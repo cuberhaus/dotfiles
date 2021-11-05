@@ -36,6 +36,7 @@ base_install () {
     $pac gdb                                    # debugging c++
     $pac git                                    # It's git bro
     $pac gnome-calculator                       # Calculator
+    $pac speedcrunch                            # Fast calculations
     $pac gnome-font-viewer                      # Font viewer
     $pac gnome-keyring                          # https://wiki.archlinux.org/title/GNOME/Keyring
     $pac gtk2 gtk3
