@@ -133,6 +133,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     pip install --upgrade pip"
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     alias cleanup="brew cleanup; 
+    sudo gem cleanup;
     vim +PlugClean +qall"
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
