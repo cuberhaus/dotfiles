@@ -449,6 +449,9 @@ exec whatsapp-nativefier &
 # Calculator
 exec speedcrunch &
 
+# Mails
+exec thunderbird &
+
 ## Moar info
 # exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &
 #}}}
