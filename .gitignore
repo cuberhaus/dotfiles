@@ -18,6 +18,12 @@
 # XFCE
 .local/share/xfce4/helpers/
 
+# xmonad
+.xmonad/xmonad-x86_64-linux
+.xmonad/xmonad.errors
+.xmonad/xmonad.hi
+.xmonad/xmonad.o
+
 # bin
 .local/bin/wheel
 .local/bin/autopep8
