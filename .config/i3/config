@@ -422,9 +422,6 @@ exec xfce4-clipman &
 #exec dwall -s room &
 exec feh --bg-scale $wallpaper &
 
-# Thunderbird applet
-# exec birdtray &
-
 # Printer service
 exec hp-systray & 
 
@@ -437,20 +434,20 @@ exec flameshot &
 ## Show day in a classy way
 exec conky --config="$conky_day" &
 
-# Moar messages
-exec discord &
-
-# Musicote
-exec spotify &
-
-# Messages
-exec whatsapp-nativefier &
-
 # Calculator
 exec speedcrunch &
 
-# Mails
-exec thunderbird &
+# # Moar messages
+# exec discord &
+
+# # Musicote
+# exec spotify &
+
+# # Messages
+# exec whatsapp-nativefier &
+
+# # Mails
+# exec thunderbird &
 
 ## Moar info
 # exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &
