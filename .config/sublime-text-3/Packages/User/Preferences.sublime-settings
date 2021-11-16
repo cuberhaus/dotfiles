@@ -34,6 +34,6 @@
 	//                  opening them from finder or dragging onto the dock icon.
 	//
 	// On Mac, this value is overridden in the platform specific settings.
-	"open_files_in_new_window": "always",
+	"open_files_in_new_window": "never",
 
 }

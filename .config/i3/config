@@ -319,20 +319,20 @@ bindsym $mod+d exec $HOME/.local/bin/program discord, [class="discord"] scratchp
 bindsym $mod+m exec $HOME/.local/bin/program thunderbird,  [class="Thunderbird"] scratchpad show
 bindsym $mod+s exec $HOME/.local/bin/program spotify, [class="Spotify"] scratchpad show
 bindsym $mod+w exec $HOME/.local/bin/program whatsapp-nativefier, [class="whatsapp-nativefier-d40211"] scratchpad show
+bindsym $mod+Shift+c exec $HOME/.local/bin/program speedcrunch, [class="SpeedCrunch"] scratchpad show
 
-# bindsym $mod+y exec kitty -n "pythonCalc"
+
 # Rstudio creates multiple instances
 # bindsym $mod+Shift+p exec $HOME/.local/bin/program rstudio-bin, [class="RStudio"] scratchpad show
 # for_window [class="RStudio"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
-
-bindsym $mod+Shift+c exec $HOME/.local/bin/program speedcrunch, [class="SpeedCrunch"] scratchpad show
-for_window [class="SpeedCrunch"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
 # for_window [class="rstudio"] floating enable
+# bindsym $mod+y exec kitty -n "pythonCalc"
 # bindsym $mod+Shift+p [class="pythonCalc"] scratchpad show
 #set $calc '$term -n "pythonCalc" -o font_size=20 python3' # kitty specific command
 
 # for_window [class="pythonCalc"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
 # for_window [class="Sublime_text"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
+for_window [class="SpeedCrunch"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
 for_window [class="discord"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 # for_window [title="New Event:"] floating enable
 for_window [class="Thunderbird"] floating enable
@@ -422,9 +422,6 @@ exec xfce4-clipman &
 #exec dwall -s room &
 exec feh --bg-scale $wallpaper &
 
-# Thunderbird applet
-# exec birdtray &
-
 # Printer service
 exec hp-systray & 
 
@@ -436,6 +433,21 @@ exec flameshot &
 
 ## Show day in a classy way
 exec conky --config="$conky_day" &
+
+# Calculator
+exec speedcrunch &
+
+# # Moar messages
+# exec discord &
+
+# # Musicote
+# exec spotify &
+
+# # Messages
+# exec whatsapp-nativefier &
+
+# # Mails
+# exec thunderbird &
 
 ## Moar info
 # exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &

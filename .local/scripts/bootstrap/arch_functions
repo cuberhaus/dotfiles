@@ -183,6 +183,20 @@ arch_install() {
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable NetworkManager.service
     fi
+
+    # samba
+    sudo mkdir /var/lib/samba/usershares
+    sudo groupadd -r sambashare
+    sudo chown root:sambashare /var/lib/samba/usershares
+    sudo chmod 1770 /var/lib/samba/usershares
+    sudo gpasswd sambashare -a your_username
+
+    # /etc/samba/smb.conf
+    # [global]
+  # usershare path = /var/lib/samba/usershares
+  # usershare max shares = 100
+  # usershare allow guests = yes
+  # usershare owner only = yes
 }
 
 yay_install() {
