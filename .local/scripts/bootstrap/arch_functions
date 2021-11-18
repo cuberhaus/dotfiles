@@ -20,6 +20,7 @@ base_install () {
     $pac arc-icon-theme                         # Doesn't install in manjaro
     $pac base-devel                             # AUR
     $pac bat                                    # "Cat" on steroids
+    $pac breeze                                 # theme
     $pac calibre                                # Book manager
     $pac cron                                   # Backups (sudo timeshift-gtk)
     $pac dconf-editor                           # Edit gnome configuration
@@ -36,7 +37,6 @@ base_install () {
     $pac gdb                                    # debugging c++
     $pac git                                    # It's git bro
     $pac gnome-calculator                       # Calculator
-    $pac speedcrunch                            # Fast calculations
     $pac gnome-font-viewer                      # Font viewer
     $pac gnome-keyring                          # https://wiki.archlinux.org/title/GNOME/Keyring
     $pac gtk2 gtk3
@@ -45,7 +45,7 @@ base_install () {
     $pac hardinfo cpu-x                         # pc information
     $pac htop                                   # Show system resources
     $pac inotify-tools                          # inotifywatch -r $file (to watch if those files have been accessed)
-    $pac kdiff3                                 # Another diff viewer
+    $pac kdiff3                                 # git mergetool
     $pac kitty                                  # Terminal emulator
     $pac kvantum-qt5                            # Qt5 Custom themes
     $pac laptop-detect                          # Detect if using a laptop
@@ -81,6 +81,7 @@ base_install () {
     $pac remmina freerdp libvncserver           # Remote conexions
     $pac ruby                                   # Package manager
     $pac seahorse                               # Password keeper
+    $pac speedcrunch                            # Fast calculations
     $pac stow                                   # To deploy dotfiles
     $pac svn                                    # Similar to git
     $pac the_silver_searcher                    # Better and faster ack (and grep)

@@ -2,19 +2,7 @@
 	email = pol.casacuberta@est.fib.upc.edu
 	name = Pol Casacuberta
 	signingkey = 8870DF9B
-[diff]
-    tool = meld
-[difftool]
-    prompt = false
-[difftool "meld"]
-    trustExitCode = true
-    cmd = open -W -a Meld --args \"$LOCAL\" \"$REMOTE\"
-[merge]
-    tool = meld
-[mergetool]
-    prompt = false
-[mergetool "meld"]
-    trustExitCode = true
-    cmd = open -W -a Meld --args --auto-merge \"$LOCAL\" \"$BASE\" \"$REMOTE\" --output=\"$MERGED\"   name = cuberhaus
 [credential]
 	helper = /usr/lib/git-core/git-credential-libsecret
+[merge]
+	tool = kdiff3
