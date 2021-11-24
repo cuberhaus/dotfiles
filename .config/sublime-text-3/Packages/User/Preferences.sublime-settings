@@ -3,8 +3,8 @@
 	[
 		"Vintage",
 	],
-	"theme": "auto",
-	"color_scheme": "Mariana.sublime-color-scheme",
+	"theme": "Default.sublime-theme",
+	"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
 	"font_size": 11,
 	"hardware_acceleration": "opengl",
 
@@ -36,4 +36,5 @@
 	// On Mac, this value is overridden in the platform specific settings.
 	"open_files_in_new_window": "never",
 
+	"dictionary": "Packages/Language - English/en_GB.dic",
 }
