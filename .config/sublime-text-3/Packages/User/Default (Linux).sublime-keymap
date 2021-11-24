@@ -7,4 +7,5 @@
     { "keys": ["ctrl+j"], "command": "show_panel", "args": {"panel": "console", "toggle": true} },
     { "keys": ["alt+k"], "command": "swap_line_up" },
     { "keys": ["alt+j"], "command": "swap_line_down" },
+    { "keys": ["ctrl+shift+o"], "command": "prompt_open_folder" },
 ]
