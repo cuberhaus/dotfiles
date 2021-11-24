@@ -3,8 +3,8 @@
 	[
 		"Vintage",
 	],
-	"theme": "Default.sublime-theme",
-	"color_scheme": "Packages/Color Scheme - Default/Monokai.tmTheme",
+	"theme": "Default Dark.sublime-theme",
+	"color_scheme": "Mariana.sublime-color-scheme",
 	/*"font_size": 14,*/
 	"hardware_acceleration": "opengl",
 
