@@ -1,0 +1,11 @@
+ {
+   /*
+       An array of language names which are enabled.
+    */
+    "codeintel_enabled_languages":
+    [
+       "JavaScript", "SCSS", "Python", "HTML",
+       "Ruby", "Python3", "XML", "Sass", "HTML5", "Perl", "CSS",
+       "Twig", "Less", "Node.js", "TemplateToolkit", "PHP","C++"
+    ],
+ }
