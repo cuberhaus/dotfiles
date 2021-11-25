@@ -8,4 +8,12 @@
     { "keys": ["alt+k"], "command": "swap_line_up" },
     { "keys": ["alt+j"], "command": "swap_line_down" },
     { "keys": ["ctrl+shift+o"], "command": "prompt_open_folder" },
+
+    { "keys": ["ctrl+."], "command": "next_modification" },
+    { "keys": ["ctrl+,"], "command": "prev_modification" },
+    { "keys": ["ctrl+k", "ctrl+z"], "command": "revert_hunk" },
+    { "keys": ["ctrl+k", "ctrl+7"], "command": "toggle_inline_diff" },
+    
+    { "keys": ["f9"], "command": "sort_lines", "args": {"case_sensitive": false} },
+    { "keys": ["ctrl+f9"], "command": "sort_lines", "args": {"case_sensitive": true} },
 ]
