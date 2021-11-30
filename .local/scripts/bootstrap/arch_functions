@@ -11,9 +11,6 @@ myTerminal="kitty"
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
 base_install () {
-    # Nemo "best filemanager"
-    gsettings set org.cinnamon.desktop.default-applications.terminal exec $myTerminal # Tell Nemo to use Termite instead of gnome-terminal
-    # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x
 
     $pac adapta-gtk-theme                       # Alternative theme
     $pac arc-gtk-theme                          # Arc theme and its icon's
@@ -107,6 +104,10 @@ base_install () {
     $pac xss-lock                               # Lockscreen
     $pac yarn                                   # Package installer
     $pac zsh                                    # Zsh shell
+
+    # DO NOT CHANGE THIS ORDER YAY COMES AFTER pac
+    yay_install
+
     $yay balena-etcher                          # "Rufus" on linux
     $yay betterlockscreen                       # Lockscreen
     $yay conky-cairo-no-nvidia                  # fix lua
@@ -127,6 +128,11 @@ base_install () {
 
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
+
+    # This has to go after installing nemo
+    # Nemo "best filemanager"
+    gsettings set org.cinnamon.desktop.default-applications.terminal exec $myTerminal # Tell Nemo to use Termite instead of gnome-terminal
+    # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x
 }
 
 arch_install() {
