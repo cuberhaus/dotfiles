@@ -25,6 +25,7 @@ base_install () {
     $pac discord
     $pac dnsutils                               # Ip
     $pac dunst                                  # Notifications
+    $pac dunstify                               # dunst notification
     $pac exa                                    # "ls" on steroids
     $pac exfat-utils                            # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     $pac file-roller                            # Archive Manager (extract, unzip...)
@@ -104,7 +105,6 @@ base_install () {
     $pac xss-lock                               # Lockscreen
     $pac yarn                                   # Package installer
     $pac zsh                                    # Zsh shell
-    $pac dunstify                               # dunst notification
 
     # DO NOT CHANGE THIS ORDER YAY COMES AFTER pac
     yay_install
@@ -236,6 +236,7 @@ i3_install () {
     $yay kbdd-git                               # i3blocks keyboard layout
 
     # GUI/Terminal
+    # $pac pipewire-pulse                         # New and improved sound, uses SBC and ACC out of the box (pulseaudio deprecated)
     $pac acpi
     $pac awk bc upower                          # Battery plus
     $pac feh                                    # Wallpaper
@@ -245,7 +246,6 @@ i3_install () {
     $pac light                                  # Brightness
     $pac perl-anyevent-i3 python-dbus
     $pac picom                                  # Compositor, for transparencies
-    # $pac pipewire-pulse                         # New and improved sound, uses SBC and ACC out of the box (pulseaudio deprecated)
     $pac pulseaudio alsa-utils                  # Audio
     $pac pulseaudio pulseaudio-equalizer         pulseaudio-bluetooth        # Audio
     $pac rofi                                   # App menu Super+d
@@ -256,9 +256,9 @@ i3_install () {
 
 xmonad_install () {
     $pac trayer                                 # xmonad add a tray for apps
-    $pac xorg-xmessage                          # xmonad send messages
-    $pac xmonad-contrib                         # Xmonad with extra plugins
     $pac xmobar                                 # Best bar for xmonad
+    $pac xmonad-contrib                         # Xmonad with extra plugins
+    $pac xorg-xmessage                          # xmonad send messages
 }
 
 # Best Desktop
