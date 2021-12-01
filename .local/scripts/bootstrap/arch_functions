@@ -104,6 +104,7 @@ base_install () {
     $pac xss-lock                               # Lockscreen
     $pac yarn                                   # Package installer
     $pac zsh                                    # Zsh shell
+    $pac dunstify                               # dunst notification
 
     # DO NOT CHANGE THIS ORDER YAY COMES AFTER pac
     yay_install
