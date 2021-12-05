@@ -156,8 +156,6 @@ arch_install() {
     # https://wiki.archlinux.org/title/CUPS#Web_interface
     # https://wiki.archlinux.org/title/Avahi#Hostname_resolution
     $pac cups system-config-printer # printers
-    $pac hplip # hp printer
-    $yay epson-inkjet-printer-escpr # epson printer
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         sudo systemctl enable org.cups.cupsd.service
         sudo systemctl start org.cups.cupsd.service
@@ -192,7 +190,11 @@ arch_install() {
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable NetworkManager.service
     fi
+}
 
+arch_and_manjaro() {
+    $pac hplip # hp printer
+    $yay epson-inkjet-printer-escpr # epson printer
     # samba
     sudo mkdir /var/lib/samba/usershares
     sudo groupadd -r sambashare
@@ -202,10 +204,10 @@ arch_install() {
 
     # /etc/samba/smb.conf
     # [global]
-  # usershare path = /var/lib/samba/usershares
-  # usershare max shares = 100
-  # usershare allow guests = yes
-  # usershare owner only = yes
+    # usershare path = /var/lib/samba/usershares
+    # usershare max shares = 100
+    # usershare allow guests = yes
+    # usershare owner only = yes
 }
 
 yay_install() {
