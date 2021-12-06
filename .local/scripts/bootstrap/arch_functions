@@ -396,7 +396,7 @@ optional() {
     # Programming tools
     $pac doxygen texlive-most graphviz          # Doxygen
     $pac jdk-openjdk
-    $pac qtcreator glm qt5-tools                # OpenGL, QT, C++
+    $pac qtcreator glm qt5-tools qt5-webkit     # OpenGL, QT, C++
     $pac r                                      # Probabilitat i estadística
     $yay android-studio                         # Android Studio
     $yay clion clion-jre                        # C++ IDE
