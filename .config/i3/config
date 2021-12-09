@@ -437,6 +437,8 @@ exec conky --config="$conky_day" &
 # Calculator
 exec speedcrunch &
 
+exec conky --config="$HOME/.conky/conkyrss" &
+
 # # Moar messages
 # exec discord &
 
