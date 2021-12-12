@@ -437,7 +437,7 @@ exec conky --config="$conky_day" &
 # Calculator
 exec speedcrunch &
 
-exec --no-startup-id "sh -c 'sleep 10; conky --config=$HOME/.conky/conkyrss & '"
+exec --no-startup-id "sh -c 'sleep 15; conky --config=$HOME/.conky/conkyrss & '"
 
 # # Moar messages
 # exec discord &
