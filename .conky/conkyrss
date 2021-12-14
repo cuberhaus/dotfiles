@@ -72,7 +72,7 @@ ${alignc}-- Calendar UPC --
 ${rss https://raco.fib.upc.edu/ical/portada.rss?KEY=9dc91d16-6f40-49da-b0be-29714228f764 300 item_titles 4}
 
 ${alignc}-- Avisos UPC --
-${rss https://raco.fib.upc.edu/extern/rss_avisos.jsp?KEY=58775b6d-80fe-4ae8-a24e-e04965a99425 300 item_titles 4}
+${rss https://raco.fib.upc.edu/extern/rss_avisos.jsp?KEY=58775b6d-80fe-4ae8-a24e-e04965a99425 300 item_titles 24}
 ]]
 
 
