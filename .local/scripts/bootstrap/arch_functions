@@ -29,7 +29,7 @@ base_install () {
     $pac exa                                    # "ls" on steroids
     $pac exfat-utils                            # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     $pac file-roller                            # Archive Manager (extract, unzip...)
-    $pac firefox                                # chrome doesn't redirect to wifi page's 
+    $pac firefox                                # chrome doesn't redirect to wifi page's
     $pac fzf                                    # Fuzzy finder
     $pac gcc                                    # Cpp
     $pac gdb                                    # debugging c++
@@ -96,7 +96,7 @@ base_install () {
     $pac w3m                                    # Preview images on ranger
     $pac wget                                   # Download stuff
     $pac wireshark                              # View incoming/outgoing connections
-    $pac wmctrl                                 #used for scripting 
+    $pac wmctrl                                 #used for scripting
     $pac xclip                                  # Clipboard
     $pac xdg-user-dirs                          # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
     $pac xfce4-clipman-plugin                   # Clipboard manager (persistant clip even when application is closed)
@@ -414,7 +414,7 @@ optional() {
 
     # Bases de dades
     $pac pgadmin4
-    $pac dbeaver 
+    $pac dbeaver
     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
     #$pac  intellij-idea-community-edition  # BD free version (no SQL)
 
