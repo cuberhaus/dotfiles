@@ -64,7 +64,7 @@ mac_install () {
 
     ### GUI Applications
     # brew install --cask iterm2                  # Best terminal emulator
-    brew install --cask adobe-acrobat-reader    # Pdf reader
+    #brew install --cask adobe-acrobat-reader    # Pdf reader
     brew install --cask calibre                 # Book manager
     brew install --cask ccleaner                # CleanUp
     brew install --cask discord                 # Group calls
@@ -82,6 +82,7 @@ mac_install () {
     brew install --cask whatsapp
     brew install kitty
     brew install sublime-text                   # Fastest editor, also looks nice
+    brew install rectangle		      # 
 }
 
 optional () {
@@ -97,7 +98,7 @@ optional () {
     # brew install --cask r                       # Probabilitat i estadística
     # brew install --cask rstudio                 # Probabilitat i estadística IDE
     #brew install --cask obs                     # Screen recorder //very complicated on mac
-    #brew install --cask slack                   # Work
+    brew install --cask slack                   # Work
     #brew install --cask tor-browser             # Private and uncensored browsing
 }
 

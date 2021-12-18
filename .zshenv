@@ -80,6 +80,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
     export CPPFLAGS="-I/usr/local/opt/llvm/include"
     PATH="/usr/local/opt/llvm/bin:$PATH"
+    export PATH=/opt/homebrew/bin:$PATH
+    export PATH=/opt/homebrew/sbin:$PATH
 fi
 
 ###############################################################

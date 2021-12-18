@@ -1,3 +1,8 @@
+.config/zsh/.zsh_sessions/
+.config/iterm2/AppSupport
+.config/karabiner/
+.local/share/karabiner/
+
 .local/bin/pip
 .local/bin/pip3
 .local/bin/pip3.9

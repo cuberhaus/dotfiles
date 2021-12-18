@@ -8,7 +8,7 @@ source $scripts/bootstrap/base_functions # Include functions
 
 ### INSTALLATION
 install_preparation
-app_store_install
+#app_store_install
 brew_install
 mac_install
 vim_install
