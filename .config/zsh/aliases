@@ -30,6 +30,7 @@ alias rclonepush_calibre="rclone -P sync ~/Calibre\ Library drive:Calibre/Calibr
 alias rclonepush_thunderbird="rclone -P sync ~/.thunderbird drive:Thunderbird"
 
 # Config Files
+alias mac="nvim $scripts/bootstrap/mac_functions"
 alias arch="nvim $scripts/bootstrap/arch_functions"
 alias aliases="nvim $ZDOTDIR/aliases"
 alias zshenv="nvim $HOME/.zshenv"

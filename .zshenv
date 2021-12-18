@@ -82,6 +82,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     PATH="/usr/local/opt/llvm/bin:$PATH"
     export PATH=/opt/homebrew/bin:$PATH
     export PATH=/opt/homebrew/sbin:$PATH
+    export SHELL_SESSION_HISTORY=0
+    export SHELL_SESSIONS_DISABLE=1
 fi
 
 ###############################################################

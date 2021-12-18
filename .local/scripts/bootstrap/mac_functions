@@ -21,7 +21,8 @@ brew_install() {
 mac_install () {
 
     touch $HOME/.hushlogin                      # Avoid terminal prompts
-
+    touch ~/.bash_sessions_disable              # Share history through sessions
+    sudo chown -R pol ~/.cache/zsh              # zsh history doesn't work when owner is wrong
     ### Terminal stuff
     brew install ack
     brew install astyle
