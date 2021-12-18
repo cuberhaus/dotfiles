@@ -86,20 +86,20 @@ mac_install () {
 }
 
 optional () {
-    #brew cask install firefox --cask           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
-    #brew cask install keka --cask              # Archiver open source
-    #brew cask install qbittorrent --cask
-    #brew cask install unetbootin --cask        # Burn iso's (or use dd command)
-    #brew install --cask alfred                  # Better Spotlight
-    #brew install --cask dbeaver-community adoptopenjdk       # BD
-    #brew install --cask eclipse-java            # BD
-    #brew install --cask intellij-idea           # Paid, better java SQL IDE
-    #brew install --cask intellij-idea-ce        # Free version
-    # brew install --cask r                       # Probabilitat i estadística
-    # brew install --cask rstudio                 # Probabilitat i estadística IDE
-    #brew install --cask obs                     # Screen recorder //very complicated on mac
+    brew cask install firefox --cask           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
+    brew cask install keka --cask              # Archiver open source
+    brew cask install qbittorrent --cask
+    brew cask install unetbootin --cask        # Burn iso's (or use dd command)
+    brew install --cask alfred                  # Better Spotlight
+    brew install --cask dbeaver-community adoptopenjdk       # BD
+    brew install --cask eclipse-java            # BD
+    brew install --cask intellij-idea           # Paid, better java SQL IDE
+    brew install --cask intellij-idea-ce        # Free version
+    brew install --cask r                       # Probabilitat i estadística
+    brew install --cask rstudio                 # Probabilitat i estadística IDE
+    brew install --cask obs                     # Screen recorder //very complicated on mac
     brew install --cask slack                   # Work
-    #brew install --cask tor-browser             # Private and uncensored browsing
+    brew install --cask tor-browser             # Private and uncensored browsing
 }
 
 doom_emacs_install() {
@@ -125,8 +125,9 @@ vim_install () {
     cd $HOME 
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
-    bash ~/scripts/ycm.sh
+    bash ~/.local/scripts/ycm.sh
     sudo npm install -g neovim
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
+    sudo chown -R pol $XDG_DATA_HOME/
 }
