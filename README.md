@@ -22,7 +22,7 @@ bash .local/scripts/arch
 ## Shortcuts
 Shortcuts to applications are stored in /usr/share/applications/
 
-### Recommendations
+## Recommendations
 - Read this repo's wiki
 - That's pretty much all
 
@@ -33,7 +33,7 @@ Shortcuts to applications are stored in /usr/share/applications/
 - ![Ubuntu_icon][ubuntu_icon] Ubuntu
 - ![MacOS_icon][macos_icon] MacOS
 
-###  WIP 
+##  WIP 
 - ![Gentoo_icon][gentoo_icon]Gentoo
 - Openbox
 

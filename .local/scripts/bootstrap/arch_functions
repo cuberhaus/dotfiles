@@ -11,9 +11,6 @@ myTerminal="kitty"
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
 base_install () {
-    # Nemo "best filemanager"
-    gsettings set org.cinnamon.desktop.default-applications.terminal exec $myTerminal # Tell Nemo to use Termite instead of gnome-terminal
-    # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x
 
     $pac adapta-gtk-theme                       # Alternative theme
     $pac arc-gtk-theme                          # Arc theme and its icon's
@@ -28,10 +25,11 @@ base_install () {
     $pac discord
     $pac dnsutils                               # Ip
     $pac dunst                                  # Notifications
+    $pac dunstify                               # dunst notification
     $pac exa                                    # "ls" on steroids
     $pac exfat-utils                            # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     $pac file-roller                            # Archive Manager (extract, unzip...)
-    $pac firefox                                # chrome doesn't redirect to wifi page's 
+    $pac firefox                                # chrome doesn't redirect to wifi page's
     $pac fzf                                    # Fuzzy finder
     $pac gcc                                    # Cpp
     $pac gdb                                    # debugging c++
@@ -98,7 +96,7 @@ base_install () {
     $pac w3m                                    # Preview images on ranger
     $pac wget                                   # Download stuff
     $pac wireshark                              # View incoming/outgoing connections
-    $pac wmctrl                                 #used for scripting 
+    $pac wmctrl                                 #used for scripting
     $pac xclip                                  # Clipboard
     $pac xdg-user-dirs                          # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
     $pac xfce4-clipman-plugin                   # Clipboard manager (persistant clip even when application is closed)
@@ -107,6 +105,10 @@ base_install () {
     $pac xss-lock                               # Lockscreen
     $pac yarn                                   # Package installer
     $pac zsh                                    # Zsh shell
+
+    # DO NOT CHANGE THIS ORDER YAY COMES AFTER pac
+    yay_install
+
     $yay balena-etcher                          # "Rufus" on linux
     $yay betterlockscreen                       # Lockscreen
     $yay conky-cairo-no-nvidia                  # fix lua
@@ -117,7 +119,8 @@ base_install () {
     $yay google-chrome                          # Best web browser
     $yay libreoffice-extension-languagetool # Libre office Grammar
     $yay skypeforlinux-stable-bin               # Skype
-    $yay spotify                                # Spotify
+    # $yay spotify                                # Spotify
+    sudo snap spotify                           # Spotify only on manjaro
     $yay timeshift                              # Backups (sudo timeshift-gtk)
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
@@ -127,6 +130,11 @@ base_install () {
 
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
+
+    # This has to go after installing nemo
+    # Nemo "best filemanager"
+    gsettings set org.cinnamon.desktop.default-applications.terminal exec $myTerminal # Tell Nemo to use Termite instead of gnome-terminal
+    # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x
 }
 
 arch_install() {
@@ -148,8 +156,6 @@ arch_install() {
     # https://wiki.archlinux.org/title/CUPS#Web_interface
     # https://wiki.archlinux.org/title/Avahi#Hostname_resolution
     $pac cups system-config-printer # printers
-    $pac hplip # hp printer
-    $yay epson-inkjet-printer-escpr # epson printer
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         sudo systemctl enable org.cups.cupsd.service
         sudo systemctl start org.cups.cupsd.service
@@ -184,7 +190,11 @@ arch_install() {
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable NetworkManager.service
     fi
+}
 
+arch_and_manjaro() {
+    $pac hplip # hp printer
+    $yay epson-inkjet-printer-escpr # epson printer
     # samba
     sudo mkdir /var/lib/samba/usershares
     sudo groupadd -r sambashare
@@ -194,10 +204,10 @@ arch_install() {
 
     # /etc/samba/smb.conf
     # [global]
-  # usershare path = /var/lib/samba/usershares
-  # usershare max shares = 100
-  # usershare allow guests = yes
-  # usershare owner only = yes
+    # usershare path = /var/lib/samba/usershares
+    # usershare max shares = 100
+    # usershare allow guests = yes
+    # usershare owner only = yes
 }
 
 yay_install() {
@@ -228,6 +238,7 @@ i3_install () {
     $yay kbdd-git                               # i3blocks keyboard layout
 
     # GUI/Terminal
+    # $pac pipewire-pulse                         # New and improved sound, uses SBC and ACC out of the box (pulseaudio deprecated)
     $pac acpi
     $pac awk bc upower                          # Battery plus
     $pac feh                                    # Wallpaper
@@ -237,7 +248,6 @@ i3_install () {
     $pac light                                  # Brightness
     $pac perl-anyevent-i3 python-dbus
     $pac picom                                  # Compositor, for transparencies
-    # $pac pipewire-pulse                         # New and improved sound, uses SBC and ACC out of the box (pulseaudio deprecated)
     $pac pulseaudio alsa-utils                  # Audio
     $pac pulseaudio pulseaudio-equalizer         pulseaudio-bluetooth        # Audio
     $pac rofi                                   # App menu Super+d
@@ -248,9 +258,9 @@ i3_install () {
 
 xmonad_install () {
     $pac trayer                                 # xmonad add a tray for apps
-    $pac xorg-xmessage                          # xmonad send messages
-    $pac xmonad-contrib                         # Xmonad with extra plugins
     $pac xmobar                                 # Best bar for xmonad
+    $pac xmonad-contrib                         # Xmonad with extra plugins
+    $pac xorg-xmessage                          # xmonad send messages
 }
 
 # Best Desktop
@@ -369,7 +379,6 @@ optional() {
     # $pac github-cli                    # Github for terminal, create issues...
     # $pac gnome-disk-utility             # Partition manager by gnome
     # $pac gparted                       # Manage partitions (doesn't work with ex-fat)
-    # $pac hexchat                        # IRC APP
     # $pac libreoffice-fresh libreoffice-fresh-ca # Do not ever use this as it can contain breaking bugs that may cause it to crash
     # $pac pix
     # $yay birdtray                               # Thunderbird tray (obsolete with shortcuts)
@@ -377,18 +386,25 @@ optional() {
 
     # Apps
     $pac audacity                               # Audio editor
-    $pac doxygen texlive-most graphviz          # Doxygen
     $pac gimp                                   # Image editor
     $pac obs-studio                             # Video recording
-    $pac qtcreator glm qt5-tools                # IDI
-    $pac r                                      # Probabilitat i estadística
     $pac texstudio                              # Latex text editor
     $pac tor; $yay tor-browser
-    $yay android-studio                         # Android Studio
-    $yay rstudio-desktop-bin                    # Probabilitat i estadística IDE
     $yay slack-desktop                          # Slack
-    $yay swi-prolog-devel                       # Prolog programming language
     $yay youtube-dl                             # Download youtube videos
+
+    # Programming tools
+    $pac doxygen texlive-most graphviz          # Doxygen
+    $pac jdk-openjdk
+    $pac qtcreator glm qt5-tools qt5-webkit     # OpenGL, QT, C++
+    $pac r                                      # Probabilitat i estadística
+    $yay android-studio                         # Android Studio
+    $yay clion clion-jre                        # C++ IDE
+    $yay intellij-idea-ultimate-edition         # BD paid IntelliJ
+    $yay intellij-idea-ultimate-edition-jre     # Best java IDE
+    $yay pycharm-professional                   # One of the best python IDE besides vscode
+    $yay rstudio-desktop-bin                    # Probabilitat i estadística IDE
+    $yay swi-prolog-devel                       # Prolog programming language
 
     curl -O https://download.sublimetext.com/sublimehq-pub.gpg && sudo pacman-key --add sublimehq-pub.gpg && sudo pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
 
@@ -398,10 +414,7 @@ optional() {
 
     # Bases de dades
     $pac pgadmin4
-    # $yay intellij-idea-ultimate-edition         # BD paid IntelliJ
-    $yay intellij-idea-ultimate-edition-jre
-    $pac dbeaver 
-    $pac jdk-openjdk
+    $pac dbeaver
     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
     #$pac  intellij-idea-community-edition  # BD free version (no SQL)
 

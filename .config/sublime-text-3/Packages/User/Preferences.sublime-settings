@@ -3,10 +3,9 @@
 	[
 		"Vintage",
 	],
-	"theme": "auto",
+	"theme": "Default.sublime-theme",
 	"color_scheme": "Mariana.sublime-color-scheme",
-	"font_size": 11,
-	"hardware_acceleration": "opengl",
+	"hardware_acceleration": "none",
 
 	// Exiting the application with hot_exit enabled will cause it to close
 	// immediately without prompting. Unsaved modifications and open files will
@@ -24,7 +23,7 @@
 	//                   to exit, not when the last window is closed. This
 	//                   setting is only used on Windows and Linux.
 	// - "disabled": Disable hot exit.
-	"hot_exit": "only_on_quit",
+	"hot_exit": "always",
 
 	// When files are opened from a file explorer or from the command line, this
 	// controls whether a new window is created or not.
@@ -36,4 +35,6 @@
 	// On Mac, this value is overridden in the platform specific settings.
 	"open_files_in_new_window": "never",
 
+	"dictionary": "Packages/Language - English/en_GB.dic",
+	"font_size": 12,
 }
