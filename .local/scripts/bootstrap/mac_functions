@@ -1,6 +1,6 @@
 #!/bash/sh
 # Author: https://github.com/cuberhaus
- 
+
 app_store_install() {
     brew install mas
     mas install 1274495053                      # Microsoft To Do
@@ -78,12 +78,12 @@ mac_install () {
     brew install --cask the-unarchiver          # Archiver "faster"
     brew install --cask tomighty                # Pomodoro timer
     brew install --cask transmission            # Torrent Downloader
-    brew install --cask visual-studio-code      
+    brew install --cask visual-studio-code
     brew install --cask vlc                     # Media Player
     brew install --cask whatsapp
     brew install kitty
     brew install sublime-text                   # Fastest editor, also looks nice
-    brew install rectangle		      # 
+    brew install rectangle                      # Open source alternative to magnet, tiler for macOS
 }
 
 optional () {
@@ -123,7 +123,7 @@ bloat_install() {
 vim_install () {
     brew install macvim                         # Vim
     brew install neovim                         # NeoVim
-    cd $HOME 
+    cd $HOME
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
     bash ~/.local/scripts/ycm.sh

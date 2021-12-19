@@ -131,7 +131,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     antigen update; 
     npm install npm -g; 
     xcode-select --install; 
-    pip install --upgrade pip"
+    pip3 install --upgrade pip"
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     alias cleanup="brew cleanup; 
     sudo gem cleanup;
