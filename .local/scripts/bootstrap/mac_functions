@@ -1,19 +1,7 @@
 #!/bash/sh
 # Author: https://github.com/cuberhaus
 
-app_store_install() {
-    brew install mas
-    mas install 1274495053                      # Microsoft To Do
-    mas install 1444383602                      # GoodNotes
-    mas install 409183694                       # Keynote
-    mas install 409201541                       # Pages
-    mas install 409203825                       # Numbers
-    mas install 441258766                       # Magnet
-    mas install 497799835                       # Xcode
-    # mas install 736189492                       # Notability
-    #mas install 1147396723                     # WhatsApp
-}
-
+# Remember to setup rclone and then rclonepull_calibre rclonepull_thunderbird
 brew_install() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 }
@@ -26,7 +14,6 @@ mac_install () {
     ### Terminal stuff
     brew install ack
     brew install astyle
-    # brew install autojump                       # Autojump obsolete?
     brew install bat                            # Cat on steroids (for ranger)
     brew install bison
     brew install cmake
@@ -35,16 +22,15 @@ mac_install () {
     brew install fzf                            # Fuzzy Finder
     brew install git                            # Git
     brew install go
-    # brew install graphviz
     brew install htop                           # Resource viewer
-    brew install llvm
+    brew install llvm                           # Compiler
     brew install mono
     brew install ncdu                           # Storage manager
     brew install neofetch                       # System info
     brew install p7zip                          # Extract function
     brew install pkg-config
     brew install ranger w3m                     # Ranger and previews
-    brew install rclone
+    brew install rclone                         # Automatic push and pull from drive
     brew install ripgrep
     brew install sox
     brew install stow                           # Stow dotfiles
@@ -65,43 +51,57 @@ mac_install () {
 
     ### GUI Applications
 
-    brew install --cask alfred                  # Better Spotlight
-    brew install --cask calibre                 # Book manager
-    brew install --cask ccleaner                # CleanUp
-    brew install --cask discord                 # Group calls
-    brew install --cask google-chrome           # Web browser
-    brew install --cask karabiner-elements      # Swap Esc with Caps_lock
-    brew install --cask kitty
-    brew install --cask meld                    # Best Diff software
-    brew install --cask rectangle                      # Open source alternative to magnet, tiler for macOS
-    brew install --cask skype                   # Videocalls
-    brew install --cask spotify                 # Music player
-    brew install --cask sublime-text                   # Fastest editor, also looks nice
-    brew install --cask telegram                # Quickly transfer files
-    brew install --cask the-unarchiver          # Archiver "faster"
-    brew install --cask tomighty                # Pomodoro timer
-    brew install --cask transmission            # Torrent Downloader
-    brew install --cask visual-studio-code
-    brew install --cask vlc                     # Media Player
-    brew install --cask whatsapp
+    brew install alfred                  # Better Spotlight
+    brew install calibre                 # Book manager
+    brew install ccleaner                # CleanUp
+    brew install discord                 # Group calls
+    brew install google-chrome           # Web browser
+    brew install karabiner-elements      # Swap Esc with Caps_lock
+    brew install kitty                   # Best terminal
+    brew install meld                    # Best Diff software
+    brew install rectangle               # Tiler
+    brew install skype                   # Videocalls
+    brew install spotify                 # Music player
+    brew install sublime-text            # Fastest editor
+    brew install telegram                # Quickly transfer files
+    brew install the-unarchiver          # Archiver "faster"
+    brew install tomighty                # Pomodoro timer
+    brew install transmission            # Torrent Downloader
+    brew install visual-studio-code      # Text editor / IDE
+    brew install vlc                     # Media Player
+    brew install whatsapp                # Messaging 
 }
 
 optional () {
-    brew cask install firefox --cask           # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
-    brew cask install keka --cask              # Archiver open source
-    brew cask install qbittorrent --cask
-    brew cask install unetbootin --cask        # Burn iso's (or use dd command)
-    brew install --cask adobe-acrobat-reader    # Pdf reader
-    brew install --cask dbeaver-community adoptopenjdk       # BD
-    brew install --cask eclipse-java            # BD
-    brew install --cask intellij-idea           # Paid, better java SQL IDE
-    brew install --cask intellij-idea-ce        # Free version
-    brew install --cask iterm2                  # Best terminal emulator
-    brew install --cask obs                     # Screen recorder //very complicated on mac
-    brew install --cask r                       # Probabilitat i estadística
-    brew install --cask rstudio                 # Probabilitat i estadística IDE
-    brew install --cask slack                   # Work
-    brew install --cask tor-browser             # Private and uncensored browsing
+    brew install adobe-acrobat-reader           # Pdf reader
+    brew install dbeaver-community adoptopenjdk       # BD
+    brew install eclipse-java                   # Java IDE
+    brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
+    brew install graphviz
+    brew install intellij-idea                  # Paid, better java SQL IDE
+    brew install intellij-idea-ce               # Free version
+    brew install iterm2                         # Terminal emulator
+    brew install keka                           # Archiver open source
+    brew install obs                            # Screen recorder //very complicated on mac
+    brew install qbittorrent                    # Torrent client  
+    brew install r                              # Probabilitat i estadística
+    brew install rstudio                        # Probabilitat i estadística IDE
+    brew install slack                          # Work
+    brew install tor-browser                    # Private and uncensored browsing
+    brew install unetbootin                     # Burn iso's (or use dd command)
+}
+
+vim_install () {
+    brew install macvim                         # Vim
+    brew install neovim                         # NeoVim
+    cd $HOME
+    vim +PlugInstall +qall
+    # Vim YouCompleteMe plugin install
+    bash ~/.local/scripts/ycm.sh
+    sudo npm install -g neovim
+    python3 -m pip install --user --upgrade pynvim
+    sudo gem install neovim
+    sudo chown -R pol $XDG_DATA_HOME/
 }
 
 doom_emacs_install() {
@@ -116,20 +116,20 @@ doom_emacs_install() {
     ln -s /usr/local/opt/emacs-plus/Emacs.app /Applications/Emacs.app
 }
 
+app_store_install() {
+    brew install mas
+    mas install 1274495053                      # Microsoft To Do
+    mas install 1444383602                      # GoodNotes
+    mas install 409183694                       # Keynote
+    mas install 409201541                       # Pages
+    mas install 409203825                       # Numbers
+    mas install 441258766                       # Magnet
+    mas install 497799835                       # Xcode
+    #mas install 736189492                       # Notability
+    #mas install 1147396723                      # WhatsApp
+}
+
 bloat_install() {
     brew install cowsay fortune coreutils       # Cows
     brew install cmatrix                        # Matrix
-}
-
-vim_install () {
-    brew install macvim                         # Vim
-    brew install neovim                         # NeoVim
-    cd $HOME
-    vim +PlugInstall +qall
-    # Vim YouCompleteMe plugin install
-    bash ~/.local/scripts/ycm.sh
-    sudo npm install -g neovim
-    python3 -m pip install --user --upgrade pynvim
-    sudo gem install neovim
-    sudo chown -R pol $XDG_DATA_HOME/
 }

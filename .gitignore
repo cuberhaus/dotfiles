@@ -1,3 +1,4 @@
+.config/rclone/
 .config/zsh/.zsh_history
 .config/zsh/.zsh_sessions/
 .config/iterm2/AppSupport
