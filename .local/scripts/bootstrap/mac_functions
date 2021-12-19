@@ -2,6 +2,10 @@
 # Author: https://github.com/cuberhaus
 
 # Remember to setup rclone and then rclonepull_calibre rclonepull_thunderbird
+# https://support.mozilla.org/en-US/kb/profiles-where-thunderbird-stores-user-data
+# /Applications/Thunderbird.app/Contents/MacOS/thunderbird-bin -ProfileManager
+# ~/Library/Thunderbird/Profiles/xxxxxxxx.default/
+
 brew_install() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 }
