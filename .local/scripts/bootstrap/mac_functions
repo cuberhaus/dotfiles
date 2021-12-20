@@ -55,25 +55,25 @@ mac_install () {
 
     ### GUI Applications
 
-    brew install alfred                  # Better Spotlight
-    brew install calibre                 # Book manager
-    brew install ccleaner                # CleanUp
-    brew install discord                 # Group calls
-    brew install google-chrome           # Web browser
-    brew install karabiner-elements      # Swap Esc with Caps_lock
-    brew install kitty                   # Best terminal
-    brew install meld                    # Best Diff software
-    brew install rectangle               # Tiler
-    brew install skype                   # Videocalls
-    brew install spotify                 # Music player
-    brew install sublime-text            # Fastest editor
-    brew install telegram                # Quickly transfer files
-    brew install the-unarchiver          # Archiver "faster"
-    brew install tomighty                # Pomodoro timer
-    brew install transmission            # Torrent Downloader
-    brew install visual-studio-code      # Text editor / IDE
-    brew install vlc                     # Media Player
-    brew install whatsapp                # Messaging 
+    brew install alfred                         # Better Spotlight
+    brew install calibre                        # Book manager
+    brew install ccleaner                       # CleanUp
+    brew install discord                        # Group calls
+    brew install google-chrome                  # Web browser
+    brew install karabiner-elements             # Swap Esc with Caps_lock
+    brew install kdiff3                         # Git mergetool  
+    brew install kitty                          # Best terminal
+    brew install rectangle                      # Tiler
+    brew install skype                          # Videocalls
+    brew install spotify                        # Music player
+    brew install sublime-text                   # Fastest editor
+    brew install telegram                       # Quickly transfer files
+    brew install the-unarchiver                 # Archiver "faster"
+    brew install tomighty                       # Pomodoro timer
+    brew install transmission                   # Torrent Downloader
+    brew install visual-studio-code             # Text editor / IDE
+    brew install vlc                            # Media Player
+    brew install whatsapp                       # Messaging 
 }
 
 optional () {
@@ -86,6 +86,7 @@ optional () {
     brew install intellij-idea-ce               # Free version
     brew install iterm2                         # Terminal emulator
     brew install keka                           # Archiver open source
+    brew install meld                           # Diff software
     brew install obs                            # Screen recorder //very complicated on mac
     brew install qbittorrent                    # Torrent client  
     brew install r                              # Probabilitat i estadística
