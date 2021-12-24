@@ -84,6 +84,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH=/opt/homebrew/sbin:$PATH
     export SHELL_SESSION_HISTORY=0
     export SHELL_SESSIONS_DISABLE=1
+    export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
 fi
 
 ###############################################################
