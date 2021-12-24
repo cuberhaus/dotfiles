@@ -97,7 +97,6 @@ optional () {
     brew install slack                          # Work
     brew install tor-browser                    # Private and uncensored browsing
     brew install unetbootin                     # Burn iso's (or use dd command)
-    brew install visual-studio; brew tap homebrew/cask-versions
 }
 
 vim_install () {
