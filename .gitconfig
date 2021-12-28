@@ -4,3 +4,5 @@
 	signingkey = 8870DF9B
 [merge]
 	tool = kdiff3
+[credential]
+	helper = /usr/lib/git-core/git-credential-libsecret
