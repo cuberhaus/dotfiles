@@ -54,7 +54,7 @@ fi
 
 # Zsh files:
 export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh" # For more information RTFM https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
-export VISUAL=vim
+export VISUAL=nvim
 export EDITOR="$VISUAL"
 export DOTFILES="$HOME/dotfiles/dotfiles"
 export WALLPAPER_LIGHT="$HOME/.local/xdg/wallpapers/doggo.jpeg"
@@ -68,7 +68,7 @@ export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-ra
 export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\"" # SET VIM AS MANPAGER
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    export TERMINAL="termite"
+    export TERMINAL="kitty"
     export QT_QPA_PLATFORMTHEME="qt5ct"
     source $HOME/.config/distro     # DISTRO variable
     if laptop-detect ; then
@@ -77,13 +77,13 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    export SHELL_SESSION_HISTORY=0
+    export SHELL_SESSIONS_DISABLE=1
     export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
     export CPPFLAGS="-I/usr/local/opt/llvm/include"
     PATH="/usr/local/opt/llvm/bin:$PATH"
     export PATH=/opt/homebrew/bin:$PATH
     export PATH=/opt/homebrew/sbin:$PATH
-    export SHELL_SESSION_HISTORY=0
-    export SHELL_SESSIONS_DISABLE=1
     export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
 fi
 
