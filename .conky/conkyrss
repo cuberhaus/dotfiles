@@ -43,6 +43,7 @@ conky.config = {
     gap_y = 60,
     minimum_height = 5,
     minimum_width = 5,
+    maximum_width = 500,
     net_avg_samples = 2,
     no_buffers = true,
     out_to_console = false,

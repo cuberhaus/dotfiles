@@ -4,8 +4,10 @@
 set $mod Mod4
 
 # Paths
-set $conky_day "$HOME/.conky/helix/conky\ helix\ white"
-set $wallpaper "$HOME/.local/xdg/wallpapers/doggo.jpeg"
+set $conky_day "$HOME/.conky/helix/conky helix black"
+# set $conky_day "$HOME/.conky/helix/conky helix white"
+# set $conky_day "$HOME/.conky/helix/conky helix grey"
+set $wallpaper "$HOME/.local/xdg/wallpapers/zyzz.jpg"
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
