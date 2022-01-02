@@ -75,6 +75,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if laptop-detect ; then
         setxkbmap es
     fi
+    export PATH=/home/pol/fib/LI/picosat-965/bin:$PATH
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -86,6 +87,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH=/opt/homebrew/bin:$PATH
     export PATH=/opt/homebrew/sbin:$PATH
     export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+
+    export PATH=/Users/pol/fib/LI/picosat-965-mac/bin:$PATH
 fi
 
 ###############################################################

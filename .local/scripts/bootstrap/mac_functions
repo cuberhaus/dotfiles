@@ -95,6 +95,7 @@ optional () {
     brew install r                              # Probabilitat i estadística
     brew install rstudio                        # Probabilitat i estadística IDE
     brew install slack                          # Work
+    brew install swi-prolog
     brew install tor-browser                    # Private and uncensored browsing
     brew install unetbootin                     # Burn iso's (or use dd command)
 }
