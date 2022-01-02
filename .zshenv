@@ -65,8 +65,9 @@ export WALLPAPER_DARK="$HOME/Downloads/wallpapers/pexels-eberhard-grossgasteiger
 export DICPATH="$XDG_CONFIG_HOME/Dictionary"
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
 export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
-export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\"" # SET VIM AS MANPAGER
-
+# export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\"" # SET VIM AS MANPAGER
+# export MANPAGER="vim -M +MANPAGER -"
+export MANPAGER='nvim +Man!' # use neovim as manpager
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export TERMINAL="kitty"
     export QT_QPA_PLATFORMTHEME="qt5ct"

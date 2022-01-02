@@ -1,3 +1,5 @@
+.config/rstudio/
+.local/share/rstudio/
 .local/share/ranger/
 .config/.mono/
 .config/xbuild/
