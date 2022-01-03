@@ -117,7 +117,7 @@ alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
 
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    alias rm="rm -vi"
+    alias rm="rm -v"
     alias update="sudo softwareupdate -i -a; 
     brew update; 
     brew upgrade; 
