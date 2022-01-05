@@ -6,7 +6,7 @@
 	"theme": "Default.sublime-theme",
 	"color_scheme": "Mariana.sublime-color-scheme",
 	"hardware_acceleration": "none",
-
+    "vintage_ctrl_keys": true
 	// Exiting the application with hot_exit enabled will cause it to close
 	// immediately without prompting. Unsaved modifications and open files will
 	// be preserved and restored when next starting.
