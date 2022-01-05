@@ -1,10 +1,12 @@
 [
-	{ "keys": ["ctrl+shift+c"], "command": "toggle_comment", "args": { "block": false } },
-	{ "keys": ["ctrl+alt+c"], "command": "toggle_comment", "args": { "block": true } },
-    { "keys": ["ctrl+b"], "command": "toggle_side_bar" },
+    // sublime.log_input(True) sublime.log_commands(True)
+	//{ "keys": ["ctrl+shift+c"], "command": "toggle_comment", "args": { "block": false } },
+	//{ "keys": ["ctrl+alt+c"], "command": "toggle_comment", "args": { "block": true } },
+    { "keys": ["ctrl+j"], "command": "toggle_side_bar" },
+    { "keys": ["shift+ctrl+7"], "command": "toggle_comment", "args": { "block": false } },
     { "keys": ["ctrl+shift+b"], "command": "build" },
     { "keys": ["ctrl+alt+b"], "command": "build", "args": {"select": true} },
-    { "keys": ["ctrl+j"], "command": "show_panel", "args": {"panel": "console", "toggle": true} },
+    //{ "keys": ["ctrl+j"], "command": "show_panel", "args": {"panel": "console", "toggle": true} },
     { "keys": ["alt+k"], "command": "swap_line_up" },
     { "keys": ["alt+j"], "command": "swap_line_down" },
     { "keys": ["ctrl+shift+o"], "command": "prompt_open_folder" },
