@@ -1,3 +1,4 @@
+.local/bin/pip3.10
 .local/share/recently-used.xbel
 .local/share/meld/
 .config/swi-prolog/
