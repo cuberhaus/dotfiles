@@ -54,8 +54,8 @@ mac_install () {
     brew install font-meslo-lg-nerd-font
 
     ### GUI Applications
-
     brew install alfred                         # Better Spotlight
+    brew install ballast                        # Auto-corrects volume balance, (weird macOS stuff)
     brew install calibre                        # Book manager
     brew install ccleaner                       # CleanUp
     brew install discord                        # Group calls
