@@ -30,28 +30,29 @@ alias rclonepush_calibre="rclone -P sync ~/Calibre\ Library drive:Calibre/Calibr
 alias rclonepush_thunderbird="rclone -P sync ~/.thunderbird drive:Thunderbird"
 
 # Config Files
-alias mac="nvim $scripts/bootstrap/mac_functions"
-alias arch="nvim $scripts/bootstrap/arch_functions"
 alias aliases="nvim $ZDOTDIR/aliases"
+alias arch="nvim $scripts/bootstrap/arch_functions"
+alias bashrc="nvim $HOME/.bashrc"
+alias dunstrc="nvim $HOME/.config/dunst/dunstrc"
+alias i3config="nvim $HOME/.config/i3/config"
+alias kitty.conf="nvim $HOME/.config/kitty/kitty.conf"
+alias mac="nvim $scripts/bootstrap/mac_functions"
+alias pacman.conf="sudo vim /etc/pacman.conf"
+alias tmux.conf="nvim $HOME/.config/tmux/tmux.conf"
+alias vimrc="nvim $HOME/.vim/vimrc"
+alias xinitrc="nvim $HOME/.xinitrc"
+alias xmonad.hs="nvim $HOME/.xmonad/xmonad.hs"
+alias xprofile="nvim $HOME/.xprofile"
+alias zprofile="nvim $ZDOTDIR/.zprofile"
 alias zshenv="nvim $HOME/.zshenv"
 alias zshrc="nvim $ZDOTDIR/.zshrc"
-alias zprofile="nvim $ZDOTDIR/.zprofile"
-alias xprofile="nvim $HOME/.xprofile"
-alias xinitrc="nvim $HOME/.xinitrc"
-alias vimrc="nvim $HOME/.vim/vimrc"
-alias bashrc="nvim $HOME/.bashrc"
-alias tmux.conf="nvim $HOME/.config/tmux/tmux.conf"
-alias kitty.conf="nvim $HOME/.config/kitty/kitty.conf"
-alias xmonad.hs="nvim $HOME/.xmonad/xmonad.hs"
-alias i3config="nvim $HOME/.config/i3/config"
-#alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
-alias pacman.conf="sudo vim /etc/pacman.conf"
-#alias vgrub="sudo vim /etc/default/grub"
-#alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
-#alias vslim="sudo vim /etc/slim.conf"
-#alias voblogout="sudo vim /etc/oblogout.conf"
-#alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
 #alias vconfgrub="sudo vim /boot/grub/grub.cfg"
+#alias vgrub="sudo vim /etc/default/grub"
+#alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
+#alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
+#alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
+#alias voblogout="sudo vim /etc/oblogout.conf"
+#alias vslim="sudo vim /etc/slim.conf"
 
 alias vim="nvim"
 
@@ -95,9 +96,7 @@ alias yolo='git add -A; git commit -m "This is a placeholder"; git push'
 # --git causes to crash when symbolic link is gone
 alias ls="exa --group-directories-first"
 alias la="exa --group-directories-first -a"
-alias lsl="exa -F --long --header --links --group --group-directories-first --git"
 alias l="exa -a -F --long --header --links --group --group-directories-first --git"
-alias lsd="exa -D -a"
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
@@ -195,7 +194,6 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         alias tmux="tmux -f $HOME/.config/tmux/tmux.conf"
         alias ls="ls -l"
         alias la="ls -a"
-        alias lsd=""
     fi
 fi
 
@@ -204,5 +202,4 @@ fi
 ###############################################################
 
 alias Xres="xrdb -load $HOME/.config/X11/xresources"
-#alias nvidia-settings="nvidia-settings --config="$XDG_CONFIG_HOME"/nvidia/settings"
 alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
