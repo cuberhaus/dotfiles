@@ -79,6 +79,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
+
     export SHELL_SESSION_HISTORY=0
     export SHELL_SESSIONS_DISABLE=1
     export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
@@ -87,7 +88,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH=/opt/homebrew/bin:$PATH
     export PATH=/opt/homebrew/sbin:$PATH
     export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
-
+    export PATH="/Users/pol/bin:$PATH"
+    
     export PATH=/Users/pol/fib/LI/picosat-965-mac/bin:$PATH
 fi
 
