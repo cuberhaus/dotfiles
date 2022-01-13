@@ -1,28 +1,6 @@
-.local/bin/pip3.10
 .local/share/recently-used.xbel
-.local/share/meld/
-.config/swi-prolog/
-
-.config/rstudio/
-.local/share/rstudio/
-.local/share/ranger/
 .config/.mono/
 .config/xbuild/
-
-.config/QtProject/
-.config/rclone/
-.config/zsh/.zsh_history
-.config/zsh/.zsh_sessions/
-.config/iterm2/AppSupport
-.config/karabiner/
-.local/share/karabiner/
-
-.local/bin/pip
-.local/bin/pip3
-.local/bin/pip3.9
-.local/bin/3to2
-.local/bin/codeintel
-.local/bin/esprima
 
 # Sublime Text
 .config/sublime-text-3/Installed Packages/
@@ -35,9 +13,6 @@
 # Termite
 .config/termite/config
 
-# Tomighty
-.tomighty/cache/
-
 # XFCE
 .local/share/xfce4/helpers/
 
@@ -48,20 +23,27 @@
 .xmonad/xmonad.o
 
 # bin
-.local/bin/wheel
+.local/bin/pip3.10
+.local/bin/3to2
 .local/bin/autopep8
+.local/bin/codeintel
+.local/bin/epylint
+.local/bin/esprima
 .local/bin/f2py
 .local/bin/f2py3
 .local/bin/f2py3.9
-.local/bin/pbr
-.local/bin/pycodestyle
-.local/include/
-.local/lib/python3.9/
-.local/bin/epylint
 .local/bin/isort
+.local/bin/pbr
+.local/bin/pip
+.local/bin/pip3
+.local/bin/pip3.9
+.local/bin/pycodestyle
 .local/bin/pylint
 .local/bin/pyreverse
 .local/bin/symilar
+.local/bin/wheel
+.local/include/
+.local/lib/python3.9/
 
 # KDE
 .config/okularrc
@@ -99,6 +81,8 @@
 # Zsh
 .config/zsh/.zshrc.zwc
 .config/zsh/.zcompdump*
+.config/zsh/.zsh_history
+.config/zsh/.zsh_sessions/
 
 # Distro
 .config/distro
@@ -134,9 +118,6 @@ vim/
 # Fonts
 *.uuid
 
-# Ranger
-.config/ranger/plugins/__init__.py
-
 # Nvidia
 .config/nvidia/settings
 
@@ -158,18 +139,21 @@ Thumbs.db
 # Git merge files
 *orig
 
-# Albert files
+
+# CACHE FILES
+## Ranger
+.config/ranger/plugins/__init__.py
+.local/share/ranger/
+## Albert files
 .config/albert/core.db
 .config/albert/org.albert*
 .config/albert/last_used_version
-
-# Vifm files
+## Vifm files
 .config/vifm/scripts
 .config/vifm/colors
 .config/vifm/vifminfo
 .config/vifm/vifm-help.txt
-
-# Stretchly
+## Stretchly
 .config/stretchly/Cache/
 .config/stretchly/Code Cache/
 .config/stretchly/Cookies
@@ -178,11 +162,27 @@ Thumbs.db
 .config/stretchly/Network Persistent State
 .config/stretchly/Session Storage/
 .config/stretchly/TransportSecurity
-
-# Transmission
+## Transmission
 .config/transmission/dht.dat
 .config/transmission/resume/
 .config/transmission/stats.json
 .config/transmission/torrents/
-
 .local/bin/bootstrap/profile.log
+## Prolog
+.config/swi-prolog/
+## Tomighty
+.tomighty/cache/
+## R
+.config/rstudio/
+.local/share/rstudio/
+## QT
+.config/QtProject/
+## Meld
+.local/share/meld/
+## Rclone
+.config/rclone/
+## Iterm 2
+.config/iterm2/AppSupport
+## Karabiner
+.config/karabiner/
+.local/share/karabiner/
