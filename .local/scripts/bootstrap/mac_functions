@@ -63,11 +63,13 @@ mac_install () {
     brew install karabiner-elements             # Swap Esc with Caps_lock
     brew install kdiff3                         # Git mergetool  
     brew install kitty                          # Best terminal
+    brew install mactex                         # LaTex compiler
     brew install rectangle                      # Tiler
     brew install skype                          # Videocalls
     brew install spotify                        # Music player
     brew install sublime-text                   # Fastest editor
     brew install telegram                       # Quickly transfer files
+    brew install texstudio                      # Free and open source LaTex editor
     brew install the-unarchiver                 # Archiver "faster"
     brew install tomighty                       # Pomodoro timer
     brew install transmission                   # Torrent Downloader

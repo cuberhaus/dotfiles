@@ -2,6 +2,11 @@
 .config/.mono/
 .config/xbuild/
 
+# TexStudio
+.config/texstudio/
+# Texmaker ?
+.config/xm1/
+
 # Sublime Text
 .config/sublime-text-3/Installed Packages/
 .config/sublime-text-3/Local/
