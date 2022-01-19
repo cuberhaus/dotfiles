@@ -44,11 +44,11 @@ call plug#begin()
 " Plug 'godlygeek/tabular'
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 " Plug 'jiangmiao/auto-pairs'
-" Plug 'lervag/vimtex'
 " Plug 'chriskempson/base16-vim'
 " Plug 'NLKNguyen/papercolor-theme'
 " Plug 'lifepillar/vim-solarized8'
 " Plug 'rakr/vim-one'
+Plug 'lervag/vimtex'
 Plug 'tikhomirov/vim-glsl'
 Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
