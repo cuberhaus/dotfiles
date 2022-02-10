@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
 
+### WARNING: If this script is to be changed, beware of the order of execution of every command
+
 ### VARIABLES
 scripts=$HOME/.local/scripts
 source $scripts/bootstrap/arch_functions        # Include functions

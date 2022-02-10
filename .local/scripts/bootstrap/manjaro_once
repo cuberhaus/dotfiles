@@ -11,7 +11,8 @@ sudo pacman -Syu
 install_preparation
 echo "#! /bin/sh
 export DISTRO=manjaro" > $HOME/.config/distro   # Distro variable
-#yay_install # Needed to install AUR packages
+sudo cp $HOME/dotfiles/dotfiles/.local/share/icons/Avatar.jpg /usr/share/icons/Avatar.jpg # Move avatar picture so that LightDM can find it
+sudo cp $HOME/dotfiles/dotfiles/.local/share/icons/Avatar.jpg $HOME/.face # Move avatar picture so mugshot can find it
 
 ### ONLY CHANGE FROM HERE ON
 base_install
