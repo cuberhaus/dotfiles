@@ -127,6 +127,7 @@ base_install () {
     $yay visual-paradigm-community              # IES, PROP
     $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
     $yay whatsapp-nativefier                    # Whatsapp client
+    $yay obsidian                               # Markdown editor
 
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
