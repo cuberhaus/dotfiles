@@ -2,6 +2,7 @@
 	"ignored_packages":
 	[
 		//"Vintage",
+/*"SideBarEnhancements",*/
 	],
 	"theme": "Default.sublime-theme",
 	"color_scheme": "Mariana.sublime-color-scheme",
