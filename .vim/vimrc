@@ -113,7 +113,8 @@ filetype plugin indent on
 set timeoutlen=1000 ttimeoutlen=0
 
 " Número relatiu a la teva posició en la barra de l'esquerra
-set number relativenumber
+" set number relativenumber
+set number 
 
 "activa suport de mouse
 set mouse=a
