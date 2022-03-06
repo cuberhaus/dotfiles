@@ -89,7 +89,7 @@ alias gsu="git submodule update --recursive --remote"
 ## Fun commit
 #alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
 ## Alternative (makes easier finding out which commits have no message)
-alias yolo='git add -A; git commit -m "This is a placeholder"; git push'
+alias yolo='git add -A; git commit -S -m "This is a placeholder"; git push'
 
 # List files
 # using -a -a will show '.' and ".."
