@@ -6,3 +6,4 @@ if [[ "$DISTRO" == "arch" ]]; then
     # 
     # [[ -f ~/.config/zsh/.zshrc ]] && . ~/.config/zsh/.zshrc
 fi
+export GPG_TTY=$(tty)

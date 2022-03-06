@@ -1,8 +1,10 @@
 [user]
 	email = pol.casacuberta@est.fib.upc.edu
 	name = Pol Casacuberta
-	signingkey = 8870DF9B
+	signingkey = CF18FE2BD1DE0B33
 [merge]
 	tool = kdiff3
 [credential]
 	helper = /usr/lib/git-core/git-credential-libsecret
+[gpg]
+	program = gpg

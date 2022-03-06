@@ -15,6 +15,8 @@ mac_install () {
     touch ~/.bash_sessions_disable              # Share history through sessions
     sudo chown -R pol ~/.cache/zsh              # zsh history doesn't work when owner is wrong
     ### Terminal stuff
+    brew install pinentry-mac                   # for prompts git password
+    brew install smimesign                      # git with gpg
     brew install ack
     brew install astyle
     brew install bat                            # Cat on steroids (for ranger)
