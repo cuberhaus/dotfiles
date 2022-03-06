@@ -26,6 +26,7 @@ mac_install () {
     brew install fzf                            # Fuzzy Finder
     brew install git                            # Git
     brew install go
+    brew install gpg
     brew install htop                           # Resource viewer
     brew install llvm                           # Compiler
     brew install mono
