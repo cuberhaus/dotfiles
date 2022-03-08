@@ -1,7 +1,7 @@
 [user]
 	email = pol.casacuberta@est.fib.upc.edu
 	name = Pol Casacuberta
-	signingkey = CF18FE2BD1DE0B33
+	signingkey = FE6F3657285DC8FEDE80E9D5EBE45EA19FB48180
 [merge]
 	tool = kdiff3
 [credential]
