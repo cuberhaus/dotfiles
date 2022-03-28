@@ -12,6 +12,7 @@ myTerminal="kitty"
 ## Invariant: be at $HOME dir
 base_install () {
 
+    $pac kcolorchooser
     $pac adapta-gtk-theme                       # Alternative theme
     $pac arc-gtk-theme                          # Arc theme and its icon's
     $pac arc-icon-theme                         # Doesn't install in manjaro
