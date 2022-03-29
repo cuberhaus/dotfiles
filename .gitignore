@@ -192,5 +192,5 @@ Thumbs.db
 ## Karabiner
 .config/karabiner/
 .local/share/karabiner/
-
+## Git
 .gitconfig
