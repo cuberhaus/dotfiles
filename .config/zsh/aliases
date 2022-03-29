@@ -10,6 +10,7 @@
 # alias='' Is created during runtime and will evaluate every time it's called
 # $RANDOM will generate a random number from 0 through 32767
 # array=('Element1' 'Element2')
+# Use mimeopen to set default apps
 ###############################################################
 
 scripts=$HOME/.local/scripts
