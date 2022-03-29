@@ -91,8 +91,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH="/Users/pol/bin:$PATH"
     
     export PATH=/Users/pol/fib/LI/picosat-965-mac/bin:$PATH
-    export PATH=/Users/pol/Library/Python/3.8/bin:$PATH
-    PYTHONPATH="/Users/pol/Library/Python/3.8/bin:$PYTHONPATH"
+    # export PATH=/Users/pol/Library/Python/3.8/bin:$PATH
+    # PYTHONPATH="/Users/pol/Library/Python/3.8/bin:$PYTHONPATH"
+    export PATH="/opt/homebrew/Cellar/python@3.9/3.9.10/bin:$PATH"
+    PYTHONPATH="/opt/homebrew/Cellar/python@3.9/3.9.10/bin:$PYTHONPATH"
     export PYTHONPATH
 fi
 
