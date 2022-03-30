@@ -57,6 +57,9 @@ alias zshrc="nvim $ZDOTDIR/.zshrc"
 
 alias vim="nvim"
 
+alias disableSleep = "sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target"
+alias enableSleep = "sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target"
+
 # Easier navigation: .., ..., ...., ....., ~ and -
 alias ..="cd .."
 alias ...="cd ../.."
