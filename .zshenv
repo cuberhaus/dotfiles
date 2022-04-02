@@ -1,4 +1,5 @@
 #!/bin/sh
+# best python linter is pylint
 # IN MAC YOU MAY HAVE TO PUT HOMEBREW IN zprofile
 # path_helper is executed from /etc/zprofile and sources /etc/paths then /etc/path.d
 # zshrc and zprofile go after that, check order to make sure
