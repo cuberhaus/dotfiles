@@ -1,4 +1,5 @@
 # ~/.config/zsh/.zprofile
+
 #emulate sh -c 'source /etc/profile'
 
 if [[ "$DISTRO" == "arch" ]]; then
@@ -7,3 +8,5 @@ if [[ "$DISTRO" == "arch" ]]; then
     # [[ -f ~/.config/zsh/.zshrc ]] && . ~/.config/zsh/.zshrc
 fi
 export GPG_TTY=$(tty)
+export PATH="/opt/homebrew/bin:$PATH"   
+
