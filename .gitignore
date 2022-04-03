@@ -1,3 +1,4 @@
+.config/gtk-2.0/
 .local/bin
 .local/share/recently-used.xbel
 .config/.mono/

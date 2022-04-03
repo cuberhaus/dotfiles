@@ -82,7 +82,6 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-
     export PATH="/Users/pol/bin:$PATH"
     export SHELL_SESSION_HISTORY=0
     export SHELL_SESSIONS_DISABLE=1
@@ -91,12 +90,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     PATH="/usr/local/opt/llvm/bin:$PATH"
     export PATH=/opt/homebrew/sbin:$PATH
     export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
-    # export PATH="/opt/homebrew/bin:$PATH"   
     export PATH=/Users/pol/fib/LI/picosat-965-mac/bin:$PATH
-    # export PATH=/Users/pol/Library/Python/3.8/bin:$PATH
-    # PYTHONPATH="/Users/pol/Library/Python/3.8/bin:$PYTHONPATH"
-    export PATH="/opt/homebrew/Cellar/python@3.9/3.9.10/bin:$PATH"
-    PYTHONPATH="/opt/homebrew/Cellar/python@3.9/3.9.10/bin:$PYTHONPATH"
     export PYTHONPATH
 fi
 
