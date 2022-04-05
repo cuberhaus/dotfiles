@@ -1,5 +1,5 @@
 #!/bin/bash
-# Author: Serg Kolo
+# Author: Serg Kolo improved by Pol Casacuberta
 # Description: A launcher script that checks whether
 #       or not a window of a particular program already exists
 #       If a window of such program is open, bring it to focus
@@ -7,9 +7,11 @@
 #       Written for https://askubuntu.com/q/440142/295286
 # Date: April 6 , 2015
 #
+# command to run
+# name of the class $2
 
-
-MYPROG=$1
+COMMAND=$1
+MYPROG=$2
 sleep 0.5
 wmctrl -lx | awk '{print $3}' | grep -i "$MYPROG"
 
@@ -20,6 +22,6 @@ if [ $? -eq 0 ]; then
    #wmctrl -a $MYPROG
     exit 1
 else 
-    $MYPROG &
+    $COMMAND &
     exit 0
 fi
