@@ -1,17 +1,26 @@
 #!/bin/bash
-# Author: Serg Kolo improved by Pol Casacuberta
+# Author: Serg Kolo modified by Pol Casacuberta
 # Description: A launcher script that checks whether
 #       or not a window of a particular program already exists
 #       If a window of such program is open, bring it to focus
 #       Otherwise - launch a new window
 #       Written for https://askubuntu.com/q/440142/295286
 # Date: April 6 , 2015
+# Date modified: April, 5 2021
 #
 # command to run
 # name of the class $2
 
 COMMAND=$1
-MYPROG=$2
+MYPROG=$1
+# If theres two arguments second argument is taken as the command to run
+
+if [ "$#" -eq 2 ]; then
+    MYPROG=$2
+fi
+
+echo $COMMAND
+
 sleep 0.5
 wmctrl -lx | awk '{print $3}' | grep -i "$MYPROG"
 
