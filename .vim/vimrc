@@ -347,8 +347,8 @@ nnoremap <leader>w :w!<cr>
 " :W sudo saves the file (useful for handling the permission-denied error)
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 
-map <C-down> <C-E>
-map <C-up> <C-Y>
+" map <C-down> <C-E>
+" map <C-up> <C-Y>
 
 " Disable highlight when <leader><cr> is pressed
 map <silent> <leader><cr> :noh<cr>
@@ -409,7 +409,7 @@ endtry
 
 " Spelling {{{
 
-" Demana per descarregar el fixter corresponent
+" Demana per descarregar el fitxer corresponent
 let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
 "setlocal spell spelllang=en
 map <leader>ss :setlocal spell! spelllang=en<cr>
