@@ -56,6 +56,8 @@ alias zshrc="nvim $ZDOTDIR/.zshrc"
 #alias vslim="sudo vim /etc/slim.conf"
 
 alias vim="nvim"
+# modify in  /usr/share/applications as well
+alias rstudio="rstudio-bin --no-sandbox"
 
 alias disableSleep="sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target"
 alias enableSleep="sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target"
