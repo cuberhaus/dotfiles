@@ -5,7 +5,7 @@
 .config/xbuild/
 
 # TexStudio
-# .config/texstudio/
+.config/texstudio/
 # Texmaker ?
 .config/xm1/
 
