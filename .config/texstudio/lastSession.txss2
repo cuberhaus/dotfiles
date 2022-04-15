@@ -1,0 +1,23 @@
+{
+    "InternalPDFViewer": {
+        "Embedded": true,
+        "File": "../../fib/A/apuntes/Apuntes.pdf"
+    },
+    "Session": {
+        "Bookmarks": [
+        ],
+        "CurrentFile": "../../fib/A/apuntes/Apuntes.tex",
+        "FileVersion": 1,
+        "Files": [
+            {
+                "Col": 0,
+                "EditorGroup": 0,
+                "FileName": "../../fib/A/apuntes/Apuntes.tex",
+                "FirstLine": 0,
+                "FoldedLines": "",
+                "Line": 267
+            }
+        ],
+        "MasterFile": ""
+    }
+}
