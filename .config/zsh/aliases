@@ -147,8 +147,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     alias cleanup="brew cleanup; 
     sudo gem cleanup;
-    vim +PlugClean +qall
-    pip cache purge"
+    vim +PlugClean +qall;
+    pip cache purge;
+    yarn cache clean"
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
 fi
@@ -175,8 +176,9 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         alias cleanup="yay -Sc; 
-        vim +PlugClean +qall
-        pip cache purge"
+        vim +PlugClean +qall;
+        pip cache purge;
+        yarn cache clean"
         #sudo pacman -R $(pacman -Qdtq)
         alias unlock="sudo rm /var/lib/pacman/db.lck" #pacman unlock
     fi
