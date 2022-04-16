@@ -1,0 +1,40 @@
+# A part-of-speech dictionary that's used additionally to the binary dictionary (*.dict).
+# This does not add words to the spell checker, see hunspell/spelling.txt for that.
+# File Encoding: UTF-8
+# Format: three tab-separated fields: fullform baseform postags
+#from Freeling
+#separatorRegExp=;
+Vitreuil;Vitreuil; Z e sp
+Winamax;Winamax; Z e sp
+Belmont;Belmont; Z e sp
+Chassagne;Chassagne; Z e sp
+Chinon;Chinon; Z e sp
+FN;FN; Z e sp
+Hulot;Hulot; Z e sp
+NCIS;NCIS; Z e sp
+Palavas;Palavas; Z e sp
+Ritz-Carlton;Ritz-Carlton; Z e sp
+eco-friendly;eco-friendly; N e sp
+Argelès-Gazost;Argelès-Gazost; Z e sp
+russo-géorgien;russo-géorgien; J m s
+médico-légals;médico-légals; J m p
+russo-géorgienne;russo-géorgienne; J f s
+Zelensky;Zelensky; Z e sp
+Zemmour;Zemmour; Z e sp
+Marioupol;Marioupol; Z e sp
+Stromae;Stromae; Z e sp
+écoresponsabilité;écoresponsabilité; Z e sp
+cyberintimidation;cyberintimidation;Z e sp
+TF;TF; Z f sp
+Pépite;Pépite; Z m sp
+WAIS;WAIS; Z e sp
+FAI;FAI; Z e sp
+BA;BA; Z e sp
+AMI;AMI; Z e sp
+QQ;QQ; Z e sp
+Pâques;Pâques; Z f sp
+persona;persona; N e sp
+non;non; N m sp
+Emma Award;Emma Award; Z m sp
+moto club;moto club; N m s
+moto clubs;moto club; N m p

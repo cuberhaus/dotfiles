@@ -1,0 +1,34 @@
+# A POS tag dictionary that's used as an addition (or as a fix) to catalan.dict
+# These words are candidates to be added (or fixed) in catalan.dict in the future
+# File Encoding: UTF-8
+# Format: fullform baseform postags (tab separated)
+########## Dictionary fixes ##########
+########## Additions ##########
+Laclau	Laclau	NPCNSP0
+Larousse	Larousse	NPCNO00
+MWC	MWC	NPMSO00
+Scholz	Scholz	NPCNSP0
+augustiniana	augustinià	NCFS000
+augustinianes	augustinià	NCFP000
+augustinians	augustinià	NCMP000
+compatrícia	compatrici	NCFS000
+compatrícies	compatrici	NCFP000
+ecoauditoria	ecoauditoria	NCFS000
+ecoauditories	ecoauditoria	NCFP000
+ecoblanqueig	ecoblanqueig	NCMS000
+ecofeminista	ecofeminista	AQ0CS0
+ecofeministes	ecofeminista	AQ0CP0
+ecogestions	ecogestió	NCFP000
+ecogestió	ecogestió	NCFS000
+ecoturístic	ecoturístic	AQ0MS0
+ecoturística	ecoturístic	AQ0FS0
+ecoturístics	ecoturístic	AQ0MP0
+ecoturístiques	ecoturístic	AQ0FP0
+gigafactoria	gigafactoria	NCFS000
+gigafactories	gigafactoria	NCFP000
+lacrosse	lacrosse	NCMS000
+patrícia	patrici	NCFS000
+patrícies	patrici	NCFP000
+romeva	romeu	NCFS000
+romeves	romeu	NCFP000
+ésAdir	ésAdir	NPMSO00

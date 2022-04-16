@@ -26,12 +26,12 @@
                 "Line": 12
             },
             {
-                "Col": 86,
+                "Col": 0,
                 "EditorGroup": 0,
                 "FileName": "../../fib/LP/erlang_project/erlang.tex",
-                "FirstLine": 0,
+                "FirstLine": 13,
                 "FoldedLines": "",
-                "Line": 7
+                "Line": 52
             }
         ],
         "MasterFile": ""
