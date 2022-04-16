@@ -12,6 +12,7 @@ myTerminal="kitty"
 ## Invariant: be at $HOME dir
 base_install () {
 
+    $pac biber #latex bibliography
     $pac kcolorchooser
     $pac adapta-gtk-theme                       # Alternative theme
     $pac arc-gtk-theme                          # Arc theme and its icon's

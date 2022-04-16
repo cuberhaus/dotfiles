@@ -119,7 +119,7 @@ alias userlist="cut -d: -f1 /etc/passwd"
 # Switch between bash and zsh
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
-
+# TODO: generalize cleanup please
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
@@ -147,7 +147,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     alias cleanup="brew cleanup; 
     sudo gem cleanup;
-    vim +PlugClean +qall"
+    vim +PlugClean +qall
+    pip cache purge"
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
 fi
@@ -174,7 +175,8 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         alias cleanup="yay -Sc; 
-        vim +PlugClean +qall"
+        vim +PlugClean +qall
+        pip cache purge"
         #sudo pacman -R $(pacman -Qdtq)
         alias unlock="sudo rm /var/lib/pacman/db.lck" #pacman unlock
     fi

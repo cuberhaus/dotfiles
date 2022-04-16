@@ -1,21 +1,37 @@
 {
     "InternalPDFViewer": {
         "Embedded": true,
-        "File": "../../fib/A/apuntes/Apuntes.pdf"
+        "File": "../../fib/LP/erlang_project/erlang.pdf"
     },
     "Session": {
         "Bookmarks": [
         ],
-        "CurrentFile": "../../fib/A/apuntes/Apuntes.tex",
+        "CurrentFile": "../../fib/LP/erlang_project/erlang.tex",
         "FileVersion": 1,
         "Files": [
             {
-                "Col": 0,
+                "Col": 18,
                 "EditorGroup": 0,
                 "FileName": "../../fib/A/apuntes/Apuntes.tex",
                 "FirstLine": 0,
                 "FoldedLines": "",
-                "Line": 267
+                "Line": 10
+            },
+            {
+                "Col": 86,
+                "EditorGroup": 0,
+                "FileName": "../../fib/G/Teoria/apunts/grafics.tex",
+                "FirstLine": 0,
+                "FoldedLines": "",
+                "Line": 12
+            },
+            {
+                "Col": 86,
+                "EditorGroup": 0,
+                "FileName": "../../fib/LP/erlang_project/erlang.tex",
+                "FirstLine": 0,
+                "FoldedLines": "",
+                "Line": 7
             }
         ],
         "MasterFile": ""
