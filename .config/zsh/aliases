@@ -124,6 +124,7 @@ alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
 cleanup="vim +PlugClean +qall;
     pip3 cache purge;
     yarn cache clean
+    npm cache clean --force
     "
 update=""
 updateall="python3 -m pip install --user --upgrade pynvim;
