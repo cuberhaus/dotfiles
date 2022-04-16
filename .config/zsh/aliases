@@ -119,6 +119,16 @@ alias userlist="cut -d: -f1 /etc/passwd"
 # Switch between bash and zsh
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
+cleanup="vim +PlugClean +qall;
+    pip3 cache purge;
+    yarn cache clean"
+update=""
+updateall="python3 -m pip install --user --upgrade pynvim;
+    vim +PlugUpgrade +PlugUpdate +qall; 
+    antigen update; 
+    pip3 install --upgrade pip
+    npm install npm -g; 
+"
 # TODO: generalize cleanup please
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -133,23 +143,29 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     xcode-select --install; 
     pip3 install --upgrade pip
     "
-    alias updateall="sudo softwareupdate -i -a; 
+    updateall="sudo softwareupdate -i -a; 
     brew update; 
     brew upgrade; 
     brew update --cask; 
-    python3 -m pip install --user --upgrade pynvim;
-    vim +PlugUpgrade +PlugUpdate +qall; 
-    antigen update; 
     xcode-select --install; 
-    pip3 install --upgrade pip
-    npm install npm -g; 
-    "
+    "$updateall
+    # alias updateall="sudo softwareupdate -i -a; 
+    # brew update; 
+    # brew upgrade; 
+    # brew update --cask; 
+    # xcode-select --install; 
+    # python3 -m pip install --user --upgrade pynvim;
+    # vim +PlugUpgrade +PlugUpdate +qall; 
+    # antigen update; 
+    # pip3 install --upgrade pip
+    # npm install npm -g; 
+    # "
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
-    alias cleanup="brew cleanup; 
-    sudo gem cleanup;
-    vim +PlugClean +qall;
-    pip cache purge;
-    yarn cache clean"
+
+    # alias cleanup="brew cleanup; 
+    # sudo gem cleanup"
+    cleanup="brew cleanup;
+    sudo gem cleanup;"$cleanup
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
 fi
@@ -175,10 +191,11 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         antigen update;"
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
-        alias cleanup="yay -Sc; 
-        vim +PlugClean +qall;
-        pip cache purge;
-        yarn cache clean"
+        cleanup="yay -Sc;"$cleanup
+        # alias cleanup="yay -Sc; 
+        # vim +PlugClean +qall;
+        # pip cache purge;
+        # yarn cache clean"
         #sudo pacman -R $(pacman -Qdtq)
         alias unlock="sudo rm /var/lib/pacman/db.lck" #pacman unlock
     fi
@@ -213,7 +230,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         alias la="ls -a"
     fi
 fi
-
+alias cleanup=$cleanup
 ###############################################################
 # => Clean home directory
 ###############################################################

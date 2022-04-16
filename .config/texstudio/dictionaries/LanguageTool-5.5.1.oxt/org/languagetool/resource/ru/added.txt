@@ -1,0 +1,14 @@
+# A part-of-speech dictionary that's used additionally to the binary dictionary (*.dict).
+# This does not add words to the spell checker, see hunspell/spelling.txt for that.
+# File Encoding: UTF-8
+# Format: three tab-separated fields: fullform baseform postags
+бам	бам	INTERJECTION
+дерев	дерево	NN:Inanim:Neut:PL:R:Talk
+миледи	миледи	NN:Anim:Fem:Sin
+сперва	сперва	ADV:Talk
+тернии	терние	NN:Inanim:Neut:PL:V
+# добавить слова без Ё с е
+ее	она	PNN:Sin:R:P3
+ее	она	PNN:Sin:V:P3
+пошел	пойти	VB:Past:INTR:PFV:Masc
+#
