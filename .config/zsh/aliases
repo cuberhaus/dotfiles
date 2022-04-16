@@ -119,53 +119,33 @@ alias userlist="cut -d: -f1 /etc/passwd"
 # Switch between bash and zsh
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
+
+# Generalize commands
 cleanup="vim +PlugClean +qall;
     pip3 cache purge;
-    yarn cache clean"
+    yarn cache clean
+    "
 update=""
 updateall="python3 -m pip install --user --upgrade pynvim;
     vim +PlugUpgrade +PlugUpdate +qall; 
     antigen update; 
     pip3 install --upgrade pip
-    npm install npm -g; 
 "
-# TODO: generalize cleanup please
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
-    alias update="sudo softwareupdate -i -a; 
-    brew update; 
-    brew upgrade; 
-    brew update --cask
-    python3 -m pip install --user --upgrade pynvim;
-    vim +PlugUpgrade +PlugUpdate +qall; 
-    antigen update; 
-    xcode-select --install; 
-    pip3 install --upgrade pip
-    "
     updateall="sudo softwareupdate -i -a; 
+    npm install npm -g; 
     brew update; 
     brew upgrade; 
     brew update --cask; 
     xcode-select --install; 
     "$updateall
-    # alias updateall="sudo softwareupdate -i -a; 
-    # brew update; 
-    # brew upgrade; 
-    # brew update --cask; 
-    # xcode-select --install; 
-    # python3 -m pip install --user --upgrade pynvim;
-    # vim +PlugUpgrade +PlugUpdate +qall; 
-    # antigen update; 
-    # pip3 install --upgrade pip
-    # npm install npm -g; 
-    # "
+    update=$updateall
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
-
-    # alias cleanup="brew cleanup; 
-    # sudo gem cleanup"
     cleanup="brew cleanup;
-    sudo gem cleanup;"$cleanup
+    sudo gem cleanup;
+    "$cleanup
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
 fi
@@ -183,19 +163,12 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        alias update="sudo pacman -Syu"
-        alias updateall="yay -Syu; 
-        pip install --upgrade pip;
-        python3 -m pip install --user --upgrade pynvim; 
-        vim +PlugUpgrade +PlugUpdate +qall; 
-        antigen update;"
+        update="sudo pacman -Syu;"$update
+        updateall="yay -Syu;
+        "$updateall
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         cleanup="yay -Sc;"$cleanup
-        # alias cleanup="yay -Sc; 
-        # vim +PlugClean +qall;
-        # pip cache purge;
-        # yarn cache clean"
         #sudo pacman -R $(pacman -Qdtq)
         alias unlock="sudo rm /var/lib/pacman/db.lck" #pacman unlock
     fi
@@ -214,23 +187,27 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
-        alias update="sudo apt-get update; 
+        updateall="sudo apt-get update; 
         sudo apt-get full-upgrade; 
         brew update; 
-        brew upgrade; 
-        vim +PlugUpgrade +PlugUpdate +qall; 
-        antigen update"
-        alias cleanup="sudo apt-get autoclean; 
+        brew upgrade;
+        "$updateall
+
+        update=$updateall
+
+        cleanup="sudo apt-get autoclean; 
         sudo apt-get clean; 
         sudo apt-get autoremove; 
         brew cleanup; 
-        vim +PlugClean +qall"
+        "$cleanup
         alias tmux="tmux -f $HOME/.config/tmux/tmux.conf"
         alias ls="ls -l"
         alias la="ls -a"
     fi
 fi
 alias cleanup=$cleanup
+alias updateall=$updateall
+alias update=$update
 ###############################################################
 # => Clean home directory
 ###############################################################
