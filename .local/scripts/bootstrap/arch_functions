@@ -113,10 +113,9 @@ base_install () {
 
     $yay balena-etcher                          # "Rufus" on linux
     $yay betterlockscreen                       # Lockscreen
-    $yay ddd                          # debugging c++
     $yay f5fpc                                  # Connexio a UPClink
     $yay google-chrome                          # Best web browser
-    $yay libreoffice-extension-languagetool # Libre office Grammar
+    $yay libreoffice-extension-languagetool     # Libre office Grammar
     # $yay spotify                                # Spotify
     sudo snap spotify                           # Spotify only on manjaro
     $yay timeshift                              # Backups (sudo timeshift-gtk)
@@ -396,6 +395,7 @@ optional() {
     # $yay electron9-bin # idk what this does
 
     # Programming tools
+    $yay ddd                          # debugging c++
     $pac doxygen texlive-most graphviz          # Doxygen
     $pac jdk-openjdk
     $pac protege # IA https://protege.stanford.edu/products.php better to download zip
