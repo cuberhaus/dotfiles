@@ -1,37 +1,29 @@
 {
     "InternalPDFViewer": {
         "Embedded": true,
-        "File": "../../fib/LP/erlang_project/erlang.pdf"
+        "File": "../../fib/LP/erlang_project/latex/erlang.pdf"
     },
     "Session": {
         "Bookmarks": [
         ],
-        "CurrentFile": "../../fib/LP/erlang_project/erlang.tex",
+        "CurrentFile": "../../fib/LP/erlang_project/latex/erlang.tex",
         "FileVersion": 1,
         "Files": [
             {
-                "Col": 18,
+                "Col": 1,
                 "EditorGroup": 0,
-                "FileName": "../../fib/A/apuntes/Apuntes.tex",
-                "FirstLine": 0,
+                "FileName": "../../fib/LP/erlang_project/latex/erlang.tex",
+                "FirstLine": 88,
                 "FoldedLines": "",
-                "Line": 10
-            },
-            {
-                "Col": 86,
-                "EditorGroup": 0,
-                "FileName": "../../fib/G/Teoria/apunts/grafics.tex",
-                "FirstLine": 0,
-                "FoldedLines": "",
-                "Line": 12
+                "Line": 152
             },
             {
                 "Col": 0,
                 "EditorGroup": 0,
-                "FileName": "../../fib/LP/erlang_project/erlang.tex",
-                "FirstLine": 13,
+                "FileName": "../../fib/LP/erlang_project/latex/sample.bib",
+                "FirstLine": 0,
                 "FoldedLines": "",
-                "Line": 52
+                "Line": 21
             }
         ],
         "MasterFile": ""
