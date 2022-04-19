@@ -1,13 +1,7 @@
 -- My take on Xmonad WM
+-- WARNING: MAY NEED TO SHUT DOWN XMONAD COMPLETELY TO SEE CHANGES, TRY TO EXIT IF NOT WORKING PROPERLY WITH SOME CHANGE
 -- Author: https://github.com/cuberhaus/dotfiles
---
--- xmonad example config file.
---
--- A template showing all available configuration hooks,
--- and how to override the defaults in your own xmonad.hs conf file.
---
--- Normally, you'd only override those defaults you care about.
---
+
 -- IMPORTS
 -- Base
 import Control.Monad (when)
@@ -376,7 +370,7 @@ tallAccordion =
     mySpacing $
       Accordion
 
-myLayout = avoidStruts $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ mkToggle (single REFLECTX) (tall ||| threeCol ||| spirals ||| tallAccordion)
+myLayout = avoidStruts $ mkToggle (SMARTBORDERS ?? NBFULL ?? EOT) $ mkToggle (single MIRROR) $ mkToggle (single REFLECTX) (tall ||| threeCol ||| spirals ||| tallAccordion)
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled = Tall nmaster delta ratio
@@ -532,7 +526,7 @@ myEmacsKeys =
     ("M-v", sendMessage NextLayout), -- Rotate through the available layout algorithms
     ("M-x", sendMessage $ Toggle MIRROR), -- Mirror current layout
     ("M-z", sendMessage (XMonad.Layout.MultiToggle.Toggle REFLECTX)),
-    ("M-f", sendMessage (Toggle FULL) >> sendMessage ToggleStruts), -- Toggle fullscreen
+    ("M-f", sendMessage (Toggle NBFULL) >> sendMessage ToggleStruts), -- Toggle fullscreen
     -- Window resizing
     ("M-M1-j", sendMessage MirrorShrink), -- Shrink vert window width
     ("M-M1-h", sendMessage Shrink), -- Shrink horiz window width
