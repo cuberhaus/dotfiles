@@ -10,13 +10,13 @@
 --
 -- IMPORTS
 -- Base
-
 import qualified Data.Map as M
 import Data.Monoid
 import System.Exit
 import System.IO
 import XMonad
 import Data.Maybe (fromJust)
+import Control.Monad
 -- Actions
 import XMonad.Actions.Promote
 import XMonad.Actions.RotSlaves (rotAllDown, rotSlavesDown)
@@ -30,6 +30,8 @@ import XMonad.Hooks.FadeWindows
 import XMonad.Hooks.InsertPosition
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ServerMode
+import XMonad.Hooks.ManageHelpers -- windows appear behind others
+import XMonad.Hooks.DynamicProperty
 -- Layouts
 import XMonad.Layout.Accordion
 import XMonad.Layout.GridVariants (Grid (Grid))
@@ -42,29 +44,21 @@ import XMonad.Layout.NoBorders -- removes borderlines from windows
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Spacing --add gaps
-import XMonad.Util.NamedScratchpad
--- Utilities
-import XMonad.Hooks.ManageHelpers -- windows appear behind others
-import XMonad.Hooks.InsertPosition 
-import XMonad.Hooks.DynamicProperty
 import XMonad.Layout.SimpleFloat
 import XMonad.Layout.Reflect -- move master to the other side
 import XMonad.Layout.WindowNavigation
 import XMonad.Layout.Simplest
-import XMonad.Layout.SimplestFloat
 import XMonad.Layout.Spiral
 import XMonad.Layout.Tabbed
 import XMonad.Layout.SubLayouts
 import XMonad.Layout.ThreeColumns
-import qualified XMonad.StackSet as W
+-- Utilities
+import XMonad.Util.NamedScratchpad
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
-
--- https://bbs.archlinux.org/viewtopic.php?id=120298>
-import XMonad.Util.Dmenu
-import System.Exit
-import Control.Monad
+import qualified XMonad.StackSet as W
+import XMonad.Util.Dmenu -- https://bbs.archlinux.org/viewtopic.php?id=120298>
 
 quitWithWarning :: X ()
 quitWithWarning = do
@@ -76,7 +70,7 @@ closeAllWindows :: X ()
 closeAllWindows = do
     let m = "confirm close all windows"
     s <- dmenu [m]
-    when (m == s) (killAll)
+    when (m == s) killAll
 
 -- Variables
 myFont :: String
@@ -178,25 +172,25 @@ myModMask = mod4Mask
 spotifyMusicCommand :: String
 spotifyMusicCommand = "spotify"
 
-isSpotifyMusic = (className =? "Spotify")
+isSpotifyMusic = className =? "Spotify"
 
 -- whatsappCommand ="dex /usr/share/applications/whatsapp-nativefier.desktop"
 whatsappCommand :: String
 whatsappCommand ="whatsapp-nativefier"
 
 -- also works to write the name of the command
-isWhatsapp = (className =? "whatsapp-nativefier-d40211" )
+isWhatsapp = className =? "whatsapp-nativefier-d40211"
 
 thunderbirdCommand :: String
 thunderbirdCommand = "thunderbird"
 
-isThunderbird = (className =? "Thunderbird" )
+isThunderbird = className =? "Thunderbird"
 
 scratchpads =
     [
-       (NS "Spotify"  spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6)) )
-        ,(NS "WhatsApp"  whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1/6) (1/6) (4/6) (4/6)) )
-        ,(NS "Thunderbird"  thunderbirdCommand isThunderbird (customFloating $ W.RationalRect (1/16) (1/16) (7/8) (7/8)) )
+       NS "Spotify"  spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6))
+        ,NS "WhatsApp"  whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1/6) (1/6) (4/6) (4/6))
+        ,NS "Thunderbird"  thunderbirdCommand isThunderbird (customFloating $ W.RationalRect (1/16) (1/16) (7/8) (7/8))
     ]
 
 myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
@@ -313,14 +307,14 @@ tall = renamed [Replace "tall"]
     $ smartBorders
     $ windowNavigation
     $ addTabs shrinkText myTabTheme
-    $ subLayout [] (Simplest)
+    $ subLayout [] Simplest
     $ mySpacing
     $ ResizableTall 1 (3/100) (1/2) []
 threeCol = renamed [Replace "threeCol"]
     $ smartBorders
     $ windowNavigation
     $ addTabs shrinkText myTabTheme
-    $ subLayout [] (Simplest)
+    $ subLayout [] Simplest
     $ mySpacing
     $ ThreeCol 1 (3 / 100) (1 / 2)
 
@@ -333,7 +327,7 @@ tallAccordion = renamed [Replace "tallAccordion"]
     $ mySpacing
     $ Accordion
 
-myLayout = avoidStruts $  mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ mkToggle (single REFLECTX) $ (tall ||| threeCol ||| spirals ||| tallAccordion )
+myLayout = avoidStruts $  mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ mkToggle (single REFLECTX) (tall ||| threeCol ||| spirals ||| tallAccordion )
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled = Tall nmaster delta ratio
@@ -399,15 +393,15 @@ myManageHook =
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
-myEventHook = ewmhDesktopsEventHook 
-        <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)  
+myEventHook = ewmhDesktopsEventHook
+        <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
         <+>  dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
         <+> fullscreenEventHook
         <+> docksEventHook
 
-        where 
+        where
             floating = customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6)
-            floating2 = customFloating $ W.RationalRect (1/8) (1/8) (5/6) (5/6) 
+            floating2 = customFloating $ W.RationalRect (1/8) (1/8) (5/6) (5/6)
 -- whatsapp isn't really needed here just put it here for completeness and demonstration of where with multiple variables
 -- To adjust rectangle had to increment first two numbers denominator to move screen upwards and change last two numbers nominator to scale up the window
 -- customFloating named scratchpad not floating, had to use this instead https://github.com/xmonad/xmonad/issues/214
@@ -486,7 +480,6 @@ myEmacsKeys =
      ,("M-f", sendMessage (Toggle FULL) >> sendMessage ToggleStruts) -- Toggle fullscreen
     -- Window resizing
      ,("M-M1-j", sendMessage MirrorShrink) -- Shrink vert window width
-     
      ,("M-M1-h", sendMessage Shrink) -- Shrink horiz window width
      ,("M-M1-l", sendMessage Expand) -- Expand horiz window width
 
@@ -561,21 +554,21 @@ main :: IO ()
 main = do
   -- Execute xmobar with its config and pipe xmonad output to xmobar
   xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
-  xmonad $  withNavigation2DConfig myNav2DConf $ 
+  xmonad $  withNavigation2DConfig myNav2DConf $
     ewmh
       desktopConfig
         { -- simple stuff
-          terminal = myTerminal 
-           ,focusFollowsMouse = myFocusFollowsMouse 
-           ,clickJustFocuses = myClickJustFocuses 
-           ,borderWidth = myBorderWidth 
-           ,modMask = myModMask 
-           ,workspaces         = myWorkspaces 
-           ,normalBorderColor = myNormalBorderColor 
-           ,focusedBorderColor = myFocusedBorderColor 
+          terminal = myTerminal
+           ,focusFollowsMouse = myFocusFollowsMouse
+           ,clickJustFocuses = myClickJustFocuses
+           ,borderWidth = myBorderWidth
+           ,modMask = myModMask
+           ,workspaces         = myWorkspaces
+           ,normalBorderColor = myNormalBorderColor
+           ,focusedBorderColor = myFocusedBorderColor
            -- key bindings
-           ,keys = myKeys 
-           ,mouseBindings      = myMouseBindings 
+           ,keys = myKeys
+           ,mouseBindings      = myMouseBindings
 
           -- hooks, layouts
             ,layoutHook = myLayout
@@ -599,7 +592,7 @@ main = do
                 , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]                    -- order of things in xmobar
                 , ppSep                 = xmobarColor white myNormalBorderColor "  :  "
                 , ppWsSep               = " "
-                , ppSort                = fmap 
+                , ppSort                = fmap
                                   (namedScratchpadFilterOutWorkspace.)
                                   (ppSort def)
                 , ppExtras              = []
