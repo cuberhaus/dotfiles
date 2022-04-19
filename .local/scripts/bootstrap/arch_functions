@@ -401,6 +401,10 @@ optional() {
     $pac protege # IA https://protege.stanford.edu/products.php better to download zip
     $pac qtcreator glm qt5-tools qt5-webkit     # OpenGL, QT, C++
     $pac r                                      # Probabilitat i estadística
+    $pac ghc                                    # Haskell compiler
+    $pac cabal-install                          # Haskell build tools to compile haskell programs
+    $pac hlint                                  # Haskell linter
+    $pac haskell-language-server                # Haskell It provides IDE-like features such as code completion, “goto definition”, documentation on hover, linting, formatting or refactoring for any editor integrating with the LSP.It provides IDE-like features such as code completion, “goto definition”, documentation on hover, linting, formatting or refactoring for any editor integrating with the LSP.
     $yay android-studio                         # Android Studio
     $yay clion clion-jre                        # C++ IDE
     $yay clips # IA SBC
