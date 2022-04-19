@@ -12,53 +12,53 @@
 -- Base
 import qualified Data.Map as M
 import Data.Monoid
-import System.Exit
-import System.IO
+import System.Exit ( exitSuccess )
+import System.IO ( hPutStrLn )
 import XMonad
 import Data.Maybe (fromJust)
-import Control.Monad
+import Control.Monad ( when )
 -- Actions
-import XMonad.Actions.Promote
+import XMonad.Actions.Promote ( promote )
 import XMonad.Actions.RotSlaves (rotAllDown, rotSlavesDown)
 import XMonad.Actions.WithAll (killAll, sinkAll)
 -- Config
-import XMonad.Config.Desktop
+import XMonad.Config.Desktop ( desktopConfig )
 -- Hooks
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
-import XMonad.Hooks.FadeWindows
+import XMonad.Hooks.FadeWindows ()
 import XMonad.Hooks.InsertPosition
 import XMonad.Hooks.ManageDocks
-import XMonad.Hooks.ServerMode
-import XMonad.Hooks.ManageHelpers -- windows appear behind others
-import XMonad.Hooks.DynamicProperty
+import XMonad.Hooks.ServerMode ()
+import XMonad.Hooks.ManageHelpers () -- windows appear behind others
+import XMonad.Hooks.DynamicProperty ( dynamicPropertyChange )
 -- Layouts
-import XMonad.Layout.Accordion
+import XMonad.Layout.Accordion ( Accordion(Accordion) )
 import XMonad.Layout.GridVariants (Grid (Grid))
 -- Layout modifiers
 import XMonad.Actions.Navigation2D -- this treats tabs properly, each tab is not an independent window but a group
-import XMonad.Layout.Renamed
+import XMonad.Layout.Renamed ( renamed, Rename(Replace) )
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.NoBorders -- removes borderlines from windows
 import XMonad.Layout.ResizableTile
-import XMonad.Layout.SimplestFloat
-import XMonad.Layout.Spacing --add gaps
-import XMonad.Layout.SimpleFloat
-import XMonad.Layout.Reflect -- move master to the other side
-import XMonad.Layout.WindowNavigation
-import XMonad.Layout.Simplest
-import XMonad.Layout.Spiral
+import XMonad.Layout.SimplestFloat ()
+import XMonad.Layout.Spacing ( spacing ) --add gaps
+import XMonad.Layout.SimpleFloat ( shrinkText )
+import XMonad.Layout.Reflect ( REFLECTX(REFLECTX) ) -- move master to the other side
+import XMonad.Layout.WindowNavigation ( windowNavigation )
+import XMonad.Layout.Simplest ( Simplest(Simplest) )
+import XMonad.Layout.Spiral ( spiral )
 import XMonad.Layout.Tabbed
 import XMonad.Layout.SubLayouts
-import XMonad.Layout.ThreeColumns
+import XMonad.Layout.ThreeColumns ( ThreeCol(ThreeCol) )
 -- Utilities
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.EZConfig (additionalKeysP)
-import XMonad.Util.Run
-import XMonad.Util.SpawnOnce
+import XMonad.Util.Run ( hPutStrLn, spawnPipe )
+import XMonad.Util.SpawnOnce ( spawnOnce )
 import qualified XMonad.StackSet as W
-import XMonad.Util.Dmenu -- https://bbs.archlinux.org/viewtopic.php?id=120298>
+import XMonad.Util.Dmenu ( dmenu ) -- https://bbs.archlinux.org/viewtopic.php?id=120298>
 
 quitWithWarning :: X ()
 quitWithWarning = do
@@ -172,6 +172,7 @@ myModMask = mod4Mask
 spotifyMusicCommand :: String
 spotifyMusicCommand = "spotify"
 
+isSpotifyMusic :: Query Bool
 isSpotifyMusic = className =? "Spotify"
 
 -- whatsappCommand ="dex /usr/share/applications/whatsapp-nativefier.desktop"
@@ -179,17 +180,22 @@ whatsappCommand :: String
 whatsappCommand ="whatsapp-nativefier"
 
 -- also works to write the name of the command
+isWhatsapp :: Query Bool
 isWhatsapp = className =? "whatsapp-nativefier-d40211"
 
 thunderbirdCommand :: String
 thunderbirdCommand = "thunderbird"
 
+isThunderbird :: Query Bool
 isThunderbird = className =? "Thunderbird"
 
+discordCommand :: String
 discordCommand = "discord"
 
+isDiscord :: Query Bool
 isDiscord = className =? "discord"
 
+scratchpads :: [NamedScratchpad]
 scratchpads =
     [
        NS "Spotify"  spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6))
@@ -198,10 +204,13 @@ scratchpads =
         ,NS "Discord"  discordCommand isDiscord (customFloating $ W.RationalRect (1/16) (1/16) (7/8) (7/8))
     ]
 
+myWorkspaces :: [String]
 myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
 -- myWorkspaces = [" dev ", " www ", " spotify ", " chat ", " mail ", " doc ", " vbox ", " vid ", " game "]
+myWorkspaceIndices :: M.Map String Integer
 myWorkspaceIndices = M.fromList $ zip myWorkspaces [1..] -- (,) == \x y -> (x,y)
 
+clickable :: [Char] -> [Char]
 clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
     where i = fromJust $ M.lookup ws myWorkspaceIndices
 -- Border colors for unfocused and focused windows, respectively.
@@ -211,13 +220,16 @@ clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
 -- myNormalBorderColor = "#000000"
 
 -- No transparency
+myNormalBorderColor :: String
 myNormalBorderColor  = "#2f343f"
 -- myNormalBorderColor  = "#282c34"
 
+myFocusedBorderColor :: String
 myFocusedBorderColor = "#bd93f9"
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
+myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf@XConfig {XMonad.modMask = modm} =
   M.fromList $
     [ --  Reset the layouts on the current workspace to default
@@ -260,6 +272,7 @@ myKeys conf@XConfig {XMonad.modMask = modm} =
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
 --
+myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
 myMouseBindings XConfig {XMonad.modMask = modm} =
   M.fromList
     -- mod-button1, Set the window to floating mode and move by dragging
@@ -294,6 +307,7 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
 -- tiled |||  deprecated by resizableTall
 mySpacing           = spacing gap
 
+myNav2DConf :: Navigation2DConfig
 myNav2DConf = def
     { defaultTiledNavigation    = centerNavigation
     , floatNavigation           = centerNavigation
@@ -371,6 +385,7 @@ myTabTheme = def { fontName            = myFont
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 --
+myManageHook :: Query (Endo WindowSet)
 myManageHook =
   composeAll
     [ className =? "confirm" --> doFloat,
@@ -398,6 +413,7 @@ myManageHook =
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
+myEventHook :: Event -> X All
 myEventHook = ewmhDesktopsEventHook
         <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
         <+>  dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
@@ -428,6 +444,7 @@ myEventHook = ewmhDesktopsEventHook
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
+myStartupHook :: X ()
 myStartupHook = do
   spawnOnce "trayer --edge bottom --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --alpha 0 --tint 0x2f343f --height 19 &"
   spawnOnce "exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &"
@@ -539,23 +556,41 @@ myEmacsKeys =
         , ("M-m", namedScratchpadAction scratchpads "Thunderbird")
 
   ]
+base03 :: String
 base03  = "#002b36"
+base02 :: String
 base02  = "#073642"
+base01 :: String
 base01  = "#586e75"
+base00 :: String
 base00  = "#657b83"
+base0 :: String
 base0   = "#839496"
+base1 :: String
 base1   = "#93a1a1"
+base2 :: String
 base2   = "#eee8d5"
+base3 :: String
 base3   = "#fdf6e3"
+yellow :: String
 yellow  = "#b58900"
+orange :: String
 orange  = "#cb4b16"
+red :: String
 red     = "#dc322f"
+magenta :: String
 magenta = "#d33682"
+violet :: String
 violet  = "#6c71c4"
+blue :: String
 blue    = "#268bd2"
+cyan :: String
 cyan    = "#2aa198"
+green :: String
 green       = "#859900"
+brightgrey :: String
 brightgrey ="#CCCCCC"
+white :: String
 white   ="#FFFFFF"
 
 main :: IO ()
