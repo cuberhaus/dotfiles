@@ -3,7 +3,7 @@
 .local/share/recently-used.xbel
 .config/.mono/
 .config/xbuild/
-
+*.vscode/
 # TexStudio
 # .config/texstudio/
 # Texmaker ?
