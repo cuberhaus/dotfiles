@@ -186,11 +186,16 @@ thunderbirdCommand = "thunderbird"
 
 isThunderbird = className =? "Thunderbird"
 
+discordCommand = "discord"
+
+isDiscord = className =? "discord"
+
 scratchpads =
     [
        NS "Spotify"  spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6))
         ,NS "WhatsApp"  whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1/6) (1/6) (4/6) (4/6))
         ,NS "Thunderbird"  thunderbirdCommand isThunderbird (customFloating $ W.RationalRect (1/16) (1/16) (7/8) (7/8))
+        ,NS "Discord"  discordCommand isDiscord (customFloating $ W.RationalRect (1/16) (1/16) (7/8) (7/8))
     ]
 
 myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
@@ -396,6 +401,7 @@ myManageHook =
 myEventHook = ewmhDesktopsEventHook
         <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
         <+>  dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
+        <+> dynamicPropertyChange "WM_NAME" (title =? "discord" --> floating)
         <+> fullscreenEventHook
         <+> docksEventHook
 
@@ -467,14 +473,13 @@ myEmacsKeys =
     -- Open apps
      ,("M-b", spawn browser) -- Windows + g (meta key is windows key)
      ,("M-n", spawn explorer) -- open explorer
-     ,("M-C-w", spawn whatsapp) -- Windows + ctrl + w
      ,("M-<Return>", spawn myTerminal) -- Spawn terminal
      ,("M-<Space>", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal termite ")
     -- Kill windows
      ,("M-S-q", kill) -- Kill Current window
      ,("M-S-a", closeAllWindows) -- Kill all windows on current workspace
     -- Layouts
-     ,("M-d", sendMessage NextLayout) -- Rotate through the available layout algorithms
+     ,("M-v", sendMessage NextLayout) -- Rotate through the available layout algorithms
      ,("M-x", sendMessage $ Toggle MIRROR) -- Mirror current layout
      ,("M-z", sendMessage (XMonad.Layout.MultiToggle.Toggle REFLECTX))
      ,("M-f", sendMessage (Toggle FULL) >> sendMessage ToggleStruts) -- Toggle fullscreen
@@ -530,6 +535,7 @@ myEmacsKeys =
         , ("M-,", onGroup W.focusDown')  -- Switch focus to prev tab
         , ("M-s", namedScratchpadAction scratchpads "Spotify")
         , ("M-w", namedScratchpadAction scratchpads "WhatsApp")
+        , ("M-d", namedScratchpadAction scratchpads "Discord")
         , ("M-m", namedScratchpadAction scratchpads "Thunderbird")
 
   ]
