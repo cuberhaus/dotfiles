@@ -225,9 +225,9 @@ myKeys conf@XConfig {XMonad.modMask = modm} =
       -- Quit xmonad
       ((modm .|. shiftMask, xK_e), quitWithWarning),
       -- -- Restart xmonad
-      ((modm .|. shiftMask, xK_r), spawn "xmonad --recompile; xmonad --restart"),
+      ((modm .|. shiftMask, xK_r), spawn "xmonad --recompile; xmonad --restart")
       -- Run xmessage with a summary of the default keybindings (useful for beginners)
-      ((modm .|. shiftMask, xK_h), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
+      -- ((modm .|. shiftMask, xK_h), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
     ]
       ++
       --
@@ -484,6 +484,8 @@ myEmacsKeys =
      ,("M-M1-l", sendMessage Expand) -- Expand horiz window width
 
      ,("M-M1-k", sendMessage MirrorExpand) -- Expand vert window width
+      -- Run xmessage with a summary of the default keybindings (useful for beginners)
+     ,("M-S-'", spawn ("echo \"" ++ help ++ "\" | yad --list --column 'Commands'") )
     -- Window navigation
      -- ,("M-m", windows W.focusMaster) -- Move focus to the master window
      -- ,("M-j", windows W.focusDown) -- Move focus to the next window
@@ -582,9 +584,9 @@ main = do
               xmobarPP
                 { ppOutput = hPutStrLn xmproc
                 , ppCurrent = xmobarColor "#98be65" "" . wrap "[" "]"           -- Current workspace
-                 , ppVisible = xmobarColor "#98be65" "" . clickable              -- Visible but not current workspace
-                 , ppHidden = xmobarColor "#82AAFF" "" . clickable -- Hidden workspaces
-                 , ppHiddenNoWindows = xmobarColor "#c792ea" ""  . clickable     -- Hidden workspaces (no windows)
+                , ppVisible = xmobarColor "#98be65" "" . clickable              -- Visible but not current workspace
+                , ppHidden = xmobarColor "#82AAFF" "" . clickable -- Hidden workspaces
+                , ppHiddenNoWindows = xmobarColor "#c792ea" ""  . clickable     -- Hidden workspaces (no windows)
                 , ppTitle = xmobarColor "#b3afc2" "" . shorten 60               -- Title of active window
                 , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"            -- Urgent workspace
                 -- bright grey
@@ -611,6 +613,7 @@ main = do
 --
 
 -- | Finally, a copy of the default bindings in simple textual tabular format.
+-- using & doesn't seem to work too well
 help :: String
 help =
   unlines
@@ -618,14 +621,14 @@ help =
       "",
       "-- launching and killing programs",
       "mod-Enter        Launch terminal",
-      "mod-d            Launch dmenu",
+      "mod-d            Rotate through the available layout algorithms",
       "mod-b            Launch browser",
       "mod-n            Launch Explorer",
       "mod-Ctrl-w       Launch Whatsapp",
       "mod-Shift-q      Close/kill the focused window",
       "",
       "-- layouts",
-      "mod-Space        Rotate through the available layout algorithms",
+      "mod-Space        Launch dmenu",
       "mod-Shift-Space  Reset the layouts on the current workSpace to default",
       "mod-f            Toggle fullscreen",
       -- "mod-n            Resize/refresh viewed windows to the correct size",
@@ -663,7 +666,7 @@ help =
       "mod-Shift-r  Restart xmonad",
       "mod-[1..9]   Switch to workSpace N",
       "",
-      "-- Workspaces & screens",
+      "-- Workspaces and screens",
       "mod-Shift-[1..9]   Move client to workspace N",
       -- "mod-{w,e,r}        Switch to physical/Xinerama screens 1, 2, or 3",
       -- "mod-Shift-{w}  Move client to screen 1, 2, or 3",
