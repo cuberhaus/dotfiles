@@ -10,67 +10,67 @@
 --
 -- IMPORTS
 -- Base
+import Control.Monad (when)
 import qualified Data.Map as M
-import Data.Monoid
-import System.Exit ( exitSuccess )
-import System.IO ( hPutStrLn )
-import XMonad
 import Data.Maybe (fromJust)
-import Control.Monad ( when )
+import Data.Monoid (All, Endo)
+import System.Exit (exitSuccess)
+import System.IO (hPutStrLn)
+import XMonad
 -- Actions
-import XMonad.Actions.Promote ( promote )
+import XMonad.Actions.Navigation2D -- this treats tabs properly, each tab is not an independent window but a group
+import XMonad.Actions.Promote (promote)
 import XMonad.Actions.RotSlaves (rotAllDown, rotSlavesDown)
 import XMonad.Actions.WithAll (killAll, sinkAll)
 -- Config
-import XMonad.Config.Desktop ( desktopConfig )
+import XMonad.Config.Desktop (desktopConfig)
 -- Hooks
 import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.DynamicProperty (dynamicPropertyChange)
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.FadeWindows ()
 import XMonad.Hooks.InsertPosition
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.ManageHelpers ()
 import XMonad.Hooks.ServerMode ()
-import XMonad.Hooks.ManageHelpers () -- windows appear behind others
-import XMonad.Hooks.DynamicProperty ( dynamicPropertyChange )
 -- Layouts
-import XMonad.Layout.Accordion ( Accordion(Accordion) )
+import XMonad.Layout.Accordion (Accordion (Accordion))
 import XMonad.Layout.GridVariants (Grid (Grid))
--- Layout modifiers
-import XMonad.Actions.Navigation2D -- this treats tabs properly, each tab is not an independent window but a group
-import XMonad.Layout.Renamed ( renamed, Rename(Replace) )
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
 import XMonad.Layout.NoBorders -- removes borderlines from windows
+import XMonad.Layout.Reflect (REFLECTX (REFLECTX)) -- move master to the other side
+import XMonad.Layout.Renamed (Rename (Replace), renamed)
 import XMonad.Layout.ResizableTile
+import XMonad.Layout.SimpleFloat (shrinkText)
+import XMonad.Layout.Simplest (Simplest (Simplest))
 import XMonad.Layout.SimplestFloat ()
-import XMonad.Layout.Spacing ( spacing ) --add gaps
-import XMonad.Layout.SimpleFloat ( shrinkText )
-import XMonad.Layout.Reflect ( REFLECTX(REFLECTX) ) -- move master to the other side
-import XMonad.Layout.WindowNavigation ( windowNavigation )
-import XMonad.Layout.Simplest ( Simplest(Simplest) )
-import XMonad.Layout.Spiral ( spiral )
-import XMonad.Layout.Tabbed
+import XMonad.Layout.Spacing (spacing)
+import XMonad.Layout.Spiral (spiral)
 import XMonad.Layout.SubLayouts
-import XMonad.Layout.ThreeColumns ( ThreeCol(ThreeCol) )
+import XMonad.Layout.Tabbed
+import XMonad.Layout.ThreeColumns (ThreeCol (ThreeCol))
+import XMonad.Layout.WindowNavigation (windowNavigation)
 -- Utilities
-import XMonad.Util.NamedScratchpad
-import XMonad.Util.EZConfig (additionalKeysP)
-import XMonad.Util.Run ( hPutStrLn, spawnPipe )
-import XMonad.Util.SpawnOnce ( spawnOnce )
 import qualified XMonad.StackSet as W
-import XMonad.Util.Dmenu ( dmenu ) -- https://bbs.archlinux.org/viewtopic.php?id=120298>
+import XMonad.Util.Dmenu (dmenu) -- https://bbs.archlinux.org/viewtopic.php?id=120298>
+import XMonad.Util.EZConfig (additionalKeysP)
+import XMonad.Util.NamedScratchpad
+import XMonad.Util.Run (hPutStrLn, spawnPipe)
+import XMonad.Util.SpawnOnce (spawnOnce)
 
 quitWithWarning :: X ()
 quitWithWarning = do
-    let o1 = "confirm quit"
-    let o2 = "cancel"
-    s <- dmenu [o2,o1]
-    when (o1 == s) (io exitSuccess)
+  let o1 = "confirm quit"
+  let o2 = "cancel"
+  s <- dmenu [o2, o1]
+  when (o1 == s) (io exitSuccess)
+
 closeAllWindows :: X ()
 closeAllWindows = do
-    let m = "confirm close all windows"
-    s <- dmenu [m]
-    when (m == s) killAll
+  let m = "confirm close all windows"
+  s <- dmenu [m]
+  when (m == s) killAll
 
 -- Variables
 myFont :: String
@@ -85,6 +85,7 @@ helix = "$HOME/.conky/helix/conky\\ helix\\ white"
 -- Applications
 browser :: String
 browser = "google-chrome-stable"
+
 -- browser = "firefox"
 
 whatsapp :: String
@@ -144,10 +145,12 @@ myClickJustFocuses :: Bool
 myClickJustFocuses = False
 
 -- sizes
-gap         = 5
+gap :: Int
+gap = 5
 
 -- Width of the window border in pixels.
 --
+myBorderWidth :: Dimension
 myBorderWidth = 3
 
 -- modMask lets you specify which modkey you want to use. The default
@@ -155,6 +158,7 @@ myBorderWidth = 3
 -- ("right alt"), which does not conflict with emacs keybindings. The
 -- "windows key" is usually mod4Mask.
 --
+myModMask :: KeyMask
 myModMask = mod4Mask
 
 -- The default number of workspaces (virtual screens) and their names.
@@ -177,7 +181,7 @@ isSpotifyMusic = className =? "Spotify"
 
 -- whatsappCommand ="dex /usr/share/applications/whatsapp-nativefier.desktop"
 whatsappCommand :: String
-whatsappCommand ="whatsapp-nativefier"
+whatsappCommand = "whatsapp-nativefier"
 
 -- also works to write the name of the command
 isWhatsapp :: Query Bool
@@ -197,22 +201,24 @@ isDiscord = className =? "discord"
 
 scratchpads :: [NamedScratchpad]
 scratchpads =
-    [
-       NS "Spotify"  spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6))
-        ,NS "WhatsApp"  whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1/6) (1/6) (4/6) (4/6))
-        ,NS "Thunderbird"  thunderbirdCommand isThunderbird (customFloating $ W.RationalRect (1/16) (1/16) (7/8) (7/8))
-        ,NS "Discord"  discordCommand isDiscord (customFloating $ W.RationalRect (1/16) (1/16) (7/8) (7/8))
-    ]
+  [ NS "Spotify" spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
+    NS "WhatsApp" whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
+    NS "Thunderbird" thunderbirdCommand isThunderbird (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8)),
+    NS "Discord" discordCommand isDiscord (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8))
+  ]
 
 myWorkspaces :: [String]
 myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
+
 -- myWorkspaces = [" dev ", " www ", " spotify ", " chat ", " mail ", " doc ", " vbox ", " vid ", " game "]
 myWorkspaceIndices :: M.Map String Integer
-myWorkspaceIndices = M.fromList $ zip myWorkspaces [1..] -- (,) == \x y -> (x,y)
+myWorkspaceIndices = M.fromList $ zip myWorkspaces [1 ..] -- (,) == \x y -> (x,y)
 
 clickable :: [Char] -> [Char]
-clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
-    where i = fromJust $ M.lookup ws myWorkspaceIndices
+clickable ws = "<action=xdotool key super+" ++ show i ++ ">" ++ ws ++ "</action>"
+  where
+    i = fromJust $ M.lookup ws myWorkspaceIndices
+
 -- Border colors for unfocused and focused windows, respectively.
 
 -- With transparency
@@ -221,11 +227,13 @@ clickable ws = "<action=xdotool key super+"++show i++">"++ws++"</action>"
 
 -- No transparency
 myNormalBorderColor :: String
-myNormalBorderColor  = "#2f343f"
+myNormalBorderColor = "#2f343f"
+
 -- myNormalBorderColor  = "#282c34"
 
 myFocusedBorderColor :: String
 myFocusedBorderColor = "#bd93f9"
+
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
@@ -305,48 +313,56 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
 --
 -- myLayout = tiled ||| Mirror tiled ||| Full
 -- tiled |||  deprecated by resizableTall
-mySpacing           = spacing gap
+mySpacing = spacing gap
 
 myNav2DConf :: Navigation2DConfig
-myNav2DConf = def
-    { defaultTiledNavigation    = centerNavigation
-    , floatNavigation           = centerNavigation
-    , screenNavigation          = lineNavigation
-    , layoutNavigation          = [("Full",          centerNavigation)
-    -- line/center same results   ,("Simple Tabs", lineNavigation)
-    --                            ,("Simple Tabs", centerNavigation)
-                                  ]
-    , unmappedWindowRect        = [("Full", singleWindowRect)
-    -- works but breaks tab deco  ,("Simple Tabs", singleWindowRect)
-    -- doesn't work but deco ok   ,("Simple Tabs", fullScreenRect)
-                                  ]
+myNav2DConf =
+  def
+    { defaultTiledNavigation = centerNavigation,
+      floatNavigation = centerNavigation,
+      screenNavigation = lineNavigation,
+      layoutNavigation =
+        [ ("Full", centerNavigation)
+        -- line/center same results   ,("Simple Tabs", lineNavigation)
+        --                            ,("Simple Tabs", centerNavigation)
+        ],
+      unmappedWindowRect =
+        [ ("Full", singleWindowRect)
+        -- works but breaks tab deco  ,("Simple Tabs", singleWindowRect)
+        -- doesn't work but deco ok   ,("Simple Tabs", fullScreenRect)
+        ]
     }
 
-tall = renamed [Replace "tall"]
-    $ smartBorders
-    $ windowNavigation
-    $ addTabs shrinkText myTabTheme
-    $ subLayout [] Simplest
-    $ mySpacing
-    $ ResizableTall 1 (3/100) (1/2) []
-threeCol = renamed [Replace "threeCol"]
-    $ smartBorders
-    $ windowNavigation
-    $ addTabs shrinkText myTabTheme
-    $ subLayout [] Simplest
-    $ mySpacing
-    $ ThreeCol 1 (3 / 100) (1 / 2)
+tall =
+  renamed [Replace "tall"] $
+    smartBorders $
+      windowNavigation $
+        addTabs shrinkText myTabTheme $
+          subLayout [] Simplest $
+            mySpacing $
+              ResizableTall 1 (3 / 100) (1 / 2) []
 
-spirals = renamed [Replace "spirals"]
-    $ smartBorders
-    $ mySpacing
-    $ spiral (6/7)
+threeCol =
+  renamed [Replace "threeCol"] $
+    smartBorders $
+      windowNavigation $
+        addTabs shrinkText myTabTheme $
+          subLayout [] Simplest $
+            mySpacing $
+              ThreeCol 1 (3 / 100) (1 / 2)
 
-tallAccordion = renamed [Replace "tallAccordion"]
-    $ mySpacing
-    $ Accordion
+spirals =
+  renamed [Replace "spirals"] $
+    smartBorders $
+      mySpacing $
+        spiral (6 / 7)
 
-myLayout = avoidStruts $  mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ mkToggle (single REFLECTX) (tall ||| threeCol ||| spirals ||| tallAccordion )
+tallAccordion =
+  renamed [Replace "tallAccordion"] $
+    mySpacing $
+      Accordion
+
+myLayout = avoidStruts $ mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single MIRROR) $ mkToggle (single REFLECTX) (tall ||| threeCol ||| spirals ||| tallAccordion)
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled = Tall nmaster delta ratio
@@ -361,14 +377,16 @@ myLayout = avoidStruts $  mkToggle (NOBORDERS ?? FULL ?? EOT) $ mkToggle (single
     delta = 3 / 100
 
 -- setting colors for tabs layout and tabs sublayout.
-myTabTheme = def { fontName            = myFont
-                 , activeColor         = "#46d9ff"
-                 , inactiveColor       = "#313846"
-                 , activeBorderColor   = "#46d9ff"
-                 , inactiveBorderColor = "#282c34"
-                 , activeTextColor     = "#282c34"
-                 , inactiveTextColor   = "#d0d0d0"
-                 }
+myTabTheme =
+  def
+    { fontName = myFont,
+      activeColor = "#46d9ff",
+      inactiveColor = "#313846",
+      activeBorderColor = "#46d9ff",
+      inactiveBorderColor = "#282c34",
+      activeTextColor = "#282c34",
+      inactiveTextColor = "#d0d0d0"
+    }
 
 ------------------------------------------------------------------------
 -- Window rules:
@@ -414,16 +432,17 @@ myManageHook =
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
 myEventHook :: Event -> X All
-myEventHook = ewmhDesktopsEventHook
-        <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
-        <+>  dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
-        <+> dynamicPropertyChange "WM_NAME" (title =? "discord" --> floating)
-        <+> fullscreenEventHook
-        <+> docksEventHook
+myEventHook =
+  ewmhDesktopsEventHook
+    <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
+    <+> dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
+    <+> dynamicPropertyChange "WM_NAME" (title =? "discord" --> floating)
+    <+> fullscreenEventHook
+    <+> docksEventHook
+  where
+    floating = customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)
+    floating2 = customFloating $ W.RationalRect (1 / 8) (1 / 8) (5 / 6) (5 / 6)
 
-        where
-            floating = customFloating $ W.RationalRect (1/12) (1/12) (5/6) (5/6)
-            floating2 = customFloating $ W.RationalRect (1/8) (1/8) (5/6) (5/6)
 -- whatsapp isn't really needed here just put it here for completeness and demonstration of where with multiple variables
 -- To adjust rectangle had to increment first two numbers denominator to move screen upwards and change last two numbers nominator to scale up the window
 -- customFloating named scratchpad not floating, had to use this instead https://github.com/xmonad/xmonad/issues/214
@@ -474,177 +493,179 @@ myStartupHook = do
 myEmacsKeys :: [(String, X ())]
 myEmacsKeys =
   [ -- Multimedia Keys
-     ("<XF86AudioPlay>", spawn mediaPlay)
-     ,("<XF86AudioPrev>", spawn mediaPrev)
-     ,("<XF86AudioNext>", spawn mediaNext)
-     ,("<XF86AudioStop>", spawn mediaPause)
-     ,("<XF86AudioMute>", spawn audioMute)
-     ,("<XF86AudioLowerVolume>", spawn volumeDown)
-     ,("<XF86AudioRaiseVolume>", spawn volumeUp)
+    ("<XF86AudioPlay>", spawn mediaPlay),
+    ("<XF86AudioPrev>", spawn mediaPrev),
+    ("<XF86AudioNext>", spawn mediaNext),
+    ("<XF86AudioStop>", spawn mediaPause),
+    ("<XF86AudioMute>", spawn audioMute),
+    ("<XF86AudioLowerVolume>", spawn volumeDown),
+    ("<XF86AudioRaiseVolume>", spawn volumeUp),
     -- Brightness keys
-     ,("<XF86MonBrightnessUp>", spawn brightUp)
-     ,("<XF86MonBrightnessDown>", spawn brightDown)
+    ("<XF86MonBrightnessUp>", spawn brightUp),
+    ("<XF86MonBrightnessDown>", spawn brightDown),
     -- Screenshots
-     ,("<Print>", spawn screenShotFast) -- Take screenshot
-     ,("M-<Print>", spawn screenShotOptions) -- Open screenshot app
+    ("<Print>", spawn screenShotFast), -- Take screenshot
+    ("M-<Print>", spawn screenShotOptions), -- Open screenshot app
     -- Open apps
-     ,("M-b", spawn browser) -- Windows + g (meta key is windows key)
-     ,("M-n", spawn explorer) -- open explorer
-     ,("M-<Return>", spawn myTerminal) -- Spawn terminal
-     ,("M-<Space>", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal termite ")
+    ("M-b", spawn browser), -- Windows + g (meta key is windows key)
+    ("M-n", spawn explorer), -- open explorer
+    ("M-<Return>", spawn myTerminal), -- Spawn terminal
+    ("M-<Space>", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal termite "),
     -- Kill windows
-     ,("M-S-q", kill) -- Kill Current window
-     ,("M-S-a", closeAllWindows) -- Kill all windows on current workspace
+    ("M-S-q", kill), -- Kill Current window
+    ("M-S-a", closeAllWindows), -- Kill all windows on current workspace
     -- Layouts
-     ,("M-v", sendMessage NextLayout) -- Rotate through the available layout algorithms
-     ,("M-x", sendMessage $ Toggle MIRROR) -- Mirror current layout
-     ,("M-z", sendMessage (XMonad.Layout.MultiToggle.Toggle REFLECTX))
-     ,("M-f", sendMessage (Toggle FULL) >> sendMessage ToggleStruts) -- Toggle fullscreen
+    ("M-v", sendMessage NextLayout), -- Rotate through the available layout algorithms
+    ("M-x", sendMessage $ Toggle MIRROR), -- Mirror current layout
+    ("M-z", sendMessage (XMonad.Layout.MultiToggle.Toggle REFLECTX)),
+    ("M-f", sendMessage (Toggle FULL) >> sendMessage ToggleStruts), -- Toggle fullscreen
     -- Window resizing
-     ,("M-M1-j", sendMessage MirrorShrink) -- Shrink vert window width
-     ,("M-M1-h", sendMessage Shrink) -- Shrink horiz window width
-     ,("M-M1-l", sendMessage Expand) -- Expand horiz window width
-
-     ,("M-M1-k", sendMessage MirrorExpand) -- Expand vert window width
-      -- Run xmessage with a summary of the default keybindings (useful for beginners)
-     ,("M-S-'", spawn ("echo \"" ++ help ++ "\" | yad --list --column 'Commands'") )
+    ("M-M1-j", sendMessage MirrorShrink), -- Shrink vert window width
+    ("M-M1-h", sendMessage Shrink), -- Shrink horiz window width
+    ("M-M1-l", sendMessage Expand), -- Expand horiz window width
+    ("M-M1-k", sendMessage MirrorExpand), -- Expand vert window width
+    -- Run xmessage with a summary of the default keybindings (useful for beginners)
+    ("M-S-'", spawn ("echo \"" ++ help ++ "\" | yad --list --column 'Commands'")),
     -- Window navigation
-     -- ,("M-m", windows W.focusMaster) -- Move focus to the master window
-     -- ,("M-j", windows W.focusDown) -- Move focus to the next window
-     -- ,("M-k", windows W.focusUp) -- Move focus to the prev window
-   , ("M-l",                  windowGo R False)
-   , ("M-h",                  windowGo L False)
-   , ("M-k",                  windowGo U False)
-   , ("M-j",                  windowGo D False)
-
-     ,("M-S-m", promote)      -- Moves focused window to master, others maintain order
+    -- ,("M-m", windows W.focusMaster) -- Move focus to the master window
+    -- ,("M-j", windows W.focusDown) -- Move focus to the next window
+    -- ,("M-k", windows W.focusUp) -- Move focus to the prev window
+    ("M-l", windowGo R False),
+    ("M-h", windowGo L False),
+    ("M-k", windowGo U False),
+    ("M-j", windowGo D False),
+    ("M-S-m", promote), -- Moves focused window to master, others maintain order
     -- ("M-S-m", windows W.swapMaster), -- Swap the focused window and the master window
 
-     -- ,("M-S-j", windows W.swapDown) -- Swap focused window with next window
-     -- ,("M-S-k", windows W.swapUp) -- Swap focused window with prev window
+    -- ,("M-S-j", windows W.swapDown) -- Swap focused window with next window
+    -- ,("M-S-k", windows W.swapUp) -- Swap focused window with prev window
 
-        -- Swap adjacent windows
-   , ("M-S-l", windowSwap R False)
-   , ("M-S-h", windowSwap L False)
-   , ("M-S-k", windowSwap U False)
-   , ("M-S-j", windowSwap D False)
-     ,("M-S-<Tab>", rotSlavesDown) -- Rotate all windows except master and keep focus in place
-     ,("M-C-<Tab>", rotAllDown) -- Rotate all the windows in the current stack
+    -- Swap adjacent windows
+    ("M-S-l", windowSwap R False),
+    ("M-S-h", windowSwap L False),
+    ("M-S-k", windowSwap U False),
+    ("M-S-j", windowSwap D False),
+    ("M-S-<Tab>", rotSlavesDown), -- Rotate all windows except master and keep focus in place
+    ("M-C-<Tab>", rotAllDown), -- Rotate all the windows in the current stack
     -- Increase, decrease windows in stack
-     ,("M-S-<Up>", sendMessage (IncMasterN 1)) -- Increase # of clients master pane
-     ,("M-S-<Down>", sendMessage (IncMasterN (-1))) -- Decrease # of clients master pane
+    ("M-S-<Up>", sendMessage (IncMasterN 1)), -- Increase # of clients master pane
+    ("M-S-<Down>", sendMessage (IncMasterN (-1))), -- Decrease # of clients master pane
     -- Increase, decrease window and screen spacing
     -- ("M-C-j", decWindowSpacing 4), -- Decrease window spacing
     -- ("M-C-k", incWindowSpacing 4), -- Increase window spacing
     -- ("M-C-h", decScreenSpacing 4), -- Decrease screen spacing
     -- ("M-C-l", incScreenSpacing 4) -- Increase screen spacing
 
-  -- Sublayouts
+    -- Sublayouts
     -- This is used to push windows to tabbed sublayouts, or pull them out of it.
-        , ("M-C-h", sendMessage $ pullGroup L)
-        , ("M-C-l", sendMessage $ pullGroup R)
-        , ("M-C-k", sendMessage $ pullGroup U)
-        , ("M-C-j", sendMessage $ pullGroup D)
-        , ("M-C-m", withFocused (sendMessage . MergeAll))
-        , ("M-C-u", withFocused (sendMessage . UnMerge))
-        , ("M-C-7", withFocused (sendMessage . UnMergeAll))
-        , ("M-.", onGroup W.focusUp')    -- Switch focus to next tab
-        , ("M-,", onGroup W.focusDown')  -- Switch focus to prev tab
-        , ("M-s", namedScratchpadAction scratchpads "Spotify")
-        , ("M-w", namedScratchpadAction scratchpads "WhatsApp")
-        , ("M-d", namedScratchpadAction scratchpads "Discord")
-        , ("M-m", namedScratchpadAction scratchpads "Thunderbird")
-
+    ("M-C-h", sendMessage $ pullGroup L),
+    ("M-C-l", sendMessage $ pullGroup R),
+    ("M-C-k", sendMessage $ pullGroup U),
+    ("M-C-j", sendMessage $ pullGroup D),
+    ("M-C-m", withFocused (sendMessage . MergeAll)),
+    ("M-C-u", withFocused (sendMessage . UnMerge)),
+    ("M-C-7", withFocused (sendMessage . UnMergeAll)),
+    ("M-.", onGroup W.focusUp'), -- Switch focus to next tab
+    ("M-,", onGroup W.focusDown'), -- Switch focus to prev tab
+    ("M-s", namedScratchpadAction scratchpads "Spotify"),
+    ("M-w", namedScratchpadAction scratchpads "WhatsApp"),
+    ("M-d", namedScratchpadAction scratchpads "Discord"),
+    ("M-m", namedScratchpadAction scratchpads "Thunderbird")
   ]
+
 base03 :: String
-base03  = "#002b36"
+base03 = "#002b36"
+
 base02 :: String
-base02  = "#073642"
+base02 = "#073642"
+
 base01 :: String
-base01  = "#586e75"
+base01 = "#586e75"
+
 base00 :: String
-base00  = "#657b83"
+base00 = "#657b83"
+
 base0 :: String
-base0   = "#839496"
-base1 :: String
-base1   = "#93a1a1"
-base2 :: String
-base2   = "#eee8d5"
-base3 :: String
-base3   = "#fdf6e3"
-yellow :: String
-yellow  = "#b58900"
-orange :: String
-orange  = "#cb4b16"
-red :: String
-red     = "#dc322f"
-magenta :: String
+base0 = "#839496"
+
+base1 = "#93a1a1"
+
+base2 = "#eee8d5"
+
+base3 = "#fdf6e3"
+
+yellow = "#b58900"
+
+orange = "#cb4b16"
+
+red = "#dc322f"
+
 magenta = "#d33682"
-violet :: String
-violet  = "#6c71c4"
-blue :: String
-blue    = "#268bd2"
-cyan :: String
-cyan    = "#2aa198"
-green :: String
-green       = "#859900"
-brightgrey :: String
-brightgrey ="#CCCCCC"
-white :: String
-white   ="#FFFFFF"
+
+violet = "#6c71c4"
+
+blue = "#268bd2"
+
+cyan = "#2aa198"
+
+green = "#859900"
+
+brightgrey = "#CCCCCC"
+
+white = "#FFFFFF"
 
 main :: IO ()
 main = do
   -- Execute xmobar with its config and pipe xmonad output to xmobar
   xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
-  xmonad $  withNavigation2DConfig myNav2DConf $
-    ewmh
-      desktopConfig
-        { -- simple stuff
-          terminal = myTerminal
-           ,focusFollowsMouse = myFocusFollowsMouse
-           ,clickJustFocuses = myClickJustFocuses
-           ,borderWidth = myBorderWidth
-           ,modMask = myModMask
-           ,workspaces         = myWorkspaces
-           ,normalBorderColor = myNormalBorderColor
-           ,focusedBorderColor = myFocusedBorderColor
-           -- key bindings
-           ,keys = myKeys
-           ,mouseBindings      = myMouseBindings
-
-          -- hooks, layouts
-            ,layoutHook = myLayout
-          -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
-        -- insertposition Above newer puts new windows on top (we want this for floating)
-        -- insertposition Below Newer puts new windows below (we want this for tiled)
-            ,manageHook = insertPosition Above Newer <+> myManageHook <+>  namedScratchpadManageHook scratchpads <+>  manageDocks
-        , handleEventHook = myEventHook
-            ,logHook =
-            dynamicLogWithPP
-              xmobarPP
-                { ppOutput = hPutStrLn xmproc
-                , ppCurrent = xmobarColor "#98be65" "" . wrap "[" "]"           -- Current workspace
-                , ppVisible = xmobarColor "#98be65" "" . clickable              -- Visible but not current workspace
-                , ppHidden = xmobarColor "#82AAFF" "" . clickable -- Hidden workspaces
-                , ppHiddenNoWindows = xmobarColor "#c792ea" ""  . clickable     -- Hidden workspaces (no windows)
-                , ppTitle = xmobarColor "#b3afc2" "" . shorten 60               -- Title of active window
-                , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"            -- Urgent workspace
-                -- bright grey
-                , ppLayout              = xmobarColor white ""
-                , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]                    -- order of things in xmobar
-                , ppSep                 = xmobarColor white myNormalBorderColor "  :  "
-                , ppWsSep               = " "
-                , ppSort                = fmap
-                                  (namedScratchpadFilterOutWorkspace.)
-                                  (ppSort def)
-                , ppExtras              = []
-                                  --(ppSort defaultPP)
-                }
-        ,startupHook = myStartupHook
-        }
-      `additionalKeysP` myEmacsKeys
-
+  xmonad $
+    withNavigation2DConfig myNav2DConf $
+      ewmh
+        desktopConfig
+          { -- simple stuff
+            terminal = myTerminal,
+            focusFollowsMouse = myFocusFollowsMouse,
+            clickJustFocuses = myClickJustFocuses,
+            borderWidth = myBorderWidth,
+            modMask = myModMask,
+            workspaces = myWorkspaces,
+            normalBorderColor = myNormalBorderColor,
+            focusedBorderColor = myFocusedBorderColor,
+            -- key bindings
+            keys = myKeys,
+            mouseBindings = myMouseBindings,
+            -- hooks, layouts
+            layoutHook = myLayout,
+            -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
+            -- insertposition Above newer puts new windows on top (we want this for floating)
+            -- insertposition Below Newer puts new windows below (we want this for tiled)
+            manageHook = insertPosition Above Newer <+> myManageHook <+> namedScratchpadManageHook scratchpads <+> manageDocks,
+            handleEventHook = myEventHook,
+            logHook =
+              dynamicLogWithPP
+                xmobarPP
+                  { ppOutput = hPutStrLn xmproc,
+                    ppCurrent = xmobarColor "#98be65" "" . wrap "[" "]", -- Current workspace
+                    ppVisible = xmobarColor "#98be65" "" . clickable, -- Visible but not current workspace
+                    ppHidden = xmobarColor "#82AAFF" "" . clickable, -- Hidden workspaces
+                    ppHiddenNoWindows = xmobarColor "#c792ea" "" . clickable, -- Hidden workspaces (no windows)
+                    ppTitle = xmobarColor "#b3afc2" "" . shorten 60, -- Title of active window
+                    ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!", -- Urgent workspace
+                    -- bright grey
+                    ppLayout = xmobarColor white "",
+                    ppOrder = \(ws : l : t : ex) -> [ws, l] ++ ex ++ [t], -- order of things in xmobar
+                    ppSep = xmobarColor white myNormalBorderColor "  :  ",
+                    ppWsSep = " ",
+                    ppSort =
+                      fmap
+                        (namedScratchpadFilterOutWorkspace .)
+                        (ppSort def),
+                    ppExtras = []
+                    --(ppSort defaultPP)
+                  },
+            startupHook = myStartupHook
+          }
+        `additionalKeysP` myEmacsKeys
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
