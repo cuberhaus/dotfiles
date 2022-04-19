@@ -199,10 +199,24 @@ discordCommand = "discord"
 isDiscord :: Query Bool
 isDiscord = className =? "discord"
 
+speedCrunchCommand :: String
+speedCrunchCommand =  "speedcrunch"
+
+isSpeedCrunch :: Query Bool
+isSpeedCrunch = className =? "SpeedCrunch"
+
+kittyCommand :: String
+kittyCommand = "kitty --class='kittyPad'"
+
+isKitty :: Query Bool
+isKitty = className =? "kittyPad"
+
 scratchpads :: [NamedScratchpad]
 scratchpads =
   [ NS "Spotify" spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
     NS "WhatsApp" whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
+    NS "SpeedCrunch" speedCrunchCommand isSpeedCrunch (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
+    NS "Kitty" kittyCommand isKitty (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "Thunderbird" thunderbirdCommand isThunderbird (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8)),
     NS "Discord" discordCommand isDiscord (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8))
   ]
@@ -570,7 +584,9 @@ myEmacsKeys =
     ("M-s", namedScratchpadAction scratchpads "Spotify"),
     ("M-w", namedScratchpadAction scratchpads "WhatsApp"),
     ("M-d", namedScratchpadAction scratchpads "Discord"),
-    ("M-m", namedScratchpadAction scratchpads "Thunderbird")
+    ("M-m", namedScratchpadAction scratchpads "Thunderbird"),
+    ("M-c", namedScratchpadAction scratchpads "SpeedCrunch"),
+    ("M-t", namedScratchpadAction scratchpads "Kitty")
   ]
 
 base03 :: String
