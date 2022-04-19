@@ -45,14 +45,14 @@ base_install () {
     $pac htop                                   # Show system resources
     $pac inotify-tools                          # inotifywatch -r $file (to watch if those files have been accessed)
     $pac kcolorchooser                          # Color picker
-    $pac kdiff3                                 # git mergetool
+    $pac kdiff3                                 # git best mergetool (complex merges are better than meld)
     $pac kitty                                  # Terminal emulator
     $pac kvantum-qt5                            # Qt5 Custom themes
     $pac laptop-detect                          # Detect if using a laptop
     $pac libmythes mythes-en mythes-es  # Libre office Synonyms
     $pac libreoffice-still libreoffice-still-ca # (install plugins located on .local)
     $pac lxappearance                           # Gtk configuration utility
-    $pac meld                                   # Best diff viewer
+    # $pac meld                                   # Best diff viewer
     $pac ncdu                                   # Manage storage
     $pac nemo
     $pac nemo-fileroller

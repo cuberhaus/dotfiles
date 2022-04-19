@@ -68,9 +68,10 @@ import Control.Monad
 
 quitWithWarning :: X ()
 quitWithWarning = do
-    let m = "confirm quit"
-    s <- dmenu [m]
-    when (m == s) (io exitSuccess)
+    let o1 = "confirm quit"
+    let o2 = "cancel"
+    s <- dmenu [o2,o1]
+    when (o1 == s) (io exitSuccess)
 closeAllWindows :: X ()
 closeAllWindows = do
     let m = "confirm close all windows"
@@ -474,18 +475,18 @@ myEmacsKeys =
      ,("M-n", spawn explorer) -- open explorer
      ,("M-C-w", spawn whatsapp) -- Windows + ctrl + w
      ,("M-<Return>", spawn myTerminal) -- Spawn terminal
-     ,("M-d", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal termite ")
+     ,("M-<Space>", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal termite ")
     -- Kill windows
      ,("M-S-q", kill) -- Kill Current window
      ,("M-S-a", closeAllWindows) -- Kill all windows on current workspace
     -- Layouts
-     ,("M-<Space>", sendMessage NextLayout) -- Rotate through the available layout algorithms
+     ,("M-d", sendMessage NextLayout) -- Rotate through the available layout algorithms
      ,("M-x", sendMessage $ Toggle MIRROR) -- Mirror current layout
      ,("M-z", sendMessage (XMonad.Layout.MultiToggle.Toggle REFLECTX))
      ,("M-f", sendMessage (Toggle FULL) >> sendMessage ToggleStruts) -- Toggle fullscreen
     -- Window resizing
      ,("M-M1-j", sendMessage MirrorShrink) -- Shrink vert window width
-    
+     
      ,("M-M1-h", sendMessage Shrink) -- Shrink horiz window width
      ,("M-M1-l", sendMessage Expand) -- Expand horiz window width
 
@@ -529,7 +530,7 @@ myEmacsKeys =
         , ("M-C-j", sendMessage $ pullGroup D)
         , ("M-C-m", withFocused (sendMessage . MergeAll))
         , ("M-C-u", withFocused (sendMessage . UnMerge))
-        , ("M-C-/", withFocused (sendMessage . UnMergeAll))
+        , ("M-C-7", withFocused (sendMessage . UnMergeAll))
         , ("M-.", onGroup W.focusUp')    -- Switch focus to next tab
         , ("M-,", onGroup W.focusDown')  -- Switch focus to prev tab
         , ("M-s", namedScratchpadAction scratchpads "Spotify")
