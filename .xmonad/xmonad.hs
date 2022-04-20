@@ -628,9 +628,9 @@ main :: IO ()
 main = do
   -- Execute xmobar with its config and pipe xmonad output to xmobar
   xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
-  xmonad $
-    withNavigation2DConfig myNav2DConf $
-      ewmh
+  xmonad .
+    withNavigation2DConfig myNav2DConf .
+      ewmh $
         desktopConfig
           { -- simple stuff
             terminal = myTerminal,
