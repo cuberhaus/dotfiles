@@ -652,30 +652,33 @@ main = do
             manageHook = insertPosition Above Newer <+> myManageHook <+> namedScratchpadManageHook scratchpads <+> manageDocks,
             handleEventHook = myEventHook,
             logHook =
-              dynamicLogWithPP
-                xmobarPP
-                  { ppOutput = hPutStrLn xmproc,
-                    ppCurrent = xmobarColor "#98be65" "" . wrap "[" "]", -- Current workspace
-                    ppVisible = xmobarColor "#98be65" "" . clickable, -- Visible but not current workspace
-                    ppHidden = xmobarColor "#82AAFF" "" . clickable, -- Hidden workspaces
-                    ppHiddenNoWindows = xmobarColor "#c792ea" "" . clickable, -- Hidden workspaces (no windows)
-                    ppTitle = xmobarColor "#b3afc2" "" . shorten 60, -- Title of active window
-                    ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!", -- Urgent workspace
-                    -- bright grey
-                    ppLayout = xmobarColor white "",
-                    ppOrder = \(ws : l : t : ex) -> [ws, l] ++ ex ++ [t], -- order of things in xmobar
-                    ppSep = xmobarColor white myNormalBorderColor "  :  ",
-                    ppWsSep = " ",
-                    ppSort =
-                      fmap
-                        (namedScratchpadFilterOutWorkspace .)
-                        (ppSort def),
-                    ppExtras = []
-                    --(ppSort defaultPP)
-                  },
+              dynamicLogWithPP $
+              myXmobarPP xmproc,
             startupHook = myStartupHook
           }
         `additionalKeysP` myEmacsKeys
+
+myXmobarPP xmproc =
+  xmobarPP
+    { ppOutput = hPutStrLn xmproc,
+      ppCurrent = xmobarColor "#98be65" "" . wrap "[" "]", -- Current workspace
+      ppVisible = xmobarColor "#98be65" "" . clickable, -- Visible but not current workspace
+      ppHidden = xmobarColor "#82AAFF" "" . clickable, -- Hidden workspaces
+      ppHiddenNoWindows = xmobarColor "#c792ea" "" . clickable, -- Hidden workspaces (no windows)
+      ppTitle = xmobarColor "#b3afc2" "" . shorten 60, -- Title of active window
+      ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!", -- Urgent workspace
+      -- bright grey
+      ppLayout = xmobarColor white "",
+      ppOrder = \(ws : l : t : ex) -> [ws, l] ++ ex ++ [t], -- order of things in xmobar
+      ppSep = xmobarColor white myNormalBorderColor "  :  ",
+      ppWsSep = " ",
+      ppSort =
+        fmap
+          (namedScratchpadFilterOutWorkspace .)
+          (ppSort def),
+      ppExtras = []
+      --(ppSort defaultPP)
+    }
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
