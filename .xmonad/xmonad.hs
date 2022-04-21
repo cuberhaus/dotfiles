@@ -40,7 +40,7 @@ import XMonad.Layout.ResizableTile
 import XMonad.Layout.SimpleFloat (shrinkText)
 import XMonad.Layout.Simplest (Simplest (Simplest))
 import XMonad.Layout.SimplestFloat ()
-import XMonad.Layout.Spacing (spacing)
+import XMonad.Layout.Spacing
 import XMonad.Layout.Spiral (spiral)
 import XMonad.Layout.SubLayouts
 import XMonad.Layout.Tabbed
@@ -52,7 +52,8 @@ import XMonad.Util.Dmenu (dmenu) -- https://bbs.archlinux.org/viewtopic.php?id=1
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run (hPutStrLn, spawnPipe)
-import XMonad.Util.SpawnOnce ( spawnOnce )
+import XMonad.Util.SpawnOnce
+import XMonad.Actions.SpawnOn
 
 quitWithWarning :: X ()
 quitWithWarning = do
@@ -236,7 +237,6 @@ clickable ws = "<action=xdotool key super+" ++ show i ++ ">" ++ ws ++ "</action>
 
 -- No transparency
 myNormalBorderColor :: String
--- myNormalBorderColor = "#2f343f"
 
 myNormalBorderColor  = "#282c34"
 
@@ -261,7 +261,7 @@ myKeys conf@XConfig {XMonad.modMask = modm} =
       -- Quit xmonad
       ((modm .|. shiftMask, xK_e), quitWithWarning),
       -- -- Restart xmonad
-      ((modm .|. shiftMask, xK_r), spawn "xmonad --recompile; xmonad --restart")
+      ((modm .|. shiftMask, xK_r), spawn "xmonad --recompile; xmonad --restart") -- Will launch two errors due to recompiling and then restarting
       -- Run xmessage with a summary of the default keybindings (useful for beginners)
       -- ((modm .|. shiftMask, xK_h), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
     ]
@@ -324,7 +324,7 @@ myMouseBindings XConfig {XMonad.modMask = modm} =
 --
 -- myLayout = tiled ||| Mirror tiled ||| Full
 -- tiled |||  deprecated by resizableTall
-mySpacing = spacing gap
+mySpacing = smartSpacing gap
 
 myNav2DConf :: Navigation2DConfig
 myNav2DConf =
@@ -481,18 +481,17 @@ myStartupHook = do
   spawnOnce "betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &"
   spawnOnce "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &"
   spawnOnce "nm-applet &"
-  spawnOnce "picom &"
+  -- spawnOnce "picom &"
   spawnOnce "blueman-applet &"
   spawnOnce "udiskie &"
   spawnOnce "xfce4-clipman &"
   spawnOnce ("feh --bg-scale " ++ wallpaper ++ "& ")
-  -- spawnOnce "birdtray &"
   spawnOnce "hp-systray &"
   spawnOnce "tomighty &"
   spawnOnce "flameshot &"
   spawnOnce "sh -c 'sleep 15; conky --config=$HOME/.conky/conkyrss & '"
   spawnOnce ("conky --config=" ++ helix ++ "& ")
-
+  -- spawnOnOnce (myWorkspaces !! 8) "speedcrunch"
 -- escape needs to be double escaped in haskell
 
 ------------------------------------------------------------------------
@@ -512,45 +511,44 @@ myEmacsKeys =
     ("<XF86AudioMute>", spawn audioMute),
     ("<XF86AudioLowerVolume>", spawn volumeDown),
     ("<XF86AudioRaiseVolume>", spawn volumeUp),
+
     -- Brightness keys
     ("<XF86MonBrightnessUp>", spawn brightUp),
     ("<XF86MonBrightnessDown>", spawn brightDown),
+
     -- Screenshots
     ("<Print>", spawn screenShotFast), -- Take screenshot
     ("M-<Print>", spawn screenShotOptions), -- Open screenshot app
+
     -- Open apps
     ("M-b", spawn browser), -- Windows + g (meta key is windows key)
     ("M-n", spawn explorer), -- open explorer
     ("M-<Return>", spawn myTerminal), -- Spawn terminal
     ("M-<Space>", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal termite "),
+
     -- Kill windows
     ("M-S-q", kill), -- Kill Current window
     ("M-S-a", closeAllWindows), -- Kill all windows on current workspace
+
     -- Layouts
     ("M-v", sendMessage NextLayout), -- Rotate through the available layout algorithms
     ("M-x", sendMessage $ Toggle MIRROR), -- Mirror current layout
     ("M-z", sendMessage (XMonad.Layout.MultiToggle.Toggle REFLECTX)),
     ("M-f", sendMessage (Toggle NBFULL) >> sendMessage ToggleStruts), -- Toggle fullscreen
+
     -- Window resizing
     ("M-M1-j", sendMessage MirrorShrink), -- Shrink vert window width
     ("M-M1-h", sendMessage Shrink), -- Shrink horiz window width
     ("M-M1-l", sendMessage Expand), -- Expand horiz window width
     ("M-M1-k", sendMessage MirrorExpand), -- Expand vert window width
+
     -- Run xmessage with a summary of the default keybindings (useful for beginners)
     ("M-S-'", spawn ("echo \"" ++ help ++ "\" | yad --list --column 'Commands'")),
-    -- Window navigation
-    -- ,("M-m", windows W.focusMaster) -- Move focus to the master window
-    -- ,("M-j", windows W.focusDown) -- Move focus to the next window
-    -- ,("M-k", windows W.focusUp) -- Move focus to the prev window
     ("M-l", windowGo R False),
     ("M-h", windowGo L False),
     ("M-k", windowGo U False),
     ("M-j", windowGo D False),
     ("M-S-m", promote), -- Moves focused window to master, others maintain order
-    -- ("M-S-m", windows W.swapMaster), -- Swap the focused window and the master window
-
-    -- ,("M-S-j", windows W.swapDown) -- Swap focused window with next window
-    -- ,("M-S-k", windows W.swapUp) -- Swap focused window with prev window
 
     -- Swap adjacent windows
     ("M-S-l", windowSwap R False),
@@ -559,14 +557,10 @@ myEmacsKeys =
     ("M-S-j", windowSwap D False),
     ("M-S-<Tab>", rotSlavesDown), -- Rotate all windows except master and keep focus in place
     ("M-C-<Tab>", rotAllDown), -- Rotate all the windows in the current stack
+
     -- Increase, decrease windows in stack
     ("M-S-<Up>", sendMessage (IncMasterN 1)), -- Increase # of clients master pane
     ("M-S-<Down>", sendMessage (IncMasterN (-1))), -- Decrease # of clients master pane
-    -- Increase, decrease window and screen spacing
-    -- ("M-C-j", decWindowSpacing 4), -- Decrease window spacing
-    -- ("M-C-k", incWindowSpacing 4), -- Increase window spacing
-    -- ("M-C-h", decScreenSpacing 4), -- Decrease screen spacing
-    -- ("M-C-l", incScreenSpacing 4) -- Increase screen spacing
 
     -- Sublayouts
     -- This is used to push windows to tabbed sublayouts, or pull them out of it.
@@ -584,7 +578,16 @@ myEmacsKeys =
     ("M-d", namedScratchpadAction scratchpads "Discord"),
     ("M-m", namedScratchpadAction scratchpads "Thunderbird"),
     ("M-c", namedScratchpadAction scratchpads "SpeedCrunch"),
-    ("M-t", namedScratchpadAction scratchpads "Kitty")
+    ("M-t", namedScratchpadAction scratchpads "Kitty"),
+    ("M-S-t", withFocused $ windows . W.sink)
+
+    -- Window navigation  (without2Dnav)
+    -- ("M-S-m", windows W.swapMaster), -- Swap the focused window and the master window
+    -- ,("M-m", windows W.focusMaster) -- Move focus to the master window
+    -- ,("M-j", windows W.focusDown) -- Move focus to the next window
+    -- ,("M-k", windows W.focusUp) -- Move focus to the prev window
+    -- ,("M-S-j", windows W.swapDown) -- Swap focused window with next window
+    -- ,("M-S-k", windows W.swapUp) -- Swap focused window with prev window
   ]
 
 base03 :: String
@@ -641,6 +644,9 @@ brightgrey = "#CCCCCC"
 white :: String
 white = "#FFFFFF"
 
+barColor = "#2f343f"
+
+
 main :: IO ()
 main = do
   -- Execute xmobar with its config and pipe xmonad output to xmobar
@@ -666,7 +672,7 @@ main = do
             -- manageDocks with trayer allows tray to not be focused like a window and be on all desktops instead of only on the first
             -- insertposition Above newer puts new windows on top (we want this for floating)
             -- insertposition Below Newer puts new windows below (we want this for tiled)
-            manageHook = insertPosition Above Newer <+> myManageHook <+> namedScratchpadManageHook scratchpads <+> manageDocks,
+            manageHook = manageSpawn <+> myManageHook <+> namedScratchpadManageHook scratchpads <+> manageDocks,
             handleEventHook = myEventHook,
             logHook =
               dynamicLogWithPP $
@@ -687,7 +693,7 @@ myXmobarPP xmproc =
       -- bright grey
       ppLayout = xmobarColor white "",
       ppOrder = \(ws : l : t : ex) -> [ws, l] ++ ex ++ [t], -- order of things in xmobar
-      ppSep = xmobarColor white myNormalBorderColor "  :  ",
+      ppSep = xmobarColor white barColor "  :  ",
       ppWsSep = " ",
       ppSort =
         fmap
