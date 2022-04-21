@@ -51,7 +51,7 @@ import XMonad.Util.Dmenu (dmenu) -- https://bbs.archlinux.org/viewtopic.php?id=1
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run (hPutStrLn, spawnPipe)
-import XMonad.Util.SpawnOnce (spawnOnce)
+import XMonad.Util.SpawnOnce
 
 quitWithWarning :: X ()
 quitWithWarning = do
@@ -483,10 +483,11 @@ myStartupHook = do
   spawnOnce "udiskie &"
   spawnOnce "xfce4-clipman &"
   spawnOnce ("feh --bg-scale " ++ wallpaper ++ "& ")
-  spawnOnce "birdtray &"
+  -- spawnOnce "birdtray &"
   spawnOnce "hp-systray &"
   spawnOnce "tomighty &"
   spawnOnce "flameshot &"
+  spawnOnce "sh -c 'sleep 15; conky --config=$HOME/.conky/conkyrss & '"
   spawnOnce ("conky --config=" ++ helix ++ "& ")
 
 -- escape needs to be double escaped in haskell
