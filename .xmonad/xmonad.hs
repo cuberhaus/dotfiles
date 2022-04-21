@@ -236,12 +236,13 @@ clickable ws = "<action=xdotool key super+" ++ show i ++ ">" ++ ws ++ "</action>
 
 -- No transparency
 myNormalBorderColor :: String
-myNormalBorderColor = "#2f343f"
+-- myNormalBorderColor = "#2f343f"
 
--- myNormalBorderColor  = "#282c34"
+myNormalBorderColor  = "#282c34"
 
 myFocusedBorderColor :: String
 myFocusedBorderColor = "#bd93f9"
+-- myFocusedBorderColor = "#000000"
 -- myFocusedBorderColor = "#FF0000"
 
 ------------------------------------------------------------------------
