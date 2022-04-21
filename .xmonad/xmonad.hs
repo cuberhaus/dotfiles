@@ -24,6 +24,7 @@ import XMonad.Hooks.DynamicProperty (dynamicPropertyChange)
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.FadeWindows ()
 import XMonad.Hooks.InsertPosition
+    ( insertPosition, Focus(Newer), Position(Above) )
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers ()
 import XMonad.Hooks.ServerMode ()
@@ -32,7 +33,7 @@ import XMonad.Layout.Accordion (Accordion (Accordion))
 import XMonad.Layout.GridVariants (Grid (Grid))
 import XMonad.Layout.MultiToggle
 import XMonad.Layout.MultiToggle.Instances
-import XMonad.Layout.NoBorders -- removes borderlines from windows
+import XMonad.Layout.NoBorders ( smartBorders ) -- removes borderlines from windows
 import XMonad.Layout.Reflect (REFLECTX (REFLECTX)) -- move master to the other side
 import XMonad.Layout.Renamed (Rename (Replace), renamed)
 import XMonad.Layout.ResizableTile
@@ -51,7 +52,7 @@ import XMonad.Util.Dmenu (dmenu) -- https://bbs.archlinux.org/viewtopic.php?id=1
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run (hPutStrLn, spawnPipe)
-import XMonad.Util.SpawnOnce
+import XMonad.Util.SpawnOnce ( spawnOnce )
 
 quitWithWarning :: X ()
 quitWithWarning = do
@@ -241,6 +242,7 @@ myNormalBorderColor = "#2f343f"
 
 myFocusedBorderColor :: String
 myFocusedBorderColor = "#bd93f9"
+-- myFocusedBorderColor = "#FF0000"
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -599,30 +601,43 @@ base00 = "#657b83"
 base0 :: String
 base0 = "#839496"
 
+base1 :: String
 base1 = "#93a1a1"
 
+base2 :: String
 base2 = "#eee8d5"
 
+base3 :: String
 base3 = "#fdf6e3"
 
+yellow :: String
 yellow = "#b58900"
 
+orange :: String
 orange = "#cb4b16"
 
+red :: String
 red = "#dc322f"
 
+magenta :: String
 magenta = "#d33682"
 
+violet :: String
 violet = "#6c71c4"
 
+blue :: String
 blue = "#268bd2"
 
+cyan :: String
 cyan = "#2aa198"
 
+green :: String
 green = "#859900"
 
+brightgrey :: String
 brightgrey = "#CCCCCC"
 
+white :: String
 white = "#FFFFFF"
 
 main :: IO ()
