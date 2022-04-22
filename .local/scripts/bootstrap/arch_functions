@@ -107,6 +107,11 @@ base_install () {
     $pac xss-lock                               # Lockscreen
     $pac yarn                                   # Package installer
     $pac zsh                                    # Zsh shell
+    $pac zathura-cb # zathura needs plugins
+    $pac zathura-djvu
+    $pac zathura-pdf-mupdf
+    $pac zathura-ps
+    $pac zathura
 
     # DO NOT CHANGE THIS ORDER YAY COMES AFTER pac
     yay_install
