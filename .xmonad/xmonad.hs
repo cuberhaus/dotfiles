@@ -237,7 +237,6 @@ clickable ws = "<action=xdotool key super+" ++ show i ++ ">" ++ ws ++ "</action>
 
 -- No transparency
 myNormalBorderColor :: String
-
 myNormalBorderColor  = "#282c34"
 
 myFocusedBorderColor :: String
@@ -481,7 +480,7 @@ myStartupHook = do
   spawnOnce "betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &"
   spawnOnce "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &"
   spawnOnce "nm-applet &"
-  -- spawnOnce "picom &"
+  spawnOnce "picom &"
   spawnOnce "blueman-applet &"
   spawnOnce "udiskie &"
   spawnOnce "xfce4-clipman &"
