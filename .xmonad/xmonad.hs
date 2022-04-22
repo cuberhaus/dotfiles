@@ -520,6 +520,7 @@ myEmacsKeys =
     ("M-<Print>", spawn screenShotOptions), -- Open screenshot app
 
     -- Open apps
+    ("M-e", spawn "emacs"), 
     ("M-b", spawn browser), -- Windows + g (meta key is windows key)
     ("M-n", spawn explorer), -- open explorer
     ("M-<Return>", spawn myTerminal), -- Spawn terminal
