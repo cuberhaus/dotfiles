@@ -14,7 +14,7 @@
 
 (setq vc-follow-symlinks t) ;; always follow symlinks
 ;; (setq vc-follow-symlinks nil) ;; or never follow them
-
+(setq smerge-command-prefix "\C-cv")
 ;; Font Configuration ----------------------------------------------------------
 ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
 ;; IF FONT LOOKS WEIRD (TOO SLIM) then it means the font is not working properly, CHANGE IT
