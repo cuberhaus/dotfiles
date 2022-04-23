@@ -6,7 +6,7 @@
 (tool-bar-mode -1)
 ;(tooltip-mode -1) disable tooltips
 (set-fringe-mode 10) ; Make some space
-;(menu-bar-mode -1)
+(menu-bar-mode -1) ;; remove top bar
 (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
 ;(setq visible-bell t)
 (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
@@ -109,6 +109,18 @@
   ([remap describe-command] . helpful-command) 
   ([remap describe-variable] . counsel-describe-variable))
 
+(defun delete-file-and-buffer ()
+  "Kill the current buffer and deletes the file it is visiting."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if filename
+        (if (y-or-n-p (concat "Do you really want to delete file " filename " ?"))
+            (progn
+              (delete-file filename)
+              (message "Deleted file %s." filename)
+              (kill-buffer)))
+      (message "Not a file visiting buffer!"))))
+
 (use-package general ;; set personal bindings for leader key for example
  ; (general-define-key "C-M-j" 'counsel-switch-buffer) ;; allows to define multiple global keybindings
   :config
@@ -118,6 +130,10 @@
   :global-prefix "C-SPC") ;; leader
   (rune/leader-keys
    "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
+   "b" '(:ignore b :which-key "buffers") ;; "folder" for toggles
+   "bn" '(evil-next-buffer :which-key "next buffer") ;; "folder" for toggles
+   "bp" '(evil-prev-buffer :which-key "previous buffer") ;; "folder" for toggles
+   "bd" '(delete-file-and-buffer :which-key "delete file") ;; classic vim save
    "w" '(save-buffer :which-key "save buffer") ;; classic vim save
    "tt" '(counsel-load-theme :which-key "choose theme")))
 
@@ -140,11 +156,12 @@
   ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
   ;; Use visual line motions even outside of visual-line-mode buffers
-  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+  ;(evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  ;(evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
+;; to center screen on cursor, zz or emacs-style C-l
 
 ;; https://github.com/linktohack/evil-commentary
 ;; use-package makes it so that it installs it from config and config section
@@ -172,6 +189,35 @@
 (rune/leader-keys
   "ts" '(hydra-text-scale/body :which-key "scale text"))
 
+;; C-c are user defined commands
+;; emacs variables local to projects
+(use-package projectile ;; git projects management
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :custom ((projectile-completion-system 'ivy)) ;; use ivy for completion can also use helm
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :init
+  ;; NOTE: Set this to the folder where you keep your Git repos!
+  (when (file-directory-p "~/")
+    (setq projectile-project-search-path '("~/")))
+  (setq projectile-switch-project-action #'projectile-dired))
+
+(use-package counsel-projectile ;; more commands with M-o in projectile (ivy allows that)
+  :config(counsel-projectile-mode)) 
+
+;; bring in the GIT
+(use-package magit ;; use tab to open instead of za in vim
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+  )
+
+;; C-n C-p in normal mode to go back and forth the clipboard
+
+;;---------------------
+;; AUTOMATIC CONFIG    
+;;---------------------
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -180,7 +226,7 @@
  '(custom-safe-themes
    '("835868dcd17131ba8b9619d14c67c127aa18b90a82438c8613586331129dda63" default))
  '(package-selected-packages
-   '(evil-commentary evil-commentary-mode hydra evil-collection evil general doom-themes which-key use-package rainbow-delimiters ivy-rich helpful doom-modeline counsel command-log-mode)))
+   '(evil-magit magit counsel-projectile projectile evil-commentary evil-commentary-mode hydra evil-collection evil general doom-themes which-key use-package rainbow-delimiters ivy-rich helpful doom-modeline counsel command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
