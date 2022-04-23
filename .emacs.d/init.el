@@ -1,5 +1,9 @@
 ;; prefixes: C-x, C-h, M-x
 ;; emacs swap window C-x o
+
+;; You will most likely need to adjust this font size for your system!
+(defvar runemacs/default-font-size 110)
+
 (setq inhibit-startup-message t) ; Disable startup menu
 
 (scroll-bar-mode -1) ; Disable the scrollbar
@@ -7,7 +11,23 @@
 ;(tooltip-mode -1) disable tooltips
 (set-fringe-mode 10) ; Make some space
 (menu-bar-mode -1) ;; remove top bar
-(set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
+
+(setq vc-follow-symlinks t) ;; always follow symlinks
+;; (setq vc-follow-symlinks nil) ;; or never follow them
+
+;; Font Configuration ----------------------------------------------------------
+;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
+;; IF FONT LOOKS WEIRD (TOO SLIM) then it means the font is not working properly, CHANGE IT
+(set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
+
+;; Set the fixed pitch face
+(set-face-attribute 'fixed-pitch nil :font "FuraCode Nerd Font" :height 120)
+
+;; Set the variable pitch face
+(set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
+
+;; -------------------------------------------------------
+
 ;(setq visible-bell t)
 (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 
@@ -156,8 +176,8 @@
   ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
   ;; Use visual line motions even outside of visual-line-mode buffers
-  ;(evil-global-set-key 'motion "j" 'evil-next-visual-line)
-  ;(evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
@@ -242,7 +262,7 @@
                   (org-level-6 . 1.1)
                   (org-level-7 . 1.1)
                   (org-level-8 . 1.1)))
-    (set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+    (set-face-attribute (car face) nil :font "DejaVu Sans" :weight 'regular :height(cdr face)))
 
   ;; Ensure that anything that should be fixed-pitch in Org files appears that way
   (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
@@ -258,6 +278,7 @@
   :config
   (setq org-ellipsis " ▾") ;; change ... to another symbol that is less confusing
   (efs/org-font-setup) ;; setup font
+   ;; hides *bold* and __underlined__ and linked words [name][link]
   )
 
 (use-package org-bullets ;; changes headers so that it doesn't show all of the stars
