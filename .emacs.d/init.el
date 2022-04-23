@@ -207,6 +207,8 @@
   :config(counsel-projectile-mode)) 
 
 ;; bring in the GIT
+;; use C-x g to open magit status
+;; type ? to know what can you do with magit
 (use-package magit ;; use tab to open instead of za in vim
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
