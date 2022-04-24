@@ -1,5 +1,6 @@
 ;; prefixes: C-x, C-h, M-x
 ;; emacs swap window C-x o
+;; use bookmarks to open specific files
 
 ;; You will most likely need to adjust this font size for your system!
 (defvar runemacs/default-font-size 110)
@@ -37,8 +38,7 @@
   (ispell-change-dictionary "default")
   (flyspell-buffer))
 
-;(setq visible-bell t)
-(load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
+(setq visible-bell t)
 
 ;; Initialize package sources
 (require 'package) ; bring in package module
@@ -63,7 +63,13 @@
 
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(use-package langtool)
+;; (use-package langtool)
+
+;; has to install pdf2svg on pc first
+(use-package org-inline-pdf
+  :init
+  (add-hook 'org-mode-hook #'org-inline-pdf-mode))
+
 
 (use-package ivy ; makes navigation between stuff easier
   :diminish ; do not show stuff on bar or something
@@ -94,6 +100,8 @@
   :custom ((doom-modeline-height 15)))
 
 (use-package doom-themes) ;; counsel-load-theme to load a theme from the list
+
+(load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 
 (column-number-mode)
 (global-display-line-numbers-mode t) ;; display line numbers everywhere
@@ -359,7 +367,7 @@
  '(custom-safe-themes
    '("835868dcd17131ba8b9619d14c67c127aa18b90a82438c8613586331129dda63" default))
  '(package-selected-packages
-   '(diff-hl diff-hl-mode git-gutter visual-fill-column org-bullets forge evil-magit magit counsel-projectile projectile evil-commentary evil-commentary-mode hydra evil-collection evil general doom-themes which-key use-package rainbow-delimiters ivy-rich helpful doom-modeline counsel command-log-mode))
+   '(fzf org-inline-pdf diff-hl diff-hl-mode visual-fill-column org-bullets forge evil-magit magit counsel-projectile projectile evil-commentary evil-commentary-mode hydra evil-collection evil general doom-themes which-key use-package rainbow-delimiters ivy-rich helpful doom-modeline counsel command-log-mode))
  '(warning-suppress-types '((use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
