@@ -9,47 +9,67 @@
     (load custom-file)
 
 ;; You will most likely need to adjust this font size for your system!
-  (defvar runemacs/default-font-size 110)
+    (defvar runemacs/default-font-size 110)
 
-  (setq inhibit-startup-message t) ; Disable startup menu
-  (scroll-bar-mode -1) ; Disable the scrollbar
-  (tool-bar-mode -1)
-  ;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
-  (set-fringe-mode 10) ; Make some space
-  (menu-bar-mode -1) ;; remove top bar
-  (cond ((eq system-type 'windows-nt)
-      ;; Windows-specific code goes here.
-      )
-        ((eq system-type 'darwin)
-            (setq ring-bell-function ;; subtle mode line flash
-                (lambda ()
-                    (let ((orig-fg (face-foreground 'mode-line)))
-                    (set-face-foreground 'mode-line "#F2804F")
-                    (run-with-idle-timer 0.1 nil
-                                        (lambda (fg) (set-face-foreground 'mode-line fg))
-                                        orig-fg))))
-      )
-      ((eq system-type 'gnu/linux)
-       (setq visible-bell t)
-      ))
+    (setq inhibit-startup-message t) ; Disable startup menu
+    (scroll-bar-mode -1) ; Disable the scrollbar
+    (tool-bar-mode -1)
+    ;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
+    (set-fringe-mode 10) ; Make some space
+    (menu-bar-mode -1) ;; remove top bar
+    (cond ((eq system-type 'windows-nt)
+        ;; Windows-specific code goes here.
+        )
+          ((eq system-type 'darwin)
+              (setq ring-bell-function ;; subtle mode line flash
+                  (lambda ()
+                      (let ((orig-fg (face-foreground 'mode-line)))
+                      (set-face-foreground 'mode-line "#F2804F")
+                      (run-with-idle-timer 0.1 nil
+                                          (lambda (fg) (set-face-foreground 'mode-line fg))
+                                          orig-fg))))
+        )
+        ((eq system-type 'gnu/linux)
+         (setq visible-bell t)
+        ))
 
-  (setq scroll-step            1
-      scroll-conservatively  10000) ;; scroll line by line not like a fucking degenerate
-  (setq smooth-scroll-margin 4) ;; margin like in vim
+    ;; (setq scroll-step            1
+    ;;     scroll-conservatively  10000) ;; scroll line by line not like a fucking degenerate
+    ;; (setq smooth-scroll-margin 4) ;; margin like in vim
+;;
+;;; Scrolling
 
-  (setq vc-follow-symlinks t) ;; always follow symlinks
-  (column-number-mode)
-  (global-display-line-numbers-mode t) ;; display line numbers everywhere
-  ;; (setq vc-follow-symlinks nil) ;; or never follow them
+(setq hscroll-margin 2
+      hscroll-step 1
+      ;; Emacs spends too much effort recentering the screen if you scroll the
+      ;; cursor more than N lines past window edges (where N is the settings of
+      ;; `scroll-conservatively'). This is especially slow in larger files
+      ;; during large-scale scrolling commands. If kept over 100, the window is
+      ;; never automatically recentered.
+      scroll-conservatively 101
+      scroll-margin 0
+      scroll-preserve-screen-position t
+      ;; Reduce cursor lag by a tiny bit by not auto-adjusting `window-vscroll'
+      ;; for tall lines.
+      auto-window-vscroll nil
+      ;; mouse
+      mouse-wheel-scroll-amount '(2 ((shift) . hscroll))
+      mouse-wheel-scroll-amount-horizontal 2)
 
-(defun efs/display-startup-time ()
-  (message "Emacs loaded in %s with %d garbage collections."
-           (format "%.2f seconds"
-                   (float-time
-                   (time-subtract after-init-time before-init-time)))
-           gcs-done))
 
-(add-hook 'emacs-startup-hook #'efs/display-startup-time)
+    (setq vc-follow-symlinks t) ;; always follow symlinks
+    (column-number-mode)
+    (global-display-line-numbers-mode t) ;; display line numbers everywhere
+    ;; (setq vc-follow-symlinks nil) ;; or never follow them
+
+  (defun efs/display-startup-time ()
+    (message "Emacs loaded in %s with %d garbage collections."
+             (format "%.2f seconds"
+                     (float-time
+                     (time-subtract after-init-time before-init-time)))
+             gcs-done))
+
+  (add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
 ;; Font Configuration -----------------------
   ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
