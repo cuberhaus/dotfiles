@@ -14,6 +14,13 @@
     ;; Windows-specific code goes here.
     )
       ((eq system-type 'darwin)
+          (setq ring-bell-function ;; subtle mode line flash
+              (lambda ()
+                  (let ((orig-fg (face-foreground 'mode-line)))
+                  (set-face-foreground 'mode-line "#F2804F")
+                  (run-with-idle-timer 0.1 nil
+                                      (lambda (fg) (set-face-foreground 'mode-line fg))
+                                      orig-fg))))
     )
     ((eq system-type 'gnu/linux)
      (setq visible-bell t)
@@ -36,13 +43,13 @@
     ;; Windows-specific code goes here.
     )
       ((eq system-type 'darwin)
-      (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 180)
+      (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 170)
 
       ;; Set the fixed pitch face
-      (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height 200)
+      (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height 180)
 
       ;; Set the variable pitch face
-      (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 200 :weight 'regular)
+      (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 180 :weight 'regular)
     )
     ((eq system-type 'gnu/linux)
       (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
@@ -477,7 +484,7 @@
 ;; Automatically tangle our Emacs.org config file when we save it
 (defun efs/org-babel-tangle-config ()
   (when (string-equal (buffer-file-name)
-                      (expand-file-name "~/fib/org/babel.org"))
+                      (expand-file-name "~/dotfiles/dotfiles/.org/babel.org"))
     ;; Dynamic scoping to the rescue
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
