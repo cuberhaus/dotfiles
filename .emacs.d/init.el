@@ -1,30 +1,22 @@
-;; prefixes: C-x: emacs keybindings, C-h: help, M-x: execute function, C-c: user-defined keybindings, C-SPC: more user defined keybindings
-;; emacs go between windows C-x o
-;; use bookmarks to open specific files
-;; to get help on variable of function put corsor over it and press C-h v or C-h f
-
-;; UNDO 
-;; C-r WONT WORK, cause we are not using a redo we have a undo stack
-;; undo is treated like a normal command, therefore you can undo the undo.
-;; undo's will go to the stack, if a move like "k" is done then you can undo again, this makes it possible to undo every single edit.
-;; in typicall (global-undo-tree-mode) (evil-set-undo-system 'undo-tree)
-;; if you are doing several undos and miss the "correct spot" and do anything at all which is not an undo command, you are stuck: you broke the chain of undos https://www.emacswiki.org/emacs/RedoMode
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
 
 ;; You will most likely need to adjust this font size for your system!
 (defvar runemacs/default-font-size 110)
 
 (setq inhibit-startup-message t) ; Disable startup menu
-
 (scroll-bar-mode -1) ; Disable the scrollbar
 (tool-bar-mode -1)
-;(tooltip-mode -1) disable tooltips (text displayed when hovering over an element like on the toolbar)
+;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
 (set-fringe-mode 10) ; Make some space
 (menu-bar-mode -1) ;; remove top bar
-
+(setq visible-bell t)
 (setq vc-follow-symlinks t) ;; always follow symlinks
+(column-number-mode)
+(global-display-line-numbers-mode t) ;; display line numbers everywhere
 ;; (setq vc-follow-symlinks nil) ;; or never follow them
 
-;; Font Configuration ----------------------------------------------------------
+;; Font Configuration -----------------------
 ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
 ;; IF FONT LOOKS WEIRD (TOO SLIM) then it means the font is not working properly, CHANGE IT
 (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
@@ -34,8 +26,8 @@
 
 ;; Set the variable pitch face
 (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
-
 ;; -------------------------------------------------------
+
 ;; execute spanish spell-checking on buffer
 (defun flyspell-spanish ()
   (interactive)
@@ -46,8 +38,6 @@
   (interactive)
   (ispell-change-dictionary "default")
   (flyspell-buffer))
-
-(setq visible-bell t)
 
 ;; Initialize package sources
 (require 'package) ; bring in package module
@@ -63,15 +53,25 @@
 ;; Initialize use-package on non-Linux platforms
 (unless (package-installed-p 'use-package) ; is this package installed, unless its installed install it
    (package-install 'use-package))
-
 (require 'use-package)
+
 (setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
 ;; makes sure that package is downloaded before use
+
 (setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
 ;(use-package command-log-mode)
 
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(global-auto-revert-mode) ;;
+
+;; Disable line numbers for some modes
+(dolist (mode '(org-mode-hook
+                term-mode-hook
+                eshell-mode-hook
+                shell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0 ))))
+
 ;; (use-package langtool)
 
 ;; has to install pdf2svg on pc first
@@ -79,27 +79,39 @@
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
 
-
 (use-package ivy ; makes navigation between stuff easier
-  :diminish ; do not show stuff on bar or something
-  :bind (("C-s" . swiper) ;;like / but with context
-         :map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)	
-         ("C-l" . ivy-alt-done)
-         ("C-j" . ivy-next-line)
-         ("C-k" . ivy-previous-line)
-         :map ivy-switch-buffer-map
-         ("C-k" . ivy-previous-line)
-         ("C-l" . ivy-done)
-         ("C-d" . ivy-switch-buffer-kill)
-         :map ivy-reverse-i-search-map
-         ("C-k" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
-  :config
-  (ivy-mode 1))
+:diminish ; do not show stuff on bar or something
+:bind (("C-s" . swiper) ;;like / but with context
+        :map ivy-minibuffer-map
+        ("TAB" . ivy-alt-done)	
+        ("C-l" . ivy-alt-done)
+        ("C-j" . ivy-next-line)
+        ("C-k" . ivy-previous-line)
+        :map ivy-switch-buffer-map
+        ("C-k" . ivy-previous-line)
+        ("C-l" . ivy-done)
+        ("C-d" . ivy-switch-buffer-kill)
+        :map ivy-reverse-i-search-map
+        ("C-k" . ivy-previous-line)
+        ("C-d" . ivy-reverse-i-search-kill))
+:config
+(ivy-mode 1))
 
-(global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
-;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
+;; eval last sexp is better cause inconsistencies from hooks when running evalbuffer
+;; and show keybindings
+(use-package ivy-rich
+:init
+(ivy-rich-mode 1))
+
+;; With ivy-rich shows descriptions for commands 
+(use-package counsel
+:bind (("M-x" . counsel-M-x)
+        ("C-x b" . counsel-ibuffer)
+        ("C-x C-f" . counsel-find-file)
+        :map minibuffer-local-map
+        ("C-r" . 'counsel-minibuffer-history))
+        :config
+        (setq ivy-initial-inputs-alist nil))
 
 (use-package all-the-icons)
 ;; custom command line
@@ -107,67 +119,11 @@
   :ensure t
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-height 15)))
-
 (use-package doom-themes) ;; counsel-load-theme to load a theme from the list
-
 (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 
-(column-number-mode)
-(global-display-line-numbers-mode t) ;; display line numbers everywhere
-(global-auto-revert-mode)
-
-;; Disable line numbers for some modes
-(dolist (mode '(org-mode-hook
-		term-mode-hook
-		eshell-mode-hook
-		shell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0 ))))
-
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
-
-(use-package which-key ;; This shows which commands are available for current keypresses
-  :init (which-key-mode) ;; runs before package is loaded automatically whether package is loaded or not we can also invoke the mode
-  :diminish which-key-mode
-  :config ;; this is run after the package is loaded
-  (setq which-key-idle-delay 0.15)) ;; delay on keybindings 
-
-;; eval last sexp is better cause inconsistencies from hooks when running evalbuffer
-;; and show keybindings
-(use-package ivy-rich
-  :init
-  (ivy-rich-mode 1))
-
-;; With ivy-rich shows descriptions for commands 
-(use-package counsel
-  :bind (("M-x" . counsel-M-x)
-	  ("C-x b" . counsel-ibuffer)
-	  ("C-x C-f" . counsel-find-file)
-	  :map minibuffer-local-map
-	  ("C-r" . 'counsel-minibuffer-history))
-	 :config
-	 (setq ivy-initial-inputs-alist nil))
-
-(use-package helpful ;; better function descriptions
-  :custom ;; custom variables
-  (counsel-describe-function-function #'helpful-callable)
-  (counsel-describe-variable-function #'helpful-variable)
-  :bind
-  ([remap describe-function] . counsel-describe-function) ;; remap keybinding to something different
-  ([remap describe-command] . helpful-command) 
-  ([remap describe-variable] . counsel-describe-variable))
-
-(defun delete-file-and-buffer ()
-  "Kill the current buffer and deletes the file it is visiting."
-  (interactive)
-  (let ((filename (buffer-file-name)))
-    (if filename
-        (if (y-or-n-p (concat "Do you really want to delete file " filename " ?"))
-            (progn
-              (delete-file filename)
-              (message "Deleted file %s." filename)
-              (kill-buffer)))
-      (message "Not a file visiting buffer!"))))
+(global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
+  ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
 (use-package general ;; set personal bindings for leader key for example
  ; (general-define-key "C-M-j" 'counsel-switch-buffer) ;; allows to define multiple global keybindings
@@ -195,6 +151,17 @@
    "bd" '(delete-file-and-buffer :which-key "delete file")
    "w" '(save-buffer :which-key "save buffer") ;; classic vim save
    "tt" '(counsel-load-theme :which-key "choose theme")))
+
+(use-package hydra) ;; emacs bindings that stick around like mode for i3
+
+(defhydra hydra-text-scale (:timeout 4)
+  "scale text"
+  ("j" text-scale-increase "in")
+  ("k" text-scale-decrease "out")
+  ("f" nil "finished" :exit t))
+
+(rune/leader-keys
+  "ts" '(hydra-text-scale/body :which-key "scale text"))
 
 ;; vim keybindings for easier on the fingers typing :D
 (use-package evil
@@ -229,20 +196,45 @@
   (evil-collection-init))
 
 ; C-z go back to EMACS MODE
-;;  if package give error try:type list-packages command to update packages
- 
-(use-package hydra) ;; emacs bindings that stick around like mode for i3
 
-(defhydra hydra-text-scale (:timeout 4)
-  "scale text"
-  ("j" text-scale-increase "in")
-  ("k" text-scale-decrease "out")
-  ("f" nil "finished" :exit t))
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
 
-(rune/leader-keys
-  "ts" '(hydra-text-scale/body :which-key "scale text"))
+(use-package which-key ;; This shows which commands are available for current keypresses
+  :init (which-key-mode) ;; runs before package is loaded automatically whether package is loaded or not we can also invoke the mode
+  :diminish which-key-mode
+  :config ;; this is run after the package is loaded
+  (setq which-key-idle-delay 0.15)) ;; delay on keybindings 
 
-;; C-c are user defined commands
+(use-package helpful ;; better function descriptions
+  :custom ;; custom variables
+  (counsel-describe-function-function #'helpful-callable)
+  (counsel-describe-variable-function #'helpful-variable)
+  :bind
+  ([remap describe-function] . counsel-describe-function) ;; remap keybinding to something different
+  ([remap describe-command] . helpful-command) 
+  ([remap describe-variable] . counsel-describe-variable))
+
+(defun delete-file-and-buffer ()
+  "Kill the current buffer and deletes the file it is visiting."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if filename
+        (if (y-or-n-p (concat "Do you really want to delete file " filename " ?"))
+            (progn
+              (delete-file filename)
+              (message "Deleted file %s." filename)
+              (kill-buffer)))
+      (message "Not a file visiting buffer!"))))
+
+;; bring in the GIT
+;; use C-x g to open magit status
+;; type ? to know what can you do with magit
+(use-package magit ;; use tab to open instead of za in vim
+  ;; :custom
+  ;;   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+  )
+
 ;; emacs variables local to projects
 (use-package projectile ;; git projects management
   :diminish projectile-mode
@@ -257,7 +249,15 @@
   (setq projectile-switch-project-action #'projectile-dired))
 
 (use-package counsel-projectile ;; more commands with M-o in projectile (ivy allows that)
-  :config(counsel-projectile-mode)) 
+  :config(counsel-projectile-mode))
+
+(use-package git-gutter ;; works just like in vim :D
+  :config
+  ;; If you enable global minor mode
+  (global-git-gutter-mode t)
+  ;; If you enable git-gutter-mode for some modes
+  (add-hook 'ruby-mode-hook 'git-gutter-mode)
+  )
 
 ;; (use-package diff-hl
 ;;   :init
@@ -267,28 +267,10 @@
 ;;   (global-diff-hl-mode)
 ;;   (diff-hl-margin-mode)
 ;;   )
-
-(use-package git-gutter ;; works just like in vim :D
-  :config
-  ;; If you enable global minor mode
-    (global-git-gutter-mode t)
-    ;; If you enable git-gutter-mode for some modes
-    (add-hook 'ruby-mode-hook 'git-gutter-mode)
-  )
-;; bring in the GIT
-;; use C-x g to open magit status
-;; type ? to know what can you do with magit
-(use-package magit ;; use tab to open instead of za in vim
-  ;; :custom
-  ;;   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
-  )
-
 ;; NOTE: Make sure to configure a GitHub token before using this package!
 ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
 ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
 ;; (use-package forge) ;; more git functionality
-
-;; C-n C-p in normal mode to go back and forth the clipboard
 
 (defun efs/org-mode-setup ()
   (org-indent-mode)
@@ -341,10 +323,10 @@
   (setq org-log-done 'time) ;; logs when a task goes to done C-h-v (describe variable)
   (setq org-log-into-drawer t) ;; collapse logs into a drawer
   (setq org-agenda-files
-	'("~/fib/org/birthday.org"
-	  "~/fib/org/Tasks.org"
-	  "~/fib/org/Habits.org"
-	  ))
+        '("~/fib/org/birthday.org"
+          "~/fib/org/Tasks.org"
+          "~/fib/org/Habits.org"
+          ))
 
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit) ;;  add org-habit to org-modules
@@ -474,25 +456,3 @@
       (org-babel-tangle))))
 
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
-
-
-;;---------------------
-;; AUTOMATIC CONFIG    
-;;---------------------
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("835868dcd17131ba8b9619d14c67c127aa18b90a82438c8613586331129dda63" default))
- '(package-selected-packages
-   '(fzf org-inline-pdf diff-hl diff-hl-mode visual-fill-column org-bullets forge evil-magit magit counsel-projectile projectile evil-commentary evil-commentary-mode hydra evil-collection evil general doom-themes which-key use-package rainbow-delimiters ivy-rich helpful doom-modeline counsel command-log-mode))
- '(warning-suppress-types '((use-package))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
