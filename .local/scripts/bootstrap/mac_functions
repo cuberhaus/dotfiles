@@ -81,7 +81,10 @@ mac_install () {
 }
 
 optional () {
-    brew install --cask emacs                   # --cask is needed
+    # brew install --cask emacs                   # --cask is needed
+    brew tap d12frosted/emacs-plus              # regular emacs version doesn't snap properly LOL
+    brew install emacs-plus --with-modern-cg433n-icon
+    ln -s /opt/homebrew/bin/Emacs.app /Applications/Emacs.app
     brew install adobe-acrobat-reader           # Pdf reader
     brew install dbeaver-community adoptopenjdk       # BD
     brew install eclipse-java                   # Java IDE

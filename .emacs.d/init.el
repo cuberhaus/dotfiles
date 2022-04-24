@@ -10,7 +10,19 @@
 ;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
 (set-fringe-mode 10) ; Make some space
 (menu-bar-mode -1) ;; remove top bar
-(setq visible-bell t)
+(cond ((eq system-type 'windows-nt)
+    ;; Windows-specific code goes here.
+    )
+      ((eq system-type 'darwin)
+    )
+    ((eq system-type 'gnu/linux)
+     (setq visible-bell t)
+    ))
+
+(setq scroll-step            1
+    scroll-conservatively  10000) ;; scroll line by line not like a fucking degenerate
+(setq smooth-scroll-margin 4) ;; margin like in vim
+
 (setq vc-follow-symlinks t) ;; always follow symlinks
 (column-number-mode)
 (global-display-line-numbers-mode t) ;; display line numbers everywhere

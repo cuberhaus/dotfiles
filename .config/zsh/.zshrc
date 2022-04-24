@@ -109,7 +109,7 @@ bindkey -v
 export KEYTIMEOUT=1
 
 #HAS TO BE AT THE END
-# Edit line in vim with ctrl-e (it's vv with zsh-vim extension):
+# Edit line in vim with ctrl-e (it's vv with zsh-vim extension): IN INSERT MODE
 autoload edit-command-line; zle -N edit-command-line
 bindkey '^e' edit-command-line
 # ctrl-f Search a file and cd into its directory
