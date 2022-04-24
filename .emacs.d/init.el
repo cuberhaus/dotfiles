@@ -4,7 +4,7 @@
       gc-cons-percentage 0.6
       file-name-handler-alist nil)
 
-  (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't
+  ;; (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
     (setq custom-file "~/.emacs.d/custom.el")
     (load custom-file)
 

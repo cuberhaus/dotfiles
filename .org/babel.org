@@ -7,6 +7,22 @@ mkdirp create directory if needed
 
 Sometimes have to type org-mode so that it reloades
 
+* Updates on emacs
+- M-x list-packages
+- Press U to mark for upgrade
+- Press x to prompt for upgrade
+
+* Performance
+- :hook - Package will load the first time one of the hooks
+- :bind - Package will load when a keybinding is used
+- :commands - When a command is used
+- :mode - First time a file with a particular extension is used
+- :after - load this package after other specific packages are loaded
+- :defer - defer loading until startup if no other options are used
+
+  see also:
+  with-eval-after-load 'package - execute body after package is loaded
+
 * Mac-OS
 Install with:
 #+begin_src shell
@@ -55,7 +71,7 @@ If package give error try:type list-packages command to update packages
         gc-cons-percentage 0.6
         file-name-handler-alist nil)
 
-    (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't
+    ;; (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
       (setq custom-file "~/.emacs.d/custom.el")
       (load custom-file)
 #+end_src
