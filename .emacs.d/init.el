@@ -14,7 +14,7 @@
 
 (setq vc-follow-symlinks t) ;; always follow symlinks
 ;; (setq vc-follow-symlinks nil) ;; or never follow them
-(setq smerge-command-prefix "\C-cv")
+
 ;; Font Configuration ----------------------------------------------------------
 ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
 ;; IF FONT LOOKS WEIRD (TOO SLIM) then it means the font is not working properly, CHANGE IT
@@ -27,6 +27,15 @@
 (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
 
 ;; -------------------------------------------------------
+(defun flyspell-spanish ()
+  (interactive)
+  (ispell-change-dictionary "castellano")
+  (flyspell-buffer))
+
+(defun flyspell-english ()
+  (interactive)
+  (ispell-change-dictionary "default")
+  (flyspell-buffer))
 
 ;(setq visible-bell t)
 (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
@@ -54,6 +63,7 @@
 
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(use-package langtool)
 
 (use-package ivy ; makes navigation between stuff easier
   :diminish ; do not show stuff on bar or something
@@ -148,14 +158,40 @@
   :keymaps '(normal insert visual emacs)
   :prefix "SPC" 
   :global-prefix "C-SPC") ;; leader
-  (rune/leader-keys
+  (rune/leader-keys ;; try to have similar keybindings in vim as well
    "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
-   "b" '(:ignore b :which-key "buffers") ;; "folder" for toggles
-   "bn" '(evil-next-buffer :which-key "next buffer") ;; "folder" for toggles
-   "bp" '(evil-prev-buffer :which-key "previous buffer") ;; "folder" for toggles
-   "bd" '(delete-file-and-buffer :which-key "delete file") ;; classic vim save
+   "b" '(:ignore b :which-key "buffers") 
+   "h" '(:ignore h :which-key "git-gutter") 
+   "g" '(git-gutter-mode :which-key "git-gutter toggle") 
+   "hn" '(git-gutter:next-hunk :which-key "next hunk") 
+   "hp" '(git-gutter:previous-hunk :which-key "previous hunk") 
+   "hv" '(git-gutter:popup-hunk :which-key "preview hunk") 
+   "hs" '(git-gutter:stage-hunk :which-key "stage hunk") 
+   "hu" '(git-gutter:revert-hunk :which-key "undo hunk") ;; take back changes
+   "hg" '(git-gutter :which-key "update changes") 
+   "o" '(buffer-menu :which-key "buffer menu") 
+   "bn" '(evil-next-buffer :which-key "next buffer") 
+   "bp" '(evil-prev-buffer :which-key "previous buffer")
+   "bc" '(evil-delete-buffer :which-key "close buffer")
+   "bd" '(delete-file-and-buffer :which-key "delete file")
    "w" '(save-buffer :which-key "save buffer") ;; classic vim save
    "tt" '(counsel-load-theme :which-key "choose theme")))
+
+    ;; (global-set-key (kbd "C-x C-g") 'git-gutter)
+    ;; (global-set-key (kbd "C-x v =") 'git-gutter:popup-hunk)
+
+    ;; ;; Jump to next/previous hunk
+    ;; (global-set-key (kbd "C-x p") 'git-gutter:previous-hunk)
+    ;; (global-set-key (kbd "C-x n") 'git-gutter:next-hunk)
+
+    ;; ;; Stage current hunk
+    ;; (global-set-key (kbd "C-x v s") 'git-gutter:stage-hunk)
+
+    ;; ;; Revert current hunk
+    ;; (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk)
+
+    ;; ;; Mark current hunk
+    ;; (global-set-key (kbd "C-x v SPC") #'git-gutter:mark-hunk)
 
 ;; vim keybindings for easier on the fingers typing :D
 ;; C-r WONT WORK, cause we are not using a redo we have a undo stack
@@ -226,6 +262,22 @@
 (use-package counsel-projectile ;; more commands with M-o in projectile (ivy allows that)
   :config(counsel-projectile-mode)) 
 
+;; (use-package diff-hl
+;;   :init
+;;   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
+;;   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+;;   :config
+;;   (global-diff-hl-mode)
+;;   (diff-hl-margin-mode)
+;;   )
+
+(use-package git-gutter ;; works just like in vim :D
+  :config
+  ;; If you enable global minor mode
+    (global-git-gutter-mode t)
+    ;; If you enable git-gutter-mode for some modes
+    (add-hook 'ruby-mode-hook 'git-gutter-mode)
+  )
 ;; bring in the GIT
 ;; use C-x g to open magit status
 ;; type ? to know what can you do with magit
@@ -307,7 +359,8 @@
  '(custom-safe-themes
    '("835868dcd17131ba8b9619d14c67c127aa18b90a82438c8613586331129dda63" default))
  '(package-selected-packages
-   '(visual-fill-column org-bullets forge evil-magit magit counsel-projectile projectile evil-commentary evil-commentary-mode hydra evil-collection evil general doom-themes which-key use-package rainbow-delimiters ivy-rich helpful doom-modeline counsel command-log-mode)))
+   '(diff-hl diff-hl-mode git-gutter visual-fill-column org-bullets forge evil-magit magit counsel-projectile projectile evil-commentary evil-commentary-mode hydra evil-collection evil general doom-themes which-key use-package rainbow-delimiters ivy-rich helpful doom-modeline counsel command-log-mode))
+ '(warning-suppress-types '((use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

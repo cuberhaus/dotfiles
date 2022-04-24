@@ -368,9 +368,9 @@ map <C-l> <C-W>l
 " map <leader>s <C-W>s
 
 " Close the current buffer :bd will close a buffer
-map <leader>bd :bd<cr>
+map <leader>bc :bc<cr>
 " Close all the buffers
-map <leader>ba :bufdo bd<cr>
+map <leader>ba :bufdo bc<cr>
 " Previous buffer
 map <leader>bp :bp <cr>
 " Next buffer
