@@ -24,7 +24,13 @@
     ;; Windows-specific code goes here.
     )
       ((eq system-type 'darwin)
-    ;; Windows-specific code goes here.
+      (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
+
+      ;; Set the fixed pitch face
+      (set-face-attribute 'fixed-pitch nil :font "FuraCode Nerd Font" :height 120)
+
+      ;; Set the variable pitch face
+      (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
     )
     ((eq system-type 'gnu/linux)
       (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
