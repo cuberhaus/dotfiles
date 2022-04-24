@@ -17,16 +17,25 @@
 ;; (setq vc-follow-symlinks nil) ;; or never follow them
 
 ;; Font Configuration -----------------------
-;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
-;; IF FONT LOOKS WEIRD (TOO SLIM) then it means the font is not working properly, CHANGE IT
-(set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
+  ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
+  ;; IF FONT LOOKS WEIRD (TOO SLIM) then it means the font is not working properly, CHANGE IT
 
-;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "FuraCode Nerd Font" :height 120)
+(cond ((eq system-type 'windows-nt)
+    ;; Windows-specific code goes here.
+    )
+      ((eq system-type 'darwin)
+    ;; Windows-specific code goes here.
+    )
+    ((eq system-type 'gnu/linux)
+      (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
 
-;; Set the variable pitch face
-(set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
-;; -------------------------------------------------------
+      ;; Set the fixed pitch face
+      (set-face-attribute 'fixed-pitch nil :font "FuraCode Nerd Font" :height 120)
+
+      ;; Set the variable pitch face
+      (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
+    ))
+  ;; -------------------------------------------------------
 
 ;; execute spanish spell-checking on buffer
 (defun flyspell-spanish ()
