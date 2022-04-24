@@ -81,6 +81,7 @@ mac_install () {
 }
 
 optional () {
+    brew install --cask emacs                   # --cask is needed
     brew install adobe-acrobat-reader           # Pdf reader
     brew install dbeaver-community adoptopenjdk       # BD
     brew install eclipse-java                   # Java IDE
