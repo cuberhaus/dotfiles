@@ -1,6 +1,13 @@
-;; prefixes: C-x, C-h, M-x
-;; emacs swap window C-x o
+;; prefixes: C-x: emacs keybindings, C-h: help, M-x: execute function, C-c: user-defined keybindings, C-SPC: more user defined keybindings
+;; emacs go between windows C-x o
 ;; use bookmarks to open specific files
+
+;; UNDO 
+;; C-r WONT WORK, cause we are not using a redo we have a undo stack
+;; undo is treated like a normal command, therefore you can undo the undo.
+;; undo's will go to the stack, if a move like "k" is done then you can undo again, this makes it possible to undo every single edit.
+;; in typicall (global-undo-tree-mode) (evil-set-undo-system 'undo-tree)
+;; if you are doing several undos and miss the "correct spot" and do anything at all which is not an undo command, you are stuck: you broke the chain of undos https://www.emacswiki.org/emacs/RedoMode
 
 ;; You will most likely need to adjust this font size for your system!
 (defvar runemacs/default-font-size 110)
@@ -9,7 +16,7 @@
 
 (scroll-bar-mode -1) ; Disable the scrollbar
 (tool-bar-mode -1)
-;(tooltip-mode -1) disable tooltips
+;(tooltip-mode -1) disable tooltips (text displayed when hovering over an element like on the toolbar)
 (set-fringe-mode 10) ; Make some space
 (menu-bar-mode -1) ;; remove top bar
 
@@ -28,6 +35,7 @@
 (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
 
 ;; -------------------------------------------------------
+;; execute spanish spell-checking on buffer
 (defun flyspell-spanish ()
   (interactive)
   (ispell-change-dictionary "castellano")
@@ -185,29 +193,7 @@
    "w" '(save-buffer :which-key "save buffer") ;; classic vim save
    "tt" '(counsel-load-theme :which-key "choose theme")))
 
-    ;; (global-set-key (kbd "C-x C-g") 'git-gutter)
-    ;; (global-set-key (kbd "C-x v =") 'git-gutter:popup-hunk)
-
-    ;; ;; Jump to next/previous hunk
-    ;; (global-set-key (kbd "C-x p") 'git-gutter:previous-hunk)
-    ;; (global-set-key (kbd "C-x n") 'git-gutter:next-hunk)
-
-    ;; ;; Stage current hunk
-    ;; (global-set-key (kbd "C-x v s") 'git-gutter:stage-hunk)
-
-    ;; ;; Revert current hunk
-    ;; (global-set-key (kbd "C-x v r") 'git-gutter:revert-hunk)
-
-    ;; ;; Mark current hunk
-    ;; (global-set-key (kbd "C-x v SPC") #'git-gutter:mark-hunk)
-
 ;; vim keybindings for easier on the fingers typing :D
-;; C-r WONT WORK, cause we are not using a redo we have a undo stack
-;; undo is treated like a normal command, therefore you can undo the undo.
-;; undo's will go to the stack, if a move like "k" is done then you can undo again, this makes it possible to undo every single edit.
-;; in typicall (global-undo-tree-mode) (evil-set-undo-system 'undo-tree)
-;; if you are doing several undos and miss the "correct spot" and do anything at all which is not an undo command, you are stuck: you broke the chain of undos https://www.emacswiki.org/emacs/RedoMode
-
 (use-package evil
   :init
   (setq evil-want-integration t) ;; must have
