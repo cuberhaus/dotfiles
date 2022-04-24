@@ -114,7 +114,7 @@
 
 (column-number-mode)
 (global-display-line-numbers-mode t) ;; display line numbers everywhere
-(global-auto-revert-mode)
+(global-auto-revert-mode) ;;
 
 ;; Disable line numbers for some modes
 (dolist (mode '(org-mode-hook
