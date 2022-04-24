@@ -24,13 +24,13 @@
     ;; Windows-specific code goes here.
     )
       ((eq system-type 'darwin)
-      (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height runemacs/default-font-size)
+      (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 180)
 
       ;; Set the fixed pitch face
-      (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height 120)
+      (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height 200)
 
       ;; Set the variable pitch face
-      (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 120 :weight 'regular)
+      (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 200 :weight 'regular)
     )
     ((eq system-type 'gnu/linux)
       (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
