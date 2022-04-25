@@ -63,7 +63,6 @@ Sometimes have to type org-mode so that it reloades
 ** Newly added packages can't be installed
 Could be because other packages are outdated, proceed to update them.
 * Code
-
 ** Startup config
 *** Optimization with garbage collector
 #+begin_src emacs-lisp
@@ -251,7 +250,19 @@ Could be because other packages are outdated, proceed to update them.
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
 #+end_src
+** Keep Folders Clean
+#+begin_src emacs-lisp
+;; NOTE: If you want to move everything out of the ~/.emacs.d folder
+;; reliably, set `user-emacs-directory` before loading no-littering!
+;(setq user-emacs-directory "~/.cache/emacs")
 
+(use-package no-littering)
+
+;; no-littering doesn't set this by default so we must place
+;; auto save files in the same path as it uses for sessions
+(setq auto-save-file-name-transforms
+      `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+#+end_src
 ** UI settings
 *** Ivy
 #+begin_src emacs-lisp
@@ -839,6 +850,38 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
       (let ((org-confirm-babel-evaluate nil))
         (org-babel-tangle))))
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+#+end_src
+** Dired
+#+begin_src emacs-lisp
+(use-package dired
+  :ensure nil ;; make sure package manager doesn't try to install
+  :commands (dired dired-jump)
+  :bind (("C-x C-j" . dired-jump))
+  :custom ((dired-listing-switches "-agho --group-directories-first"))
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-single-up-directory
+    "l" 'dired-single-buffer))
+
+(use-package dired-single
+  :commands (dired dired-jump))
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-open
+  :commands (dired dired-jump)
+  :config
+  ;; Doesn't work as expected!
+  ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
+  (setq dired-open-extensions '(("png" . "feh")
+                                ("mkv" . "mpv"))))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
 #+end_src
 ** Disable Optimization
 Disable optimization at the end of startup so that garbage collector works properly and doesn't make emacs crash.

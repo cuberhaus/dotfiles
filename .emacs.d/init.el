@@ -150,6 +150,17 @@
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
 
+;; NOTE: If you want to move everything out of the ~/.emacs.d folder
+;; reliably, set `user-emacs-directory` before loading no-littering!
+;(setq user-emacs-directory "~/.cache/emacs")
+
+(use-package no-littering)
+
+;; no-littering doesn't set this by default so we must place
+;; auto save files in the same path as it uses for sessions
+(setq auto-save-file-name-transforms
+      `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+
 (use-package ivy ; makes navigation between stuff easier
   :diminish ; do not show stuff on bar or something
   :bind (("C-s" . swiper) ;;like / but with context
@@ -621,6 +632,36 @@
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+
+(use-package dired
+  :ensure nil ;; make sure package manager doesn't try to install
+  :commands (dired dired-jump)
+  :bind (("C-x C-j" . dired-jump))
+  :custom ((dired-listing-switches "-agho --group-directories-first"))
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-single-up-directory
+    "l" 'dired-single-buffer))
+
+(use-package dired-single
+  :commands (dired dired-jump))
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-open
+  :commands (dired dired-jump)
+  :config
+  ;; Doesn't work as expected!
+  ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
+  (setq dired-open-extensions '(("png" . "feh")
+                                ("mkv" . "mpv"))))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
 
 ;; after startup, it is important you reset this to some reasonable default. A large 
 ;; gc-cons-threshold will cause freezing and stuttering during long-term 
