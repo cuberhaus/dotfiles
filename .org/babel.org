@@ -5,8 +5,6 @@ Apply the same configuration above to every block
 Tangle means where to put this files code to
 mkdirp create directory if needed
 
-Sometimes have to type org-mode so that it reloades
-
 * Updates on emacs
 - M-x list-packages
 - Press U to mark for upgrade
@@ -19,11 +17,8 @@ Sometimes have to type org-mode so that it reloades
 - :mode - First time a file with a particular extension is used
 - :after - load this package after other specific packages are loaded
 - :defer - defer loading until startup if no other options are used
-
   see also:
   with-eval-after-load 'package - execute body after package is loaded
-
-  
 * Mac-OS
 Install with:
 #+begin_src shell
@@ -61,8 +56,10 @@ in typicall (global-undo-tree-mode) (evil-set-undo-system 'undo-tree)
 if you are doing several undos and miss the "correct spot" and do anything at all which is not an undo command, you are stuck: you broke the chain of undos https://www.emacswiki.org/emacs/RedoMode
 
 * Solving errors
+** Package errors
 If package give error try:type list-packages command to update packages.
-
+** Org errors
+Sometimes have to type org-mode so that it reloades
 ** Newly added packages can't be installed
 Could be because other packages are outdated, proceed to update them.
 * Code
@@ -621,40 +618,8 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 #+end_src
 
 ** Org
-
+*** Templates
 #+begin_src emacs-lisp
-  (use-package haskell-mode
-    :after org) ;; needed for haskell snippets
-  
-        (defun efs/org-mode-setup ()
-          (org-indent-mode)
-          (variable-pitch-mode 1) ;; allows text to be of variable size
-          (visual-line-mode 1) ;; makes emacs editing commands act on visual lines not logical ones, also word-wrapping, idk if i want this
-          )
-
-        (defun efs/org-font-setup ()
-          ;; Replace list hyphen with dot
-          (font-lock-add-keywords 'org-mode
-                                  '(("^ *\\([-]\\) "
-                                     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))) ;; replace - in lists for a dot
-
-          ;; Set faces for heading levels
-          (dolist (face '((org-level-1 . 1.2) ;; variable sizes for headers
-                          (org-level-2 . 1.1)
-                          (org-level-3 . 1.05)
-                          (org-level-4 . 1.0)
-                          (org-level-5 . 1.1)
-                          (org-level-6 . 1.1)
-                          (org-level-7 . 1.1)
-                          (org-level-8 . 1.1)))
-            (set-face-attribute (car face) nil :font "DejaVu Sans" :weight 'regular :height(cdr face)))
-    (with-eval-after-load 'org
-        (org-babel-do-load-languages
-          'org-babel-load-languages
-          '((emacs-lisp . t)
-            (python . t)))
-        (push '("conf-unix" . conf-unix) org-src-lang-modes)
-        )
     (with-eval-after-load 'org
         (require 'org-tempo)
         (add-to-list 'org-structure-template-alist '("py" . "src python"))
@@ -663,15 +628,64 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
         (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
         (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
         )
+#+end_src
 
-          ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-          (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-          (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch)) ;; fixed pitch on some stuff so that it lines up correctly, and variable on others so that it looks better
-          (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
-          (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-          (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-          (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-          (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+*** Language support
+#+begin_src emacs-lisp
+  (use-package haskell-mode
+    :after org) ;; needed for haskell snippets
+
+#+end_src
+
+#+begin_src emacs-lisp
+  (with-eval-after-load 'org
+      (org-babel-do-load-languages
+        'org-babel-load-languages
+        '((emacs-lisp . t)
+          (java . t)
+          (python . t)))
+      (push '("conf-unix" . conf-unix) org-src-lang-modes)
+      )
+#+end_src
+
+*** Font setup
+
+#+begin_src emacs-lisp
+  (defun efs/org-font-setup ()
+    ;; Replace list hyphen with dot
+    (font-lock-add-keywords 'org-mode
+                            '(("^ *\\([-]\\) "
+                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))) ;; replace - in lists for a dot
+
+    ;; Set faces for heading levels
+    (dolist (face '((org-level-1 . 1.2) ;; variable sizes for headers
+                    (org-level-2 . 1.1)
+                    (org-level-3 . 1.05)
+                    (org-level-4 . 1.0)
+                    (org-level-5 . 1.1)
+                    (org-level-6 . 1.1)
+                    (org-level-7 . 1.1)
+                    (org-level-8 . 1.1)))
+      (set-face-attribute (car face) nil :font "DejaVu Sans" :weight 'regular :height(cdr face)))
+
+    ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+    (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+    (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch)) ;; fixed pitch on some stuff so that it lines up correctly, and variable on others so that it looks better
+    (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+    (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+#+end_src
+
+*** Org configuration
+#+begin_src emacs-lisp
+  
+        (defun efs/org-mode-setup ()
+          (org-indent-mode)
+          (variable-pitch-mode 1) ;; allows text to be of variable size
+          (visual-line-mode 1) ;; makes emacs editing commands act on visual lines not logical ones, also word-wrapping, idk if i want this
+          )
 
         (use-package org  ;; org is already installed though
           :commands (org-capture org-agenda)
@@ -794,11 +808,10 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
                "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
 
           )
+#+end_src
 
-        (use-package org-bullets ;; changes headers so that it doesn't show all of the stars
-          :hook (org-mode . org-bullets-mode)
-          :custom
-          (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
+*** Text in the middle
+#+begin_src emacs-lisp
 
         (defun efs/org-mode-visual-fill ()
           (setq visual-fill-column-width 100 ;; set column width (character width?)
@@ -807,17 +820,29 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 
         (use-package visual-fill-column
           :hook (org-mode . efs/org-mode-visual-fill))
+#+end_src
+*** Org bullets
+#+begin_src emacs-lisp
+        (use-package org-bullets ;; changes headers so that it doesn't show all of the stars
+          :hook (org-mode . org-bullets-mode)
+          :custom
+          (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
+#+end_src
 
-        ;; Automatically tangle our Emacs.org config file when we save it
-        (defun efs/org-babel-tangle-config ()
-          (when (string-equal (buffer-file-name)
-                              (expand-file-name "~/dotfiles/dotfiles/.org/babel.org"))
-            ;; Dynamic scoping to the rescue
-            (let ((org-confirm-babel-evaluate nil))
-              (org-babel-tangle))))
-
-        (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
-
+*** Automatically tangle config file when we save it
+#+begin_src emacs-lisp
+  ;; Automatically tangle our Emacs.org config file when we save it
+  (defun efs/org-babel-tangle-config ()
+    (when (string-equal (buffer-file-name)
+                        (expand-file-name "~/dotfiles/dotfiles/.org/babel.org"))
+      ;; Dynamic scoping to the rescue
+      (let ((org-confirm-babel-evaluate nil))
+        (org-babel-tangle))))
+  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+#+end_src
+** Disable Optimization
+Disable optimization at the end of startup so that garbage collector works properly and doesn't make emacs crash.
+#+begin_src emacs-lisp
   ;; after startup, it is important you reset this to some reasonable default. A large 
   ;; gc-cons-threshold will cause freezing and stuttering during long-term 
   ;; interactive use. I find these are nice defaults:

@@ -425,200 +425,202 @@
 ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
 ;; (use-package forge) ;; more git functionality
 
+(with-eval-after-load 'org
+    (require 'org-tempo)
+    (add-to-list 'org-structure-template-alist '("py" . "src python"))
+    (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+    (add-to-list 'org-structure-template-alist '("hs" . "src haskell"))
+    (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
+    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+    )
+
 (use-package haskell-mode
   :after org) ;; needed for haskell snippets
 
-      (defun efs/org-mode-setup ()
-        (org-indent-mode)
-        (variable-pitch-mode 1) ;; allows text to be of variable size
-        (visual-line-mode 1) ;; makes emacs editing commands act on visual lines not logical ones, also word-wrapping, idk if i want this
-        )
+(with-eval-after-load 'org
+    (org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t)
+        (java . t)
+        (python . t)))
+    (push '("conf-unix" . conf-unix) org-src-lang-modes)
+    )
 
-      (defun efs/org-font-setup ()
-        ;; Replace list hyphen with dot
-        (font-lock-add-keywords 'org-mode
-                                '(("^ *\\([-]\\) "
-                                   (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))) ;; replace - in lists for a dot
+(defun efs/org-font-setup ()
+  ;; Replace list hyphen with dot
+  (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))) ;; replace - in lists for a dot
 
-        ;; Set faces for heading levels
-        (dolist (face '((org-level-1 . 1.2) ;; variable sizes for headers
-                        (org-level-2 . 1.1)
-                        (org-level-3 . 1.05)
-                        (org-level-4 . 1.0)
-                        (org-level-5 . 1.1)
-                        (org-level-6 . 1.1)
-                        (org-level-7 . 1.1)
-                        (org-level-8 . 1.1)))
-          (set-face-attribute (car face) nil :font "DejaVu Sans" :weight 'regular :height(cdr face)))
-  (with-eval-after-load 'org
-      (org-babel-do-load-languages
-        'org-babel-load-languages
-        '((emacs-lisp . t)
-          (python . t)))
-      (push '("conf-unix" . conf-unix) org-src-lang-modes)
-      )
-  (with-eval-after-load 'org
-      (require 'org-tempo)
-      (add-to-list 'org-structure-template-alist '("py" . "src python"))
-      (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-      (add-to-list 'org-structure-template-alist '("hs" . "src haskell"))
-      (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
-      (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-      )
+  ;; Set faces for heading levels
+  (dolist (face '((org-level-1 . 1.2) ;; variable sizes for headers
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1)))
+    (set-face-attribute (car face) nil :font "DejaVu Sans" :weight 'regular :height(cdr face)))
 
-        ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-        (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-        (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch)) ;; fixed pitch on some stuff so that it lines up correctly, and variable on others so that it looks better
-        (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
-        (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-        (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-        (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-        (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch)) ;; fixed pitch on some stuff so that it lines up correctly, and variable on others so that it looks better
+  (set-face-attribute 'org-table nil   :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
-      (use-package org  ;; org is already installed though
-        :commands (org-capture org-agenda)
-        :hook (org-mode . efs/org-mode-setup)
-        :config
-        (message "Org mode loaded")
-        (setq org-ellipsis " ▾") ;; change ... to another symbol that is less confusing
-        (efs/org-font-setup) ;; setup font
-         ;; hides *bold* and __underlined__ and linked words [name][link]
-        (setq org-agenda-start-with-log-mode t)
-        (setq org-log-done 'time) ;; logs when a task goes to done C-h-v (describe variable)
-        (setq org-log-into-drawer t) ;; collapse logs into a drawer
-        (setq org-agenda-files
-              '("~/fib/org/birthday.org"
-                "~/fib/org/Tasks.org"
-                "~/fib/org/Habits.org"
-                ))
+(defun efs/org-mode-setup ()
+  (org-indent-mode)
+  (variable-pitch-mode 1) ;; allows text to be of variable size
+  (visual-line-mode 1) ;; makes emacs editing commands act on visual lines not logical ones, also word-wrapping, idk if i want this
+  )
 
-        (require 'org-habit)
-        (add-to-list 'org-modules 'org-habit) ;;  add org-habit to org-modules
-        (setq org-habit-graph-column 60) ;; what column the habit tracker shows
+(use-package org  ;; org is already installed though
+  :commands (org-capture org-agenda)
+  :hook (org-mode . efs/org-mode-setup)
+  :config
+  (message "Org mode loaded")
+  (setq org-ellipsis " ▾") ;; change ... to another symbol that is less confusing
+  (efs/org-font-setup) ;; setup font
+   ;; hides *bold* and __underlined__ and linked words [name][link]
+  (setq org-agenda-start-with-log-mode t)
+  (setq org-log-done 'time) ;; logs when a task goes to done C-h-v (describe variable)
+  (setq org-log-into-drawer t) ;; collapse logs into a drawer
+  (setq org-agenda-files
+        '("~/fib/org/birthday.org"
+          "~/fib/org/Tasks.org"
+          "~/fib/org/Habits.org"
+          ))
 
-        (setq org-todo-keywords
-          '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-            (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+  (require 'org-habit)
+  (add-to-list 'org-modules 'org-habit) ;;  add org-habit to org-modules
+  (setq org-habit-graph-column 60) ;; what column the habit tracker shows
 
-        (setq org-refile-targets ;; move TODO tasks to a different file
-          '(("Archive.org" :maxlevel . 1)
-            ("Tasks.org" :maxlevel . 1)))
+  (setq org-todo-keywords
+    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
 
-        ;; Save Org buffers after refiling!
-        (advice-add 'org-refile :after 'org-save-all-org-buffers)
+  (setq org-refile-targets ;; move TODO tasks to a different file
+    '(("Archive.org" :maxlevel . 1)
+      ("Tasks.org" :maxlevel . 1)))
 
-        (setq org-tag-alist
-          '((:startgroup)
-             ; Put mutually exclusive tags here
-             (:endgroup)
-             ("@errand" . ?E)
-             ("@home" . ?H)
-             ("@work" . ?W)
-             ("agenda" . ?a)
-             ("planning" . ?p)
-             ("publish" . ?P)
-             ("batch" . ?b)
-             ("note" . ?n)
-             ("idea" . ?i)))
+  ;; Save Org buffers after refiling!
+  (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-      ;; Configure custom agenda views
-        (setq org-agenda-custom-commands
-         '(("d" "Dashboard"
-           ((agenda "" ((org-deadline-warning-days 7)))
-            (todo "NEXT"
-              ((org-agenda-overriding-header "Next Tasks")))
-            (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+  (setq org-tag-alist
+    '((:startgroup)
+       ; Put mutually exclusive tags here
+       (:endgroup)
+       ("@errand" . ?E)
+       ("@home" . ?H)
+       ("@work" . ?W)
+       ("agenda" . ?a)
+       ("planning" . ?p)
+       ("publish" . ?P)
+       ("batch" . ?b)
+       ("note" . ?n)
+       ("idea" . ?i)))
 
-          ("n" "Next Tasks"
-           ((todo "NEXT"
-              ((org-agenda-overriding-header "Next Tasks")))))
+;; Configure custom agenda views
+  (setq org-agenda-custom-commands
+   '(("d" "Dashboard"
+     ((agenda "" ((org-deadline-warning-days 7)))
+      (todo "NEXT"
+        ((org-agenda-overriding-header "Next Tasks")))
+      (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
 
-          ("W" "Work Tasks" tags-todo "+work-email")
+    ("n" "Next Tasks"
+     ((todo "NEXT"
+        ((org-agenda-overriding-header "Next Tasks")))))
 
-          ;; Low-effort next actions
-          ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-           ((org-agenda-overriding-header "Low Effort Tasks")
-            (org-agenda-max-todos 20)
-            (org-agenda-files org-agenda-files)))
+    ("W" "Work Tasks" tags-todo "+work-email")
 
-          ("w" "Workflow Status"
-           ((todo "WAIT"
-                  ((org-agenda-overriding-header "Waiting on External")
-                   (org-agenda-files org-agenda-files)))
-            (todo "REVIEW"
-                  ((org-agenda-overriding-header "In Review")
-                   (org-agenda-files org-agenda-files)))
-            (todo "PLAN"
-                  ((org-agenda-overriding-header "In Planning")
-                   (org-agenda-todo-list-sublevels nil)
-                   (org-agenda-files org-agenda-files)))
-            (todo "BACKLOG"
-                  ((org-agenda-overriding-header "Project Backlog")
-                   (org-agenda-todo-list-sublevels nil)
-                   (org-agenda-files org-agenda-files)))
-            (todo "READY"
-                  ((org-agenda-overriding-header "Ready for Work")
-                   (org-agenda-files org-agenda-files)))
-            (todo "ACTIVE"
-                  ((org-agenda-overriding-header "Active Projects")
-                   (org-agenda-files org-agenda-files)))
-            (todo "COMPLETED"
-                  ((org-agenda-overriding-header "Completed Projects")
-                   (org-agenda-files org-agenda-files)))
-            (todo "CANC"
-                  ((org-agenda-overriding-header "Cancelled Projects")
-                   (org-agenda-files org-agenda-files)))))))
+    ;; Low-effort next actions
+    ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+     ((org-agenda-overriding-header "Low Effort Tasks")
+      (org-agenda-max-todos 20)
+      (org-agenda-files org-agenda-files)))
 
-       (setq org-capture-templates
-          `(("t" "Tasks / Projects")
-            ("tt" "Task" entry (file+olp "~/fib/org/Tasks.org" "Inbox")
-                 "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+    ("w" "Workflow Status"
+     ((todo "WAIT"
+            ((org-agenda-overriding-header "Waiting on External")
+             (org-agenda-files org-agenda-files)))
+      (todo "REVIEW"
+            ((org-agenda-overriding-header "In Review")
+             (org-agenda-files org-agenda-files)))
+      (todo "PLAN"
+            ((org-agenda-overriding-header "In Planning")
+             (org-agenda-todo-list-sublevels nil)
+             (org-agenda-files org-agenda-files)))
+      (todo "BACKLOG"
+            ((org-agenda-overriding-header "Project Backlog")
+             (org-agenda-todo-list-sublevels nil)
+             (org-agenda-files org-agenda-files)))
+      (todo "READY"
+            ((org-agenda-overriding-header "Ready for Work")
+             (org-agenda-files org-agenda-files)))
+      (todo "ACTIVE"
+            ((org-agenda-overriding-header "Active Projects")
+             (org-agenda-files org-agenda-files)))
+      (todo "COMPLETED"
+            ((org-agenda-overriding-header "Completed Projects")
+             (org-agenda-files org-agenda-files)))
+      (todo "CANC"
+            ((org-agenda-overriding-header "Cancelled Projects")
+             (org-agenda-files org-agenda-files)))))))
 
-            ("j" "Journal Entries")
-            ("jj" "Journal" entry
-                 (file+olp+datetree "~/fib/org/Journal.org")
-                 "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-                 ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-                 :clock-in :clock-resume
-                 :empty-lines 1)
-            ("jm" "Meeting" entry
-                 (file+olp+datetree "~/fib/org/Journal.org")
-                 "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-                 :clock-in :clock-resume
-                 :empty-lines 1)
+ (setq org-capture-templates
+    `(("t" "Tasks / Projects")
+      ("tt" "Task" entry (file+olp "~/fib/org/Tasks.org" "Inbox")
+           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
-            ("w" "Workflows")
-            ("we" "Checking Email" entry (file+olp+datetree "~/fib/org/Journal.org")
-                 "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
+      ("j" "Journal Entries")
+      ("jj" "Journal" entry
+           (file+olp+datetree "~/fib/org/Journal.org")
+           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+           ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+           :clock-in :clock-resume
+           :empty-lines 1)
+      ("jm" "Meeting" entry
+           (file+olp+datetree "~/fib/org/Journal.org")
+           "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
+           :clock-in :clock-resume
+           :empty-lines 1)
 
-            ("m" "Metrics Capture")
-            ("mw" "Weight" table-line (file+headline "~/fib/org/Metrics.org" "Weight")
-             "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
+      ("w" "Workflows")
+      ("we" "Checking Email" entry (file+olp+datetree "~/fib/org/Journal.org")
+           "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
 
-        )
+      ("m" "Metrics Capture")
+      ("mw" "Weight" table-line (file+headline "~/fib/org/Metrics.org" "Weight")
+       "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
 
-      (use-package org-bullets ;; changes headers so that it doesn't show all of the stars
-        :hook (org-mode . org-bullets-mode)
-        :custom
-        (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
+  )
 
-      (defun efs/org-mode-visual-fill ()
-        (setq visual-fill-column-width 100 ;; set column width (character width?)
-              visual-fill-column-center-text t) ;; center text on middle of screen
-        (visual-fill-column-mode 1))
+(defun efs/org-mode-visual-fill ()
+  (setq visual-fill-column-width 100 ;; set column width (character width?)
+        visual-fill-column-center-text t) ;; center text on middle of screen
+  (visual-fill-column-mode 1))
 
-      (use-package visual-fill-column
-        :hook (org-mode . efs/org-mode-visual-fill))
+(use-package visual-fill-column
+  :hook (org-mode . efs/org-mode-visual-fill))
 
-      ;; Automatically tangle our Emacs.org config file when we save it
-      (defun efs/org-babel-tangle-config ()
-        (when (string-equal (buffer-file-name)
-                            (expand-file-name "~/dotfiles/dotfiles/.org/babel.org"))
-          ;; Dynamic scoping to the rescue
-          (let ((org-confirm-babel-evaluate nil))
-            (org-babel-tangle))))
+(use-package org-bullets ;; changes headers so that it doesn't show all of the stars
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
 
-      (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+;; Automatically tangle our Emacs.org config file when we save it
+(defun efs/org-babel-tangle-config ()
+  (when (string-equal (buffer-file-name)
+                      (expand-file-name "~/dotfiles/dotfiles/.org/babel.org"))
+    ;; Dynamic scoping to the rescue
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
+(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
 
 ;; after startup, it is important you reset this to some reasonable default. A large 
 ;; gc-cons-threshold will cause freezing and stuttering during long-term 
