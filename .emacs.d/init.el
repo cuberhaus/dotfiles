@@ -1,12 +1,13 @@
 ;; The default is 800 kilobytes.  Measured in bytes.
 (defvar last-file-name-handler-alist file-name-handler-alist)
 (setq gc-cons-threshold 402653184
-      gc-cons-percentage 0.6
-      file-name-handler-alist nil)
+    gc-cons-percentage 0.6
+    file-name-handler-alist nil)
 
-  ;; (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
-    (setq custom-file "~/.emacs.d/custom.el")
-    (load custom-file)
+;; (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
+
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
 
 ;; You will most likely need to adjust this font size for your system!
     (defvar runemacs/default-font-size 110)
@@ -303,6 +304,79 @@
               (kill-buffer)))
       (message "Not a file visiting buffer!"))))
 
+(defun efs/lsp-mode-setup ()
+  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook (lsp-mode . efs/lsp-mode-setup)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :config
+  (lsp-enable-which-key-integration t)) ;; give description for keys with wichkey
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-sideline-show-code-actions t)
+  (lsp-ui-doc-position 'bottom))
+
+(use-package lsp-treemacs
+  :after lsp)
+
+(use-package lsp-ivy
+  :after (lsp-mode lsp))
+
+(use-package dap-mode
+  ;; Uncomment the config below if you want all UI panes to be hidden by default!
+  ;; :custom
+  ;; (lsp-enable-dap-auto-configure nil)
+  ;; :config
+  ;; (dap-ui-mode 1)
+  :after lsp
+  :config
+  ;; Set up Node debugging
+  (require 'dap-node)
+  (dap-node-setup) ;; Automatically installs Node debug adapter if needed
+
+  ;; Bind `C-c l d` to `dap-hydra` for easy access
+  (general-define-key
+    :keymaps 'lsp-mode-map
+    :prefix lsp-keymap-prefix
+    "d" '(dap-hydra t :wk "debugger")))
+
+(use-package python-mode
+  :ensure t
+  :hook (python-mode . lsp-deferred)
+  :custom
+  ;; NOTE: Set these if Python 3 is called "python3" on your system!
+  (python-shell-interpreter "python3")
+  (dap-python-executable "python3")
+  (dap-python-debugger 'debugpy)
+  :config
+  (require 'dap-python))
+
+;; (use-package latex-mode
+;;   :ensure t
+;;   :hook (latex-mode . lsp-deferred)
+(add-hook 'latex-mode 'lsp-deferred)
+;;   )
+
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+         ("<tab>" . company-complete-selection))
+        (:map lsp-mode-map
+         ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
 ;; bring in the GIT
 ;; use C-x g to open magit status
 ;; type ? to know what can you do with magit
@@ -351,7 +425,10 @@
 ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
 ;; (use-package forge) ;; more git functionality
 
-(defun efs/org-mode-setup ()
+(use-package haskell-mode
+  :after org) ;; needed for haskell snippets
+
+      (defun efs/org-mode-setup ()
         (org-indent-mode)
         (variable-pitch-mode 1) ;; allows text to be of variable size
         (visual-line-mode 1) ;; makes emacs editing commands act on visual lines not logical ones, also word-wrapping, idk if i want this
@@ -382,7 +459,10 @@
       )
   (with-eval-after-load 'org
       (require 'org-tempo)
+      (add-to-list 'org-structure-template-alist '("py" . "src python"))
       (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+      (add-to-list 'org-structure-template-alist '("hs" . "src haskell"))
+      (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
       (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
       )
 

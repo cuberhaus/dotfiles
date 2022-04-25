@@ -11,6 +11,9 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+if [ -d "$HOME/.local/share/cargo/bin" ] ; then
+    PATH="$HOME/.local/share/cargo/bin:$PATH"
+fi
 # if [[ "$DESKTOP_SESSION" == "i3" ]]; then
 # DO NOT EVER LEAVE AN IF EMPTY OR IT WILL CAUSE APPS TO NOT HAVE PATH STUFF BEWARE
 # TO CHECK IF PATH FOR APPS WORK OPEN OKULAR OR QT5 SETTINGS
