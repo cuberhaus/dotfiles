@@ -852,6 +852,7 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
 #+end_src
 ** Dired
+
 #+begin_src emacs-lisp
 (use-package dired
   :ensure nil ;; make sure package manager doesn't try to install

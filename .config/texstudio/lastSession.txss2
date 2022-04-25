@@ -10,12 +10,12 @@
         "FileVersion": 1,
         "Files": [
             {
-                "Col": 1,
+                "Col": 0,
                 "EditorGroup": 0,
                 "FileName": "../../fib/LP/erlang_project/latex/erlang.tex",
-                "FirstLine": 88,
+                "FirstLine": 95,
                 "FoldedLines": "",
-                "Line": 152
+                "Line": 145
             },
             {
                 "Col": 0,

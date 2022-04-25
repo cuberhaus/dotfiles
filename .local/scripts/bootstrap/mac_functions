@@ -81,10 +81,6 @@ mac_install () {
 }
 
 optional () {
-    # brew install --cask emacs                   # --cask is needed
-    brew tap d12frosted/emacs-plus              # regular emacs version doesn't snap properly LOL
-    brew install emacs-plus --with-modern-cg433n-icon
-    ln -s /opt/homebrew/bin/Emacs.app /Applications/Emacs.app
     brew install adobe-acrobat-reader           # Pdf reader
     brew install dbeaver-community adoptopenjdk       # BD
     brew install eclipse-java                   # Java IDE
@@ -129,9 +125,9 @@ doom_emacs_install() {
     brew install coreutils fd
     # Installs clang
     xcode-select --install
-    brew tap d12frosted/emacs-plus
-    brew install emacs-plus --with-modern-cg433n-icon
-    ln -s /usr/local/opt/emacs-plus/Emacs.app /Applications/Emacs.app
+    brew tap railwaycat/emacsmacport
+    brew install emacs-mac --with-modules
+    ln -s /usr/local/opt/emacs-mac/Emacs.app /Applications/Emacs.app
 }
 
 app_store_install() {
