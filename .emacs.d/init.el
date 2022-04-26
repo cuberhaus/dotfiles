@@ -4,7 +4,7 @@
     gc-cons-percentage 0.6
     file-name-handler-alist nil)
 
-;; (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
+(setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
@@ -611,13 +611,13 @@
 
   )
 
-(defun efs/org-mode-visual-fill ()
-  (setq visual-fill-column-width 100 ;; set column width (character width?)
-        visual-fill-column-center-text t) ;; center text on middle of screen
-  (visual-fill-column-mode 1))
+;; (defun efs/org-mode-visual-fill ()
+;;   (setq visual-fill-column-width 100 ;; set column width (character width?)
+;;         visual-fill-column-center-text t) ;; center text on middle of screen
+;;   (visual-fill-column-mode 1))
 
-(use-package visual-fill-column
-  :hook (org-mode . efs/org-mode-visual-fill))
+;; (use-package visual-fill-column
+;;   :hook (org-mode . efs/org-mode-visual-fill))
 
 (use-package org-bullets ;; changes headers so that it doesn't show all of the stars
   :hook (org-mode . org-bullets-mode)
@@ -644,7 +644,7 @@
     "l" 'dired-single-buffer))
 
 (use-package dired-single
-  :commands (dired dired-jump))
+  :commands (dired dired-jump));; doesn't open new buffers like classic jump
 
 (use-package all-the-icons-dired
   :hook (dired-mode . all-the-icons-dired-mode))
@@ -654,7 +654,7 @@
   :config
   ;; Doesn't work as expected!
   ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
-  (setq dired-open-extensions '(("png" . "feh")
+  (setq dired-open-extensions '(("png" . "feh") ;; use programs for file extensions
                                 ("mkv" . "mpv"))))
 
 (use-package dired-hide-dotfiles

@@ -1,5 +1,5 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ~/dotfiles/dotfiles/.emacs.d/init.el :mkdirp yes
-#+Title Emacs!
+#+title Emacs!
 
 Apply the same configuration above to every block
 Tangle means where to put this files code to
@@ -75,7 +75,7 @@ Could be because other packages are outdated, proceed to update them.
 
 *** Debug packages and see startup time
 #+begin_src emacs-lisp
-  ;; (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
+  (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 #+end_src
 *** Customize System to different file
 #+begin_src emacs-lisp
@@ -824,13 +824,13 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 *** Text in the middle
 #+begin_src emacs-lisp
 
-        (defun efs/org-mode-visual-fill ()
-          (setq visual-fill-column-width 100 ;; set column width (character width?)
-                visual-fill-column-center-text t) ;; center text on middle of screen
-          (visual-fill-column-mode 1))
+  ;; (defun efs/org-mode-visual-fill ()
+  ;;   (setq visual-fill-column-width 100 ;; set column width (character width?)
+  ;;         visual-fill-column-center-text t) ;; center text on middle of screen
+  ;;   (visual-fill-column-mode 1))
 
-        (use-package visual-fill-column
-          :hook (org-mode . efs/org-mode-visual-fill))
+  ;; (use-package visual-fill-column
+  ;;   :hook (org-mode . efs/org-mode-visual-fill))
 #+end_src
 *** Org bullets
 #+begin_src emacs-lisp
@@ -853,36 +853,37 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 #+end_src
 ** Dired
 #+begin_src emacs-lisp
-(use-package dired
-  :ensure nil ;; make sure package manager doesn't try to install
-  :commands (dired dired-jump)
-  :bind (("C-x C-j" . dired-jump))
-  :custom ((dired-listing-switches "-agho --group-directories-first"))
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'dired-single-up-directory
-    "l" 'dired-single-buffer))
+  (use-package dired
+    :ensure nil ;; make sure package manager doesn't try to install
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :custom ((dired-listing-switches "-agho --group-directories-first"))
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-single-up-directory
+      "l" 'dired-single-buffer))
 
-(use-package dired-single
-  :commands (dired dired-jump))
+  (use-package dired-single
+    :commands (dired dired-jump));; doesn't open new buffers like classic jump
 
-(use-package all-the-icons-dired
-  :hook (dired-mode . all-the-icons-dired-mode))
+  (use-package all-the-icons-dired
+    :hook (dired-mode . all-the-icons-dired-mode))
 
-(use-package dired-open
-  :commands (dired dired-jump)
-  :config
-  ;; Doesn't work as expected!
-  ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
-  (setq dired-open-extensions '(("png" . "feh")
-                                ("mkv" . "mpv"))))
+  (use-package dired-open
+    :commands (dired dired-jump)
+    :config
+    ;; Doesn't work as expected!
+    ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
+    (setq dired-open-extensions '(("png" . "feh") ;; use programs for file extensions
+                                  ("mkv" . "mpv"))))
 
-(use-package dired-hide-dotfiles
-  :hook (dired-mode . dired-hide-dotfiles-mode)
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "H" 'dired-hide-dotfiles-mode))
+  (use-package dired-hide-dotfiles
+    :hook (dired-mode . dired-hide-dotfiles-mode)
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "H" 'dired-hide-dotfiles-mode))
 #+end_src
+
 ** Disable Optimization
 Disable optimization at the end of startup so that garbage collector works properly and doesn't make emacs crash.
 #+begin_src emacs-lisp
