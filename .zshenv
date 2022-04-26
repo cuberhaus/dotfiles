@@ -85,6 +85,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    export PATH="$HOME/.emacs.d/bin/:$PATH"
     export PATH="/Users/pol/bin:$PATH"
     export SHELL_SESSION_HISTORY=0
     export SHELL_SESSIONS_DISABLE=1
