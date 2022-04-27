@@ -107,7 +107,8 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 # vi mode
 bindkey -v
 export KEYTIMEOUT=1
-
+# TRIED ON ZSHENV AND ZPROFILE ONLY WORKS IN ZSHRC
+export CLASSPATH=".:/usr/local/lib/antlr-4.10.1-complete.jar:$CLASSPATH"
 #HAS TO BE AT THE END
 # Edit line in vim with ctrl-e (it's vv with zsh-vim extension): IN INSERT MODE
 autoload edit-command-line; zle -N edit-command-line
