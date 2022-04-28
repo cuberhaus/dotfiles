@@ -57,7 +57,14 @@
 ;                (file+headline +org-capture-todo-file "Dream")
 ;                "* TODO %?\n :PROPERTIES:\n :CATEGORY: dream\n :END:\n %i\n"
 ;                :prepend t :kill-buffer t))))
-
+(with-eval-after-load 'org
+    (require 'org-tempo)
+    (add-to-list 'org-structure-template-alist '("py" . "src python"))
+    (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+    (add-to-list 'org-structure-template-alist '("hs" . "src haskell"))
+    (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
+    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+    )
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
