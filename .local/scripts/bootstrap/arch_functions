@@ -212,6 +212,10 @@ arch_and_manjaro() {
     # usershare owner only = yes
 }
 
+manjaro() {
+    $pac manjaro-pipewire
+}
+
 yay_install() {
     cd $HOME/
     git clone https://aur.archlinux.org/yay.git
@@ -250,8 +254,8 @@ i3_install () {
     $pac light                                  # Brightness
     $pac perl-anyevent-i3 python-dbus
     $pac picom                                  # Compositor, for transparencies
-    $pac pulseaudio alsa-utils                  # Audio
-    $pac pulseaudio pulseaudio-equalizer         pulseaudio-bluetooth        # Audio
+    # $pac pulseaudio alsa-utils                  # Audio
+    # $pac pulseaudio pulseaudio-equalizer         pulseaudio-bluetooth        # Audio
     $pac rofi                                   # App menu Super+d
     $pac yad xdotool                            # Calendar
     $pac zenity                                 # Poweroff menu i3blocks

@@ -221,8 +221,10 @@ Could be because other packages are outdated, proceed to update them.
 ** General configurations
 
 #+begin_src emacs-lisp
-  
-  (setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
+  ;; (setq-default indent-tabs-mode nil)
+  ;; (setq-default tab-width 4)
+  ;; (setq indent-line-function 'insert-tab)
+  ;; (setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
   ;(use-package command-log-mode)
 
   ;; Make ESC quit prompts
@@ -642,6 +644,7 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 #+end_src
 
 *** Language support
+
 #+begin_src emacs-lisp
   (use-package haskell-mode
     :after org) ;; needed for haskell snippets
@@ -840,6 +843,16 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
           (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
 #+end_src
 
+
+#+begin_src emacs-lisp
+  ;; (use-package org-fragtog
+  ;; :after org-bullets
+  ;; :hook (org-fragtog) ; this auto-enables it when you enter an org-buffer, remove if you do not want this
+  ;; :config
+  ;; (org-fragtog-mode)
+  ;; ;; whatever you want
+  ;; )
+#+end_src
 *** Automatically tangle config file when we save it
 #+begin_src emacs-lisp
   ;; Automatically tangle our Emacs.org config file when we save it

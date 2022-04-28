@@ -129,7 +129,10 @@
 (setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
 ;; makes sure that package is downloaded before use
 
-(setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
+;; (setq-default indent-tabs-mode nil)
+;; (setq-default tab-width 4)
+;; (setq indent-line-function 'insert-tab)
+;; (setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
 ;(use-package command-log-mode)
 
 ;; Make ESC quit prompts
@@ -623,6 +626,14 @@
   :hook (org-mode . org-bullets-mode)
   :custom
   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
+
+;; (use-package org-fragtog
+;; :after org-bullets
+;; :hook (org-fragtog) ; this auto-enables it when you enter an org-buffer, remove if you do not want this
+;; :config
+;; (org-fragtog-mode)
+;; ;; whatever you want
+;; )
 
 ;; Automatically tangle our Emacs.org config file when we save it
 (defun efs/org-babel-tangle-config ()
