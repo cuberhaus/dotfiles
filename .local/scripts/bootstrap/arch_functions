@@ -1,6 +1,9 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
 
+#https://raymondjdouglas.com/blog/2019/airpods-on-arch/
+#Chrome disable this:
+#chrome://flags/#global-media-controls-modern-ui
 ### VARIABLES
 scripts=$HOME/.local/scripts
 flags="-S --noconfirm --needed"
@@ -214,6 +217,8 @@ arch_and_manjaro() {
 
 manjaro() {
     $pac manjaro-pipewire
+    # Make airpods work
+    sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
 }
 
 yay_install() {
