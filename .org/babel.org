@@ -1,16 +1,17 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ~/dotfiles/dotfiles/.emacs.d/init.el :mkdirp yes
 #+title Emacs!
 
+* Info
+** Babel header
 Apply the same configuration above to every block
 Tangle means where to put this files code to
 mkdirp create directory if needed
-
-* Updates on emacs
+** Updates on emacs
 - M-x list-packages
 - Press U to mark for upgrade
 - Press x to prompt for upgrade
 
-* Performance
+** Performance
 - :hook - Package will load the first time one of the hooks
 - :bind - Package will load when a keybinding is used
 - :commands - When a command is used
@@ -19,7 +20,7 @@ mkdirp create directory if needed
 - :defer - defer loading until startup if no other options are used
   see also:
   with-eval-after-load 'package - execute body after package is loaded
-* Mac-OS
+** Mac-OS
 Install with:
 #+begin_src shell
 brew tap d12frosted/emacs-plus
@@ -30,24 +31,24 @@ And remember to symlink, check how with
 #+begin_src shell
 brew info emacs-plus
 #+end_src
-* Prefixes
+** Guide to keybindings
+- C-n C-p : in normal mode to go back and forth the clipboard
+- C-x o : emacs go between windows
+- C-h v : help on variables
+- C-h f : help on functions
+
+*** Prefixes
  - C-x: emacs keybindings
  - C-h: help
  - M-x: execute function
  - C-c: user-defined keybindings
  - C-SPC: more user defined keybindings
 
-* Guide to keybindings
-- C-n C-p : in normal mode to go back and forth the clipboard
-- C-x o : emacs go between windows
-- C-h v : help on variables
-- C-h f : help on functions
-
-* General information
+** General information
 Use bookmarks to open specific files.
 To get help on variable of function put corsor over it and press C-h v or C-h f
 
-* Undo in Emacs
+** Undo in Emacs
 
 C-r WONT WORK, cause we are not using a redo we have a undo stack
 undo is treated like a normal command, therefore you can undo the undo.
@@ -55,12 +56,12 @@ undo's will go to the stack, if a move like "k" is done then you can undo again,
 in typicall (global-undo-tree-mode) (evil-set-undo-system 'undo-tree)
 if you are doing several undos and miss the "correct spot" and do anything at all which is not an undo command, you are stuck: you broke the chain of undos https://www.emacswiki.org/emacs/RedoMode
 
-* Solving errors
-** Package errors
+** Solving errors
+*** Package errors
 If package give error try:type list-packages command to update packages.
-** Org errors
+*** Org errors
 Sometimes have to type org-mode so that it reloades
-** Newly added packages can't be installed
+*** Newly added packages can't be installed
 Could be because other packages are outdated, proceed to update them.
 * Code
 ** Startup config
@@ -83,7 +84,6 @@ Could be because other packages are outdated, proceed to update them.
     (load custom-file)
 #+end_src
 ** Basic UI Settings
-
 #+begin_src emacs-lisp
       ;; You will most likely need to adjust this font size for your system!
       (defvar runemacs/default-font-size 110)
@@ -180,7 +180,6 @@ Could be because other packages are outdated, proceed to update them.
 #+end_src
 
 ** Spell-checking
-
 #+begin_src emacs-lisp
   ;; execute spanish spell-checking on buffer
   (defun flyspell-spanish ()
@@ -194,8 +193,7 @@ Could be because other packages are outdated, proceed to update them.
     (flyspell-buffer))
 #+end_src
 
-** Packages
-
+** Package System
 #+begin_src emacs-lisp
 
   ;; Initialize package sources
@@ -218,14 +216,36 @@ Could be because other packages are outdated, proceed to update them.
   ;; makes sure that package is downloaded before use
 #+end_src
 
-** General configurations
+** Automatic package updates
+#+begin_src emacs-lisp
 
+(use-package auto-package-update
+  :custom
+  (auto-package-update-interval 7)
+  (auto-package-update-prompt-before-update t)
+  (auto-package-update-hide-results t)
+  :config
+  (auto-package-update-maybe)
+  (auto-package-update-at-time "09:00"))
+
+#+end_src
+** General configurations
+*** Tabs
 #+begin_src emacs-lisp
   ;; (setq-default indent-tabs-mode nil)
   ;; (setq-default tab-width 4)
   ;; (setq indent-line-function 'insert-tab)
-  ;; (setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
+#+end_src
+
+*** Log keystrokes on screen
+#+begin_src emacs-lisp
   ;(use-package command-log-mode)
+#+end_src
+
+*** General configuration
+#+begin_src emacs-lisp
+
+  (setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
 
   ;; Make ESC quit prompts
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
@@ -243,7 +263,6 @@ Could be because other packages are outdated, proceed to update them.
     (add-hook mode (lambda () (display-line-numbers-mode 0 ))))
 #+end_src
 ** Unused packages
-
 #+begin_src emacs-lisp
 ;; (use-package langtool)
 
@@ -285,13 +304,40 @@ Could be because other packages are outdated, proceed to update them.
            ("C-d" . ivy-reverse-i-search-kill))
     :config
     (ivy-mode 1))
-
   ;; eval last sexp is better cause inconsistencies from hooks when running evalbuffer
   ;; and show keybindings
+#+end_src
+*** Ivy-rich better explanations
+#+begin_src emacs-lisp
   (use-package ivy-rich ;; shows better explanations
     :after ivy
     :init
     (ivy-rich-mode 1))
+#+end_src
+*** Improved Candidate Sorting with prescient.el
+prescient.el provides some helpful behavior for sorting Ivy completion candidates based on how recently or frequently you select them. This can be especially helpful when using M-x to run commands that you don’t have bound to a key but still need to access occasionally.
+
+This Prescient configuration is optimized for use in System Crafters videos and streams, check out the video on prescient.el for more details on how to configure it!
+#+begin_src emacs-lisp
+  (use-package ivy-prescient
+    :after counsel ;; must have this
+    ;; :custom
+    ;; (ivy-prescient-enable-filtering nil) ;; keep ivy filtering style
+    :config
+    ;; Uncomment the following line to have sorting remembered across sessions!
+    (prescient-persist-mode 1)
+    (ivy-prescient-mode 1)
+    )
+  ;; (setq prescient-filter-method '(fuzzy regexp))
+  (setq prescient-sort-length-enable nil) ;; do not sort by length
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package company-prescient
+  :after company
+  :config
+  (company-prescient-mode 1))
+
 #+end_src
 
 *** Counsel 
@@ -306,8 +352,6 @@ Could be because other packages are outdated, proceed to update them.
           ("C-r" . 'counsel-minibuffer-history))
           :config
           (setq ivy-initial-inputs-alist nil))
-
-
 #+end_src
 
 *** Doom 
@@ -322,7 +366,6 @@ Could be because other packages are outdated, proceed to update them.
   (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 #+end_src
 ** Keybindings
-
 #+begin_src emacs-lisp
   (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
     ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
@@ -409,14 +452,7 @@ Could be because other packages are outdated, proceed to update them.
 
 #+end_src
 
-** Programming
-#+begin_src emacs-lisp
-  (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
-#+end_src
-
 ** Help
-
 #+begin_src emacs-lisp
 
   (use-package which-key ;; This shows which commands are available for current keypresses
@@ -455,181 +491,6 @@ Could be because other packages are outdated, proceed to update them.
 
 #+end_src
 
-** Development
-*** IDE Features with lsp
-M-? to find references, definition
-#+begin_src emacs-lisp
-(defun efs/lsp-mode-setup ()
-  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
-
-(use-package lsp-mode
-  :commands (lsp lsp-deferred)
-  :hook (lsp-mode . efs/lsp-mode-setup)
-  :init
-  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-  :config
-  (lsp-enable-which-key-integration t)) ;; give description for keys with wichkey
-#+end_src
-*** lsp-ui
-#+begin_src emacs-lisp
-    (use-package lsp-ui
-      :hook (lsp-mode . lsp-ui-mode)
-      :custom
-      (lsp-ui-sideline-show-code-actions t)
-      (lsp-ui-doc-position 'bottom))
-#+end_src
-*** lsp-treemacs
-Tree views for different code aspects
-#+begin_src emacs-lisp
-(use-package lsp-treemacs
-  :after lsp)
-#+end_src
-*** lsp-ivy
-lsp-treemacs-symbols - Show a tree view of the symbols in the current file
-lsp-treemacs-references - Show a tree view for the references of the symbol under the cursor
-lsp-treemacs-error-list - Show a tree view for the diagnostic messages in the project
-
-#+begin_src emacs-lisp
-  (use-package lsp-ivy
-    :after (lsp-mode lsp))
-#+end_src
-*** Debugging with dap-mode
-#+begin_src emacs-lisp
-  (use-package dap-mode
-    ;; Uncomment the config below if you want all UI panes to be hidden by default!
-    ;; :custom
-    ;; (lsp-enable-dap-auto-configure nil)
-    ;; :config
-    ;; (dap-ui-mode 1)
-    :after lsp
-    :config
-    ;; Set up Node debugging
-    (require 'dap-node)
-    (dap-node-setup) ;; Automatically installs Node debug adapter if needed
-
-    ;; Bind `C-c l d` to `dap-hydra` for easy access
-    (general-define-key
-      :keymaps 'lsp-mode-map
-      :prefix lsp-keymap-prefix
-      "d" '(dap-hydra t :wk "debugger")))
-#+end_src
-*** python
-Have to install
-#+begin_src shell
-pip install python-lsp-server
-#+end_src
-
-
-#+begin_src emacs-lisp
-  (use-package python-mode
-    :ensure t
-    :hook (python-mode . lsp-deferred)
-    :custom
-    ;; NOTE: Set these if Python 3 is called "python3" on your system!
-    (python-shell-interpreter "python3")
-    (dap-python-executable "python3")
-    (dap-python-debugger 'debugpy)
-    :config
-    (require 'dap-python))
-#+end_src
-
-*** Latex
-install LSP server
-#+begin_src shell
-  cargo install --locked --git https://github.com/latex-lsp/texlab.git
-#+end_src
-
-#+begin_src emacs-lisp
-  ;; (use-package latex-mode
-  ;;   :ensure t
-  ;;   :hook (latex-mode . lsp-deferred)
-  (add-hook 'latex-mode 'lsp-deferred)
-  ;;   )
-#+end_src
-*** Company Mode
-Company Mode provides a nicer in-buffer completion interface than completion-at-point which is more reminiscent of what you would expect from an IDE. We add a simple configuration to make the keybindings a little more useful (TAB now completes the selection and initiates completion at the current location if needed).
-#+begin_src emacs-lisp
-(use-package company
-  :after lsp-mode
-  :hook (lsp-mode . company-mode)
-  :bind (:map company-active-map
-         ("<tab>" . company-complete-selection))
-        (:map lsp-mode-map
-         ("<tab>" . company-indent-or-complete-common))
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
-
-(use-package company-box
-  :hook (company-mode . company-box-mode))
-#+end_src
-** Git
-
-*** Magit
-#+begin_src emacs-lisp
-  ;; bring in the GIT
-  ;; use C-x g to open magit status
-  ;; type ? to know what can you do with magit
-  (use-package magit ;; use tab to open instead of za in vim
-    :commands magit-status
-    ;; :custom
-    ;;   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
-    )
-
-#+end_src
-
-*** Projects
-#+begin_src emacs-lisp
-  ;; emacs variables local to projects
-  (use-package projectile ;; git projects management
-    :diminish projectile-mode
-    :config (projectile-mode)
-    :custom ((projectile-completion-system 'ivy)) ;; use ivy for completion can also use helm
-    :bind-keymap
-    ("C-c p" . projectile-command-map)
-    :init
-    ;; NOTE: Set this to the folder where you keep your Git repos!
-    (when (file-directory-p "~/")
-      (setq projectile-project-search-path '("~/")))
-    (setq projectile-switch-project-action #'projectile-dired))
-
-  (use-package counsel-projectile ;; more commands with M-o in projectile (ivy allows that)
-    :after projectile
-    :config(counsel-projectile-mode)) 
-#+end_src
-*** Gutter
-
-#+begin_src emacs-lisp
-  (use-package git-gutter ;; works just like in vim :D
-    :commands (git-gutter-mode git-gutter)
-    :config
-    ;; If you enable global minor mode
-    ;; (global-git-gutter-mode t)
-    ;; If you enable git-gutter-mode for some modes
-    (add-hook 'ruby-mode-hook 'git-gutter-mode)
-    )
-#+end_src
-
-*** Unused packages
-
-#+begin_src emacs-lisp
-  ;; (use-package diff-hl
-  ;;   :init
-  ;;   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
-  ;;   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-  ;;   :config
-  ;;   (global-diff-hl-mode)
-  ;;   (diff-hl-margin-mode)
-  ;;   )
-  ;; NOTE: Make sure to configure a GitHub token before using this package!
-  ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
-  ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
-  ;; (use-package forge) ;; more git functionality
-
-
-#+end_src
-
 ** Org
 *** Templates
 #+begin_src emacs-lisp
@@ -663,7 +524,6 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 #+end_src
 
 *** Font setup
-
 #+begin_src emacs-lisp
   (defun efs/org-font-setup ()
     ;; Replace list hyphen with dot
@@ -694,7 +554,6 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 
 *** Org configuration
 #+begin_src emacs-lisp
-  
         (defun efs/org-mode-setup ()
           (org-indent-mode)
           (variable-pitch-mode 1) ;; allows text to be of variable size
@@ -842,8 +701,7 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
           :custom
           (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
 #+end_src
-
-
+*** Org-fragtog
 #+begin_src emacs-lisp
   ;; (use-package org-fragtog
   ;; :after org-bullets
@@ -863,6 +721,276 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
       (let ((org-confirm-babel-evaluate nil))
         (org-babel-tangle))))
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+#+end_src
+** Development
+*** Rainbow-delimiters
+#+begin_src emacs-lisp
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
+#+end_src
+
+*** IDE Features with lsp
+M-? to find references, definition
+#+begin_src emacs-lisp
+(defun efs/lsp-mode-setup ()
+  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook (lsp-mode . efs/lsp-mode-setup)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :config
+  (lsp-enable-which-key-integration t)) ;; give description for keys with wichkey
+#+end_src
+*** lsp-ui
+#+begin_src emacs-lisp
+    (use-package lsp-ui
+      :hook (lsp-mode . lsp-ui-mode)
+      :custom
+      (lsp-ui-sideline-show-code-actions t)
+      (lsp-ui-doc-position 'bottom))
+#+end_src
+*** lsp-treemacs
+Tree views for different code aspects
+#+begin_src emacs-lisp
+(use-package lsp-treemacs
+  :after lsp)
+#+end_src
+*** lsp-ivy
+lsp-treemacs-symbols - Show a tree view of the symbols in the current file
+lsp-treemacs-references - Show a tree view for the references of the symbol under the cursor
+lsp-treemacs-error-list - Show a tree view for the diagnostic messages in the project
+
+#+begin_src emacs-lisp
+  (use-package lsp-ivy
+    :after (lsp-mode lsp))
+#+end_src
+*** Debugging with dap-mode
+#+begin_src emacs-lisp
+  (use-package dap-mode
+    ;; Uncomment the config below if you want all UI panes to be hidden by default!
+    ;; :custom
+    ;; (lsp-enable-dap-auto-configure nil)
+    ;; :config
+    ;; (dap-ui-mode 1)
+    :after lsp
+    :config
+    ;; Set up Node debugging
+    (require 'dap-node)
+    (dap-node-setup) ;; Automatically installs Node debug adapter if needed
+
+    ;; Bind `C-c l d` to `dap-hydra` for easy access
+    (general-define-key
+      :keymaps 'lsp-mode-map
+      :prefix lsp-keymap-prefix
+      "d" '(dap-hydra t :wk "debugger")))
+#+end_src
+*** python
+Have to install
+#+begin_src shell
+pip install python-lsp-server
+#+end_src
+
+
+#+begin_src emacs-lisp
+  (use-package python-mode
+    :ensure t
+    :hook (python-mode . lsp-deferred)
+    :custom
+    ;; NOTE: Set these if Python 3 is called "python3" on your system!
+    (python-shell-interpreter "python3")
+    (dap-python-executable "python3")
+    (dap-python-debugger 'debugpy)
+    :config
+    (require 'dap-python))
+#+end_src
+
+*** Latex
+install LSP server
+#+begin_src shell
+  cargo install --locked --git https://github.com/latex-lsp/texlab.git
+#+end_src
+
+#+begin_src emacs-lisp
+    (use-package latex-preview-pane
+      :hook (latex-mode . latex-preview-pane-mode)
+    )
+
+  ;; (use-package tex
+  ;;   :ensure auctex)
+  ;;    (setq TeX-auto-save t)
+  ;;   (setq TeX-parse-self t)
+  ;;   (setq-default TeX-master nil)
+
+  ;;   (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+  ;;   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+  ;;   (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+
+  ;;   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+  ;;   (setq reftex-plug-into-AUCTeX t)
+
+
+#+end_src
+
+#+begin_src emacs-lisp
+  ;; (use-package latex-mode
+  ;;   :ensure t
+  ;;   :hook (latex-mode . lsp-deferred)
+  ;;   (add-hook 'latex-mode 'lsp-deferred)
+  ;;   )
+#+end_src
+*** Company Mode
+Company Mode provides a nicer in-buffer completion interface than completion-at-point which is more reminiscent of what you would expect from an IDE. We add a simple configuration to make the keybindings a little more useful (TAB now completes the selection and initiates completion at the current location if needed).
+#+begin_src emacs-lisp
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+         ("<tab>" . company-complete-selection))
+        (:map lsp-mode-map
+         ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+#+end_src
+*** Git
+**** Magit
+#+begin_src emacs-lisp
+  ;; bring in the GIT
+  ;; use C-x g to open magit status
+  ;; type ? to know what can you do with magit
+  (use-package magit ;; use tab to open instead of za in vim
+    :commands magit-status
+    ;; :custom
+    ;;   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+    )
+
+#+end_src
+
+**** Projects
+#+begin_src emacs-lisp
+  ;; emacs variables local to projects
+  (use-package projectile ;; git projects management
+    :diminish projectile-mode
+    :config (projectile-mode)
+    :custom ((projectile-completion-system 'ivy)) ;; use ivy for completion can also use helm
+    :bind-keymap
+    ("C-c p" . projectile-command-map)
+    :init
+    ;; NOTE: Set this to the folder where you keep your Git repos!
+    (when (file-directory-p "~/")
+      (setq projectile-project-search-path '("~/")))
+    (setq projectile-switch-project-action #'projectile-dired))
+
+  (use-package counsel-projectile ;; more commands with M-o in projectile (ivy allows that)
+    :after projectile
+    :config(counsel-projectile-mode)) 
+#+end_src
+**** Gutter
+
+#+begin_src emacs-lisp
+  (use-package git-gutter ;; works just like in vim :D
+    :commands (git-gutter-mode git-gutter)
+    :config
+    ;; If you enable global minor mode
+    ;; (global-git-gutter-mode t)
+    ;; If you enable git-gutter-mode for some modes
+    (add-hook 'ruby-mode-hook 'git-gutter-mode)
+    )
+#+end_src
+
+**** Unused packages
+
+#+begin_src emacs-lisp
+  ;; (use-package diff-hl
+  ;;   :init
+  ;;   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
+  ;;   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  ;;   :config
+  ;;   (global-diff-hl-mode)
+  ;;   (diff-hl-margin-mode)
+  ;;   )
+  ;; NOTE: Make sure to configure a GitHub token before using this package!
+  ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
+  ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
+  ;; (use-package forge) ;; more git functionality
+
+
+#+end_src
+
+** Terminals
+*** Term-mode
+#+begin_src emacs-lisp
+  (use-package term
+    :commands term
+    :config
+    (setq explicit-shell-file-name "zsh") ;; Change this to zsh, etc
+    ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
+
+    ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
+    (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
+
+#+end_src
+**** Better term-mode colors
+#+begin_src emacs-lisp
+
+  (use-package eterm-256color
+    :hook (term-mode . eterm-256color-mode))
+
+#+end_src
+*** vterm
+#+begin_src emacs-lisp
+(use-package vterm
+  :commands vterm
+  :config
+  (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
+  ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
+  (setq vterm-max-scrollback 10000))
+#+end_src
+*** shell-mode
+#+begin_src emacs-lisp
+(when (eq system-type 'windows-nt)
+  (setq explicit-shell-file-name "powershell.exe")
+  (setq explicit-powershell.exe-args '()))
+#+end_src
+*** Eshell
+#+begin_src emacs-lisp
+
+  (defun efs/configure-eshell ()
+    ;; Save command history when commands are entered
+    (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
+
+    ;; Truncate buffer for performance
+    (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+    ;; Bind some useful keys for evil-mode
+    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
+    (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
+    (evil-normalize-keymaps)
+
+    (setq eshell-history-size         10000
+          eshell-buffer-maximum-lines 10000
+          eshell-hist-ignoredups t
+          eshell-scroll-to-bottom-on-input t))
+
+  (use-package eshell-git-prompt
+    :after eshell)
+
+  (use-package eshell
+    :hook (eshell-first-time-mode . efs/configure-eshell)
+    :config
+
+    (with-eval-after-load 'esh-opt
+      (setq eshell-destroy-buffer-when-process-dies t)
+      (setq eshell-visual-commands '("htop" "zsh" "vim")))
+    ;; (eshell-git-prompt-use-theme 'powerline)
+    )
+
 #+end_src
 ** Dired
 
@@ -890,14 +1018,16 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
     ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
     (setq dired-open-extensions '(("png" . "feh") ;; use programs for file extensions
                                   ("mkv" . "mpv"))))
-
   (use-package dired-hide-dotfiles
     :hook (dired-mode . dired-hide-dotfiles-mode)
     :config
     (evil-collection-define-key 'normal 'dired-mode-map
       "H" 'dired-hide-dotfiles-mode))
 #+end_src
-
+** buffer kill
+#+begin_src emacs-lisp
+(setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions)) ;; do not query to kill the buffer
+#+end_src
 ** Disable Optimization
 Disable optimization at the end of startup so that garbage collector works properly and doesn't make emacs crash.
 #+begin_src emacs-lisp

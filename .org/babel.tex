@@ -1,15 +1,145 @@
+% Created 2022-04-28 Thu 20:28
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{pol}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={pol},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 28.1 (Org mode 9.5.2)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+\#+title Emacs!
+
+\section{Info}
+\label{sec:orgfbc6ad0}
+\subsection{Babel header}
+\label{sec:orga085b2a}
+Apply the same configuration above to every block
+Tangle means where to put this files code to
+mkdirp create directory if needed
+\subsection{Updates on emacs}
+\label{sec:org852232c}
+\begin{itemize}
+\item M-x list-packages
+\item Press U to mark for upgrade
+\item Press x to prompt for upgrade
+\end{itemize}
+
+\subsection{Performance}
+\label{sec:org4332028}
+\begin{itemize}
+\item :hook - Package will load the first time one of the hooks
+\item :bind - Package will load when a keybinding is used
+\item :commands - When a command is used
+\item :mode - First time a file with a particular extension is used
+\item :after - load this package after other specific packages are loaded
+\item :defer - defer loading until startup if no other options are used
+see also:
+with-eval-after-load 'package - execute body after package is loaded
+\end{itemize}
+\subsection{Mac-OS}
+\label{sec:org30fc153}
+Install with:
+\begin{verbatim}
+brew tap d12frosted/emacs-plus
+brew install emacs-plus
+\end{verbatim}
+
+And remember to symlink, check how with
+\begin{verbatim}
+brew info emacs-plus
+\end{verbatim}
+\subsection{Guide to keybindings}
+\label{sec:org17067e4}
+\begin{itemize}
+\item C-n C-p : in normal mode to go back and forth the clipboard
+\item C-x o : emacs go between windows
+\item C-h v : help on variables
+\item C-h f : help on functions
+\end{itemize}
+
+\subsubsection{Prefixes}
+\label{sec:org3133685}
+\begin{itemize}
+\item C-x: emacs keybindings
+\item C-h: help
+\item M-x: execute function
+\item C-c: user-defined keybindings
+\item C-SPC: more user defined keybindings
+\end{itemize}
+
+\subsection{General information}
+\label{sec:org57fe0cf}
+Use bookmarks to open specific files.
+To get help on variable of function put corsor over it and press C-h v or C-h f
+
+\subsection{Undo in Emacs}
+\label{sec:org846c622}
+
+C-r WONT WORK, cause we are not using a redo we have a undo stack
+undo is treated like a normal command, therefore you can undo the undo.
+undo's will go to the stack, if a move like "k" is done then you can undo again, this makes it possible to undo every single edit.
+in typicall (global-undo-tree-mode) (evil-set-undo-system 'undo-tree)
+if you are doing several undos and miss the "correct spot" and do anything at all which is not an undo command, you are stuck: you broke the chain of undos \url{https://www.emacswiki.org/emacs/RedoMode}
+
+\subsection{Solving errors}
+\label{sec:org87696f0}
+\subsubsection{Package errors}
+\label{sec:org6c5c9c6}
+If package give error try:type list-packages command to update packages.
+\subsubsection{Org errors}
+\label{sec:orgd57f7e2}
+Sometimes have to type org-mode so that it reloades
+\subsubsection{Newly added packages can't be installed}
+\label{sec:org0cc0868}
+Could be because other packages are outdated, proceed to update them.
+\section{Code}
+\label{sec:org7308e8f}
+\subsection{Startup config}
+\label{sec:orgd77571e}
+\subsubsection{Optimization with garbage collector}
+\label{sec:orga0a2122}
+\begin{verbatim}
 ;; The default is 800 kilobytes.  Measured in bytes.
 (defvar last-file-name-handler-alist file-name-handler-alist)
 (setq gc-cons-threshold 402653184
     gc-cons-percentage 0.6
     file-name-handler-alist nil)
+\end{verbatim}
 
+\subsubsection{Debug packages and see startup time}
+\label{sec:orgc24924c}
+\begin{verbatim}
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
-
+\end{verbatim}
+\subsubsection{Customize System to different file}
+\label{sec:org7e8e8d1}
+\begin{verbatim}
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
-
-;; You will most likely need to adjust this font size for your system!
+\end{verbatim}
+\subsection{Basic UI Settings}
+\label{sec:orgf76ed69}
+\begin{verbatim}
+    ;; You will most likely need to adjust this font size for your system!
     (defvar runemacs/default-font-size 110)
 
     (setq inhibit-startup-message t) ; Disable startup menu
@@ -19,20 +149,20 @@
     (set-fringe-mode 10) ; Make some space
     (menu-bar-mode -1) ;; remove top bar
     (cond ((eq system-type 'windows-nt)
-        ;; Windows-specific code goes here.
-        )
-          ((eq system-type 'darwin)
-              (setq ring-bell-function ;; subtle mode line flash
-                  (lambda ()
-                      (let ((orig-fg (face-foreground 'mode-line)))
-                      (set-face-foreground 'mode-line "#F2804F")
-                      (run-with-idle-timer 0.1 nil
-                                          (lambda (fg) (set-face-foreground 'mode-line fg))
-                                          orig-fg))))
-        )
-        ((eq system-type 'gnu/linux)
-         (setq visible-bell t)
-        ))
+	;; Windows-specific code goes here.
+	)
+	  ((eq system-type 'darwin)
+	      (setq ring-bell-function ;; subtle mode line flash
+		  (lambda ()
+		      (let ((orig-fg (face-foreground 'mode-line)))
+		      (set-face-foreground 'mode-line "#F2804F")
+		      (run-with-idle-timer 0.1 nil
+					  (lambda (fg) (set-face-foreground 'mode-line fg))
+					  orig-fg))))
+	)
+	((eq system-type 'gnu/linux)
+	 (setq visible-bell t)
+	))
 
     ;; (setq scroll-step            1
     ;;     scroll-conservatively  10000) ;; scroll line by line not like a fucking degenerate
@@ -65,14 +195,18 @@
 
   (defun efs/display-startup-time ()
     (message "Emacs loaded in %s with %d garbage collections."
-             (format "%.2f seconds"
-                     (float-time
-                     (time-subtract after-init-time before-init-time)))
-             gcs-done))
+	     (format "%.2f seconds"
+		     (float-time
+		     (time-subtract after-init-time before-init-time)))
+	     gcs-done))
 
   (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+\end{verbatim}
 
-;; Font Configuration -----------------------
+\subsection{Font settings}
+\label{sec:org782d61d}
+\begin{verbatim}
+  ;; Font Configuration -----------------------
   ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
   ;; IF FONT LOOKS WEIRD (TOO SLIM) then it means the font is not working properly, CHANGE IT
 
@@ -98,7 +232,11 @@
       (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
     ))
   ;; -------------------------------------------------------
+\end{verbatim}
 
+\subsection{Spell-checking}
+\label{sec:org6c3a70c}
+\begin{verbatim}
 ;; execute spanish spell-checking on buffer
 (defun flyspell-spanish ()
   (interactive)
@@ -109,13 +247,19 @@
   (interactive)
   (ispell-change-dictionary "default")
   (flyspell-buffer))
+\end{verbatim}
+
+\subsection{Package System}
+\label{sec:org030bc8a}
+
+\begin{verbatim}
 
 ;; Initialize package sources
 (require 'package) ; bring in package module
 ; package repositories
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+			 ("org" . "https://orgmode.org/elpa/")
+			 ("elpa" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize) ; Initializes package system
 (unless package-archive-contents ; unless package exists we refresh package list
@@ -128,21 +272,27 @@
 
 (setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
 ;; makes sure that package is downloaded before use
+\end{verbatim}
 
-(use-package auto-package-update
-  :custom
-  (auto-package-update-interval 7)
-  (auto-package-update-prompt-before-update t)
-  (auto-package-update-hide-results t)
-  :config
-  (auto-package-update-maybe)
-  (auto-package-update-at-time "09:00"))
-
+\subsection{General configurations}
+\label{sec:orgf8c44c3}
+\subsubsection{Tabs}
+\label{sec:org320be3e}
+\begin{verbatim}
 ;; (setq-default indent-tabs-mode nil)
 ;; (setq-default tab-width 4)
 ;; (setq indent-line-function 'insert-tab)
+\end{verbatim}
 
+\subsubsection{Log keystrokes on screen}
+\label{sec:org3e8e5be}
+\begin{verbatim}
 ;(use-package command-log-mode)
+\end{verbatim}
+
+\subsubsection{General configuration}
+\label{sec:org72d0c0c}
+\begin{verbatim}
 
 (setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
 
@@ -150,20 +300,31 @@
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (global-auto-revert-mode) ;;
 
+\end{verbatim}
+
+\subsubsection{Disable line numbers}
+\label{sec:org403b8ac}
+\begin{verbatim}
 ;; Disable line numbers for some modes
 (dolist (mode '(org-mode-hook
-                term-mode-hook
-                eshell-mode-hook
-                shell-mode-hook))
+		term-mode-hook
+		eshell-mode-hook
+		shell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0 ))))
-
+\end{verbatim}
+\subsection{Unused packages}
+\label{sec:org40bd837}
+\begin{verbatim}
 ;; (use-package langtool)
 
 ;; has to install pdf2svg on pc first
 ;; (use-package org-inline-pdf
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
-
+\end{verbatim}
+\subsection{Keep Folders Clean}
+\label{sec:orgd8bcbbf}
+\begin{verbatim}
 ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
 ;; reliably, set `user-emacs-directory` before loading no-littering!
 ;(setq user-emacs-directory "~/.cache/emacs")
@@ -174,32 +335,46 @@
 ;; auto save files in the same path as it uses for sessions
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
-
+\end{verbatim}
+\subsection{UI settings}
+\label{sec:org5827422}
+\subsubsection{Ivy}
+\label{sec:org5c70c55}
+\begin{verbatim}
 (use-package ivy ; makes navigation between stuff easier
   :diminish ; do not show stuff on bar or something
   :bind (("C-s" . swiper) ;;like / but with context
-         :map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)	
-         ("C-l" . ivy-alt-done)
-         ("C-j" . ivy-next-line)
-         ("C-k" . ivy-previous-line)
-         :map ivy-switch-buffer-map
-         ("C-k" . ivy-previous-line)
-         ("C-l" . ivy-done)
-         ("C-d" . ivy-switch-buffer-kill)
-         :map ivy-reverse-i-search-map
-         ("C-k" . ivy-previous-line)
-         ("C-d" . ivy-reverse-i-search-kill))
+	 :map ivy-minibuffer-map
+	 ("TAB" . ivy-alt-done)	
+	 ("C-l" . ivy-alt-done)
+	 ("C-j" . ivy-next-line)
+	 ("C-k" . ivy-previous-line)
+	 :map ivy-switch-buffer-map
+	 ("C-k" . ivy-previous-line)
+	 ("C-l" . ivy-done)
+	 ("C-d" . ivy-switch-buffer-kill)
+	 :map ivy-reverse-i-search-map
+	 ("C-k" . ivy-previous-line)
+	 ("C-d" . ivy-reverse-i-search-kill))
   :config
   (ivy-mode 1))
 ;; eval last sexp is better cause inconsistencies from hooks when running evalbuffer
 ;; and show keybindings
-
+\end{verbatim}
+\subsubsection{Ivy-rich better explanations}
+\label{sec:org8ccf08a}
+\begin{verbatim}
 (use-package ivy-rich ;; shows better explanations
   :after ivy
   :init
   (ivy-rich-mode 1))
+\end{verbatim}
+\subsubsection{Improved Candidate Sorting with prescient.el}
+\label{sec:orga12a20b}
+prescient.el provides some helpful behavior for sorting Ivy completion candidates based on how recently or frequently you select them. This can be especially helpful when using M-x to run commands that you don’t have bound to a key but still need to access occasionally.
 
+This Prescient configuration is optimized for use in System Crafters videos and streams, check out the video on prescient.el for more details on how to configure it!
+\begin{verbatim}
 (use-package ivy-prescient
   :after counsel ;; must have this
   ;; :custom
@@ -209,24 +384,36 @@
   (prescient-persist-mode 1)
   (ivy-prescient-mode 1)
   )
-;; (setq prescient-filter-method '(fuzzy regexp))
+(setq prescient-filter-method '(fuzzy regexp))
 (setq prescient-sort-length-enable nil) ;; do not sort by length
+\end{verbatim}
 
+\begin{verbatim}
 (use-package company-prescient
 :after company
 :config
 (company-prescient-mode 1))
 
+\end{verbatim}
+
+\subsubsection{Counsel}
+\label{sec:org60620d6}
+\begin{verbatim}
+
 ;; With ivy-rich shows descriptions for commands 
 (use-package counsel
 :bind (("M-x" . counsel-M-x)
-        ("C-x b" . counsel-ibuffer)
-        ("C-x C-f" . counsel-find-file)
-        :map minibuffer-local-map
-        ("C-r" . 'counsel-minibuffer-history))
-        :config
-        (setq ivy-initial-inputs-alist nil))
+	("C-x b" . counsel-ibuffer)
+	("C-x C-f" . counsel-find-file)
+	:map minibuffer-local-map
+	("C-r" . 'counsel-minibuffer-history))
+	:config
+	(setq ivy-initial-inputs-alist nil))
+\end{verbatim}
 
+\subsubsection{Doom}
+\label{sec:orgaddaf39}
+\begin{verbatim}
 (use-package all-the-icons)
 ;; custom command line
 (use-package doom-modeline
@@ -235,7 +422,10 @@
   :custom ((doom-modeline-height 15)))
 (use-package doom-themes) ;; counsel-load-theme to load a theme from the list
 (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
-
+\end{verbatim}
+\subsection{Keybindings}
+\label{sec:org5342b17}
+\begin{verbatim}
 (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
   ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
@@ -266,7 +456,11 @@
    "bd" '(delete-file-and-buffer :which-key "delete file")
    "w" '(save-buffer :which-key "save buffer") ;; classic vim save
    "tt" '(counsel-load-theme :which-key "choose theme")))
+\end{verbatim}
 
+\subsubsection{Hydra}
+\label{sec:orgfd40ec9}
+\begin{verbatim}
 (use-package hydra
   :defer t) ;; emacs bindings that stick around like mode for i3
 
@@ -278,6 +472,10 @@
 (rune/leader-keys
   "ts" '(hydra-text-scale/body :which-key "scale text"))
 
+\end{verbatim}
+\subsubsection{Evil}
+\label{sec:org06e09af}
+\begin{verbatim}
 ;; vim keybindings for easier on the fingers typing :D
 (use-package evil
   :init
@@ -313,6 +511,12 @@
 
 ; C-z go back to EMACS MODE
 
+\end{verbatim}
+
+\subsection{Help}
+\label{sec:org3206605}
+\begin{verbatim}
+
 (use-package which-key ;; This shows which commands are available for current keypresses
   :commands(helpful-callable helpfull-variable helpful-command helpful-key)
   :defer 0
@@ -331,18 +535,248 @@
   ([remap describe-command] . helpful-command) 
   ([remap describe-variable] . counsel-describe-variable))
 
+\end{verbatim}
+
+\subsection{Functions}
+\label{sec:org26cace7}
+\begin{verbatim}
 (defun delete-file-and-buffer ()
   "Kill the current buffer and deletes the file it is visiting."
   (interactive)
   (let ((filename (buffer-file-name)))
     (if filename
-        (if (y-or-n-p (concat "Do you really want to delete file " filename " ?"))
-            (progn
-              (delete-file filename)
-              (message "Deleted file %s." filename)
-              (kill-buffer)))
+	(if (y-or-n-p (concat "Do you really want to delete file " filename " ?"))
+	    (progn
+	      (delete-file filename)
+	      (message "Deleted file %s." filename)
+	      (kill-buffer)))
       (message "Not a file visiting buffer!"))))
 
+\end{verbatim}
+
+\subsection{Development}
+\label{sec:orgbf06511}
+\subsubsection{Rainbow-delimiters}
+\label{sec:org6ebb379}
+\begin{verbatim}
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
+\end{verbatim}
+
+\subsubsection{IDE Features with lsp}
+\label{sec:org78709e4}
+M-? to find references, definition
+\begin{verbatim}
+(defun efs/lsp-mode-setup ()
+  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook (lsp-mode . efs/lsp-mode-setup)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :config
+  (lsp-enable-which-key-integration t)) ;; give description for keys with wichkey
+\end{verbatim}
+\subsubsection{lsp-ui}
+\label{sec:org6a7b3e5}
+\begin{verbatim}
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-sideline-show-code-actions t)
+  (lsp-ui-doc-position 'bottom))
+\end{verbatim}
+\subsubsection{lsp-treemacs}
+\label{sec:org0edba9b}
+Tree views for different code aspects
+\begin{verbatim}
+(use-package lsp-treemacs
+  :after lsp)
+\end{verbatim}
+\subsubsection{lsp-ivy}
+\label{sec:orgf7fa193}
+lsp-treemacs-symbols - Show a tree view of the symbols in the current file
+lsp-treemacs-references - Show a tree view for the references of the symbol under the cursor
+lsp-treemacs-error-list - Show a tree view for the diagnostic messages in the project
+
+\begin{verbatim}
+(use-package lsp-ivy
+  :after (lsp-mode lsp))
+\end{verbatim}
+\subsubsection{Debugging with dap-mode}
+\label{sec:org0d02a60}
+\begin{verbatim}
+(use-package dap-mode
+  ;; Uncomment the config below if you want all UI panes to be hidden by default!
+  ;; :custom
+  ;; (lsp-enable-dap-auto-configure nil)
+  ;; :config
+  ;; (dap-ui-mode 1)
+  :after lsp
+  :config
+  ;; Set up Node debugging
+  (require 'dap-node)
+  (dap-node-setup) ;; Automatically installs Node debug adapter if needed
+
+  ;; Bind `C-c l d` to `dap-hydra` for easy access
+  (general-define-key
+    :keymaps 'lsp-mode-map
+    :prefix lsp-keymap-prefix
+    "d" '(dap-hydra t :wk "debugger")))
+\end{verbatim}
+\subsubsection{python}
+\label{sec:org717331e}
+Have to install
+\begin{verbatim}
+pip install python-lsp-server
+\end{verbatim}
+
+
+\begin{verbatim}
+(use-package python-mode
+  :ensure t
+  :hook (python-mode . lsp-deferred)
+  :custom
+  ;; NOTE: Set these if Python 3 is called "python3" on your system!
+  (python-shell-interpreter "python3")
+  (dap-python-executable "python3")
+  (dap-python-debugger 'debugpy)
+  :config
+  (require 'dap-python))
+\end{verbatim}
+
+\subsubsection{Latex}
+\label{sec:orgeae761f}
+install LSP server
+\begin{verbatim}
+cargo install --locked --git https://github.com/latex-lsp/texlab.git
+\end{verbatim}
+
+\begin{verbatim}
+  (use-package latex-preview-pane
+    :hook (latex-mode . latex-preview-pane-mode)
+  )
+
+;; (use-package tex
+;;   :ensure auctex)
+;;    (setq TeX-auto-save t)
+;;   (setq TeX-parse-self t)
+;;   (setq-default TeX-master nil)
+
+;;   (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+;;   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+;;   (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+
+;;   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+;;   (setq reftex-plug-into-AUCTeX t)
+
+
+\end{verbatim}
+
+\begin{verbatim}
+;; (use-package latex-mode
+;;   :ensure t
+;;   :hook (latex-mode . lsp-deferred)
+;;   (add-hook 'latex-mode 'lsp-deferred)
+;;   )
+\end{verbatim}
+\subsubsection{Company Mode}
+\label{sec:org78673a7}
+Company Mode provides a nicer in-buffer completion interface than completion-at-point which is more reminiscent of what you would expect from an IDE. We add a simple configuration to make the keybindings a little more useful (TAB now completes the selection and initiates completion at the current location if needed).
+\begin{verbatim}
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+	 ("<tab>" . company-complete-selection))
+	(:map lsp-mode-map
+	 ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+\end{verbatim}
+\subsubsection{Git}
+\label{sec:org6f72740}
+\begin{enumerate}
+\item Magit
+\label{sec:org3fb0b7b}
+\begin{verbatim}
+;; bring in the GIT
+;; use C-x g to open magit status
+;; type ? to know what can you do with magit
+(use-package magit ;; use tab to open instead of za in vim
+  :commands magit-status
+  ;; :custom
+  ;;   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+  )
+
+\end{verbatim}
+
+\item Projects
+\label{sec:org2eef22d}
+\begin{verbatim}
+;; emacs variables local to projects
+(use-package projectile ;; git projects management
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :custom ((projectile-completion-system 'ivy)) ;; use ivy for completion can also use helm
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :init
+  ;; NOTE: Set this to the folder where you keep your Git repos!
+  (when (file-directory-p "~/")
+    (setq projectile-project-search-path '("~/")))
+  (setq projectile-switch-project-action #'projectile-dired))
+
+(use-package counsel-projectile ;; more commands with M-o in projectile (ivy allows that)
+  :after projectile
+  :config(counsel-projectile-mode)) 
+\end{verbatim}
+\item Gutter
+\label{sec:org241f0f5}
+
+\begin{verbatim}
+(use-package git-gutter ;; works just like in vim :D
+  :commands (git-gutter-mode git-gutter)
+  :config
+  ;; If you enable global minor mode
+  ;; (global-git-gutter-mode t)
+  ;; If you enable git-gutter-mode for some modes
+  (add-hook 'ruby-mode-hook 'git-gutter-mode)
+  )
+\end{verbatim}
+
+\item Unused packages
+\label{sec:orge2096c5}
+
+\begin{verbatim}
+;; (use-package diff-hl
+;;   :init
+;;   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
+;;   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+;;   :config
+;;   (global-diff-hl-mode)
+;;   (diff-hl-margin-mode)
+;;   )
+;; NOTE: Make sure to configure a GitHub token before using this package!
+;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
+;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
+;; (use-package forge) ;; more git functionality
+
+
+\end{verbatim}
+\end{enumerate}
+
+\subsection{Org}
+\label{sec:org07bb6b2}
+\subsubsection{Templates}
+\label{sec:orgd5656c2}
+\begin{verbatim}
 (with-eval-after-load 'org
     (require 'org-tempo)
     (add-to-list 'org-structure-template-alist '("py" . "src python"))
@@ -351,34 +785,46 @@
     (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
     (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
     )
+\end{verbatim}
 
+\subsubsection{Language support}
+\label{sec:org5edf529}
+
+\begin{verbatim}
 (use-package haskell-mode
   :after org) ;; needed for haskell snippets
 
+\end{verbatim}
+
+\begin{verbatim}
 (with-eval-after-load 'org
     (org-babel-do-load-languages
       'org-babel-load-languages
       '((emacs-lisp . t)
-        (java . t)
-        (python . t)))
+	(java . t)
+	(python . t)))
     (push '("conf-unix" . conf-unix) org-src-lang-modes)
     )
+\end{verbatim}
 
+\subsubsection{Font setup}
+\label{sec:org1a18b2f}
+\begin{verbatim}
 (defun efs/org-font-setup ()
   ;; Replace list hyphen with dot
   (font-lock-add-keywords 'org-mode
-                          '(("^ *\\([-]\\) "
-                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))) ;; replace - in lists for a dot
+			  '(("^ *\\([-]\\) "
+			     (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•")))))) ;; replace - in lists for a dot
 
   ;; Set faces for heading levels
   (dolist (face '((org-level-1 . 1.2) ;; variable sizes for headers
-                  (org-level-2 . 1.1)
-                  (org-level-3 . 1.05)
-                  (org-level-4 . 1.0)
-                  (org-level-5 . 1.1)
-                  (org-level-6 . 1.1)
-                  (org-level-7 . 1.1)
-                  (org-level-8 . 1.1)))
+		  (org-level-2 . 1.1)
+		  (org-level-3 . 1.05)
+		  (org-level-4 . 1.0)
+		  (org-level-5 . 1.1)
+		  (org-level-6 . 1.1)
+		  (org-level-7 . 1.1)
+		  (org-level-8 . 1.1)))
     (set-face-attribute (car face) nil :font "DejaVu Sans" :weight 'regular :height(cdr face)))
 
   ;; Ensure that anything that should be fixed-pitch in Org files appears that way
@@ -389,7 +835,11 @@
   (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
   (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
+\end{verbatim}
 
+\subsubsection{Org configuration}
+\label{sec:orgc470e09}
+\begin{verbatim}
 (defun efs/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode 1) ;; allows text to be of variable size
@@ -408,10 +858,10 @@
   (setq org-log-done 'time) ;; logs when a task goes to done C-h-v (describe variable)
   (setq org-log-into-drawer t) ;; collapse logs into a drawer
   (setq org-agenda-files
-        '("~/fib/org/birthday.org"
-          "~/fib/org/Tasks.org"
-          "~/fib/org/Habits.org"
-          ))
+	'("~/fib/org/birthday.org"
+	  "~/fib/org/Tasks.org"
+	  "~/fib/org/Habits.org"
+	  ))
 
   (require 'org-habit)
   (add-to-list 'org-modules 'org-habit) ;;  add org-habit to org-modules
@@ -447,12 +897,12 @@
    '(("d" "Dashboard"
      ((agenda "" ((org-deadline-warning-days 7)))
       (todo "NEXT"
-        ((org-agenda-overriding-header "Next Tasks")))
+	((org-agenda-overriding-header "Next Tasks")))
       (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
 
     ("n" "Next Tasks"
      ((todo "NEXT"
-        ((org-agenda-overriding-header "Next Tasks")))))
+	((org-agenda-overriding-header "Next Tasks")))))
 
     ("W" "Work Tasks" tags-todo "+work-email")
 
@@ -464,59 +914,64 @@
 
     ("w" "Workflow Status"
      ((todo "WAIT"
-            ((org-agenda-overriding-header "Waiting on External")
-             (org-agenda-files org-agenda-files)))
+	    ((org-agenda-overriding-header "Waiting on External")
+	     (org-agenda-files org-agenda-files)))
       (todo "REVIEW"
-            ((org-agenda-overriding-header "In Review")
-             (org-agenda-files org-agenda-files)))
+	    ((org-agenda-overriding-header "In Review")
+	     (org-agenda-files org-agenda-files)))
       (todo "PLAN"
-            ((org-agenda-overriding-header "In Planning")
-             (org-agenda-todo-list-sublevels nil)
-             (org-agenda-files org-agenda-files)))
+	    ((org-agenda-overriding-header "In Planning")
+	     (org-agenda-todo-list-sublevels nil)
+	     (org-agenda-files org-agenda-files)))
       (todo "BACKLOG"
-            ((org-agenda-overriding-header "Project Backlog")
-             (org-agenda-todo-list-sublevels nil)
-             (org-agenda-files org-agenda-files)))
+	    ((org-agenda-overriding-header "Project Backlog")
+	     (org-agenda-todo-list-sublevels nil)
+	     (org-agenda-files org-agenda-files)))
       (todo "READY"
-            ((org-agenda-overriding-header "Ready for Work")
-             (org-agenda-files org-agenda-files)))
+	    ((org-agenda-overriding-header "Ready for Work")
+	     (org-agenda-files org-agenda-files)))
       (todo "ACTIVE"
-            ((org-agenda-overriding-header "Active Projects")
-             (org-agenda-files org-agenda-files)))
+	    ((org-agenda-overriding-header "Active Projects")
+	     (org-agenda-files org-agenda-files)))
       (todo "COMPLETED"
-            ((org-agenda-overriding-header "Completed Projects")
-             (org-agenda-files org-agenda-files)))
+	    ((org-agenda-overriding-header "Completed Projects")
+	     (org-agenda-files org-agenda-files)))
       (todo "CANC"
-            ((org-agenda-overriding-header "Cancelled Projects")
-             (org-agenda-files org-agenda-files)))))))
+	    ((org-agenda-overriding-header "Cancelled Projects")
+	     (org-agenda-files org-agenda-files)))))))
 
  (setq org-capture-templates
     `(("t" "Tasks / Projects")
       ("tt" "Task" entry (file+olp "~/fib/org/Tasks.org" "Inbox")
-           "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+	   "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
       ("j" "Journal Entries")
       ("jj" "Journal" entry
-           (file+olp+datetree "~/fib/org/Journal.org")
-           "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-           ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-           :clock-in :clock-resume
-           :empty-lines 1)
+	   (file+olp+datetree "~/fib/org/Journal.org")
+	   "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+	   ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+	   :clock-in :clock-resume
+	   :empty-lines 1)
       ("jm" "Meeting" entry
-           (file+olp+datetree "~/fib/org/Journal.org")
-           "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-           :clock-in :clock-resume
-           :empty-lines 1)
+	   (file+olp+datetree "~/fib/org/Journal.org")
+	   "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
+	   :clock-in :clock-resume
+	   :empty-lines 1)
 
       ("w" "Workflows")
       ("we" "Checking Email" entry (file+olp+datetree "~/fib/org/Journal.org")
-           "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
+	   "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
 
       ("m" "Metrics Capture")
       ("mw" "Weight" table-line (file+headline "~/fib/org/Metrics.org" "Weight")
        "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
 
   )
+\end{verbatim}
+
+\subsubsection{Text in the middle}
+\label{sec:org9b515f7}
+\begin{verbatim}
 
 ;; (defun efs/org-mode-visual-fill ()
 ;;   (setq visual-fill-column-width 100 ;; set column width (character width?)
@@ -525,12 +980,18 @@
 
 ;; (use-package visual-fill-column
 ;;   :hook (org-mode . efs/org-mode-visual-fill))
-
+\end{verbatim}
+\subsubsection{Org bullets}
+\label{sec:org452f434}
+\begin{verbatim}
 (use-package org-bullets ;; changes headers so that it doesn't show all of the stars
   :hook (org-mode . org-bullets-mode)
   :custom
   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
-
+\end{verbatim}
+\subsubsection{Org-fragtog}
+\label{sec:org9ba0da0}
+\begin{verbatim}
 ;; (use-package org-fragtog
 ;; :after org-bullets
 ;; :hook (org-fragtog) ; this auto-enables it when you enter an org-buffer, remove if you do not want this
@@ -538,210 +999,23 @@
 ;; (org-fragtog-mode)
 ;; ;; whatever you want
 ;; )
-
+\end{verbatim}
+\subsubsection{Automatically tangle config file when we save it}
+\label{sec:org00d9bf3}
+\begin{verbatim}
 ;; Automatically tangle our Emacs.org config file when we save it
 (defun efs/org-babel-tangle-config ()
   (when (string-equal (buffer-file-name)
-                      (expand-file-name "~/dotfiles/dotfiles/.org/babel.org"))
+		      (expand-file-name "~/dotfiles/dotfiles/.org/babel.org"))
     ;; Dynamic scoping to the rescue
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+\end{verbatim}
+\subsection{Dired}
+\label{sec:orgdc8aa8e}
 
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
-
-(defun efs/lsp-mode-setup ()
-  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
-
-(use-package lsp-mode
-  :commands (lsp lsp-deferred)
-  :hook (lsp-mode . efs/lsp-mode-setup)
-  :init
-  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-  :config
-  (lsp-enable-which-key-integration t)) ;; give description for keys with wichkey
-
-(use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-sideline-show-code-actions t)
-  (lsp-ui-doc-position 'bottom))
-
-(use-package lsp-treemacs
-  :after lsp)
-
-(use-package lsp-ivy
-  :after (lsp-mode lsp))
-
-(use-package dap-mode
-  ;; Uncomment the config below if you want all UI panes to be hidden by default!
-  ;; :custom
-  ;; (lsp-enable-dap-auto-configure nil)
-  ;; :config
-  ;; (dap-ui-mode 1)
-  :after lsp
-  :config
-  ;; Set up Node debugging
-  (require 'dap-node)
-  (dap-node-setup) ;; Automatically installs Node debug adapter if needed
-
-  ;; Bind `C-c l d` to `dap-hydra` for easy access
-  (general-define-key
-    :keymaps 'lsp-mode-map
-    :prefix lsp-keymap-prefix
-    "d" '(dap-hydra t :wk "debugger")))
-
-(use-package python-mode
-  :ensure t
-  :hook (python-mode . lsp-deferred)
-  :custom
-  ;; NOTE: Set these if Python 3 is called "python3" on your system!
-  (python-shell-interpreter "python3")
-  (dap-python-executable "python3")
-  (dap-python-debugger 'debugpy)
-  :config
-  (require 'dap-python))
-
-(use-package latex-preview-pane
-    :hook (latex-mode . latex-preview-pane-mode)
-  )
-
-;; (use-package tex
-;;   :ensure auctex)
-;;    (setq TeX-auto-save t)
-;;   (setq TeX-parse-self t)
-;;   (setq-default TeX-master nil)
-
-;;   (add-hook 'LaTeX-mode-hook 'visual-line-mode)
-;;   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
-;;   (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
-
-;;   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-;;   (setq reftex-plug-into-AUCTeX t)
-
-;; (use-package latex-mode
-;;   :ensure t
-;;   :hook (latex-mode . lsp-deferred)
-;;   (add-hook 'latex-mode 'lsp-deferred)
-;;   )
-
-(use-package company
-  :after lsp-mode
-  :hook (lsp-mode . company-mode)
-  :bind (:map company-active-map
-         ("<tab>" . company-complete-selection))
-        (:map lsp-mode-map
-         ("<tab>" . company-indent-or-complete-common))
-  :custom
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0))
-
-(use-package company-box
-  :hook (company-mode . company-box-mode))
-
-;; bring in the GIT
-;; use C-x g to open magit status
-;; type ? to know what can you do with magit
-(use-package magit ;; use tab to open instead of za in vim
-  :commands magit-status
-  ;; :custom
-  ;;   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
-  )
-
-;; emacs variables local to projects
-(use-package projectile ;; git projects management
-  :diminish projectile-mode
-  :config (projectile-mode)
-  :custom ((projectile-completion-system 'ivy)) ;; use ivy for completion can also use helm
-  :bind-keymap
-  ("C-c p" . projectile-command-map)
-  :init
-  ;; NOTE: Set this to the folder where you keep your Git repos!
-  (when (file-directory-p "~/")
-    (setq projectile-project-search-path '("~/")))
-  (setq projectile-switch-project-action #'projectile-dired))
-
-(use-package counsel-projectile ;; more commands with M-o in projectile (ivy allows that)
-  :after projectile
-  :config(counsel-projectile-mode))
-
-(use-package git-gutter ;; works just like in vim :D
-  :commands (git-gutter-mode git-gutter)
-  :config
-  ;; If you enable global minor mode
-  ;; (global-git-gutter-mode t)
-  ;; If you enable git-gutter-mode for some modes
-  (add-hook 'ruby-mode-hook 'git-gutter-mode)
-  )
-
-;; (use-package diff-hl
-;;   :init
-;;   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
-;;   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-;;   :config
-;;   (global-diff-hl-mode)
-;;   (diff-hl-margin-mode)
-;;   )
-;; NOTE: Make sure to configure a GitHub token before using this package!
-;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
-;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
-;; (use-package forge) ;; more git functionality
-
-(use-package term
-  :commands term
-  :config
-  (setq explicit-shell-file-name "zsh") ;; Change this to zsh, etc
-  ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
-
-  ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
-  (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
-
-(use-package eterm-256color
-  :hook (term-mode . eterm-256color-mode))
-
-(use-package vterm
-  :commands vterm
-  :config
-  (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
-  ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
-  (setq vterm-max-scrollback 10000))
-
-(when (eq system-type 'windows-nt)
-  (setq explicit-shell-file-name "powershell.exe")
-  (setq explicit-powershell.exe-args '()))
-
-(defun efs/configure-eshell ()
-  ;; Save command history when commands are entered
-  (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
-
-  ;; Truncate buffer for performance
-  (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
-
-  ;; Bind some useful keys for evil-mode
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "C-r") 'counsel-esh-history)
-  (evil-define-key '(normal insert visual) eshell-mode-map (kbd "<home>") 'eshell-bol)
-  (evil-normalize-keymaps)
-
-  (setq eshell-history-size         10000
-        eshell-buffer-maximum-lines 10000
-        eshell-hist-ignoredups t
-        eshell-scroll-to-bottom-on-input t))
-
-(use-package eshell-git-prompt
-  :after eshell)
-
-(use-package eshell
-  :hook (eshell-first-time-mode . efs/configure-eshell)
-  :config
-
-  (with-eval-after-load 'esh-opt
-    (setq eshell-destroy-buffer-when-process-dies t)
-    (setq eshell-visual-commands '("htop" "zsh" "vim")))
-  ;; (eshell-git-prompt-use-theme 'powerline)
-  )
-
+\begin{verbatim}
 (use-package dired
   :ensure nil ;; make sure package manager doesn't try to install
   :commands (dired dired-jump)
@@ -764,18 +1038,24 @@
   ;; Doesn't work as expected!
   ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
   (setq dired-open-extensions '(("png" . "feh") ;; use programs for file extensions
-                                ("mkv" . "mpv"))))
+				("mkv" . "mpv"))))
+
 (use-package dired-hide-dotfiles
   :hook (dired-mode . dired-hide-dotfiles-mode)
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
     "H" 'dired-hide-dotfiles-mode))
+\end{verbatim}
 
-(setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions)) ;; do not query to kill the buffer
-
+\subsection{Disable Optimization}
+\label{sec:orgf89bee3}
+Disable optimization at the end of startup so that garbage collector works properly and doesn't make emacs crash.
+\begin{verbatim}
 ;; after startup, it is important you reset this to some reasonable default. A large 
 ;; gc-cons-threshold will cause freezing and stuttering during long-term 
 ;; interactive use. I find these are nice defaults:
   (setq gc-cons-threshold 16777216
-        gc-cons-percentage 0.1
-        file-name-handler-alist last-file-name-handler-alist)
+	gc-cons-percentage 0.1
+	file-name-handler-alist last-file-name-handler-alist)
+\end{verbatim}
+\end{document}
