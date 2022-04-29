@@ -1,2 +1,15 @@
 * Ontologias
 ** Description Logics (DL)
+** Tareas
+*** De Análisis
+**** Identificación
+***** Monitorizacion
+***** Diagnóstico
+**** Predicción
+**** Control
+*** De Síntesis
+** Métodos de resolución
+*** Clasificación heurística
+Adecuado para tareas de análisis
+Fases:
+*** resolución
