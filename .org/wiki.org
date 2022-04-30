@@ -142,7 +142,7 @@ Exec=/usr/bin/discord --no-sandbox
 PulseAudio]]
 
 
-* [[./figures/Arch_icon.svg]]
+* [[./figures/Arch_icon.svg]] Arch
 ** TIP
    :PROPERTIES:
    :CUSTOM_ID: tip
