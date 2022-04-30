@@ -1,0 +1,1180 @@
+#+PROPERTY: header-args:emacs-lisp 
+#+STARTUP: inlineimages
+#+STARTUP: overview
+
+* Arch Install
+** Give your user privileges
+   :PROPERTIES:
+   :CUSTOM_ID: give-your-user-privileges
+   :END:
+
+#+begin_quote
+  Video makes backlight work and wheel gives you sudo privileges.
+#+end_quote
+
+#+begin_src sh
+usermod -a -G video pol
+usermod -a -G wheel pol
+usermod -a -G input pol
+#+end_src
+
+** Reisub
+   :PROPERTIES:
+   :CUSTOM_ID: reisub
+   :END:
+Activate
+[[https://forum.manjaro.org/t/howto-reboot-turn-off-your-frozen-computer-reisub-reisuo/3855][REISUB]]
+for safe reboots if computer freezes.
+
+** Rclone setup
+   :PROPERTIES:
+   :CUSTOM_ID: rclone-setup
+   :END:
+
+#+begin_quote
+  Used to download Calibre Library and .thunderbird
+#+end_quote
+
+- Configure rclone with:
+
+#+begin_example
+rclone config
+#+end_example
+
+- Then clone from drive:
+
+#+begin_example
+rclonepull
+#+end_example
+
+** Bluetooth
+   :PROPERTIES:
+   :CUSTOM_ID: bluetooth
+   :END:
+- [[https://wiki.archlinux.org/index.php/Bluetooth#Auto_power-on_after_boot][Auto
+  power-on]] after boot ``` /etc/bluetooth/main.conf
+
+  [Policy] AutoEnable=true ```
+
+By default, your Bluetooth adapter will not power on after boot. -
+[[https://wiki.archlinux.org/index.php/Bluetooth_headset#Setting_up_auto_connection][Setting
+up auto connection]] ``` /etc/pulse/default.pa
+
+#+begin_example
+### Automatically switch to newly-connected devices
+load-module module-switch-on-connect
+```
+#+end_example
+
+*** Trust
+    :PROPERTIES:
+    :CUSTOM_ID: trust
+    :END:
+Make sure that your bluetooth audio device is trusted, otherwise
+repeated pairing will fail.
+
+** Video Card
+   :PROPERTIES:
+   :CUSTOM_ID: video-card
+   :END:
+Configure nvidia nvidia-xconfig.
+
+** LightDM permissions "Wallpaper error"
+   :PROPERTIES:
+   :CUSTOM_ID: lightdm-permissions-wallpaper-error
+   :END:
+Wallpaper error when background is set in desktop, it will also be used
+by LightDM unless the picture isn't coming from /usr/share/backgrounds.
+
+** Swap escape and caps
+   :PROPERTIES:
+   :CUSTOM_ID: swap-escape-and-caps
+   :END:
+View file:
+
+#+begin_example
+vim /etc/X11/xorg.conf.d/00-keyboard.conf
+#+end_example
+
+See mappings for
+[[https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration#Frequently_used_XKB_options][xkb]]:
+
+#+begin_src sh
+setxkbmap -print -verbose 10
+#+end_src
+
+Swap caps [[https://man.archlinux.org/man/xkeyboard-config.7][spanish
+keyboard]] with
+[[https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration#Using_localectl][localectl]]:
+
+#+begin_src sh
+localectl --no-convert set-x11-keymap es pc104 cat caps:swapescape
+localectl --no-convert set-x11-keymap es pc105 "" caps:swapescape
+#+end_src
+
+With
+[[https://wiki.archlinux.org/index.php/Linux_console/Keyboard_configuration][linux
+systemd options]] (xbd) or
+[[https://wiki.archlinux.org/index.php/Xorg/Keyboard_configuration][xorg]]
+(xkb)
+
+#+begin_example
+setxkbmap -rules evdev -model evdev -layout us -variant altgr-intl
+#+end_example
+
+** Discord fix long calls
+   :PROPERTIES:
+   :CUSTOM_ID: discord-fix-long-calls
+   :END:
+Modify .desktop discord file:
+
+#+begin_example
+Exec=/usr/bin/discord --no-sandbox
+#+end_example
+
+[[https://www.reddit.com/r/archlinux/comments/kcbjcu/discord_becomes_laggy_during_long_voice_calls/][Why?]]
+
+** Pulseaudio
+   :PROPERTIES:
+   :CUSTOM_ID: pulseaudio
+   :END:
+[[https://wiki.archlinux.org/index.php/PulseAudio/Troubleshooting][Troubleshoot
+PulseAudio]]
+
+
+* [[./figures/Arch_icon.svg]]
+** TIP
+   :PROPERTIES:
+   :CUSTOM_ID: tip
+   :END:
+If a application doesn't work properly even though packages are
+installed, check that all optional packages for app are installed
+
+** Whatsapp-nativefier fix
+   :PROPERTIES:
+   :CUSTOM_ID: whatsapp-nativefier-fix
+   :END:
+Pressing ctrl+shift+i (on Linux) and the Devtools window will open. Then
+click on Application -> Service Workers And check the option Bypass for
+network.
+
+Now press ctrl+r to reload. And ctrl+shift+i to close the Devtools.
+
+Whenever you open your whatsapp the problem will occur, but since the
+Bypass for network option has already been enabled, you only need to
+press ctrl+shift+i (open devtools), ctrl+r (reload), ctrl+shift+i (close
+devtools)
+
+** Connect to upclink VPN
+   :PROPERTIES:
+   :CUSTOM_ID: connect-to-upclink-vpn
+   :END:
+#+begin_src sh
+f5fpc -s -x -t https://upclink.upc.edu
+f5fpc --stop
+#+end_src
+
+** Java JDK Configuration
+   :PROPERTIES:
+   :CUSTOM_ID: java-jdk-configuration
+   :END:
+#+begin_example
+archlinux-java <COMMAND>
+
+COMMAND:
+    status      List installed Java environments and enabled one
+    get     Return the short name of the Java environment set as default
+    set <JAVA_ENV>  Force <JAVA_ENV> as default
+    unset       Unset current default Java environment
+    fix     Fix an invalid/broken default Java environment configuration
+#+end_example
+
+** How to format USB
+   :PROPERTIES:
+   :CUSTOM_ID: how-to-format-usb
+   :END:
+Format as
+[[https://www.howtogeek.com/73178/what-file-system-should-i-use-for-my-usb-drive/#:~:text=File%20systems%20are%20the%20sort,run%20into%20others%20on%20occasion.][exFAT]]
+for most compatibility with every OS and over 4GB files compatible.
+
+** Application shortcut location
+   :PROPERTIES:
+   :CUSTOM_ID: application-shortcut-location
+   :END:
+https://wiki.archlinux.org/index.php/Desktop_entries
+
+/usr/share/applications
+
+/home/$USER/.local/share/applications ## Usage
+
+*** Bluetooth
+    :PROPERTIES:
+    :CUSTOM_ID: bluetooth-1
+    :END:
+To use microphone on bluetooth headset swap from A2DP profile in
+bluetooth manager or pavucontrol to HSP/HFP -
+https://wiki.archlinux.org/index.php/Bluetooth_headset -
+https://bbs.archlinux.org/viewtopic.php?id=116895 -
+https://www.philips.co.in/c-f/XC000008687/what-is-a-bluetooth-profile-hsp,-hsp,-a2dp,-avrcp
+
+**** Troubleshoot
+     :PROPERTIES:
+     :CUSTOM_ID: troubleshoot
+     :END:
+Use
+[[https://wiki.archlinux.org/title/Bluetooth#Troubleshooting][debug]]
+option with
+
+#+begin_example
+/usr/lib/bluetooth/bluetoothd -n -d
+#+end_example
+
+*** Pacman
+    :PROPERTIES:
+    :CUSTOM_ID: pacman
+    :END:
+Print all environment variables:
+
+#+begin_src sh
+env
+#+end_src
+
+Remove a package and its /dependancies/:
+
+#+begin_src sh
+sudo pacman -Rs
+#+end_src
+
+Remove all *orphan* packages:
+
+#+begin_src sh
+pacman -Rns $(pacman -Qtdq)
+#+end_src
+
+List all AUR packages:
+
+#+begin_src sh
+pacman -Qm
+#+end_src
+
+List installed packages
+
+#+begin_src sh
+pacman -Qqe > pkglist.txt
+#+end_src
+
+Remove cache:
+
+#+begin_src sh
+yay -Sc
+#+end_src
+
+Identify which package owns a file
+
+#+begin_src sh
+pacman -Qo /path/to/file
+#+end_src
+
+[[https://forum.manjaro.org/t/update-or-package-installation-returns-failed-to-commit-transaction-conflicting-files-filename-exists-in-filesystem/3598][Pacman
+failed to commit transaction:]]
+
+#+begin_src sh
+sudo pacman -S $PACKAGE --overwrite '*'
+#+end_src
+
+**** Flags
+     :PROPERTIES:
+     :CUSTOM_ID: flags
+     :END:
+- [[https://superuser.com/questions/568967/prevent-pacman-from-reinstalling-packages-that-were-already-installed][--needed]]:
+  prevent pacman from reinstalling packages that were already installed
+
+*** Usb
+    :PROPERTIES:
+    :CUSTOM_ID: usb
+    :END:
+Remove Usb safely:
+
+/Option 1/:
+
+#+begin_src sh
+sync
+umount /dev/sdX
+#+end_src
+
+/Option 2/:
+
+#+begin_src sh
+udisksctl unmount -b /dev/sdXY
+udisksctl power-off -b /dev/sdX
+#+end_src
+
+*** Usefull commands
+    :PROPERTIES:
+    :CUSTOM_ID: usefull-commands
+    :END:
+Show where a executable is at:
+
+#+begin_example
+which firefox
+whereis firefox
+#+end_example
+
+See who is connected to your computer:
+
+#+begin_quote
+  ":0" if its yourself and different ip if its an outsider
+#+end_quote
+
+#+begin_example
+who
+#+end_example
+
+Check who is connected to the same router
+
+#+begin_example
+arp
+#+end_example
+
+See [[https://en.wikipedia.org/wiki/Default_gateway][Default gateway]]
+
+#+begin_example
+route
+#+end_example
+
+Print PATH:
+
+#+begin_src sh
+path
+#+end_src
+
+Print environment variables:
+
+#+begin_src sh
+printenv
+#+end_src
+
+Print out installed packages by [[https://brew.sh/][Homebrew]]:
+
+#+begin_src sh
+brew leaves
+#+end_src
+
+Find out class of an app:
+
+#+begin_src sh
+xprop
+#+end_src
+
+View resources usage:
+
+#+begin_src sh
+htop
+#+end_src
+
+View disk usage:
+
+#+begin_src sh
+ncdu
+#+end_src
+
+Show all attached devices:
+
+#+begin_src sh
+lsblk
+#+end_src
+
+To copy files from one place to another place:
+
+#+begin_src sh
+dd
+#+end_src
+
+Show swap memory:
+
+#+begin_src sh
+swapon --show
+#+end_src
+
+Gives information about a disk:
+
+#+begin_src sh
+fdisk -l /dev/sdx
+#+end_src
+
+List blocks with label and
+[[https://wiki.archlinux.org/index.php/Persistent_block_device_naming][UUID]]
+
+#+begin_src sh
+lsblk -f
+#+end_src
+
+List currently running services:
+
+#+begin_src sh
+systemctl --type=service
+#+end_src
+
+Show systemd Journal:
+
+#+begin_src sh
+journalctl
+#+end_src
+
+Change user owner of a file:
+
+#+begin_src sh
+chown $user $file
+#+end_src
+
+Change group of a file:
+
+#+begin_src sh
+chgrp $group $file
+#+end_src
+
+*** Disk Partition
+    :PROPERTIES:
+    :CUSTOM_ID: disk-partition
+    :END:
+Use cfdisk instead of fdisk
+
+#+begin_src sh
+cfdisk
+#+end_src
+
+*** Pacstrap
+    :PROPERTIES:
+    :CUSTOM_ID: pacstrap
+    :END:
+#+begin_src sh
+pacstrap /mnt base linux linux-firmware man-db man-pages texinfo vim sudo
+#+end_src
+
+*** GPG keys
+    :PROPERTIES:
+    :CUSTOM_ID: gpg-keys
+    :END:
+Install a
+[[https://www.reddit.com/r/linuxquestions/comments/9fxddu/please_help_me_resolve_aur_signing_key_issue/][key]]
+
+#+begin_src sh
+gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys CB9387521E1EE0127DA804843FDBB55084CC5D84
+#+end_src
+
+- hkp://pgp.mit.edu:80
+- hkps://pgp.mit.edu
+- hkps://keyserver.ubuntu.com
+- hkp://p80.pool.sks-keyservers.net:80
+
+*** Jobs
+    :PROPERTIES:
+    :CUSTOM_ID: jobs
+    :END:
+View all background jobs
+
+#+begin_src sh
+jobs
+#+end_src
+
+Take a job from the background to the foreground
+
+#+begin_quote
+  Takes job number 1 to the foreground
+#+end_quote
+
+#+begin_src sh
+fg %1
+#+end_src
+
+Kill a specific job
+
+#+begin_quote
+  Kills job number 2
+#+end_quote
+
+#+begin_src sh
+kill %2
+#+end_src
+
+Pressing 'CTRL+Z' will suspend the current foreground job.
+
+Making a command execute in background when suspended
+
+#+begin_src sh
+bg %1
+#+end_src
+
+*** Bash
+    :PROPERTIES:
+    :CUSTOM_ID: bash
+    :END:
+brace expansion:
+
+#+begin_example
+mkdir Teoria\ {1..4}
+#+end_example
+
+Result: creates folders named Teoria 1, Teoria 2, Teoria 3, Teoria 4
+
+*** Wayland with LightDM
+    :PROPERTIES:
+    :CUSTOM_ID: wayland-with-lightdm
+    :END:
+Steps:
+https://www.reddit.com/r/antergos/comments/9h7grw/how_to_wayland_with_lightdm/ 1.
+Verify that you have a Gnome session in /usr/share/wayland-sessions.
+
+2. [@2] Using root privilege open a text editor of your preference and
+   edit the /etc/lightdm/lightdm.conf file and uncomment the following
+   line:
+   sessions-directory=/usr/share/lightdm/sessions:/usr/share/xsessions:/usr/share/wayland-sessions
+
+3. Using root privilege (su or sudo) go to /usr/share/xsessions and move
+   (mv) the gnome.desktop file to gnome.desktop.bak or whatever
+   extension you want at the end of that file name: i.e $ sudo mv
+   gnome.desktop gnome.desktop.bak
+
+4. DO NOT change the name of the other session called
+   gnome-xorg.desktop. Be sure that you are renaming that file under
+   /usr/share/wayland-sessions.
+
+5. Now reboot the machine and select the appropriate sessions in the
+   lightdm sessions list. There are no more duplicated Gnome names, but
+   one called Gnome and other for xorg called Gnome-xorg. Try the Gnome
+   one and check in gnome-terminal if the Wayland protocol is being
+   used: echo $XDG_SESSION_TYPE The response of that command should be
+   wayland.
+
+
+* [[./figures/git_icon.png]] Git
+[[https://git-scm.com/docs/git-checkout][Go]] back 'x' revisions back on
+a file:
+
+#+begin_example
+git checkout HEAD~x Makefile
+#+end_example
+
+Search for a specific string changed during all history:
+
+#+begin_example
+git log -S'get info' -p
+#+end_example
+
+Go back 'x' revisions back:
+
+#+begin_example
+git checkout HEAD~x
+#+end_example
+
+Go back to a previous commit and uncommit it, keeping any changes done
+until that commit:
+
+#+begin_example
+git reset --soft HEAD^
+#+end_example
+
+Add new submodule
+
+#+begin_src sh
+git submodule add URL   DIRECTORY
+#+end_src
+
+Submodules info
+
+#+begin_src sh
+git submodule status
+#+end_src
+
+Update all submodules:
+
+#+begin_src sh
+git submodule update --recursive --remote
+#+end_src
+
+Clone newly added submodules /See:/
+[[https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules][1]]
+and
+[[https://stackoverflow.com/questions/38208748/how-do-i-clone-a-local-repo-with-submodules][2]]
+
+#+begin_src sh
+git submodule sync
+git submodule update --init --recursive
+#+end_src
+
+[[https://stackoverflow.com/questions/4604486/how-do-i-move-an-existing-git-submodule-within-a-git-repository][Move
+Submodule]]
+
+#+begin_src sh
+git mv old/submod new/submod
+#+end_src
+
+View submodules differences
+
+#+begin_src sh
+git diff --submodule=diff
+#+end_src
+
+Download only a part of a repository:
+
+#+begin_quote
+  https://github.com/lodash/lodash/tree/master/test ➜
+  https://github.com/lodash/lodash/trunk/test
+#+end_quote
+
+#+begin_src sh
+svn checkout https://github.com/lodash/lodash/trunk/test
+#+end_src
+
+Make the current commit the
+[[https://stackoverflow.com/questions/9683279/make-the-current-commit-the-only-initial-commit-in-a-git-repository][only
+commit]] in a git repo
+
+#+begin_src sh
+git checkout --orphan newBranch
+git add -A  # Add all files and commit them
+git commit
+git branch -D master  # Deletes the master branch
+git branch -m master  # Rename the current branch to master
+git push -f origin master  # Force push master branch to github
+git reflog expire --all --expire=now  # remove hidden refs
+git gc --aggressive --prune=all     # remove the old files
+git commit -m "First commit"
+git push -f origin master
+#+end_src
+
+#+begin_quote
+  Doing this didn't reduce the repo size at all
+#+end_quote
+
+Remove file from all
+[[https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/removing-sensitive-data-from-a-repository][commits]]:
+
+#+begin_src sh
+bfg --delete-files FILE_WITH_SENSITIVE_DATA PATH_TO_REPO
+cd some-big-repo.git
+git reflog expire --expire=now --all && git gc --prune=now --aggressive
+git push
+#+end_src
+
+Remove [[https://rtyley.github.io/bfg-repo-cleaner/][folder]] from all
+commits:
+
+#+begin_src sh
+bfg --delete-folders FOLDER_WITH_DATA PATH_TO_REPO
+cd some-big-repo.git
+git reflog expire --expire=now --all && git gc --prune=now --aggressive
+git push
+#+end_src
+
+Welcome to the dotfiles wiki!
+
+
+* [[./figures/i3_icon.png]]  I3 window manager
+** Help
+   :PROPERTIES:
+   :CUSTOM_ID: help
+   :END:
+Check the i3 [[https://i3wm.org/docs/userguide.html][official guide]]
+
+** Tools
+   :PROPERTIES:
+   :CUSTOM_ID: tools
+   :END:
+Use xev to find keysym of a key to use on keybindings
+
+#+begin_example
+xev
+#+end_example
+
+** Config
+   :PROPERTIES:
+   :CUSTOM_ID: config
+   :END:
+
+#+begin_quote
+  Located under .config/i3/config
+#+end_quote
+
+This file has been auto-generated by i3-config-wizard(1).\\
+It will not be overwritten, so edit it as you like.
+
+Should you change your keyboard layout some time, delete this file and
+re-run i3-config-wizard(1).
+
+#+begin_example
+i3-config-wizard
+#+end_example
+
+i3 config file (v4)
+
+
+* [[./figures/libre_office.png]] Libre Office
+** Return to last edit position when opening files (You want this!)
+   :PROPERTIES:
+   :CUSTOM_ID: return-to-last-edit-position-when-opening-files-you-want-this
+   :END:
+Tools -> Options -> User Data -> First/last name/initials\\
+or\\
+alt+f12 -> User Data -> First/last name/initials\\
+> Allows libre office to know which user is opening a file so it can
+save some cache information
+
+** Plugins
+   :PROPERTIES:
+   :CUSTOM_ID: plugins
+   :END:
+Plugins folder is located under /.local/LibreOfficePluggins\\
+Install plugins by right clicking .oxt files
+
+** Change icons
+   :PROPERTIES:
+   :CUSTOM_ID: change-icons
+   :END:
+Tools -> Options -> View -> Icon Style -> Sukapura
+
+
+* [[./figures/mac_icon.png]] MacOS
+** Brew
+   :PROPERTIES:
+   :CUSTOM_ID: brew
+   :END:
+Fix brew
+
+#+begin_src sh
+brew doctor
+#+end_src
+
+** ctrl + space not working?
+   :PROPERTIES:
+   :CUSTOM_ID: ctrl-space-not-working
+   :END:
+[[https://forum.sublimetext.com/t/os-x-control-space-not-working/2145/3][Disable
+change language shortcut]]
+
+** Get italics in terminal:
+   :PROPERTIES:
+   :CUSTOM_ID: get-italics-in-terminal
+   :END:
+tic xterm-256color-italic.terminfo
+
+https://alexpearce.me/2014/05/italics-in-iterm2-vim-tmux/
+
+If a page is down try to use its cached version:
+
+#+begin_example
+http://webcache.googleusercontent.com/search?q=cache:example.com/page.html
+#+end_example
+
+#+begin_quote
+  In Unix-like operating systems, a device file or special file is an
+  interface to a device driver that appears in a file system as if it
+  were an ordinary file.\\
+  On Linux they are in the /dev directory, according to the Filesystem
+  Hierarchy Standard.
+#+end_quote
+
+#+begin_quote
+  "Double space is a soft break"\\
+  You can use any html syntax inside a markdown file
+#+end_quote
+
+#+begin_quote
+  About
+  [[https://wikis.utexas.edu/display/MSBTech/Installing+OVA+files+using+VirtualBox#:~:text=An%20OVA%20file%20is%20an,have%20installed%20on%20your%20computer.][OVA]]
+  files:\\
+  An OVA file is an Open Virtualization Appliance that contains a
+  compressed, "installable" version of a virtual machine. When you open
+  an OVA file it extracts the VM and imports it into whatever
+  virtualization software you have installed on your computer. Neovim is
+  much faster than vim
+#+end_quote
+
+
+* [[./figures/rclone_icon.png]] Rclone
+** Rclone to sync files
+Make remote an exact copy of the local folder > If you were to use copy
+instead of sync, it wouldn't delete extra files on the remote that are
+no longer needed, what we want > in this case is for the destination to
+be an exact copy.
+
+#+begin_quote
+  remote = folder\\
+  REMOTENAME: drive:
+#+end_quote
+
+#+begin_src sh
+rclone -P sync ~/.thunderbird drive:Thunderbird
+rclone -P sync ~/Calibre\ Library drive:Calibre/Calibre\ Library
+#+end_src
+
+Make local folder an exact copy of the remote
+
+#+begin_quote
+  folder = remote
+#+end_quote
+
+#+begin_src sh
+rclone -P sync drive:Thunderbird ~/.thunderbird
+rclone -P sync drive:Calibre/Calibre\ Library ~/Calibre\ Library
+#+end_src
+
+On Windows:
+
+#+begin_example
+cd $HOME
+rclone sync drive:Calibre/Calibre` Library Calibre` Library -P --create-empty-src-dirs
+#+end_example
+
+Configure rclone:
+
+#+begin_src sh
+rclone config
+#+end_src
+
+Quota about a remote:
+
+#+begin_src sh
+rclone about drive:
+#+end_src
+
+To list remotes:
+
+#+begin_src sh
+rclone listremotes
+#+end_src
+
+Look for [[https://rclone.org/commands/rclone_check/][changes]] between
+remote and local:
+
+#+begin_src sh
+rclone check SOURCEDIRECTORY drive:DIRECTORYBEINGCOPIEDTO
+#+end_src
+
+** Flags
+- -P Shows progress in real time
+
+Here you'll find all things i've learnt from linux thus far, enjoy!
+
+
+* [[./figures/ssh_icon.png]] SSH
+
+** Connect to a computer with ssh
+Connect to a computer using ssh: > systemctl start/enable sshd "ssh
+daemon" > Use arp -a to look for possible pc's to connect to.
+
+#+begin_example
+ssh user@ip_or_alias
+#+end_example
+
+** Create a key
+Create the [[https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh][key]]
+
+#+begin_src sh
+ssh-keygen -t rsa -b 2048 -C "some name"
+#+end_src
+
+[[https://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent][Open the program that holds private keys and then add the key]]\\
+/Tip:/ Do not add the .pub (public key)
+
+#+begin_src sh
+eval `ssh-agent -s`
+ssh-add KEYFILE
+#+end_src
+
+List
+[[https://help.github.jp/enterprise/2.11/user/articles/changing-a-remote-s-url/][remotes]]
+to see their protocol
+
+#+begin_src sh
+git remote -v
+#+end_src
+
+Change from Https to SSH
+
+#+begin_src sh
+git remote set-url origin git@github.com:cuberhaus/dotfiles.git
+#+end_src
+
+Change from SSH to Https
+
+#+begin_src sh
+git remote set-url origin https://github.com/cuberhaus/dotfiles.git
+#+end_src
+
+
+* [[./figures/stow_icon.png]] Stow
+Adding files to stow symlink:
+
+1. Create files with the same name of those we want to add to the repo
+   (/in ~/dotfiles/dotfiles/)
+
+   #+begin_src sh
+   mkdir folder_structure_that_contains_the_file     # skip if it's inside ~/
+   touch file_name
+   #+end_src
+
+2. Move files with the same name than those we created with "touch" to
+   our dotfiles folder replacing our "touch" files and create links that
+   replace mgces from the home directory
+
+   #+begin_src sh
+   stow --adopt -nvt ~ dotfiles/
+   #+end_src
+
+Flags:
+
+- -n Do nothing, just to see the effects of the command beforehand
+- -v Verbose
+- -t Target folder where links will be created "~"
+- --adopt Moves the existing files to the -d "destination" folder,
+  without it, just links will be created
+
+Cloning the repo and creating symlinks to the files
+
+Steps:
+
+#+begin_src sh
+cd ~
+mkdir dotfiles
+cd dotfiles
+git clone https://github.com/cuberhaus/dotfiles
+stow -nvt ~ dotfiles/
+#+end_src
+
+
+* [[./figures/ubuntu_icon.png]] Ubuntu
+Print out manually installed packages
+
+#+begin_src sh
+comm -23 <(apt-mark showmanual | sort -u) <(gzip -dc /var/log/installer/initial-status.gz | sed -n 's/^Package: //p' | sort -u)
+#+end_src
+
+
+* [[./figures/vim_icon.png]] Text editor
+
+#+begin_quote
+  A.k.a. The best Editor
+#+end_quote
+
+** Clean Launch
+   :PROPERTIES:
+   :CUSTOM_ID: clean-launch
+   :END:
+#+begin_example
+vim --clean
+#+end_example
+
+** Veure els errors per pantalla
+   :PROPERTIES:
+   :CUSTOM_ID: veure-els-errors-per-pantalla
+   :END:
+#+begin_example
+:messages
+#+end_example
+
+** Comment line
+   :PROPERTIES:
+   :CUSTOM_ID: comment-line
+   :END:
+*gc* - toggles line comment. For example gcc to toggle line comment for
+current line and gc2j to toggle line comments for the current line and
+the next two lines.
+
+- VS CODE *gC* - toggles block comment. For example gCi) to comment out
+  everything within parentheses.
+
+** Change/Delete/Add surrounding like ” ” ' ' ( ) [ ] etc
+   :PROPERTIES:
+   :CUSTOM_ID: changedeleteadd-surrounding-like-etc
+   :END:
+| Surround Command Description           |                                                                       |
+|----------------------------------------+-----------------------------------------------------------------------|
+| d s < existing char >                  | Delete existing surround                                              |
+| c s < existing char > < desired char > | Change surround existing to desired                                   |
+| y s < motion > < desired char >        | Surround something with something using motion (as in "you surround") |
+| S < desired char >                     | Surround when in visual modes (surrounds full selection)              |
+
+Open { or [ to add spaces in between and closing ] } for no spaces: cs]{
+{ Hello } world!
+
+** Jump around
+   :PROPERTIES:
+   :CUSTOM_ID: jump-around
+   :END:
+Press *Ctrl-O* to jump back to the previous (older) location.
+
+Press *Ctrl-I* (same as Tab) to jump forward to the next (newer)
+location.
+
+Jump to category under the cursor *<C-]>*
+
+Jump back **
+
+Press *Enter* to jump to the subject (topic) under the cursor.
+
+Press *Backspace* to return from the last jump.
+
+#+begin_example
+map <buffer> <CR> <C-]>
+map <buffer> <BS> <C-T>
+#+end_example
+
+** Re-select last visual select
+   :PROPERTIES:
+   :CUSTOM_ID: re-select-last-visual-select
+   :END:
+#+begin_example
+gv
+#+end_example
+
+** Increase numbers increasingly by 1
+   :PROPERTIES:
+   :CUSTOM_ID: increase-numbers-increasingly-by-1
+   :END:
+#+begin_example
+g ctrl A
+#+end_example
+
+(increase i+1)
+
+** Surround Visually:
+   :PROPERTIES:
+   :CUSTOM_ID: surround-visually
+   :END:
+Visual select then press S (and whatever you want to surround with)
+
+** Save session
+   :PROPERTIES:
+   :CUSTOM_ID: save-session
+   :END:
+To start recording vim session
+
+#+begin_example
+:Obsess
+#+end_example
+
+To source the session
+
+#+begin_example
+vim -S
+#+end_example
+
+** 🎩 VSCodeVim tricks!
+   :PROPERTIES:
+   :CUSTOM_ID: vscodevim-tricks
+   :END:
+VS Code has a lot of nifty tricks and we try to preserve some of them:
+
+*gd* - jump to definition.
+
+*gq* - on a visual selection reflow and wordwrap blocks of text,
+preserving commenting style. Great for formatting documentation
+comments.
+
+*gb* - adds another cursor on the next word it finds which is the same
+as the word under the cursor.
+
+*af* - visual mode command which selects increasingly large blocks of
+text. For example, if you had "blah (foo [bar 'ba|z'])" then it would
+select 'baz' first. If you pressed af again, it'd then select [bar
+'baz'], and if you did it a third time it would select "(foo [bar
+'baz'])".
+
+*gh* - equivalent to hovering your mouse over wherever the cursor is.
+Handy for seeing types and error messages without reaching for the
+mouse!
+
+
+* [[./figures/wine_icon.png]]  Wine
+Uninstall a wine application
+
+#+begin_src sh
+wine uninstaller
+#+end_src
+
+
+* Arquitectura de computadors
+** Compiladors
+   :PROPERTIES:
+   :CUSTOM_ID: compiladors
+   :END:
+1. Para obtener el código ensamblador a partir de ficheros fuente:
+
+   #+begin_src sh
+   gcc -S miprograma_parte1.c miprogram_parte2.c
+   #+end_src
+
+2. Para obtener el código objeto a partir del código ensamblador de los
+   anteriores programas miprograma_parte1.s y miporgrama_parte2.s:
+
+   #+begin_src sh
+   gcc -c miprogram_parte1.s miprograma_parte2.s
+   #+end_src
+
+   - O equivalentemente:
+
+   #+begin_src sh
+   as miprograma_parte1.s miprograma_parte2.s
+   #+end_src
+
+3. Finalmente hay que linkar el código de ambos programas y generar uno
+   solo:
+
+   #+begin_src sh
+   gcc -o miprograma.x miprograma_parte1.o miprograma_parte2.o
+   #+end_src
+
+   - Alternativamente:
+
+   #+begin_src sh
+   ld -o miprograma.x miprograma_parte1.o miprograma_parte2.o
+   #+end_src
+
+Para ejecutar los tres pasos directamente:
+
+#+begin_src sh
+gcc -o miprograma miprograma_parte1.c miprograma_parte2.c
+#+end_src
+
+Para activar las optimizaciones en el compilador añadimos -O0 -O1 -O2
+-O3
+
+1. No optimizar
+
+2. Optimizaciones básicas (equivale a -O)
+
+3. Optimizaciones avanzadas (requieren más tiempo)
+
+4. Optimizaciones arriesgadas (pueden relentizar el programa)
+
+** Recuento de instrucciones
+   :PROPERTIES:
+   :CUSTOM_ID: recuento-de-instrucciones
+   :END:
+- *Cálculo directo:* contar instrucciones, bucles...
+
+- *Contadores Hardware:* contadores internos, velocidad original, no
+  todos los procesadores tienen, necesario recompilar kernel para
+  acceder a ellos y no permite alterar el código original.
+
+- *Instrumentar el código:* Añadir instrucciones al código del programa
+  para contar instrucciones (o lo que haga falta).
+
+- *Simular el procesador:* Complejo, lento, lee el código compilado y
+  "ejecuta" el programa, permite saber si cambios en el procesador
+  mejoran o empeoran la ejecución de un programa (multiplicador más
+  lento pero que permite mas multiplicaciones en paralelo, mejora el
+  tiempo de ejecución del programa?).
+
+  Pide información al SO (y procesador) e instrumenta el código
+
+  #+begin_src sh
+  valgrind --tool=lackey ./miejecutable
+  #+end_src
+
+Convert machine code (in binary) to assembly
+
+#+begin_example
+objdump -d objecte.o
+#+end_example
