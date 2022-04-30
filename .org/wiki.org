@@ -4,6 +4,8 @@
 inlineimages displays inline images as images
 overview displays sections, folded by default
 
+Search how to tangle org sections to stand-alone files
+
 * Arch Install
 ** Give your user privileges
    :PROPERTIES:
