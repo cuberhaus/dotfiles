@@ -1,6 +1,8 @@
 #+PROPERTY: header-args:emacs-lisp 
 #+STARTUP: inlineimages
 #+STARTUP: overview
+inlineimages displays inline images as images
+overview displays sections, folded by default
 
 * Arch Install
 ** Give your user privileges
