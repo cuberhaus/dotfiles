@@ -145,6 +145,16 @@ Exec=/usr/bin/discord --no-sandbox
 [[https://wiki.archlinux.org/index.php/PulseAudio/Troubleshooting][Troubleshoot
 PulseAudio]]
 
+* Clips
+
+** Commands
+(reset):
+(facts): Show current facts
+(agenda): Rules pendent of activating
+(instances): Show current instances
+(run): Run all rules
+(run ?number): Run 1 rule
+
 
 * [[./figures/Arch_icon.svg]] Arch
 ** TIP

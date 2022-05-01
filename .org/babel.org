@@ -1,5 +1,6 @@
 #+PROPERTY: header-args:emacs-lisp :tangle ~/dotfiles/dotfiles/.emacs.d/init.el :mkdirp yes
 #+title Emacs!
+#+STARTUP: overview
 
 * Info
 ** Babel header
@@ -285,6 +286,36 @@ Could be because other packages are outdated, proceed to update them.
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 #+end_src
 ** UI settings
+*** eyebrowse
+Have an i3-like workspace management
+C-c C-w 
+https://wikemacs.org/wiki/Elscreen
+Eyebrowse aims to be more feature complete and bug free. By the prolific Wasamasa.
+#+begin_src emacs-lisp
+  (use-package eyebrowse
+    :ensure t
+    :init
+    (global-unset-key (kbd "C-c C-w"))
+    (setq eyebrowse-keymap-prefix (kbd "C-a"))
+    (setq eyebrowse-new-workspace t) ; by default nil, clones last workspace, set to true shows scratch
+    :config
+    (eyebrowse-mode t)
+    )
+
+#+end_src
+*** Winner Mode
+C-left: undo
+C-right: redo
+Winner Mode is a global minor mode that allows you to “undo” and “redo” changes in WindowConfiguration. It is included in GNU Emacs, and documented as winner-mode .
+#+begin_src emacs-lisp
+(winner-mode 1)
+#+end_src
+*** Desktop save mode
+Use the desktop library to save the state of Emacs from one session to another. Once you save the Emacs desktop—the buffers, their file names, major modes, buffer positions, and so on—then subsequent Emacs sessions reload the saved desktop.
+https://www.gnu.org/software/emacs/manual/html_node/emacs/Saving-Emacs-Sessions.html
+#+begin_src emacs-lisp
+  (desktop-save-mode 1)
+#+end_src
 *** Ivy
 #+begin_src emacs-lisp
   (use-package ivy ; makes navigation between stuff easier
@@ -380,6 +411,9 @@ This Prescient configuration is optimized for use in System Crafters videos and 
     :global-prefix "C-SPC") ;; leader
     (rune/leader-keys ;; try to have similar keybindings in vim as well
      "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
+     "v" '(:ignore t :which-key "terminal") ;;
+     "vv" '(vterm-toggle :which-key "toggle vterm") ;; "folder" for toggles
+     "vc" '(vterm-toggle-cd :which-key "toggle vterm on current folder") ;; "folder" for toggles
      "b" '(:ignore b :which-key "buffers") 
      "h" '(:ignore h :which-key "git-gutter") 
      "c" '(org-capture :which-key "org-capture") ;; this is F*** awesome
@@ -408,10 +442,25 @@ This Prescient configuration is optimized for use in System Crafters videos and 
       "scale text"
       ("j" text-scale-increase "in")
       ("k" text-scale-decrease "out")
-      ("f" nil "finished" :exit t))
+      ("q" nil "finished" :exit t))
     (rune/leader-keys
       "ts" '(hydra-text-scale/body :which-key "scale text"))
 
+    (rune/leader-keys
+      "tr" '(window-resize-hydra/body :which-key "resize windows"))
+
+    (defhydra window-resize-hydra (:hint nil)
+    "
+               _k_ increase height
+  _h_ decrease width    _l_ increase width
+               _j_ decrease height
+  "
+    ("h" evil-window-decrease-width)
+    ("j" evil-window-increase-height)
+    ("k" evil-window-decrease-height)
+    ("l" evil-window-increase-width)
+
+    ("q" nil))
 #+end_src
 *** Evil
 #+begin_src emacs-lisp
@@ -723,6 +772,26 @@ This Prescient configuration is optimized for use in System Crafters videos and 
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
 #+end_src
 ** Development
+*** Formatter
+#+begin_src emacs-lisp
+  (use-package format-all
+    :preface
+    (defun ian/format-code ()
+      "Auto-format whole buffer."
+      (interactive)
+      (if (derived-mode-p 'prolog-mode)
+          (prolog-indent-buffer)
+        (format-all-buffer)))
+    :config
+    (global-set-key (kbd "M-f") #'ian/format-code)
+    (add-hook 'prog-mode-hook #'format-all-ensure-formatter))
+
+    ;; (setq format-all-formatters (("LaTeX" latexindent)))
+#+end_src
+*** Clips
+#+begin_src emacs-lisp
+(use-package clips-mode)
+#+end_src
 *** Rainbow-delimiters
 #+begin_src emacs-lisp
   (use-package rainbow-delimiters
@@ -944,6 +1013,13 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 
 #+end_src
 *** vterm
+#+begin_src emacs-lisp
+    ;; (use-package vterm-toggle)
+  ;; (global-set-key [M-t] 'vterm-toggle-cd)
+  ;; (global-set-key [C-f2] 'vterm-toggle)
+
+#+end_src
+
 #+begin_src emacs-lisp
 (use-package vterm
   :commands vterm

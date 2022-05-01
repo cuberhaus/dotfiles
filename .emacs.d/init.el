@@ -175,6 +175,20 @@
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
+(use-package eyebrowse
+  :ensure t
+  :init
+  (global-unset-key (kbd "C-c C-w"))
+  (setq eyebrowse-keymap-prefix (kbd "C-a"))
+  (setq eyebrowse-new-workspace t) ; by default nil, clones last workspace, set to true shows scratch
+  :config
+  (eyebrowse-mode t)
+  )
+
+(winner-mode 1)
+
+(desktop-save-mode 1)
+
 (use-package ivy ; makes navigation between stuff easier
   :diminish ; do not show stuff on bar or something
   :bind (("C-s" . swiper) ;;like / but with context
@@ -249,6 +263,9 @@
   :global-prefix "C-SPC") ;; leader
   (rune/leader-keys ;; try to have similar keybindings in vim as well
    "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
+   "v" '(:ignore t :which-key "terminal") ;;
+   "vv" '(vterm-toggle :which-key "toggle vterm") ;; "folder" for toggles
+   "vc" '(vterm-toggle-cd :which-key "toggle vterm on current folder") ;; "folder" for toggles
    "b" '(:ignore b :which-key "buffers") 
    "h" '(:ignore h :which-key "git-gutter") 
    "c" '(org-capture :which-key "org-capture") ;; this is F*** awesome
@@ -268,15 +285,31 @@
    "tt" '(counsel-load-theme :which-key "choose theme")))
 
 (use-package hydra
-  :defer t) ;; emacs bindings that stick around like mode for i3
+    :defer t) ;; emacs bindings that stick around like mode for i3
 
-(defhydra hydra-text-scale (:timeout 4)
-  "scale text"
-  ("j" text-scale-increase "in")
-  ("k" text-scale-decrease "out")
-  ("f" nil "finished" :exit t))
-(rune/leader-keys
-  "ts" '(hydra-text-scale/body :which-key "scale text"))
+  (defhydra hydra-text-scale (:timeout 4)
+    "scale text"
+    ("j" text-scale-increase "in")
+    ("k" text-scale-decrease "out")
+    ("q" nil "finished" :exit t))
+  (rune/leader-keys
+    "ts" '(hydra-text-scale/body :which-key "scale text"))
+
+  (rune/leader-keys
+    "tr" '(window-resize-hydra/body :which-key "resize windows"))
+
+  (defhydra window-resize-hydra (:hint nil)
+  "
+             _k_ increase height
+_h_ decrease width    _l_ increase width
+             _j_ decrease height
+"
+  ("h" evil-window-decrease-width)
+  ("j" evil-window-increase-height)
+  ("k" evil-window-decrease-height)
+  ("l" evil-window-increase-width)
+
+  ("q" nil))
 
 ;; vim keybindings for easier on the fingers typing :D
 (use-package evil
@@ -548,6 +581,22 @@
       (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
 
+(use-package format-all
+  :preface
+  (defun ian/format-code ()
+    "Auto-format whole buffer."
+    (interactive)
+    (if (derived-mode-p 'prolog-mode)
+        (prolog-indent-buffer)
+      (format-all-buffer)))
+  :config
+  (global-set-key (kbd "M-f") #'ian/format-code)
+  (add-hook 'prog-mode-hook #'format-all-ensure-formatter))
+
+  ;; (setq format-all-formatters (("LaTeX" latexindent)))
+
+(use-package clips-mode)
+
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
 
@@ -700,6 +749,10 @@
 
 (use-package eterm-256color
   :hook (term-mode . eterm-256color-mode))
+
+;; (use-package vterm-toggle)
+;; (global-set-key [M-t] 'vterm-toggle-cd)
+;; (global-set-key [C-f2] 'vterm-toggle)
 
 (use-package vterm
   :commands vterm

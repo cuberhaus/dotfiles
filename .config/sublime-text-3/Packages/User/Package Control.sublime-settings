@@ -5,6 +5,7 @@
 	],
 	"installed_packages":
 	[
+		"CLIPS Rules",
 		"OpenGL Shading Language (GLSL)",
 		"Package Control",
 		"Prolog",
