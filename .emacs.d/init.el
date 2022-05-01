@@ -179,7 +179,7 @@
   :ensure t
   :init
   (global-unset-key (kbd "C-c C-w"))
-  (setq eyebrowse-keymap-prefix (kbd "C-a"))
+  (setq eyebrowse-keymap-prefix (kbd "C-a")) ;; we have to set this before the package is initialized  https://github.com/wasamasa/eyebrowse/issues/49
   (setq eyebrowse-new-workspace t) ; by default nil, clones last workspace, set to true shows scratch
   :config
   (eyebrowse-mode t)
