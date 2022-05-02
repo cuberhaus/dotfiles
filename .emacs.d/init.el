@@ -187,7 +187,53 @@
 
 (winner-mode 1)
 
-(desktop-save-mode 1)
+;; (desktop-save-mode 1)
+
+;; use only one desktop
+(setq desktop-path '("~/.emacs.d/"))
+(setq desktop-dirname "~/.emacs.d/")
+(setq desktop-base-file-name "emacs-desktop")
+
+;; remove desktop after it's been read
+;; (add-hook 'desktop-after-read-hook
+;;           '(lambda ()
+;;              ;; desktop-remove clears desktop-dirname
+;;              (setq desktop-dirname-tmp desktop-dirname)
+;;              (desktop-remove)
+;;              (setq desktop-dirname desktop-dirname-tmp)))
+
+(defun saved-session ()
+  (file-exists-p (concat desktop-dirname "/" desktop-base-file-name)))
+
+;; use session-restore to restore the desktop manually
+(defun session-restore ()
+  "Restore a saved emacs session."
+  (interactive)
+  (if (saved-session)
+      (desktop-read)
+    (message "No desktop found.")))
+
+;; use session-save to save the desktop manually
+(defun session-save ()
+  "Save an emacs session."
+  (interactive)
+  (if (saved-session)
+      (if (y-or-n-p "Overwrite existing desktop? ")
+          (desktop-save-in-desktop-dir)
+        (message "Session not saved."))
+    (desktop-save-in-desktop-dir)))
+
+;; ask user whether to restore desktop at start-up
+(add-hook 'after-init-hook
+          '(lambda ()
+             (if (saved-session)
+                 (if (y-or-n-p "Restore desktop? ")
+                     (session-restore)))))
+
+;; (add-hook 'kill-emacs-hook '(lambda ()
+;;                              (if (y-or-n-p "Save desktop? ")
+;;                               (desktop-save-in-desktop-dir))
+;;                              ))
 
 (use-package ivy ; makes navigation between stuff easier
   :diminish ; do not show stuff on bar or something
@@ -262,8 +308,11 @@
   :prefix "SPC" 
   :global-prefix "C-SPC") ;; leader
   (rune/leader-keys ;; try to have similar keybindings in vim as well
+   "s" '(:ignore s :which-key "session") ;; "folder" for toggles
+   "ss" '(session-save :which-key "session save") ;; "folder" for toggles
+   "sr" '(session-restore :which-key "session restore") ;; "folder" for toggles
    "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
-   "v" '(:ignore t :which-key "terminal") ;;
+   "v" '(:ignore v :which-key "terminal") ;;
    "vv" '(vterm-toggle :which-key "toggle vterm") ;; "folder" for toggles
    "vc" '(vterm-toggle-cd :which-key "toggle vterm on current folder") ;; "folder" for toggles
    "b" '(:ignore b :which-key "buffers") 
@@ -580,6 +629,15 @@ _h_ decrease width    _l_ increase width
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+
+(use-package smartparens
+    :config
+    (require 'smartparens-config)
+    (smartparens-global-mode t)
+    ;; (setq smart-parens-strict-mode)
+    )
+;; (add-hook 'js-mode-hook #'smartparens-mode)
+;; (add-hook 'c++-mode-hook #'smartparens-mode)
 
 (use-package format-all
   :preface

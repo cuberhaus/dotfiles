@@ -11,4 +11,7 @@ decltype(x+1) y = 0; // decltype en aquest cas és int i per tant és llegeix in
 
 #+end_src
 * Algorisme de Milner
+* Subtipos 1
+** Covarianza
 
+** Contravarianza
