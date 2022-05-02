@@ -853,6 +853,9 @@ _h_ decrease width    _l_ increase width
   :hook (haskell-mode . lsp-deferred)
   )
 
+(use-package lsp-java
+  :hook (java-mode . lsp-deferred))
+
 (use-package latex-preview-pane
     :hook (latex-mode . latex-preview-pane-mode)
   )

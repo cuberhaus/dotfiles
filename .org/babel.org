@@ -1088,6 +1088,11 @@ pip install python-lsp-server
     :hook (haskell-mode . lsp-deferred)
     )
 #+end_src
+*** java
+#+begin_src emacs-lisp
+  (use-package lsp-java
+    :hook (java-mode . lsp-deferred))
+#+end_src
 *** Latex
 install LSP server
 #+begin_src shell
