@@ -159,22 +159,24 @@
       :commands langtool-check)
 
 ;; execute spanish spell-checking on buffer
-    (defun flyspell-spanish ()
-      (interactive)
-      (ispell-change-dictionary "castellano")
-      (flyspell-buffer))
+      (defun flyspell-spanish ()
+        (interactive)
+        (ispell-change-dictionary "castellano")
+        (flyspell-buffer))
 
-    (defun flyspell-english ()
-      (interactive)
-      (ispell-change-dictionary "default")
-      (flyspell-buffer))
-  (use-package flycheck
+      (defun flyspell-english ()
+        (interactive)
+        (ispell-change-dictionary "default")
+        (flyspell-buffer))
+(use-package flycheck
+  :commands (flycheck-mode global-flycheck-mode)
     :ensure t
-    :init (global-flycheck-mode)
+    ;; :init (global-flycheck-mode)
     )
-(use-package flycheck-popup-tip)
-(with-eval-after-load 'flycheck
-  '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
+  (use-package flycheck-popup-tip
+    :after flycheck)
+  (with-eval-after-load 'flycheck
+    '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
 
 ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
 ;; reliably, set `user-emacs-directory` before loading no-littering!
@@ -409,6 +411,7 @@ _h_ decrease width    _l_ increase width
 
 (use-package evil-goggles
   :ensure t
+  :after evil
   :config
   (evil-goggles-mode)
 
@@ -458,7 +461,7 @@ _h_ decrease width    _l_ increase width
     )
 
 (use-package haskell-mode
-  :after org) ;; needed for haskell snippets
+  :after (org lsp) ) ;; needed for haskell snippets
 
 (with-eval-after-load 'org
     (org-babel-do-load-languages
@@ -845,6 +848,10 @@ _h_ decrease width    _l_ increase width
   (dap-python-debugger 'debugpy)
   :config
   (require 'dap-python))
+
+(use-package lsp-haskell
+  :hook (haskell-mode . lsp-deferred)
+  )
 
 (use-package latex-preview-pane
     :hook (latex-mode . latex-preview-pane-mode)

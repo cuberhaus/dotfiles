@@ -269,23 +269,25 @@ https://github.com/mhayashi1120/Emacs-langtool
 #+end_src
 
 #+begin_src emacs-lisp
-      ;; execute spanish spell-checking on buffer
-      (defun flyspell-spanish ()
-        (interactive)
-        (ispell-change-dictionary "castellano")
-        (flyspell-buffer))
+          ;; execute spanish spell-checking on buffer
+          (defun flyspell-spanish ()
+            (interactive)
+            (ispell-change-dictionary "castellano")
+            (flyspell-buffer))
 
-      (defun flyspell-english ()
-        (interactive)
-        (ispell-change-dictionary "default")
-        (flyspell-buffer))
+          (defun flyspell-english ()
+            (interactive)
+            (ispell-change-dictionary "default")
+            (flyspell-buffer))
     (use-package flycheck
-      :ensure t
-      :init (global-flycheck-mode)
-      )
-  (use-package flycheck-popup-tip)
-  (with-eval-after-load 'flycheck
-    '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
+      :commands (flycheck-mode global-flycheck-mode)
+        :ensure t
+        ;; :init (global-flycheck-mode)
+        )
+      (use-package flycheck-popup-tip
+        :after flycheck)
+      (with-eval-after-load 'flycheck
+        '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
 #+end_src
 ** Keep Folders Clean
 #+begin_src emacs-lisp
@@ -571,16 +573,17 @@ This Prescient configuration is optimized for use in System Crafters videos and 
 *** evil-googles
 Displays a visual hint when editing with evil.
 #+begin_src emacs-lisp
-(use-package evil-goggles
-  :ensure t
-  :config
-  (evil-goggles-mode)
+  (use-package evil-goggles
+    :ensure t
+    :after evil
+    :config
+    (evil-goggles-mode)
 
-  ;; optionally use diff-mode's faces; as a result, deleted text
-  ;; will be highlighed with `diff-removed` face which is typically
-  ;; some red color (as defined by the color theme)
-  ;; other faces such as `diff-added` will be used for other actions
-  (evil-goggles-use-diff-faces))
+    ;; optionally use diff-mode's faces; as a result, deleted text
+    ;; will be highlighed with `diff-removed` face which is typically
+    ;; some red color (as defined by the color theme)
+    ;; other faces such as `diff-added` will be used for other actions
+    (evil-goggles-use-diff-faces))
 #+end_src
 ** Help
 #+begin_src emacs-lisp
@@ -638,7 +641,7 @@ Displays a visual hint when editing with evil.
 
 #+begin_src emacs-lisp
   (use-package haskell-mode
-    :after org) ;; needed for haskell snippets
+    :after (org lsp) ) ;; needed for haskell snippets
 
 #+end_src
 
@@ -1079,7 +1082,12 @@ pip install python-lsp-server
     :config
     (require 'dap-python))
 #+end_src
-
+*** haskell
+#+begin_src emacs-lisp
+  (use-package lsp-haskell
+    :hook (haskell-mode . lsp-deferred)
+    )
+#+end_src
 *** Latex
 install LSP server
 #+begin_src shell
