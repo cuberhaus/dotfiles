@@ -665,17 +665,16 @@ _h_ decrease width    _l_ increase width
 ;; (add-hook 'js-mode-hook #'smartparens-mode)
 ;; (add-hook 'c++-mode-hook #'smartparens-mode)
 
-(use-package format-all
-  :commands (format-all-buffer)
-  :preface
+(global-set-key (kbd "M-f") #'ian/format-code)
   (defun ian/format-code ()
     "Auto-format whole buffer."
     (interactive)
     (if (derived-mode-p 'prolog-mode)
         (prolog-indent-buffer)
       (format-all-buffer)))
+(use-package format-all
+  :commands (format-all-buffer)
   :config
-  (global-set-key (kbd "M-f") #'ian/format-code)
   (add-hook 'prog-mode-hook #'format-all-ensure-formatter))
 
   ;; (setq format-all-formatters (("LaTeX" latexindent)))
@@ -852,6 +851,9 @@ _h_ decrease width    _l_ increase width
 (use-package lsp-haskell
   :hook (haskell-mode . lsp-deferred)
   )
+
+(use-package ccls
+  :hook (c-mode c++-mode objc-mode))
 
 (use-package lsp-java
   :hook (java-mode . lsp-deferred))

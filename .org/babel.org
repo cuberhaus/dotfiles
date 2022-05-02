@@ -869,17 +869,16 @@ Displays a visual hint when editing with evil.
 #+end_src
 *** Formatter
 #+begin_src emacs-lisp
-  (use-package format-all
-    :commands (format-all-buffer)
-    :preface
+  (global-set-key (kbd "M-f") #'ian/format-code)
     (defun ian/format-code ()
       "Auto-format whole buffer."
       (interactive)
       (if (derived-mode-p 'prolog-mode)
           (prolog-indent-buffer)
         (format-all-buffer)))
+  (use-package format-all
+    :commands (format-all-buffer)
     :config
-    (global-set-key (kbd "M-f") #'ian/format-code)
     (add-hook 'prog-mode-hook #'format-all-ensure-formatter))
 
     ;; (setq format-all-formatters (("LaTeX" latexindent)))
@@ -1087,6 +1086,11 @@ pip install python-lsp-server
   (use-package lsp-haskell
     :hook (haskell-mode . lsp-deferred)
     )
+#+end_src
+*** c cpp objc
+#+begin_src emacs-lisp
+  (use-package ccls
+    :hook (c-mode c++-mode objc-mode))
 #+end_src
 *** java
 #+begin_src emacs-lisp
