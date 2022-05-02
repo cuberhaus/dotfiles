@@ -132,6 +132,8 @@ doom_emacs_install() {
     brew tap d12frosted/emacs-plus
     brew install emacs-plus --with-native-comp
 
+    # ghcup installer for the general purpose language Haskell
+    curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
     # Optional
     brew install jq
     brew install black # python code formatting
@@ -143,7 +145,8 @@ doom_emacs_install() {
     brew install editorconfig # elisp
     brew install glslang # elisp
     brew install cabal-install #haskell
-
+    brew install dante
+    brew install haskell-language-server
 }
 
 app_store_install() {
