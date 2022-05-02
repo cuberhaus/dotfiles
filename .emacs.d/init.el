@@ -99,17 +99,6 @@
     ))
   ;; -------------------------------------------------------
 
-;; execute spanish spell-checking on buffer
-(defun flyspell-spanish ()
-  (interactive)
-  (ispell-change-dictionary "castellano")
-  (flyspell-buffer))
-
-(defun flyspell-english ()
-  (interactive)
-  (ispell-change-dictionary "default")
-  (flyspell-buffer))
-
 ;; Initialize package sources
 (require 'package) ; bring in package module
 ; package repositories
@@ -163,6 +152,29 @@
 ;; (use-package org-inline-pdf
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
+
+(setq langtool-java-classpath
+      "/usr/share/languagetool:/usr/share/java/languagetool/*")
+    (use-package langtool
+      :commands langtool-check)
+
+;; execute spanish spell-checking on buffer
+    (defun flyspell-spanish ()
+      (interactive)
+      (ispell-change-dictionary "castellano")
+      (flyspell-buffer))
+
+    (defun flyspell-english ()
+      (interactive)
+      (ispell-change-dictionary "default")
+      (flyspell-buffer))
+  (use-package flycheck
+    :ensure t
+    :init (global-flycheck-mode)
+    )
+(use-package flycheck-popup-tip)
+(with-eval-after-load 'flycheck
+  '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
 
 ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
 ;; reliably, set `user-emacs-directory` before loading no-littering!
@@ -224,11 +236,11 @@
     (desktop-save-in-desktop-dir)))
 
 ;; ask user whether to restore desktop at start-up
-(add-hook 'after-init-hook
-          '(lambda ()
-             (if (saved-session)
-                 (if (y-or-n-p "Restore desktop? ")
-                     (session-restore)))))
+;; (add-hook 'after-init-hook
+;;           '(lambda ()
+;;              (if (saved-session)
+;;                  (if (y-or-n-p "Restore desktop? ")
+;;                      (session-restore)))))
 
 ;; (add-hook 'kill-emacs-hook '(lambda ()
 ;;                              (if (y-or-n-p "Save desktop? ")
@@ -394,6 +406,17 @@ _h_ decrease width    _l_ increase width
   (evil-collection-init))
 
 ; C-z go back to EMACS MODE
+
+(use-package evil-goggles
+  :ensure t
+  :config
+  (evil-goggles-mode)
+
+  ;; optionally use diff-mode's faces; as a result, deleted text
+  ;; will be highlighed with `diff-removed` face which is typically
+  ;; some red color (as defined by the color theme)
+  ;; other faces such as `diff-added` will be used for other actions
+  (evil-goggles-use-diff-faces))
 
 (use-package which-key ;; This shows which commands are available for current keypresses
   :commands(helpful-callable helpfull-variable helpful-command helpful-key)
@@ -640,6 +663,7 @@ _h_ decrease width    _l_ increase width
 ;; (add-hook 'c++-mode-hook #'smartparens-mode)
 
 (use-package format-all
+  :commands (format-all-buffer)
   :preface
   (defun ian/format-code ()
     "Auto-format whole buffer."
@@ -653,7 +677,8 @@ _h_ decrease width    _l_ increase width
 
   ;; (setq format-all-formatters (("LaTeX" latexindent)))
 
-(use-package clips-mode)
+(use-package clips-mode
+  )
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
@@ -676,8 +701,118 @@ _h_ decrease width    _l_ increase width
   (lsp-ui-sideline-show-code-actions t)
   (lsp-ui-doc-position 'bottom))
 
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+          treemacs-deferred-git-apply-delay        0.5
+          treemacs-directory-name-transformer      #'identity
+          treemacs-display-in-side-window          t
+          treemacs-eldoc-display                   'simple
+          treemacs-file-event-delay                5000
+          treemacs-file-extension-regex            treemacs-last-period-regex-value
+          treemacs-file-follow-delay               0.2
+          treemacs-file-name-transformer           #'identity
+          treemacs-follow-after-init               t
+          treemacs-expand-after-init               t
+          treemacs-find-workspace-method           'find-for-file-or-pick-first
+          treemacs-git-command-pipe                ""
+          treemacs-goto-tag-strategy               'refetch-index
+          treemacs-header-scroll-indicators        '(nil . "^^^^^^")'
+          treemacs-indentation                     2
+          treemacs-indentation-string              " "
+          treemacs-is-never-other-window           nil
+          treemacs-max-git-entries                 5000
+          treemacs-missing-project-action          'ask
+          treemacs-move-forward-on-expand          nil
+          treemacs-no-png-images                   nil
+          treemacs-no-delete-other-windows         t
+          treemacs-project-follow-cleanup          nil
+          treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-position                        'left
+          treemacs-read-string-input               'from-child-frame
+          treemacs-recenter-distance               0.1
+          treemacs-recenter-after-file-follow      nil
+          treemacs-recenter-after-tag-follow       nil
+          treemacs-recenter-after-project-jump     'always
+          treemacs-recenter-after-project-expand   'on-distance
+          treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
+          treemacs-show-cursor                     nil
+          treemacs-show-hidden-files               t
+          treemacs-silent-filewatch                nil
+          treemacs-silent-refresh                  nil
+          treemacs-sorting                         'alphabetic-asc
+          treemacs-select-when-already-in-treemacs 'move-back
+          treemacs-space-between-root-nodes        t
+          treemacs-tag-follow-cleanup              t
+          treemacs-tag-follow-delay                1.5
+          treemacs-text-scale                      nil
+          treemacs-user-mode-line-format           nil
+          treemacs-user-header-line-format         nil
+          treemacs-wide-toggle-width               70
+          treemacs-width                           35
+          treemacs-width-increment                 1
+          treemacs-width-is-initially-locked       t
+          treemacs-workspace-switch-cleanup        nil)
+
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode 'always)
+
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+
+    (treemacs-hide-gitignored-files-mode nil))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t d"   . treemacs-select-directory)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-evil
+  :after (treemacs evil)
+  :ensure t)
+
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
+
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once)
+  :ensure t)
+
+(use-package treemacs-magit
+  :after (treemacs magit)
+  :ensure t)
+
+(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+  :ensure t
+  :config (treemacs-set-scope-type 'Perspectives))
+
+(use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
+  :after (treemacs)
+  :ensure t
+  :config (treemacs-set-scope-type 'Tabs))
 (use-package lsp-treemacs
-  :after lsp)
+      :after lsp)
 
 (use-package lsp-ivy
   :after (lsp-mode lsp))

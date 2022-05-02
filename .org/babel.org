@@ -51,7 +51,7 @@ To get help on variable of function put corsor over it and press C-h v or C-h f
 
 ** Undo in Emacs
 
-C-r WONT WORK, cause we are not using a redo we have a undo stack
+C-r WON'T WORK, because we are not using a redo we have an undo stack
 undo is treated like a normal command, therefore you can undo the undo.
 undo's will go to the stack, if a move like "k" is done then you can undo again, this makes it possible to undo every single edit.
 in typicall (global-undo-tree-mode) (evil-set-undo-system 'undo-tree)
@@ -180,20 +180,6 @@ Could be because other packages are outdated, proceed to update them.
     ;; -------------------------------------------------------
 #+end_src
 
-** Spell-checking
-#+begin_src emacs-lisp
-  ;; execute spanish spell-checking on buffer
-  (defun flyspell-spanish ()
-    (interactive)
-    (ispell-change-dictionary "castellano")
-    (flyspell-buffer))
-
-  (defun flyspell-english ()
-    (interactive)
-    (ispell-change-dictionary "default")
-    (flyspell-buffer))
-#+end_src
-
 ** Package System
 #+begin_src emacs-lisp
 
@@ -271,6 +257,35 @@ Could be because other packages are outdated, proceed to update them.
 ;; (use-package org-inline-pdf
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
+#+end_src
+** Spell-checking
+https://github.com/mhayashi1120/Emacs-langtool
+#+begin_src emacs-lisp
+
+    (setq langtool-java-classpath
+          "/usr/share/languagetool:/usr/share/java/languagetool/*")
+        (use-package langtool
+          :commands langtool-check)
+#+end_src
+
+#+begin_src emacs-lisp
+      ;; execute spanish spell-checking on buffer
+      (defun flyspell-spanish ()
+        (interactive)
+        (ispell-change-dictionary "castellano")
+        (flyspell-buffer))
+
+      (defun flyspell-english ()
+        (interactive)
+        (ispell-change-dictionary "default")
+        (flyspell-buffer))
+    (use-package flycheck
+      :ensure t
+      :init (global-flycheck-mode)
+      )
+  (use-package flycheck-popup-tip)
+  (with-eval-after-load 'flycheck
+    '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
 #+end_src
 ** Keep Folders Clean
 #+begin_src emacs-lisp
@@ -354,11 +369,11 @@ By default desktop-save-mode automatically saves the session all the time and re
       (desktop-save-in-desktop-dir)))
 
   ;; ask user whether to restore desktop at start-up
-  (add-hook 'after-init-hook
-            '(lambda ()
-               (if (saved-session)
-                   (if (y-or-n-p "Restore desktop? ")
-                       (session-restore)))))
+  ;; (add-hook 'after-init-hook
+  ;;           '(lambda ()
+  ;;              (if (saved-session)
+  ;;                  (if (y-or-n-p "Restore desktop? ")
+  ;;                      (session-restore)))))
 
   ;; (add-hook 'kill-emacs-hook '(lambda ()
   ;;                              (if (y-or-n-p "Save desktop? ")
@@ -553,7 +568,20 @@ This Prescient configuration is optimized for use in System Crafters videos and 
   ; C-z go back to EMACS MODE
 
 #+end_src
+*** evil-googles
+Displays a visual hint when editing with evil.
+#+begin_src emacs-lisp
+(use-package evil-goggles
+  :ensure t
+  :config
+  (evil-goggles-mode)
 
+  ;; optionally use diff-mode's faces; as a result, deleted text
+  ;; will be highlighed with `diff-removed` face which is typically
+  ;; some red color (as defined by the color theme)
+  ;; other faces such as `diff-added` will be used for other actions
+  (evil-goggles-use-diff-faces))
+#+end_src
 ** Help
 #+begin_src emacs-lisp
 
@@ -839,6 +867,7 @@ This Prescient configuration is optimized for use in System Crafters videos and 
 *** Formatter
 #+begin_src emacs-lisp
   (use-package format-all
+    :commands (format-all-buffer)
     :preface
     (defun ian/format-code ()
       "Auto-format whole buffer."
@@ -854,7 +883,8 @@ This Prescient configuration is optimized for use in System Crafters videos and 
 #+end_src
 *** Clips
 #+begin_src emacs-lisp
-(use-package clips-mode)
+  (use-package clips-mode
+    )
 #+end_src
 *** Rainbow-delimiters
 #+begin_src emacs-lisp
@@ -885,11 +915,121 @@ M-? to find references, definition
       (lsp-ui-sideline-show-code-actions t)
       (lsp-ui-doc-position 'bottom))
 #+end_src
-*** lsp-treemacs
+*** treemacs
 Tree views for different code aspects
 #+begin_src emacs-lisp
-(use-package lsp-treemacs
-  :after lsp)
+  (use-package treemacs
+    :ensure t
+    :defer t
+    :init
+    (with-eval-after-load 'winum
+      (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+    :config
+    (progn
+      (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+            treemacs-deferred-git-apply-delay        0.5
+            treemacs-directory-name-transformer      #'identity
+            treemacs-display-in-side-window          t
+            treemacs-eldoc-display                   'simple
+            treemacs-file-event-delay                5000
+            treemacs-file-extension-regex            treemacs-last-period-regex-value
+            treemacs-file-follow-delay               0.2
+            treemacs-file-name-transformer           #'identity
+            treemacs-follow-after-init               t
+            treemacs-expand-after-init               t
+            treemacs-find-workspace-method           'find-for-file-or-pick-first
+            treemacs-git-command-pipe                ""
+            treemacs-goto-tag-strategy               'refetch-index
+            treemacs-header-scroll-indicators        '(nil . "^^^^^^")'
+            treemacs-indentation                     2
+            treemacs-indentation-string              " "
+            treemacs-is-never-other-window           nil
+            treemacs-max-git-entries                 5000
+            treemacs-missing-project-action          'ask
+            treemacs-move-forward-on-expand          nil
+            treemacs-no-png-images                   nil
+            treemacs-no-delete-other-windows         t
+            treemacs-project-follow-cleanup          nil
+            treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+            treemacs-position                        'left
+            treemacs-read-string-input               'from-child-frame
+            treemacs-recenter-distance               0.1
+            treemacs-recenter-after-file-follow      nil
+            treemacs-recenter-after-tag-follow       nil
+            treemacs-recenter-after-project-jump     'always
+            treemacs-recenter-after-project-expand   'on-distance
+            treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
+            treemacs-show-cursor                     nil
+            treemacs-show-hidden-files               t
+            treemacs-silent-filewatch                nil
+            treemacs-silent-refresh                  nil
+            treemacs-sorting                         'alphabetic-asc
+            treemacs-select-when-already-in-treemacs 'move-back
+            treemacs-space-between-root-nodes        t
+            treemacs-tag-follow-cleanup              t
+            treemacs-tag-follow-delay                1.5
+            treemacs-text-scale                      nil
+            treemacs-user-mode-line-format           nil
+            treemacs-user-header-line-format         nil
+            treemacs-wide-toggle-width               70
+            treemacs-width                           35
+            treemacs-width-increment                 1
+            treemacs-width-is-initially-locked       t
+            treemacs-workspace-switch-cleanup        nil)
+
+      ;; The default width and height of the icons is 22 pixels. If you are
+      ;; using a Hi-DPI display, uncomment this to double the icon size.
+      ;;(treemacs-resize-icons 44)
+
+      (treemacs-follow-mode t)
+      (treemacs-filewatch-mode t)
+      (treemacs-fringe-indicator-mode 'always)
+
+      (pcase (cons (not (null (executable-find "git")))
+                   (not (null treemacs-python-executable)))
+        (`(t . t)
+         (treemacs-git-mode 'deferred))
+        (`(t . _)
+         (treemacs-git-mode 'simple)))
+
+      (treemacs-hide-gitignored-files-mode nil))
+    :bind
+    (:map global-map
+          ("M-0"       . treemacs-select-window)
+          ("C-x t 1"   . treemacs-delete-other-windows)
+          ("C-x t t"   . treemacs)
+          ("C-x t d"   . treemacs-select-directory)
+          ("C-x t B"   . treemacs-bookmark)
+          ("C-x t C-t" . treemacs-find-file)
+          ("C-x t M-t" . treemacs-find-tag)))
+
+  (use-package treemacs-evil
+    :after (treemacs evil)
+    :ensure t)
+
+  (use-package treemacs-projectile
+    :after (treemacs projectile)
+    :ensure t)
+
+  (use-package treemacs-icons-dired
+    :hook (dired-mode . treemacs-icons-dired-enable-once)
+    :ensure t)
+
+  (use-package treemacs-magit
+    :after (treemacs magit)
+    :ensure t)
+
+  (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+    :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+    :ensure t
+    :config (treemacs-set-scope-type 'Perspectives))
+
+  (use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
+    :after (treemacs)
+    :ensure t
+    :config (treemacs-set-scope-type 'Tabs))
+  (use-package lsp-treemacs
+        :after lsp)
 #+end_src
 *** lsp-ivy
 lsp-treemacs-symbols - Show a tree view of the symbols in the current file
@@ -1132,7 +1272,7 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
     )
 
 #+end_src
-** Dired
+** Dired / Directories
 
 #+begin_src emacs-lisp
   (use-package dired
