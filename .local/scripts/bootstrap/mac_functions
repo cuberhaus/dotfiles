@@ -125,9 +125,25 @@ doom_emacs_install() {
     brew install coreutils fd
     # Installs clang
     xcode-select --install
-    brew tap railwaycat/emacsmacport
-    brew install emacs-mac --with-modules
-    ln -s /usr/local/opt/emacs-mac/Emacs.app /Applications/Emacs.app
+    # brew tap railwaycat/emacsmacport
+    # brew install emacs-mac --with-modules
+    # ln -s /usr/local/opt/emacs-mac/Emacs.app /Applications/Emacs.app
+
+    brew tap d12frosted/emacs-plus
+    brew install emacs-plus --with-native-comp
+
+    # Optional
+    brew install jq
+    brew install black # python code formatting
+    brew install pipenv # python 
+    brew install shellcheck # shell script linting
+    brew install hlint # flycheck for haskell
+    brew install cabal # haskell-mode
+    brew install aspell #  spell checker
+    brew install editorconfig # elisp
+    brew install glslang # elisp
+    brew install cabal-install #haskell
+
 }
 
 app_store_install() {
