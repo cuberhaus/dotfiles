@@ -9,6 +9,25 @@
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 
+;; Initialize package sources
+(require 'package) ; bring in package module
+; package repositories
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
+
+(package-initialize) ; Initializes package system
+(unless package-archive-contents ; unless package exists we refresh package list
+ (package-refresh-contents)) 
+
+;; Initialize use-package on non-Linux platforms
+(unless (package-installed-p 'use-package) ; is this package installed, unless its installed install it
+   (package-install 'use-package))
+(require 'use-package)
+
+(setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
+;; makes sure that package is downloaded before use
+
 ;; You will most likely need to adjust this font size for your system!
     (defvar runemacs/default-font-size 110)
 
@@ -98,25 +117,6 @@
       (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
     ))
   ;; -------------------------------------------------------
-
-;; Initialize package sources
-(require 'package) ; bring in package module
-; package repositories
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
-
-(package-initialize) ; Initializes package system
-(unless package-archive-contents ; unless package exists we refresh package list
- (package-refresh-contents)) 
-
-;; Initialize use-package on non-Linux platforms
-(unless (package-installed-p 'use-package) ; is this package installed, unless its installed install it
-   (package-install 'use-package))
-(require 'use-package)
-
-(setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
-;; makes sure that package is downloaded before use
 
 (use-package auto-package-update
   :custom
@@ -660,10 +660,16 @@ _h_ decrease width    _l_ increase width
     :config
     (require 'smartparens-config)
     (smartparens-global-mode t)
-    ;; (setq smart-parens-strict-mode)
+    (smartparens-global-strict-mode t)
     )
 ;; (add-hook 'js-mode-hook #'smartparens-mode)
 ;; (add-hook 'c++-mode-hook #'smartparens-mode)
+
+(use-package evil-smartparens
+    :after (smartparens)
+    )
+(add-hook 'smartparens-enabled-hook #'evil-smartparens-mode) ;; enable evil smartparens when smartparents is up
+(add-hook 'smartparens-enabled-hook #'sp-use-smartparens-bindings) ;; enable smartparens keybindings
 
 (global-set-key (kbd "M-f") #'ian/format-code)
   (defun ian/format-code ()
@@ -680,6 +686,7 @@ _h_ decrease width    _l_ increase width
   ;; (setq format-all-formatters (("LaTeX" latexindent)))
 
 (use-package clips-mode
+  :mode "\\.clp\\'"
   )
 
 (use-package rainbow-delimiters

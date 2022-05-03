@@ -84,6 +84,29 @@ Could be because other packages are outdated, proceed to update them.
     (setq custom-file "~/.emacs.d/custom.el")
     (load custom-file)
 #+end_src
+
+** Package System
+#+begin_src emacs-lisp
+
+  ;; Initialize package sources
+  (require 'package) ; bring in package module
+  ; package repositories
+  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                           ("org" . "https://orgmode.org/elpa/")
+                           ("elpa" . "https://elpa.gnu.org/packages/")))
+
+  (package-initialize) ; Initializes package system
+  (unless package-archive-contents ; unless package exists we refresh package list
+   (package-refresh-contents)) 
+
+  ;; Initialize use-package on non-Linux platforms
+  (unless (package-installed-p 'use-package) ; is this package installed, unless its installed install it
+     (package-install 'use-package))
+  (require 'use-package)
+
+  (setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
+  ;; makes sure that package is downloaded before use
+#+end_src
 ** Basic UI Settings
 #+begin_src emacs-lisp
       ;; You will most likely need to adjust this font size for your system!
@@ -180,28 +203,6 @@ Could be because other packages are outdated, proceed to update them.
     ;; -------------------------------------------------------
 #+end_src
 
-** Package System
-#+begin_src emacs-lisp
-
-  ;; Initialize package sources
-  (require 'package) ; bring in package module
-  ; package repositories
-  (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                           ("org" . "https://orgmode.org/elpa/")
-                           ("elpa" . "https://elpa.gnu.org/packages/")))
-
-  (package-initialize) ; Initializes package system
-  (unless package-archive-contents ; unless package exists we refresh package list
-   (package-refresh-contents)) 
-
-  ;; Initialize use-package on non-Linux platforms
-  (unless (package-installed-p 'use-package) ; is this package installed, unless its installed install it
-     (package-install 'use-package))
-  (require 'use-package)
-
-  (setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
-  ;; makes sure that package is downloaded before use
-#+end_src
 
 ** Automatic package updates
 #+begin_src emacs-lisp
@@ -857,15 +858,27 @@ Displays a visual hint when editing with evil.
 #+end_src
 ** Development
 *** Smartparens
+Tutorial: https://ebzzry.com/en/emacs-pairs/
+To insert single quote type C-q '
 #+begin_src emacs-lisp
+
     (use-package smartparens
       :config
       (require 'smartparens-config)
       (smartparens-global-mode t)
-      ;; (setq smart-parens-strict-mode)
+      (smartparens-global-strict-mode t)
       )
   ;; (add-hook 'js-mode-hook #'smartparens-mode)
   ;; (add-hook 'c++-mode-hook #'smartparens-mode)
+#+end_src
+
+*** evil-smartparens
+#+begin_src emacs-lisp
+    (use-package evil-smartparens
+      :after (smartparens)
+      )
+  (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode) ;; enable evil smartparens when smartparents is up
+  (add-hook 'smartparens-enabled-hook #'sp-use-smartparens-bindings) ;; enable smartparens keybindings
 #+end_src
 *** Formatter
 #+begin_src emacs-lisp
@@ -886,6 +899,7 @@ Displays a visual hint when editing with evil.
 *** Clips
 #+begin_src emacs-lisp
   (use-package clips-mode
+    :mode "\\.clp\\'"
     )
 #+end_src
 *** Rainbow-delimiters
