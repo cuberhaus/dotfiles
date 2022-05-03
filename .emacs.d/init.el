@@ -53,10 +53,6 @@
          (setq visible-bell t)
         ))
 
-    ;; (setq scroll-step            1
-    ;;     scroll-conservatively  10000) ;; scroll line by line not like a fucking degenerate
-    ;; (setq smooth-scroll-margin 4) ;; margin like in vim
-;;
 ;;; Scrolling
 
 (setq hscroll-margin 2
@@ -77,7 +73,6 @@
       mouse-wheel-scroll-amount-horizontal 2)
 
 
-    (setq vc-follow-symlinks t) ;; always follow symlinks
     (column-number-mode)
     (global-display-line-numbers-mode t) ;; display line numbers everywhere
     ;; (setq vc-follow-symlinks nil) ;; or never follow them
@@ -90,6 +85,21 @@
              gcs-done))
 
   (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+
+;; (require 'sublimity)
+;; (require 'sublimity-scroll)
+;; (sublimity-mode 1)
+
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
+
+;; (setq ad-redefinition-action 'accept)
+
+(setq vc-follow-symlinks t) ;; always follow symlinks
+
+(setq large-file-warning-threshold nil)
 
 ;; Font Configuration -----------------------
   ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
@@ -137,7 +147,10 @@
 
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-(global-auto-revert-mode) ;;
+
+(global-auto-revert-mode 1) ;;
+;; Revert Dired and other buffers
+(setq global-auto-revert-non-file-buffers t)
 
 ;; Disable line numbers for some modes
 (dolist (mode '(org-mode-hook
@@ -152,6 +165,82 @@
 ;; (use-package org-inline-pdf
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
+
+(use-package bufler
+  ;; :straight t
+  :bind (("C-M-j" . bufler-switch-buffer)
+         ("C-M-k" . bufler-workspace-frame-set))
+  :config
+  ;; (evil-collection-define-key 'normal 'bufler-list-mode-map
+  ;;   (kbd "RET")   'bufler-list-buffer-switch
+  ;;   (kbd "M-RET") 'bufler-list-buffer-peek
+  ;;   "D"           'bufler-list-buffer-kill)
+
+  (bufler-defgroups
+   (group
+    ;; Subgroup collecting all named workspaces.
+    (auto-workspace))
+   (group
+    ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
+    (group-or "*Help/Info*"
+              (mode-match "*Help*" (rx bos "help-"))
+              (mode-match "*Info*" (rx bos "info-"))))
+   (group
+    ;; Subgroup collecting all special buffers (i.e. ones that are not
+    ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
+    ;; through to other groups, so they end up grouped with their project buffers).
+    (group-and "*Special*"
+               (lambda (buffer)
+                 (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
+                                      buffer)
+                             (funcall (mode-match "Dired" (rx bos "dired"))
+                                      buffer)
+                             (funcall (auto-file) buffer))
+                   "*Special*")))
+    (group
+     ;; Subgroup collecting these "special special" buffers
+     ;; separately for convenience.
+     (name-match "**Special**"
+                 (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
+    (group
+     ;; Subgroup collecting all other Magit buffers, grouped by directory.
+     (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
+     (auto-directory))
+    ;; Subgroup for Helm buffers.
+    (mode-match "*Helm*" (rx bos "helm-"))
+    ;; Remaining special buffers are grouped automatically by mode.
+    (auto-mode))
+   ;; All buffers under "~/.emacs.d" (or wherever it is).
+   (dir user-emacs-directory)
+   (group
+    ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
+    ;; `org-directory' is not yet defined).
+    (dir (if (bound-and-true-p org-directory)
+             org-directory
+           "~/org"))
+    (group
+     ;; Subgroup collecting indirect Org buffers, grouping them by file.
+     ;; This is very useful when used with `org-tree-to-indirect-buffer'.
+     (auto-indirect)
+     (auto-file))
+    ;; Group remaining buffers by whether they're file backed, then by mode.
+    (group-not "*special*" (auto-file))
+    (auto-mode))
+   (group
+    ;; Subgroup collecting buffers in a projectile project.
+    (auto-projectile))
+   (group
+    ;; Subgroup collecting buffers in a version-control project,
+    ;; grouping them by directory.
+    (auto-project))
+   ;; Group remaining buffers by directory, then major mode.
+   (auto-directory)
+   (auto-mode)))
+
+;; (use-package default-text-scale
+;;   :defer 1
+;;   :config
+;;   (default-text-scale-mode))
 
 (setq langtool-java-classpath
       "/usr/share/languagetool:/usr/share/java/languagetool/*")
@@ -178,6 +267,10 @@
   (with-eval-after-load 'flycheck
     '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
 
+;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
+(setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
+      url-history-file (expand-file-name "url/history" user-emacs-directory))
+
 ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
 ;; reliably, set `user-emacs-directory` before loading no-littering!
 ;(setq user-emacs-directory "~/.cache/emacs")
@@ -188,6 +281,13 @@
 ;; auto save files in the same path as it uses for sessions
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+
+;; ;; Keep customization settings in a temporary file (thanks Ambrevar!)
+;; (setq custom-file
+;;       (if (boundp 'server-socket-dir)
+;;           (expand-file-name "custom.el" server-socket-dir)
+;;         (expand-file-name (format "emacs-custom-%s.el" (user-uid)) temporary-file-directory)))
+;; (load custom-file t)
 
 (use-package eyebrowse
   :ensure t
@@ -310,7 +410,12 @@
 (use-package doom-themes) ;; counsel-load-theme to load a theme from the list
 (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 
-(global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
+(use-package diminish)
+
+;; (use-package minions
+;;   :hook (doom-modeline-mode . minions-mode))
+
+;; (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
   ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
 (use-package general ;; set personal bindings for leader key for example
@@ -346,6 +451,8 @@
    "bd" '(delete-file-and-buffer :which-key "delete file")
    "w" '(save-buffer :which-key "save buffer") ;; classic vim save
    "tt" '(counsel-load-theme :which-key "choose theme")))
+
+(global-set-key (kbd "C-M-u") 'universal-argument)
 
 (use-package hydra
     :defer t) ;; emacs bindings that stick around like mode for i3
@@ -655,21 +762,6 @@ _h_ decrease width    _l_ increase width
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
-
-(use-package smartparens
-    :config
-    (require 'smartparens-config)
-    (smartparens-global-mode t)
-    (smartparens-global-strict-mode t)
-    )
-;; (add-hook 'js-mode-hook #'smartparens-mode)
-;; (add-hook 'c++-mode-hook #'smartparens-mode)
-
-(use-package evil-smartparens
-    :after (smartparens)
-    )
-(add-hook 'smartparens-enabled-hook #'evil-smartparens-mode) ;; enable evil smartparens when smartparents is up
-(add-hook 'smartparens-enabled-hook #'sp-use-smartparens-bindings) ;; enable smartparens keybindings
 
 (global-set-key (kbd "M-f") #'ian/format-code)
   (defun ian/format-code ()
@@ -1037,6 +1129,49 @@ _h_ decrease width    _l_ increase width
     "H" 'dired-hide-dotfiles-mode))
 
 (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions)) ;; do not query to kill the buffer
+
+(use-package smartparens
+    :config
+    (require 'smartparens-config)
+    (smartparens-global-mode t)
+    ;; (smartparens-global-strict-mode t)
+    )
+;; (add-hook 'js-mode-hook #'smartparens-mode)
+;; (add-hook 'c++-mode-hook #'smartparens-mode)
+
+(use-package evil-smartparens
+    :after (smartparens)
+    )
+(add-hook 'smartparens-enabled-hook #'evil-smartparens-mode) ;; enable evil smartparens when smartparents is up
+(add-hook 'smartparens-enabled-hook #'sp-use-smartparens-bindings) ;; enable smartparens keybindings
+
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
+
+;; (use-package openwith
+;;   :config
+;;   (setq openwith-associations
+;;         (list
+;;           (list (openwith-make-extension-regexp
+;;                 '("mpg" "mpeg" "mp3" "mp4"
+;;                   "avi" "wmv" "wav" "mov" "flv"
+;;                   "ogm" "ogg" "mkv"))
+;;                 "vlc"
+;;                 '(file))
+;;           (list (openwith-make-extension-regexp
+;;                 '("xbm" "pbm" "pgm" "ppm" "pnm"
+;;                   "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega was
+;;                   ;; causing feh to be opened...
+;;                   "feh"
+;;                   '(file))
+;;           (list (openwith-make-extension-regexp
+;;                 '("pdf"))
+;;                 "zathura"
+;;                 '(file))))
+;;   )
+;;   (setq openwith-mode t)
 
 ;; after startup, it is important you reset this to some reasonable default. A large 
 ;; gc-cons-threshold will cause freezing and stuttering during long-term 

@@ -107,6 +107,7 @@ Could be because other packages are outdated, proceed to update them.
   (setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
   ;; makes sure that package is downloaded before use
 #+end_src
+
 ** Basic UI Settings
 #+begin_src emacs-lisp
       ;; You will most likely need to adjust this font size for your system!
@@ -134,10 +135,6 @@ Could be because other packages are outdated, proceed to update them.
            (setq visible-bell t)
           ))
 
-      ;; (setq scroll-step            1
-      ;;     scroll-conservatively  10000) ;; scroll line by line not like a fucking degenerate
-      ;; (setq smooth-scroll-margin 4) ;; margin like in vim
-  ;;
   ;;; Scrolling
 
   (setq hscroll-margin 2
@@ -158,7 +155,6 @@ Could be because other packages are outdated, proceed to update them.
         mouse-wheel-scroll-amount-horizontal 2)
 
 
-      (setq vc-follow-symlinks t) ;; always follow symlinks
       (column-number-mode)
       (global-display-line-numbers-mode t) ;; display line numbers everywhere
       ;; (setq vc-follow-symlinks nil) ;; or never follow them
@@ -171,6 +167,34 @@ Could be because other packages are outdated, proceed to update them.
                gcs-done))
 
     (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+#+end_src
+*** sublimity
+smooth-scrolling
+#+begin_src emacs-lisp
+  ;; (require 'sublimity)
+  ;; (require 'sublimity-scroll)
+  ;; (sublimity-mode 1)
+
+#+end_src
+*** emacs dashboard
+#+begin_src emacs-lisp
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
+#+end_src
+*** Do not warn me
+advice added to functions
+#+begin_src emacs-lisp
+  ;; (setq ad-redefinition-action 'accept)
+#+end_src
+Symlinks
+#+begin_src emacs-lisp
+  (setq vc-follow-symlinks t) ;; always follow symlinks
+#+end_src
+Large files
+#+begin_src emacs-lisp
+  (setq large-file-warning-threshold nil)
 #+end_src
 
 ** Font settings 
@@ -237,8 +261,14 @@ Could be because other packages are outdated, proceed to update them.
 
   ;; Make ESC quit prompts
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-  (global-auto-revert-mode) ;;
 
+#+end_src
+
+*** Auto-reverting changed files
+#+begin_src emacs-lisp
+  (global-auto-revert-mode 1) ;;
+  ;; Revert Dired and other buffers
+  (setq global-auto-revert-non-file-buffers t)
 #+end_src
 
 *** Disable line numbers
@@ -258,6 +288,87 @@ Could be because other packages are outdated, proceed to update them.
 ;; (use-package org-inline-pdf
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
+#+end_src
+** Buffer Management with Bufler
+#+begin_src emacs-lisp
+
+  (use-package bufler
+    ;; :straight t
+    :bind (("C-M-j" . bufler-switch-buffer)
+           ("C-M-k" . bufler-workspace-frame-set))
+    :config
+    ;; (evil-collection-define-key 'normal 'bufler-list-mode-map
+    ;;   (kbd "RET")   'bufler-list-buffer-switch
+    ;;   (kbd "M-RET") 'bufler-list-buffer-peek
+    ;;   "D"           'bufler-list-buffer-kill)
+
+    (bufler-defgroups
+     (group
+      ;; Subgroup collecting all named workspaces.
+      (auto-workspace))
+     (group
+      ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
+      (group-or "*Help/Info*"
+                (mode-match "*Help*" (rx bos "help-"))
+                (mode-match "*Info*" (rx bos "info-"))))
+     (group
+      ;; Subgroup collecting all special buffers (i.e. ones that are not
+      ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
+      ;; through to other groups, so they end up grouped with their project buffers).
+      (group-and "*Special*"
+                 (lambda (buffer)
+                   (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
+                                        buffer)
+                               (funcall (mode-match "Dired" (rx bos "dired"))
+                                        buffer)
+                               (funcall (auto-file) buffer))
+                     "*Special*")))
+      (group
+       ;; Subgroup collecting these "special special" buffers
+       ;; separately for convenience.
+       (name-match "**Special**"
+                   (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
+      (group
+       ;; Subgroup collecting all other Magit buffers, grouped by directory.
+       (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
+       (auto-directory))
+      ;; Subgroup for Helm buffers.
+      (mode-match "*Helm*" (rx bos "helm-"))
+      ;; Remaining special buffers are grouped automatically by mode.
+      (auto-mode))
+     ;; All buffers under "~/.emacs.d" (or wherever it is).
+     (dir user-emacs-directory)
+     (group
+      ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
+      ;; `org-directory' is not yet defined).
+      (dir (if (bound-and-true-p org-directory)
+               org-directory
+             "~/org"))
+      (group
+       ;; Subgroup collecting indirect Org buffers, grouping them by file.
+       ;; This is very useful when used with `org-tree-to-indirect-buffer'.
+       (auto-indirect)
+       (auto-file))
+      ;; Group remaining buffers by whether they're file backed, then by mode.
+      (group-not "*special*" (auto-file))
+      (auto-mode))
+     (group
+      ;; Subgroup collecting buffers in a projectile project.
+      (auto-projectile))
+     (group
+      ;; Subgroup collecting buffers in a version-control project,
+      ;; grouping them by directory.
+      (auto-project))
+     ;; Group remaining buffers by directory, then major mode.
+     (auto-directory)
+     (auto-mode)))
+#+end_src
+** Frame Scaling / Zooming
+#+begin_src emacs-lisp
+  ;; (use-package default-text-scale
+  ;;   :defer 1
+  ;;   :config
+  ;;   (default-text-scale-mode))
 #+end_src
 ** Spell-checking
 https://github.com/mhayashi1120/Emacs-langtool
@@ -290,7 +401,23 @@ https://github.com/mhayashi1120/Emacs-langtool
       (with-eval-after-load 'flycheck
         '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
 #+end_src
-** Keep Folders Clean
+** Keep Emacs clean
+*** Emacs cache
+#+begin_src emacs-lisp
+;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
+(setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
+      url-history-file (expand-file-name "url/history" user-emacs-directory))
+
+#+end_src
+*** Keep Folders Clean
+- Emacs.org~
+- #Emacs.org#
+- .#Emacs.org
+- ~/.emacs.d/.lsp-session-v1
+- ~/.emacs.d/transient/
+- ~/.emacs.d/projectile-bookmarks.eld
+Emacs and the packages we use create a lot of “temporary” files for various reasons.
+Let’s keep our folders clean!
 #+begin_src emacs-lisp
 ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
 ;; reliably, set `user-emacs-directory` before loading no-littering!
@@ -302,6 +429,15 @@ https://github.com/mhayashi1120/Emacs-langtool
 ;; auto save files in the same path as it uses for sessions
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+#+end_src
+
+#+begin_src emacs-lisp
+  ;; ;; Keep customization settings in a temporary file (thanks Ambrevar!)
+  ;; (setq custom-file
+  ;;       (if (boundp 'server-socket-dir)
+  ;;           (expand-file-name "custom.el" server-socket-dir)
+  ;;         (expand-file-name (format "emacs-custom-%s.el" (user-uid)) temporary-file-directory)))
+  ;; (load custom-file t)
 #+end_src
 ** UI settings
 *** eyebrowse
@@ -464,9 +600,22 @@ This Prescient configuration is optimized for use in System Crafters videos and 
   (use-package doom-themes) ;; counsel-load-theme to load a theme from the list
   (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 #+end_src
+
+*** Mode diminishing
+The diminish package hides pesky minor modes from the modelines.
+
+#+begin_src emacs-lisp
+(use-package diminish)
+#+end_src
+
+*** Minions
+#+begin_src emacs-lisp
+  ;; (use-package minions
+  ;;   :hook (doom-modeline-mode . minions-mode))
+#+end_src
 ** Keybindings
 #+begin_src emacs-lisp
-  (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
+  ;; (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
     ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
   (use-package general ;; set personal bindings for leader key for example
@@ -503,7 +652,11 @@ This Prescient configuration is optimized for use in System Crafters videos and 
      "w" '(save-buffer :which-key "save buffer") ;; classic vim save
      "tt" '(counsel-load-theme :which-key "choose theme")))
 #+end_src
-
+*** Rebind C-u
+Since I let evil-mode take over C-u for buffer scrolling, I need to re-bind the universal-argument command to another key sequence. I’m choosing C-M-u for this purpose.
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-M-u") 'universal-argument)
+#+end_src
 *** Hydra
 #+begin_src emacs-lisp
     (use-package hydra
@@ -857,29 +1010,6 @@ Displays a visual hint when editing with evil.
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
 #+end_src
 ** Development
-*** Smartparens
-Tutorial: https://ebzzry.com/en/emacs-pairs/
-To insert single quote type C-q '
-#+begin_src emacs-lisp
-
-    (use-package smartparens
-      :config
-      (require 'smartparens-config)
-      (smartparens-global-mode t)
-      (smartparens-global-strict-mode t)
-      )
-  ;; (add-hook 'js-mode-hook #'smartparens-mode)
-  ;; (add-hook 'c++-mode-hook #'smartparens-mode)
-#+end_src
-
-*** evil-smartparens
-#+begin_src emacs-lisp
-    (use-package evil-smartparens
-      :after (smartparens)
-      )
-  (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode) ;; enable evil smartparens when smartparents is up
-  (add-hook 'smartparens-enabled-hook #'sp-use-smartparens-bindings) ;; enable smartparens keybindings
-#+end_src
 *** Formatter
 #+begin_src emacs-lisp
   (global-set-key (kbd "M-f") #'ian/format-code)
@@ -1338,6 +1468,70 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 ** buffer kill
 #+begin_src emacs-lisp
 (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions)) ;; do not query to kill the buffer
+#+end_src
+** Smartparens
+*** Smartparens
+Tutorial: https://ebzzry.com/en/emacs-pairs/
+To insert single quote type C-q '
+#+begin_src emacs-lisp
+
+    (use-package smartparens
+      :config
+      (require 'smartparens-config)
+      (smartparens-global-mode t)
+      ;; (smartparens-global-strict-mode t)
+      )
+  ;; (add-hook 'js-mode-hook #'smartparens-mode)
+  ;; (add-hook 'c++-mode-hook #'smartparens-mode)
+#+end_src
+
+*** evil-smartparens
+#+begin_src emacs-lisp
+    (use-package evil-smartparens
+      :after (smartparens)
+      )
+  (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode) ;; enable evil smartparens when smartparents is up
+  (add-hook 'smartparens-enabled-hook #'sp-use-smartparens-bindings) ;; enable smartparens keybindings
+#+end_src
+
+*** Surround vim
+visual select and S
+ys <object> yank surrounding
+cs <object> change surrounding
+ds <object> delete surrounding
+Can add new surroundings check out package website
+#+begin_src emacs-lisp
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
+#+end_src
+** Opening files externally
+Doesn't work
+#+begin_src emacs-lisp
+
+  ;; (use-package openwith
+  ;;   :config
+  ;;   (setq openwith-associations
+  ;;         (list
+  ;;           (list (openwith-make-extension-regexp
+  ;;                 '("mpg" "mpeg" "mp3" "mp4"
+  ;;                   "avi" "wmv" "wav" "mov" "flv"
+  ;;                   "ogm" "ogg" "mkv"))
+  ;;                 "vlc"
+  ;;                 '(file))
+  ;;           (list (openwith-make-extension-regexp
+  ;;                 '("xbm" "pbm" "pgm" "ppm" "pnm"
+  ;;                   "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega was
+  ;;                   ;; causing feh to be opened...
+  ;;                   "feh"
+  ;;                   '(file))
+  ;;           (list (openwith-make-extension-regexp
+  ;;                 '("pdf"))
+  ;;                 "zathura"
+  ;;                 '(file))))
+  ;;   )
+  ;;   (setq openwith-mode t)
 #+end_src
 ** Disable Optimization
 Disable optimization at the end of startup so that garbage collector works properly and doesn't make emacs crash.
