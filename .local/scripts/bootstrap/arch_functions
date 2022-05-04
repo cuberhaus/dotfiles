@@ -13,8 +13,11 @@ myTerminal="kitty"
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
-base_install () {
+emacs() {
+    pip3 install ptvsd                          # for python dap
     $pac languagetool                           # languagetool for emacs
+}
+base_install () {
     $pac conky
     $pac adapta-gtk-theme                       # Alternative theme
     $pac arc-gtk-theme                          # Arc theme and its icon's
