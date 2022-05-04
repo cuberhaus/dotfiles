@@ -142,6 +142,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 
 #+end_src
 ** Basic UI Settings
+*** Basic UI
 #+begin_src emacs-lisp
       ;; You will most likely need to adjust this font size for your system!
       (defvar runemacs/default-font-size 110)
@@ -211,10 +212,10 @@ smooth-scrolling
 #+end_src
 *** emacs dashboard
 #+begin_src emacs-lisp
-  ;; (use-package dashboard
-  ;;   :ensure t
-  ;;   :config
-  ;;   (dashboard-setup-startup-hook))
+    (use-package dashboard
+      :ensure t
+      :config
+      (dashboard-setup-startup-hook))
 #+end_src
 *** Do not warn me
 advice added to functions

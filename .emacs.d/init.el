@@ -114,10 +114,10 @@
 ;; (require 'sublimity-scroll)
 ;; (sublimity-mode 1)
 
-;; (use-package dashboard
-;;   :ensure t
-;;   :config
-;;   (dashboard-setup-startup-hook))
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
 
 ;; (setq ad-redefinition-action 'accept)
 
