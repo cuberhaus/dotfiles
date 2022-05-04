@@ -108,6 +108,31 @@ Could be because other packages are outdated, proceed to update them.
   ;; makes sure that package is downloaded before use
 #+end_src
 
+*** straight
+#+begin_src emacs-lisp
+  ;; ;; Bootstrap straight.el
+  ;; (defvar bootstrap-version)
+  ;; (let ((bootstrap-file
+  ;;       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+  ;;       (bootstrap-version 5))
+  ;;   (unless (file-exists-p bootstrap-file)
+  ;;     (with-current-buffer
+  ;;         (url-retrieve-synchronously
+  ;;         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+  ;;         'silent 'inhibit-cookies)
+  ;;       (goto-char (point-max))
+  ;;       (eval-print-last-sexp)))
+  ;;   (load bootstrap-file nil 'nomessage))
+
+  ;; ;; Always use straight to install on systems other than Linux
+  ;; (setq straight-use-package-by-default (not (eq system-type 'gnu/linux)))
+
+  ;; ;; Use straight.el for use-package expressions
+  ;; (straight-use-package 'use-package)
+
+  ;; Clean up unused repos with `straight-remove-unused-repos'
+
+#+end_src
 ** Basic UI Settings
 #+begin_src emacs-lisp
       ;; You will most likely need to adjust this font size for your system!
@@ -178,10 +203,10 @@ smooth-scrolling
 #+end_src
 *** emacs dashboard
 #+begin_src emacs-lisp
-(use-package dashboard
-  :ensure t
-  :config
-  (dashboard-setup-startup-hook))
+  ;; (use-package dashboard
+  ;;   :ensure t
+  ;;   :config
+  ;;   (dashboard-setup-startup-hook))
 #+end_src
 *** Do not warn me
 advice added to functions
@@ -197,6 +222,12 @@ Large files
   (setq large-file-warning-threshold nil)
 #+end_src
 
+*** Mode diminishing
+The diminish package hides pesky minor modes from the modelines.
+
+#+begin_src emacs-lisp
+(use-package diminish)
+#+end_src
 ** Font settings 
 #+begin_src emacs-lisp
     ;; Font Configuration -----------------------
@@ -290,78 +321,80 @@ Large files
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
 #+end_src
 ** Buffer Management with Bufler
+
+Have to wait for efficient integration with Ivy (currently this is what makes ivy startup early)
 #+begin_src emacs-lisp
+  ;; (use-package bufler
+  ;;   ;; :commands (bufler-switch-buffer bufler-workspace-frame-set bufler-list)
+  ;;   ;; :disabled
+  ;;   :bind (("C-M-j" . bufler-switch-buffer)
+  ;;          ("C-M-k" . bufler-workspace-frame-set))
+  ;;   :config
+  ;;   ;; (evil-collection-define-key 'normal 'bufler-list-mode-map
+  ;;   ;;   (kbd "RET")   'bufler-list-buffer-switch
+  ;;   ;;   (kbd "M-RET") 'bufler-list-buffer-peek
+  ;;   ;;   "D"           'bufler-list-buffer-kill)
 
-  (use-package bufler
-    ;; :straight t
-    :bind (("C-M-j" . bufler-switch-buffer)
-           ("C-M-k" . bufler-workspace-frame-set))
-    :config
-    ;; (evil-collection-define-key 'normal 'bufler-list-mode-map
-    ;;   (kbd "RET")   'bufler-list-buffer-switch
-    ;;   (kbd "M-RET") 'bufler-list-buffer-peek
-    ;;   "D"           'bufler-list-buffer-kill)
-
-    (bufler-defgroups
-     (group
-      ;; Subgroup collecting all named workspaces.
-      (auto-workspace))
-     (group
-      ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
-      (group-or "*Help/Info*"
-                (mode-match "*Help*" (rx bos "help-"))
-                (mode-match "*Info*" (rx bos "info-"))))
-     (group
-      ;; Subgroup collecting all special buffers (i.e. ones that are not
-      ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
-      ;; through to other groups, so they end up grouped with their project buffers).
-      (group-and "*Special*"
-                 (lambda (buffer)
-                   (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
-                                        buffer)
-                               (funcall (mode-match "Dired" (rx bos "dired"))
-                                        buffer)
-                               (funcall (auto-file) buffer))
-                     "*Special*")))
-      (group
-       ;; Subgroup collecting these "special special" buffers
-       ;; separately for convenience.
-       (name-match "**Special**"
-                   (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
-      (group
-       ;; Subgroup collecting all other Magit buffers, grouped by directory.
-       (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
-       (auto-directory))
-      ;; Subgroup for Helm buffers.
-      (mode-match "*Helm*" (rx bos "helm-"))
-      ;; Remaining special buffers are grouped automatically by mode.
-      (auto-mode))
-     ;; All buffers under "~/.emacs.d" (or wherever it is).
-     (dir user-emacs-directory)
-     (group
-      ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
-      ;; `org-directory' is not yet defined).
-      (dir (if (bound-and-true-p org-directory)
-               org-directory
-             "~/org"))
-      (group
-       ;; Subgroup collecting indirect Org buffers, grouping them by file.
-       ;; This is very useful when used with `org-tree-to-indirect-buffer'.
-       (auto-indirect)
-       (auto-file))
-      ;; Group remaining buffers by whether they're file backed, then by mode.
-      (group-not "*special*" (auto-file))
-      (auto-mode))
-     (group
-      ;; Subgroup collecting buffers in a projectile project.
-      (auto-projectile))
-     (group
-      ;; Subgroup collecting buffers in a version-control project,
-      ;; grouping them by directory.
-      (auto-project))
-     ;; Group remaining buffers by directory, then major mode.
-     (auto-directory)
-     (auto-mode)))
+  ;;   (bufler-defgroups
+  ;;    (group
+  ;;     ;; Subgroup collecting all named workspaces.
+  ;;     (auto-workspace))
+  ;;    (group
+  ;;     ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
+  ;;     (group-or "*Help/Info*"
+  ;;               (mode-match "*Help*" (rx bos "help-"))
+  ;;               (mode-match "*Info*" (rx bos "info-"))))
+  ;;    (group
+  ;;     ;; Subgroup collecting all special buffers (i.e. ones that are not
+  ;;     ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
+  ;;     ;; through to other groups, so they end up grouped with their project buffers).
+  ;;     (group-and "*Special*"
+  ;;                (lambda (buffer)
+  ;;                  (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
+  ;;                                       buffer)
+  ;;                              (funcall (mode-match "Dired" (rx bos "dired"))
+  ;;                                       buffer)
+  ;;                              (funcall (auto-file) buffer))
+  ;;                    "*Special*")))
+  ;;     (group
+  ;;      ;; Subgroup collecting these "special special" buffers
+  ;;      ;; separately for convenience.
+  ;;      (name-match "**Special**"
+  ;;                  (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
+  ;;     (group
+  ;;      ;; Subgroup collecting all other Magit buffers, grouped by directory.
+  ;;      (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
+  ;;      (auto-directory))
+  ;;     ;; Subgroup for Helm buffers.
+  ;;     (mode-match "*Helm*" (rx bos "helm-"))
+  ;;     ;; Remaining special buffers are grouped automatically by mode.
+  ;;     (auto-mode))
+  ;;    ;; All buffers under "~/.emacs.d" (or wherever it is).
+  ;;    (dir user-emacs-directory)
+  ;;    (group
+  ;;     ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
+  ;;     ;; `org-directory' is not yet defined).
+  ;;     (dir (if (bound-and-true-p org-directory)
+  ;;              org-directory
+  ;;            "~/org"))
+  ;;     (group
+  ;;      ;; Subgroup collecting indirect Org buffers, grouping them by file.
+  ;;      ;; This is very useful when used with `org-tree-to-indirect-buffer'.
+  ;;      (auto-indirect)
+  ;;      (auto-file))
+  ;;     ;; Group remaining buffers by whether they're file backed, then by mode.
+  ;;     (group-not "*special*" (auto-file))
+  ;;     (auto-mode))
+  ;;    (group
+  ;;     ;; Subgroup collecting buffers in a projectile project.
+  ;;     (auto-projectile))
+  ;;    (group
+  ;;     ;; Subgroup collecting buffers in a version-control project,
+  ;;     ;; grouping them by directory.
+  ;;     (auto-project))
+  ;;    ;; Group remaining buffers by directory, then major mode.
+  ;;    (auto-directory)
+  ;;    (auto-mode)))
 #+end_src
 ** Frame Scaling / Zooming
 #+begin_src emacs-lisp
@@ -381,35 +414,27 @@ https://github.com/mhayashi1120/Emacs-langtool
 #+end_src
 
 #+begin_src emacs-lisp
-          ;; execute spanish spell-checking on buffer
-          (defun flyspell-spanish ()
-            (interactive)
-            (ispell-change-dictionary "castellano")
-            (flyspell-buffer))
+        ;; execute spanish spell-checking on buffer
+        (defun flyspell-spanish ()
+          (interactive)
+          (ispell-change-dictionary "castellano")
+          (flyspell-buffer))
 
-          (defun flyspell-english ()
-            (interactive)
-            (ispell-change-dictionary "default")
-            (flyspell-buffer))
-    (use-package flycheck
-      :commands (flycheck-mode global-flycheck-mode)
-        :ensure t
-        ;; :init (global-flycheck-mode)
-        )
-      (use-package flycheck-popup-tip
-        :after flycheck)
-      (with-eval-after-load 'flycheck
-        '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
+        (defun flyspell-english ()
+          (interactive)
+          (ispell-change-dictionary "default")
+          (flyspell-buffer))
+  (use-package flycheck
+    :commands (flycheck-mode global-flycheck-mode)
+      :ensure t
+      ;; :init (global-flycheck-mode)
+      )
+    (use-package flycheck-popup-tip
+      :after flycheck)
+    (with-eval-after-load 'flycheck
+      '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
 #+end_src
 ** Keep Emacs clean
-*** Emacs cache
-#+begin_src emacs-lisp
-;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
-(setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
-      url-history-file (expand-file-name "url/history" user-emacs-directory))
-
-#+end_src
-*** Keep Folders Clean
 - Emacs.org~
 - #Emacs.org#
 - .#Emacs.org
@@ -419,16 +444,20 @@ https://github.com/mhayashi1120/Emacs-langtool
 Emacs and the packages we use create a lot of “temporary” files for various reasons.
 Let’s keep our folders clean!
 #+begin_src emacs-lisp
-;; NOTE: If you want to move everything out of the ~/.emacs.d folder
-;; reliably, set `user-emacs-directory` before loading no-littering!
-;(setq user-emacs-directory "~/.cache/emacs")
+  ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
+  (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
+        url-history-file (expand-file-name "url/history" user-emacs-directory))
 
-(use-package no-littering)
+  ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
+  ;; reliably, set `user-emacs-directory` before loading no-littering!
+  ;(setq user-emacs-directory "~/.cache/emacs")
 
-;; no-littering doesn't set this by default so we must place
-;; auto save files in the same path as it uses for sessions
-(setq auto-save-file-name-transforms
-      `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+  (use-package no-littering)
+
+  ;; no-littering doesn't set this by default so we must place
+  ;; auto save files in the same path as it uses for sessions
+  (setq auto-save-file-name-transforms
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -564,7 +593,7 @@ This Prescient configuration is optimized for use in System Crafters videos and 
     (ivy-prescient-mode 1)
     )
   ;; (setq prescient-filter-method '(fuzzy regexp))
-  (setq prescient-sort-length-enable nil) ;; do not sort by length
+  ;; (setq prescient-sort-length-enable nil) ;; do not sort by length
 #+end_src
 
 #+begin_src emacs-lisp
@@ -601,13 +630,6 @@ This Prescient configuration is optimized for use in System Crafters videos and 
   (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 #+end_src
 
-*** Mode diminishing
-The diminish package hides pesky minor modes from the modelines.
-
-#+begin_src emacs-lisp
-(use-package diminish)
-#+end_src
-
 *** Minions
 #+begin_src emacs-lisp
   ;; (use-package minions
@@ -615,7 +637,7 @@ The diminish package hides pesky minor modes from the modelines.
 #+end_src
 ** Keybindings
 #+begin_src emacs-lisp
-  ;; (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
+  (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
     ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
   (use-package general ;; set personal bindings for leader key for example
@@ -650,6 +672,7 @@ The diminish package hides pesky minor modes from the modelines.
      "bc" '(evil-delete-buffer :which-key "close buffer")
      "bd" '(delete-file-and-buffer :which-key "delete file")
      "w" '(save-buffer :which-key "save buffer") ;; classic vim save
+     "to" '(openwith-mode :which-key "open with external app")
      "tt" '(counsel-load-theme :which-key "choose theme")))
 #+end_src
 *** Rebind C-u
@@ -727,17 +750,48 @@ Since I let evil-mode take over C-u for buffer scrolling, I need to re-bind the 
 *** evil-googles
 Displays a visual hint when editing with evil.
 #+begin_src emacs-lisp
-  (use-package evil-goggles
-    :ensure t
-    :after evil
-    :config
-    (evil-goggles-mode)
+  ;; (use-package evil-goggles
+  ;;   :ensure t
+  ;;   :after evil
+  ;;   :config
+  ;;   (evil-goggles-mode)
 
-    ;; optionally use diff-mode's faces; as a result, deleted text
-    ;; will be highlighed with `diff-removed` face which is typically
-    ;; some red color (as defined by the color theme)
-    ;; other faces such as `diff-added` will be used for other actions
-    (evil-goggles-use-diff-faces))
+  ;;   ;; optionally use diff-mode's faces; as a result, deleted text
+  ;;   ;; will be highlighed with `diff-removed` face which is typically
+  ;;   ;; some red color (as defined by the color theme)
+  ;;   ;; other faces such as `diff-added` will be used for other actions
+  ;;   (evil-goggles-use-diff-faces))
+#+end_src
+*** Distraction free writing
+#+begin_src emacs-lisp
+  ;; (darkroom-mode 0) this makes keybinding work automatically but also runs on startup
+  (use-package darkroom
+    :commands darkroom-mode
+    :config
+    (setq darkroom-text-scale-increase 0)
+    )
+
+  (defun dw/enter-focus-mode ()
+    (interactive)
+    (darkroom-mode 1)
+    (display-line-numbers-mode 0))
+
+  (defun dw/leave-focus-mode ()
+    (interactive)
+    (darkroom-mode 0)
+    (display-line-numbers-mode 1))
+
+  (defun dw/toggle-focus-mode ()
+    (interactive)
+    (if (symbol-value darkroom-mode)
+      (dw/leave-focus-mode)
+      (dw/enter-focus-mode)))
+
+  (rune/leader-keys
+    "tf" '(dw/toggle-focus-mode :which-key "focus mode")
+    ;; "te" '(dw/enter-focus-mode :which-key "focus mode")
+    ;; "ta" '(dw/leave-focus-mode :which-key "focus mode")
+    )
 #+end_src
 ** Help
 #+begin_src emacs-lisp
@@ -840,134 +894,136 @@ Displays a visual hint when editing with evil.
 #+end_src
 
 *** Org configuration
+
 #+begin_src emacs-lisp
-        (defun efs/org-mode-setup ()
-          (org-indent-mode)
-          (variable-pitch-mode 1) ;; allows text to be of variable size
-          (visual-line-mode 1) ;; makes emacs editing commands act on visual lines not logical ones, also word-wrapping, idk if i want this
-          )
+  (defun efs/org-mode-setup ()
+    (org-indent-mode)
+    (variable-pitch-mode 1) ;; allows text to be of variable size
+    (visual-line-mode 1) ;; makes emacs editing commands act on visual lines not logical ones, also word-wrapping, idk if i want this
+    )
 
-        (use-package org  ;; org is already installed though
-          :commands (org-capture org-agenda)
-          :hook (org-mode . efs/org-mode-setup)
-          :config
-          (message "Org mode loaded")
-          (setq org-ellipsis " ▾") ;; change ... to another symbol that is less confusing
-          (efs/org-font-setup) ;; setup font
-           ;; hides *bold* and __underlined__ and linked words [name][link]
-          (setq org-agenda-start-with-log-mode t)
-          (setq org-log-done 'time) ;; logs when a task goes to done C-h-v (describe variable)
-          (setq org-log-into-drawer t) ;; collapse logs into a drawer
-          (setq org-agenda-files
-                '("~/fib/org/birthday.org"
-                  "~/fib/org/Tasks.org"
-                  "~/fib/org/Habits.org"
-                  ))
+  (use-package org  ;; org is already installed though
+    :commands (org-capture org-agenda)
+    :hook (org-mode . efs/org-mode-setup)
+    :config
+    (message "Org mode loaded")
+    (setq org-ellipsis " ▾") ;; change ... to another symbol that is less confusing
+    (efs/org-font-setup) ;; setup font
+     ;; hides *bold* and __underlined__ and linked words [name][link]
+    (setq org-agenda-start-with-log-mode t)
+    (setq org-log-done 'time) ;; logs when a task goes to done C-h-v (describe variable)
+    (setq org-log-into-drawer t) ;; collapse logs into a drawer
+    (setq org-agenda-files
+          '("~/fib/org/birthday.org"
+            "~/fib/org/Tasks.org"
+            "~/fib/org/Habits.org"
+            ))
 
-          (require 'org-habit)
-          (add-to-list 'org-modules 'org-habit) ;;  add org-habit to org-modules
-          (setq org-habit-graph-column 60) ;; what column the habit tracker shows
+    (require 'org-habit)
+    (add-to-list 'org-modules 'org-habit) ;;  add org-habit to org-modules
+    (setq org-habit-graph-column 60) ;; what column the habit tracker shows
 
-          (setq org-todo-keywords
-            '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-              (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+    (setq org-todo-keywords
+      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
+        ;; (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")
+    ))
 
-          (setq org-refile-targets ;; move TODO tasks to a different file
-            '(("Archive.org" :maxlevel . 1)
-              ("Tasks.org" :maxlevel . 1)))
+    (setq org-refile-targets ;; move TODO tasks to a different file
+      '(("Archive.org" :maxlevel . 1)
+        ("Tasks.org" :maxlevel . 1)))
 
-          ;; Save Org buffers after refiling!
-          (advice-add 'org-refile :after 'org-save-all-org-buffers)
+    ;; Save Org buffers after refiling!
+    (advice-add 'org-refile :after 'org-save-all-org-buffers)
 
-          (setq org-tag-alist
-            '((:startgroup)
-               ; Put mutually exclusive tags here
-               (:endgroup)
-               ("@errand" . ?E)
-               ("@home" . ?H)
-               ("@work" . ?W)
-               ("agenda" . ?a)
-               ("planning" . ?p)
-               ("publish" . ?P)
-               ("batch" . ?b)
-               ("note" . ?n)
-               ("idea" . ?i)))
+    (setq org-tag-alist
+      '((:startgroup)
+         ; Put mutually exclusive tags here
+         (:endgroup)
+         ("@errand" . ?E)
+         ("@home" . ?H)
+         ("@work" . ?W)
+         ("agenda" . ?a)
+         ("planning" . ?p)
+         ("publish" . ?P)
+         ("batch" . ?b)
+         ("note" . ?n)
+         ("idea" . ?i)))
 
-        ;; Configure custom agenda views
-          (setq org-agenda-custom-commands
-           '(("d" "Dashboard"
-             ((agenda "" ((org-deadline-warning-days 7)))
-              (todo "NEXT"
-                ((org-agenda-overriding-header "Next Tasks")))
-              (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+  ;; Configure custom agenda views
+    (setq org-agenda-custom-commands
+     '(("d" "Dashboard"
+       ((agenda "" ((org-deadline-warning-days 7)))
+        (todo "NEXT"
+          ((org-agenda-overriding-header "Next Tasks")))
+        (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
 
-            ("n" "Next Tasks"
-             ((todo "NEXT"
-                ((org-agenda-overriding-header "Next Tasks")))))
+      ("n" "Next Tasks"
+       ((todo "NEXT"
+          ((org-agenda-overriding-header "Next Tasks")))))
 
-            ("W" "Work Tasks" tags-todo "+work-email")
+      ("W" "Work Tasks" tags-todo "+work-email")
 
-            ;; Low-effort next actions
-            ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-             ((org-agenda-overriding-header "Low Effort Tasks")
-              (org-agenda-max-todos 20)
-              (org-agenda-files org-agenda-files)))
+      ;; Low-effort next actions
+      ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+       ((org-agenda-overriding-header "Low Effort Tasks")
+        (org-agenda-max-todos 20)
+        (org-agenda-files org-agenda-files)))
 
-            ("w" "Workflow Status"
-             ((todo "WAIT"
-                    ((org-agenda-overriding-header "Waiting on External")
-                     (org-agenda-files org-agenda-files)))
-              (todo "REVIEW"
-                    ((org-agenda-overriding-header "In Review")
-                     (org-agenda-files org-agenda-files)))
-              (todo "PLAN"
-                    ((org-agenda-overriding-header "In Planning")
-                     (org-agenda-todo-list-sublevels nil)
-                     (org-agenda-files org-agenda-files)))
-              (todo "BACKLOG"
-                    ((org-agenda-overriding-header "Project Backlog")
-                     (org-agenda-todo-list-sublevels nil)
-                     (org-agenda-files org-agenda-files)))
-              (todo "READY"
-                    ((org-agenda-overriding-header "Ready for Work")
-                     (org-agenda-files org-agenda-files)))
-              (todo "ACTIVE"
-                    ((org-agenda-overriding-header "Active Projects")
-                     (org-agenda-files org-agenda-files)))
-              (todo "COMPLETED"
-                    ((org-agenda-overriding-header "Completed Projects")
-                     (org-agenda-files org-agenda-files)))
-              (todo "CANC"
-                    ((org-agenda-overriding-header "Cancelled Projects")
-                     (org-agenda-files org-agenda-files)))))))
+      ("w" "Workflow Status"
+       ((todo "WAIT"
+              ((org-agenda-overriding-header "Waiting on External")
+               (org-agenda-files org-agenda-files)))
+        (todo "REVIEW"
+              ((org-agenda-overriding-header "In Review")
+               (org-agenda-files org-agenda-files)))
+        (todo "PLAN"
+              ((org-agenda-overriding-header "In Planning")
+               (org-agenda-todo-list-sublevels nil)
+               (org-agenda-files org-agenda-files)))
+        (todo "BACKLOG"
+              ((org-agenda-overriding-header "Project Backlog")
+               (org-agenda-todo-list-sublevels nil)
+               (org-agenda-files org-agenda-files)))
+        (todo "READY"
+              ((org-agenda-overriding-header "Ready for Work")
+               (org-agenda-files org-agenda-files)))
+        (todo "ACTIVE"
+              ((org-agenda-overriding-header "Active Projects")
+               (org-agenda-files org-agenda-files)))
+        (todo "COMPLETED"
+              ((org-agenda-overriding-header "Completed Projects")
+               (org-agenda-files org-agenda-files)))
+        (todo "CANC"
+              ((org-agenda-overriding-header "Cancelled Projects")
+               (org-agenda-files org-agenda-files)))))))
 
-         (setq org-capture-templates
-            `(("t" "Tasks / Projects")
-              ("tt" "Task" entry (file+olp "~/fib/org/Tasks.org" "Inbox")
-                   "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
+   (setq org-capture-templates
+      `(("t" "Tasks / Projects")
+        ("tt" "Task" entry (file+olp "~/fib/org/Tasks.org" "Inbox")
+             "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
-              ("j" "Journal Entries")
-              ("jj" "Journal" entry
-                   (file+olp+datetree "~/fib/org/Journal.org")
-                   "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
-                   ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
-                   :clock-in :clock-resume
-                   :empty-lines 1)
-              ("jm" "Meeting" entry
-                   (file+olp+datetree "~/fib/org/Journal.org")
-                   "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
-                   :clock-in :clock-resume
-                   :empty-lines 1)
+        ("j" "Journal Entries")
+        ("jj" "Journal" entry
+             (file+olp+datetree "~/fib/org/Journal.org")
+             "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
+             ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
+             :clock-in :clock-resume
+             :empty-lines 1)
+        ("jm" "Meeting" entry
+             (file+olp+datetree "~/fib/org/Journal.org")
+             "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
+             :clock-in :clock-resume
+             :empty-lines 1)
 
-              ("w" "Workflows")
-              ("we" "Checking Email" entry (file+olp+datetree "~/fib/org/Journal.org")
-                   "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
+        ("w" "Workflows")
+        ("we" "Checking Email" entry (file+olp+datetree "~/fib/org/Journal.org")
+             "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
 
-              ("m" "Metrics Capture")
-              ("mw" "Weight" table-line (file+headline "~/fib/org/Metrics.org" "Weight")
-               "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
+        ("m" "Metrics Capture")
+        ("mw" "Weight" table-line (file+headline "~/fib/org/Metrics.org" "Weight")
+         "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
 
-          )
+    )
 #+end_src
 
 *** Text in the middle
@@ -1008,6 +1064,45 @@ Displays a visual hint when editing with evil.
       (let ((org-confirm-babel-evaluate nil))
         (org-babel-tangle))))
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+#+end_src
+** Org Roam
+For some reason have to run “package-refresh-contents”
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :ensure t
+    :init
+    (setq org-roam-v2-ack t)
+    :custom
+    (org-roam-directory "~/fib/RoamNotes")
+    (org-roam-completion-everywhere t)
+    (org-roam-capture-templates
+     '(("d" "default" plain
+        "%?"
+        :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date: %U\n")
+        :unnarrowed t)
+
+       ("l" "programming language" plain
+        "* Characteristics\n\n- Family: %?\n- Inspired by: \n\n* Reference:\n\n"
+        :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)
+
+       ("b" "book notes" plain
+        "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
+        :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)
+
+       ("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
+        :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Project")
+        :unnarrowed t)
+
+       ))
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+           ("C-c n f" . org-roam-node-find)
+           ("C-c n i" . org-roam-node-insert)
+           :map org-mode-map
+           ("C-M-i"    . completion-at-point))
+    :config
+    (org-roam-setup))
 #+end_src
 ** Development
 *** Formatter
@@ -1247,34 +1342,36 @@ install LSP server
   cargo install --locked --git https://github.com/latex-lsp/texlab.git
 #+end_src
 
+for autocompletion better to use lsp
 #+begin_src emacs-lisp
-    (use-package latex-preview-pane
-      :hook (latex-mode . latex-preview-pane-mode)
-    )
 
-  ;; (use-package tex
-  ;;   :ensure auctex)
-  ;;    (setq TeX-auto-save t)
-  ;;   (setq TeX-parse-self t)
-  ;;   (setq-default TeX-master nil)
+     ;; ;; yasnippet code 'optional', before auto-complete
+  ;;    (use-package yasnippet)
+  ;;    (yas-global-mode 1)
 
-  ;;   (add-hook 'LaTeX-mode-hook 'visual-line-mode)
-  ;;   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
-  ;;   (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+  ;; (use-package auto-complete)
+  ;;   (use-package auto-complete-auctex) 
+  ;;    (global-auto-complete-mode t) 
+  ;;        (use-package latex-preview-pane
+  ;;          :hook (latex-mode . latex-preview-pane-mode)
+  ;;        )
 
-  ;;   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-  ;;   (setq reftex-plug-into-AUCTeX t)
+       ;; (use-package tex
+       ;;   :ensure auctex)
+       ;;    (setq TeX-auto-save t)
+       ;;   (setq TeX-parse-self t)
+       ;;   (setq-default TeX-master nil)
+
+         ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+         ;; (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+         ;; (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+
+         ;; (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+         ;; (setq reftex-plug-into-AUCTeX t)
 
 
 #+end_src
 
-#+begin_src emacs-lisp
-  ;; (use-package latex-mode
-  ;;   :ensure t
-  ;;   :hook (latex-mode . lsp-deferred)
-  ;;   (add-hook 'latex-mode 'lsp-deferred)
-  ;;   )
-#+end_src
 *** Company Mode
 Company Mode provides a nicer in-buffer completion interface than completion-at-point which is more reminiscent of what you would expect from an IDE. We add a simple configuration to make the keybindings a little more useful (TAB now completes the selection and initiates completion at the current location if needed).
 #+begin_src emacs-lisp
@@ -1507,31 +1604,31 @@ Can add new surroundings check out package website
   (global-evil-surround-mode 1))
 #+end_src
 ** Opening files externally
-Doesn't work
+Doesn't work properly
+have to set it manually when you want to use it 
 #+begin_src emacs-lisp
-
-  ;; (use-package openwith
-  ;;   :config
-  ;;   (setq openwith-associations
-  ;;         (list
-  ;;           (list (openwith-make-extension-regexp
-  ;;                 '("mpg" "mpeg" "mp3" "mp4"
-  ;;                   "avi" "wmv" "wav" "mov" "flv"
-  ;;                   "ogm" "ogg" "mkv"))
-  ;;                 "vlc"
-  ;;                 '(file))
-  ;;           (list (openwith-make-extension-regexp
-  ;;                 '("xbm" "pbm" "pgm" "ppm" "pnm"
-  ;;                   "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega was
-  ;;                   ;; causing feh to be opened...
-  ;;                   "feh"
-  ;;                   '(file))
-  ;;           (list (openwith-make-extension-regexp
-  ;;                 '("pdf"))
-  ;;                 "zathura"
-  ;;                 '(file))))
-  ;;   )
-  ;;   (setq openwith-mode t)
+  (use-package openwith
+    :commands (openwith-mode)
+    :config
+    (setq openwith-associations
+          (list
+            (list (openwith-make-extension-regexp
+                  '("mpg" "mpeg" "mp3" "mp4"
+                    "avi" "wmv" "wav" "mov" "flv"
+                    "ogm" "ogg" "mkv"))
+                  "vlc"
+                  '(file))
+            (list (openwith-make-extension-regexp
+                  '("xbm" "pbm" "pgm" "ppm" "pnm"
+                    "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega was
+                    ;; causing feh to be opened...
+                    "feh"
+                    '(file))
+            (list (openwith-make-extension-regexp
+                  '("pdf"))
+                  "zathura"
+                  '(file))))
+    )
 #+end_src
 ** Disable Optimization
 Disable optimization at the end of startup so that garbage collector works properly and doesn't make emacs crash.

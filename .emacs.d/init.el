@@ -28,6 +28,28 @@
 (setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
 ;; makes sure that package is downloaded before use
 
+;; ;; Bootstrap straight.el
+;; (defvar bootstrap-version)
+;; (let ((bootstrap-file
+;;       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+;;       (bootstrap-version 5))
+;;   (unless (file-exists-p bootstrap-file)
+;;     (with-current-buffer
+;;         (url-retrieve-synchronously
+;;         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+;;         'silent 'inhibit-cookies)
+;;       (goto-char (point-max))
+;;       (eval-print-last-sexp)))
+;;   (load bootstrap-file nil 'nomessage))
+
+;; ;; Always use straight to install on systems other than Linux
+;; (setq straight-use-package-by-default (not (eq system-type 'gnu/linux)))
+
+;; ;; Use straight.el for use-package expressions
+;; (straight-use-package 'use-package)
+
+;; Clean up unused repos with `straight-remove-unused-repos'
+
 ;; You will most likely need to adjust this font size for your system!
     (defvar runemacs/default-font-size 110)
 
@@ -90,16 +112,18 @@
 ;; (require 'sublimity-scroll)
 ;; (sublimity-mode 1)
 
-(use-package dashboard
-  :ensure t
-  :config
-  (dashboard-setup-startup-hook))
+;; (use-package dashboard
+;;   :ensure t
+;;   :config
+;;   (dashboard-setup-startup-hook))
 
 ;; (setq ad-redefinition-action 'accept)
 
 (setq vc-follow-symlinks t) ;; always follow symlinks
 
 (setq large-file-warning-threshold nil)
+
+(use-package diminish)
 
 ;; Font Configuration -----------------------
   ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
@@ -166,76 +190,77 @@
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
 
-(use-package bufler
-  ;; :straight t
-  :bind (("C-M-j" . bufler-switch-buffer)
-         ("C-M-k" . bufler-workspace-frame-set))
-  :config
-  ;; (evil-collection-define-key 'normal 'bufler-list-mode-map
-  ;;   (kbd "RET")   'bufler-list-buffer-switch
-  ;;   (kbd "M-RET") 'bufler-list-buffer-peek
-  ;;   "D"           'bufler-list-buffer-kill)
+;; (use-package bufler
+;;   ;; :commands (bufler-switch-buffer bufler-workspace-frame-set bufler-list)
+;;   ;; :disabled
+;;   :bind (("C-M-j" . bufler-switch-buffer)
+;;          ("C-M-k" . bufler-workspace-frame-set))
+;;   :config
+;;   ;; (evil-collection-define-key 'normal 'bufler-list-mode-map
+;;   ;;   (kbd "RET")   'bufler-list-buffer-switch
+;;   ;;   (kbd "M-RET") 'bufler-list-buffer-peek
+;;   ;;   "D"           'bufler-list-buffer-kill)
 
-  (bufler-defgroups
-   (group
-    ;; Subgroup collecting all named workspaces.
-    (auto-workspace))
-   (group
-    ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
-    (group-or "*Help/Info*"
-              (mode-match "*Help*" (rx bos "help-"))
-              (mode-match "*Info*" (rx bos "info-"))))
-   (group
-    ;; Subgroup collecting all special buffers (i.e. ones that are not
-    ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
-    ;; through to other groups, so they end up grouped with their project buffers).
-    (group-and "*Special*"
-               (lambda (buffer)
-                 (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
-                                      buffer)
-                             (funcall (mode-match "Dired" (rx bos "dired"))
-                                      buffer)
-                             (funcall (auto-file) buffer))
-                   "*Special*")))
-    (group
-     ;; Subgroup collecting these "special special" buffers
-     ;; separately for convenience.
-     (name-match "**Special**"
-                 (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
-    (group
-     ;; Subgroup collecting all other Magit buffers, grouped by directory.
-     (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
-     (auto-directory))
-    ;; Subgroup for Helm buffers.
-    (mode-match "*Helm*" (rx bos "helm-"))
-    ;; Remaining special buffers are grouped automatically by mode.
-    (auto-mode))
-   ;; All buffers under "~/.emacs.d" (or wherever it is).
-   (dir user-emacs-directory)
-   (group
-    ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
-    ;; `org-directory' is not yet defined).
-    (dir (if (bound-and-true-p org-directory)
-             org-directory
-           "~/org"))
-    (group
-     ;; Subgroup collecting indirect Org buffers, grouping them by file.
-     ;; This is very useful when used with `org-tree-to-indirect-buffer'.
-     (auto-indirect)
-     (auto-file))
-    ;; Group remaining buffers by whether they're file backed, then by mode.
-    (group-not "*special*" (auto-file))
-    (auto-mode))
-   (group
-    ;; Subgroup collecting buffers in a projectile project.
-    (auto-projectile))
-   (group
-    ;; Subgroup collecting buffers in a version-control project,
-    ;; grouping them by directory.
-    (auto-project))
-   ;; Group remaining buffers by directory, then major mode.
-   (auto-directory)
-   (auto-mode)))
+;;   (bufler-defgroups
+;;    (group
+;;     ;; Subgroup collecting all named workspaces.
+;;     (auto-workspace))
+;;    (group
+;;     ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
+;;     (group-or "*Help/Info*"
+;;               (mode-match "*Help*" (rx bos "help-"))
+;;               (mode-match "*Info*" (rx bos "info-"))))
+;;    (group
+;;     ;; Subgroup collecting all special buffers (i.e. ones that are not
+;;     ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
+;;     ;; through to other groups, so they end up grouped with their project buffers).
+;;     (group-and "*Special*"
+;;                (lambda (buffer)
+;;                  (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
+;;                                       buffer)
+;;                              (funcall (mode-match "Dired" (rx bos "dired"))
+;;                                       buffer)
+;;                              (funcall (auto-file) buffer))
+;;                    "*Special*")))
+;;     (group
+;;      ;; Subgroup collecting these "special special" buffers
+;;      ;; separately for convenience.
+;;      (name-match "**Special**"
+;;                  (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
+;;     (group
+;;      ;; Subgroup collecting all other Magit buffers, grouped by directory.
+;;      (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
+;;      (auto-directory))
+;;     ;; Subgroup for Helm buffers.
+;;     (mode-match "*Helm*" (rx bos "helm-"))
+;;     ;; Remaining special buffers are grouped automatically by mode.
+;;     (auto-mode))
+;;    ;; All buffers under "~/.emacs.d" (or wherever it is).
+;;    (dir user-emacs-directory)
+;;    (group
+;;     ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
+;;     ;; `org-directory' is not yet defined).
+;;     (dir (if (bound-and-true-p org-directory)
+;;              org-directory
+;;            "~/org"))
+;;     (group
+;;      ;; Subgroup collecting indirect Org buffers, grouping them by file.
+;;      ;; This is very useful when used with `org-tree-to-indirect-buffer'.
+;;      (auto-indirect)
+;;      (auto-file))
+;;     ;; Group remaining buffers by whether they're file backed, then by mode.
+;;     (group-not "*special*" (auto-file))
+;;     (auto-mode))
+;;    (group
+;;     ;; Subgroup collecting buffers in a projectile project.
+;;     (auto-projectile))
+;;    (group
+;;     ;; Subgroup collecting buffers in a version-control project,
+;;     ;; grouping them by directory.
+;;     (auto-project))
+;;    ;; Group remaining buffers by directory, then major mode.
+;;    (auto-directory)
+;;    (auto-mode)))
 
 ;; (use-package default-text-scale
 ;;   :defer 1
@@ -384,7 +409,7 @@
   (ivy-prescient-mode 1)
   )
 ;; (setq prescient-filter-method '(fuzzy regexp))
-(setq prescient-sort-length-enable nil) ;; do not sort by length
+;; (setq prescient-sort-length-enable nil) ;; do not sort by length
 
 (use-package company-prescient
 :after company
@@ -410,12 +435,10 @@
 (use-package doom-themes) ;; counsel-load-theme to load a theme from the list
 (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 
-(use-package diminish)
-
 ;; (use-package minions
 ;;   :hook (doom-modeline-mode . minions-mode))
 
-;; (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
+(global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
   ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
 (use-package general ;; set personal bindings for leader key for example
@@ -450,6 +473,7 @@
    "bc" '(evil-delete-buffer :which-key "close buffer")
    "bd" '(delete-file-and-buffer :which-key "delete file")
    "w" '(save-buffer :which-key "save buffer") ;; classic vim save
+   "to" '(openwith-mode :which-key "open with external app")
    "tt" '(counsel-load-theme :which-key "choose theme")))
 
 (global-set-key (kbd "C-M-u") 'universal-argument)
@@ -516,17 +540,46 @@ _h_ decrease width    _l_ increase width
 
 ; C-z go back to EMACS MODE
 
-(use-package evil-goggles
-  :ensure t
-  :after evil
-  :config
-  (evil-goggles-mode)
+;; (use-package evil-goggles
+;;   :ensure t
+;;   :after evil
+;;   :config
+;;   (evil-goggles-mode)
 
-  ;; optionally use diff-mode's faces; as a result, deleted text
-  ;; will be highlighed with `diff-removed` face which is typically
-  ;; some red color (as defined by the color theme)
-  ;; other faces such as `diff-added` will be used for other actions
-  (evil-goggles-use-diff-faces))
+;;   ;; optionally use diff-mode's faces; as a result, deleted text
+;;   ;; will be highlighed with `diff-removed` face which is typically
+;;   ;; some red color (as defined by the color theme)
+;;   ;; other faces such as `diff-added` will be used for other actions
+;;   (evil-goggles-use-diff-faces))
+
+;; (darkroom-mode 0) this makes keybinding work automatically but also runs on startup
+(use-package darkroom
+  :commands darkroom-mode
+  :config
+  (setq darkroom-text-scale-increase 0)
+  )
+
+(defun dw/enter-focus-mode ()
+  (interactive)
+  (darkroom-mode 1)
+  (display-line-numbers-mode 0))
+
+(defun dw/leave-focus-mode ()
+  (interactive)
+  (darkroom-mode 0)
+  (display-line-numbers-mode 1))
+
+(defun dw/toggle-focus-mode ()
+  (interactive)
+  (if (symbol-value darkroom-mode)
+    (dw/leave-focus-mode)
+    (dw/enter-focus-mode)))
+
+(rune/leader-keys
+  "tf" '(dw/toggle-focus-mode :which-key "focus mode")
+  ;; "te" '(dw/enter-focus-mode :which-key "focus mode")
+  ;; "ta" '(dw/leave-focus-mode :which-key "focus mode")
+  )
 
 (use-package which-key ;; This shows which commands are available for current keypresses
   :commands(helpful-callable helpfull-variable helpful-command helpful-key)
@@ -634,7 +687,8 @@ _h_ decrease width    _l_ increase width
 
   (setq org-todo-keywords
     '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!)")
-      (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")))
+      ;; (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)")
+  ))
 
   (setq org-refile-targets ;; move TODO tasks to a different file
     '(("Archive.org" :maxlevel . 1)
@@ -762,6 +816,42 @@ _h_ decrease width    _l_ increase width
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+
+(use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory "~/fib/RoamNotes")
+  (org-roam-completion-everywhere t)
+  (org-roam-capture-templates
+   '(("d" "default" plain
+      "%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date: %U\n")
+      :unnarrowed t)
+
+     ("l" "programming language" plain
+      "* Characteristics\n\n- Family: %?\n- Inspired by: \n\n* Reference:\n\n"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)
+
+     ("b" "book notes" plain
+      "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+      :unnarrowed t)
+
+     ("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
+      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Project")
+      :unnarrowed t)
+
+     ))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         :map org-mode-map
+         ("C-M-i"    . completion-at-point))
+  :config
+  (org-roam-setup))
 
 (global-set-key (kbd "M-f") #'ian/format-code)
   (defun ian/format-code ()
@@ -957,28 +1047,29 @@ _h_ decrease width    _l_ increase width
 (use-package lsp-java
   :hook (java-mode . lsp-deferred))
 
-(use-package latex-preview-pane
-    :hook (latex-mode . latex-preview-pane-mode)
-  )
+;; ;; yasnippet code 'optional', before auto-complete
+;;    (use-package yasnippet)
+;;    (yas-global-mode 1)
 
-;; (use-package tex
-;;   :ensure auctex)
-;;    (setq TeX-auto-save t)
-;;   (setq TeX-parse-self t)
-;;   (setq-default TeX-master nil)
+;; (use-package auto-complete)
+;;   (use-package auto-complete-auctex) 
+;;    (global-auto-complete-mode t) 
+;;        (use-package latex-preview-pane
+;;          :hook (latex-mode . latex-preview-pane-mode)
+;;        )
 
-;;   (add-hook 'LaTeX-mode-hook 'visual-line-mode)
-;;   (add-hook 'LaTeX-mode-hook 'flyspell-mode)
-;;   (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+     ;; (use-package tex
+     ;;   :ensure auctex)
+     ;;    (setq TeX-auto-save t)
+     ;;   (setq TeX-parse-self t)
+     ;;   (setq-default TeX-master nil)
 
-;;   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-;;   (setq reftex-plug-into-AUCTeX t)
+       ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode)
+       ;; (add-hook 'LaTeX-mode-hook 'flyspell-mode)
+       ;; (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
 
-;; (use-package latex-mode
-;;   :ensure t
-;;   :hook (latex-mode . lsp-deferred)
-;;   (add-hook 'latex-mode 'lsp-deferred)
-;;   )
+       ;; (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+       ;; (setq reftex-plug-into-AUCTeX t)
 
 (use-package company
   :after lsp-mode
@@ -1150,28 +1241,28 @@ _h_ decrease width    _l_ increase width
   :config
   (global-evil-surround-mode 1))
 
-;; (use-package openwith
-;;   :config
-;;   (setq openwith-associations
-;;         (list
-;;           (list (openwith-make-extension-regexp
-;;                 '("mpg" "mpeg" "mp3" "mp4"
-;;                   "avi" "wmv" "wav" "mov" "flv"
-;;                   "ogm" "ogg" "mkv"))
-;;                 "vlc"
-;;                 '(file))
-;;           (list (openwith-make-extension-regexp
-;;                 '("xbm" "pbm" "pgm" "ppm" "pnm"
-;;                   "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega was
-;;                   ;; causing feh to be opened...
-;;                   "feh"
-;;                   '(file))
-;;           (list (openwith-make-extension-regexp
-;;                 '("pdf"))
-;;                 "zathura"
-;;                 '(file))))
-;;   )
-;;   (setq openwith-mode t)
+(use-package openwith
+  :commands (openwith-mode)
+  :config
+  (setq openwith-associations
+        (list
+          (list (openwith-make-extension-regexp
+                '("mpg" "mpeg" "mp3" "mp4"
+                  "avi" "wmv" "wav" "mov" "flv"
+                  "ogm" "ogg" "mkv"))
+                "vlc"
+                '(file))
+          (list (openwith-make-extension-regexp
+                '("xbm" "pbm" "pgm" "ppm" "pnm"
+                  "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega was
+                  ;; causing feh to be opened...
+                  "feh"
+                  '(file))
+          (list (openwith-make-extension-regexp
+                '("pdf"))
+                "zathura"
+                '(file))))
+  )
 
 ;; after startup, it is important you reset this to some reasonable default. A large 
 ;; gc-cons-threshold will cause freezing and stuttering during long-term 
