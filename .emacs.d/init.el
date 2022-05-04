@@ -1,8 +1,10 @@
-;; The default is 800 kilobytes.  Measured in bytes.
-(defvar last-file-name-handler-alist file-name-handler-alist)
-(setq gc-cons-threshold 402653184
-    gc-cons-percentage 0.6
-    file-name-handler-alist nil)
+;; -*- lexical-binding: t; -*-
+
+ ;; The default is 800 kilobytes.  Measured in bytes.
+ (defvar last-file-name-handler-alist file-name-handler-alist)
+ (setq gc-cons-threshold 402653184
+     gc-cons-percentage 0.6
+     file-name-handler-alist nil)
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
@@ -455,6 +457,7 @@
    "sr" '(session-restore :which-key "session restore") ;; "folder" for toggles
    "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
    "v" '(:ignore v :which-key "terminal") ;;
+   "vt" '(vterm :which-key "open vterm") ;; "folder" for toggles
    "vv" '(vterm-toggle :which-key "toggle vterm") ;; "folder" for toggles
    "vc" '(vterm-toggle-cd :which-key "toggle vterm on current folder") ;; "folder" for toggles
    "b" '(:ignore b :which-key "buffers") 
@@ -669,7 +672,17 @@ _h_ decrease width    _l_ increase width
   :hook (org-mode . efs/org-mode-setup)
   :config
   (message "Org mode loaded")
-  (setq org-ellipsis " ▾") ;; change ... to another symbol that is less confusing
+  (setq org-ellipsis " ▾"
+        org-hide-emphasis-markers t
+        org-src-fontify-natively t
+        org-fontify-quote-and-verse-blocks t
+        org-src-tab-acts-natively t
+        org-edit-src-content-indentation 4
+        org-hide-block-startup nil
+        org-src-preserve-indentation nil
+        org-startup-folded 'content
+        org-cycle-separator-lines 2
+        ) ;; change ... to another symbol that is less confusing
   (efs/org-font-setup) ;; setup font
    ;; hides *bold* and __underlined__ and linked words [name][link]
   (setq org-agenda-start-with-log-mode t)
@@ -787,6 +800,9 @@ _h_ decrease width    _l_ increase width
 
   )
 
+(use-package org-appear
+  :hook (org-mode . org-appear-mode))
+
 ;; (defun efs/org-mode-visual-fill ()
 ;;   (setq visual-fill-column-width 100 ;; set column width (character width?)
 ;;         visual-fill-column-center-text t) ;; center text on middle of screen
@@ -818,40 +834,152 @@ _h_ decrease width    _l_ increase width
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
 
 (use-package org-roam
-  :ensure t
-  :init
-  (setq org-roam-v2-ack t)
-  :custom
-  (org-roam-directory "~/fib/RoamNotes")
-  (org-roam-completion-everywhere t)
-  (org-roam-capture-templates
-   '(("d" "default" plain
-      "%?"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date: %U\n")
-      :unnarrowed t)
+      ;; :ensure t
+      ;; :demand t
+      :init
+      (setq org-roam-v2-ack t)
+      :custom
+      (org-roam-directory "~/fib/RoamNotes")
+      (org-roam-completion-everywhere t)
+      (org-roam-capture-templates
+       '(("d" "default" plain ;; first template should be default one cause keybindings ahead will use that for fast typing
+          "%?"
+          :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date: %U\n")
+          :unnarrowed t)
 
-     ("l" "programming language" plain
-      "* Characteristics\n\n- Family: %?\n- Inspired by: \n\n* Reference:\n\n"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-      :unnarrowed t)
+         ("l" "programming language" plain
+          "* Characteristics\n\n- Family: %?\n- Inspired by: \n\n* Reference:\n\n"
+          :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
 
-     ("b" "book notes" plain
-      "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-      :unnarrowed t)
+         ("b" "book notes" plain
+          "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
+          :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          :unnarrowed t)
 
-     ("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Project")
-      :unnarrowed t)
+         ("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
+          :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Project")
+          :unnarrowed t)
 
-     ))
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
-         :map org-mode-map
-         ("C-M-i"    . completion-at-point))
-  :config
-  (org-roam-setup))
+         ))
+      (org-roam-dailies-capture-templates
+      '(("d" "default" entry "* %<%I:%M %p>: %?"
+         :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+
+      :bind (("C-c n l" . org-roam-buffer-toggle)
+             ("C-c n f" . org-roam-node-find)
+             ("C-c n i" . org-roam-node-insert)
+             ("C-c n I" . org-roam-node-insert-immediate)
+             ;; ("C-c n p" . my/org-roam-find-project)
+             ;; ("C-c n t" . my/org-roam-capture-task)
+             ;; ("C-c n b" . my/org-roam-capture-inbox)
+             :map org-mode-map
+             ("C-M-i"    . completion-at-point)
+             :map org-roam-dailies-map
+             ("Y" . org-roam-dailies-capture-yesterday)
+             ("T" . org-roam-dailies-capture-tomorrow))
+      :bind-keymap
+      ("C-c n d" . org-roam-dailies-map)
+      :config
+      (org-roam-setup)
+      (require 'org-roam-dailies) ;; Ensure the keymap is available
+      (org-roam-db-autosync-mode)
+      )
+
+    ;; Bind this to C-c n I
+  (defun org-roam-node-insert-immediate (arg &rest args)
+    (interactive "P")
+    (let ((args (cons arg args))
+          (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                    '(:immediate-finish t)))))
+      (apply #'org-roam-node-insert args)))
+
+;; (defun my/org-roam-filter-by-tag (tag-name)
+;;   (lambda (node)
+;;     (member tag-name (org-roam-node-tags node))))
+
+;; (defun my/org-roam-list-notes-by-tag (tag-name)
+;;   (mapcar #'org-roam-node-file
+;;           (seq-filter
+;;            (my/org-roam-filter-by-tag tag-name)
+;;            (org-roam-node-list))))
+
+;; (defun my/org-roam-refresh-agenda-list ()
+;;   (interactive)
+;;   (setq org-agenda-files (my/org-roam-list-notes-by-tag "Project")))
+
+;; ;; Build the agenda list the first time for the session
+;; (my/org-roam-refresh-agenda-list)
+
+;; (defun my/org-roam-project-finalize-hook ()
+;;   "Adds the captured project file to `org-agenda-files' if the
+;; capture was not aborted."
+;;   ;; Remove the hook since it was added temporarily
+;;   (remove-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+;;   ;; Add project file to the agenda list if the capture was confirmed
+;;   (unless org-note-abort
+;;     (with-current-buffer (org-capture-get :buffer)
+;;       (add-to-list 'org-agenda-files (buffer-file-name)))))
+
+;; (defun my/org-roam-find-project ()
+;;   (interactive)
+;;   ;; Add the project file to the agenda after capture is finished
+;;   (add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+;;   ;; Select a project file to open, creating it if necessary
+;;   (org-roam-node-find
+;;    nil
+;;    nil
+;;    (my/org-roam-filter-by-tag "Project")
+;;    :templates
+;;    '(("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
+;;       :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+category: ${title}\n#+filetags: Project")
+;;       :unnarrowed t))))
+
+;; (defun my/org-roam-capture-inbox ()
+;;   (interactive)
+;;   (org-roam-capture- :node (org-roam-node-create)
+;;                      :templates '(("i" "inbox" plain "* %?"
+;;                                   :if-new (file+head "Inbox.org" "#+title: Inbox\n")))))
+
+;; (defun my/org-roam-capture-task ()
+;;   (interactive)
+;;   ;; Add the project file to the agenda after capture is finished
+;;   (add-hook 'org-capture-after-finalize-hook #'my/org-roam-project-finalize-hook)
+
+;;   ;; Capture the new task, creating the project file if necessary
+;;   (org-roam-capture- :node (org-roam-node-read
+;;                             nil
+;;                             (my/org-roam-filter-by-tag "Project"))
+;;                      :templates '(("p" "project" plain "** TODO %?"
+;;                                    :if-new (file+head+olp "%<%Y%m%d%H%M%S>-${slug}.org"
+;;                                                           "#+title: ${title}\n#+category: ${title}\n#+filetags: Project"
+;;                                                           ("Tasks"))))))
+
+;; (defun my/org-roam-copy-todo-to-today ()
+;;   (interactive)
+;;   (let ((org-refile-keep t) ;; Set this to nil to delete the original!
+;;         (org-roam-dailies-capture-templates
+;;           '(("t" "tasks" entry "%?"
+;;              :if-new (file+head+olp "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n" ("Tasks")))))
+;;         (org-after-refile-insert-hook #'save-buffer)
+;;         today-file
+;;         pos)
+;;     (save-window-excursion
+;;       (org-roam-dailies--capture (current-time) t)
+;;       (setq today-file (buffer-file-name))
+;;       (setq pos (point)))
+
+;;     ;; Only refile if the target file is different than the current file
+;;     (unless (equal (file-truename today-file)
+;;                    (file-truename (buffer-file-name)))
+;;       (org-refile nil nil (list "Tasks" today-file nil pos)))))
+
+;; (add-to-list 'org-after-todo-state-change-hook
+;;              (lambda ()
+;;                (when (equal org-state "DONE")
+;;                  (my/org-roam-copy-todo-to-today))))
 
 (global-set-key (kbd "M-f") #'ian/format-code)
   (defun ian/format-code ()
@@ -1008,23 +1136,24 @@ _h_ decrease width    _l_ increase width
 (use-package lsp-ivy
   :after (lsp-mode lsp))
 
-(use-package dap-mode
-  ;; Uncomment the config below if you want all UI panes to be hidden by default!
-  ;; :custom
-  ;; (lsp-enable-dap-auto-configure nil)
-  ;; :config
-  ;; (dap-ui-mode 1)
-  :after lsp
-  :config
-  ;; Set up Node debugging
-  (require 'dap-node)
-  (dap-node-setup) ;; Automatically installs Node debug adapter if needed
+(setq dap-auto-configure-features '(sessions locals controls tooltip))
+    (use-package dap-mode
+      ;; Uncomment the config below if you want all UI panes to be hidden by default!
+      ;; :custom
+      ;; (lsp-enable-dap-auto-configure nil)
+      ;; :config
+      ;; (dap-ui-mode 1)
+      :after lsp
+      :config
+      ;; Set up Node debugging
+      (require 'dap-node)
+      (dap-node-setup) ;; Automatically installs Node debug adapter if needed
 
-  ;; Bind `C-c l d` to `dap-hydra` for easy access
-  (general-define-key
-    :keymaps 'lsp-mode-map
-    :prefix lsp-keymap-prefix
-    "d" '(dap-hydra t :wk "debugger")))
+      ;; Bind `C-c l d` to `dap-hydra` for easy access
+      (general-define-key
+        :keymaps 'lsp-mode-map
+        :prefix lsp-keymap-prefix
+        "d" '(dap-hydra t :wk "debugger")))
 
 (use-package python-mode
   :ensure t
