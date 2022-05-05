@@ -764,48 +764,62 @@ Since I let evil-mode take over C-u for buffer scrolling, I need to re-bind the 
 #+end_src
 *** Evil
 #+begin_src emacs-lisp
-            ;; vim keybindings for easier on the fingers typing :D
-            (use-package evil
-              :init
-              (setq evil-want-integration t) ;; must have
-              (setq evil-want-keybinding nil)
-              (setq evil-want-C-u-scroll t)
-              (setq evil-want-C-i-jump nil)
-              ;;(setq evil-respect-visual-line-mode t) idk
-              ;;(setq evil-undo-system 'undo-tree) idk
-              :config
-              (evil-mode 1)
-              (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-              ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+                    ;; vim keybindings for easier on the fingers typing :D
+                    (use-package evil
+                      :init
+                      (setq evil-want-integration t) ;; must have
+                      (setq evil-want-keybinding nil)
+                      (setq evil-want-C-u-scroll t)
+                      (setq evil-want-C-i-jump nil)
+                      ;;(setq evil-respect-visual-line-mode t) idk
+                      ;;(setq evil-undo-system 'undo-tree) idk
+                      :config
+                      (evil-mode 1)
+                      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+                      ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-              ;; Use visual line motions even outside of visual-line-mode buffers
-              (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
-              (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
+                      ;; Use visual line motions even outside of visual-line-mode buffers
+                      (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
+                      (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
 
-              (evil-set-initial-state 'messages-buffer-mode 'normal)
-              (evil-set-initial-state 'dashboard-mode 'normal))
-            ;; to center screen on cursor, zz or emacs-style C-l
+                      (evil-set-initial-state 'messages-buffer-mode 'normal)
+                      (evil-set-initial-state 'dashboard-mode 'normal))
+                    ;; to center screen on cursor, zz or emacs-style C-l
 
-            ;; https://github.com/linktohack/evil-commentary
-            ;; use-package makes it so that it installs it from config and config section
-            ;; activates the mode
-            (use-package evil-commentary
-              :after evil
-              :config
-              (evil-commentary-mode))
+                    ;; https://github.com/linktohack/evil-commentary
+                    ;; use-package makes it so that it installs it from config and config section
+                    ;; activates the mode
+                    (use-package evil-commentary
+                      :after evil
+                      :config
+                      (evil-commentary-mode))
 
-            (use-package evil-collection
-              :after evil ;; load after evil, must have
-              :config
-              (evil-collection-init))
-            (use-package evil-numbers
-              :after evil)
-        (global-set-key (kbd "C-c +") 'evil-numbers/inc-at-pt)
-        (global-set-key (kbd "C-c -") 'evil-numbers/dec-at-pt)
-    ;; (define-key evil-normal-state-map (kbd "C-c +") 'evil-numbers/inc-at-pt)
-    ;; (define-key evil-normal-state-map (kbd "C-c -") 'evil-numbers/dec-at-pt)
-            ; C-z go back to EMACS MODE
+                    (use-package evil-collection
+                      :after evil ;; load after evil, must have
+                      :config
+                      (evil-collection-init))
 
+    ;; glorious increment like in vim :D
+    (use-package evil-numbers
+      :after evil)
+    (global-set-key (kbd "C-c +") 'evil-numbers/inc-at-pt)
+    (global-set-key (kbd "C-c -") 'evil-numbers/dec-at-pt)
+    (global-set-key (kbd "C-c C-+") 'evil-numbers/inc-at-pt-incremental)
+    (global-set-key (kbd "C-c C--") 'evil-numbers/dec-at-pt-incremental)
+
+        ;; only in normal and insert
+        ;; (evil-define-key '(normal visual) 'global (kbd "C-c +") 'evil-numbers/inc-at-pt)
+        ;; (evil-define-key '(normal visual) 'global (kbd "C-c -") 'evil-numbers/dec-at-pt)
+        ;; (evil-define-key '(normal visual) 'global (kbd "C-c C-+") 'evil-numbers/inc-at-pt-incremental)
+        ;; (evil-define-key '(normal visual) 'global (kbd "C-c C--") 'evil-numbers/dec-at-pt-incremental)
+
+    ;; without shadowing regular + -
+    ;;     (evil-define-key '(normal visual) 'global (kbd "<kp-add>") 'evil-numbers/inc-at-pt)
+    ;; (evil-define-key '(normal visual) 'global (kbd "<kp-subtract>") 'evil-numbers/dec-at-pt)
+    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-add>") 'evil-numbers/inc-at-pt-incremental)
+    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-subtract>") 'evil-numbers/dec-at-pt-incremental)
+
+                    ; C-z go back to EMACS MODE
 #+end_src
 *** evil-googles
 Displays a visual hint when editing with evil.
