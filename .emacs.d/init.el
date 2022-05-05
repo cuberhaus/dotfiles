@@ -1276,7 +1276,8 @@ _h_ decrease width    _l_ increase width
 (use-package eterm-256color
   :hook (term-mode . eterm-256color-mode))
 
-(use-package vterm-toggle)
+(use-package vterm-toggle
+      :commands (vterm-toggle vterm-toggle-cd))
   ;; (global-set-key [M-t] 'vterm-toggle-cd)
   ;; (global-set-key [C-f2] 'vterm-toggle)
 (setq vterm-toggle-fullscreen-p nil)
