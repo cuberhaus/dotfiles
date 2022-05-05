@@ -192,6 +192,8 @@
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
 
+;; (use-package multiple-cursors) ;; useless for what i needed
+
 ;; (use-package bufler
 ;;   ;; :commands (bufler-switch-buffer bufler-workspace-frame-set bufler-list)
 ;;   ;; :disabled
@@ -548,41 +550,46 @@ _h_ decrease width    _l_ increase width
   ("q" nil))
 
 ;; vim keybindings for easier on the fingers typing :D
-(use-package evil
-  :init
-  (setq evil-want-integration t) ;; must have
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump nil)
-  ;;(setq evil-respect-visual-line-mode t) idk
-  ;;(setq evil-undo-system 'undo-tree) idk
-  :config
-  (evil-mode 1)
-  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-  ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+        (use-package evil
+          :init
+          (setq evil-want-integration t) ;; must have
+          (setq evil-want-keybinding nil)
+          (setq evil-want-C-u-scroll t)
+          (setq evil-want-C-i-jump nil)
+          ;;(setq evil-respect-visual-line-mode t) idk
+          ;;(setq evil-undo-system 'undo-tree) idk
+          :config
+          (evil-mode 1)
+          (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+          ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-  ;; Use visual line motions even outside of visual-line-mode buffers
-  (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
-  (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
+          ;; Use visual line motions even outside of visual-line-mode buffers
+          (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
+          (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
 
-  (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (evil-set-initial-state 'dashboard-mode 'normal))
-;; to center screen on cursor, zz or emacs-style C-l
+          (evil-set-initial-state 'messages-buffer-mode 'normal)
+          (evil-set-initial-state 'dashboard-mode 'normal))
+        ;; to center screen on cursor, zz or emacs-style C-l
 
-;; https://github.com/linktohack/evil-commentary
-;; use-package makes it so that it installs it from config and config section
-;; activates the mode
-(use-package evil-commentary
-  :after evil
-  :config
-  (evil-commentary-mode))
+        ;; https://github.com/linktohack/evil-commentary
+        ;; use-package makes it so that it installs it from config and config section
+        ;; activates the mode
+        (use-package evil-commentary
+          :after evil
+          :config
+          (evil-commentary-mode))
 
-(use-package evil-collection
-  :after evil ;; load after evil, must have
-  :config
-  (evil-collection-init))
-
-; C-z go back to EMACS MODE
+        (use-package evil-collection
+          :after evil ;; load after evil, must have
+          :config
+          (evil-collection-init))
+        (use-package evil-numbers
+          :after evil)
+    (global-set-key (kbd "C-c +") 'evil-numbers/inc-at-pt)
+    (global-set-key (kbd "C-c -") 'evil-numbers/dec-at-pt)
+;; (define-key evil-normal-state-map (kbd "C-c +") 'evil-numbers/inc-at-pt)
+;; (define-key evil-normal-state-map (kbd "C-c -") 'evil-numbers/dec-at-pt)
+        ; C-z go back to EMACS MODE
 
 ;; (use-package evil-goggles
 ;;   :ensure t
@@ -1323,8 +1330,7 @@ _h_ decrease width    _l_ increase width
   (setq vterm-max-scrollback 10000))
 
 (use-package vterm-toggle
-  ;; :commands (vterm-toggle vterm-toggle-cd)
-  ;; :config
+  ;; :commands (vterm-toggle vterm-toggle-cd) ;; trying to improve performance for this breaks it, you could also take out bellow function but vterm opens weirdly without it
   )
 ;; (global-set-key [M-t] 'vterm-toggle-cd)
 ;; (global-set-key [C-f2] 'vterm-toggle)
