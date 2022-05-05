@@ -320,8 +320,8 @@
   :ensure t
   :init
   ;; (global-unset-key (kbd "C-c C-w"))
-  (setq eyebrowse-keymap-prefix (kbd "TAB")) ;; we have to set this before the package is initialized  https://github.com/wasamasa/eyebrowse/issues/49
-  (setq eyebrowse-new-workspace t) ; by default nil, clones last workspace, set to true shows scratch
+  (setq eyebrowse-keymap-prefix (kbd "C-a")) ;; we have to set this before the package is initialized  https://github.com/wasamasa/eyebrowse/issues/49
+  ;; (setq eyebrowse-new-workspace t) ; by default nil, clones last workspace, set to true shows scratch
   :config
   (eyebrowse-mode t)
   )
@@ -452,9 +452,9 @@
   :prefix "SPC" 
   :global-prefix "C-SPC") ;; leader
   (rune/leader-keys ;; try to have similar keybindings in vim as well
+   ;; "" '(:keymap eyebrowse-mode-map :which-key "workspace") ;; It's not perfect but works, has to go first
    "<RET>" '(bookmark-jump :which-key "jump to bookmark") ;; "folder" for toggles
-   "" '(:keymap eyebrowse-mode-map :which-key "workspace") ;; It's not perfect but works
-   "." '(find-file :which-key "find file") ;; "folder" for toggles
+   "." '(counsel-find-file :which-key "find file") ;; "folder" for toggles
    "s" '(:ignore s :which-key "session") ;; "folder" for toggles
    "ss" '(session-save :which-key "session save") ;; "folder" for toggles
    "sr" '(session-restore :which-key "session restore") ;; "folder" for toggles
