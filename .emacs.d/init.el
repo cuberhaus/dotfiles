@@ -447,39 +447,44 @@
  ; (general-define-key "C-M-j" 'counsel-switch-buffer) ;; allows to define multiple global keybindings
   ;; :after evil
   :config
-  (general-create-definer rune/leader-keys
+  (general-evil-setup t)
+  (general-create-definer pol/leader-key
   :keymaps '(normal insert visual emacs)
   :prefix "SPC" 
   :global-prefix "C-SPC") ;; leader
-  (rune/leader-keys ;; try to have similar keybindings in vim as well
-   ;; "" '(:keymap eyebrowse-mode-map :which-key "workspace") ;; It's not perfect but works, has to go first
-   "<RET>" '(bookmark-jump :which-key "jump to bookmark") ;; "folder" for toggles
-   "." '(counsel-find-file :which-key "find file") ;; "folder" for toggles
-   "s" '(:ignore s :which-key "session") ;; "folder" for toggles
-   "ss" '(session-save :which-key "session save") ;; "folder" for toggles
-   "sr" '(session-restore :which-key "session restore") ;; "folder" for toggles
-   "o" '(:ignore o :which-key "open") 
-   "ot" '(vterm-toggle :which-key "toggle vterm") ;; "folder" for toggles
-   "od" '(vterm-toggle-cd :which-key "toggle vterm on current folder") ;; "folder" for toggles
-   "c" '(org-capture :which-key "org-capture") ;; this is F*** awesome
-   "g" '(git-gutter-mode :which-key "git-gutter toggle") 
-   "h" '(:ignore h :which-key "git-gutter") 
-   "hn" '(git-gutter:next-hunk :which-key "next hunk") 
-   "hp" '(git-gutter:previous-hunk :which-key "previous hunk") 
-   "hv" '(git-gutter:popup-hunk :which-key "preview hunk") 
-   "hs" '(git-gutter:stage-hunk :which-key "stage hunk") 
-   "hu" '(git-gutter:revert-hunk :which-key "undo hunk") ;; take back changes
-   "hg" '(git-gutter :which-key "update changes") 
-   "b" '(:ignore b :which-key "buffers") 
-   "bn" '(evil-next-buffer :which-key "next buffer") 
-   "bp" '(evil-prev-buffer :which-key "previous buffer")
-   "bc" '(evil-delete-buffer :which-key "close buffer")
-   "bd" '(delete-file-and-buffer :which-key "delete file")
-   "w" '(save-buffer :which-key "save buffer") ;; classic vim save
-   "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
-   "to" '(openwith-mode :which-key "open with external app")
-   "tt" '(counsel-load-theme :which-key "choose theme")
-   ))
+  (general-create-definer pol/ctrl-c-keys
+    :prefix "C-c"))
+
+
+(pol/leader-key ;; try to have similar keybindings in vim as well
+  ;; "" '(:keymap eyebrowse-mode-map :which-key "workspace") ;; It's not perfect but works, has to go first
+  "<RET>" '(bookmark-jump :which-key "jump to bookmark") ;; "folder" for toggles
+  "." '(counsel-find-file :which-key "find file") ;; "folder" for toggles
+  "s" '(:ignore s :which-key "session") ;; "folder" for toggles
+  "ss" '(session-save :which-key "session save") ;; "folder" for toggles
+  "sr" '(session-restore :which-key "session restore") ;; "folder" for toggles
+  "o" '(:ignore o :which-key "open") 
+  "ot" '(vterm-toggle :which-key "toggle vterm") ;; "folder" for toggles
+  "od" '(vterm-toggle-cd :which-key "toggle vterm on current folder") ;; "folder" for toggles
+  "c" '(org-capture :which-key "org-capture") ;; this is F*** awesome
+  "g" '(git-gutter-mode :which-key "git-gutter toggle") 
+  "h" '(:ignore h :which-key "git-gutter") 
+  "hn" '(git-gutter:next-hunk :which-key "next hunk") 
+  "hp" '(git-gutter:previous-hunk :which-key "previous hunk") 
+  "hv" '(git-gutter:popup-hunk :which-key "preview hunk") 
+  "hs" '(git-gutter:stage-hunk :which-key "stage hunk") 
+  "hu" '(git-gutter:revert-hunk :which-key "undo hunk") ;; take back changes
+  "hg" '(git-gutter :which-key "update changes") 
+  "b" '(:ignore b :which-key "buffers") 
+  "bn" '(evil-next-buffer :which-key "next buffer") 
+  "bp" '(evil-prev-buffer :which-key "previous buffer")
+  "bc" '(evil-delete-buffer :which-key "close buffer")
+  "bd" '(delete-file-and-buffer :which-key "delete file")
+  "w" '(save-buffer :which-key "save buffer") ;; classic vim save
+  "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
+  "to" '(openwith-mode :which-key "open with external app")
+  "tt" '(counsel-load-theme :which-key "choose theme")
+  )
 
 (global-set-key (kbd "C-M-u") 'universal-argument)
 
@@ -491,10 +496,10 @@
     ("j" text-scale-increase "in")
     ("k" text-scale-decrease "out")
     ("q" nil "finished" :exit t))
-  (rune/leader-keys
+  (pol/leader-key
     "ts" '(hydra-text-scale/body :which-key "scale text"))
 
-  (rune/leader-keys
+  (pol/leader-key
     "tr" '(window-resize-hydra/body :which-key "resize windows"))
 
   (defhydra window-resize-hydra (:hint nil)
@@ -517,6 +522,8 @@ _h_ decrease width    _l_ increase width
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t)
   (setq evil-want-C-i-jump nil)
+  ;;(setq evil-respect-visual-line-mode t) idk
+  ;;(setq evil-undo-system 'undo-tree) idk
   :config
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
@@ -580,7 +587,7 @@ _h_ decrease width    _l_ increase width
     (dw/leave-focus-mode)
     (dw/enter-focus-mode)))
 
-(rune/leader-keys
+(pol/leader-key
   "tf" '(dw/toggle-focus-mode :which-key "focus mode")
   ;; "te" '(dw/enter-focus-mode :which-key "focus mode")
   ;; "ta" '(dw/leave-focus-mode :which-key "focus mode")
@@ -1276,29 +1283,31 @@ _h_ decrease width    _l_ increase width
 (use-package eterm-256color
   :hook (term-mode . eterm-256color-mode))
 
-(use-package vterm-toggle
-      :commands (vterm-toggle vterm-toggle-cd))
-  ;; (global-set-key [M-t] 'vterm-toggle-cd)
-  ;; (global-set-key [C-f2] 'vterm-toggle)
-(setq vterm-toggle-fullscreen-p nil)
-(add-to-list 'display-buffer-alist
-             '((lambda(bufname _) (with-current-buffer bufname
-                                    (or (equal major-mode 'vterm-mode)
-                                        (string-prefix-p vterm-buffer-name bufname))))
-                (display-buffer-reuse-window display-buffer-at-bottom)
-                ;;(display-buffer-reuse-window display-buffer-in-direction)
-                ;;display-buffer-in-direction/direction/dedicated is added in emacs27
-                ;;(direction . bottom)
-                ;;(dedicated . t) ;dedicated is supported in emacs27
-                (reusable-frames . visible)
-                (window-height . 0.3)))
-
 (use-package vterm
   :commands vterm
   :config
   (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
   ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
   (setq vterm-max-scrollback 10000))
+
+(use-package vterm-toggle
+  ;; :commands (vterm-toggle vterm-toggle-cd)
+  ;; :config
+  )
+;; (global-set-key [M-t] 'vterm-toggle-cd)
+;; (global-set-key [C-f2] 'vterm-toggle)
+(setq vterm-toggle-fullscreen-p nil)
+(add-to-list 'display-buffer-alist
+             '((lambda(bufname _) (with-current-buffer bufname
+                                    (or (equal major-mode 'vterm-mode)
+                                        (string-prefix-p vterm-buffer-name bufname))))
+               (display-buffer-reuse-window display-buffer-at-bottom)
+               ;;(display-buffer-reuse-window display-buffer-in-direction)
+               ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+               ;;(direction . bottom)
+               ;;(dedicated . t) ;dedicated is supported in emacs27
+               (reusable-frames . visible)
+               (window-height . 0.3)))
 
 (when (eq system-type 'windows-nt)
   (setq explicit-shell-file-name "powershell.exe")
@@ -1366,9 +1375,10 @@ _h_ decrease width    _l_ increase width
 (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions)) ;; do not query to kill the buffer
 
 (use-package smartparens
-    :config
-    (require 'smartparens-config)
-    (smartparens-global-mode t)
+    :hook (prog-mode . smartparens-mode)
+    ;; :config
+    ;; (require 'smartparens-config)
+    ;; (smartparens-global-mode t)
     ;; (smartparens-global-strict-mode t)
     )
 ;; (add-hook 'js-mode-hook #'smartparens-mode)
