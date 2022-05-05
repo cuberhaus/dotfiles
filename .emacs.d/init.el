@@ -319,11 +319,12 @@
 (use-package eyebrowse
   :ensure t
   :init
-  ;; (global-unset-key (kbd "C-c C-w"))
-  (setq eyebrowse-keymap-prefix (kbd "C-a")) ;; we have to set this before the package is initialized  https://github.com/wasamasa/eyebrowse/issues/49
-  ;; (setq eyebrowse-new-workspace t) ; by default nil, clones last workspace, set to true shows scratch
+  (setq eyebrowse-keymap-prefix (kbd "")) ;; this seems to work to unbind keybindings :D
+  (global-unset-key (kbd "C-c C-w"))
+  ;; we have to set this before the package is initialized  https://github.com/wasamasa/eyebrowse/issues/49
   :config
   (eyebrowse-mode t)
+  (setq eyebrowse-new-workspace t) ; by default nil, clones last workspace, set to true shows scratch
   )
 
 (winner-mode 1)
@@ -455,9 +456,37 @@
   (general-create-definer pol/ctrl-c-keys
     :prefix "C-c"))
 
+    ;;,** Mode Keybindings
+    ;; (general-define-key
+    ;; :keymaps 'eyebrowse-mode-map
+    ;; :prefix "SPC a"
+    ;; ;; bind "C-c C-l"
+    ;; ;; "C-z" 'cider-switch-to-repl-buffer
+    ;; )
+
+;; define workspace keys
+(pol/leader-key
+  "a<" '(eyebrowse-prev-window-config :which-key "find file") ;; "folder" for toggles
+  "a>" '(eyebrowse-next-window-config :which-key "find file") ;; "folder" for toggles
+  "a'" '(eyebrowse-rename-window-config :which-key "find file") ;; "folder" for toggles
+  ;; "a" '(eyebrowse-create-window-config :which-key "find file") ;; "folder" for toggles
+  "a," '(eyebrowse-rename-window-config :which-key "find file") ;; "folder" for toggles
+  "a." '(eyebrowse-switch-to-window-config :which-key "find file") ;; "folder" for toggles
+  "ac" '(eyebrowse-create-window-config :which-key "find file") ;; "folder" for toggles
+  "0" '(eyebrowse-switch-to-window-config-0 :which-key "ws 0") ;; "folder" for toggles
+  "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 1") ;; "folder" for toggles
+  "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 2") ;; "folder" for toggles
+  "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 3") ;; "folder" for toggles
+  "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 4") ;; "folder" for toggles
+  "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 5") ;; "folder" for toggles
+  "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 6") ;; "folder" for toggles
+  "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 7") ;; "folder" for toggles
+  "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 8") ;; "folder" for toggles
+  "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 9") ;; "folder" for toggles
+  )
 
 (pol/leader-key ;; try to have similar keybindings in vim as well
-  ;; "" '(:keymap eyebrowse-mode-map :which-key "workspace") ;; It's not perfect but works, has to go first
+  ;; "a" '(:keymap eyebrowse-mode-map :which-key "workspace") ;; It's not perfect but works, has to go first
   "<RET>" '(bookmark-jump :which-key "jump to bookmark") ;; "folder" for toggles
   "." '(counsel-find-file :which-key "find file") ;; "folder" for toggles
   "s" '(:ignore s :which-key "session") ;; "folder" for toggles
@@ -485,6 +514,9 @@
   "to" '(openwith-mode :which-key "open with external app")
   "tt" '(counsel-load-theme :which-key "choose theme")
   )
+
+  ;; (global-unset-key (kbd "C-c C-w"))
+  ;; (global-unset-key (kbd "SPC a"))
 
 (global-set-key (kbd "C-M-u") 'universal-argument)
 
