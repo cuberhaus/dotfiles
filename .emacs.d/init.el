@@ -454,7 +454,7 @@
   (rune/leader-keys ;; try to have similar keybindings in vim as well
    "<RET>" '(bookmark-jump :which-key "jump to bookmark") ;; "folder" for toggles
    "" '(:keymap eyebrowse-mode-map :which-key "workspace") ;; It's not perfect but works
-   "." '(find-file :which-key "jump to bookmark") ;; "folder" for toggles
+   "." '(find-file :which-key "find file") ;; "folder" for toggles
    "s" '(:ignore s :which-key "session") ;; "folder" for toggles
    "ss" '(session-save :which-key "session save") ;; "folder" for toggles
    "sr" '(session-restore :which-key "session restore") ;; "folder" for toggles
