@@ -18,8 +18,8 @@
  (rear-context-string . "05-04 Wednesday\n")
  (position . 338))
 ("org-capture-last-stored"
- (filename . "~/fib/org/Journal.org")
- (front-context-string . "**** 06:43 pm - ")
- (rear-context-string . "5-04 Wednesday\n\n")
- (position . 363))
+ (filename . "~/fib/RoamNotes/20220505065631-habits.org")
+ (front-context-string)
+ (rear-context-string . "5-05 Thu 06:56]\n")
+ (position . 115))
 )

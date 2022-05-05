@@ -319,8 +319,8 @@
 (use-package eyebrowse
   :ensure t
   :init
-  (global-unset-key (kbd "C-c C-w"))
-  (setq eyebrowse-keymap-prefix (kbd "C-a")) ;; we have to set this before the package is initialized  https://github.com/wasamasa/eyebrowse/issues/49
+  ;; (global-unset-key (kbd "C-c C-w"))
+  (setq eyebrowse-keymap-prefix (kbd "TAB")) ;; we have to set this before the package is initialized  https://github.com/wasamasa/eyebrowse/issues/49
   (setq eyebrowse-new-workspace t) ; by default nil, clones last workspace, set to true shows scratch
   :config
   (eyebrowse-mode t)
@@ -452,32 +452,34 @@
   :prefix "SPC" 
   :global-prefix "C-SPC") ;; leader
   (rune/leader-keys ;; try to have similar keybindings in vim as well
+   "<RET>" '(bookmark-jump :which-key "jump to bookmark") ;; "folder" for toggles
+   "" '(:keymap eyebrowse-mode-map :which-key "workspace") ;; It's not perfect but works
+   "." '(find-file :which-key "jump to bookmark") ;; "folder" for toggles
    "s" '(:ignore s :which-key "session") ;; "folder" for toggles
    "ss" '(session-save :which-key "session save") ;; "folder" for toggles
    "sr" '(session-restore :which-key "session restore") ;; "folder" for toggles
-   "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
-   "v" '(:ignore v :which-key "terminal") ;;
-   "vt" '(vterm :which-key "open vterm") ;; "folder" for toggles
-   "vv" '(vterm-toggle :which-key "toggle vterm") ;; "folder" for toggles
-   "vc" '(vterm-toggle-cd :which-key "toggle vterm on current folder") ;; "folder" for toggles
-   "b" '(:ignore b :which-key "buffers") 
-   "h" '(:ignore h :which-key "git-gutter") 
+   "o" '(:ignore o :which-key "open") 
+   "ot" '(vterm-toggle :which-key "toggle vterm") ;; "folder" for toggles
+   "od" '(vterm-toggle-cd :which-key "toggle vterm on current folder") ;; "folder" for toggles
    "c" '(org-capture :which-key "org-capture") ;; this is F*** awesome
    "g" '(git-gutter-mode :which-key "git-gutter toggle") 
+   "h" '(:ignore h :which-key "git-gutter") 
    "hn" '(git-gutter:next-hunk :which-key "next hunk") 
    "hp" '(git-gutter:previous-hunk :which-key "previous hunk") 
    "hv" '(git-gutter:popup-hunk :which-key "preview hunk") 
    "hs" '(git-gutter:stage-hunk :which-key "stage hunk") 
    "hu" '(git-gutter:revert-hunk :which-key "undo hunk") ;; take back changes
    "hg" '(git-gutter :which-key "update changes") 
-   "o" '(buffer-menu :which-key "buffer menu") 
+   "b" '(:ignore b :which-key "buffers") 
    "bn" '(evil-next-buffer :which-key "next buffer") 
    "bp" '(evil-prev-buffer :which-key "previous buffer")
    "bc" '(evil-delete-buffer :which-key "close buffer")
    "bd" '(delete-file-and-buffer :which-key "delete file")
    "w" '(save-buffer :which-key "save buffer") ;; classic vim save
+   "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
    "to" '(openwith-mode :which-key "open with external app")
-   "tt" '(counsel-load-theme :which-key "choose theme")))
+   "tt" '(counsel-load-theme :which-key "choose theme")
+   ))
 
 (global-set-key (kbd "C-M-u") 'universal-argument)
 
@@ -1274,9 +1276,21 @@ _h_ decrease width    _l_ increase width
 (use-package eterm-256color
   :hook (term-mode . eterm-256color-mode))
 
-;; (use-package vterm-toggle)
-;; (global-set-key [M-t] 'vterm-toggle-cd)
-;; (global-set-key [C-f2] 'vterm-toggle)
+(use-package vterm-toggle)
+  ;; (global-set-key [M-t] 'vterm-toggle-cd)
+  ;; (global-set-key [C-f2] 'vterm-toggle)
+(setq vterm-toggle-fullscreen-p nil)
+(add-to-list 'display-buffer-alist
+             '((lambda(bufname _) (with-current-buffer bufname
+                                    (or (equal major-mode 'vterm-mode)
+                                        (string-prefix-p vterm-buffer-name bufname))))
+                (display-buffer-reuse-window display-buffer-at-bottom)
+                ;;(display-buffer-reuse-window display-buffer-in-direction)
+                ;;display-buffer-in-direction/direction/dedicated is added in emacs27
+                ;;(direction . bottom)
+                ;;(dedicated . t) ;dedicated is supported in emacs27
+                (reusable-frames . visible)
+                (window-height . 0.3)))
 
 (use-package vterm
   :commands vterm
