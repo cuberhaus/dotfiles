@@ -45,7 +45,7 @@ Plug 'ctrlpvim/ctrlp.vim'
 " Plug 'junegunn/fzf.vim'
 " Plug 'godlygeek/tabular'
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
-" Plug 'jiangmiao/auto-pairs'
+Plug 'jiangmiao/auto-pairs'
 " Plug 'chriskempson/base16-vim'
 " Plug 'NLKNguyen/papercolor-theme'
 " Plug 'lifepillar/vim-solarized8'
