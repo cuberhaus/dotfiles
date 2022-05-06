@@ -390,7 +390,7 @@
          :map ivy-switch-buffer-map
          ("C-k" . ivy-previous-line)
          ("C-l" . ivy-done)
-         ("C-d" . ivy-switch-buffer-kill)
+         ("C-d" . ivy-switch-buffer-kill) ;; delete ivy buffer
          :map ivy-reverse-i-search-map
          ("C-k" . ivy-previous-line)
          ("C-d" . ivy-reverse-i-search-kill))
@@ -468,13 +468,13 @@
 
 ;; define workspace keys
 (pol/leader-key
-  "a<" '(eyebrowse-prev-window-config :which-key "previous window") 
-  "a>" '(eyebrowse-next-window-config :which-key "next window")
-  "a'" '(eyebrowse-last-window-config :which-key "rename window config")
-  ;; "a" '(eyebrowse-create-window-config :which-key "find file")
-  "a," '(eyebrowse-rename-window-config :which-key "rename window config")
-  "a." '(eyebrowse-switch-to-window-config :which-key "switch to window config")
-  "ac" '(eyebrowse-create-window-config :which-key "create window config")
+  "TAB <" '(eyebrowse-prev-window-config :which-key "previous window") 
+  "TAB >" '(eyebrowse-next-window-config :which-key "next window")
+  "TAB '" '(eyebrowse-last-window-config :which-key "last window")
+  "TAB k" '(eyebrowse-close-window-config :which-key "close window")
+  "TAB ," '(eyebrowse-rename-window-config :which-key "rename window")
+  "TAB ." '(eyebrowse-switch-to-window-config :which-key "switch to window")
+  "TAB c" '(eyebrowse-create-window-config :which-key "create window config")
   "0" '(eyebrowse-switch-to-window-config-0 :which-key "ws 0")
   "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 1")
   "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 2")
