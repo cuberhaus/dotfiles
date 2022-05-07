@@ -212,10 +212,10 @@ smooth-scrolling
 #+end_src
 *** emacs dashboard
 #+begin_src emacs-lisp
-    ;; (use-package dashboard
-    ;;   :ensure t
-    ;;   :config
-    ;;   (dashboard-setup-startup-hook))
+    (use-package dashboard ;; for some reason activating this fixes python bug LOL have to debug that another time
+      :ensure t
+      :config
+      (dashboard-setup-startup-hook))
 #+end_src
 *** Do not warn me
 advice added to functions
@@ -1821,6 +1821,11 @@ Can add new surroundings check out package website
   :ensure t
   :config
   (global-evil-surround-mode 1))
+#+end_src
+** Pomodoro
+#+begin_src emacs-lisp
+    (use-package pomodoro)
+    (pomodoro-add-to-mode-line)
 #+end_src
 ** Opening files externally
 Doesn't work properly

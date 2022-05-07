@@ -114,10 +114,10 @@
 ;; (require 'sublimity-scroll)
 ;; (sublimity-mode 1)
 
-;; (use-package dashboard
-;;   :ensure t
-;;   :config
-;;   (dashboard-setup-startup-hook))
+(use-package dashboard ;; for some reason activating this fixes python bug LOL have to debug that another time
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
 
 ;; (setq ad-redefinition-action 'accept)
 
@@ -1446,6 +1446,9 @@ _h_ decrease width    _l_ increase width
   :ensure t
   :config
   (global-evil-surround-mode 1))
+
+(use-package pomodoro)
+(pomodoro-add-to-mode-line)
 
 (use-package openwith
   :commands (openwith-mode)
