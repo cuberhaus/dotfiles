@@ -439,6 +439,11 @@ optional() {
     sudo pacman -Syu sublime-text
     sudo pacman -Syu sublime-merge
 
+
+    #LP compiladors
+    $pac lilypond timidity ffmpeg
+    pip3 install antlr4-python3-runtime
+
     # Bases de dades
     $pac pgadmin4
     $pac dbeaver
