@@ -16,6 +16,7 @@ myTerminal="kitty"
 emacs() {
     pip3 install ptvsd                          # for python dap
     $pac languagetool                           # languagetool for emacs
+    $pac mplayer                                # for pomodoro sound
 }
 base_install () {
     $pac conky
