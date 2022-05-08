@@ -441,8 +441,14 @@ optional() {
     sudo pacman -Syu sublime-merge
 
 
-    #LP compiladors
-    $pac lilypond timidity ffmpeg
+    #LP compiladors 
+    #https://wiki.archlinux.org/title/Timidity++#SoundFonts
+    $pac lilypond timidity ffmpeg 
+    $pac freepats-general-midi # for timidity need to download a soundfont
+    sudo gpasswd -a pol audio 
+    sudo echo "soundfont /usr/share/soundfonts/freepats-general-midi.sf2" >> /etc/timidity/timidity.cfg
+
+    sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
     pip3 install antlr4-python3-runtime
 
     # Bases de dades
