@@ -8,7 +8,7 @@
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
-(setq custom-file "~/.emacs.d/custom.el")
+(setq custom-file "~/.config/my_emacs/custom.el")
 (load custom-file)
 
 ;; Initialize package sources

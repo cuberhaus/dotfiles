@@ -89,7 +89,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 #+end_src
 *** Customize System to different file
 #+begin_src emacs-lisp
-    (setq custom-file "~/.emacs.d/custom.el")
+    (setq custom-file "~/.config/my_emacs/custom.el")
     (load custom-file)
 #+end_src
 
