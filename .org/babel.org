@@ -220,6 +220,7 @@ smooth-scrolling
 
 #+end_src
 *** emacs dashboard
+Takes a bit longer to load, although not THAT much, probably. 0.1-0.2 ms
 #+begin_src emacs-lisp
     (use-package dashboard ;; for some reason activating this fixes python bug LOL have to debug that another time
       :ensure t
@@ -1833,8 +1834,11 @@ Can add new surroundings check out package website
 #+end_src
 ** Pomodoro
 #+begin_src emacs-lisp
-    (use-package pomodoro)
-    (pomodoro-add-to-mode-line)
+    (use-package pomodoro
+      :commands pomodoro-start
+      :config
+      (pomodoro-add-to-mode-line)
+      )
 #+end_src
 ** Opening files externally
 Doesn't work properly

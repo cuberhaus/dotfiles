@@ -1449,8 +1449,11 @@ _h_ decrease width    _l_ increase width
   :config
   (global-evil-surround-mode 1))
 
-(use-package pomodoro)
-(pomodoro-add-to-mode-line)
+(use-package pomodoro
+  :commands pomodoro-start
+  :config
+  (pomodoro-add-to-mode-line)
+  )
 
 (use-package openwith
   :commands (openwith-mode)
