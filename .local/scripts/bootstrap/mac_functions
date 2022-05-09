@@ -131,7 +131,8 @@ doom_emacs_install() {
 
     brew tap d12frosted/emacs-plus
     brew install emacs-plus --with-native-comp
-
+    git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/doom-emacs
+    ~/.config/doom-emacs/bin/doom install
     # ghcup installer for the general purpose language Haskell
     curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
     # Optional

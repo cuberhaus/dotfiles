@@ -9,7 +9,9 @@
 # Texmaker ?
 .config/xm1/
 
+
 #emacs
+.config/doom-emacs/
 *~
 \#*\#
 /.emacs.desktop
