@@ -119,6 +119,8 @@ vim_install () {
 }
 
 doom_emacs_install() {
+    #chemacs
+    git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
     # required dependencies
     brew install git ripgrep
     # optional dependencies

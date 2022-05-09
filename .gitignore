@@ -11,6 +11,8 @@
 
 
 #emacs
+.config/my_emacs/.last-package-update-day
+.config/my_emacs/elpa/
 .config/doom-emacs/
 *~
 \#*\#
