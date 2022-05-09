@@ -11,6 +11,12 @@
 
 
 #emacs
+.cache/emacs/var/auto-package-update-last-update-day
+.cache/emacs/var/prescient-save.el
+.cache/emacs/var/projectile/
+.cache/emacs/var/recentf-save.el
+.cache/emacs/var/transient/
+.cache/emacs/var/treemacs/
 .config/my_emacs/.last-package-update-day
 .config/my_emacs/elpa/
 .config/doom-emacs/
