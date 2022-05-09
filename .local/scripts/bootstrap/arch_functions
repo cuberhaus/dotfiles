@@ -19,6 +19,10 @@ emacs() {
     $pac mplayer                                # for pomodoro sound
     # managing emacs with chemacs
     #https://github.com/plexus/chemacs2
+    #doom
+    $pac aspell
+    $pac shellcheck
+    $pac python-pipenv
 }
 base_install () {
     $pac conky

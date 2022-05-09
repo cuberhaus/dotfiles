@@ -84,6 +84,10 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export PATH=/home/pol/fib/LI/picosat-965/bin:$PATH
 fi
 
+if [ -d "$HOME/.config/doom-emacs" ] ; then
+    export PATH="$HOME/.config/doom-emacs/bin/:$PATH"
+fi
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH="$HOME/.emacs.d/bin/:$PATH"
     export PATH="/Users/pol/bin:$PATH"
