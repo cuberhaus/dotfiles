@@ -17,6 +17,8 @@ emacs() {
     pip3 install ptvsd                          # for python dap
     $pac languagetool                           # languagetool for emacs
     $pac mplayer                                # for pomodoro sound
+    # managing emacs with chemacs
+    #https://github.com/plexus/chemacs2
 }
 base_install () {
     $pac conky
