@@ -1,10 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
  ;; The default is 800 kilobytes.  Measured in bytes.
- (defvar last-file-name-handler-alist file-name-handler-alist)
- (setq gc-cons-threshold 402653184
-     gc-cons-percentage 0.6
-     file-name-handler-alist nil)
+ ;; (defvar last-file-name-handler-alist file-name-handler-alist)
+ ;; (setq gc-cons-threshold 402653184
+ ;;     gc-cons-percentage 0.6
+ ;;     file-name-handler-alist nil)
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
@@ -52,30 +52,33 @@
 
 ;; Clean up unused repos with `straight-remove-unused-repos'
 
-;; You will most likely need to adjust this font size for your system!
-    (defvar runemacs/default-font-size 110)
+;; (setq inhibit-startup-message t) ; Disable startup menu
+;; (scroll-bar-mode -1) ; Disable the scrollbar
+;; (tool-bar-mode -1)
+;; ;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
+;; (set-fringe-mode 10) ; Make some space
+;; (menu-bar-mode -1) ;; remove top bar
 
-    (setq inhibit-startup-message t) ; Disable startup menu
-    (scroll-bar-mode -1) ; Disable the scrollbar
-    (tool-bar-mode -1)
-    ;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
-    (set-fringe-mode 10) ; Make some space
-    (menu-bar-mode -1) ;; remove top bar
-    (cond ((eq system-type 'windows-nt)
-        ;; Windows-specific code goes here.
-        )
-          ((eq system-type 'darwin)
-              (setq ring-bell-function ;; subtle mode line flash
-                  (lambda ()
-                      (let ((orig-fg (face-foreground 'mode-line)))
-                      (set-face-foreground 'mode-line "#F2804F")
-                      (run-with-idle-timer 0.1 nil
-                                          (lambda (fg) (set-face-foreground 'mode-line fg))
-                                          orig-fg))))
-        )
-        ((eq system-type 'gnu/linux)
-         (setq visible-bell t)
-        ))
+;; (setq vc-follow-symlinks nil) ;; or never follow them
+
+;; You will most likely need to adjust this font size for your system!
+(defvar runemacs/default-font-size 110)
+
+(cond ((eq system-type 'windows-nt)
+       ;; Windows-specific code goes here.
+       )
+      ((eq system-type 'darwin)
+       (setq ring-bell-function ;; subtle mode line flash
+             (lambda ()
+               (let ((orig-fg (face-foreground 'mode-line)))
+                 (set-face-foreground 'mode-line "#F2804F")
+                 (run-with-idle-timer 0.1 nil
+                                      (lambda (fg) (set-face-foreground 'mode-line fg))
+                                      orig-fg))))
+       )
+      ((eq system-type 'gnu/linux)
+       (setq visible-bell t)
+       ))
 
 ;;; Scrolling
 
@@ -97,18 +100,17 @@
       mouse-wheel-scroll-amount-horizontal 2)
 
 
-    (column-number-mode)
-    (global-display-line-numbers-mode t) ;; display line numbers everywhere
-    ;; (setq vc-follow-symlinks nil) ;; or never follow them
+(column-number-mode)
+(global-display-line-numbers-mode t) ;; display line numbers everywhere
 
-  (defun efs/display-startup-time ()
-    (message "Emacs loaded in %s with %d garbage collections."
-             (format "%.2f seconds"
-                     (float-time
-                     (time-subtract after-init-time before-init-time)))
-             gcs-done))
+    (defun efs/display-startup-time ()
+      (message "Emacs loaded in %s with %d garbage collections."
+               (format "%.2f seconds"
+                       (float-time
+                       (time-subtract after-init-time before-init-time)))
+               gcs-done))
 
-  (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+    (add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
 ;; (require 'sublimity)
 ;; (require 'sublimity-scroll)

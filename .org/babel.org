@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:emacs-lisp :tangle ~/dotfiles/dotfiles/.emacs.d/init.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle ~/dotfiles/dotfiles/.config/my_emacs/init.el :mkdirp yes
 #+title Emacs!
 #+STARTUP: overview
 ~code~
@@ -6,6 +6,7 @@
 _underscored_
 *bold*
 /italic/
+
 * Info
 ** Babel header
 Apply the same configuration above to every block
@@ -71,16 +72,17 @@ Could be because other packages are outdated, proceed to update them.
 * Code
 ** Startup config
 *** Optimization with garbage collector
+*MOVED TO EARLY INIT*
 Lexical-binding has to with org-roam:
 https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 #+begin_src emacs-lisp
-  ;; -*- lexical-binding: t; -*-
+    ;; -*- lexical-binding: t; -*-
 
-   ;; The default is 800 kilobytes.  Measured in bytes.
-   (defvar last-file-name-handler-alist file-name-handler-alist)
-   (setq gc-cons-threshold 402653184
-       gc-cons-percentage 0.6
-       file-name-handler-alist nil)
+     ;; The default is 800 kilobytes.  Measured in bytes.
+     ;; (defvar last-file-name-handler-alist file-name-handler-alist)
+     ;; (setq gc-cons-threshold 402653184
+     ;;     gc-cons-percentage 0.6
+     ;;     file-name-handler-alist nil)
 #+end_src
 
 *** Debug packages and see startup time
@@ -143,55 +145,62 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 #+end_src
 ** Basic UI Settings
 *** Basic UI
+
+*MOVED TO EARLY INIT*
 #+begin_src emacs-lisp
-      ;; You will most likely need to adjust this font size for your system!
-      (defvar runemacs/default-font-size 110)
+    ;; (setq inhibit-startup-message t) ; Disable startup menu
+    ;; (scroll-bar-mode -1) ; Disable the scrollbar
+    ;; (tool-bar-mode -1)
+    ;; ;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
+    ;; (set-fringe-mode 10) ; Make some space
+    ;; (menu-bar-mode -1) ;; remove top bar
+    
+#+end_src
 
-      (setq inhibit-startup-message t) ; Disable startup menu
-      (scroll-bar-mode -1) ; Disable the scrollbar
-      (tool-bar-mode -1)
-      ;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
-      (set-fringe-mode 10) ; Make some space
-      (menu-bar-mode -1) ;; remove top bar
-      (cond ((eq system-type 'windows-nt)
-          ;; Windows-specific code goes here.
-          )
-            ((eq system-type 'darwin)
-                (setq ring-bell-function ;; subtle mode line flash
-                    (lambda ()
-                        (let ((orig-fg (face-foreground 'mode-line)))
-                        (set-face-foreground 'mode-line "#F2804F")
-                        (run-with-idle-timer 0.1 nil
-                                            (lambda (fg) (set-face-foreground 'mode-line fg))
-                                            orig-fg))))
-          )
-          ((eq system-type 'gnu/linux)
-           (setq visible-bell t)
-          ))
-
-  ;;; Scrolling
-
-  (setq hscroll-margin 2
-        hscroll-step 1
-        ;; Emacs spends too much effort recentering the screen if you scroll the
-        ;; cursor more than N lines past window edges (where N is the settings of
-        ;; `scroll-conservatively'). This is especially slow in larger files
-        ;; during large-scale scrolling commands. If kept over 100, the window is
-        ;; never automatically recentered.
-        scroll-conservatively 101
-        scroll-margin 0
-        scroll-preserve-screen-position t
-        ;; Reduce cursor lag by a tiny bit by not auto-adjusting `window-vscroll'
-        ;; for tall lines.
-        auto-window-vscroll nil
-        ;; mouse
-        mouse-wheel-scroll-amount '(2 ((shift) . hscroll))
-        mouse-wheel-scroll-amount-horizontal 2)
-
-
-      (column-number-mode)
-      (global-display-line-numbers-mode t) ;; display line numbers everywhere
+#+begin_src emacs-lisp
       ;; (setq vc-follow-symlinks nil) ;; or never follow them
+
+;; You will most likely need to adjust this font size for your system!
+(defvar runemacs/default-font-size 110)
+
+(cond ((eq system-type 'windows-nt)
+       ;; Windows-specific code goes here.
+       )
+      ((eq system-type 'darwin)
+       (setq ring-bell-function ;; subtle mode line flash
+             (lambda ()
+               (let ((orig-fg (face-foreground 'mode-line)))
+                 (set-face-foreground 'mode-line "#F2804F")
+                 (run-with-idle-timer 0.1 nil
+                                      (lambda (fg) (set-face-foreground 'mode-line fg))
+                                      orig-fg))))
+       )
+      ((eq system-type 'gnu/linux)
+       (setq visible-bell t)
+       ))
+
+;;; Scrolling
+
+(setq hscroll-margin 2
+      hscroll-step 1
+      ;; Emacs spends too much effort recentering the screen if you scroll the
+      ;; cursor more than N lines past window edges (where N is the settings of
+      ;; `scroll-conservatively'). This is especially slow in larger files
+      ;; during large-scale scrolling commands. If kept over 100, the window is
+      ;; never automatically recentered.
+      scroll-conservatively 101
+      scroll-margin 0
+      scroll-preserve-screen-position t
+      ;; Reduce cursor lag by a tiny bit by not auto-adjusting `window-vscroll'
+      ;; for tall lines.
+      auto-window-vscroll nil
+      ;; mouse
+      mouse-wheel-scroll-amount '(2 ((shift) . hscroll))
+      mouse-wheel-scroll-amount-horizontal 2)
+
+
+(column-number-mode)
+(global-display-line-numbers-mode t) ;; display line numbers everywhere
 
     (defun efs/display-startup-time ()
       (message "Emacs loaded in %s with %d garbage collections."
