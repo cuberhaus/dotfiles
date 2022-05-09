@@ -9,7 +9,11 @@
 # Texmaker ?
 .config/xm1/
 
+
 #emacs
+.config/my_emacs/.last-package-update-day
+.config/my_emacs/elpa/
+.config/doom-emacs/
 *~
 \#*\#
 /.emacs.desktop
