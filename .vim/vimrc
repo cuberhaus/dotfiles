@@ -44,11 +44,11 @@ call plug#begin()
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 " Plug 'lervag/vimtex'
 " On-demand lazy load
-" Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
-Plug 'liuchengxu/vim-which-key'  " makes learning vim keys easier
+Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] } " on demand loading
+" Plug 'liuchengxu/vim-which-key'  " makes learning vim keys easier
 Plug 'preservim/tagbar'
-Plug 'ctrlpvim/ctrlp.vim'
-Plug 'jiangmiao/auto-pairs'
+" Plug 'ctrlpvim/ctrlp.vim' " its pretty useless out of the box ngl
+" Plug 'jiangmiao/auto-pairs' " it acts fucking weird sometimes, better off
 Plug 'tikhomirov/vim-glsl'
 Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
@@ -74,6 +74,7 @@ Plug 'ycm-core/YouCompleteMe'
 " Plug 'lifepillar/vim-solarized8'
 call plug#end()
 "Acaben els plugins
+autocmd! User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
 
 "Configuracions del plugin YouCompleteMe
 let g:ycm_confirm_extra_conf = 0 "Disables prompting for script every time
@@ -195,7 +196,9 @@ nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 let g:which_key_map =  {}
 let g:which_key_map.f = { 'name' : '+file' }
 
-call which_key#register('<Space>', "g:which_key_map")
+" call which_key#register('<Space>', "g:which_key_map") " when using on demand loading not used
+
+
 ": }}}
 
 " Colors and Fonts {{{
