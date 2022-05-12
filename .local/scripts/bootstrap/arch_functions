@@ -255,6 +255,8 @@ vim_install () {
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
 
+
+    $pac ctags
     # auto format plugin
     $pac astyle
     sudo pip install black

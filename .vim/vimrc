@@ -43,6 +43,10 @@ call plug#begin()
 " Plug 'godlygeek/tabular'
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 " Plug 'lervag/vimtex'
+" On-demand lazy load
+" Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
+Plug 'liuchengxu/vim-which-key'  " makes learning vim keys easier
+Plug 'preservim/tagbar'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'tikhomirov/vim-glsl'
@@ -186,6 +190,12 @@ set autochdir
 " Return to last edit position when opening files (You want this!)
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
+nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
+" Define prefix dictionary
+let g:which_key_map =  {}
+let g:which_key_map.f = { 'name' : '+file' }
+
+call which_key#register('<Space>', "g:which_key_map")
 ": }}}
 
 " Colors and Fonts {{{
@@ -274,7 +284,7 @@ set breakindent "Indent after line wrapped
 "}}}
 
 " Keybindings {{{
-
+nmap <leader>tt :TagbarToggle<CR>
 function! GotoJump()
   jumps
   let j = input("Please select your jump: ")
@@ -301,10 +311,10 @@ nnoremap <leader>T :YcmCompleter GetType<cr>
 let g:ctrlp_map = '<c-f>'
 
 " Toggle paste mode on and off
-nnoremap <leader>pp :setlocal paste!<cr>
+nnoremap <leader>tp :setlocal paste!<cr>
 
 " Press ctrl+m to toggle markdown preview
-nmap <C-s> <Plug>MarkdownPreviewToggle
+nmap <leader>tm <Plug>MarkdownPreviewToggle
 " nmap <C-s> <Plug>MarkdownPreview
 " nmap <M-s> <Plug>MarkdownPreviewStop
 " nmap <C-p> <Plug>MarkdownPreviewToggle
@@ -345,7 +355,7 @@ nmap <C-n> <Plug>yankstack_substitute_newer_paste
 nnoremap <silent> <leader>g :GitGutterToggle<cr>
 
 " Fast saving
-nnoremap <leader>w :w!<cr>
+nnoremap <leader>fs :w!<cr>
 
 " :W sudo saves the file (useful for handling the permission-denied error)
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
@@ -378,11 +388,11 @@ map <leader>bp :bp <cr>
 map <leader>bn :bn <cr>
 " Opens a new tab with the current buffer's path
 " Super useful when editing files in the same directory
-map <leader>te :tabedit <C-r>=expand("%:p:h")<cr>/
 " Useful mappings for managing tabs
-map <leader>tn :tabnew<cr>
-map <leader>tc :tabclose<cr>
-map <leader>t<leader> :tabnext <cr>
+" map <leader>te :tabedit <C-r>=expand("%:p:h")<cr>/
+" map <leader>tn :tabnew<cr>
+" map <leader>tc :tabclose<cr>
+" map <leader>t<leader> :tabnext <cr>
 
 " Git Gutter
 nmap <leader>hn <Plug>(GitGutterNextHunk)
