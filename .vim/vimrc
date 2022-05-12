@@ -40,22 +40,16 @@ endif
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
 call plug#begin()
-Plug 'ctrlpvim/ctrlp.vim'
-" Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-" Plug 'junegunn/fzf.vim'
 " Plug 'godlygeek/tabular'
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
-Plug 'jiangmiao/auto-pairs'
-" Plug 'chriskempson/base16-vim'
-" Plug 'NLKNguyen/papercolor-theme'
-" Plug 'lifepillar/vim-solarized8'
-" Plug 'rakr/vim-one'
 " Plug 'lervag/vimtex'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'jiangmiao/auto-pairs'
 Plug 'tikhomirov/vim-glsl'
 Plug 'Chiel92/vim-autoformat'
 Plug 'airblade/vim-gitgutter'
 Plug 'ap/vim-css-color'
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install'  }
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 Plug 'joshdick/onedark.vim'
 Plug 'junegunn/goyo.vim'
 Plug 'maxbrunsfeld/vim-yankstack'
@@ -70,6 +64,10 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'vim-scripts/bufexplorer.zip'
 Plug 'ycm-core/YouCompleteMe'
+" COLORS
+" Plug 'chriskempson/base16-vim'
+" Plug 'NLKNguyen/papercolor-theme'
+" Plug 'lifepillar/vim-solarized8'
 call plug#end()
 "Acaben els plugins
 
@@ -306,7 +304,10 @@ let g:ctrlp_map = '<c-f>'
 nnoremap <leader>pp :setlocal paste!<cr>
 
 " Press ctrl+m to toggle markdown preview
-nmap <C-m> <Plug>MarkdownPreviewToggle
+nmap <C-s> <Plug>MarkdownPreviewToggle
+" nmap <C-s> <Plug>MarkdownPreview
+" nmap <M-s> <Plug>MarkdownPreviewStop
+" nmap <C-p> <Plug>MarkdownPreviewToggle
 
 "Autoformat
 noremap <F3> :Autoformat<CR>

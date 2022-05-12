@@ -23,7 +23,10 @@ emacs() {
     $pac aspell
     $pac shellcheck
     $pac python-pipenv
+    #format all
+    $pac prettier
 }
+
 base_install () {
     $pac conky
     $pac adapta-gtk-theme                       # Alternative theme
@@ -251,6 +254,19 @@ vim_install () {
     sudo npm install -g neovim
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim
+
+    # auto format plugin
+    $pac astyle
+    sudo pip install black
+    $pac autopep8
+    $pac yapf
+    sudo npm install -g js-beautify
+    pip3 install cmake-format
+    sudo npm install -g remark-cli
+    $pac shfmt
+    $pac stylish-haskell
+    $pac tidy
+    sudo npm install -g js-beautify # css html javascript
 }
 
 # Best Tiling Window Manager
@@ -447,11 +463,11 @@ optional() {
     sudo pacman -Syu sublime-merge
 
 
-    #LP compiladors 
+    #LP compiladors
     #https://wiki.archlinux.org/title/Timidity++#SoundFonts
-    $pac lilypond timidity ffmpeg 
+    $pac lilypond timidity ffmpeg
     $pac freepats-general-midi # for timidity need to download a soundfont
-    sudo gpasswd -a pol audio 
+    sudo gpasswd -a pol audio
     sudo echo "soundfont /usr/share/soundfonts/freepats-general-midi.sf2" >> /etc/timidity/timidity.cfg
 
     sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
