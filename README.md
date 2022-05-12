@@ -1,4 +1,5 @@
 # Cuberhaus's dotfiles
+Opinionated defaults, this repo is not meant to be used by everyone, just a personal configuration to take ideas out of. However if you are brave enough you can install it with the instructions below, you are advised to read the installation scripts before hand. 
 
 ## Install this repo:
 Clone repo and its submodules:
