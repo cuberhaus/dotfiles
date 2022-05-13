@@ -43,6 +43,10 @@ call plug#begin()
 " Plug 'godlygeek/tabular'
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 " Plug 'lervag/vimtex'
+" Track the engine.
+Plug 'SirVer/ultisnips'
+" Snippets are separated from the engine. Add this if you want them:
+Plug 'honza/vim-snippets'
 " On-demand lazy load
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] } " on demand loading
 " Plug 'liuchengxu/vim-which-key'  " makes learning vim keys easier
@@ -75,6 +79,9 @@ Plug 'ycm-core/YouCompleteMe'
 call plug#end()
 "Acaben els plugins
 autocmd! User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
+let g:UltiSnipsExpandTrigger="<S-e>" " insert snippet !!
+let g:UltiSnipsJumpForwardTrigger="<c-b>"
+let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 
 "Configuracions del plugin YouCompleteMe
 let g:ycm_confirm_extra_conf = 0 "Disables prompting for script every time
