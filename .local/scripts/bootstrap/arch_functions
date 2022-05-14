@@ -438,7 +438,7 @@ optional() {
     # $yay electron9-bin # idk what this does
 
     # Programming tools
-    $pac ff-planner # IA 3a practica
+    $pac ff-planner # IA 3a practica (ff-planner -o definicion_dominio -f fichero_problema)
     $yay ddd                          # debugging c++
     $pac doxygen texlive-most graphviz          # Doxygen
     $pac jdk-openjdk
