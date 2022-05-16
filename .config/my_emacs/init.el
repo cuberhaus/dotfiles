@@ -1241,8 +1241,12 @@ _h_ decrease width    _l_ increase width
   :hook (java-mode . lsp-deferred))
 
 ;; ;; yasnippet code 'optional', before auto-complete
-;;    (use-package yasnippet)
-;;    (yas-global-mode 1)
+(use-package yasnippet)
+(use-package doom-snippets ;; this gets you nice snippets to use just tab and they will complete for you
+  :load-path "~/.config/doom-snippets"
+  :after yasnippet)
+;; (use-package yasnippets-latex)
+(yas-global-mode 1)
 
 ;; (use-package auto-complete)
 ;;   (use-package auto-complete-auctex) 
@@ -1251,18 +1255,28 @@ _h_ decrease width    _l_ increase width
 ;;          :hook (latex-mode . latex-preview-pane-mode)
 ;;        )
 
-     ;; (use-package tex
-     ;;   :ensure auctex)
-     ;;    (setq TeX-auto-save t)
-     ;;   (setq TeX-parse-self t)
-     ;;   (setq-default TeX-master nil)
+(use-package tex
+  :ensure auctex)
+(setq TeX-auto-save t)
+(setq TeX-parse-self t)
+(setq TeX-PDF-mode t)
+(setq-default TeX-master nil)
 
-       ;; (add-hook 'LaTeX-mode-hook 'visual-line-mode)
-       ;; (add-hook 'LaTeX-mode-hook 'flyspell-mode)
-       ;; (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+(add-hook 'LaTeX-mode-hook 'visual-line-mode)
+(add-hook 'LaTeX-mode-hook 'flyspell-mode)
+(add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
 
-       ;; (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
-       ;; (setq reftex-plug-into-AUCTeX t)
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+(setq reftex-plug-into-AUCTeX t)
+
+(use-package cdlatex)
+(add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+(add-hook 'latex-mode-hook 'turn-on-cdlatex)   ; with Emacs latex mode
+
+(use-package auto-yasnippet)
+(global-set-key (kbd "H-w") #'aya-create)
+(global-set-key (kbd "H-y") #'aya-expand)
+;; (global-set-key (kbd "C-o") #'aya-open-line) change TAB to C-o to expand yasnippets
 
 (use-package company
   :after lsp-mode

@@ -18,8 +18,8 @@
  (rear-context-string . "05-04 Wednesday\n")
  (position . 338))
 ("org-capture-last-stored"
- (filename . "~/fib/RoamNotes/20220505065631-habits.org")
- (front-context-string)
- (rear-context-string . "5-05 Thu 06:56]\n")
- (position . 115))
+ (filename . "~/fib/RoamNotes/20220514212033-arch.org")
+ (front-context-string . "* Xmonad/haskell")
+ (rear-context-string . "5-14 Sat 21:20]\n")
+ (position . 113))
 )
