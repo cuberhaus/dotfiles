@@ -512,7 +512,13 @@
   "bp" '(evil-prev-buffer :which-key "previous buffer")
   "bc" '(evil-delete-buffer :which-key "close buffer")
   "bd" '(delete-file-and-buffer :which-key "delete file")
-  "w" '(save-buffer :which-key "save buffer") ;; classic vim save
+  "p" '(:ignore s :which-key "project")
+  "pr" '(projectile-recentf :which-key "recent file")
+  "pp" '(projectile-switch-project :which-key "switch project")
+  "pb" '(projectile-switch-to-buffer :which-key "switch buffer")
+  "f" '(:ignore s :which-key "file")
+  "fr" '(counsel-recentf :which-key "Recent file") ;; classic vim save
+  "fs" '(save-buffer :which-key "save buffer") ;; classic vim save
   "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
   "to" '(openwith-mode :which-key "open with external app")
   "tt" '(counsel-load-theme :which-key "choose theme")
@@ -1274,9 +1280,9 @@ _h_ decrease width    _l_ increase width
 (add-hook 'latex-mode-hook 'turn-on-cdlatex)   ; with Emacs latex mode
 
 (use-package auto-yasnippet)
-(global-set-key (kbd "H-w") #'aya-create)
-(global-set-key (kbd "H-y") #'aya-expand)
-;; (global-set-key (kbd "C-o") #'aya-open-line) change TAB to C-o to expand yasnippets
+;; (global-set-key (kbd "H-w") #'aya-create)
+;; (global-set-key (kbd "H-y") #'aya-expand)
+(global-set-key (kbd "C-o") #'aya-open-line) ;;change TAB to C-o to expand yasnippets
 
 (use-package company
   :after lsp-mode
