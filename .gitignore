@@ -6,6 +6,13 @@
 *.vscode/
 # TexStudio
 # .config/texstudio/
+.config/texstudio/macro/
+.config/texstudio/completion/
+.config/texstudio/lastSession.txss
+.config/texstudio/lastSession.txss2
+.config/texstudio/packageCache.dat
+.config/texstudio/template_resources.xml
+.config/texstudio/wordCount.usage
 # Texmaker ?
 .config/xm1/
 
@@ -28,33 +35,26 @@
 auto-save-list
 tramp
 .\#*
-
 # Org-mode
 .org-id-locations
 *_archive
-
 # flymake-mode
 *_flymake.*
-
 # eshell files
 /eshell/history
 /eshell/lastdir
-
 # elpa packages
 /elpa/
-
 # reftex files
 *.rel
-
 # AUCTeX auto folder
 /auto/
+# Flycheck
+flycheck_*.el
 
 # cask packages
 .cask/
 dist/
-
-# Flycheck
-flycheck_*.el
 
 # server auth directory
 /server/
@@ -204,7 +204,6 @@ Thumbs.db
 
 # Git merge files
 *orig
-
 
 # CACHE FILES
 ## Ranger
