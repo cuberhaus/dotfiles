@@ -6,6 +6,7 @@
 *.vscode/
 # TexStudio
 # .config/texstudio/
+.config/texstudio/templates/
 .config/texstudio/macro/
 .config/texstudio/completion/
 .config/texstudio/lastSession.txss
