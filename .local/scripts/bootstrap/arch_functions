@@ -15,6 +15,11 @@ myTerminal="kitty"
 ## Invariant: be at $HOME dir
 emacs() {
     pip3 install ptvsd                          # for python dap
+    pip install grip                            # real time preview compiler 
+    # npm install -g marked  
+    $pac pandoc                                 # universal converter
+    # $pac marked                                 #"fast" markdown preview compiler
+    sudo npm install markdownlint
     $pac languagetool                           # languagetool for emacs
     $pac mplayer                                # for pomodoro sound
     # managing emacs with chemacs

@@ -522,6 +522,9 @@
   "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
   "to" '(openwith-mode :which-key "open with external app")
   "tt" '(counsel-load-theme :which-key "choose theme")
+  "mp" '(grip-mode :which-key "live preview")
+  ;; "mt" '(markdown-toc-generate-toc :which-key "live preview")
+  "mt" '(markdown-toc-generate-or-refresh-toc :which-key "generate-or-refresh-toc")
   )
 
   ;; (global-unset-key (kbd "C-c C-w"))
@@ -1050,6 +1053,20 @@ _h_ decrease width    _l_ increase width
 ;;              (lambda ()
 ;;                (when (equal org-state "DONE")
 ;;                  (my/org-roam-copy-todo-to-today))))
+
+;; Use keybindings
+(use-package grip-mode
+  :ensure t
+  ;; :commands
+  )
+
+(use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown"))
+
+(use-package markdown-toc
+  :after markdown-mode)
 
 (global-set-key (kbd "M-f") #'ian/format-code)
   (defun ian/format-code ()
