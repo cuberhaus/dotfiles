@@ -1373,8 +1373,9 @@ https://github.com/jrblevin/markdown-mode
 #+end_src
 *** Rainbow-delimiters
 #+begin_src emacs-lisp
-  (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
+    (use-package rainbow-delimiters
+      :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
+(add-hook 'clips-mode-hook 'rainbow-delimiters-mode) ;; activate rainbow-mode
 #+end_src
 
 *** IDE Features with lsp

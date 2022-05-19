@@ -2,7 +2,12 @@
 ;;; This format is meant to be slightly human-readable;
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
-(("init.el"
+(("wiki.org"
+ (filename . "~/dotfiles/dotfiles/.org/wiki.org")
+ (front-context-string . "#+PROPERTY: head")
+ (rear-context-string)
+ (position . 1))
+("init.el"
  (filename . "~/dotfiles/dotfiles/.org/babel.org")
  (front-context-string . "#+PROPERTY: head")
  (rear-context-string)

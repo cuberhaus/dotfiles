@@ -1087,7 +1087,8 @@ _h_ decrease width    _l_ increase width
   )
 
 (use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
+      :hook (prog-mode . rainbow-delimiters-mode)) ;; prog-mode is based mode for any programming language
+(add-hook 'clips-mode-hook 'rainbow-delimiters-mode) ;; activate rainbow-mode
 
 (defun efs/lsp-mode-setup ()
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
