@@ -2,7 +2,12 @@
 ;;; This format is meant to be slightly human-readable;
 ;;; nevertheless, you probably don't want to edit it.
 ;;; -*- End Of Bookmark File Format Version Stamp -*-
-(("wiki.org"
+(("arch_functions"
+ (filename . "~/dotfiles/dotfiles/.local/scripts/bootstrap/arch_functions")
+ (front-context-string . "#! /usr/bin/env ")
+ (rear-context-string)
+ (position . 1))
+("wiki.org"
  (filename . "~/dotfiles/dotfiles/.org/wiki.org")
  (front-context-string . "#+PROPERTY: head")
  (rear-context-string)
