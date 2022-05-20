@@ -1280,7 +1280,11 @@ _h_ decrease width    _l_ increase width
 ;;        )
 
 (use-package tex
-  :ensure auctex)
+  :mode "\\.tex\\'"
+  :ensure auctex
+  :config 
+  (latex-mode)
+  )
 (setq TeX-auto-save t)
 (setq TeX-parse-self t)
 (setq TeX-PDF-mode t)
@@ -1293,7 +1297,8 @@ _h_ decrease width    _l_ increase width
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 (setq reftex-plug-into-AUCTeX t)
 
-(use-package cdlatex)
+(use-package cdlatex
+  :hook latex-mode)
 (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
 (add-hook 'latex-mode-hook 'turn-on-cdlatex)   ; with Emacs latex mode
 
