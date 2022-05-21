@@ -6,7 +6,7 @@
 _underscored_
 *bold*
 /italic/
-
+
 * Info
 ** Babel header
 Apply the same configuration above to every block
@@ -226,6 +226,13 @@ Takes a bit longer to load, although not THAT much, probably. 0.1-0.2 ms
       :ensure t
       :config
       (dashboard-setup-startup-hook))
+
+#+end_src
+*** Page-break-lines
+Pretty break-lines C-q C-l
+#+begin_src emacs-lisp
+    (use-package page-break-lines
+      :config (global-page-break-lines-mode))
 #+end_src
 *** Do not warn me
 advice added to functions
@@ -1925,6 +1932,7 @@ have to set it manually when you want to use it
                   '(file))))
     )
 #+end_src
+	
 ** Disable Optimization
 Disable optimization at the end of startup so that garbage collector works properly and doesn't make emacs crash.
 #+begin_src emacs-lisp

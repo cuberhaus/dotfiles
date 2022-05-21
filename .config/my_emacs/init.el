@@ -121,6 +121,9 @@
   :config
   (dashboard-setup-startup-hook))
 
+(use-package page-break-lines
+  :config (global-page-break-lines-mode))
+
 ;; (setq ad-redefinition-action 'accept)
 
 (setq vc-follow-symlinks t) ;; always follow symlinks
