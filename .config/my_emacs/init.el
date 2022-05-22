@@ -112,6 +112,8 @@
 
     (add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
+(global-hl-line-mode t)
+
 ;; (require 'sublimity)
 ;; (require 'sublimity-scroll)
 ;; (sublimity-mode 1)
@@ -493,40 +495,52 @@
   )
 
 (pol/leader-key ;; try to have similar keybindings in vim as well
-  "<RET>" '(bookmark-jump :which-key "jump to bookmark")
-  "." '(counsel-find-file :which-key "find file")
-  "s" '(:ignore s :which-key "session")
-  "ss" '(session-save :which-key "session save")
-  "sr" '(session-restore :which-key "session restore")
-  "o" '(:ignore o :which-key "open") 
-  "ot" '(vterm-toggle :which-key "toggle vterm")
-  "od" '(vterm-toggle-cd :which-key "toggle vterm on current folder")
-  "c" '(org-capture :which-key "org-capture") ;; this is F*** awesome
-  "g" '(git-gutter-mode :which-key "git-gutter toggle") 
-  "h" '(:ignore h :which-key "git-gutter") 
-  "hn" '(git-gutter:next-hunk :which-key "next hunk") 
-  "hp" '(git-gutter:previous-hunk :which-key "previous hunk") 
-  "hv" '(git-gutter:popup-hunk :which-key "preview hunk") 
-  "hs" '(git-gutter:stage-hunk :which-key "stage hunk") 
-  "hu" '(git-gutter:revert-hunk :which-key "undo hunk") ;; take back changes
-  "hg" '(git-gutter :which-key "update changes") 
-  "b" '(:ignore b :which-key "buffers") 
-  "bn" '(evil-next-buffer :which-key "next buffer") 
-  "bp" '(evil-prev-buffer :which-key "previous buffer")
-  "bc" '(evil-delete-buffer :which-key "close buffer")
-  "bd" '(delete-file-and-buffer :which-key "delete file")
-  "p" '(:ignore s :which-key "project")
-  "pr" '(projectile-recentf :which-key "recent file")
-  "pp" '(projectile-switch-project :which-key "switch project")
-  "pb" '(projectile-switch-to-buffer :which-key "switch buffer")
-  "f" '(:ignore s :which-key "file")
-  "fr" '(counsel-recentf :which-key "Recent file") ;; classic vim save
-  "fs" '(save-buffer :which-key "save buffer") ;; classic vim save
-  "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
-  "to" '(openwith-mode :which-key "open with external app")
-  "tt" '(counsel-load-theme :which-key "choose theme")
-  "mp" '(grip-mode :which-key "live preview")
-  ;; "mt" '(markdown-toc-generate-toc :which-key "live preview")
+  "<RET>" '(bookmark-jump :which-key "Jump to bookmark")
+  "." '(counsel-find-file :which-key "Find file")
+  "s" '(:ignore s :which-key "Session")
+  "ss" '(session-save :which-key "Session save")
+  "sr" '(session-restore :which-key "Session restore")
+  "o" '(:ignore o :which-key "Open") 
+  "ot" '(vterm-toggle :which-key "Toggle vterm")
+  "od" '(vterm-toggle-cd :which-key "Toggle vterm on current folder")
+  "c" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
+  "h" '(:ignore h :which-key "Git-gutter") 
+  "hn" '(git-gutter:next-hunk :which-key "Next hunk") 
+  "hp" '(git-gutter:previous-hunk :which-key "Previous hunk") 
+  "hv" '(git-gutter:popup-hunk :which-key "Preview hunk") 
+  "hs" '(git-gutter:stage-hunk :which-key "Stage hunk") 
+  "hu" '(git-gutter:revert-hunk :which-key "Undo hunk") ;; take back changes
+  "hg" '(git-gutter :which-key "Update changes") 
+  "b" '(:ignore b :which-key "Buffers") 
+  "bn" '(evil-next-buffer :which-key "Next buffer") 
+  "bp" '(evil-prev-buffer :which-key "Previous buffer")
+  "bk" '(evil-delete-buffer :which-key "Kill buffer")
+  "bd" '(evil-delete-buffer :which-key "Kill buffer")
+  "br" '(revert-buffer :which-key "Revert buffer")
+  "bR" '(rename-buffer :which-key "Rename buffer")
+  "bs" '(basic-save-buffer :which-key "Save the current buffer in its visited file")
+  "bS" '(basic-save-buffer :which-key "Save all buffers visiting a file")
+  ;; "bd" '(revert-buffer-quick :which-key "kill buffer")
+  "p" '(:ignore s :which-key "Project")
+  "pr" '(projectile-recentf :which-key "Recent file")
+  "pp" '(projectile-switch-project :which-key "Switch project")
+  "pb" '(projectile-switch-to-buffer :which-key "Switch buffer")
+  "f" '(:ignore s :which-key "File")
+  "fr" '(counsel-recentf :which-key "Recent file")
+  "fs" '(save-buffer :which-key "Save buffer") ;; classic vim save
+  "fS" '(write-file :which-key "Write current buffer into file FILENAME")
+  "fD" '(delete-file-and-buffer :which-key "Delete file")
+  "t" '(:ignore t :which-key "Toggles") ;; "folder" for toggles
+  "to" '(openwith-mode :which-key "Open with external app")
+  "tt" '(counsel-load-theme :which-key "Choose theme")
+  "tg" '(git-gutter-mode :which-key "Git-gutter toggle") 
+  "tp" '(:ignore :which-key "Pomodoro") 
+  "tp C-s" '(pomodoro-start :which-key "pomodoro-start") 
+  "tpp" '(pomodoro-pause :which-key "pomodoro-pause") 
+  "tpr" '(pomodoro-resume :which-key "pomodoro-resume") 
+  ;; "tp" '(pomodoro-start :which-key "git-gutter toggle") 
+  "t C-p" '( :which-key "git-gutter toggle") 
+  "mp" '(grip-mode :which-key "Live preview")
   "mt" '(markdown-toc-generate-or-refresh-toc :which-key "generate-or-refresh-toc")
   )
 
@@ -1496,10 +1510,17 @@ _h_ decrease width    _l_ increase width
   (global-evil-surround-mode 1))
 
 (use-package pomodoro
-  :commands pomodoro-start
-  :config
-  (pomodoro-add-to-mode-line)
+  ;; :commands pomodoro-start
+  ;; :config
+  ;; (pomodoro-add-to-mode-line)
+  ;; :init
+  ;; (pomodoro-add-to-mode-line)
   )
+  (pomodoro-add-to-mode-line)
+  (setq pomodoro-inhibit-prompting-messages nil)
+  (setq pomodoro-desktop-notification nil)
+
+;; (use-package tomatinho)
 
 (use-package openwith
   :commands (openwith-mode)

@@ -7,6 +7,7 @@
     - [Shortcuts](#shortcuts)
     - [Recommendations](#recommendations)
     - [Supported OS](#supported-os)
+    - [Window Managers](#window-managers)
     - [WIP](#wip)
 
 <!-- markdown-toc end -->
@@ -52,6 +53,12 @@ Shortcuts to applications are stored in /usr/share/applications/
 *   ![Manjaro\_icon][manjaro_icon] Manjaro
 *   ![Ubuntu\_icon][ubuntu_icon] Ubuntu
 *   ![MacOS\_icon][macos_icon] MacOS
+
+## Window Managers
+* Xmonad (Main config)
+* i3 (Second best)
+* Cinnamon desktop
+* Gnome
 
 ## WIP
 
