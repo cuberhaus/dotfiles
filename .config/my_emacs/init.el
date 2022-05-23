@@ -475,52 +475,69 @@
 
 ;; define workspace keys
 (pol/leader-key
-  "TAB <" '(eyebrowse-prev-window-config :which-key "previous window") 
-  "TAB >" '(eyebrowse-next-window-config :which-key "next window")
-  "TAB '" '(eyebrowse-last-window-config :which-key "last window")
-  "TAB k" '(eyebrowse-close-window-config :which-key "close window")
-  "TAB ," '(eyebrowse-rename-window-config :which-key "rename window")
-  "TAB ." '(eyebrowse-switch-to-window-config :which-key "switch to window")
-  "TAB c" '(eyebrowse-create-window-config :which-key "create window config")
+  "TAB" '(:ignore s :which-key "workspace")
+  "TAB <" '(eyebrowse-prev-window-config :which-key "Previous window") 
+  "TAB >" '(eyebrowse-next-window-config :which-key "Next window")
+  "TAB '" '(eyebrowse-last-window-config :which-key "Last window")
+  "TAB k" '(eyebrowse-close-window-config :which-key "Close window")
+  "TAB ," '(eyebrowse-rename-window-config :which-key "Rename window")
+  "TAB ." '(eyebrowse-switch-to-window-config :which-key "Switch to window")
+  "TAB c" '(eyebrowse-create-window-config :which-key "Create window config")
+  ;; "0" '(eyebrowse-switch-to-window-config-0 :which-key "Switch to final workspace")
+  ;; "1" '(eyebrowse-switch-to-window-config-1 :which-key "Switch to 1st workspace")
+  ;; "2" '(eyebrowse-switch-to-window-config-2 :which-key "Switch to 2nd workspace")
+  ;; "3" '(eyebrowse-switch-to-window-config-3 :which-key "Switch to 3rd workspace")
+  ;; "4" '(eyebrowse-switch-to-window-config-4 :which-key "Switch to 4th workspace")
+  ;; "5" '(eyebrowse-switch-to-window-config-5 :which-key "Switch to 5th workspace")
+  ;; "6" '(eyebrowse-switch-to-window-config-6 :which-key "Switch to 6th workspace")
+  ;; "7" '(eyebrowse-switch-to-window-config-7 :which-key "Switch to 7th workspace")
+  ;; "8" '(eyebrowse-switch-to-window-config-8 :which-key "Switch to 8th workspace")
+  ;; "9" '(eyebrowse-switch-to-window-config-9 :which-key "Switch to 9th workspace")
   "0" '(eyebrowse-switch-to-window-config-0 :which-key "ws 0")
-  "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 1")
-  "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 2")
-  "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 3")
-  "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 4")
-  "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 5")
-  "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 6")
-  "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 7")
-  "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 8")
-  "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 9")
+  "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 0")
+  "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 0")
+  "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 0")
+  "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 0")
+  "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 0")
+  "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 0")
+  "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 0")
+  "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 0")
+  "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 0")
   )
 
 (pol/leader-key ;; try to have similar keybindings in vim as well
   "<RET>" '(bookmark-jump :which-key "Jump to bookmark")
   "." '(counsel-find-file :which-key "Find file")
-  "s" '(:ignore s :which-key "Session")
+  "s" '(:ignore s :which-key "session")
   "ss" '(session-save :which-key "Session save")
   "sr" '(session-restore :which-key "Session restore")
-  "o" '(:ignore o :which-key "Open") 
+  "o" '(:ignore o :which-key "open") 
   "ot" '(vterm-toggle :which-key "Toggle vterm")
   "od" '(vterm-toggle-cd :which-key "Toggle vterm on current folder")
   "c" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
-  "h" '(:ignore h :which-key "Git-gutter") 
+  "h" '(:ignore h :which-key "git-gutter") 
   "hn" '(git-gutter:next-hunk :which-key "Next hunk") 
   "hp" '(git-gutter:previous-hunk :which-key "Previous hunk") 
   "hv" '(git-gutter:popup-hunk :which-key "Preview hunk") 
   "hs" '(git-gutter:stage-hunk :which-key "Stage hunk") 
   "hu" '(git-gutter:revert-hunk :which-key "Undo hunk") ;; take back changes
   "hg" '(git-gutter :which-key "Update changes") 
-  "b" '(:ignore b :which-key "Buffers") 
+  "b" '(:ignore b :which-key "buffers") 
   "bn" '(evil-next-buffer :which-key "Next buffer") 
   "bp" '(evil-prev-buffer :which-key "Previous buffer")
   "bk" '(evil-delete-buffer :which-key "Kill buffer")
   "bd" '(evil-delete-buffer :which-key "Kill buffer")
-  "br" '(revert-buffer :which-key "Revert buffer")
+  "br" '(revert-buffer-quick :which-key "Revert buffer")
   "bR" '(rename-buffer :which-key "Rename buffer")
   "bs" '(basic-save-buffer :which-key "Save the current buffer in its visited file")
   "bS" '(basic-save-buffer :which-key "Save all buffers visiting a file")
   ;; "bd" '(revert-buffer-quick :which-key "kill buffer")
+  "<" '(counsel-switch-buffer :which-key "Switch buffer") ;; similarity with doom
+  "u" '(universal-argument :which-key "Universal argument") ;; similarity with doom
+  "-" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer") ;; similarity with doom
+  "w" '(:ignore w :which-key "Windows")
+  "wr" '(winner-redo :which-key "Redo window layout")
+  "wu" '(winner-undo :which-key "Undo window layout")
   "p" '(:ignore s :which-key "Project")
   "pr" '(projectile-recentf :which-key "Recent file")
   "pp" '(projectile-switch-project :which-key "Switch project")
@@ -577,61 +594,64 @@ _h_ decrease width    _l_ increase width
   ("q" nil))
 
 ;; vim keybindings for easier on the fingers typing :D
-                (use-package evil
-                  :init
-                  (setq evil-want-integration t) ;; must have
-                  (setq evil-want-keybinding nil)
-                  (setq evil-want-C-u-scroll t)
-                  (setq evil-want-C-i-jump nil)
-                  ;;(setq evil-respect-visual-line-mode t) idk
-                  ;;(setq evil-undo-system 'undo-tree) idk
-                  :config
-                  (evil-mode 1)
-                  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-                  ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+                    (use-package evil
+                      :init
+                      (setq evil-want-integration t) ;; must have
+                      (setq evil-want-keybinding nil)
+                      (setq evil-want-C-u-scroll t)
+                      (setq evil-want-C-i-jump nil)
+                      ;;(setq evil-respect-visual-line-mode t) idk
+                      ;;(setq evil-undo-system 'undo-tree) idk
+                      :config
+                      (evil-mode 1)
+                      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+                      ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-                  ;; Use visual line motions even outside of visual-line-mode buffers
-                  (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
-                  (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
+                      ;; Use visual line motions even outside of visual-line-mode buffers
+                      (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
+                      (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
 
-                  (evil-set-initial-state 'messages-buffer-mode 'normal)
-                  (evil-set-initial-state 'dashboard-mode 'normal))
-                ;; to center screen on cursor, zz or emacs-style C-l
+                      (evil-set-initial-state 'messages-buffer-mode 'normal)
+                      (evil-set-initial-state 'dashboard-mode 'normal))
+                    ;; to center screen on cursor, zz or emacs-style C-l
 
-                ;; https://github.com/linktohack/evil-commentary
-                ;; use-package makes it so that it installs it from config and config section
-                ;; activates the mode
-                (use-package evil-commentary
-                  :after evil
-                  :config
-                  (evil-commentary-mode))
+                    ;; https://github.com/linktohack/evil-commentary
+                    ;; use-package makes it so that it installs it from config and config section
+                    ;; activates the mode
+                    (use-package evil-commentary
+                      :after evil
+                      :config
+                      (evil-commentary-mode))
 
-                (use-package evil-collection
-                  :after evil ;; load after evil, must have
-                  :config
-                  (evil-collection-init))
+                    (use-package evil-collection
+                      :after evil ;; load after evil, must have
+                      :config
+                      (evil-collection-init))
 
-;; glorious increment like in vim :D
-(use-package evil-numbers
-  :after evil)
-(global-set-key (kbd "C-c +") 'evil-numbers/inc-at-pt)
-(global-set-key (kbd "C-c -") 'evil-numbers/dec-at-pt)
-(global-set-key (kbd "C-c C-+") 'evil-numbers/inc-at-pt-incremental)
-(global-set-key (kbd "C-c C--") 'evil-numbers/dec-at-pt-incremental)
+    ;; glorious increment like in vim :D
+    (use-package evil-numbers
+      :after evil)
+;; (define-key evil-visual-state-map (kbd "C-a") 'evil-numbers/inc-at-pt) ;; vim classic
+;; (define-key evil-visual-state-map (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental) ;; vim classic
+;; (define-key evil-visual-state-map (kbd "C-x") 'evil-numbers/dec-at-pt) ;; vim classic
+;; (define-key evil-visual-state-map (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental) ;; vim classic
 
-    ;; only in normal and insert
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-c +") 'evil-numbers/inc-at-pt)
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-c -") 'evil-numbers/dec-at-pt)
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-c C-+") 'evil-numbers/inc-at-pt-incremental)
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-c C--") 'evil-numbers/dec-at-pt-incremental)
+;; (define-key evil-normal-state-map (kbd "C-a") 'evil-numbers/inc-at-pt)
+;; (define-key evil-normal-state-map (kbd "C-x") 'evil-numbers/dec-at-pt)
 
-;; without shadowing regular + -
-;;     (evil-define-key '(normal visual) 'global (kbd "<kp-add>") 'evil-numbers/inc-at-pt)
-;; (evil-define-key '(normal visual) 'global (kbd "<kp-subtract>") 'evil-numbers/dec-at-pt)
-;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-add>") 'evil-numbers/inc-at-pt-incremental)
-;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-subtract>") 'evil-numbers/dec-at-pt-incremental)
+        ;; only in normal and insert vim classic bindings
+        (evil-define-key '(normal visual) 'global (kbd "C-a") 'evil-numbers/inc-at-pt)
+        (evil-define-key '(normal visual) 'global (kbd "C-x") 'evil-numbers/dec-at-pt)
+        (evil-define-key '(normal visual) 'global (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental)
+        (evil-define-key '(normal visual) 'global (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental)
 
-                ; C-z go back to EMACS MODE
+    ;; without shadowing regular + -
+    ;;     (evil-define-key '(normal visual) 'global (kbd "<kp-add>") 'evil-numbers/inc-at-pt)
+    ;; (evil-define-key '(normal visual) 'global (kbd "<kp-subtract>") 'evil-numbers/dec-at-pt)
+    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-add>") 'evil-numbers/inc-at-pt-incremental)
+    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-subtract>") 'evil-numbers/dec-at-pt-incremental)
+
+                    ; C-z go back to EMACS MODE
 
 ;; (use-package evil-goggles
 ;;   :ensure t
@@ -681,7 +701,7 @@ _h_ decrease width    _l_ increase width
   :diminish which-key-mode
   :config ;; this is run after the package is loaded
  (which-key-mode)
-  (setq which-key-idle-delay 0.15)) ;; delay on keybindings 
+  (setq which-key-idle-delay 0.3)) ;; delay on keybindings 
 
 (use-package helpful ;; better function descriptions
   :custom ;; custom variables
