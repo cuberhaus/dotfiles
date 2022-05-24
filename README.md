@@ -1,7 +1,20 @@
 # Cuberhaus's dotfiles
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [Cuberhaus's dotfiles](#cuberhauss-dotfiles)
+    - [Installation](#installation)
+    - [Shortcuts](#shortcuts)
+    - [Recommendations](#recommendations)
+    - [Supported OS](#supported-os)
+    - [Window Managers](#window-managers)
+    - [WIP](#wip)
+
+<!-- markdown-toc end -->
+
 Opinionated defaults, this repo is not meant to be used by everyone, just a personal configuration to take ideas out of. However if you are brave enough you can install it with the instructions below, you are advised to read the installation scripts before hand. 
 
-## Install this repo:
+## Installation
 
 Clone repo and its submodules:
 
@@ -34,12 +47,18 @@ Shortcuts to applications are stored in /usr/share/applications/
 *   Read this repo's wiki
 *   That's pretty much all
 
-## Supported:
+## Supported OS
 
 *   ![Arch\_icon][arch_icon] Arch
 *   ![Manjaro\_icon][manjaro_icon] Manjaro
 *   ![Ubuntu\_icon][ubuntu_icon] Ubuntu
 *   ![MacOS\_icon][macos_icon] MacOS
+
+## Window Managers
+* Xmonad (Main config)
+* i3 (Second best)
+* Cinnamon desktop
+* Gnome
 
 ## WIP
 

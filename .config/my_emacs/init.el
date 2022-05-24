@@ -112,6 +112,8 @@
 
     (add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
+(global-hl-line-mode t)
+
 ;; (require 'sublimity)
 ;; (require 'sublimity-scroll)
 ;; (sublimity-mode 1)
@@ -120,6 +122,9 @@
   :ensure t
   :config
   (dashboard-setup-startup-hook))
+
+(use-package page-break-lines
+  :config (global-page-break-lines-mode))
 
 ;; (setq ad-redefinition-action 'accept)
 
@@ -273,30 +278,54 @@
 ;;   :config
 ;;   (default-text-scale-mode))
 
-(setq langtool-java-classpath
-      "/usr/share/languagetool:/usr/share/java/languagetool/*")
-    (use-package langtool
-      :commands langtool-check)
+;; (setq langtool-java-classpath
+;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
+;;     (use-package langtool
+;;       :commands langtool-check)
 
 ;; execute spanish spell-checking on buffer
-      (defun flyspell-spanish ()
-        (interactive)
-        (ispell-change-dictionary "castellano")
-        (flyspell-buffer))
+              (defun flyspell-spanish ()
+                (interactive)
+                (ispell-change-dictionary "castellano")
+                (flyspell-buffer))
 
-      (defun flyspell-english ()
-        (interactive)
-        (ispell-change-dictionary "default")
-        (flyspell-buffer))
-(use-package flycheck
-  :commands (flycheck-mode global-flycheck-mode)
-    :ensure t
-    ;; :init (global-flycheck-mode)
-    )
-  (use-package flycheck-popup-tip
-    :after flycheck)
-  (with-eval-after-load 'flycheck
-    '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
+              (defun flyspell-english ()
+                (interactive)
+                (ispell-change-dictionary "default")
+                (flyspell-buffer))
+                                                      ; if: Warning (emacs): Unable to activate package `elpy'.
+                                                      ;Required package `highlight-indentation-0.5.0' is unavailable then install package
+              (use-package pkg-info)
+              (use-package spell-fu
+                ) ;; this underlines mistakes
+          (add-hook 'spell-fu-mode-hook ;;this is what really makes it work
+                    (lambda ()
+              (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "es")) ;;if functions are correct this works
+                      (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "ca"))
+              (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "en"))
+                ))
+    (setq ispell-dictionary "es") ;; sets spanish as default
+      (setq ispell-program-name "aspell") ;; already points to aspell
+      (setq ispell-extra-args '("--sug-mode=ultra" "--lang=es"))
+              (setq spell-fu-directory "~/.config/spell_fu") ;; Please create this directory manually. where spell_fu stores stuff
+              (setq ispell-personal-dictionary "~/.config/spell_fu/.pws") ;;spell_fu stores stuff here
+              ;; (spell-fu-dictionary-add (spell-fu-get-ispell "es"))
+              ;; (spell-fu-dictionary-add (spell-fu-get-ispell "en"))
+              ;; (spell-fu-dictionary-add (spell-fu-get-ispell "ca"))
+
+              ;; (global-spell-fu-mode)
+              (use-package flycheck
+                :commands (flycheck-mode global-flycheck-mode)
+                      :ensure t
+                      ;; :init (global-flycheck-mode)
+                      )
+              (use-package flycheck-popup-tip
+                :after flycheck)
+              (with-eval-after-load 'flycheck
+                '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
+(use-package flyspell-lazy
+  )
+(flyspell-lazy-mode 1)
 
 ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
 (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
@@ -470,60 +499,91 @@
 
 ;; define workspace keys
 (pol/leader-key
-  "TAB <" '(eyebrowse-prev-window-config :which-key "previous window") 
-  "TAB >" '(eyebrowse-next-window-config :which-key "next window")
-  "TAB '" '(eyebrowse-last-window-config :which-key "last window")
-  "TAB k" '(eyebrowse-close-window-config :which-key "close window")
-  "TAB ," '(eyebrowse-rename-window-config :which-key "rename window")
-  "TAB ." '(eyebrowse-switch-to-window-config :which-key "switch to window")
-  "TAB c" '(eyebrowse-create-window-config :which-key "create window config")
+  "TAB" '(:ignore s :which-key "workspace")
+  "TAB <" '(eyebrowse-prev-window-config :which-key "Previous window") 
+  "TAB >" '(eyebrowse-next-window-config :which-key "Next window")
+  "TAB '" '(eyebrowse-last-window-config :which-key "Last window")
+  "TAB k" '(eyebrowse-close-window-config :which-key "Close window")
+  "TAB ," '(eyebrowse-rename-window-config :which-key "Rename window")
+  "TAB ." '(eyebrowse-switch-to-window-config :which-key "Switch to window")
+  "TAB c" '(eyebrowse-create-window-config :which-key "Create window config")
+  ;; "0" '(eyebrowse-switch-to-window-config-0 :which-key "Switch to final workspace")
+  ;; "1" '(eyebrowse-switch-to-window-config-1 :which-key "Switch to 1st workspace")
+  ;; "2" '(eyebrowse-switch-to-window-config-2 :which-key "Switch to 2nd workspace")
+  ;; "3" '(eyebrowse-switch-to-window-config-3 :which-key "Switch to 3rd workspace")
+  ;; "4" '(eyebrowse-switch-to-window-config-4 :which-key "Switch to 4th workspace")
+  ;; "5" '(eyebrowse-switch-to-window-config-5 :which-key "Switch to 5th workspace")
+  ;; "6" '(eyebrowse-switch-to-window-config-6 :which-key "Switch to 6th workspace")
+  ;; "7" '(eyebrowse-switch-to-window-config-7 :which-key "Switch to 7th workspace")
+  ;; "8" '(eyebrowse-switch-to-window-config-8 :which-key "Switch to 8th workspace")
+  ;; "9" '(eyebrowse-switch-to-window-config-9 :which-key "Switch to 9th workspace")
   "0" '(eyebrowse-switch-to-window-config-0 :which-key "ws 0")
-  "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 1")
-  "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 2")
-  "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 3")
-  "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 4")
-  "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 5")
-  "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 6")
-  "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 7")
-  "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 8")
-  "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 9")
+  "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 0")
+  "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 0")
+  "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 0")
+  "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 0")
+  "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 0")
+  "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 0")
+  "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 0")
+  "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 0")
+  "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 0")
   )
 
 (pol/leader-key ;; try to have similar keybindings in vim as well
-  "<RET>" '(bookmark-jump :which-key "jump to bookmark")
-  "." '(counsel-find-file :which-key "find file")
+  "<RET>" '(bookmark-jump :which-key "Jump to bookmark")
+  "." '(counsel-find-file :which-key "Find file")
   "s" '(:ignore s :which-key "session")
-  "ss" '(session-save :which-key "session save")
-  "sr" '(session-restore :which-key "session restore")
+  "ss" '(session-save :which-key "Session save")
+  "sr" '(session-restore :which-key "Session restore")
   "o" '(:ignore o :which-key "open") 
-  "ot" '(vterm-toggle :which-key "toggle vterm")
-  "od" '(vterm-toggle-cd :which-key "toggle vterm on current folder")
-  "c" '(org-capture :which-key "org-capture") ;; this is F*** awesome
-  "g" '(git-gutter-mode :which-key "git-gutter toggle") 
+  "ot" '(vterm-toggle :which-key "Toggle vterm")
+  "od" '(vterm-toggle-cd :which-key "Toggle vterm on current folder")
+  "c" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
   "h" '(:ignore h :which-key "git-gutter") 
-  "hn" '(git-gutter:next-hunk :which-key "next hunk") 
-  "hp" '(git-gutter:previous-hunk :which-key "previous hunk") 
-  "hv" '(git-gutter:popup-hunk :which-key "preview hunk") 
-  "hs" '(git-gutter:stage-hunk :which-key "stage hunk") 
-  "hu" '(git-gutter:revert-hunk :which-key "undo hunk") ;; take back changes
-  "hg" '(git-gutter :which-key "update changes") 
+  "hn" '(git-gutter:next-hunk :which-key "Next hunk") 
+  "hp" '(git-gutter:previous-hunk :which-key "Previous hunk") 
+  "hv" '(git-gutter:popup-hunk :which-key "Preview hunk") 
+  "hs" '(git-gutter:stage-hunk :which-key "Stage hunk") 
+  "hu" '(git-gutter:revert-hunk :which-key "Undo hunk") ;; take back changes
+  "hg" '(git-gutter :which-key "Update changes") 
   "b" '(:ignore b :which-key "buffers") 
-  "bn" '(evil-next-buffer :which-key "next buffer") 
-  "bp" '(evil-prev-buffer :which-key "previous buffer")
-  "bc" '(evil-delete-buffer :which-key "close buffer")
-  "bd" '(delete-file-and-buffer :which-key "delete file")
-  "p" '(:ignore s :which-key "project")
-  "pr" '(projectile-recentf :which-key "recent file")
-  "pp" '(projectile-switch-project :which-key "switch project")
-  "pb" '(projectile-switch-to-buffer :which-key "switch buffer")
-  "f" '(:ignore s :which-key "file")
-  "fr" '(counsel-recentf :which-key "Recent file") ;; classic vim save
-  "fs" '(save-buffer :which-key "save buffer") ;; classic vim save
-  "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
-  "to" '(openwith-mode :which-key "open with external app")
-  "tt" '(counsel-load-theme :which-key "choose theme")
-  "mp" '(grip-mode :which-key "live preview")
-  ;; "mt" '(markdown-toc-generate-toc :which-key "live preview")
+  "bn" '(evil-next-buffer :which-key "Next buffer") 
+  "bp" '(evil-prev-buffer :which-key "Previous buffer")
+  "bk" '(evil-delete-buffer :which-key "Kill buffer")
+  "bd" '(evil-delete-buffer :which-key "Kill buffer")
+  "br" '(revert-buffer-quick :which-key "Revert buffer")
+  "bR" '(rename-buffer :which-key "Rename buffer")
+  "bs" '(basic-save-buffer :which-key "Save the current buffer in its visited file")
+  "bS" '(basic-save-buffer :which-key "Save all buffers visiting a file")
+  ;; "bd" '(revert-buffer-quick :which-key "kill buffer")
+  "<" '(counsel-switch-buffer :which-key "Switch buffer") ;; similarity with doom
+  "u" '(universal-argument :which-key "Universal argument") ;; similarity with doom
+  "-" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer") ;; similarity with doom
+  "w" '(:ignore w :which-key "Windows")
+  "wr" '(winner-redo :which-key "Redo window layout")
+  "wu" '(winner-undo :which-key "Undo window layout")
+  "p" '(:ignore s :which-key "Project")
+  "pr" '(projectile-recentf :which-key "Recent file")
+  "pp" '(projectile-switch-project :which-key "Switch project")
+  "pb" '(projectile-switch-to-buffer :which-key "Switch buffer")
+  "f" '(:ignore s :which-key "File")
+  "fr" '(counsel-recentf :which-key "Recent file")
+  "fs" '(save-buffer :which-key "Save buffer") ;; classic vim save
+  "fS" '(write-file :which-key "Write current buffer into file FILENAME")
+  "fD" '(delete-file-and-buffer :which-key "Delete file")
+  "t" '(:ignore t :which-key "Toggles") ;; "folder" for toggles
+  "to" '(openwith-mode :which-key "Open with external app")
+  "tt" '(counsel-load-theme :which-key "Choose theme")
+  "ts" '(spell-fu-mode :which-key "Spell checker")
+  "tf" '(flycheck-mode :which-key "Flycheck")
+  "tg" '(git-gutter-mode :which-key "Git-gutter toggle") 
+  "tp" '(:ignore :which-key "Pomodoro") 
+  "tp C-s" '(pomodoro-start :which-key "pomodoro-start") 
+  "tpp" '(pomodoro-pause :which-key "pomodoro-pause") 
+  "tpr" '(pomodoro-resume :which-key "pomodoro-resume") 
+  ;; "tp" '(pomodoro-start :which-key "git-gutter toggle") 
+  "t C-p" '( :which-key "git-gutter toggle") 
+  "mp" '(grip-mode :which-key "Live preview")
   "mt" '(markdown-toc-generate-or-refresh-toc :which-key "generate-or-refresh-toc")
   )
 
@@ -541,7 +601,7 @@
     ("k" text-scale-decrease "out")
     ("q" nil "finished" :exit t))
   (pol/leader-key
-    "ts" '(hydra-text-scale/body :which-key "scale text"))
+    "t+" '(hydra-text-scale/body :which-key "scale text"))
 
   (pol/leader-key
     "tr" '(window-resize-hydra/body :which-key "resize windows"))
@@ -560,61 +620,64 @@ _h_ decrease width    _l_ increase width
   ("q" nil))
 
 ;; vim keybindings for easier on the fingers typing :D
-                (use-package evil
-                  :init
-                  (setq evil-want-integration t) ;; must have
-                  (setq evil-want-keybinding nil)
-                  (setq evil-want-C-u-scroll t)
-                  (setq evil-want-C-i-jump nil)
-                  ;;(setq evil-respect-visual-line-mode t) idk
-                  ;;(setq evil-undo-system 'undo-tree) idk
-                  :config
-                  (evil-mode 1)
-                  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-                  ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+                    (use-package evil
+                      :init
+                      (setq evil-want-integration t) ;; must have
+                      (setq evil-want-keybinding nil)
+                      (setq evil-want-C-u-scroll t)
+                      (setq evil-want-C-i-jump nil)
+                      ;;(setq evil-respect-visual-line-mode t) idk
+                      ;;(setq evil-undo-system 'undo-tree) idk
+                      :config
+                      (evil-mode 1)
+                      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+                      ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-                  ;; Use visual line motions even outside of visual-line-mode buffers
-                  (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
-                  (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
+                      ;; Use visual line motions even outside of visual-line-mode buffers
+                      (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
+                      (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
 
-                  (evil-set-initial-state 'messages-buffer-mode 'normal)
-                  (evil-set-initial-state 'dashboard-mode 'normal))
-                ;; to center screen on cursor, zz or emacs-style C-l
+                      (evil-set-initial-state 'messages-buffer-mode 'normal)
+                      (evil-set-initial-state 'dashboard-mode 'normal))
+                    ;; to center screen on cursor, zz or emacs-style C-l
 
-                ;; https://github.com/linktohack/evil-commentary
-                ;; use-package makes it so that it installs it from config and config section
-                ;; activates the mode
-                (use-package evil-commentary
-                  :after evil
-                  :config
-                  (evil-commentary-mode))
+                    ;; https://github.com/linktohack/evil-commentary
+                    ;; use-package makes it so that it installs it from config and config section
+                    ;; activates the mode
+                    (use-package evil-commentary
+                      :after evil
+                      :config
+                      (evil-commentary-mode))
 
-                (use-package evil-collection
-                  :after evil ;; load after evil, must have
-                  :config
-                  (evil-collection-init))
+                    (use-package evil-collection
+                      :after evil ;; load after evil, must have
+                      :config
+                      (evil-collection-init))
 
-;; glorious increment like in vim :D
-(use-package evil-numbers
-  :after evil)
-(global-set-key (kbd "C-c +") 'evil-numbers/inc-at-pt)
-(global-set-key (kbd "C-c -") 'evil-numbers/dec-at-pt)
-(global-set-key (kbd "C-c C-+") 'evil-numbers/inc-at-pt-incremental)
-(global-set-key (kbd "C-c C--") 'evil-numbers/dec-at-pt-incremental)
+    ;; glorious increment like in vim :D
+    (use-package evil-numbers
+      :after evil)
+;; (define-key evil-visual-state-map (kbd "C-a") 'evil-numbers/inc-at-pt) ;; vim classic
+;; (define-key evil-visual-state-map (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental) ;; vim classic
+;; (define-key evil-visual-state-map (kbd "C-x") 'evil-numbers/dec-at-pt) ;; vim classic
+;; (define-key evil-visual-state-map (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental) ;; vim classic
 
-    ;; only in normal and insert
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-c +") 'evil-numbers/inc-at-pt)
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-c -") 'evil-numbers/dec-at-pt)
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-c C-+") 'evil-numbers/inc-at-pt-incremental)
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-c C--") 'evil-numbers/dec-at-pt-incremental)
+;; (define-key evil-normal-state-map (kbd "C-a") 'evil-numbers/inc-at-pt)
+;; (define-key evil-normal-state-map (kbd "C-x") 'evil-numbers/dec-at-pt)
 
-;; without shadowing regular + -
-;;     (evil-define-key '(normal visual) 'global (kbd "<kp-add>") 'evil-numbers/inc-at-pt)
-;; (evil-define-key '(normal visual) 'global (kbd "<kp-subtract>") 'evil-numbers/dec-at-pt)
-;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-add>") 'evil-numbers/inc-at-pt-incremental)
-;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-subtract>") 'evil-numbers/dec-at-pt-incremental)
+        ;; only in normal and insert vim classic bindings
+        (evil-define-key '(normal visual) 'global (kbd "C-a") 'evil-numbers/inc-at-pt)
+        (evil-define-key '(normal visual) 'global (kbd "C-x") 'evil-numbers/dec-at-pt)
+        (evil-define-key '(normal visual) 'global (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental)
+        (evil-define-key '(normal visual) 'global (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental)
 
-                ; C-z go back to EMACS MODE
+    ;; without shadowing regular + -
+    ;;     (evil-define-key '(normal visual) 'global (kbd "<kp-add>") 'evil-numbers/inc-at-pt)
+    ;; (evil-define-key '(normal visual) 'global (kbd "<kp-subtract>") 'evil-numbers/dec-at-pt)
+    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-add>") 'evil-numbers/inc-at-pt-incremental)
+    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-subtract>") 'evil-numbers/dec-at-pt-incremental)
+
+                    ; C-z go back to EMACS MODE
 
 ;; (use-package evil-goggles
 ;;   :ensure t
@@ -652,7 +715,7 @@ _h_ decrease width    _l_ increase width
     (dw/enter-focus-mode)))
 
 (pol/leader-key
-  "tf" '(dw/toggle-focus-mode :which-key "focus mode")
+  "tz" '(dw/toggle-focus-mode :which-key "focus mode")
   ;; "te" '(dw/enter-focus-mode :which-key "focus mode")
   ;; "ta" '(dw/leave-focus-mode :which-key "focus mode")
   )
@@ -664,7 +727,7 @@ _h_ decrease width    _l_ increase width
   :diminish which-key-mode
   :config ;; this is run after the package is loaded
  (which-key-mode)
-  (setq which-key-idle-delay 0.15)) ;; delay on keybindings 
+  (setq which-key-idle-delay 0.3)) ;; delay on keybindings 
 
 (use-package helpful ;; better function descriptions
   :custom ;; custom variables
@@ -1280,7 +1343,11 @@ _h_ decrease width    _l_ increase width
 ;;        )
 
 (use-package tex
-  :ensure auctex)
+  :mode "\\.tex\\'"
+  :ensure auctex
+  :config 
+  (latex-mode)
+  )
 (setq TeX-auto-save t)
 (setq TeX-parse-self t)
 (setq TeX-PDF-mode t)
@@ -1293,7 +1360,8 @@ _h_ decrease width    _l_ increase width
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 (setq reftex-plug-into-AUCTeX t)
 
-(use-package cdlatex)
+(use-package cdlatex
+  :hook latex-mode)
 (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
 (add-hook 'latex-mode-hook 'turn-on-cdlatex)   ; with Emacs latex mode
 
@@ -1488,10 +1556,17 @@ _h_ decrease width    _l_ increase width
   (global-evil-surround-mode 1))
 
 (use-package pomodoro
-  :commands pomodoro-start
-  :config
-  (pomodoro-add-to-mode-line)
+  ;; :commands pomodoro-start
+  ;; :config
+  ;; (pomodoro-add-to-mode-line)
+  ;; :init
+  ;; (pomodoro-add-to-mode-line)
   )
+  (pomodoro-add-to-mode-line)
+  (setq pomodoro-inhibit-prompting-messages nil)
+  (setq pomodoro-desktop-notification nil)
+
+;; (use-package tomatinho)
 
 (use-package openwith
   :commands (openwith-mode)
