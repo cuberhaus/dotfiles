@@ -306,6 +306,17 @@ xmonad_install () {
     $pac xmobar                                 # Best bar for xmonad
     $pac xmonad-contrib                         # Xmonad with extra plugins
     $pac xorg-xmessage                          # xmonad send messages
+    sudo mkdir /etc/pacman.d/hooks/
+    # https://stackoverflow.com/questions/84882/sudo-echo-something-etc-privilegedfile-doesnt-work
+    echo "[Trigger]
+Operation = Upgrade
+Type = Package
+Target = xmonad
+
+[Action]
+Description = Recompiling xmonad...
+When = PostTransaction
+Exec = /usr/bin/sudo -u pol /usr/bin/xmonad --recompile"  | sudo tee /etc/pacman.d/hooks/xmonad.hook
 }
 
 # Best Desktop
