@@ -278,30 +278,54 @@
 ;;   :config
 ;;   (default-text-scale-mode))
 
-(setq langtool-java-classpath
-      "/usr/share/languagetool:/usr/share/java/languagetool/*")
-    (use-package langtool
-      :commands langtool-check)
+;; (setq langtool-java-classpath
+;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
+;;     (use-package langtool
+;;       :commands langtool-check)
 
 ;; execute spanish spell-checking on buffer
-      (defun flyspell-spanish ()
-        (interactive)
-        (ispell-change-dictionary "castellano")
-        (flyspell-buffer))
+              (defun flyspell-spanish ()
+                (interactive)
+                (ispell-change-dictionary "castellano")
+                (flyspell-buffer))
 
-      (defun flyspell-english ()
-        (interactive)
-        (ispell-change-dictionary "default")
-        (flyspell-buffer))
-(use-package flycheck
-  :commands (flycheck-mode global-flycheck-mode)
-    :ensure t
-    ;; :init (global-flycheck-mode)
-    )
-  (use-package flycheck-popup-tip
-    :after flycheck)
-  (with-eval-after-load 'flycheck
-    '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
+              (defun flyspell-english ()
+                (interactive)
+                (ispell-change-dictionary "default")
+                (flyspell-buffer))
+                                                      ; if: Warning (emacs): Unable to activate package `elpy'.
+                                                      ;Required package `highlight-indentation-0.5.0' is unavailable then install package
+              (use-package pkg-info)
+              (use-package spell-fu
+                ) ;; this underlines mistakes
+          (add-hook 'spell-fu-mode-hook ;;this is what really makes it work
+                    (lambda ()
+              (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "es")) ;;if functions are correct this works
+                      (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "ca"))
+              (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "en"))
+                ))
+    (setq ispell-dictionary "es") ;; sets spanish as default
+      (setq ispell-program-name "aspell") ;; already points to aspell
+      (setq ispell-extra-args '("--sug-mode=ultra" "--lang=es"))
+              (setq spell-fu-directory "~/.config/spell_fu") ;; Please create this directory manually. where spell_fu stores stuff
+              (setq ispell-personal-dictionary "~/.config/spell_fu/.pws") ;;spell_fu stores stuff here
+              ;; (spell-fu-dictionary-add (spell-fu-get-ispell "es"))
+              ;; (spell-fu-dictionary-add (spell-fu-get-ispell "en"))
+              ;; (spell-fu-dictionary-add (spell-fu-get-ispell "ca"))
+
+              ;; (global-spell-fu-mode)
+              (use-package flycheck
+                :commands (flycheck-mode global-flycheck-mode)
+                      :ensure t
+                      ;; :init (global-flycheck-mode)
+                      )
+              (use-package flycheck-popup-tip
+                :after flycheck)
+              (with-eval-after-load 'flycheck
+                '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
+(use-package flyspell-lazy
+  )
+(flyspell-lazy-mode 1)
 
 ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
 (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
@@ -550,6 +574,8 @@
   "t" '(:ignore t :which-key "Toggles") ;; "folder" for toggles
   "to" '(openwith-mode :which-key "Open with external app")
   "tt" '(counsel-load-theme :which-key "Choose theme")
+  "ts" '(spell-fu-mode :which-key "Spell checker")
+  "tf" '(flycheck-mode :which-key "Flycheck")
   "tg" '(git-gutter-mode :which-key "Git-gutter toggle") 
   "tp" '(:ignore :which-key "Pomodoro") 
   "tp C-s" '(pomodoro-start :which-key "pomodoro-start") 
@@ -575,7 +601,7 @@
     ("k" text-scale-decrease "out")
     ("q" nil "finished" :exit t))
   (pol/leader-key
-    "ts" '(hydra-text-scale/body :which-key "scale text"))
+    "t+" '(hydra-text-scale/body :which-key "scale text"))
 
   (pol/leader-key
     "tr" '(window-resize-hydra/body :which-key "resize windows"))
@@ -689,7 +715,7 @@ _h_ decrease width    _l_ increase width
     (dw/enter-focus-mode)))
 
 (pol/leader-key
-  "tf" '(dw/toggle-focus-mode :which-key "focus mode")
+  "tz" '(dw/toggle-focus-mode :which-key "focus mode")
   ;; "te" '(dw/enter-focus-mode :which-key "focus mode")
   ;; "ta" '(dw/leave-focus-mode :which-key "focus mode")
   )

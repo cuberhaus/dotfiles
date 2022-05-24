@@ -30,6 +30,15 @@ emacs() {
     $pac python-pipenv
     #format all
     $pac prettier
+    #https://wiki.archlinux.org/title/Language_checking
+    $pac aspell
+    $pac aspell-ca
+    $pac aspell-de
+    $pac aspell-en
+    $pac aspell-es
+    $pac ispell
+    sudo npm install textlint --global
+    pip install proselint
 }
 
 base_install () {
