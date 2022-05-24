@@ -91,6 +91,9 @@ fi
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH="$HOME/.emacs.d/bin/:$PATH"
     export PATH="/Users/pol/bin:$PATH"
+    #https://stackoverflow.com/questions/603785/environment-variables-in-mac-os-x
+    export KITTY_CONFIG_DIRECTORY="$HOME/dotfiles/dotfiles/.config/kitty/mac"
+    #launchctl setenv KITTY_CONFIG_DIRECTORY $KITTY_CONFIG_DIRECTORY
     export SHELL_SESSION_HISTORY=0
     export SHELL_SESSIONS_DISABLE=1
     export LDFLAGS="-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
