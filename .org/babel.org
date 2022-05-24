@@ -449,49 +449,51 @@ https://github.com/mhayashi1120/Emacs-langtool
 
 Use flycheck-verify-setup to check everything is up and running
 #+begin_src emacs-lisp
-                      ;; execute spanish spell-checking on buffer
-                      (defun flyspell-spanish ()
-                        (interactive)
-                        (ispell-change-dictionary "castellano")
-                        (flyspell-buffer))
+                  ;; execute spanish spell-checking on buffer
+                  (defun flyspell-spanish ()
+                    (interactive)
+                    (ispell-change-dictionary "castellano")
+                    (flyspell-buffer))
 
-                      (defun flyspell-english ()
-                        (interactive)
-                        (ispell-change-dictionary "default")
-                        (flyspell-buffer))
-                                                              ; if: Warning (emacs): Unable to activate package `elpy'.
-                                                              ;Required package `highlight-indentation-0.5.0' is unavailable then install package
-                      (use-package pkg-info)
-                      (use-package spell-fu
-                        ) ;; this underlines mistakes
-                  (add-hook 'spell-fu-mode-hook ;;this is what really makes it work
-                            (lambda ()
-                      (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "es")) ;;if functions are correct this works
-                              (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "ca"))
-                      (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "en"))
-                        ))
-            (setq ispell-dictionary "es") ;; sets spanish as default
-              (setq ispell-program-name "aspell") ;; already points to aspell
-              (setq ispell-extra-args '("--sug-mode=ultra" "--lang=es"))
-                      (setq spell-fu-directory "~/.config/spell_fu") ;; Please create this directory manually. where spell_fu stores stuff
-                      (setq ispell-personal-dictionary "~/.config/spell_fu/.pws") ;;spell_fu stores stuff here
-                      ;; (spell-fu-dictionary-add (spell-fu-get-ispell "es"))
-                      ;; (spell-fu-dictionary-add (spell-fu-get-ispell "en"))
-                      ;; (spell-fu-dictionary-add (spell-fu-get-ispell "ca"))
+                  (defun flyspell-english ()
+                    (interactive)
+                    (ispell-change-dictionary "default")
+                    (flyspell-buffer))
+                                                          ; if: Warning (emacs): Unable to activate package `elpy'.
+                                                          ;Required package `highlight-indentation-0.5.0' is unavailable then install package
+                  (use-package pkg-info)
+                  (use-package spell-fu
+                    :commands spell-fu-mode
+                    ) ;; this underlines mistakes
+              (add-hook 'spell-fu-mode-hook ;;this is what really makes it work
+                        (lambda ()
+                  (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "es")) ;;if functions are correct this works
+                          (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "ca"))
+                  (spell-fu-dictionary-add (spell-fu-get-ispell-dictionary "en"))
+                    ))
+        (setq ispell-dictionary "es") ;; sets spanish as default
+          (setq ispell-program-name "aspell") ;; already points to aspell
+          (setq ispell-extra-args '("--sug-mode=ultra" "--lang=es"))
+                  (setq spell-fu-directory "~/.config/spell_fu") ;; Please create this directory manually. where spell_fu stores stuff
+                  (setq ispell-personal-dictionary "~/.config/spell_fu/.pws") ;;spell_fu stores stuff here
+                  ;; (spell-fu-dictionary-add (spell-fu-get-ispell "es"))
+                  ;; (spell-fu-dictionary-add (spell-fu-get-ispell "en"))
+                  ;; (spell-fu-dictionary-add (spell-fu-get-ispell "ca"))
 
-                      ;; (global-spell-fu-mode)
-                      (use-package flycheck
-                        :commands (flycheck-mode global-flycheck-mode)
-                              :ensure t
-                              ;; :init (global-flycheck-mode)
-                              )
-                      (use-package flycheck-popup-tip
-                        :after flycheck)
-                      (with-eval-after-load 'flycheck
-                        '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
-        (use-package flyspell-lazy
-          )
-        (flyspell-lazy-mode 1)
+                  ;; (global-spell-fu-mode)
+                  (use-package flycheck
+                    :commands (flycheck-mode global-flycheck-mode)
+                          :ensure t
+                          ;; :init (global-flycheck-mode)
+                          )
+                  (use-package flycheck-popup-tip
+                    :after flycheck)
+                  (with-eval-after-load 'flycheck
+                    '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
+    (use-package flyspell-lazy
+      :commands (flycheck-mode global-flycheck-mode)
+      )
+    (flyspell-lazy-mode 1)
 #+end_src
 ** Keep Emacs clean
 - Emacs.org~
@@ -698,7 +700,7 @@ This Prescient configuration is optimized for use in System Crafters videos and 
 ** Keybindings
 #+begin_src emacs-lisp
     (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
-      ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
+    ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
     (use-package general ;; set personal bindings for leader key for example
      ; (general-define-key "C-M-j" 'counsel-switch-buffer) ;; allows to define multiple global keybindings
@@ -706,9 +708,9 @@ This Prescient configuration is optimized for use in System Crafters videos and 
       :config
       (general-evil-setup t)
       (general-create-definer pol/leader-key
-      :keymaps '(normal insert visual emacs)
-      :prefix "SPC" 
-      :global-prefix "C-SPC") ;; leader
+        :keymaps '(normal insert visual emacs)
+        :prefix "SPC" 
+        :global-prefix "C-SPC") ;; leader
       (general-create-definer pol/ctrl-c-keys
         :prefix "C-c"))
 
