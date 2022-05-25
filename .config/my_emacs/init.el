@@ -297,6 +297,7 @@
                                                       ;Required package `highlight-indentation-0.5.0' is unavailable then install package
               (use-package pkg-info)
               (use-package spell-fu
+                :commands spell-fu-mode
                 ) ;; this underlines mistakes
           (add-hook 'spell-fu-mode-hook ;;this is what really makes it work
                     (lambda ()
@@ -324,6 +325,7 @@
               (with-eval-after-load 'flycheck
                 '(add-hook 'flycheck-mode-hook 'flycheck-popup-tip-mode))
 (use-package flyspell-lazy
+  :commands (flycheck-mode global-flycheck-mode)
   )
 (flyspell-lazy-mode 1)
 
@@ -475,7 +477,7 @@
 ;;   :hook (doom-modeline-mode . minions-mode))
 
 (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
-  ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
+;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
 (use-package general ;; set personal bindings for leader key for example
  ; (general-define-key "C-M-j" 'counsel-switch-buffer) ;; allows to define multiple global keybindings
@@ -483,9 +485,9 @@
   :config
   (general-evil-setup t)
   (general-create-definer pol/leader-key
-  :keymaps '(normal insert visual emacs)
-  :prefix "SPC" 
-  :global-prefix "C-SPC") ;; leader
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC" 
+    :global-prefix "C-SPC") ;; leader
   (general-create-definer pol/ctrl-c-keys
     :prefix "C-c"))
 
@@ -939,13 +941,13 @@ _h_ decrease width    _l_ increase width
 (use-package org-appear
   :hook (org-mode . org-appear-mode))
 
-;; (defun efs/org-mode-visual-fill ()
-;;   (setq visual-fill-column-width 100 ;; set column width (character width?)
-;;         visual-fill-column-center-text t) ;; center text on middle of screen
-;;   (visual-fill-column-mode 1))
+(defun efs/org-mode-visual-fill ()
+  (setq visual-fill-column-width 100 ;; set column width (character width?)
+        visual-fill-column-center-text t) ;; center text on middle of screen
+  (visual-fill-column-mode 1))
 
-;; (use-package visual-fill-column
-;;   :hook (org-mode . efs/org-mode-visual-fill))
+(use-package visual-fill-column
+  :hook (org-mode . efs/org-mode-visual-fill))
 
 (use-package org-bullets ;; changes headers so that it doesn't show all of the stars
   :hook (org-mode . org-bullets-mode)

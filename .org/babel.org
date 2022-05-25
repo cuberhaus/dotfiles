@@ -1210,13 +1210,13 @@ Show markup symbols when cursor is placed inside of them
 *** Text in the middle
 #+begin_src emacs-lisp
 
-  ;; (defun efs/org-mode-visual-fill ()
-  ;;   (setq visual-fill-column-width 100 ;; set column width (character width?)
-  ;;         visual-fill-column-center-text t) ;; center text on middle of screen
-  ;;   (visual-fill-column-mode 1))
+    (defun efs/org-mode-visual-fill ()
+      (setq visual-fill-column-width 100 ;; set column width (character width?)
+            visual-fill-column-center-text t) ;; center text on middle of screen
+      (visual-fill-column-mode 1))
 
-  ;; (use-package visual-fill-column
-  ;;   :hook (org-mode . efs/org-mode-visual-fill))
+    (use-package visual-fill-column
+      :hook (org-mode . efs/org-mode-visual-fill))
 #+end_src
 *** Org bullets
 #+begin_src emacs-lisp
