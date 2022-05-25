@@ -192,8 +192,6 @@
                 shell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0 ))))
 
-;; (use-package langtool)
-
 ;; has to install pdf2svg on pc first
 ;; (use-package org-inline-pdf
 ;;   :init
@@ -279,10 +277,20 @@
 ;;   (default-text-scale-mode))
 
 ;; in arch linux use languagetool path
-(setq langtool-java-classpath
-      "/usr/share/languagetool:/usr/share/java/languagetool/*")
-    (use-package langtool
-      :commands langtool-check)
+        (setq langtool-java-classpath
+              "/usr/share/languagetool:/usr/share/java/languagetool/*")
+            (use-package langtool
+              :commands langtool-check)
+;;     (defun langtool-autoshow-detail-popup (overlays)
+;;       (when (require 'popup nil t)
+;;         ;; Do not interrupt current popup
+;;         (unless (or popup-instances
+;;                     ;; suppress popup after type `C-g` .
+;;                     (memq last-command '(keyboard-quit)))
+;;           (let ((msg (langtool-details-error-message overlays)))
+;;             (popup-tip msg)))))
+;; (setq langtool-autoshow-message-function
+;;       'langtool-autoshow-detail-popup)
 
 ;; execute spanish spell-checking on buffer
               (defun flyspell-spanish ()
@@ -588,6 +596,12 @@
   "t C-p" '( :which-key "git-gutter toggle") 
   "mp" '(grip-mode :which-key "Live preview")
   "mt" '(markdown-toc-generate-or-refresh-toc :which-key "generate-or-refresh-toc")
+  "l" '(:ignore :which-key "Language tool") 
+  "ll" '(langtool-check :which-key "Check buffer") 
+  "ld" '(langtool-check-done :which-key "Remove langtool markers") 
+  "lc" '(langtool-correct-buffer :which-key "Correct buffer") 
+  "ln" '(langtool-goto-next-error :which-key "Go to next error") 
+  "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
   )
 
   ;; (global-unset-key (kbd "C-c C-w"))
