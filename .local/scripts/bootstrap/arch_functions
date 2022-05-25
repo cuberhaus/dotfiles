@@ -14,6 +14,7 @@ myTerminal="kitty"
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
 emacs() {
+    echo "default" | tee $HOME/.config/chemacs/profile
     pip3 install ptvsd                          # for python dap
     pip install grip                            # real time preview compiler 
     # npm install -g marked  
