@@ -466,13 +466,13 @@ Highlight buffer on the fly will be done by this
 It is much better to use server-mode than console-mode, better suggestions
 Buffer corrections will be done with this
 #+begin_src emacs-lisp
-                ;; in arch linux use languagetool path
-                ;; (setq langtool-java-classpath
-                ;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
-    (setq langtool-language-tool-server-jar "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar")
-(setq langtool-server-user-arguments '("-p" "8085")) ;; this makes it possible to run two servers, or rather two connections to the server from flycheck-languagetool for on the fly highlight and langtool for correction suggestions (GODLIKE)
-                    (use-package langtool
-                      :commands (langtool-check langtool-check-done))
+                    ;; in arch linux use languagetool path
+                    ;; (setq langtool-java-classpath
+                    ;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
+        (setq langtool-language-tool-server-jar "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar")
+    (setq langtool-server-user-arguments '("-p" "8085")) ;; this makes it possible to run two servers, or rather two connections to the server from flycheck-languagetool for on the fly highlight and langtool for correction suggestions (GODLIKE)
+                        (use-package langtool
+                          :commands (langtool-check langtool-check-done))
 #+end_src
 
 Use flycheck-verify-setup to check everything is up and running
@@ -843,7 +843,7 @@ This Prescient configuration is optimized for use in System Crafters videos and 
       "lc" '(langtool-correct-buffer :which-key "Correct buffer") 
       "ln" '(flycheck-next-error :which-key "Go to next error") 
       "lp" '(flycheck-previous-error :which-key "Go to previous error") 
-      "ld" '(flycheck-display-error-at-point :which-key "Go to previous error") 
+      "le" '(flycheck-display-error-at-point :which-key "Display error") 
       ;; "ln" '(langtool-goto-next-error :which-key "Go to next error") 
       ;; "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
       )

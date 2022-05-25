@@ -616,7 +616,7 @@
   "lc" '(langtool-correct-buffer :which-key "Correct buffer") 
   "ln" '(flycheck-next-error :which-key "Go to next error") 
   "lp" '(flycheck-previous-error :which-key "Go to previous error") 
-  "ld" '(flycheck-display-error-at-point :which-key "Go to previous error") 
+  "le" '(flycheck-display-error-at-point :which-key "Display error") 
   ;; "ln" '(langtool-goto-next-error :which-key "Go to next error") 
   ;; "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
   )
