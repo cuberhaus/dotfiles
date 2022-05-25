@@ -276,21 +276,36 @@
 ;;   :config
 ;;   (default-text-scale-mode))
 
+;; (use-package languagetool
+;;   :ensure t
+;;   :defer t
+;;   :commands (languagetool-check
+;;              languagetool-clear-suggestions
+;;              languagetool-correct-at-point
+;;              languagetool-correct-buffer
+;;              languagetool-set-language
+;;              languagetool-server-mode
+;;              languagetool-server-start
+;;              languagetool-server-stop)
+;;   :config
+;;   (setq languagetool-java-arguments '("-Dfile.encoding=UTF-8")
+;;         languagetool-console-command "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-commandline.jar"
+;;         languagetool-server-command "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+
+(use-package flycheck-languagetool
+      :ensure t
+      :hook (text-mode . flycheck-languagetool-setup)
+      :init
+      (setq flycheck-languagetool-server-jar "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+(setq flycheck-languagetool-language "es")
+
 ;; in arch linux use languagetool path
-        (setq langtool-java-classpath
-              "/usr/share/languagetool:/usr/share/java/languagetool/*")
-            (use-package langtool
-              :commands langtool-check)
-;;     (defun langtool-autoshow-detail-popup (overlays)
-;;       (when (require 'popup nil t)
-;;         ;; Do not interrupt current popup
-;;         (unless (or popup-instances
-;;                     ;; suppress popup after type `C-g` .
-;;                     (memq last-command '(keyboard-quit)))
-;;           (let ((msg (langtool-details-error-message overlays)))
-;;             (popup-tip msg)))))
-;; (setq langtool-autoshow-message-function
-;;       'langtool-autoshow-detail-popup)
+                ;; (setq langtool-java-classpath
+                ;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
+    (setq langtool-language-tool-server-jar "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar")
+(setq langtool-server-user-arguments '("-p" "8085")) ;; this makes it possible to run two servers, or rather two connections to the server from flycheck-languagetool for on the fly highlight and langtool for correction suggestions (GODLIKE)
+                    (use-package langtool
+                      :commands (langtool-check langtool-check-done))
 
 ;; execute spanish spell-checking on buffer
               (defun flyspell-spanish ()
@@ -326,6 +341,7 @@
               ;; (global-spell-fu-mode)
               (use-package flycheck
                 :commands (flycheck-mode global-flycheck-mode)
+                :hook 
                       :ensure t
                       ;; :init (global-flycheck-mode)
                       )
@@ -598,8 +614,11 @@
   "ll" '(langtool-check :which-key "Check buffer") 
   "ld" '(langtool-check-done :which-key "Check-done, remove markers") 
   "lc" '(langtool-correct-buffer :which-key "Correct buffer") 
-  "ln" '(langtool-goto-next-error :which-key "Go to next error") 
-  "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
+  "ln" '(flycheck-next-error :which-key "Go to next error") 
+  "lp" '(flycheck-previous-error :which-key "Go to previous error") 
+  "ld" '(flycheck-display-error-at-point :which-key "Go to previous error") 
+  ;; "ln" '(langtool-goto-next-error :which-key "Go to next error") 
+  ;; "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
   )
 
   ;; (global-unset-key (kbd "C-c C-w"))
@@ -616,10 +635,10 @@
     ("k" text-scale-decrease "out")
     ("q" nil "finished" :exit t))
   (pol/leader-key
-    "t+" '(hydra-text-scale/body :which-key "scale text"))
+    "t+" '(hydra-text-scale/body :which-key "Scale text"))
 
   (pol/leader-key
-    "tr" '(window-resize-hydra/body :which-key "resize windows"))
+    "tr" '(window-resize-hydra/body :which-key "Resize windows"))
 
   (defhydra window-resize-hydra (:hint nil)
   "
@@ -730,7 +749,7 @@ _h_ decrease width    _l_ increase width
     (dw/enter-focus-mode)))
 
 (pol/leader-key
-  "tz" '(dw/toggle-focus-mode :which-key "focus mode")
+  "tz" '(dw/toggle-focus-mode :which-key "Focus mode")
   ;; "te" '(dw/enter-focus-mode :which-key "focus mode")
   ;; "ta" '(dw/leave-focus-mode :which-key "focus mode")
   )
