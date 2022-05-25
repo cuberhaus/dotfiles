@@ -150,6 +150,7 @@ doom_emacs_install() {
     brew install cabal-install #haskell
     brew install dante
     brew install haskell-language-server
+    echo "doom" | tee $HOME/.config/chemacs/profile
 }
 
 app_store_install() {
