@@ -278,10 +278,11 @@
 ;;   :config
 ;;   (default-text-scale-mode))
 
-;; (setq langtool-java-classpath
-;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
-;;     (use-package langtool
-;;       :commands langtool-check)
+;; in arch linux use languagetool path
+(setq langtool-java-classpath
+      "/usr/share/languagetool:/usr/share/java/languagetool/*")
+    (use-package langtool
+      :commands langtool-check)
 
 ;; execute spanish spell-checking on buffer
               (defun flyspell-spanish ()

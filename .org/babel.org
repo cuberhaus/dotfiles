@@ -440,11 +440,11 @@ Have to wait for efficient integration with Ivy (currently this is what makes iv
 ** Spell-checking
 https://github.com/mhayashi1120/Emacs-langtool
 #+begin_src emacs-lisp
-
-    ;; (setq langtool-java-classpath
-    ;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
-    ;;     (use-package langtool
-    ;;       :commands langtool-check)
+    ;; in arch linux use languagetool path
+    (setq langtool-java-classpath
+          "/usr/share/languagetool:/usr/share/java/languagetool/*")
+        (use-package langtool
+          :commands langtool-check)
 #+end_src
 
 Use flycheck-verify-setup to check everything is up and running
