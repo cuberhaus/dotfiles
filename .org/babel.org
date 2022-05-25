@@ -1417,7 +1417,7 @@ For some reason have to run “package-refresh-contents”
     ;; Use keybindings
     (use-package grip-mode
       :ensure t
-      ;; :commands
+      :commands grip-mode
       )
 #+end_src
 

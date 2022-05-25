@@ -1135,7 +1135,7 @@ _h_ decrease width    _l_ increase width
 ;; Use keybindings
 (use-package grip-mode
   :ensure t
-  ;; :commands
+  :commands grip-mode
   )
 
 (use-package markdown-mode
