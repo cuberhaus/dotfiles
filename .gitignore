@@ -20,6 +20,7 @@
 
 
 #emacs
+.cache/emacs/var/org/
 .cache/emacs/var/auto-package-update-last-update-day
 .cache/emacs/var/prescient-save.el
 .cache/emacs/var/projectile/
