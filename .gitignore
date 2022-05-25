@@ -1,3 +1,5 @@
+.config/chemacs/profile
+
 *.tmp
 .config/gtk-2.0/
 .local/bin
