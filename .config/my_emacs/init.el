@@ -289,20 +289,20 @@
 ;;              languagetool-server-stop)
 ;;   :config
 ;;   (setq languagetool-java-arguments '("-Dfile.encoding=UTF-8")
-;;         languagetool-console-command "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-commandline.jar"
-;;         languagetool-server-command "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+;;         languagetool-console-command (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-commandline.jar")
+;;         languagetool-server-command (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar")))
 
 (use-package flycheck-languagetool
       :ensure t
       :hook (text-mode . flycheck-languagetool-setup)
       :init
-      (setq flycheck-languagetool-server-jar "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+      (setq flycheck-languagetool-server-jar (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar")))
 (setq flycheck-languagetool-language "es")
 
 ;; in arch linux use languagetool path
                 ;; (setq langtool-java-classpath
                 ;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
-    (setq langtool-language-tool-server-jar "/home/pol/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar")
+    (setq langtool-language-tool-server-jar (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
 (setq langtool-server-user-arguments '("-p" "8085")) ;; this makes it possible to run two servers, or rather two connections to the server from flycheck-languagetool for on the fly highlight and langtool for correction suggestions (GODLIKE)
                     (use-package langtool
                       :commands (langtool-check langtool-check-done))
@@ -614,11 +614,11 @@
   "ll" '(langtool-check :which-key "Check buffer") 
   "ld" '(langtool-check-done :which-key "Check-done, remove markers") 
   "lc" '(langtool-correct-buffer :which-key "Correct buffer") 
-  "ln" '(flycheck-next-error :which-key "Go to next error") 
-  "lp" '(flycheck-previous-error :which-key "Go to previous error") 
-  "le" '(flycheck-display-error-at-point :which-key "Display error") 
-  ;; "ln" '(langtool-goto-next-error :which-key "Go to next error") 
-  ;; "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
+  ;; "ln" '(flycheck-next-error :which-key "Go to next error") 
+  ;; "lp" '(flycheck-previous-error :which-key "Go to previous error") 
+  ;; "le" '(flycheck-display-error-at-point :which-key "Display error") 
+  "ln" '(langtool-goto-next-error :which-key "Go to next error") 
+  "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
   )
 
   ;; (global-unset-key (kbd "C-c C-w"))
