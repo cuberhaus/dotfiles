@@ -727,12 +727,15 @@ This Prescient configuration is optimized for use in System Crafters videos and 
 #+end_src
 ** Keybindings
 #+begin_src emacs-lisp
+    (setq mac-command-modifier 'meta)
     ;; (defun show-in-finder ()
     ;;   (interactive)
     ;;   (shell-command (concat "open -R "  buffer-file-name))
     ;;   )
     (use-package reveal-in-osx-finder)
+#+end_src
 
+#+begin_src emacs-lisp
     (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
     ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 

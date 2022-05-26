@@ -500,6 +500,7 @@
 ;; (use-package minions
 ;;   :hook (doom-modeline-mode . minions-mode))
 
+(setq mac-command-modifier 'meta)
 ;; (defun show-in-finder ()
 ;;   (interactive)
 ;;   (shell-command (concat "open -R "  buffer-file-name))
