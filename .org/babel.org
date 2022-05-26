@@ -732,133 +732,143 @@ This Prescient configuration is optimized for use in System Crafters videos and 
     ;;   (interactive)
     ;;   (shell-command (concat "open -R "  buffer-file-name))
     ;;   )
-    (use-package reveal-in-osx-finder)
+    (use-package reveal-in-osx-finder) ;; works well
 #+end_src
 
 #+begin_src emacs-lisp
-    (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
-    ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
+        (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
+        ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
-    (use-package general ;; set personal bindings for leader key for example
-     ; (general-define-key "C-M-j" 'counsel-switch-buffer) ;; allows to define multiple global keybindings
-      ;; :after evil
-      :config
-      (general-evil-setup t)
-      (general-create-definer pol/leader-key
-        :keymaps '(normal insert visual emacs)
-        :prefix "SPC" 
-        :global-prefix "C-SPC") ;; leader
-      (general-create-definer pol/ctrl-c-keys
-        :prefix "C-c"))
+        (use-package general ;; set personal bindings for leader key for example
+         ; (general-define-key "C-M-j" 'counsel-switch-buffer) ;; allows to define multiple global keybindings
+          ;; :after evil
+          :config
+          (general-evil-setup t)
+          (general-create-definer pol/leader-key
+            :keymaps '(normal insert visual emacs)
+            :prefix "SPC" 
+            :global-prefix "C-SPC") ;; leader
+          (general-create-definer pol/ctrl-c-keys
+            :prefix "C-c"))
 
-        ;;,** Mode Keybindings
-        ;; (general-define-key
-        ;; :keymaps 'eyebrowse-mode-map
-        ;; :prefix "SPC a"
-        ;; ;; bind "C-c C-l"
-        ;; ;; "C-z" 'cider-switch-to-repl-buffer
-        ;; )
+            ;;,** Mode Keybindings
+            ;; (general-define-key
+            ;; :keymaps 'eyebrowse-mode-map
+            ;; :prefix "SPC a"
+            ;; ;; bind "C-c C-l"
+            ;; ;; "C-z" 'cider-switch-to-repl-buffer
+            ;; )
 
-    ;; define workspace keys
-    (pol/leader-key
-      "TAB" '(:ignore s :which-key "workspace")
-      "TAB <" '(eyebrowse-prev-window-config :which-key "Previous window") 
-      "TAB >" '(eyebrowse-next-window-config :which-key "Next window")
-      "TAB '" '(eyebrowse-last-window-config :which-key "Last window")
-      "TAB k" '(eyebrowse-close-window-config :which-key "Close window")
-      "TAB ," '(eyebrowse-rename-window-config :which-key "Rename window")
-      "TAB ." '(eyebrowse-switch-to-window-config :which-key "Switch to window")
-      "TAB c" '(eyebrowse-create-window-config :which-key "Create window config")
-      ;; "0" '(eyebrowse-switch-to-window-config-0 :which-key "Switch to final workspace")
-      ;; "1" '(eyebrowse-switch-to-window-config-1 :which-key "Switch to 1st workspace")
-      ;; "2" '(eyebrowse-switch-to-window-config-2 :which-key "Switch to 2nd workspace")
-      ;; "3" '(eyebrowse-switch-to-window-config-3 :which-key "Switch to 3rd workspace")
-      ;; "4" '(eyebrowse-switch-to-window-config-4 :which-key "Switch to 4th workspace")
-      ;; "5" '(eyebrowse-switch-to-window-config-5 :which-key "Switch to 5th workspace")
-      ;; "6" '(eyebrowse-switch-to-window-config-6 :which-key "Switch to 6th workspace")
-      ;; "7" '(eyebrowse-switch-to-window-config-7 :which-key "Switch to 7th workspace")
-      ;; "8" '(eyebrowse-switch-to-window-config-8 :which-key "Switch to 8th workspace")
-      ;; "9" '(eyebrowse-switch-to-window-config-9 :which-key "Switch to 9th workspace")
-      "0" '(eyebrowse-switch-to-window-config-0 :which-key "ws 0")
-      "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 0")
-      "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 0")
-      "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 0")
-      "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 0")
-      "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 0")
-      "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 0")
-      "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 0")
-      "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 0")
-      "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 0")
-      )
+    (cond ((eq system-type 'windows-nt)
+           ;; Windows-specific code goes here.
+           )
+          ((eq system-type 'darwin)
+           (pol/leader-key
+             "oo" '(reveal-in-osx-finder :which-key "Toggle vterm")
+             )
+           )
+          ((eq system-type 'gnu/linux)
+           ))
+        ;; define workspace keys
+        (pol/leader-key
+          "TAB" '(:ignore s :which-key "workspace")
+          "TAB <" '(eyebrowse-prev-window-config :which-key "Previous window") 
+          "TAB >" '(eyebrowse-next-window-config :which-key "Next window")
+          "TAB '" '(eyebrowse-last-window-config :which-key "Last window")
+          "TAB k" '(eyebrowse-close-window-config :which-key "Close window")
+          "TAB ," '(eyebrowse-rename-window-config :which-key "Rename window")
+          "TAB ." '(eyebrowse-switch-to-window-config :which-key "Switch to window")
+          "TAB c" '(eyebrowse-create-window-config :which-key "Create window config")
+          ;; "0" '(eyebrowse-switch-to-window-config-0 :which-key "Switch to final workspace")
+          ;; "1" '(eyebrowse-switch-to-window-config-1 :which-key "Switch to 1st workspace")
+          ;; "2" '(eyebrowse-switch-to-window-config-2 :which-key "Switch to 2nd workspace")
+          ;; "3" '(eyebrowse-switch-to-window-config-3 :which-key "Switch to 3rd workspace")
+          ;; "4" '(eyebrowse-switch-to-window-config-4 :which-key "Switch to 4th workspace")
+          ;; "5" '(eyebrowse-switch-to-window-config-5 :which-key "Switch to 5th workspace")
+          ;; "6" '(eyebrowse-switch-to-window-config-6 :which-key "Switch to 6th workspace")
+          ;; "7" '(eyebrowse-switch-to-window-config-7 :which-key "Switch to 7th workspace")
+          ;; "8" '(eyebrowse-switch-to-window-config-8 :which-key "Switch to 8th workspace")
+          ;; "9" '(eyebrowse-switch-to-window-config-9 :which-key "Switch to 9th workspace")
+          "0" '(eyebrowse-switch-to-window-config-0 :which-key "ws 0")
+          "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 0")
+          "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 0")
+          "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 0")
+          "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 0")
+          "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 0")
+          "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 0")
+          "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 0")
+          "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 0")
+          "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 0")
+          )
 
-    (pol/leader-key ;; try to have similar keybindings in vim as well
-      "<RET>" '(bookmark-jump :which-key "Jump to bookmark")
-      "." '(counsel-find-file :which-key "Find file")
-      "s" '(:ignore s :which-key "session")
-      "ss" '(session-save :which-key "Session save")
-      "sr" '(session-restore :which-key "Session restore")
-      "o" '(:ignore o :which-key "open") 
-      "ot" '(vterm-toggle :which-key "Toggle vterm")
-      "od" '(vterm-toggle-cd :which-key "Toggle vterm on current folder")
-      "o-" '(dired-jump :which-key "Toggle vterm")
-      "c" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
-      "h" '(:ignore h :which-key "git-gutter") 
-      "hn" '(git-gutter:next-hunk :which-key "Next hunk") 
-      "hp" '(git-gutter:previous-hunk :which-key "Previous hunk") 
-      "hv" '(git-gutter:popup-hunk :which-key "Preview hunk") 
-      "hs" '(git-gutter:stage-hunk :which-key "Stage hunk") 
-      "hu" '(git-gutter:revert-hunk :which-key "Undo hunk") ;; take back changes
-      "hg" '(git-gutter :which-key "Update changes") 
-      "b" '(:ignore b :which-key "buffers") 
-      "bn" '(evil-next-buffer :which-key "Next buffer") 
-      "bp" '(evil-prev-buffer :which-key "Previous buffer")
-      "bk" '(evil-delete-buffer :which-key "Kill buffer")
-      "bd" '(evil-delete-buffer :which-key "Kill buffer")
-      "br" '(revert-buffer-quick :which-key "Revert buffer")
-      "bR" '(rename-buffer :which-key "Rename buffer")
-      "bs" '(basic-save-buffer :which-key "Save the current buffer in its visited file")
-      "bS" '(basic-save-buffer :which-key "Save all buffers visiting a file")
-      "<" '(counsel-switch-buffer :which-key "Switch buffer") ;; similarity with doom
-      "u" '(universal-argument :which-key "Universal argument") ;; similarity with doom
-      "-" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer") ;; similarity with doom
-      "w" '(:ignore w :which-key "windows")
-      "wr" '(winner-redo :which-key "Redo window layout")
-      "wu" '(winner-undo :which-key "Undo window layout")
-      "p" '(:ignore s :which-key "project")
-      "pr" '(projectile-recentf :which-key "Recent file")
-      "pp" '(projectile-switch-project :which-key "Switch project")
-      "pb" '(projectile-switch-to-buffer :which-key "Switch buffer")
-      "f" '(:ignore s :which-key "file")
-      "fr" '(counsel-recentf :which-key "Recent file")
-      "fs" '(save-buffer :which-key "Save buffer") ;; classic vim save
-      "fS" '(write-file :which-key "Write current buffer into file FILENAME")
-      "fD" '(delete-file-and-buffer :which-key "Delete file")
-      "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
-      "to" '(openwith-mode :which-key "Open with external app")
-      "tt" '(counsel-load-theme :which-key "Choose theme")
-      "ts" '(spell-fu-mode :which-key "Spell checker")
-      "tf" '(flycheck-mode :which-key "Flycheck")
-      "tg" '(git-gutter-mode :which-key "Git-gutter toggle") 
-      "tp" '(:ignore tp :which-key "pomodoro") 
-      "tp C-s" '(pomodoro-start :which-key "Pomodoro start") 
-      "tpp" '(pomodoro-pause :which-key "Pomodoro pause") 
-      "tpr" '(pomodoro-resume :which-key "Pomodoro resume") 
-      "m" '(:ignore m :which-key "markdown") 
-      "mp" '(grip-mode :which-key "Live preview")
-      "mt" '(markdown-toc-generate-or-refresh-toc :which-key "Generate or refresh toc")
-      "l" '(:ignore l :which-key "language tool") 
-      "ll" '(langtool-check :which-key "Check buffer") 
-      "ld" '(langtool-check-done :which-key "Check-done, remove markers") 
-      "lc" '(langtool-correct-buffer :which-key "Correct buffer") 
-      ;; "ln" '(flycheck-next-error :which-key "Go to next error") 
-      ;; "lp" '(flycheck-previous-error :which-key "Go to previous error") 
-      ;; "le" '(flycheck-display-error-at-point :which-key "Display error") 
-      "ln" '(langtool-goto-next-error :which-key "Go to next error") 
-      "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
-      )
+        (pol/leader-key ;; try to have similar keybindings in vim as well
+          "<RET>" '(bookmark-jump :which-key "Jump to bookmark")
+          "." '(counsel-find-file :which-key "Find file")
+          "s" '(:ignore s :which-key "session")
+          "ss" '(session-save :which-key "Session save")
+          "sr" '(session-restore :which-key "Session restore")
+          "o" '(:ignore o :which-key "open") 
+          "ot" '(vterm-toggle :which-key "Toggle vterm")
+          "od" '(vterm-toggle-cd :which-key "Toggle vterm on current folder")
+          "o-" '(dired-jump :which-key "Toggle vterm")
+          "c" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
+          "h" '(:ignore h :which-key "git-gutter") 
+          "hn" '(git-gutter:next-hunk :which-key "Next hunk") 
+          "hp" '(git-gutter:previous-hunk :which-key "Previous hunk") 
+          "hv" '(git-gutter:popup-hunk :which-key "Preview hunk") 
+          "hs" '(git-gutter:stage-hunk :which-key "Stage hunk") 
+          "hu" '(git-gutter:revert-hunk :which-key "Undo hunk") ;; take back changes
+          "hg" '(git-gutter :which-key "Update changes") 
+          "b" '(:ignore b :which-key "buffers") 
+          "bn" '(evil-next-buffer :which-key "Next buffer") 
+          "bp" '(evil-prev-buffer :which-key "Previous buffer")
+          "bk" '(evil-delete-buffer :which-key "Kill buffer")
+          "bd" '(evil-delete-buffer :which-key "Kill buffer")
+          "br" '(revert-buffer-quick :which-key "Revert buffer")
+          "bR" '(rename-buffer :which-key "Rename buffer")
+          "bs" '(basic-save-buffer :which-key "Save the current buffer in its visited file")
+          "bS" '(basic-save-buffer :which-key "Save all buffers visiting a file")
+          "<" '(counsel-switch-buffer :which-key "Switch buffer") ;; similarity with doom
+          "u" '(universal-argument :which-key "Universal argument") ;; similarity with doom
+          "-" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer") ;; similarity with doom
+          "w" '(:ignore w :which-key "windows")
+          "wr" '(winner-redo :which-key "Redo window layout")
+          "wu" '(winner-undo :which-key "Undo window layout")
+          "p" '(:ignore s :which-key "project")
+          "pr" '(projectile-recentf :which-key "Recent file")
+          "pp" '(projectile-switch-project :which-key "Switch project")
+          "pb" '(projectile-switch-to-buffer :which-key "Switch buffer")
+          "f" '(:ignore s :which-key "file")
+          "fr" '(counsel-recentf :which-key "Recent file")
+          "fs" '(save-buffer :which-key "Save buffer") ;; classic vim save
+          "fS" '(write-file :which-key "Write current buffer into file FILENAME")
+          "fD" '(delete-file-and-buffer :which-key "Delete file")
+          "t" '(:ignore t :which-key "toggles") ;; "folder" for toggles
+          "to" '(openwith-mode :which-key "Open with external app")
+          "tt" '(counsel-load-theme :which-key "Choose theme")
+          "ts" '(spell-fu-mode :which-key "Spell checker")
+          "tf" '(flycheck-mode :which-key "Flycheck")
+          "tg" '(git-gutter-mode :which-key "Git-gutter toggle") 
+          "tp" '(:ignore tp :which-key "pomodoro") 
+          "tp C-s" '(pomodoro-start :which-key "Pomodoro start") 
+          "tpp" '(pomodoro-pause :which-key "Pomodoro pause") 
+          "tpr" '(pomodoro-resume :which-key "Pomodoro resume") 
+          "m" '(:ignore m :which-key "markdown") 
+          "mp" '(grip-mode :which-key "Live preview")
+          "mt" '(markdown-toc-generate-or-refresh-toc :which-key "Generate or refresh toc")
+          "l" '(:ignore l :which-key "language tool") 
+          "ll" '(langtool-check :which-key "Check buffer") 
+          "ld" '(langtool-check-done :which-key "Check-done, remove markers") 
+          "lc" '(langtool-correct-buffer :which-key "Correct buffer") 
+          ;; "ln" '(flycheck-next-error :which-key "Go to next error") 
+          ;; "lp" '(flycheck-previous-error :which-key "Go to previous error") 
+          ;; "le" '(flycheck-display-error-at-point :which-key "Display error") 
+          "ln" '(langtool-goto-next-error :which-key "Go to next error") 
+          "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
+          )
 
-      ;; (global-unset-key (kbd "C-c C-w"))
-      ;; (global-unset-key (kbd "SPC a"))
+          ;; (global-unset-key (kbd "C-c C-w"))
+          ;; (global-unset-key (kbd "SPC a"))
 #+end_src
 *** Rebind C-u
 Since I let evil-mode take over C-u for buffer scrolling, I need to re-bind the universal-argument command to another key sequence. I’m choosing C-M-u for this purpose.
