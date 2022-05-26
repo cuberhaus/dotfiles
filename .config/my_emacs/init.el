@@ -341,10 +341,9 @@
               ;; (global-spell-fu-mode)
               (use-package flycheck
                 :commands (flycheck-mode global-flycheck-mode)
-                :hook 
-                      :ensure t
-                      ;; :init (global-flycheck-mode)
-                      )
+                :ensure t
+                ;; :init (global-flycheck-mode)
+                )
               (use-package flycheck-popup-tip
                 :after flycheck)
               (with-eval-after-load 'flycheck
