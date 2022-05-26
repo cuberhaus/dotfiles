@@ -500,6 +500,8 @@
 ;; (use-package minions
 ;;   :hook (doom-modeline-mode . minions-mode))
 
+(setq mac-command-modifier 'meta)
+
 (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
 ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
