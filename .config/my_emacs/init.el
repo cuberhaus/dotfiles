@@ -500,6 +500,12 @@
 ;; (use-package minions
 ;;   :hook (doom-modeline-mode . minions-mode))
 
+;; (defun show-in-finder ()
+;;   (interactive)
+;;   (shell-command (concat "open -R "  buffer-file-name))
+;;   )
+(use-package reveal-in-osx-finder)
+
 (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
 ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
 
@@ -564,6 +570,7 @@
   "o" '(:ignore o :which-key "open") 
   "ot" '(vterm-toggle :which-key "Toggle vterm")
   "od" '(vterm-toggle-cd :which-key "Toggle vterm on current folder")
+  "o-" '(dired-jump :which-key "Toggle vterm")
   "c" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
   "h" '(:ignore h :which-key "git-gutter") 
   "hn" '(git-gutter:next-hunk :which-key "Next hunk") 
