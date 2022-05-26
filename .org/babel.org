@@ -764,7 +764,7 @@ This Prescient configuration is optimized for use in System Crafters videos and 
            )
           ((eq system-type 'darwin)
            (pol/leader-key
-             "oo" '(reveal-in-osx-finder :which-key "Toggle vterm")
+             "oo" '(reveal-in-osx-finder :which-key "Open file in finder")
              )
            )
           ((eq system-type 'gnu/linux)

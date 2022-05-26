@@ -535,7 +535,7 @@
        )
       ((eq system-type 'darwin)
        (pol/leader-key
-         "oo" '(reveal-in-osx-finder :which-key "Toggle vterm")
+         "oo" '(reveal-in-osx-finder :which-key "Open file in finder")
          )
        )
       ((eq system-type 'gnu/linux)
