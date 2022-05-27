@@ -582,7 +582,9 @@
       "ot" '(vterm-toggle :which-key "Toggle vterm")
       "od" '(vterm-toggle-cd :which-key "Toggle vterm on current folder")
       "o-" '(dired-jump :which-key "Toggle vterm")
-      "c" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
+      "C" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
+      "c" '(:ignore c :which-key "code") 
+      "cf" '(format-all-buffer :which-key "code") 
       "h" '(:ignore h :which-key "git-gutter") 
       "hn" '(git-gutter:next-hunk :which-key "Next hunk") 
       "hp" '(git-gutter:previous-hunk :which-key "Previous hunk") 
