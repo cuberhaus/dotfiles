@@ -65,6 +65,34 @@
     (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
     (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
     )
+
+
+(use-package! eyebrowse
+    :ensure t
+    :init
+    (setq eyebrowse-keymap-prefix (kbd "")) ;; this seems to work to unbind keybindings :D
+    (global-unset-key (kbd "C-c C-w"))
+    ;; we have to set this before the package is initialized  https://github.com/wasamasa/eyebrowse/issues/49
+    :config
+    (eyebrowse-mode t)
+    (setq eyebrowse-new-workspace t) ; by default nil, clones last workspace, set to true shows scratch
+)
+;; https://www.youtube.com/watch?v=QRmKpqDP5yE&ab_channel=ZaisteProgramming
+;; lookup function !map within emacs
+;; with :desc you can add a description string immediately after
+(map! :leader
+      :desc "ws 0" "0" #'eyebrowse-switch-to-window-config-0
+      :desc "ws 1" "1" #'eyebrowse-switch-to-window-config-1
+      :desc "ws 2" "2" #'eyebrowse-switch-to-window-config-2
+      :desc "ws 3" "3" #'eyebrowse-switch-to-window-config-3
+      :desc "ws 4" "4" #'eyebrowse-switch-to-window-config-4
+      :desc "ws 5" "5" #'eyebrowse-switch-to-window-config-5
+      :desc "ws 6" "6" #'eyebrowse-switch-to-window-config-6
+      :desc "ws 7" "7" #'eyebrowse-switch-to-window-config-7
+      :desc "ws 8" "8" #'eyebrowse-switch-to-window-config-8
+      :desc "ws 9" "9" #'eyebrowse-switch-to-window-config-9
+      )
+
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
