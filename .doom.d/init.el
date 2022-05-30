@@ -21,6 +21,7 @@
 
        :completion
        company           ; the ultimate code completion backend
+       ; (company +childframe)           ; the ultimate code completion backend
        (ivy +icons +prescient); a search engine for love and life
        ;;ivy                      ; a search engine for love and life
        ;;(helm +fuzzy)              ; the *other* search engine for love and life

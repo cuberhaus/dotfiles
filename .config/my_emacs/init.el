@@ -1433,7 +1433,7 @@ _h_ decrease width    _l_ increase width
   :custom
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
-
+;; (use-package company-dict)
 (use-package company-box
   :hook (company-mode . company-box-mode))
 
