@@ -138,6 +138,7 @@ doom_emacs_install() {
     # ghcup installer for the general purpose language Haskell
     curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
     # Optional
+    brew install gnuplot # doom org 
     brew install jq
     brew install black # python code formatting
     brew install pipenv # python 
