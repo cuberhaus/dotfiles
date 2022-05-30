@@ -80,7 +80,26 @@
 ;; https://www.youtube.com/watch?v=QRmKpqDP5yE&ab_channel=ZaisteProgramming
 ;; lookup function !map within emacs
 ;; with :desc you can add a description string immediately after
-(map! :leader
+
+;; (define-key (kbd "SPC m b") nil)
+
+;; to view in which keymap a key is defined check C-h k in keybindings section
+(map!
+ (:after evil
+  :map evil-normal-state-map
+ "C-=" nil ;; to set a key to nothing
+ "C-+" nil
+ ;; "C--" #'text-scale-decrease
+ "C-=" #'doom/reset-font-size ;; this was increase for some reason
+ "C--" #'text-scale-decrease
+ "C-+" #'text-scale-increase ;; this was reset font size lol
+  )
+ (
+ ;; "C-=" #'doom/reset-font-size
+ ;; "C--" #'text-scale-decrease ;; previo
+ ;; "C-+" #'text-scale-increase ;; previo
+ )
+ (:leader
       :desc "ws 0" "0" #'eyebrowse-switch-to-window-config-0
       :desc "ws 1" "1" #'eyebrowse-switch-to-window-config-1
       :desc "ws 2" "2" #'eyebrowse-switch-to-window-config-2
@@ -91,6 +110,7 @@
       :desc "ws 7" "7" #'eyebrowse-switch-to-window-config-7
       :desc "ws 8" "8" #'eyebrowse-switch-to-window-config-8
       :desc "ws 9" "9" #'eyebrowse-switch-to-window-config-9
+      )
       )
 
 ;; Here are some additional functions/macros that could help you configure Doom:
