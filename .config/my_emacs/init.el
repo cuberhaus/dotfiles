@@ -540,6 +540,11 @@
        )
       ((eq system-type 'gnu/linux)
        ))
+;; same as :bind-keymap
+    ;; (general-define-key
+    ;;  :prefix "SPC"
+    ;;   )
+
     ;; define workspace keys
     (pol/leader-key
       "TAB" '(:ignore s :which-key "workspace")
@@ -572,6 +577,15 @@
       "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 0")
       )
 
+    (pol/leader-key
+      "n" '(:ignore n :which-key "notes")
+      "nrf" '(org-roam-node-find :which-key "Find node")
+      "nri" '(org-roam-node-insert :which-key "Inset node")
+      "nrI" '(org-roam-node-insert-immediate :which-key "Insert Node quick")
+      "nrd" '(:keymap org-roam-dailies-map :package org-roam :which-key "dailies")
+      ;; "nrdY" '( :keymap org-roam-dailies-map :package org-roam :which-key "dailies")
+      ;; "nrdT" '( :keymap org-roam-dailies-map :package org-roam :which-key "dailies")
+      )
     (pol/leader-key ;; try to have similar keybindings in vim as well
       "<RET>" '(bookmark-jump :which-key "Jump to bookmark")
       "." '(counsel-find-file :which-key "Find file")
@@ -1055,10 +1069,12 @@ _h_ decrease width    _l_ increase width
       '(("d" "default" entry "* %<%I:%M %p>: %?"
          :if-new (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
 
-      :bind (("C-c n l" . org-roam-buffer-toggle)
-             ("C-c n f" . org-roam-node-find)
-             ("C-c n i" . org-roam-node-insert)
-             ("C-c n I" . org-roam-node-insert-immediate)
+      :bind (
+             ;; ("C-c n l" . org-roam-buffer-toggle)
+             ;; ("C-c n f" . org-roam-node-find)
+             ;; ("C-c n i" . org-roam-node-insert)
+             ;; ("C-c n I" . org-roam-node-insert-immediate)
+
              ;; ("C-c n p" . my/org-roam-find-project)
              ;; ("C-c n t" . my/org-roam-capture-task)
              ;; ("C-c n b" . my/org-roam-capture-inbox)
