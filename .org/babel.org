@@ -1313,7 +1313,7 @@ For some reason have to run “package-refresh-contents”
           :init
           (setq org-roam-v2-ack t)
           :custom
-          (org-roam-directory "~/fib/RoamNotes")
+          (org-roam-directory "~/fib/org/roam")
           (org-roam-completion-everywhere t)
           (org-roam-capture-templates
            '(("d" "default" plain ;; first template should be default one cause keybindings ahead will use that for fast typing
