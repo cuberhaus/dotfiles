@@ -82,6 +82,12 @@ helix = "$HOME/.conky/helix/conky\\ helix\\ white"
 browser :: String
 browser = "google-chrome-stable"
 
+emacs :: String 
+emacs = "emacs"
+
+doomEmacs :: String
+doomEmacs = "emacs --with-profile doom"
+
 -- browser = "firefox"
 
 whatsapp :: String
@@ -505,6 +511,7 @@ myStartupHook = do
 -- Run xmonad with the settings you specify. No need to modify this.
 --
 
+-- modifier keys M1-M5 M1 is left alt key
 -- Keybindings
 myEmacsKeys :: [(String, X ())]
 myEmacsKeys =
@@ -526,7 +533,8 @@ myEmacsKeys =
     ("M-<Print>", spawn screenShotOptions), -- Open screenshot app
 
     -- Open apps
-    ("M-e", spawn "emacs"), 
+    ("M-e", spawn emacs), 
+    ("M-M1-e", spawn doomEmacs), 
     ("M-b", spawn browser), -- Windows + g (meta key is windows key)
     ("M-n", spawn explorer), -- open explorer
     ("M-<Return>", spawn myTerminal), -- Spawn terminal
