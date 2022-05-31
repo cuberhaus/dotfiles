@@ -57,6 +57,9 @@
 ;                (file+headline +org-capture-todo-file "Dream")
 ;                "* TODO %?\n :PROPERTIES:\n :CATEGORY: dream\n :END:\n %i\n"
 ;                :prepend t :kill-buffer t))))
+
+(setq org-directory "~/fib/org/")
+
 (with-eval-after-load 'org
     (require 'org-tempo)
     (add-to-list 'org-structure-template-alist '("py" . "src python"))
@@ -94,10 +97,13 @@
  "C--" #'text-scale-decrease
  "C-+" #'text-scale-increase ;; this was reset font size lol
   )
- (
- ;; "C-=" #'doom/reset-font-size
- ;; "C--" #'text-scale-decrease ;; previo
- ;; "C-+" #'text-scale-increase ;; previo
+
+ (:after evil
+  :map evil-org-mode-map
+  :m "g j" nil
+  :m "g k" nil
+ ;; :desc "go down visual line"  "g j" nil
+ ;; :desc "go down visual line"  "g k" nil
  )
  (:leader
       :desc "ws 0" "0" #'eyebrowse-switch-to-window-config-0
