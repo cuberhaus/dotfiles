@@ -69,6 +69,8 @@
     (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
     )
 
+(setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
+
 
 (use-package! eyebrowse
     :ensure t
