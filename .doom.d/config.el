@@ -26,6 +26,7 @@
 ;; (after! org-appear )
 (setq org-hide-emphasis-markers t)
 (add-hook 'org-mode-hook 'org-appear-mode)
+(global-page-break-lines-mode)
 ;;;;
 ;;(setq company-idle-delay 0.2
 ;;      company-minimum-prefix-length 2)
