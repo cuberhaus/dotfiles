@@ -21,6 +21,11 @@
         company-minimum-prefix-length 2)
   (setq company-show-numbers t)
   (add-hook 'evil-normal-state-entry-hook #'company-abort)) ;; make aborting less annoying.
+
+
+;; (after! org-appear )
+(setq org-hide-emphasis-markers t)
+(add-hook 'org-mode-hook 'org-appear-mode)
 ;;;;
 ;;(setq company-idle-delay 0.2
 ;;      company-minimum-prefix-length 2)
