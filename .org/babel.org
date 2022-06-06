@@ -1143,7 +1143,7 @@ Displays a visual hint when editing with evil.
     :config
     (message "Org mode loaded")
     (setq org-ellipsis " ▾"
-          org-hide-emphasis-markers t
+          org-hide-emphasis-markers t ;; this hides emphasis markers like bold or itallics
           org-src-fontify-natively t
           org-fontify-quote-and-verse-blocks t
           org-src-tab-acts-natively t

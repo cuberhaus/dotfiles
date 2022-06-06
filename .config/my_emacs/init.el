@@ -876,7 +876,7 @@ _h_ decrease width    _l_ increase width
   :config
   (message "Org mode loaded")
   (setq org-ellipsis " ▾"
-        org-hide-emphasis-markers t
+        org-hide-emphasis-markers t ;; this hides emphasis markers like bold or itallics
         org-src-fontify-natively t
         org-fontify-quote-and-verse-blocks t
         org-src-tab-acts-natively t
@@ -1042,7 +1042,7 @@ _h_ decrease width    _l_ increase width
       :init
       (setq org-roam-v2-ack t)
       :custom
-      (org-roam-directory "~/fib/RoamNotes")
+      (org-roam-directory "~/fib/org/roam")
       (org-roam-completion-everywhere t)
       (org-roam-capture-templates
        '(("d" "default" plain ;; first template should be default one cause keybindings ahead will use that for fast typing
