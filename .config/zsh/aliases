@@ -66,6 +66,7 @@ alias zshrc="nvim $ZDOTDIR/.zshrc"
 #alias vslim="sudo vim /etc/slim.conf"
 
 alias vim="nvim"
+alias e="emacsclient -nc"
 # modify in  /usr/share/applications as well
 alias rstudio="rstudio-bin --no-sandbox"
 
