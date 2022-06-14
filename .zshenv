@@ -60,8 +60,6 @@ fi
 
 # Zsh files:
 export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh" # For more information RTFM https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
-export VISUAL=nvim
-export EDITOR="$VISUAL"
 export DOTFILES="$HOME/dotfiles/dotfiles"
 export WALLPAPER_LIGHT="$HOME/.local/xdg/wallpapers/doggo.jpeg"
 export WALLPAPER_DARK="$HOME/Downloads/wallpapers/pexels-eberhard-grossgasteiger-1612351.jpg"
@@ -74,7 +72,11 @@ export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-ra
 # export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\"" # SET VIM AS MANPAGER
 # export MANPAGER="vim -M +MANPAGER -"
 export MANPAGER='nvim +Man!' # use neovim as manpager
+
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    export VISUAL=emacsclient
+    export EDITOR="$VISUAL"
+
     export TERMINAL="kitty"
     export QT_QPA_PLATFORMTHEME="qt5ct"
     source $HOME/.config/distro     # DISTRO variable
@@ -89,6 +91,8 @@ if [ -d "$HOME/.config/doom-emacs" ] ; then
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    export VISUAL=nvim
+    export EDITOR="$VISUAL"
     export PATH="$HOME/.emacs.d/bin/:$PATH"
     export PATH="/Users/pol/bin:$PATH"
     #https://stackoverflow.com/questions/603785/environment-variables-in-mac-os-x

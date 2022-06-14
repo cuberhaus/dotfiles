@@ -82,8 +82,11 @@ helix = "$HOME/.conky/helix/conky\\ helix\\ white"
 browser :: String
 browser = "google-chrome-stable"
 
+-- emacs :: String 
+-- emacs = "emacs"
+
 emacs :: String 
-emacs = "emacs"
+emacs = "emacsclient -nc"
 
 doomEmacs :: String
 doomEmacs = "emacs --with-profile doom"
