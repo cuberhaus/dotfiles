@@ -1501,6 +1501,9 @@ _h_ decrease width    _l_ increase width
 ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
 ;; (use-package forge) ;; more git functionality
 
+(use-package
+  systemd)
+
 (use-package term
   :commands term
   :config

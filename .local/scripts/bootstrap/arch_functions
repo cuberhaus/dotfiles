@@ -40,6 +40,7 @@ emacs() {
     $pac ispell
     sudo npm install textlint --global
     pip install proselint
+    systemctl --user enable emacs
 }
 
 base_install () {

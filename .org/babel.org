@@ -1872,6 +1872,11 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 
 #+end_src
 
+*** Systemd
+#+begin_src emacs-lisp
+    (use-package
+      systemd)
+#+end_src
 ** Terminals
 *** Term-mode
 #+begin_src emacs-lisp
