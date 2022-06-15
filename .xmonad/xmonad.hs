@@ -539,8 +539,8 @@ myEmacsKeys =
     ("M-<Print>", spawn screenShotOptions), -- Open screenshot app
 
     -- Open apps
-    ("M-e", spawn emacs), 
-    ("M-M1-e", spawn emacsClient), 
+    ("M-e", spawn emacsClient), 
+    ("M-M1-e", spawn emacs), 
     ("M-M1-d", spawn doomEmacs), 
     ("M-b", spawn browser), -- Windows + g (meta key is windows key)
     ("M-n", spawn explorer), -- open explorer
