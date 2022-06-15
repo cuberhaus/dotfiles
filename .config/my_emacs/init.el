@@ -118,10 +118,10 @@
 ;; (require 'sublimity-scroll)
 ;; (sublimity-mode 1)
 
-(use-package dashboard ;; for some reason activating this fixes python bug LOL have to debug that another time
-  :ensure t
-  :config
-  (dashboard-setup-startup-hook))
+;; (use-package dashboard ;; for some reason activating this fixes python bug LOL have to debug that another time
+;;   :ensure t
+;;   :config
+;;   (dashboard-setup-startup-hook))
 
 (use-package page-break-lines
   :config (global-page-break-lines-mode))
@@ -138,27 +138,44 @@
   ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
   ;; IF FONT LOOKS WEIRD (TOO SLIM) then it means the font is not working properly, CHANGE IT
 
-(cond ((eq system-type 'windows-nt)
-    ;; Windows-specific code goes here.
-    )
-      ((eq system-type 'darwin)
-      (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 170)
+       (defun aard-set-face (frame)
+         "Configure faces on frame creation"
+         (select-frame frame)
+         (if (display-graphic-p)
+             (progn
+            (if (member "FuraCode Nerd Font" (font-family-list))
+            (set-frame-font "FuraCode Nerd Font-9"))
 
-      ;; Set the fixed pitch face
-      (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height 180)
+            (if (member "Terminus" (font-family-list))
+            (set-frame-font "Terminus-12"))
 
-      ;; Set the variable pitch face
-      (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 180 :weight 'regular)
-    )
-    ((eq system-type 'gnu/linux)
-      (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
+                 ;; [...] face changes [...]
+         )))
 
-      ;; Set the fixed pitch face
-      (set-face-attribute 'fixed-pitch nil :font "FuraCode Nerd Font" :height 120)
+;; (cond ((eq system-type 'windows-nt)
+;;     ;; Windows-specific code goes here.
+;;     )
+;;       ((eq system-type 'darwin)
+;;       (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 170)
 
-      ;; Set the variable pitch face
-      (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
-    ))
+
+;;       ;; Set the fixed pitch face
+;;       (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height 180)
+
+;;       ;; Set the variable pitch face
+;;       (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 180 :weight 'regular)
+;;     )
+;;     ((eq system-type 'gnu/linux)
+;;       (add-hook 'after-make-frame-functions 'aard-set-face)
+;;       ; (set-default-font “Terminus-12”)
+;;       (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
+
+;;       ;; Set the fixed pitch face
+;;       (set-face-attribute 'fixed-pitch nil :font "FuraCode Nerd Font" :height 120)
+
+;;       ;; Set the variable pitch face
+;;       (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
+;;     ))
   ;; -------------------------------------------------------
 
 (use-package auto-package-update
@@ -374,6 +391,8 @@
 ;;           (expand-file-name "custom.el" server-socket-dir)
 ;;         (expand-file-name (format "emacs-custom-%s.el" (user-uid)) temporary-file-directory)))
 ;; (load custom-file t)
+
+(use-package restart-emacs)
 
 (use-package eyebrowse
   :ensure t

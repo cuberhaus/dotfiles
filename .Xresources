@@ -40,6 +40,14 @@ URxvt.matcher.button: 1
 ! Colored links
 !URxvt.matcher.rend.0: Uline Bold fg5
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! => Emacs
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/* Emacs.font: RobotoMono Nerd Font */
+! this works
+Emacs.font: FuraCode Nerd Font 
+/* Emacs.font: xft:FiraCode Nerd Font:size=12 */
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! => Theme
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
