@@ -86,7 +86,10 @@ browser = "google-chrome-stable"
 -- emacs = "emacs"
 
 emacs :: String 
-emacs = "emacsclient -nc"
+emacs = "emacs"
+
+emacsClient :: String 
+emacsClient = "emacsclient -nc"
 
 doomEmacs :: String
 doomEmacs = "emacs --with-profile doom"
@@ -537,7 +540,8 @@ myEmacsKeys =
 
     -- Open apps
     ("M-e", spawn emacs), 
-    ("M-M1-e", spawn doomEmacs), 
+    ("M-M1-e", spawn emacsClient), 
+    ("M-M1-d", spawn doomEmacs), 
     ("M-b", spawn browser), -- Windows + g (meta key is windows key)
     ("M-n", spawn explorer), -- open explorer
     ("M-<Return>", spawn myTerminal), -- Spawn terminal

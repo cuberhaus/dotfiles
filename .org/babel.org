@@ -274,34 +274,31 @@ The diminish package hides pesky minor modes from the modelines.
 
                 (if (member "Terminus" (font-family-list))
                 (set-frame-font "Terminus-12"))
-
-                     ;; [...] face changes [...]
              )))
 
-    ;; (cond ((eq system-type 'windows-nt)
-    ;;     ;; Windows-specific code goes here.
-    ;;     )
-    ;;       ((eq system-type 'darwin)
-    ;;       (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 170)
+    (cond ((eq system-type 'windows-nt)
+        ;; Windows-specific code goes here.
+        )
+          ((eq system-type 'darwin)
+          (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 170)
 
 
-    ;;       ;; Set the fixed pitch face
-    ;;       (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height 180)
+          ;; Set the fixed pitch face
+          (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height 180)
 
-    ;;       ;; Set the variable pitch face
-    ;;       (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 180 :weight 'regular)
-    ;;     )
-    ;;     ((eq system-type 'gnu/linux)
-    ;;       (add-hook 'after-make-frame-functions 'aard-set-face)
-    ;;       ; (set-default-font “Terminus-12”)
-    ;;       (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
+          ;; Set the variable pitch face
+          (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 180 :weight 'regular)
+        )
+        ((eq system-type 'gnu/linux)
+          ;; (add-hook 'after-make-frame-functions 'aard-set-face)
+          (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
 
-    ;;       ;; Set the fixed pitch face
-    ;;       (set-face-attribute 'fixed-pitch nil :font "FuraCode Nerd Font" :height 120)
+          ;; Set the fixed pitch face
+          (set-face-attribute 'fixed-pitch nil :font "FuraCode Nerd Font" :height 120)
 
-    ;;       ;; Set the variable pitch face
-    ;;       (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
-    ;;     ))
+          ;; Set the variable pitch face
+          (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
+        ))
       ;; -------------------------------------------------------
 #+end_src
 
