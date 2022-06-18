@@ -173,6 +173,9 @@ base_install () {
 }
 
 arch_install() {
+    $pac xorg-xrandr
+    $pac arandr # visual interface for xrandr
+    $pac autorandr # https://github.com/phillipberndt/autorandr
     # Drivers
     $pac linux
     $pac linux-headers
