@@ -64,7 +64,7 @@
 ;                "* TODO %?\n :PROPERTIES:\n :CATEGORY: dream\n :END:\n %i\n"
 ;                :prepend t :kill-buffer t))))
 
-(setq org-directory "~/fib/org/")
+(setq org-directory "~/docs/org/")
 
 (with-eval-after-load 'org
     (require 'org-tempo)
