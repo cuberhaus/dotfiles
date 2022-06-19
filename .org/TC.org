@@ -1,9 +1,0 @@
-#+STARTUP: latexpreview
-* CFLs
-- Propietats de tancament
- Revessat, Unió, concatenació, estrella, morfisme directe, morfisme invers
-- No estan tancats respecte de complementaris, intersecció
-* DCFLs
-Tancats sota complementari
- $C \in CFL, R \in Reg -> C \union R \in CFL$
- $C \in DCFL, R \in Reg -> C \union R \in DCFL$
