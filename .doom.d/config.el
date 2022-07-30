@@ -108,8 +108,11 @@
 
  (:after evil
   :map evil-org-mode-map
-  :m "g j" nil
-  :m "g k" nil
+   :m "g j" nil
+   :m "g k" nil
+;; (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
+;; (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
+
  ;; :desc "go down visual line"  "g j" nil
  ;; :desc "go down visual line"  "g k" nil
  )
