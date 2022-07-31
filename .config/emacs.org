@@ -1326,14 +1326,15 @@ Show markup symbols when cursor is placed inside of them
 #+end_src
 *** Automatically tangle config file when we save it
 #+begin_src emacs-lisp
-  ;; Automatically tangle our Emacs.org config file when we save it
-  (defun efs/org-babel-tangle-config ()
-    (when (string-equal (buffer-file-name)
-                        (expand-file-name "~/dotfiles/dotfiles/.org/babel.org"))
-      ;; Dynamic scoping to the rescue
-      (let ((org-confirm-babel-evaluate nil))
-        (org-babel-tangle))))
-  (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+    ;; Automatically tangle our Emacs.org config file when we save it
+
+    (defun efs/org-babel-tangle-config ()
+      (when (string-equal (buffer-file-name)
+                          (expand-file-name "~/dotfiles/dotfiles/.config/emacs.org"))
+        ;; Dynamic scoping to the rescue
+        (let ((org-confirm-babel-evaluate nil))
+          (org-babel-tangle))))
+    (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
 #+end_src
 ** Org Roam
 For some reason have to run “package-refresh-contents”
@@ -2107,10 +2108,11 @@ have to set it manually when you want to use it
 ** Disable Optimization
 Disable optimization at the end of startup so that garbage collector works properly and doesn't make emacs crash.
 #+begin_src emacs-lisp
-  ;; after startup, it is important you reset this to some reasonable default. A large 
-  ;; gc-cons-threshold will cause freezing and stuttering during long-term 
-  ;; interactive use. I find these are nice defaults:
-    (setq gc-cons-threshold 16777216
-          gc-cons-percentage 0.1
-          file-name-handler-alist last-file-name-handler-alist)
+    ;; after startup, it is important you reset this to some reasonable default. A large 
+    ;; gc-cons-threshold will cause freezing and stuttering during long-term 
+    ;; interactive use. I find these are nice defaults:
+
+      (setq gc-cons-threshold 16777216
+            gc-cons-percentage 0.1
+            file-name-handler-alist last-file-name-handler-alist)
 #+end_src

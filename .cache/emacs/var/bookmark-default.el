@@ -28,8 +28,8 @@
  (rear-context-string . "05-04 Wednesday\n")
  (position . 338))
 ("org-capture-last-stored"
- (filename . "~/fib/RoamNotes/20220517104216-terminal.org")
- (front-context-string)
- (rear-context-string . "5-17 Tue 10:42]\n")
- (position . 117))
+ (filename . "~/fib/org/Journal.org")
+ (front-context-string . "**** 07:01 pm - ")
+ (rear-context-string . ":END:\n\niasdfas\n\n")
+ (position . 591))
 )

@@ -908,9 +908,9 @@ _h_ decrease width    _l_ increase width
   (setq org-log-done 'time) ;; logs when a task goes to done C-h-v (describe variable)
   (setq org-log-into-drawer t) ;; collapse logs into a drawer
   (setq org-agenda-files
-        '("~/fib/org/birthday.org"
-          "~/fib/org/Tasks.org"
-          "~/fib/org/Habits.org"
+        '("~/docs/org/birthday.org"
+          "~/docs/org/Tasks.org"
+          "~/docs/org/Habits.org"
           ))
 
   (require 'org-habit)
@@ -993,28 +993,28 @@ _h_ decrease width    _l_ increase width
 
  (setq org-capture-templates
     `(("t" "Tasks / Projects")
-      ("tt" "Task" entry (file+olp "~/fib/org/Tasks.org" "Inbox")
+      ("tt" "Task" entry (file+olp "~/docs/org/Tasks.org" "Inbox")
            "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
       ("j" "Journal Entries")
       ("jj" "Journal" entry
-           (file+olp+datetree "~/fib/org/Journal.org")
+           (file+olp+datetree "~/docs/org/Journal.org")
            "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
            ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
            :clock-in :clock-resume
            :empty-lines 1)
       ("jm" "Meeting" entry
-           (file+olp+datetree "~/fib/org/Journal.org")
+           (file+olp+datetree "~/docs/org/Journal.org")
            "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
            :clock-in :clock-resume
            :empty-lines 1)
 
       ("w" "Workflows")
-      ("we" "Checking Email" entry (file+olp+datetree "~/fib/org/Journal.org")
+      ("we" "Checking Email" entry (file+olp+datetree "~/docs/org/Journal.org")
            "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
 
       ("m" "Metrics Capture")
-      ("mw" "Weight" table-line (file+headline "~/fib/org/Metrics.org" "Weight")
+      ("mw" "Weight" table-line (file+headline "~/docs/org/Metrics.org" "Weight")
        "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
 
   )
@@ -1044,9 +1044,10 @@ _h_ decrease width    _l_ increase width
 ;; )
 
 ;; Automatically tangle our Emacs.org config file when we save it
+
 (defun efs/org-babel-tangle-config ()
   (when (string-equal (buffer-file-name)
-                      (expand-file-name "~/dotfiles/dotfiles/.org/babel.org"))
+                      (expand-file-name "~/dotfiles/dotfiles/.config/emacs.org"))
     ;; Dynamic scoping to the rescue
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
@@ -1058,7 +1059,7 @@ _h_ decrease width    _l_ increase width
       :init
       (setq org-roam-v2-ack t)
       :custom
-      (org-roam-directory "~/fib/org/roam")
+      (org-roam-directory "~/docs/org/roam")
       (org-roam-completion-everywhere t)
       (org-roam-capture-templates
        '(("d" "default" plain ;; first template should be default one cause keybindings ahead will use that for fast typing
@@ -1682,6 +1683,7 @@ _h_ decrease width    _l_ increase width
 ;; after startup, it is important you reset this to some reasonable default. A large 
 ;; gc-cons-threshold will cause freezing and stuttering during long-term 
 ;; interactive use. I find these are nice defaults:
+
   (setq gc-cons-threshold 16777216
         gc-cons-percentage 0.1
         file-name-handler-alist last-file-name-handler-alist)
