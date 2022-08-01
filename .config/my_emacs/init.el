@@ -612,7 +612,7 @@
       "ot" '(vterm-toggle :which-key "Toggle vterm")
       "od" '(vterm-toggle-cd :which-key "Toggle vterm on current folder")
       "o-" '(dired-jump :which-key "Toggle vterm")
-      "C" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
+      "X" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
       "c" '(:ignore c :which-key "code") 
       "cf" '(format-all-buffer :which-key "code") 
       "h" '(:ignore h :which-key "git-gutter") 
