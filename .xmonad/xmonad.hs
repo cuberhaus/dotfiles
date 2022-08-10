@@ -4,6 +4,7 @@
 
 -- IMPORTS
 -- Base
+import XMonad.Util.WorkspaceCompare
 import Control.Monad (when)
 import qualified Data.Map as M
 import Data.Maybe (fromJust)
@@ -461,12 +462,12 @@ myManageHook =
 --
 myEventHook :: Event -> X All
 myEventHook =
-  ewmhDesktopsEventHook
-    <+> dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
+  -- ewmhDesktopsEventHook
+    dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
     <+> dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
     <+> dynamicPropertyChange "WM_NAME" (title =? "discord" --> floating)
-    <+> fullscreenEventHook
-    <+> docksEventHook
+    -- <+> fullscreenEventHook -- deprecated for ewmhFullscreen
+    -- <+> docksEventHook -- deprecated by docs. It's now a combinator on the whole configuration object and not just a hook.
   where
     floating = customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)
     floating2 = customFloating $ W.RationalRect (1 / 8) (1 / 8) (5 / 6) (5 / 6)
@@ -674,8 +675,9 @@ main = do
   xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
   xmonad .
     withNavigation2DConfig myNav2DConf .
-      ewmhFullscreen $
-        desktopConfig
+      addEwmhWorkspaceSort (pure myFilter) . ewmhFullscreen $ -- so that ewmh treats scratchpads correctly
+        docks $
+            desktopConfig -- docks is supposed to avoid overlapping windows with dock
           { -- simple stuff
             terminal = myTerminal,
             focusFollowsMouse = myFocusFollowsMouse,
@@ -696,7 +698,7 @@ main = do
             manageHook = manageSpawn <+> myManageHook <+> namedScratchpadManageHook scratchpads <+> manageDocks,
             handleEventHook = myEventHook,
             logHook =
-              dynamicLogWithPP $
+              dynamicLogWithPP . myFilter2 $ -- filter out scratchpads
               myXmobarPP xmproc,
             startupHook = myStartupHook
           }
@@ -716,14 +718,17 @@ myXmobarPP xmproc =
       ppOrder = \(ws : l : t : ex) -> [ws, l] ++ ex ++ [t], -- order of things in xmobar
       ppSep = xmobarColor white barColor "  :  ",
       ppWsSep = " ",
-      ppSort =
-        fmap
-          (namedScratchpadFilterOutWorkspace .)
-          (ppSort def),
+      -- ppSort =
+      --   -- fmap
+      --     -- (namedScratchpadFilterOutWorkspace .)
+      --     (ppSort def),
       ppExtras = []
-      --(ppSort defaultPP)
     }
 
+myFilter = filterOutWs [scratchpadWorkspaceTag]
+myFilter2 = filterOutWsPP [scratchpadWorkspaceTag]
+
+-- myFilter = filterOutWs [scratchpads]
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
 -- use the defaults defined in xmonad/XMonad/Config.hs
