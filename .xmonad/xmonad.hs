@@ -675,7 +675,7 @@ main = do
   xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
   xmonad .
     withNavigation2DConfig myNav2DConf .
-      addEwmhWorkspaceSort (pure myFilter) . ewmhFullscreen $ -- so that ewmh treats scratchpads correctly
+      addEwmhWorkspaceSort (pure myFilterEwmh) . ewmhFullscreen $ -- so that ewmh treats scratchpads correctly
         docks $
             desktopConfig -- docks is supposed to avoid overlapping windows with dock
           { -- simple stuff
@@ -698,7 +698,7 @@ main = do
             manageHook = manageSpawn <+> myManageHook <+> namedScratchpadManageHook scratchpads <+> manageDocks,
             handleEventHook = myEventHook,
             logHook =
-              dynamicLogWithPP . myFilter2 $ -- filter out scratchpads
+              dynamicLogWithPP . myFilterPP $ -- filter out scratchpads
               myXmobarPP xmproc,
             startupHook = myStartupHook
           }
@@ -725,8 +725,10 @@ myXmobarPP xmproc =
       ppExtras = []
     }
 
-myFilter = filterOutWs [scratchpadWorkspaceTag]
-myFilter2 = filterOutWsPP [scratchpadWorkspaceTag]
+-- This differentiation is needed because filterOutWs and filterOutWsPP lends different types, that way you can't use them interchangably and need two separate filters.
+myFilterEwmh = filterOutWs filterList
+myFilterPP = filterOutWsPP filterList
+filterList = [scratchpadWorkspaceTag]
 
 -- myFilter = filterOutWs [scratchpads]
 -- A structure containing your configuration settings, overriding
