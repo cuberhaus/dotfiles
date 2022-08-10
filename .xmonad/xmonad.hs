@@ -674,7 +674,7 @@ main = do
   xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
   xmonad .
     withNavigation2DConfig myNav2DConf .
-      ewmh $
+      ewmhFullscreen $
         desktopConfig
           { -- simple stuff
             terminal = myTerminal,

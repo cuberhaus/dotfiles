@@ -29,7 +29,7 @@
  (position . 338))
 ("org-capture-last-stored"
  (filename . "~/docs/org/Journal.org")
- (front-context-string . "**** 07:45 pm - ")
+ (front-context-string . "**** 09:32 pm - ")
  (rear-context-string . " \"El Cuadrado\"\n\n")
  (position . 3208))
 )
