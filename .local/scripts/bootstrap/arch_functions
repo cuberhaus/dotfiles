@@ -249,7 +249,7 @@ arch_and_manjaro() {
 }
 
 manjaro() {
-    $pac manjaro-pipewire
+    $pac manjaro-pipewire # $pac wireplumber
     # Make airpods work
     sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
 }

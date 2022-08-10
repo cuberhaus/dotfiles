@@ -3,6 +3,13 @@
 -- Author: https://github.com/cuberhaus/dotfiles
 
 -- IMPORTS
+import Data.List (sortBy)
+import Data.Function (on)
+import Control.Monad (forM_, join)
+import XMonad.Util.Run (safeSpawn)
+import XMonad.Util.NamedWindows (getName)
+import qualified XMonad.StackSet as W
+
 -- Base
 import XMonad.Util.WorkspaceCompare
 import Control.Monad (when)
@@ -673,6 +680,9 @@ main :: IO ()
 main = do
   -- Execute xmobar with its config and pipe xmonad output to xmobar
   xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
+  -- forM_ [".xmonad-workspace-log", ".xmonad-title-log"] $ \file -> do
+  --   safeSpawn "mkfifo" ["/tmp/" ++ file]
+
   xmonad .
     withNavigation2DConfig myNav2DConf .
       addEwmhWorkspaceSort (pure myFilterEwmh) . ewmhFullscreen $ -- so that ewmh treats scratchpads correctly
@@ -697,12 +707,34 @@ main = do
             -- insertposition Below Newer puts new windows below (we want this for tiled)
             manageHook = manageSpawn <+> myManageHook <+> namedScratchpadManageHook scratchpads <+> manageDocks,
             handleEventHook = myEventHook,
+
+            -- polybar
+            -- logHook = eventLogHook ,
+
+            -- xmobar
             logHook =
               dynamicLogWithPP . myFilterPP $ -- filter out scratchpads
               myXmobarPP xmproc,
+
             startupHook = myStartupHook
           }
         `additionalKeysP` myEmacsKeys
+
+
+eventLogHook = do
+  winset <- gets windowset
+  title <- maybe (return "") (fmap show . getName) . W.peek $ winset
+  let currWs = W.currentTag winset
+  let wss = map W.tag $ W.workspaces winset
+  let wsStr = join $ map (fmt currWs) $ sort' wss
+
+  io $ appendFile "/tmp/.xmonad-title-log" (title ++ "\n")
+  io $ appendFile "/tmp/.xmonad-workspace-log" (wsStr ++ "\n")
+
+  where fmt currWs ws
+          | currWs == ws = "[" ++ ws ++ "]"
+          | otherwise    = "" ++ ws ++ ""
+        sort' = sortBy (compare `on` (!! 0))
 
 myXmobarPP xmproc =
   xmobarPP
