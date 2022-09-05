@@ -506,6 +506,10 @@ optional() {
     sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
     pip3 install antlr4-python3-runtime
 
+    # mathlab
+    $pac libxcrypt-compat
+    #Fix installation: https://wiki.archlinux.org/title/MATLAB#Unable_to_launch_the_MATLABWindow_application
+
     # Bases de dades
     $pac pgadmin4
     $pac dbeaver
