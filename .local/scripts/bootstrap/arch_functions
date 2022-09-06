@@ -510,6 +510,11 @@ optional() {
     $pac libxcrypt-compat
     #Fix installation: https://wiki.archlinux.org/title/MATLAB#Unable_to_launch_the_MATLABWindow_application
 
+    # PAR
+    $yay xfig
+    # pass files to boada https://forum.manjaro.org/t/scp-connection-closed/112991/10
+    # scp -O par2107@boada.ac.upc.edu:lab1/arch/map-boada-11.fig .
+
     # Bases de dades
     $pac pgadmin4
     $pac dbeaver
