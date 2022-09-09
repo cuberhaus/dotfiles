@@ -37,6 +37,7 @@ xmonad_install
 
 laptop_install
 vim_install
+emacs
 
 #wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
 chsh -s $(which zsh)                            # Change default shell to zsh

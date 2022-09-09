@@ -17,35 +17,6 @@ pip="pip install --user" # in arch pip packages should be installed based on use
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
-emacs() {
-    echo "default" | tee $HOME/.config/chemacs/profile
-    $pip install ptvsd                          # for python dap
-    $pip grip                            # real time preview compiler 
-    # npm install marked  
-    $pac pandoc                                 # universal converter
-    # $pac marked                                 #"fast" markdown preview compiler
-    npm install markdownlint
-    $pac languagetool                           # languagetool for emacs
-    $pac mplayer                                # for pomodoro sound
-    # managing emacs with chemacs
-    #https://github.com/plexus/chemacs2
-    #doom
-    $pac aspell
-    $pac shellcheck
-    $pac python-pipenv
-    #format all
-    $pac prettier
-    #https://wiki.archlinux.org/title/Language_checking
-    $pac aspell
-    $pac aspell-ca
-    $pac aspell-de
-    $pac aspell-en
-    $pac aspell-es
-    $pac ispell
-    npm install textlint
-    $pip proselint
-    systemctl --user enable emacs
-}
 
 base_install () {
     $pac conky
@@ -437,13 +408,49 @@ dwall() {
     sudo rm -r $HOME/dynamic-wallpaper
 }
 
-doom_emacs_install () {
+emacs() {
+    $pac emacs-nativecomp
+    # Chemacs installation to manage doom and personal
+    [ -f ~/.emacs ] && mv ~/.emacs ~/.emacs.bak
+    [ -d ~/.emacs.d ] && mv ~/.emacs.d ~/.emacs.default
+    git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
+
+    echo "default" | tee $HOME/.config/chemacs/profile
+    $pip install ptvsd                          # for python dap
+    $pip grip                            # real time preview compiler 
+    # npm install marked  
+    $pac pandoc                                 # universal converter
+    # $pac marked                                 #"fast" markdown preview compiler
+    npm install markdownlint
+    $pac languagetool                           # languagetool for emacs
+    $pac mplayer                                # for pomodoro sound
+    # managing emacs with chemacs
+    #https://github.com/plexus/chemacs2
+    #doom
+    $pac aspell
+    $pac shellcheck
+    $pac python-pipenv
+    #format all
+    $pac prettier
+    #https://wiki.archlinux.org/title/Language_checking
+    $pac aspell
+    $pac aspell-ca
+    $pac aspell-de
+    $pac aspell-en
+    $pac aspell-es
+    $pac ispell
+    npm install textlint
+    $pip proselint
+    systemctl --user enable emacs # this enables emacs as a daemon
+
+    # DOOM
     $pac emacs-nativecomp
     $pac ripgrep
     $pac fd
-    # DOOM
-    git clone --depth 1 https://github.com/hlissner/doom-emacs $HOME/.emacs.d
-    $HOME/.emacs.d/bin/doom install
+    # sudo mkdir -p /home/ineu/.emacs.d/.local/
+    # sudo touch /home/ineu/.emacs.d/.local/autoloads.28.1
+    git clone https://github.com/hlissner/doom-emacs $HOME/.config/doom-emacs
+    $HOME/.config/doom-emacs/bin/doom install
 }
 
 ### All packages in here should be handpicked
