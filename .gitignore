@@ -1,4 +1,7 @@
 .config/chemacs/profile
+#Xmonad
+.xmonad/build-x86_64-linux/
+
 
 *.tmp
 .config/gtk-2.0/
