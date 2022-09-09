@@ -277,6 +277,7 @@ vim_install () {
     npm install neovim
     python3 -m $pip --upgrade pynvim
     sudo gem install neovim
+    sudo chmod +w $HOME/.vim/cache/viminfo
 
 
     $pac ctags
@@ -520,6 +521,10 @@ optional() {
     # scp -O par2107@boada.ac.upc.edu:lab1/arch/map-boada-11.fig .
     #ssh -X par2107@boada.ac.upc.edu
     # ON MAC use default terminal
+
+    #APA
+    $pac jupyterlab
+    $pac jupyter-notebook
 
     # Bases de dades
     $pac pgadmin4

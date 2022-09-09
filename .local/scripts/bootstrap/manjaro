@@ -3,6 +3,7 @@
 
 ### WARNING: If this script is to be changed, beware of the order of execution of every command
 
+
 ### VARIABLES
 scripts=$HOME/.local/scripts
 source $scripts/bootstrap/arch_functions        # Include functions
@@ -21,7 +22,7 @@ sudo cp $HOME/dotfiles/dotfiles/.local/share/icons/Avatar.jpg $HOME/.face # Move
 ### ONLY CHANGE FROM HERE ON
 base_install
 i3_install
-#xmonad_install
+xmonad_install
 
 #applets                                        # Installs Cinnamon applets # implement pending
 #bloat_install
@@ -36,5 +37,6 @@ i3_install
 
 laptop_install
 vim_install
+
 #wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
 chsh -s $(which zsh)                            # Change default shell to zsh
