@@ -141,7 +141,7 @@ update=""
 updateall="python3 -m pip install --user --upgrade pynvim;
     vim +PlugUpgrade +PlugUpdate +qall; 
     antigen update; 
-    pip3 install --upgrade pip
+    pip3 install --user --upgrade pip
 "
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then

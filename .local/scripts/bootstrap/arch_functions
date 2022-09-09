@@ -19,7 +19,7 @@ pip="pip install --user"
 ## Invariant: be at $HOME dir
 emacs() {
     echo "default" | tee $HOME/.config/chemacs/profile
-    pip3 install ptvsd                          # for python dap
+    $pip install ptvsd                          # for python dap
     $pip grip                            # real time preview compiler 
     # npm install marked  
     $pac pandoc                                 # universal converter
@@ -286,7 +286,7 @@ vim_install () {
     $pac autopep8
     $pac yapf
     npm install js-beautify
-    pip3 install cmake-format
+    $pac install cmake-format
     npm install remark-cli
     $pac shfmt
     $pac stylish-haskell
@@ -508,7 +508,7 @@ optional() {
     sudo echo "soundfont /usr/share/soundfonts/freepats-general-midi.sf2" >> /etc/timidity/timidity.cfg
 
     sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
-    pip3 install antlr4-python3-runtime
+    $pac install antlr4-python3-runtime
 
     # mathlab
     $pac libxcrypt-compat
