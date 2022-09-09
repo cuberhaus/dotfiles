@@ -13,7 +13,7 @@ flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
 yay="yay $flags"
 myTerminal="kitty"
-pip="$pip --user"
+pip="pip install --user"
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
