@@ -10,17 +10,18 @@ flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
 yay="yay $flags"
 myTerminal="kitty"
+pip="$pip --user"
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
 emacs() {
     echo "default" | tee $HOME/.config/chemacs/profile
     pip3 install ptvsd                          # for python dap
-    pip install grip                            # real time preview compiler 
-    # npm install -g marked  
+    $pip grip                            # real time preview compiler 
+    # npm install marked  
     $pac pandoc                                 # universal converter
     # $pac marked                                 #"fast" markdown preview compiler
-    sudo npm install markdownlint
+    npm install markdownlint
     $pac languagetool                           # languagetool for emacs
     $pac mplayer                                # for pomodoro sound
     # managing emacs with chemacs
@@ -38,8 +39,8 @@ emacs() {
     $pac aspell-en
     $pac aspell-es
     $pac ispell
-    sudo npm install textlint --global
-    pip install proselint
+    npm install textlint
+    $pip proselint
     systemctl --user enable emacs
 }
 
@@ -269,25 +270,25 @@ vim_install () {
     # Vim YouCompleteMe plugin install
     bash $scripts/ycm.sh
     $pac python2 python-pip
-    pip install wheel
-    sudo npm install -g neovim
-    python3 -m pip install --user --upgrade pynvim
+    $pip wheel
+    npm install neovim
+    python3 -m $pip --upgrade pynvim
     sudo gem install neovim
 
 
     $pac ctags
     # auto format plugin
     $pac astyle
-    sudo pip install black
+    $pip black
     $pac autopep8
     $pac yapf
-    sudo npm install -g js-beautify
+    npm install js-beautify
     pip3 install cmake-format
-    sudo npm install -g remark-cli
+    npm install remark-cli
     $pac shfmt
     $pac stylish-haskell
     $pac tidy
-    sudo npm install -g js-beautify # css html javascript
+    npm install js-beautify # css html javascript
 }
 
 # Best Tiling Window Manager

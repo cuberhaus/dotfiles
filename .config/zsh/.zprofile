@@ -7,3 +7,5 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 export GPG_TTY=$(tty)
 
+PATH="$HOME/.local/bin:$PATH"
+export npm_config_prefix="$HOME/.local"
