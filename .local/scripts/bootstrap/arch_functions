@@ -4,6 +4,9 @@
 #https://raymondjdouglas.com/blog/2019/airpods-on-arch/
 #Chrome disable this:
 #chrome://flags/#global-media-controls-modern-ui
+# Gem by default is user
+# pip by default is system-wide
+#npm by default is system-wide
 ### VARIABLES
 scripts=$HOME/.local/scripts
 flags="-S --noconfirm --needed"
