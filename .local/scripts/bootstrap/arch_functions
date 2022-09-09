@@ -13,7 +13,7 @@ flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
 yay="yay $flags"
 myTerminal="kitty"
-pip="pip install --user"
+pip="pip install --user" # in arch pip packages should be installed based on user or through arch packages
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
@@ -110,6 +110,7 @@ base_install () {
     $pac polkit                                 # Policy kit
     $pac polkit-gnome                           # https://wiki.archlinux.org/index.php/Polkit
     $pac python
+    $pac python-pipenv
     $pac python3
     $pac qt5ct                                  # Qt5 configuration utility
     $pac ranger                                 # Ranger
@@ -437,7 +438,7 @@ dwall() {
 }
 
 doom_emacs_install () {
-    $pac emacs
+    $pac emacs-nativecomp
     $pac ripgrep
     $pac fd
     # DOOM

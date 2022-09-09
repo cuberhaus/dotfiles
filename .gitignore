@@ -1,6 +1,7 @@
 .config/chemacs/profile
 #Xmonad
 .xmonad/build-x86_64-linux/
+.config/github-copilot/*
 
 
 *.tmp

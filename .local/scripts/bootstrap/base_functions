@@ -7,9 +7,13 @@ install_preparation() {
     # Fix some errors and cleanup
     # mkdir always before touch
     sudo mkdir -p "$XDG_DATA_HOME"/vim/{undo,swap,backup} # Fixes vim
+    sudo chown -R pol:pol $XDG_DATA_HOME/vim/
     sudo mkdir $HOME/.cache/zsh
+    sudo chown -R pol:pol $HOME/.cache/zsh/
     sudo mkdir $HOME/.cache/vlc
+    sudo chown -R pol:pol $HOME/.cache/vlc/
     sudo mkdir $HOME/.vim/cache
+    sudo chown -R pol:pol $HOME/.vim/cache
 
     sudo touch $HOME/.vim/cache/viminfo # viminfo
     sudo touch $XDG_DATA_HOME/vim/viminfo # viminfo
