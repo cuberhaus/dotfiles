@@ -127,7 +127,9 @@ base_install () {
 
     $yay balena-etcher                          # "Rufus" on linux
     $yay betterlockscreen                       # Lockscreen
-    $yay f5fpc                                  # Connexio a UPClink
+    # $yay f5fpc                                  # Connexio a UPClink
+    $pac virt-viewer
+    $yay f5vpn
     $yay google-chrome                          # Best web browser
     $yay libreoffice-extension-languagetool     # Libre office Grammar
     # $yay spotify                                # Spotify
@@ -282,6 +284,7 @@ i3_install () {
     $pac i3-gaps                                # i3 with gaps
     $pac i3blocks                               # Bottom bar
     $pac light                                  # Brightness
+    sudo usermod -a -G video pol                # Needed for light
     $pac perl-anyevent-i3 python-dbus
     $pac picom                                  # Compositor, for transparencies
     # $pac pulseaudio alsa-utils                  # Audio
@@ -484,7 +487,10 @@ optional() {
     $pac ff-planner # IA 3a practica (ff-planner -o definicion_dominio -f fichero_problema)
     $yay ddd                          # debugging c++
     $pac doxygen texlive-most graphviz          # Doxygen
-    $pac jdk-openjdk
+    $pac jdk-openjdk # elasticsearch needs one of this idk which one
+    $pac jdk11-openjdk
+    $pac jdk17-openjdk
+    $pac jdk8-openjdk
     $pac protege # IA https://protege.stanford.edu/products.php better to download zip
     $pac qtcreator glm qt5-tools qt5-webkit     # OpenGL, QT, C++
     $pac r                                      # Probabilitat i estadística
@@ -533,6 +539,11 @@ optional() {
     #APA
     $pac jupyterlab
     $pac jupyter-notebook
+
+    #CAIM 
+    $yay elasticsearch
+    $pip elasticsearch
+    $pip elasticsearch_dsl
 
     # Bases de dades
     $pac pgadmin4

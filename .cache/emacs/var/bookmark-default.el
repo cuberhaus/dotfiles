@@ -28,8 +28,8 @@
  (rear-context-string . "05-04 Wednesday\n")
  (position . 338))
 ("org-capture-last-stored"
- (filename . "~/docs/org/Journal.org")
- (front-context-string . "**** 09:32 pm - ")
- (rear-context-string . " \"El Cuadrado\"\n\n")
- (position . 3208))
+ (filename . "~/docs/org/roam/20220912082627-vc.org")
+ (front-context-string)
+ (rear-context-string . "9-12 Mon 08:26]\n")
+ (position . 111))
 )

@@ -2,6 +2,14 @@
 #Xmonad
 .xmonad/build-x86_64-linux/
 .config/github-copilot/*
+.config/libreoffice/4/user/autotext/
+.config/libreoffice/4/user/basic/
+.config/libreoffice/4/user/database/
+.config/libreoffice/4/user/extensions/
+.config/libreoffice/4/user/gallery/
+.config/libreoffice/4/user/pack/
+.config/libreoffice/4/user/registrymodifications.xcu
+.config/libreoffice/4/user/uno_packages/
 
 
 *.tmp
