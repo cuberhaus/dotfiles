@@ -154,6 +154,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     xcode-select --install; 
     "$updateall
     update=$updateall
+    # sudo xcode-select -switch /Library/Developer/CommandLineTools
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     cleanup="brew cleanup;
     sudo gem cleanup;
