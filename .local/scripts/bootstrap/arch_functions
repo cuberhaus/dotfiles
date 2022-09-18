@@ -77,6 +77,7 @@ base_install () {
     $pac papirus-icon-theme                     # Best icon theme!
     $pac partitionmanager                       # Partition manager for KDE
     $pac perl-file-mimeinfo                     # mimeopen -d $file and type whatever app you want to open that with
+    xdg-mime default nemo.desktop inode/directory # xdg-mime default nemo.desktop inode/directory when mimeopen doesn't work https://unix.stackexchange.com/questions/77136/xdg-open-default-applications-behavior
     $pac playerctl                              # Audio
     $pac polkit                                 # Policy kit
     $pac polkit-gnome                           # https://wiki.archlinux.org/index.php/Polkit
@@ -227,6 +228,7 @@ arch_and_manjaro() {
 }
 
 manjaro() {
+    sudo timedatectl set-ntp true # eduroam doesn't work without this
     $pac manjaro-pipewire # $pac wireplumber
     # Make airpods work
     sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
@@ -542,6 +544,8 @@ optional() {
 
     #CAIM 
     $yay elasticsearch
+    sudo elasticsearch-keystore create
+    # sudo systemctl start elasticsearch.service # to initialize
     $pip elasticsearch
     $pip elasticsearch_dsl
 
