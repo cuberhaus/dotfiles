@@ -477,6 +477,7 @@ optional() {
     $pac gimp                                   # Image editor
     $pac obs-studio                             # Video recording
     $pac texstudio                              # Latex text editor
+    $pac texlive-most                           #latex
     $pac tor; $yay tor-browser
     $yay skypeforlinux-stable-bin               # Skype
     $yay slack-desktop                          # Slack

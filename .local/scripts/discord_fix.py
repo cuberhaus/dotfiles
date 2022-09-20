@@ -10,5 +10,5 @@ with open(path, 'r+') as f:
     data = json.load(f)
     data.update(disc)
     print(json.dumps(data))
-    f.seek(0)
+    f.seek(0) # set pointer to start of file
     json.dump(data, f, indent=4)
