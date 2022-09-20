@@ -1416,7 +1416,7 @@ _h_ decrease width    _l_ increase width
 ;; ;; yasnippet code 'optional', before auto-complete
 (use-package yasnippet)
 (use-package doom-snippets ;; this gets you nice snippets to use just tab and they will complete for you
-  :load-path "~/.config/doom-snippets"
+  :load-path "~/.config/snippets"
   :after yasnippet)
 ;; (use-package yasnippets-latex)
 (yas-global-mode 1)

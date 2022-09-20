@@ -23,3 +23,6 @@
 [submodule ".local/share/xfce4/terminal"]
 	path = .local/share/xfce4/terminal
 	url = https://github.com/afq984/base16-xfce4-terminal
+[submodule ".config/snippets"]
+	path = .config/snippets
+	url = https://github.com/doomemacs/snippets
