@@ -454,8 +454,8 @@ emacs() {
     $pac fd
     # sudo mkdir -p /home/ineu/.emacs.d/.local/
     # sudo touch /home/ineu/.emacs.d/.local/autoloads.28.1
-    git clone https://github.com/hlissner/doom-emacs $HOME/.config/doom-emacs
-    $HOME/.config/doom-emacs/bin/doom install
+    git clone https://github.com/hlissner/doom-emacs ~/.config/doom-emacs
+    ~/.config/doom-emacs/bin/doom install
 }
 
 ### All packages in here should be handpicked
