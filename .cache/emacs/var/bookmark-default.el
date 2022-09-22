@@ -8,17 +8,17 @@
  (rear-context-string)
  (position . 1))
 ("wiki.org"
- (filename . "~/dotfiles/dotfiles/.org/wiki.org")
+ (filename . "~/docs/org/wiki.org")
  (front-context-string . "#+PROPERTY: head")
  (rear-context-string)
  (position . 1))
 ("init.el"
- (filename . "~/dotfiles/dotfiles/.org/babel.org")
+ (filename . "~/dotfiles/dotfiles/.config/emacs.org")
  (front-context-string . "#+PROPERTY: head")
  (rear-context-string)
  (position . 1))
 ("todo"
- (filename . "~/fib/org/Tasks.org")
+ (filename . "~/docs/org/Tasks.md")
  (front-context-string . "* Inbox\n\n** DONE")
  (rear-context-string)
  (position . 1))

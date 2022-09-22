@@ -211,8 +211,6 @@
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
 
-;; (use-package multiple-cursors) ;; useless for what i needed
-
 ;; (use-package bufler
 ;;   ;; :commands (bufler-switch-buffer bufler-workspace-frame-set bufler-list)
 ;;   ;; :disabled

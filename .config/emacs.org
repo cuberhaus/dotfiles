@@ -362,10 +362,6 @@ The diminish package hides pesky minor modes from the modelines.
 ;;   :init
 ;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
 #+end_src
-*** Multiple cursors
-#+begin_src emacs-lisp
-    ;; (use-package multiple-cursors) ;; useless for what i needed
-#+end_src
 ** Buffer Management with Bufler
 
 Have to wait for efficient integration with Ivy (currently this is what makes ivy startup early)
