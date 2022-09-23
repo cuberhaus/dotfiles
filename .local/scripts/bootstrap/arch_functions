@@ -6,7 +6,7 @@
 #chrome://flags/#global-media-controls-modern-ui
 # Gem by default is user
 # pip by default is system-wide
-#npm by default is system-wide
+#npm by default is system-wide unless using npm_config_prefix then npm install packageName will install package in user
 ### VARIABLES
 scripts=$HOME/.local/scripts
 flags="-S --noconfirm --needed"
@@ -421,7 +421,7 @@ emacs() {
     git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
 
     echo "default" | tee $HOME/.config/chemacs/profile
-    $pip install ptvsd                          # for python dap
+    $pip ptvsd                          # for python dap
     $pip grip                            # real time preview compiler 
     # npm install marked  
     $pac pandoc                                 # universal converter

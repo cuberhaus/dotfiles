@@ -1620,10 +1620,12 @@ _h_ decrease width    _l_ increase width
 (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions)) ;; do not query to kill the buffer
 
 (use-package smartparens
-    :hook (prog-mode . smartparens-mode)
-    ;; :config
-    ;; (require 'smartparens-config)
-    ;; (smartparens-global-mode t)
+    ;; :hook (prog-mode . smartparens-mode)
+    :config
+    (require 'smartparens-config)
+    (smartparens-global-mode t)
+    ;; (sp-pair "$" "$") 
+    (sp-local-pair '(org-mode LaTeX-mode) "$" "$") ;; only use this in org-mode
     ;; (smartparens-global-strict-mode t)
     )
 ;; (add-hook 'js-mode-hook #'smartparens-mode)
