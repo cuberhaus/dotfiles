@@ -1017,8 +1017,11 @@ _h_ decrease width    _l_ increase width
 
   )
 
+(setq org-highlight-latex-and-related '(native))  ;; has to be set to native otherwise see some strange beheaviour, this way its colored green as in doom emacs
+
 (use-package org-appear
   :hook (org-mode . org-appear-mode))
+(setq org-appear-inside-latex t)
 
 (defun efs/org-mode-visual-fill ()
   (setq visual-fill-column-width 100 ;; set column width (character width?)
@@ -1033,13 +1036,8 @@ _h_ decrease width    _l_ increase width
   :custom
   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
 
-;; (use-package org-fragtog
-;; :after org-bullets
-;; :hook (org-fragtog) ; this auto-enables it when you enter an org-buffer, remove if you do not want this
-;; :config
-;; (org-fragtog-mode)
-;; ;; whatever you want
-;; )
+(use-package org-fragtog)
+(add-hook 'org-mode-hook 'org-fragtog-mode) ;; This should enable org-fragtog when entering org-mode
 
 ;; Automatically tangle our Emacs.org config file when we save it
 

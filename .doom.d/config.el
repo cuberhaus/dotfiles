@@ -91,6 +91,8 @@
 
 (setq org-directory "~/docs/org/")
 
+(setq prescient-sort-length-enable nil) ;; do not sort by length, not working in doom i dont think
+
 (with-eval-after-load 'org
     (require 'org-tempo)
     (add-to-list 'org-structure-template-alist '("py" . "src python"))

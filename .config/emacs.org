@@ -1284,13 +1284,15 @@ Displays a visual hint when editing with evil.
 
     )
 #+end_src
-
+#+begin_src emacs-lisp
+(setq org-highlight-latex-and-related '(native))  ;; has to be set to native otherwise see some strange beheaviour, this way its colored green as in doom emacs
+#+end_src
 *** org-appear
 Show markup symbols when cursor is placed inside of them
 #+begin_src emacs-lisp
 (use-package org-appear
   :hook (org-mode . org-appear-mode))
-
+(setq org-appear-inside-latex t)
 #+end_src
 *** Text in the middle
 #+begin_src emacs-lisp
@@ -1312,13 +1314,8 @@ Show markup symbols when cursor is placed inside of them
 #+end_src
 *** Org-fragtog
 #+begin_src emacs-lisp
-  ;; (use-package org-fragtog
-  ;; :after org-bullets
-  ;; :hook (org-fragtog) ; this auto-enables it when you enter an org-buffer, remove if you do not want this
-  ;; :config
-  ;; (org-fragtog-mode)
-  ;; ;; whatever you want
-  ;; )
+    (use-package org-fragtog)
+    (add-hook 'org-mode-hook 'org-fragtog-mode) ;; This should enable org-fragtog when entering org-mode
 #+end_src
 *** Automatically tangle config file when we save it
 #+begin_src emacs-lisp
