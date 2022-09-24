@@ -207,7 +207,7 @@ thunderbirdCommand :: String
 thunderbirdCommand = "thunderbird"
 
 isThunderbird :: Query Bool
-isThunderbird = className =? "Thunderbird"
+isThunderbird = className =? "thunderbird"
 
 discordCommand :: String
 discordCommand = "discord"
