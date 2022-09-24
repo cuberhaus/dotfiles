@@ -219,6 +219,7 @@ arch_and_manjaro() {
     sudo chown root:sambashare /var/lib/samba/usershares
     sudo chmod 1770 /var/lib/samba/usershares
     sudo gpasswd sambashare -a your_username
+    git config --global credential.helper store # Remember git password
 
     # /etc/samba/smb.conf
     # [global]
