@@ -888,6 +888,8 @@ _h_ decrease width    _l_ increase width
   :commands (org-capture org-agenda)
   :hook (org-mode . efs/org-mode-setup)
   :config
+
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0)) ;; doesnt'work
   (message "Org mode loaded")
   (setq org-ellipsis " ▾"
         org-hide-emphasis-markers t ;; this hides emphasis markers like bold or itallics
@@ -1019,6 +1021,8 @@ _h_ decrease width    _l_ increase width
 
 (setq org-highlight-latex-and-related '(native))  ;; has to be set to native otherwise see some strange beheaviour, this way its colored green as in doom emacs
 
+
+
 (use-package org-appear
   :hook (org-mode . org-appear-mode))
 (setq org-appear-inside-latex t)
@@ -1036,6 +1040,7 @@ _h_ decrease width    _l_ increase width
   :custom
   (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))) ;; default symbols get weird
 
+(setq org-startup-latex-with-latex-preview t) ;; doesn't work
 (use-package org-fragtog)
 (add-hook 'org-mode-hook 'org-fragtog-mode) ;; This should enable org-fragtog when entering org-mode
 
@@ -1239,6 +1244,7 @@ _h_ decrease width    _l_ increase width
   (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
   (lsp-headerline-breadcrumb-mode))
 
+;; (use-package lsp-modSmartparens
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
   :hook (lsp-mode . efs/lsp-mode-setup)
