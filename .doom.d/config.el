@@ -60,6 +60,9 @@
 (setq confirm-kill-emacs nil)
 
 (sp-local-pair '(org-mode LaTeX-mode) "$" "$") ;; only use this in org-mode
+;; (sp-local-pair '(org-mode LaTeX-mode) "=" "=") ;; only use this in org-mode
+(sp-local-pair '(org-mode LaTeX-mode) "{" "}") ;; only use this in org-mode
+;; (sp-local-pair '(org-mode LaTeX-mode) "~" "~") ;; only use this in org-mode
 ;; Custom capture templates
 (after! org
    (setq org-capture-templates
