@@ -1623,6 +1623,8 @@ _h_ decrease width    _l_ increase width
   (evil-collection-define-key 'normal 'dired-mode-map
     "H" 'dired-hide-dotfiles-mode))
 
+(setq tex-fontify-script nil)
+
 (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions)) ;; do not query to kill the buffer
 
 (use-package smartparens
