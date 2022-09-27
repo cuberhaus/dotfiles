@@ -81,8 +81,13 @@ mac_install () {
 }
 
 optional () {
-    pip install --user elasticsearch_dsl        # APA
-    pip install --user elasticsearch            # APA
+    # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/brew.html
+    brew tap elastic/tap
+    brew install elastic/tap/elasticsearch-full
+    pip3 install --user elasticsearch_dsl        # APA
+    pip3 install --user elasticsearch_dsl        # APA
+    # pip install --user elasticsearch            # APA
+    # pip install --user elasticsearch            # APA
     brew install xquartz                        # PAR
     brew install jupyter                        # jupyter notebooks
     brew install adobe-acrobat-reader           # Pdf reader
