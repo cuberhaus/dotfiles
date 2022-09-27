@@ -514,12 +514,19 @@
 ;; (use-package minions
 ;;   :hook (doom-modeline-mode . minions-mode))
 
-(setq mac-command-modifier 'meta)
-;; (defun show-in-finder ()
-;;   (interactive)
-;;   (shell-command (concat "open -R "  buffer-file-name))
-;;   )
-(use-package reveal-in-osx-finder) ;; works well
+;; key bindings
+(when (eq system-type 'darwin) ;; mac specific settings
+  (setq mac-option-modifier 'alt)
+  (setq mac-command-modifier 'meta)
+  (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
+  (setq mac-right-option-modifier 'none) ;; so that you can write backslash and basically use alt gr (right option on mac)
+  )
+    ;; (setq mac-command-modifier 'meta)
+    ;; (defun show-in-finder ()
+    ;;   (interactive)
+    ;;   (shell-command (concat "open -R "  buffer-file-name))
+    ;;   )
+    (use-package reveal-in-osx-finder) ;; works well
 
 (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
     ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode

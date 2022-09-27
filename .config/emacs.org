@@ -741,12 +741,19 @@ This Prescient configuration is optimized for use in System Crafters videos and 
 #+end_src
 ** Keybindings
 #+begin_src emacs-lisp
-    (setq mac-command-modifier 'meta)
-    ;; (defun show-in-finder ()
-    ;;   (interactive)
-    ;;   (shell-command (concat "open -R "  buffer-file-name))
-    ;;   )
-    (use-package reveal-in-osx-finder) ;; works well
+            ;; key bindings
+        (when (eq system-type 'darwin) ;; mac specific settings
+          (setq mac-option-modifier 'alt)
+          (setq mac-command-modifier 'meta)
+          (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
+          (setq mac-right-option-modifier 'none) ;; so that you can write backslash and basically use alt gr (right option on mac)
+          )
+            ;; (setq mac-command-modifier 'meta)
+            ;; (defun show-in-finder ()
+            ;;   (interactive)
+            ;;   (shell-command (concat "open -R "  buffer-file-name))
+            ;;   )
+            (use-package reveal-in-osx-finder) ;; works well
 #+end_src
 
 #+begin_src emacs-lisp
@@ -2027,8 +2034,7 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 #+begin_src emacs-lisp
 (setq kill-buffer-query-functions (delq 'process-kill-buffer-query-function kill-buffer-query-functions)) ;; do not query to kill the buffer
 #+end_src
-
-*** Smartparens
+** Smartparens
 Tutorial: https://ebzzry.com/en/emacs-pairs/
 To insert single quote type C-q '
 #+begin_src emacs-lisp
@@ -2045,7 +2051,7 @@ To insert single quote type C-q '
     ;; (add-hook 'c++-mode-hook #'smartparens-mode)
 #+end_src
 
-*** evil-smartparens
+** evil-smartparens
 #+begin_src emacs-lisp
     (use-package evil-smartparens
       :after (smartparens)
@@ -2054,7 +2060,7 @@ To insert single quote type C-q '
   (add-hook 'smartparens-enabled-hook #'sp-use-smartparens-bindings) ;; enable smartparens keybindings
 #+end_src
 
-*** Surround vim
+** Surround vim
 visual select and S
 ys <object> yank surrounding
 cs <object> change surrounding
