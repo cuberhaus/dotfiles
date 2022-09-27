@@ -1756,8 +1756,7 @@ pip install python-lsp-server
     :hook (java-mode . lsp-deferred))
 #+end_src
 *** Snippets
-
-heck out how to create more snippets:
+check out how to create more snippets:
 https://github.com/snyball/doom-snippets
 #+begin_src emacs-lisp
     ;; ;; yasnippet code 'optional', before auto-complete
@@ -2025,6 +2024,11 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
     :config
     (evil-collection-define-key 'normal 'dired-mode-map
       "H" 'dired-hide-dotfiles-mode))
+#+end_src
+** Deactivate superscripts
+
+#+begin_src emacs-lisp
+(setq tex-fontify-script nil)
 #+end_src
 ** Buffer kill
 #+begin_src emacs-lisp
