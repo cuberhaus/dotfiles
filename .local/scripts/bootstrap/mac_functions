@@ -81,6 +81,9 @@ mac_install () {
 }
 
 optional () {
+    pip install --user elasticsearch_dsl        # APA
+    pip install --user elasticsearch            # APA
+    brew install xquartz                        # PAR
     brew install jupyter                        # jupyter notebooks
     brew install adobe-acrobat-reader           # Pdf reader
     brew install dbeaver-community adoptopenjdk       # BD
