@@ -227,9 +227,19 @@ kittyCommand = "kitty --class='kittyPad'"
 isKitty :: Query Bool
 isKitty = className =? "kittyPad"
 
+cavaCommand = "kitty --class='cava' -o font_size=1 cava"
+isCava = className =? "cava"
+
+isEmacs = title =? "EmacsScratch"
+emacsCommand = "emacs --name='EmacsScratch' --title=EmacsScratch"
+
 scratchpads :: [NamedScratchpad]
 scratchpads =
-  [ NS "Spotify" spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
+  [ 
+    NS "Emacs" emacsCommand isEmacs (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
+
+    NS "Spotify" spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
+    NS "Spotify" cavaCommand isCava (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (1 / 24)),
     NS "WhatsApp" whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "SpeedCrunch" speedCrunchCommand isSpeedCrunch (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "Kitty" kittyCommand isKitty (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
@@ -473,6 +483,7 @@ myEventHook =
     dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
     <+> dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
     <+> dynamicPropertyChange "WM_NAME" (title =? "discord" --> floating)
+    <+> dynamicPropertyChange "WM_NAME" (title =? "EmacsScratch" --> floating)
     -- <+> fullscreenEventHook -- deprecated for ewmhFullscreen
     -- <+> docksEventHook -- deprecated by docs. It's now a combinator on the whole configuration object and not just a hook.
   where
@@ -547,8 +558,9 @@ myEmacsKeys =
     ("M-<Print>", spawn screenShotOptions), -- Open screenshot app
 
     -- Open apps
-    ("M-e", spawn emacsClient), 
-    ("M-M1-e", spawn emacs), 
+    ("M-e", namedScratchpadAction scratchpads "Emacs"),
+    ("M-M1-e", spawn emacsClient), 
+    -- ("M-M1-e", spawn emacs), 
     ("M-M1-d", spawn doomEmacs), 
     ("M-b", spawn browser), -- Windows + g (meta key is windows key)
     ("M-n", spawn explorer), -- open explorer
@@ -560,7 +572,7 @@ myEmacsKeys =
     ("M-S-a", closeAllWindows), -- Kill all windows on current workspace
 
     -- Layouts
-    ("M-v", sendMessage NextLayout), -- Rotate through the available layout algorithms
+    ("M-<Tab>", sendMessage NextLayout), -- Rotate through the available layout algorithms
     ("M-x", sendMessage $ Toggle MIRROR), -- Mirror current layout
     ("M-z", sendMessage (XMonad.Layout.MultiToggle.Toggle REFLECTX)),
     ("M-f", sendMessage (Toggle NBFULL) >> sendMessage ToggleStruts), -- Toggle fullscreen
@@ -602,7 +614,7 @@ myEmacsKeys =
     ("M-C-7", withFocused (sendMessage . UnMergeAll)),
     ("M-.", onGroup W.focusUp'), -- Switch focus to next tab
     ("M-,", onGroup W.focusDown'), -- Switch focus to prev tab
-    ("M-s", namedScratchpadAction scratchpads "Spotify"),
+    ("M-s", allNamedScratchpadAction scratchpads "Spotify"),
     ("M-w", namedScratchpadAction scratchpads "WhatsApp"),
     ("M-d", namedScratchpadAction scratchpads "Discord"),
     ("M-m", namedScratchpadAction scratchpads "Thunderbird"),
