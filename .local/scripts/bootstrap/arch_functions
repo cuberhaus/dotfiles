@@ -300,6 +300,7 @@ i3_install () {
 }
 
 xmonad_install () {
+    $pac dmenu
     $pac trayer                                 # xmonad add a tray for apps
     $pac xmobar                                 # Best bar for xmonad
     $pac xmonad-contrib                         # Xmonad with extra plugins
@@ -539,6 +540,7 @@ optional() {
     # pass files to boada https://forum.manjaro.org/t/scp-connection-closed/112991/10
     # scp -O par2107@boada.ac.upc.edu:lab1/arch/map-boada-11.fig .
     #ssh -X par2107@boada.ac.upc.edu
+    #ssh -Y par2107@boada.ac.upc.edu works better with -Y 
     # ON MAC use default terminal
 
     #APA
