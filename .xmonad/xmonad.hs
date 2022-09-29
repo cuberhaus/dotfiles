@@ -239,7 +239,7 @@ scratchpads =
     NS "Emacs" emacsCommand isEmacs (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
 
     NS "Spotify" spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
-    NS "Spotify" cavaCommand isCava (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (1 / 24)),
+    -- NS "Spotify" cavaCommand isCava (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (1 / 24)),
     NS "WhatsApp" whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "SpeedCrunch" speedCrunchCommand isSpeedCrunch (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "Kitty" kittyCommand isKitty (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
