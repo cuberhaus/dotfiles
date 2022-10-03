@@ -1,3 +1,4 @@
+.local/state/
 .cache/emacs/var/eshell/
 .cache/emacs/var/spell-fu/
 .local/etc/jupyter/
