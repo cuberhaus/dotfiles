@@ -1,3 +1,15 @@
+.local/bin/black
+.local/bin/blackd
+.local/bin/grip
+.local/bin/isympy
+.local/bin/jirashell
+.local/bin/jp.py
+.local/bin/proselint
+.local/bin/pyjwt
+.local/bin/remotezip
+.local/bin/stomp
+.local/bin/tabulate
+.local/bin/tqdm
 .local/state/
 .cache/emacs/var/eshell/
 .cache/emacs/var/spell-fu/
@@ -20,7 +32,7 @@
 
 *.tmp
 .config/gtk-2.0/
-.local/bin
+# .local/bin
 .local/share/recently-used.xbel
 .config/.mono/
 .config/xbuild/
