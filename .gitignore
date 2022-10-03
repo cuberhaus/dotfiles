@@ -1,3 +1,6 @@
+.local/bin/antlr-4.10.1-complete.jar
+.local/bin/npm
+.local/bin/npx
 .local/bin/black
 .local/bin/blackd
 .local/bin/grip
