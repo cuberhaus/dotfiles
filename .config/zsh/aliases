@@ -141,6 +141,7 @@ update=""
 updateall="python3 -m pip install --user --upgrade pynvim;
     vim +PlugUpgrade +PlugUpdate +qall; 
     antigen update; 
+    emacs -f auto-package-update-now;
     pip3 install --user --upgrade pip
 "
 ### MacOS
