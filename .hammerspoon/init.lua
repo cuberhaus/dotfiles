@@ -136,7 +136,7 @@ dragOtherToScroll = hs.eventtap.new({ hs.eventtap.event.types.otherMouseDragged 
             oldmousepos = hs.mouse.getAbsolutePosition()    
             local dx = e:getProperty(hs.eventtap.event.properties['mouseEventDeltaX'])
             local dy = e:getProperty(hs.eventtap.event.properties['mouseEventDeltaY'])
-            local scroll = hs.eventtap.event.newScrollEvent({-dx * scrollmult, dy * scrollmult},{},'pixel')
+            local scroll = hs.eventtap.event.newScrollEvent({dx * scrollmult, dy * scrollmult},{},'pixel')
             -- put the mouse back
             hs.mouse.setAbsolutePosition(oldmousepos)
             return true, {scroll}
