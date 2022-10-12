@@ -57,6 +57,7 @@ mac_install () {
 
     ### GUI Applications
     # brew install shortcuts                      # spotlight shutdown now THIS WILL BREAK YOUR MAC
+    brew install hammerspoon
     brew install mos                            # Separate inverse scroll for mouse and trackpad, DUH!
     brew install alfred                         # Better Spotlight
     brew install ballast                        # Auto-corrects volume balance, (weird macOS stuff)
