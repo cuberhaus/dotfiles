@@ -57,6 +57,7 @@ mac_install () {
 
     ### GUI Applications
     # brew install shortcuts                      # spotlight shutdown now THIS WILL BREAK YOUR MAC
+    # consider installing the logi options+ (first time installing it caused brightness buttons to not work? lol)
     brew install hammerspoon
     brew install mos                            # Separate inverse scroll for mouse and trackpad, DUH!
     brew install alfred                         # Better Spotlight
