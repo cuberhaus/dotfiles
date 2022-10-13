@@ -138,11 +138,11 @@ cleanup="vim +PlugClean +qall;
     npm cache clean --force
     "
 update=""
-updateall="python3 -m pip install --user --upgrade pynvim;
-    vim +PlugUpgrade +PlugUpdate +qall; 
-    antigen update; 
-    emacs -f auto-package-update-now;
-    pip3 install --user --upgrade pip
+updateall="python3 -m pip install --user --upgrade pynvim &;
+    vim +PlugUpgrade +PlugUpdate +qall &; 
+    antigen update &; 
+    emacs -f auto-package-update-now &;
+    pip3 install --user --upgrade pip &
 "
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -179,7 +179,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
         update="sudo pacman -Syu;"$update
         updateall="yay -Syu;
-        npm update;
+        npm update &;
         "$updateall
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
