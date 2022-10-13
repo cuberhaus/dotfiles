@@ -1,3 +1,5 @@
+.cache/emacs/var/lsp/
+.config/libreoffice/4/user/GraphicsRenderTests.log
 .local/bin/antlr-4.10.1-complete.jar
 .local/bin/npm
 .local/bin/npx
