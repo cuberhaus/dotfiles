@@ -250,7 +250,7 @@ vim_install () {
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
     bash $scripts/ycm.sh
-    $pac python2 python-pip
+    $pac python-pip
     $pip wheel
     npm install neovim
     python3 -m $pip --upgrade pynvim
