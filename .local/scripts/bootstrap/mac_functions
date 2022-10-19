@@ -6,6 +6,7 @@
 # /Applications/Thunderbird.app/Contents/MacOS/thunderbird-bin -ProfileManager
 # ~/Library/Thunderbird/Profiles/xxxxxxxx.default/
 
+#delete .xinitrc shortcut because it conflicts with xquartz and will open and close indefinitely.
 brew_install() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 }
