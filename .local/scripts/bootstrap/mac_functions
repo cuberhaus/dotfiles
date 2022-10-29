@@ -6,6 +6,7 @@
 # /Applications/Thunderbird.app/Contents/MacOS/thunderbird-bin -ProfileManager
 # ~/Library/Thunderbird/Profiles/xxxxxxxx.default/
 
+#delete .xinitrc shortcut because it conflicts with xquartz and will open and close indefinitely.
 brew_install() {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 }
@@ -58,6 +59,7 @@ mac_install () {
     ### GUI Applications
     # brew install shortcuts                      # spotlight shutdown now THIS WILL BREAK YOUR MAC
     # consider installing the logi options+ (first time installing it caused brightness buttons to not work? lol)
+    brew install qview                          # image viewer (better than builtin mac) free and open source
     brew install hammerspoon
     brew install mos                            # Separate inverse scroll for mouse and trackpad, DUH!
     brew install alfred                         # Better Spotlight
