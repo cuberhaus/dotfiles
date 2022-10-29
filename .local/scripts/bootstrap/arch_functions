@@ -122,6 +122,8 @@ base_install () {
     $pac zathura-pdf-mupdf
     $pac zathura-ps
     $pac zathura
+    $pac gnome-calculator
+    $pac kalk
 
     # DO NOT CHANGE THIS ORDER YAY COMES AFTER pac
     yay_install

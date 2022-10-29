@@ -233,9 +233,22 @@ isCava = className =? "cava"
 isEmacs = title =? "EmacsScratch"
 emacsCommand = "emacs --name='EmacsScratch' --title=EmacsScratch"
 
+-- calculatorCommand :: String
+-- calculatorCommand = "gnome-calculator"
+
+calculatorCommand :: String
+calculatorCommand = "kalk"
+
+-- isCalculator :: Query Bool
+-- isCalculator = className =? "gnome-calculator"
+
+isCalculator :: Query Bool
+isCalculator = className =? "kalk"
+
 scratchpads :: [NamedScratchpad]
 scratchpads =
   [ 
+    NS "calculator" calculatorCommand isCalculator (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "Emacs" emacsCommand isEmacs (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
 
     NS "Spotify" spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
@@ -484,6 +497,7 @@ myEventHook =
     <+> dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
     <+> dynamicPropertyChange "WM_NAME" (title =? "discord" --> floating)
     <+> dynamicPropertyChange "WM_NAME" (title =? "EmacsScratch" --> floating)
+    <+> dynamicPropertyChange "WM_NAME" (title =? "Kalk" --> floating2)
     -- <+> fullscreenEventHook -- deprecated for ewmhFullscreen
     -- <+> docksEventHook -- deprecated by docs. It's now a combinator on the whole configuration object and not just a hook.
   where
@@ -538,9 +552,11 @@ myStartupHook = do
 
 -- modifier keys M1-M5 M1 is left alt key
 -- Keybindings
+
 myEmacsKeys :: [(String, X ())]
 myEmacsKeys =
   [ -- Multimedia Keys
+    ("<XF86Calculator>", namedScratchpadAction scratchpads "calculator"),
     ("<XF86AudioPlay>", spawn mediaPlay),
     ("<XF86AudioPrev>", spawn mediaPrev),
     ("<XF86AudioNext>", spawn mediaNext),
