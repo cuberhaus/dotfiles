@@ -21,6 +21,12 @@
         "tooltip": "Check this to show the tray even when there are no new notifications.",
         "value": false
     },
+    "showNotificationCount": {
+        "type": "switch",
+        "default": true,
+        "description": "Show the number of notifications",
+        "value": true
+    },
     "section3": {
         "type": "section",
         "description": "Keyboard shortcuts"
@@ -48,5 +54,5 @@
         "description": "Open notification settings",
         "callback": "on_btn_open_system_settings_clicked"
     },
-    "__md5__": "a0c865754395f09606cbab225c8f1fc1"
+    "__md5__": "cb9ad336b2e360509f8ba388e1d19b8f"
 }

@@ -309,6 +309,14 @@ maximized=false
 ignore-ca-cert=false
 ignore-phase2-ca-cert=false
 
+[nm-applet/eap/1ea7b447-453f-4d99-86e6-2b35fea3b0a1]
+ignore-ca-cert=true
+ignore-phase2-ca-cert=false
+
+[nm-applet/eap/4ac19591-540a-43c6-81f3-c70aab6e0c9e]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
 [nm-applet/eap/6a564236-12d8-4b7c-a870-d961b765b5a3]
 ignore-ca-cert=false
 ignore-phase2-ca-cert=false
@@ -321,11 +329,31 @@ ignore-phase2-ca-cert=false
 ignore-ca-cert=false
 ignore-phase2-ca-cert=false
 
+[nm-applet/eap/9fdba982-69db-4f99-b5a6-51ecec4f1c93]
+ignore-ca-cert=true
+ignore-phase2-ca-cert=false
+
+[nm-applet/eap/a6d0ef8c-7615-4174-962a-555867c571be]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
+[nm-applet/eap/a984188d-07df-4e4b-8623-543b6edd788b]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
 [nm-applet/eap/c0b6c4e9-565f-4c75-a96b-53fd2910afb5]
 ignore-ca-cert=false
 ignore-phase2-ca-cert=false
 
 [nm-applet/eap/d3558690-b4da-4985-b536-893ff3e35970]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
+[nm-applet/eap/ea281341-b798-438f-a569-0fb822c3c390]
+ignore-ca-cert=true
+ignore-phase2-ca-cert=false
+
+[nm-applet/eap/ffa7939b-d921-4ddf-8a18-2733c6197940]
 ignore-ca-cert=false
 ignore-phase2-ca-cert=false
 
