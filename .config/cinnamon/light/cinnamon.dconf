@@ -36,7 +36,7 @@ mousekeys-accel-time=300
 mousekeys-init-delay=300
 mousekeys-max-speed=10
 slowkeys-delay=300
-stickykeys-enable=true
+stickykeys-enable=false
 stickykeys-modifier-beep=true
 stickykeys-two-key-off=true
 togglekeys-enable-beep=false
@@ -157,6 +157,7 @@ memory-limit=2048
 
 [muffin]
 tile-hud-threshold=25
+tile-maximize=true
 workspace-cycle=false
 
 [settings-daemon/peripherals/keyboard]
