@@ -1,6 +1,6 @@
 [desktop]
 computer-icon-visible=true
-font='Verdana 11'
+font='Ubuntu 11'
 home-icon-visible=true
 trash-icon-visible=true
 volumes-visible=true
@@ -29,7 +29,7 @@ selection-menu-make-link=true
 
 [window-state]
 bookmarks-expanded=true
-geometry='1117x551+463+587'
+geometry='1117x551+321+83'
 maximized=false
 my-computer-expanded=true
 network-expanded=true

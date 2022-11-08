@@ -42,6 +42,9 @@ stickykeys-two-key-off=true
 togglekeys-enable-beep=false
 togglekeys-enable-osd=true
 
+[desktop/a11y/magnifier]
+mag-factor=1.0
+
 [desktop/a11y/mouse]
 dwell-click-enabled=false
 dwell-threshold=10
@@ -67,7 +70,7 @@ image-source='xml:///usr/share/gnome-background-properties/wallpapers-2018.xml'
 [desktop/interface]
 cursor-blink-time=1200
 cursor-size=24
-font-name='Verdana 11'
+font-name='Ubuntu 11'
 gtk-theme='Mint-Y-Aqua'
 icon-theme='Mint-Y-Aqua'
 keyboard-layout-prefer-variant-names=false
@@ -140,7 +143,7 @@ event-sounds=true
 audible-bell=true
 resize-with-right-button=true
 theme='Mint-Y'
-titlebar-font='Verdana Bold 12'
+titlebar-font='Ubuntu 11'
 visual-bell=false
 visual-bell-type='fullscreen-flash'
 
