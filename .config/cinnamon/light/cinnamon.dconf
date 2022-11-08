@@ -36,7 +36,8 @@ mousekeys-accel-time=300
 mousekeys-init-delay=300
 mousekeys-max-speed=10
 slowkeys-delay=300
-stickykeys-enable=false
+stickykeys-enable=true
+stickykeys-modifier-beep=true
 stickykeys-two-key-off=true
 togglekeys-enable-beep=false
 togglekeys-enable-osd=true
@@ -67,7 +68,7 @@ image-source='xml:///usr/share/gnome-background-properties/wallpapers-2018.xml'
 cursor-blink-time=1200
 cursor-size=24
 font-name='Verdana 11'
-gtk-theme='Mint-Y'
+gtk-theme='Mint-Y-Aqua'
 icon-theme='Mint-Y-Aqua'
 keyboard-layout-prefer-variant-names=false
 keyboard-layout-use-upper=false
@@ -136,11 +137,12 @@ idle-delay=uint32 900
 event-sounds=true
 
 [desktop/wm/preferences]
+audible-bell=true
 resize-with-right-button=true
 theme='Mint-Y'
 titlebar-font='Verdana Bold 12'
-visual-bell=true
-visual-bell-type='frame-flash'
+visual-bell=false
+visual-bell-type='fullscreen-flash'
 
 [keyboard]
 keyboard-position='bottom'
