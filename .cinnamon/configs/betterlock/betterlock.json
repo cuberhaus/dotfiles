@@ -1,20 +1,27 @@
 {
     "show-notifications": {
         "type": "switch",
-        "default": true,
+        "default": false,
         "description": "Show notifications",
         "value": true
     },
-    "indicator-type": {
-        "type": "combobox",
-        "default": "both",
-        "options": {
-            "Num Lock and Caps Lock": "both",
-            "Num Lock only": "num-only",
-            "Caps Lock only": "caps-only"
-        },
-        "description": "Choose which indicator to show",
-        "value": "both"
+    "show-caps-lock-indicator": {
+        "type": "switch",
+        "default": false,
+        "description": "Show caps lock indicator",
+        "value": false
     },
-    "__md5__": "f87445771aa1626dc589a25134a6ffc3"
+    "show-num-lock-indicator": {
+        "type": "switch",
+        "default": false,
+        "description": "Show num lock indicator",
+        "value": false
+    },
+    "show-scr-lock-indicator": {
+        "type": "switch",
+        "default": false,
+        "description": "Show scr lock indicator",
+        "value": false
+    },
+    "__md5__": "0a99645fbdd48dd0fd9bae336a11fd89"
 }

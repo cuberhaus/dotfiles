@@ -50,7 +50,7 @@ size=(1080, 585)
 last-panel='universal-access'
 
 [desktop/a11y/applications]
-screen-keyboard-enabled=false
+screen-keyboard-enabled=true
 screen-reader-enabled=false
 
 [desktop/a11y/mouse]
@@ -90,7 +90,7 @@ gtk-im-module='gtk-im-context-simple'
 gtk-theme='Arc-Dark'
 icon-theme='breeze'
 toolbar-style='text'
-toolkit-accessibility=false
+toolkit-accessibility=true
 
 [desktop/notifications]
 application-children=['skypeforlinux', 'org-gnome-books']

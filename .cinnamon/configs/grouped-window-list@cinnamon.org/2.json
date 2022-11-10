@@ -168,7 +168,9 @@
             "whatsapp-nativefier.desktop",
             "termite.desktop",
             "visual-studio-code.desktop",
-            "spotify.desktop"
+            "spotify.desktop",
+            "kitty.desktop",
+            "thunderbird.desktop"
         ]
     },
     "group-apps": {
