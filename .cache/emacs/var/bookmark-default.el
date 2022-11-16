@@ -23,13 +23,13 @@
  (rear-context-string)
  (position . 1))
 ("journal"
- (filename . "~/fib/org/Journal.org")
+ (filename . "~/docs/org/Journal.org")
  (front-context-string . "\n**** 06:43 pm -")
  (rear-context-string . "05-04 Wednesday\n")
  (position . 338))
 ("org-capture-last-stored"
  (filename . "~/docs/org/Journal.org")
- (front-context-string . "**** 09:45 PM - ")
- (rear-context-string . "severe problem\n\n")
- (position . 4618))
+ (front-context-string . "**** 02:30 PM - ")
+ (rear-context-string . "-11-15 Tuesday\n\n")
+ (position . 5033))
 )
