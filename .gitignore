@@ -1,3 +1,6 @@
+.local/bin/mrjob
+.local/bin/mrjob-3
+.local/bin/mrjob-3.7
 .config/com.corsair/
 .cache/emacs/var/lsp/
 .config/libreoffice/4/user/GraphicsRenderTests.log
