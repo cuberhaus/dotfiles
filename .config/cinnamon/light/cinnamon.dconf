@@ -1,5 +1,5 @@
 [/]
-applet-cache-updated=1668867593
+applet-cache-updated=1668874805
 command-history=['r', 'hu', 'termite', 'export DISPLAY=:0; cinnamon --replace &']
 desklet-cache-updated=1604870895
 desklet-snap-interval=25
@@ -8,7 +8,7 @@ device-aliases=['/org/freedesktop/UPower/devices/battery_BAT0:=ASUSTeK ASUS Batt
 enabled-applets=['panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:16:systray@cinnamon.org:3', 'panel1:right:19:xapp-status@cinnamon.org:4', 'panel1:right:18:notifications@cinnamon.org:5', 'panel1:right:11:removable-drives@cinnamon.org:7', 'panel1:right:20:network@cinnamon.org:9', 'panel1:right:21:sound@cinnamon.org:10', 'panel1:right:22:power@cinnamon.org:11', 'panel1:right:24:calendar@cinnamon.org:12', 'panel1:right:15:workspace-switcher@cinnamon.org:25', 'panel1:right:12:printers@cinnamon.org:62', 'panel1:left:1:menu@cinnamon.org:63', 'panel1:right:5:a11y@cinnamon.org:64', 'panel1:right:3:SpicesUpdate@claudiux:66', 'panel1:right:0:keyboard@cinnamon.org:69']
 enabled-desklets=['calendar@deeppradhan:6:1575:850']
 enabled-extensions=@as []
-extension-cache-updated=1668867593
+extension-cache-updated=1668874805
 favorite-apps=['cinnamon-settings.desktop', 'transmission-gtk.desktop', 'thunderbird.desktop']
 next-applet-id=70
 next-desklet-id=13
@@ -81,7 +81,7 @@ text-scaling-factor=1.0
 toolkit-accessibility=false
 
 [desktop/keybindings]
-custom-list=['custom1', '__dummy__', 'custom0']
+custom-list=['custom2', 'custom0', '__dummy__', 'custom1']
 
 [desktop/keybindings/custom-keybindings/custom0]
 binding=['<Primary><Alt>t']
@@ -89,9 +89,14 @@ command='kitty'
 name='kitty'
 
 [desktop/keybindings/custom-keybindings/custom1]
-binding=['<Primary><Shift>e']
+binding=['<Primary><Alt>e']
 command='emacsclient -nc'
 name='Emacs'
+
+[desktop/keybindings/custom-keybindings/custom2]
+binding=['<Primary><Alt>c']
+command='gnome-calculator'
+name='Calculator'
 
 [desktop/keybindings/media-keys]
 terminal=@as []
@@ -104,7 +109,7 @@ display-notifications=true
 
 [desktop/peripherals/keyboard]
 delay=uint32 500
-numlock-state=false
+numlock-state=true
 repeat-interval=uint32 30
 
 [desktop/peripherals/mouse]
@@ -168,7 +173,7 @@ tile-maximize=true
 workspace-cycle=false
 
 [settings-daemon/peripherals/keyboard]
-numlock-state='off'
+numlock-state='on'
 
 [settings-daemon/plugins/power]
 lid-close-ac-action='suspend'
