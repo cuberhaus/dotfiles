@@ -273,7 +273,7 @@ load-extra-items=true
 
 [libgnomekbd/keyboard]
 layouts=['es', 'es\tcmk_ed_ks', 'es\tcmk_ed_us', 'us\tcmk_ed_us']
-options=['grp\tgrp:shift_caps_toggle']
+options=@as []
 
 [libgnomekbd/preview]
 height=623
