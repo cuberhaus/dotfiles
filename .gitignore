@@ -290,7 +290,7 @@ Thumbs.db
 ## Iterm 2
 .config/iterm2/AppSupport
 ## Karabiner
-.config/karabiner/
+# .config/karabiner/
 .local/share/karabiner/
 ## Git
 .gitconfig
