@@ -225,6 +225,11 @@
                 "name": "SpicesUpdate@claudiux",
                 "isunprotected": true,
                 "requestnewdownload": false
+            },
+            {
+                "name": "SW++@mohammad-sn",
+                "isunprotected": true,
+                "requestnewdownload": false
             }
         ]
     },
