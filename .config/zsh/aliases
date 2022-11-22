@@ -97,6 +97,7 @@ alias c="clear"
 # Git
 alias gs="git status"
 alias gf="git fetch"
+alias gl="git pull"
 alias ga="git add "
 alias gm="git merge"
 alias gc="git commit -m "
