@@ -23,8 +23,9 @@ window-maximized=true
 accuracy=9
 angle-units='degrees'
 base=16
-button-mode='programming'
+button-mode='basic'
 number-format='automatic'
+refresh-interval=604800
 show-thousands=false
 show-zeroes=false
 source-currency=''
@@ -50,7 +51,7 @@ size=(1080, 585)
 last-panel='universal-access'
 
 [desktop/a11y/applications]
-screen-keyboard-enabled=true
+screen-keyboard-enabled=false
 screen-reader-enabled=false
 
 [desktop/a11y/mouse]
@@ -90,7 +91,7 @@ gtk-im-module='gtk-im-context-simple'
 gtk-theme='Arc-Dark'
 icon-theme='breeze'
 toolbar-style='text'
-toolkit-accessibility=true
+toolkit-accessibility=false
 
 [desktop/notifications]
 application-children=['skypeforlinux', 'org-gnome-books']
@@ -268,14 +269,14 @@ col-6-visible=true
 col-6-width=0
 
 [libgnomekbd/desktop]
-load-extra-items=false
+load-extra-items=true
 
 [libgnomekbd/keyboard]
-layouts=@as []
-options=['caps\tcaps:swapescape']
+layouts=['es', 'es\tcmk_ed_ks', 'es\tcmk_ed_us', 'us\tcmk_ed_us']
+options=@as []
 
 [libgnomekbd/preview]
-height=605
+height=623
 width=1464
 x=240
 y=135

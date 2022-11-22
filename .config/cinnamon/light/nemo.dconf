@@ -16,7 +16,7 @@ disabled-extensions=['NemoTerminalProvider+NemoPython', 'SeahorseNemo']
 enable-delete=false
 last-server-connect-method=5
 show-computer-icon-toolbar=true
-show-hidden-files=true
+show-hidden-files=false
 show-home-icon-toolbar=false
 show-location-entry=true
 show-new-folder-icon-toolbar=false
@@ -29,7 +29,7 @@ selection-menu-make-link=true
 
 [window-state]
 bookmarks-expanded=true
-geometry='1117x551+531+208'
+geometry='946x519+959+262'
 maximized=false
 my-computer-expanded=true
 network-expanded=true
