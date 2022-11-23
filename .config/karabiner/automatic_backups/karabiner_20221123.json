@@ -41,100 +41,6 @@
                                 "type": "basic"
                             }
                         ]
-                    },
-                    {
-                        "description": "Print Screen to Command+Shift+4",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "print_screen"
-                                },
-                                "to": {
-                                    "key_code": "4",
-                                    "modifiers": [
-                                        "left_command",
-                                        "left_shift"
-                                    ]
-                                },
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Printscreen key to whole capture (command+shift+3)",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "print_screen"
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "3",
-                                        "modifiers": [
-                                            "left_command",
-                                            "left_shift"
-                                        ]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Alt+Printscreen key to portion capture (command+shift+4)",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "print_screen",
-                                    "modifiers": {
-                                        "mandatory": [
-                                            "left_option"
-                                        ],
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "4",
-                                        "modifiers": [
-                                            "left_command",
-                                            "left_shift"
-                                        ]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Ctrl+Printscreen key to panel capture (command+shift+5)",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "print_screen",
-                                    "modifiers": {
-                                        "mandatory": [
-                                            "left_control"
-                                        ],
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "5",
-                                        "modifiers": [
-                                            "left_command",
-                                            "left_shift"
-                                        ]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
                     }
                 ]
             },
@@ -157,27 +63,7 @@
                             },
                             "to": [
                                 {
-                                    "key_code": "escape"
-                                }
-                            ]
-                        },
-                        {
-                            "from": {
-                                "key_code": "scroll_lock"
-                            },
-                            "to": [
-                                {
-                                    "consumer_key_code": "al_terminal_lock_or_screensaver"
-                                }
-                            ]
-                        },
-                        {
-                            "from": {
-                                "key_code": "pause"
-                            },
-                            "to": [
-                                {
-                                    "consumer_key_code": "al_calculator"
+                                    "key_code": "f18"
                                 }
                             ]
                         }
