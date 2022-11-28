@@ -165,11 +165,8 @@
         "value": [
             "nemo.desktop",
             "google-chrome.desktop",
-            "whatsapp-nativefier.desktop",
             "termite.desktop",
-            "spotify.desktop",
-            "kitty.desktop",
-            "thunderbird.desktop"
+            "kitty.desktop"
         ]
     },
     "group-apps": {

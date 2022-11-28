@@ -123,7 +123,7 @@ window-size=(1024, 768)
 document-directory=@ms 'file:///home/pol/Downloads'
 
 [evince/default]
-window-ratio=(1.0084033613445378, 0.71258907363420432)
+window-ratio=(1.0081699346405228, 0.71212121212121215)
 
 [evolution-data-server]
 migrated=true

@@ -1,16 +1,16 @@
 [/]
-applet-cache-updated=1668882004
+applet-cache-updated=1669672614
 command-history=['r', 'hu', 'termite', 'export DISPLAY=:0; cinnamon --replace &']
 desklet-cache-updated=1604870895
 desklet-snap-interval=25
 desktop-effects-on-dialogs=true
 device-aliases=['/org/freedesktop/UPower/devices/battery_BAT0:=ASUSTeK ASUS Battery']
-enabled-applets=['panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:16:systray@cinnamon.org:3', 'panel1:right:19:xapp-status@cinnamon.org:4', 'panel1:right:18:notifications@cinnamon.org:5', 'panel1:right:11:removable-drives@cinnamon.org:7', 'panel1:right:20:network@cinnamon.org:9', 'panel1:right:21:sound@cinnamon.org:10', 'panel1:right:22:power@cinnamon.org:11', 'panel1:right:24:calendar@cinnamon.org:12', 'panel1:right:15:workspace-switcher@cinnamon.org:25', 'panel1:right:12:printers@cinnamon.org:62', 'panel1:left:1:menu@cinnamon.org:63', 'panel1:right:5:a11y@cinnamon.org:64', 'panel1:right:3:SpicesUpdate@claudiux:66', 'panel1:right:0:keyboard@cinnamon.org:69']
+enabled-applets=['panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:8:systray@cinnamon.org:3', 'panel1:right:10:xapp-status@cinnamon.org:4', 'panel1:right:9:notifications@cinnamon.org:5', 'panel1:right:5:removable-drives@cinnamon.org:7', 'panel1:right:11:network@cinnamon.org:9', 'panel1:right:12:sound@cinnamon.org:10', 'panel1:right:13:power@cinnamon.org:11', 'panel1:right:14:calendar@cinnamon.org:12', 'panel1:right:7:workspace-switcher@cinnamon.org:25', 'panel1:right:6:printers@cinnamon.org:62', 'panel1:left:0:menu@cinnamon.org:63', 'panel1:right:4:a11y@cinnamon.org:64', 'panel1:right:3:SpicesUpdate@claudiux:66', 'panel1:right:2:keyboard@cinnamon.org:69', 'panel1:left:1:show-desktop@cinnamon.org:72']
 enabled-desklets=['calendar@deeppradhan:6:1575:850']
 enabled-extensions=@as []
-extension-cache-updated=1668882003
-favorite-apps=['cinnamon-settings.desktop', 'transmission-gtk.desktop', 'thunderbird.desktop']
-next-applet-id=70
+extension-cache-updated=1669672613
+favorite-apps=['cinnamon-settings.desktop', 'transmission-gtk.desktop', 'thunderbird.desktop', 'spotify.desktop', 'kitty.desktop', 'whatsapp-nativefier.desktop']
+next-applet-id=75
 next-desklet-id=13
 no-adjacent-panel-barriers=true
 panel-edit-mode=false
@@ -36,7 +36,7 @@ mousekeys-accel-time=300
 mousekeys-init-delay=300
 mousekeys-max-speed=10
 slowkeys-delay=300
-stickykeys-enable=true
+stickykeys-enable=false
 stickykeys-modifier-beep=true
 stickykeys-two-key-off=false
 togglekeys-enable-beep=false
@@ -60,12 +60,12 @@ exec='termite'
 exec-arg='-e'
 
 [desktop/background]
-picture-options='stretched'
-picture-uri='file:///usr/share/backgrounds/wallpapers-2018/panorama-3629120.jpg'
+picture-options='zoom'
+picture-uri='file:///usr/share/backgrounds/linuxmint-tina/adeole_yosemite.jpg'
 
 [desktop/background/slideshow]
 delay=15
-image-source='xml:///usr/share/gnome-background-properties/wallpapers-2018.xml'
+image-source='xml:///usr/share/gnome-background-properties/linuxmint-tina.xml'
 
 [desktop/interface]
 cursor-blink-time=1200
@@ -99,6 +99,9 @@ command='gnome-calculator'
 name='Calculator'
 
 [desktop/keybindings/media-keys]
+next=['AudioNext']
+play=['AudioPlay']
+previous=['AudioPrev']
 terminal=@as []
 
 [desktop/media-handling]
@@ -166,6 +169,7 @@ keyboard-type='touch'
 [launcher]
 check-frequency=300
 memory-limit=2048
+memory-limit-enabled=true
 
 [muffin]
 tile-hud-threshold=25
