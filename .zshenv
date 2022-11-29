@@ -93,6 +93,7 @@ if [ -d "$HOME/.config/doom-emacs" ] ; then
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    # export JAVA_HOME=`/usr/libexec/java_home`
     export VISUAL=nvim
     export EDITOR="$VISUAL"
     export PATH="$HOME/.emacs.d/bin/:$PATH"

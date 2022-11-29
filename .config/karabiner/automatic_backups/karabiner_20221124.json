@@ -61,62 +61,13 @@
                                 "type": "basic"
                             }
                         ]
-                    },
-                    {
-                        "description": "Alt+Printscreen key to portion capture (command+shift+4)",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "print_screen",
-                                    "modifiers": {
-                                        "mandatory": [
-                                            "left_option"
-                                        ],
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "4",
-                                        "modifiers": [
-                                            "left_command",
-                                            "left_shift"
-                                        ]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
                     }
                 ]
             },
             "devices": [
                 {
                     "disable_built_in_keyboard_if_exists": false,
-                    "fn_function_keys": [
-                        {
-                            "from": {
-                                "key_code": "f7"
-                            },
-                            "to": [
-                                {
-                                    "consumer_key_code": "al_text_editor"
-                                }
-                            ]
-                        },
-                        {
-                            "from": {
-                                "key_code": "f8"
-                            },
-                            "to": [
-                                {
-                                    "consumer_key_code": "al_internet_browser"
-                                }
-                            ]
-                        }
-                    ],
+                    "fn_function_keys": [],
                     "identifiers": {
                         "is_keyboard": true,
                         "is_pointing_device": false,
