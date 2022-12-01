@@ -37,7 +37,8 @@
             "chromium-browser",
             "spotify",
             "org.gnome.Lollypop",
-            "google-chrome"
+            "google-chrome",
+            "firefox"
         ]
     },
     "section2": {
