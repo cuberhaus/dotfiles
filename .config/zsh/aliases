@@ -40,6 +40,7 @@ alias rclonepull_thunderbird="rclone -P sync drive:Thunderbird ~/.thunderbird"
 alias rclonepush_calibre="rclone -P sync ~/Calibre\ Library drive:Calibre/Calibre\ Library"
 alias rclonepush_thunderbird="rclone -P sync ~/.thunderbird drive:Thunderbird"
 
+alias colemak="$HOME/.local/scripts/BigBagKbdTrixXKB-master/setxkb.sh '5ca es ks'"
 # Config Files
 alias aliases="nvim $ZDOTDIR/aliases"
 alias arch="nvim $scripts/bootstrap/arch_functions"

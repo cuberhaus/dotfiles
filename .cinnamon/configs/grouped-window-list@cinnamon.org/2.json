@@ -164,8 +164,6 @@
         ],
         "value": [
             "nemo.desktop",
-            "google-chrome.desktop",
-            "termite.desktop",
             "kitty.desktop"
         ]
     },
