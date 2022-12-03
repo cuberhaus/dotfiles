@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8"?>
 <!DOCTYPE keyboard SYSTEM "file://localhost/System/Library/DTDs/KeyboardLayout.dtd">
-<!--Last edited by Ukelele version 359 on 2022-12-03 at 12:57 (CET)-->
-<keyboard group="126" id="-28565" name="Colemak DH ISO" maxout="3">
+<!--Last edited by Ukelele version 359 on 2022-12-03 at 13:26 (CET)-->
+<keyboard group="126" id="-18301" name="Colemak DH ISO ES" maxout="3">
     <layouts>
         <layout first="0" last="17" mapSet="16c" modifiers="f4"/>
         <layout first="18" last="18" mapSet="984" modifiers="f4"/>
@@ -45,7 +45,7 @@
         <keyMap index="0">
             <key code="0" action="14"/>
             <key code="1" output="r"/>
-            <key code="2" output="s"/>
+            <key code="2" action="s"/>
             <key code="3" output="t"/>
             <key code="4" output="m"/>
             <key code="5" output="g"/>
@@ -76,13 +76,13 @@
             <key code="30" output="+"/>
             <key code="31" action="20"/>
             <key code="32" output="l"/>
-            <key code="33" output="`"/>
+            <key code="33" action="`"/>
             <key code="34" action="19"/>
             <key code="35" output="ñ"/>
             <key code="36" output="&#x000D;"/>
             <key code="37" action="16"/>
             <key code="38" action="17"/>
-            <key code="39" output="´"/>
+            <key code="39" action="´"/>
             <key code="40" action="15"/>
             <key code="41" action="18"/>
             <key code="42" output="ç"/>
@@ -1033,6 +1033,9 @@
             <when state="3" output="â"/>
             <when state="4" output="ä"/>
             <when state="5" output="ã"/>
+            <when state="Dead Key State 0" output="á"/>
+            <when state="accent obert" output="à"/>
+            <when state="accent tancat" output="á"/>
         </action>
         <action id="15">
             <when state="none" output="e"/>
@@ -1040,6 +1043,9 @@
             <when state="2" output="è"/>
             <when state="3" output="ê"/>
             <when state="4" output="ë"/>
+            <when state="Dead Key State 0" output="é"/>
+            <when state="accent obert" output="è"/>
+            <when state="accent tancat" output="é"/>
         </action>
         <action id="16">
             <when state="none" output="i"/>
@@ -1047,6 +1053,9 @@
             <when state="2" output="ì"/>
             <when state="3" output="î"/>
             <when state="4" output="ï"/>
+            <when state="Dead Key State 0" output="í"/>
+            <when state="accent obert" output="ì"/>
+            <when state="accent tancat" output="í"/>
         </action>
         <action id="17">
             <when state="none" output="n"/>
@@ -1059,6 +1068,9 @@
             <when state="3" output="ô"/>
             <when state="4" output="ö"/>
             <when state="5" output="õ"/>
+            <when state="Dead Key State 0" output="ó"/>
+            <when state="accent obert" output="ò"/>
+            <when state="accent tancat" output="ó"/>
         </action>
         <action id="19">
             <when state="none" output="u"/>
@@ -1066,6 +1078,9 @@
             <when state="2" output="ù"/>
             <when state="3" output="û"/>
             <when state="4" output="ü"/>
+            <when state="Dead Key State 0" output="ú"/>
+            <when state="accent obert" output="ù"/>
+            <when state="accent tancat" output="ú"/>
         </action>
         <action id="2">
             <when state="none" next="3"/>
@@ -1118,6 +1133,17 @@
             <when state="none" output="N"/>
             <when state="5" output="Ñ"/>
         </action>
+        <action id="`">
+            <when state="none" next="accent obert"/>
+        </action>
+        <action id="s">
+            <when state="none" output="s"/>
+            <when state="Dead Key State 0" output="s"/>
+        </action>
+        <action id="´">
+            <when state="none" next="Dead Key State 0"/>
+            <when state="Dead Key State 0" next="accent tancat"/>
+        </action>
     </actions>
     <terminators>
         <when state="1" output="´"/>
@@ -1125,5 +1151,8 @@
         <when state="3" output="ˆ"/>
         <when state="4" output="¨"/>
         <when state="5" output="˜"/>
+        <when state="Dead Key State 0" output="´"/>
+        <when state="accent obert" output="`"/>
+        <when state="accent tancat" output=""/>
     </terminators>
 </keyboard>
