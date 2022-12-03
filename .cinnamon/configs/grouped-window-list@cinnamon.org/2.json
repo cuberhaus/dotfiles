@@ -164,7 +164,8 @@
         ],
         "value": [
             "nemo.desktop",
-            "kitty.desktop"
+            "kitty.desktop",
+            "google-chrome.desktop"
         ]
     },
     "group-apps": {
