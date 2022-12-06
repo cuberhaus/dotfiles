@@ -19,6 +19,10 @@ pip="pip install --user" # in arch pip packages should be installed based on use
 ## Invariant: be at $HOME dir
 
 base_install () {
+    # $pac tensorflow
+    $pac bazel
+    $pac cudnn
+    $pac cuda                                   # GPU
     $pac conky
     $pac adapta-gtk-theme                       # Alternative theme
     $pac arc-gtk-theme                          # Arc theme and its icon's
