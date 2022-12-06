@@ -1,0 +1,14 @@
+pull() {
+    cd "$1" || exit
+    git fetch
+    git merge
+    cd "$HOME" || exit
+}
+
+folders=("docs" "APA_Practica" "APA" "PAR" "fib" "dotfiles/dotfiles" "CAIM")
+
+cd "$HOME" || exit
+for i in "${folders[@]}"
+do
+    pull "$i"
+done
