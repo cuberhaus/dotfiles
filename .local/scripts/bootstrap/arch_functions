@@ -20,6 +20,7 @@ pip="pip install --user" # in arch pip packages should be installed based on use
 
 base_install () {
     # $pac tensorflow
+    $pac opencl-headers
     $pac bazel
     $pac cudnn
     $pac cuda                                   # GPU
