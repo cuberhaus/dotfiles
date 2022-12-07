@@ -1,3 +1,6 @@
+[Disks]
+image-dir-uri='file:///home/pol/Downloads'
+
 [Lollypop]
 network-access-acl=262142
 notification-flag=2
@@ -52,7 +55,7 @@ last-panel='universal-access'
 
 [desktop/a11y/applications]
 screen-keyboard-enabled=false
-screen-reader-enabled=false
+screen-reader-enabled=true
 
 [desktop/a11y/mouse]
 dwell-click-enabled=false
@@ -91,7 +94,7 @@ gtk-im-module='gtk-im-context-simple'
 gtk-theme='Arc-Dark'
 icon-theme='breeze'
 toolbar-style='text'
-toolkit-accessibility=false
+toolkit-accessibility=true
 
 [desktop/notifications]
 application-children=['skypeforlinux', 'org-gnome-books']
@@ -272,14 +275,14 @@ col-6-width=0
 load-extra-items=true
 
 [libgnomekbd/keyboard]
-layouts=['es', 'es\tcmk_ed_ks', 'es\tcmk_ed_us', 'us\tcmk_ed_us']
+layouts=@as []
 options=@as []
 
 [libgnomekbd/preview]
 height=623
 width=1464
-x=240
-y=135
+x=14
+y=208
 
 [meld]
 wrap-mode='none'
@@ -430,7 +433,7 @@ list=['5e9777be-fa9a-4bd8-80e1-f2e09dda0023', 'b231088a-bd42-4891-ad7e-b310c1e2b
 background-color='#f3f3f3'
 bold-color='#4d4d4c'
 bold-color-same-as-fg=true
-font='UbuntuMono Nerd Font Mono 1'
+font='UbuntuMono Nerd Font Mono 12'
 foreground-color='#4d4d4c'
 palette='#f3f3f3:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#d0d0d0:#808080:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#262626'
 scrollbar-policy='never'
@@ -448,7 +451,7 @@ use-system-font=false
 background-color='#f3f3f3'
 bold-color='#4d4d4c'
 bold-color-same-as-fg=true
-font='UbuntuMono Nerd Font Mono 1'
+font='UbuntuMono Nerd Font Mono 12'
 foreground-color='#4d4d4c'
 palette='#f3f3f3:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#d0d0d0:#808080:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#262626'
 scrollbar-policy='never'

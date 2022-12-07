@@ -1,5 +1,5 @@
 [/]
-applet-cache-updated=1669672614
+applet-cache-updated=1670409895
 command-history=['r', 'hu', 'termite', 'export DISPLAY=:0; cinnamon --replace &']
 desklet-cache-updated=1604870895
 desklet-snap-interval=25
@@ -8,8 +8,9 @@ device-aliases=['/org/freedesktop/UPower/devices/battery_BAT0:=ASUSTeK ASUS Batt
 enabled-applets=['panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:8:systray@cinnamon.org:3', 'panel1:right:10:xapp-status@cinnamon.org:4', 'panel1:right:9:notifications@cinnamon.org:5', 'panel1:right:5:removable-drives@cinnamon.org:7', 'panel1:right:11:network@cinnamon.org:9', 'panel1:right:12:sound@cinnamon.org:10', 'panel1:right:13:power@cinnamon.org:11', 'panel1:right:14:calendar@cinnamon.org:12', 'panel1:right:7:workspace-switcher@cinnamon.org:25', 'panel1:right:6:printers@cinnamon.org:62', 'panel1:left:0:menu@cinnamon.org:63', 'panel1:right:4:a11y@cinnamon.org:64', 'panel1:right:3:SpicesUpdate@claudiux:66', 'panel1:right:2:keyboard@cinnamon.org:69', 'panel1:left:1:show-desktop@cinnamon.org:72']
 enabled-desklets=['calendar@deeppradhan:6:1575:850']
 enabled-extensions=@as []
-extension-cache-updated=1669672613
-favorite-apps=['cinnamon-settings.desktop', 'transmission-gtk.desktop', 'thunderbird.desktop', 'spotify.desktop', 'kitty.desktop', 'whatsapp-nativefier.desktop', 'emacsclient.desktop']
+extension-cache-updated=1670409895
+favorite-apps=['cinnamon-settings.desktop', 'transmission-gtk.desktop', 'thunderbird.desktop', 'spotify.desktop', 'kitty.desktop', 'whatsapp-nativefier.desktop', 'emacsclient.desktop', 'nemo.desktop']
+looking-glass-history=['asdfasdf']
 next-applet-id=75
 next-desklet-id=13
 no-adjacent-panel-barriers=true
@@ -28,7 +29,7 @@ quit-time-delay=60
 [desktop/a11y/applications]
 screen-keyboard-enabled=false
 screen-magnifier-enabled=false
-screen-reader-enabled=false
+screen-reader-enabled=true
 
 [desktop/a11y/keyboard]
 bouncekeys-delay=300
@@ -61,11 +62,11 @@ exec-arg='-e'
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///usr/share/backgrounds/linuxmint-tina/adeole_yosemite.jpg'
+picture-uri='file:///usr/share/backgrounds/linuxmint-sylvia/kemsley_kluane.jpg'
 
 [desktop/background/slideshow]
 delay=15
-image-source='xml:///usr/share/gnome-background-properties/linuxmint-tina.xml'
+image-source='xml:///usr/share/gnome-background-properties/linuxmint-sylvia.xml'
 
 [desktop/interface]
 cursor-blink-time=1200
@@ -78,10 +79,10 @@ keyboard-layout-show-flags=true
 keyboard-layout-use-upper=false
 scaling-factor=uint32 0
 text-scaling-factor=1.0
-toolkit-accessibility=false
+toolkit-accessibility=true
 
 [desktop/keybindings]
-custom-list=['custom2', 'custom0', '__dummy__', 'custom1']
+custom-list=['custom1', '__dummy__', 'custom0', 'custom2']
 
 [desktop/keybindings/custom-keybindings/custom0]
 binding=['<Primary><Alt>t']
@@ -102,7 +103,11 @@ name='Calculator'
 next=['AudioNext']
 play=['AudioPlay']
 previous=['AudioPrev']
+screensaver=@as []
 terminal=@as []
+
+[desktop/keybindings/wm]
+switch-to-workspace-left=['<Control><Alt>Left']
 
 [desktop/media-handling]
 autorun-never=false
@@ -112,7 +117,7 @@ display-notifications=true
 
 [desktop/peripherals/keyboard]
 delay=uint32 500
-numlock-state=false
+numlock-state=true
 repeat-interval=uint32 30
 
 [desktop/peripherals/mouse]
@@ -177,7 +182,7 @@ tile-maximize=true
 workspace-cycle=false
 
 [settings-daemon/peripherals/keyboard]
-numlock-state='off'
+numlock-state='on'
 
 [settings-daemon/plugins/power]
 lid-close-ac-action='suspend'
