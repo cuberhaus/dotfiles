@@ -1,7 +1,7 @@
 <?xml version="1.1" encoding="UTF-8"?>
 <!DOCTYPE keyboard SYSTEM "file://localhost/System/Library/DTDs/KeyboardLayout.dtd">
-<!--Last edited by Ukelele version 359 on 2022-12-03 at 13:26 (CET)-->
-<keyboard group="126" id="-8459" name="Colemak DH ISO ES" maxout="3">
+<!--Last edited by Ukelele version 359 on 2022-12-03 at 20:16 (CET)-->
+<keyboard group="126" id="-17510" name="Colemak DH ISO ES" maxout="3">
     <layouts>
         <layout first="0" last="17" mapSet="16c" modifiers="f4"/>
         <layout first="18" last="18" mapSet="984" modifiers="f4"/>
@@ -72,7 +72,7 @@
             <key code="26" output="7"/>
             <key code="27" output="&#x0027;"/>
             <key code="28" output="8"/>
-            <key code="29" output="="/>
+            <key code="29" output="0"/>
             <key code="30" output="+"/>
             <key code="31" action="20"/>
             <key code="32" output="l"/>
@@ -181,7 +181,7 @@
             <key code="26" output="/"/>
             <key code="27" output="?"/>
             <key code="28" output="("/>
-            <key code="29" output=")"/>
+            <key code="29" output="="/>
             <key code="30" output="*"/>
             <key code="31" action="12"/>
             <key code="32" output="L"/>
@@ -400,10 +400,10 @@
             <key code="27" output="–"/>
             <key code="28" output="•"/>
             <key code="29" output="º"/>
-            <key code="30" output="‘"/>
+            <key code="30" output="]"/>
             <key code="31" output="¥"/>
             <key code="32" output="¬"/>
-            <key code="33" output="“"/>
+            <key code="33" output="["/>
             <key code="34" action="3"/>
             <key code="35" output="…"/>
             <key code="36" output="&#x000D;"/>
@@ -414,7 +414,7 @@
             <key code="41" output="ø"/>
             <key code="42" output="}"/>
             <key code="43" output="≤"/>
-            <key code="44" output="÷"/>
+            <key code="44" output="–"/>
             <key code="45" output="˚"/>
             <key code="46" output="˙"/>
             <key code="47" output="≥"/>
