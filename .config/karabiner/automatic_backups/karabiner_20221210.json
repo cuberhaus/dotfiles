@@ -240,18 +240,7 @@
                     },
                     "ignore": false,
                     "manipulate_caps_lock_led": true,
-                    "simple_modifications": [
-                        {
-                            "from": {
-                                "key_code": "scroll_lock"
-                            },
-                            "to": [
-                                {
-                                    "consumer_key_code": "al_terminal_lock_or_screensaver"
-                                }
-                            ]
-                        }
-                    ],
+                    "simple_modifications": [],
                     "treat_as_built_in_keyboard": false
                 }
             ],
