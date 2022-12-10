@@ -150,13 +150,18 @@ updateall="python3 -m pip install --user --upgrade pynvim &;
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
     updateall="sudo softwareupdate -i -a; 
-    npm install npm -g; 
+    xcode-select --install; 
     brew update; 
     brew upgrade; 
     brew update --cask; 
-    xcode-select --install; 
+    npm install npm -g; 
     "$updateall
-    update=$updateall
+    update="sudo softwareupdate -i -a;
+    xcode-select --install; 
+    brew update; 
+    brew upgrade; 
+    brew update --cask; 
+    "$update
     # sudo xcode-select -switch /Library/Developer/CommandLineTools
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     cleanup="brew cleanup;
@@ -182,7 +187,8 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        update="sudo pacman -Syu;"$update
+        update="sudo pacman -Syu;
+        "$update
         updateall="yay -Syu;
         npm update &;
         "$updateall
