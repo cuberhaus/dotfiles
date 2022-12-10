@@ -158,13 +158,14 @@
     "pinned-apps": {
         "type": "generic",
         "default": [
+            "nemo.desktop",
             "firefox.desktop",
-            "org.gnome.Terminal.desktop",
-            "nemo.desktop"
+            "org.gnome.Terminal.desktop"
         ],
         "value": [
             "nemo.desktop",
-            "kitty.desktop"
+            "kitty.desktop",
+            "google-chrome.desktop"
         ]
     },
     "group-apps": {
@@ -351,5 +352,5 @@
         "description": "Window opacity",
         "value": 100
     },
-    "__md5__": "e40a0b58776e89bfacbd212bc3d55f20"
+    "__md5__": "6f73ea938aeb5481595a809eb6cbe8e3"
 }

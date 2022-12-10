@@ -26,3 +26,6 @@
 [submodule ".config/snippets"]
 	path = .config/snippets
 	url = https://github.com/doomemacs/snippets
+[submodule ".local/scripts/BigBagKbdTrixXKB"]
+	path = .local/scripts/BigBagKbdTrixXKB
+	url = https://github.com/DreymaR/BigBagKbdTrixXKB

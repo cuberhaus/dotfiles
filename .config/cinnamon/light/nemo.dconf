@@ -29,7 +29,7 @@ selection-menu-make-link=true
 
 [window-state]
 bookmarks-expanded=true
-geometry='946x529+297+49'
+geometry='946x529+50+50'
 maximized=false
 my-computer-expanded=true
 network-expanded=true
