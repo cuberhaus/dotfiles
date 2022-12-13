@@ -91,7 +91,19 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 #+end_src
 *** Customize System to different file
 #+begin_src emacs-lisp
-    (setq custom-file "~/.config/my_emacs/custom.el")
+(cond ((eq system-type 'windows-nt)
+       ;; Windows-specific code goes here.
+      (setq custom-file "~/.emacs.d/custom.el")
+       )
+       ;; Mac-specific code goes here.
+      ((eq system-type 'darwin)
+      (setq custom-file "~/.config/my_emacs/custom.el")
+       )
+       ;; Linux-specific code goes here.
+      ((eq system-type 'gnu/linux)
+      (setq custom-file "~/.config/my_emacs/custom.el")
+       )
+       )
     (load custom-file)
 #+end_src
 
