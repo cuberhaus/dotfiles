@@ -130,6 +130,7 @@ base_install () {
     $pac gnome-calculator
     $pac kalk
     $pac solaar # logitech unifying
+    $pac telegram
 
     # DO NOT CHANGE THIS ORDER YAY COMES AFTER pac
     yay_install

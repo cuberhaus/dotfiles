@@ -297,3 +297,11 @@ Thumbs.db
 .local/share/karabiner/
 ## Git
 .gitconfig
+.local/bin/django-admin
+.local/bin/psghelp
+.local/bin/psgissue
+.local/bin/psgmain
+.local/bin/psgsettings
+.local/bin/psgupgrade
+.local/bin/psgver
+.local/bin/sqlformat
