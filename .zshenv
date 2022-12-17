@@ -76,7 +76,7 @@ export MANPAGER='nvim +Man!' # use neovim as manpager
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     #If you are using openjdk6 >= 1.6.1, the cleanest way to work around the hardcoded list is to warn the vm that xmonad is non-reparenting by exporting the appropriate environment variable:
     export _JAVA_AWT_WM_NONREPARENTING=1 # this fixes matlab
-    export VISUAL=emacsclient
+    export VISUAL=vim
     export EDITOR="$VISUAL"
 
     export TERMINAL="kitty"
