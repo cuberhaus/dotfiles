@@ -1,6 +1,6 @@
 [desktop]
 computer-icon-visible=true
-font='Ubuntu 11'
+font='Verdana 11'
 home-icon-visible=true
 trash-icon-visible=true
 volumes-visible=true
@@ -16,7 +16,7 @@ disabled-extensions=['NemoTerminalProvider+NemoPython', 'SeahorseNemo']
 enable-delete=false
 last-server-connect-method=5
 show-computer-icon-toolbar=true
-show-hidden-files=false
+show-hidden-files=true
 show-home-icon-toolbar=false
 show-location-entry=true
 show-new-folder-icon-toolbar=false
@@ -29,8 +29,8 @@ selection-menu-make-link=true
 
 [window-state]
 bookmarks-expanded=true
-geometry='946x529+50+50'
-maximized=false
+geometry='1117x551+463+587'
+maximized=true
 my-computer-expanded=true
 network-expanded=true
 side-pane-view='places'

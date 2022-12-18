@@ -3,19 +3,23 @@ applet-cache-updated=1604870895
 command-history=['r', 'hu', 'termite', 'export DISPLAY=:0; cinnamon --replace &']
 desklet-cache-updated=1604870895
 desklet-snap-interval=25
+desktop-effects-on-dialogs=true
 device-aliases=['/org/freedesktop/UPower/devices/battery_BAT0:=ASUSTeK ASUS Battery']
-enabled-applets=['panel1:left:2:grouped-window-list@cinnamon.org:2', 'panel1:right:9:systray@cinnamon.org:3', 'panel1:right:12:xapp-status@cinnamon.org:4', 'panel1:right:11:notifications@cinnamon.org:5', 'panel1:right:4:removable-drives@cinnamon.org:7', 'panel1:right:13:network@cinnamon.org:9', 'panel1:right:14:sound@cinnamon.org:10', 'panel1:right:15:power@cinnamon.org:11', 'panel1:right:17:calendar@cinnamon.org:12', 'panel1:right:10:weather@mockturtl:13', 'panel1:right:8:workspace-switcher@cinnamon.org:25', 'panel1:right:18:clean-show-desktop@filipetorresbr:31', 'panel1:right:6:force-quit@cinnamon.org:45', 'panel1:right:7:show-hide-applets@mohammad-sn:48', 'panel1:right:3:color-picker@fmete:51', 'panel1:right:1:SpicesUpdate@claudiux:52', 'panel1:right:16:betterlock:53', 'panel1:left:0:Cinnamenu@json:57', 'panel1:right:0:keyboard@cinnamon.org:60', 'panel1:right:5:printers@cinnamon.org:62']
+enabled-applets=['panel1:left:1:grouped-window-list@cinnamon.org:2', 'panel1:right:6:systray@cinnamon.org:3', 'panel1:right:8:xapp-status@cinnamon.org:4', 'panel1:right:7:notifications@cinnamon.org:5', 'panel1:right:2:removable-drives@cinnamon.org:7', 'panel1:right:9:network@cinnamon.org:9', 'panel1:right:10:sound@cinnamon.org:10', 'panel1:right:11:power@cinnamon.org:11', 'panel1:right:13:calendar@cinnamon.org:12', 'panel1:right:5:workspace-switcher@cinnamon.org:25', 'panel1:right:1:SpicesUpdate@claudiux:52', 'panel1:right:12:betterlock:53', 'panel1:right:0:keyboard@cinnamon.org:60', 'panel1:right:0:printers@cinnamon.org:62', 'panel1:left:0:menu@cinnamon.org:63']
 enabled-desklets=['calendar@deeppradhan:6:1575:850']
 enabled-extensions=@as []
 extension-cache-updated=1602088012
 favorite-apps=['cinnamon-settings.desktop', 'transmission-gtk.desktop']
-next-applet-id=63
+looking-glass-history=['asdfasdf']
+next-applet-id=64
 next-desklet-id=13
+no-adjacent-panel-barriers=true
 panel-edit-mode=false
 panel-launchers=['DEPRECATED']
 panel-zone-symbolic-icon-sizes='[{"panelId": 1, "left": 28, "center": 28, "right": 16}]'
 panels-enabled=['1:0:bottom']
 panels-height=['1:40']
+window-effect-speed=1
 workspace-expo-view-as-grid=true
 
 [cinnamon-session]
@@ -24,6 +28,7 @@ quit-time-delay=60
 
 [desktop/a11y/applications]
 screen-keyboard-enabled=false
+screen-magnifier-enabled=false
 screen-reader-enabled=false
 
 [desktop/a11y/keyboard]
@@ -32,6 +37,14 @@ mousekeys-accel-time=300
 mousekeys-init-delay=300
 mousekeys-max-speed=10
 slowkeys-delay=300
+stickykeys-enable=false
+stickykeys-modifier-beep=true
+stickykeys-two-key-off=false
+togglekeys-enable-beep=false
+togglekeys-enable-osd=true
+
+[desktop/a11y/magnifier]
+mag-factor=1.0
 
 [desktop/a11y/mouse]
 dwell-click-enabled=false
@@ -59,9 +72,10 @@ image-source='xml:///usr/share/gnome-background-properties/linuxmint-ulyana.xml'
 cursor-blink-time=1200
 cursor-size=24
 font-name='Verdana 11'
-gtk-theme='Arc-Dark'
+gtk-theme='Mint-Y-Blue'
 icon-theme='Papirus-Dark'
 keyboard-layout-prefer-variant-names=false
+keyboard-layout-show-flags=true
 keyboard-layout-use-upper=false
 scaling-factor=uint32 0
 text-scaling-factor=1.0
@@ -75,14 +89,66 @@ binding=['<Primary><Alt>t']
 command='termite'
 name='Termite'
 
+[desktop/keybindings/custom-keybindings/custom1]
+binding=['<Primary><Alt>e']
+command='emacsclient -nc'
+name='Emacs'
+
+[desktop/keybindings/custom-keybindings/custom2]
+binding=['<Primary><Alt>c']
+command='gnome-calculator'
+name='Calculator'
+
 [desktop/keybindings/media-keys]
+next=['AudioNext']
+play=['AudioPlay']
+previous=['AudioPrev']
+screensaver=@as []
 terminal=@as []
+
+[desktop/keybindings/wm]
+switch-to-workspace-left=['<Control><Alt>Left']
 
 [desktop/media-handling]
 autorun-never=false
 
 [desktop/notifications]
 display-notifications=true
+
+[desktop/peripherals/keyboard]
+delay=uint32 500
+numlock-state=false
+repeat-interval=uint32 30
+
+[desktop/peripherals/mouse]
+double-click=400
+drag-threshold=8
+speed=0.0
+
+[desktop/peripherals/stylus/8a811020]
+button-action='default'
+pressure-curve=[0, 0, 100, 100]
+secondary-button-action='default'
+tertiary-button-action='default'
+
+[desktop/peripherals/tablets/056a:0377]
+mapping='absolute'
+output=['', '', '']
+
+[desktop/peripherals/tablets/056a:0377/buttonA]
+action='keybinding'
+
+[desktop/peripherals/tablets/056a:0377/buttonB]
+action='help'
+
+[desktop/peripherals/tablets/056a:0377/buttonC]
+action='keybinding'
+
+[desktop/peripherals/tablets/056a:0377/buttonD]
+action='keybinding'
+
+[desktop/peripherals/touchpad]
+speed=0.0
 
 [desktop/screensaver]
 layout-group=0
@@ -94,12 +160,25 @@ idle-delay=uint32 900
 event-sounds=false
 
 [desktop/wm/preferences]
+audible-bell=true
 resize-with-right-button=true
 theme='Arc-Dark'
 titlebar-font='Verdana Bold 12'
+visual-bell=false
+visual-bell-type='fullscreen-flash'
+
+[keyboard]
+keyboard-position='bottom'
+keyboard-type='touch'
+
+[launcher]
+check-frequency=300
+memory-limit=2048
+memory-limit-enabled=true
 
 [muffin]
 tile-hud-threshold=25
+tile-maximize=true
 workspace-cycle=false
 
 [settings-daemon/peripherals/keyboard]
@@ -129,5 +208,5 @@ login-enabled=true
 map-enabled=false
 
 [theme]
-name='Arc-Dark'
+name='Matcha-dark-azul'
 theme-cache-updated=1602113200

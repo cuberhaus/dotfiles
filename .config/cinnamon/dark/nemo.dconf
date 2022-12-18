@@ -28,8 +28,9 @@ show-show-thumbnails-toolbar=false
 selection-menu-make-link=true
 
 [window-state]
+bookmarks-expanded=true
 geometry='1117x551+463+587'
-maximized=false
+maximized=true
 my-computer-expanded=true
 network-expanded=true
 side-pane-view='places'
