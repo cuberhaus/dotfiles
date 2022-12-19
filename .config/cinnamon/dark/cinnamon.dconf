@@ -82,7 +82,7 @@ text-scaling-factor=1.0
 toolkit-accessibility=false
 
 [desktop/keybindings]
-custom-list=['custom0', '__dummy__', 'custom1']
+custom-list=['custom1', '__dummy__', 'custom0']
 
 [desktop/keybindings/custom-keybindings/custom0]
 binding=['<Primary><Alt>t']
@@ -90,7 +90,7 @@ command='kitty'
 name='kitty'
 
 [desktop/keybindings/custom-keybindings/custom1]
-binding=@as []
+binding=['<Primary><Alt>e']
 command='emacsclient -nc'
 name='emacs'
 
