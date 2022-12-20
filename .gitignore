@@ -309,3 +309,10 @@ Thumbs.db
 .local/bin/convert-onnx-to-caffe2
 .local/bin/torchrun
 
+.local/bin/dash-generate-components
+.local/bin/dash-update-components
+.local/bin/jupyter-trust
+.local/bin/open3d
+.local/bin/py.test
+.local/bin/pytest
+.local/bin/renderer
