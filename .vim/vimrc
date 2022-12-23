@@ -45,6 +45,7 @@ call plug#begin()
 " Plug 'lervag/vimtex'
 " Track the engine.
 " Plug 'github/copilot.vim'
+Plug 'kshenoy/vim-signature'
 Plug 'SirVer/ultisnips'
 " Snippets are separated from the engine. Add this if you want them:
 Plug 'honza/vim-snippets'
