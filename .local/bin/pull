@@ -1,12 +1,19 @@
+#!/bin/bash
+
 pull() {
-    echo "Pulling $1"
-    cd "$1" || exit
-    git fetch
-    git merge
-    cd "$HOME" || exit
+    if [[ -d "$1" ]]
+    then
+        echo "$1 exists on your filesystem."
+        printf "Pulling $1\n"
+        cd "$1" || exit
+        git fetch
+        git merge
+        cd "$HOME" || exit
+        printf "\n"
+    fi
 }
 
-folders=("docs" "APA_Practica" "APA" "PAR" "fib" "dotfiles/dotfiles" "CAIM")
+folders=("docs" "APA_Practica" "APA" "PAR" "fib" "dotfiles/dotfiles" "VC" "CAIM")
 
 cd "$HOME" || exit
 for i in "${folders[@]}"
