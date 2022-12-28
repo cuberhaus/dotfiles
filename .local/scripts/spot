@@ -1,3 +1,4 @@
+#!/bin/bash
 running=$(pidof spotify)
 if [ "$running" != "" ]; then
     artist=$(playerctl metadata artist)

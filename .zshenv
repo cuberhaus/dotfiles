@@ -9,7 +9,7 @@
 
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
-    PATH="$HOME/.local/bin/pol:$PATH"
+    # PATH="$HOME/.local/bin/pol:$PATH"
 fi
 
 if [ -d "$HOME/.local/share/cargo/bin" ] ; then
@@ -19,6 +19,11 @@ fi
 # DO NOT EVER LEAVE AN IF EMPTY OR IT WILL CAUSE APPS TO NOT HAVE PATH STUFF BEWARE
 # TO CHECK IF PATH FOR APPS WORK OPEN OKULAR OR QT5 SETTINGS
 # fi
+
+if [ -d "$HOME/.local/scripts/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+    # PATH="$HOME/.local/bin/pol:$PATH"
+fi
 
 if [[ "$DESKTOP_SESSION" == "cinnamon" ]]; then
     if [ -d "$HOME/.local/scripts/cinnamon_path" ] ; then
