@@ -24,6 +24,13 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 scripts=$HOME/.local/scripts
+
+# Alias to get context, since we do not want it cluttering our prompt all of the time, we want to  focus on what is important.
+name=$(whoami)
+host=$(hostname)
+context=$name@$host
+alias prompt="echo $context"
+
 # Burn iso into usb
 # sudo lsblk to look for usb
 #sudo dd if=.iso of=/dev/sdb status=progress
