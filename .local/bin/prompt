@@ -1,0 +1,12 @@
+name=$(whoami)
+host=$(hostname)
+tput setaf 1 # red
+echo -n "$name"
+# Reset the text color to the default
+tput sgr0
+echo -n "@"
+# Set the text color to green
+tput setaf 2
+echo "$host"
+# Reset the text color to the default
+tput sgr0
