@@ -1,3 +1,23 @@
+
+.local/bin/django-admin
+.local/bin/psghelp
+.local/bin/psgissue
+.local/bin/psgmain
+.local/bin/psgsettings
+.local/bin/psgupgrade
+.local/bin/psgver
+.local/bin/sqlformat
+.local/bin/convert-caffe2-to-onnx
+.local/bin/convert-onnx-to-caffe2
+.local/bin/torchrun
+
+.local/bin/dash-generate-components
+.local/bin/dash-update-components
+.local/bin/jupyter-trust
+.local/bin/open3d
+.local/bin/py.test
+.local/bin/pytest
+.local/bin/renderer
 .local/bin/mrjob
 .local/bin/mrjob-3
 .local/bin/mrjob-3.7
@@ -297,22 +317,4 @@ Thumbs.db
 .local/share/karabiner/
 ## Git
 .gitconfig
-.local/bin/django-admin
-.local/bin/psghelp
-.local/bin/psgissue
-.local/bin/psgmain
-.local/bin/psgsettings
-.local/bin/psgupgrade
-.local/bin/psgver
-.local/bin/sqlformat
-.local/bin/convert-caffe2-to-onnx
-.local/bin/convert-onnx-to-caffe2
-.local/bin/torchrun
 
-.local/bin/dash-generate-components
-.local/bin/dash-update-components
-.local/bin/jupyter-trust
-.local/bin/open3d
-.local/bin/py.test
-.local/bin/pytest
-.local/bin/renderer
