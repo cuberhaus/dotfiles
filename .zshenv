@@ -9,7 +9,6 @@
 
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
-    # PATH="$HOME/.local/bin/pol:$PATH"
 fi
 
 if [ -d "$HOME/.local/share/cargo/bin" ] ; then
@@ -21,8 +20,7 @@ fi
 # fi
 
 if [ -d "$HOME/.local/scripts/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-    # PATH="$HOME/.local/bin/pol:$PATH"
+    PATH="$HOME/.local/scripts/bin:$PATH"
 fi
 
 if [[ "$DESKTOP_SESSION" == "cinnamon" ]]; then

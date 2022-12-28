@@ -1,60 +1,4 @@
 .local/bin
-# .local/bin/bootstrap/profile.log
-# .local/bin/wheel
-# .local/bin/symilar
-# .local/bin/pyreverse
-# .local/bin/pylint
-# .local/bin/pycodestyle
-# .local/bin/pip3.9
-# .local/bin/pip3
-# .local/bin/pip
-# .local/bin/pbr
-# .local/bin/isort
-# .local/bin/f2py3.9
-# .local/bin/f2py3
-# .local/bin/f2py
-# .local/bin/esprima
-# .local/bin/epylint
-# .local/bin/codeintel
-# .local/bin/autopep8
-# .local/bin/3to2
-# .local/bin/pip3.10
-# .local/bin/tqdm
-# .local/bin/tabulate
-# .local/bin/stomp
-# .local/bin/remotezip
-# .local/bin/pyjwt
-# .local/bin/proselint
-# .local/bin/jp.py
-# .local/bin/jirashell
-# .local/bin/isympy
-# .local/bin/grip
-# .local/bin/blackd
-# .local/bin/black
-# .local/bin/npx
-# .local/bin/npm
-# .local/bin/antlr-4.10.1-complete.jar
-# .local/bin/mrjob-3.7
-# .local/bin/mrjob-3
-# .local/bin/mrjob
-# .local/bin/renderer
-# .local/bin/pytest
-# .local/bin/py.test
-# .local/bin/open3d
-# .local/bin/jupyter-trust
-# .local/bin/dash-update-components
-# .local/bin/dash-generate-components
-# .local/bin/torchrun
-# .local/bin/convert-onnx-to-caffe2
-# .local/bin/convert-caffe2-to-onnx
-# .local/bin/sqlformat
-# .local/bin/psgver
-# .local/bin/psgupgrade
-# .local/bin/psgsettings
-# .local/bin/psgmain
-# .local/bin/psgissue
-# .local/bin/psghelp
-# .local/bin/django-admin
 
 
 .config/com.corsair/
@@ -99,26 +43,26 @@
 # Texmaker ?
 .config/xm1/
 
-
-#emacs
-.cache/emacs/var/org/
+# Emacs
+*.elc
+*~
+.\#*
 .cache/emacs/var/auto-package-update-last-update-day
+.cache/emacs/var/org/
 .cache/emacs/var/prescient-save.el
 .cache/emacs/var/projectile/
 .cache/emacs/var/recentf-save.el
 .cache/emacs/var/transient/
 .cache/emacs/var/treemacs/
+.config/doom-emacs/
 .config/my_emacs/.last-package-update-day
 .config/my_emacs/elpa/
-.config/doom-emacs/
-*~
-\#*\#
 /.emacs.desktop
 /.emacs.desktop.lock
-*.elc
+\#*\#
 auto-save-list
 tramp
-.\#*
+
 # Org-mode
 .org-id-locations
 *_archive
