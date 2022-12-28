@@ -1,5 +1,6 @@
-name=$(whoami)
-host=$(hostname)
+#!/bin/bash
+name=$(whoami)  # user name
+host=$(hostname) # host name
 tput setaf 1 # red
 echo -n "$name"
 # Reset the text color to the default
