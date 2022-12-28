@@ -200,6 +200,7 @@ skip-newer=false
 [file-roller/dialogs/new]
 default-extension='.tar.gz'
 encrypt-header=false
+expand-options=false
 volume-size=0
 
 [file-roller/listing]
@@ -370,6 +371,10 @@ search-view='list-view'
 initial-size=(949, 967)
 maximized=false
 
+[nm-applet/eap/0b195f8f-8050-4d5d-a994-25eed7e842b8]
+ignore-ca-cert=false
+ignore-phase2-ca-cert=false
+
 [nm-applet/eap/0b4df08d-9d98-406b-a9b8-78ded537b6ab]
 ignore-ca-cert=false
 ignore-phase2-ca-cert=false
@@ -516,20 +521,18 @@ first-run=false
 default-show-menubar=false
 
 [terminal/legacy/profiles:]
-list=['5e9777be-fa9a-4bd8-80e1-f2e09dda0023', 'b231088a-bd42-4891-ad7e-b310c1e2b211']
+default='34e15455-f612-496a-8ae8-c3b56676888b'
+list=['34e15455-f612-496a-8ae8-c3b56676888b']
+
+[terminal/legacy/profiles:/:34e15455-f612-496a-8ae8-c3b56676888b]
+background-color='rgb(46,52,54)'
+foreground-color='rgb(211,215,207)'
+palette=['rgb(23,20,33)', 'rgb(192,28,40)', 'rgb(38,162,105)', 'rgb(162,115,76)', 'rgb(18,72,139)', 'rgb(163,71,186)', 'rgb(42,161,179)', 'rgb(208,207,204)', 'rgb(94,92,100)', 'rgb(246,97,81)', 'rgb(51,209,122)', 'rgb(233,173,12)', 'rgb(42,123,222)', 'rgb(192,97,203)', 'rgb(51,199,222)', 'rgb(255,255,255)']
+use-theme-colors=true
+visible-name='new'
 
 [terminal/legacy/profiles:/:5e9777be-fa9a-4bd8-80e1-f2e09dda0023]
-background-color='#f3f3f3'
-bold-color='#4d4d4c'
-bold-color-same-as-fg=true
-font='UbuntuMono Nerd Font Mono 1'
-foreground-color='#4d4d4c'
-palette='#f3f3f3:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#d0d0d0:#808080:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#262626'
-scrollbar-policy='never'
-use-system-font=false
 use-theme-background=false
-use-theme-colors=false
-visible-name='Base 16 PaperColor-Light Light'
 
 [terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9]
 font='UbuntuMono Nerd Font Mono 1'
@@ -537,14 +540,4 @@ scrollbar-policy='never'
 use-system-font=false
 
 [terminal/legacy/profiles:/:b231088a-bd42-4891-ad7e-b310c1e2b211]
-background-color='#f3f3f3'
-bold-color='#4d4d4c'
-bold-color-same-as-fg=true
-font='UbuntuMono Nerd Font Mono 1'
-foreground-color='#4d4d4c'
-palette='#f3f3f3:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#d0d0d0:#808080:#8959a8:#718c00:#4271ae:#005f87:#d7005f:#3e999f:#262626'
-scrollbar-policy='never'
-use-system-font=false
 use-theme-background=false
-use-theme-colors=false
-visible-name='Base 16 PaperColor-Light Light'
