@@ -65,8 +65,3 @@ if $flag1; then
     echo "Dumping dark mode..."
     dark
 fi
-
-
-
-
-
