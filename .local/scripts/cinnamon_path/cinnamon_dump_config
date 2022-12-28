@@ -1,20 +1,72 @@
 #!/bin/sh
 light() {
-    dconf dump /org/cinnamon/ > ~/.config/cinnamon/light/cinnamon.dconf
-    dconf dump /org/nemo/ > ~/.config/cinnamon/light/nemo.dconf
-    dconf dump /org/gtk/ > ~/.config/cinnamon/light/gtk.dconf
-    dconf dump /org/gnome/ > ~/.config/cinnamon/light/gnome.dconf
+    dconf dump /org/cinnamon/ >~/.config/cinnamon/light/cinnamon.dconf
+    dconf dump /org/nemo/ >~/.config/cinnamon/light/nemo.dconf
+    dconf dump /org/gtk/ >~/.config/cinnamon/light/gtk.dconf
+    dconf dump /org/gnome/ >~/.config/cinnamon/light/gnome.dconf
 }
 dark() {
-    dconf dump /org/cinnamon/ > ~/.config/cinnamon/dark/cinnamon.dconf
-    dconf dump /org/nemo/ > ~/.config/cinnamon/dark/nemo.dconf
-    dconf dump /org/gtk/ > ~/.config/cinnamon/dark/gtk.dconf
-    dconf dump /org/gnome/ > ~/.config/cinnamon/dark/gnome.dconf
+    dconf dump /org/cinnamon/ >~/.config/cinnamon/dark/cinnamon.dconf
+    dconf dump /org/nemo/ >~/.config/cinnamon/dark/nemo.dconf
+    dconf dump /org/gtk/ >~/.config/cinnamon/dark/gtk.dconf
+    dconf dump /org/gnome/ >~/.config/cinnamon/dark/gnome.dconf
 }
-echo "Dump config into Light/Dark folder [l/d]"
-read theme
-if [[ $theme == l || $theme == L ]]; then
+
+usage() {
+    echo "Usage: $0 [OPTION...] " 1>&2
+    echo "-l light mode" 1>&2
+    echo "-d dark mode" 1>&2
+}
+exit_abnormal() { # Function: Exit with error.
+    usage
+    exit 1
+}
+
+# Set default values for flags
+flag1=false
+flag2=false
+
+#https://www.computerhope.com/unix/bash/getopts.htm
+while getopts ":ld" options; do # Loop: Get the next option;
+    # use silent error checking;
+    case "${options}" in #
+    l)                   # If the option is n,
+        flag1=true
+        ;;
+    d) # If the option is n,
+        flag2=true
+        ;;
+    :) # If expected argument omitted:
+        echo "Error: -${OPTARG} requires an argument."
+        exit_abnormal # Exit abnormally.
+        ;;
+    *)                # If unknown (any other) option:
+        exit_abnormal # Exit abnormally.
+        ;;
+    ?)
+        exit_abnormal
+        ;;
+    esac
+done
+
+# Check that one of the flags was present
+if ! $flag1 && ! $flag2; then
+  echo "Error: one of the flags -l or -d must be present." >&2
+  exit_abnormal
+  exit 1
+fi
+
+if $flag1; then
+    echo "Dumping light mode..."
     light
-elif [[ $theme == d || $theme == D ]]; then
+fi
+
+if $flag1; then
+    echo "Dumping dark mode..."
     dark
 fi
+
+
+
+
+
