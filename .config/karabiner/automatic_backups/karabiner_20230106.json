@@ -250,26 +250,6 @@
                                     "consumer_key_code": "al_terminal_lock_or_screensaver"
                                 }
                             ]
-                        },
-                        {
-                            "from": {
-                                "key_code": "pause"
-                            },
-                            "to": [
-                                {
-                                    "consumer_key_code": "al_calculator"
-                                }
-                            ]
-                        },
-                        {
-                            "from": {
-                                "key_code": "insert"
-                            },
-                            "to": [
-                                {
-                                    "consumer_key_code": "al_email_reader"
-                                }
-                            ]
                         }
                     ],
                     "treat_as_built_in_keyboard": false
