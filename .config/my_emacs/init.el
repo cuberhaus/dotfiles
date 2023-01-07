@@ -8,8 +8,20 @@
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
-(setq custom-file "~/.config/my_emacs/custom.el")
-(load custom-file)
+(cond ((eq system-type 'windows-nt)
+       ;; Windows-specific code goes here.
+      (setq custom-file "~/.emacs.d/custom.el")
+       )
+       ;; Mac-specific code goes here.
+      ((eq system-type 'darwin)
+      (setq custom-file "~/.config/my_emacs/custom.el")
+       )
+       ;; Linux-specific code goes here.
+      ((eq system-type 'gnu/linux)
+      (setq custom-file "~/.config/my_emacs/custom.el")
+       )
+       )
+    (load custom-file)
 
 ;; Initialize package sources
 (require 'package) ; bring in package module
@@ -839,6 +851,9 @@ _h_ decrease width    _l_ increase width
               (message "Deleted file %s." filename)
               (kill-buffer)))
       (message "Not a file visiting buffer!"))))
+
+(add-to-list 'dnd-protocol-alist
+             '("^file:///.*\\.png" . org-insert-link))
 
 (with-eval-after-load 'org
     (require 'org-tempo)
@@ -1672,28 +1687,28 @@ _h_ decrease width    _l_ increase width
 
 ;; (use-package tomatinho)
 
-(use-package openwith
-  :commands (openwith-mode)
-  :config
-  (setq openwith-associations
-        (list
-          (list (openwith-make-extension-regexp
-                '("mpg" "mpeg" "mp3" "mp4"
-                  "avi" "wmv" "wav" "mov" "flv"
-                  "ogm" "ogg" "mkv"))
-                "vlc"
-                '(file))
-          (list (openwith-make-extension-regexp
-                '("xbm" "pbm" "pgm" "ppm" "pnm"
-                  "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega was
-                  ;; causing feh to be opened...
-                  "feh"
-                  '(file))
-          (list (openwith-make-extension-regexp
-                '("pdf"))
-                "zathura"
-                '(file))))
-  )
+;; (use-package openwith
+;;   :commands (openwith-mode)
+;;   :config
+;;   (setq openwith-associations
+;;         (list
+;;           (list (openwith-make-extension-regexp
+;;                 '("mpg" "mpeg" "mp3" "mp4"
+;;                   "avi" "wmv" "wav" "mov" "flv"
+;;                   "ogm" "ogg" "mkv"))
+;;                 "vlc"
+;;                 '(file))
+;;           (list (openwith-make-extension-regexp
+;;                 '("xbm" "pbm" "pgm" "ppm" "pnm"
+;;                   "png" "gif" "bmp" "tif" "jpeg")) ;; Removed jpg because Telega was
+;;                   ;; causing feh to be opened...
+;;                   "feh"
+;;                   '(file))
+;;           (list (openwith-make-extension-regexp
+;;                 '("pdf"))
+;;                 "zathura"
+;;                 '(file))))
+;;   )
 
 ;; after startup, it is important you reset this to some reasonable default. A large 
 ;; gc-cons-threshold will cause freezing and stuttering during long-term 
