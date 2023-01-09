@@ -1770,6 +1770,19 @@ pip install python-lsp-server
   (use-package ccls
     :hook (c-mode c++-mode objc-mode))
 #+end_src
+*** Matlab
+#+begin_src emacs-lisp
+(use-package matlab-mode
+  :ensure t
+  :mode "\\.m\\'"
+  :init
+  (setq matlab-indent-function t) ; if you want function bodies indented
+  (setq matlab-shell-command "matlab")
+  :config
+  (setq matlab-indent-level 4)) ; set indentation level to 2 spaces
+
+#+end_src
+
 *** java
 #+begin_src emacs-lisp
   (use-package lsp-java
