@@ -1,6 +1,5 @@
 {
     "global": {
-        "ask_for_confirmation_before_quitting": true,
         "check_for_updates_on_startup": true,
         "show_in_menu_bar": true,
         "show_profile_name_in_menu_bar": false,
@@ -244,11 +243,11 @@
                     "simple_modifications": [
                         {
                             "from": {
-                                "key_code": "insert"
+                                "key_code": "scroll_lock"
                             },
                             "to": [
                                 {
-                                    "consumer_key_code": "al_email_reader"
+                                    "consumer_key_code": "al_terminal_lock_or_screensaver"
                                 }
                             ]
                         },
@@ -264,11 +263,11 @@
                         },
                         {
                             "from": {
-                                "key_code": "scroll_lock"
+                                "key_code": "insert"
                             },
                             "to": [
                                 {
-                                    "consumer_key_code": "al_terminal_lock_or_screensaver"
+                                    "consumer_key_code": "al_email_reader"
                                 }
                             ]
                         }
