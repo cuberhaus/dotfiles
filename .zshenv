@@ -114,6 +114,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
     export PATH=/Users/pol/fib/LI/picosat-965-mac/bin:$PATH
     export PYTHONPATH
+    export PATH="/Users/pol/Library/Python/3.10/bin:$PATH"
 fi
 
 ###############################################################
