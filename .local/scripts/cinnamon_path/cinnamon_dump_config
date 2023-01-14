@@ -61,7 +61,7 @@ if $flag1; then
     light
 fi
 
-if $flag1; then
+if $flag2; then
     echo "Dumping dark mode..."
     dark
 fi

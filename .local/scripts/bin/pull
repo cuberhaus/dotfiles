@@ -1,5 +1,46 @@
 #!/bin/bash
 
+mac_key() {
+    eval `ssh-agent -s`
+    ssh-add -K ~/.ssh/imac
+}
+
+usage() {
+    echo "Usage: $0 [OPTION...] " 1>&2
+    echo "-k Add ssh key" 1>&2
+}
+
+exit_abnormal() { # Function: Exit with error.
+    usage
+    exit 1
+}
+
+flag1=false
+
+#https://www.computerhope.com/unix/bash/getopts.htm
+while getopts "k" options; do # Loop: Get the next option;
+    # use silent error checking;
+    case "${options}" in #
+    k)                   # If the option is n,
+        flag1=true
+        ;;
+    :) # If expected argument omitted: # there are no expected arguments so far
+        echo "Error: -${OPTARG} requires an argument."
+        exit_abnormal # Exit abnormally.
+        ;;
+    *)                # If unknown (any other) option:
+        exit_abnormal # Exit abnormally.
+        ;;
+    ?)
+        exit_abnormal
+        ;;
+    esac
+done
+
+if $flag1; then
+    mac_key
+fi
+
 pull() {
     if [[ -d "$1" ]]
     then
@@ -20,3 +61,4 @@ for i in "${folders[@]}"
 do
     pull "$i"
 done
+
