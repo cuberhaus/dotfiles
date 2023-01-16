@@ -114,6 +114,7 @@ fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export CLASSPATH=".:$HOME/.local/bin/antlr-4.10.1-complete.jar:$CLASSPATH"
+    export PATH=/opt/homebrew/bin:$PATH
 fi
 #HAS TO BE AT THE END
 # Edit line in vim with ctrl-e (it's vv with zsh-vim extension): IN INSERT MODE
