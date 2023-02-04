@@ -41,7 +41,7 @@ alias discord="discord --no-sandbox &"
 # Recompile ycm (if autocompletion stops working execute this)
 alias ycminstall="python3 $HOME/.vim/plugged/YouCompleteMe/install.py"
 # Rclone (be careful!) 
-# "rclone config" first "better to use copy instead so that I do not delete books on accident while pushing or pulling, it becomes a mess, since if I pull i will delete any extra books I have locally, and if I push I will delete the extra books I have remotely, overall, a fucking mess
+# "rclone config" first, better to use copy instead of "rclone sync" so that I do not delete books on accident while pushing or pulling, it becomes a mess, since if I pull i will delete any extra books I have locally, and if I push I will delete the extra books I have remotely, overall, a fucking mess
 alias rclonepull_calibre="rclone -P copy drive:Calibre/Calibre\ Library ~/Calibre\ Library"
 alias rclonepull_thunderbird="rclone -P copy drive:Thunderbird ~/.thunderbird"
 alias rclonepush_calibre="rclone -P copy ~/Calibre\ Library drive:Calibre/Calibre\ Library"
