@@ -38,6 +38,7 @@ scripts=$HOME/.local/scripts
 # Fix discord long calls
 # alias discord="discord --no-sandbox </dev/null &>/dev/null &"
 alias discord="discord --no-sandbox &"
+alias xmonad_fix="sudo ghc-pkg recache"
 # Recompile ycm (if autocompletion stops working execute this)
 alias ycminstall="python3 $HOME/.vim/plugged/YouCompleteMe/install.py"
 # Rclone (be careful!) 
