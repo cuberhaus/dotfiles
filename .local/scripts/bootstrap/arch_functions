@@ -486,7 +486,7 @@ optional() {
     # $pac dhcpcd                         # Internet
     # $pac github-cli                    # Github for terminal, create issues...
     # $pac gnome-disk-utility             # Partition manager by gnome
-    # $pac gparted                       # Manage partitions (doesn't work with ex-fat)
+    $pac gparted                       # Manage partitions (doesn't work with ex-fat) BUT it can resize with mounted partition which kde can't
     # $pac libreoffice-fresh libreoffice-fresh-ca # Do not ever use this as it can contain breaking bugs that may cause it to crash
     # $pac pix
     # $yay birdtray                               # Thunderbird tray (obsolete with shortcuts)
