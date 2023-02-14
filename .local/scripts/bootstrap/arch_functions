@@ -8,6 +8,13 @@
 # pip by default is system-wide
 #npm by default is system-wide unless using npm_config_prefix then npm install packageName will install package in user
 ### VARIABLES
+
+# /etc/fstab
+# "
+# # pol_drive (dev/sda)
+# UUID=7ABE-E459  /run/media/
+# "
+
 scripts=$HOME/.local/scripts
 flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
@@ -137,7 +144,9 @@ base_install () {
     
     $yay florence # virtual keyboard
     $yay downgrade # sudo DOWNGRADE_FROM_ALA=1 downgrade packageName to downgrade a package to a selected package in the list
-    $yay balena-etcher                          # "Rufus" on linux
+    # $yay balena-etcher                          # "Rufus" on linux
+    $yay balena-etcher-appimage                 # much faster to install and actually works
+    $yay woeusb-ng                              # create windows bootable device installation
     $yay betterlockscreen                       # Lockscreen
     $pac virt-viewer
     $yay google-chrome                          # Best web browser
