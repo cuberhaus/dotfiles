@@ -12,6 +12,7 @@ base_install () { ## For windows install it's good to have this
     $apt build-essential 
     $apt cmake                  # To install ycm
     $apt curl 
+    $apt exa                    # ls on steroids
     $apt file 
     $apt fonts-powerline 
     $apt fzf                    # Fuzzy finder

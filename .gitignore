@@ -1,3 +1,4 @@
+.cache
 .config/joplin-desktop/
 
 # Cinnamon // causes git changes
