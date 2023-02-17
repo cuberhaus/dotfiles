@@ -42,6 +42,7 @@ base_install () { ## For windows install it's good to have this
     $apt vim-gtk                # Vim with full functionality
     $apt yarn 
     $apt zsh
+    git config --global credential.helper store
 }
 
 bloat_install () {
