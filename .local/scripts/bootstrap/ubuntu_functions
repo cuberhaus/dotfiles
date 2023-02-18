@@ -55,7 +55,6 @@ bloat_install () {
 
 ubuntu_install() {
     # GUI
-    # sudo pip3 install spotify-cli-linux       # Spotify
     $apt LXAppearance           # Theme
     $apt arc-theme 
     $apt calibre
@@ -97,16 +96,6 @@ albert_install () {
     fi
 }
 
-# brew_install () {
-#     cd $HOME
-#     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-#     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-#     brew update
-#     brew upgrade
-#     brew install gcc patchelf graphviz
-#     brew install exa                            # "ls" on steroids
-# }
-
 chrome_install () {
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
     sudo apt install ./google-chrome-stable_current_amd64.deb
@@ -118,6 +107,18 @@ emacs_install () {
     # Doom
     $apt git ripgrep            # required dependencies
     $apt tar fd-find clang      # optional dependencies
+
+    # Chemacs installation to manage doom and personal
+    [ -f ~/.emacs ] && mv ~/.emacs ~/.emacs.bak
+    [ -d ~/.emacs.d ] && mv ~/.emacs.d ~/.emacs.default
+    git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
+
+    echo "default" | tee $HOME/.config/chemacs/profile
+
+    # systemctl --user enable emacs # this enables emacs as a daemon
+
+    git clone https://github.com/hlissner/doom-emacs ~/.config/doom-emacs
+    ~/.config/doom-emacs/bin/doom install
 }
 
 i3_install () {
@@ -163,7 +164,6 @@ i3_install () {
 
 snaps_install() {
     #sudo snap install ao
-    #sudo snap install atom --classic
     #sudo snap install android-studio --classic
     sudo snap install discord
     sudo snap install skype --classic
@@ -189,7 +189,6 @@ vim_install () {
 
 optional() {
     # $apt texlive-full doxygen   # Doxygen
-    # $apt chromium-browser       # Web browser
     # $apt virtualbox-qt          # Virtual machines
     # Qt G
     $apt build-essential libgl1-mesa-dev libglu1-mesa-dev

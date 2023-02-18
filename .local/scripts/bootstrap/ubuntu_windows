@@ -23,7 +23,7 @@ vim_install
 #albert_install
 #bloat_install
 #chrome_install
-#emacs_install
+emacs_install
 #i3_install
 #snap_install
 #steam_install
