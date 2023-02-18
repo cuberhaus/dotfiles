@@ -44,6 +44,14 @@ base_install () { ## For windows install it's good to have this
     $apt zsh
     git config --global credential.helper store
 }
+windows_install() {
+    # wslc emacs (to create a shortcut to windows desktop to open emacs directly
+    # https://wslutiliti.es/wslu/
+    sudo add-apt-repository ppa:wslutilities/wslu
+    sudo apt update
+    sudo apt install wslu
+    wslc emacs
+}
 
 bloat_install () {
     brew install pipes-sh
