@@ -19,13 +19,15 @@ brew_install
 ### ONLY CHANGE FROM HERE ON
 base_install
 vim_install
+emacs_install
+windows_install
 
 #albert_install
 #bloat_install
 #chrome_install
-emacs_install
 #i3_install
 #snap_install
 #steam_install
 #ubuntu_install
+
 chsh -s $(which zsh)                            # Change default shell to zsh
