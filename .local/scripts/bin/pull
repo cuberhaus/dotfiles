@@ -54,7 +54,7 @@ pull() {
     fi
 }
 
-folders=("dev" "docs" "APA_Practica" "APA" "PAR" "fib" "dotfiles/dotfiles" "VC" "CAIM" "bitsXlaMarato")
+folders=("dev" "docs" "APA_Practica" "APA" "PAR" "fib" "dotfiles/dotfiles" "VC" "CAIM" "bitsXlaMarato" "MD" "ROB")
 
 cd "$HOME" || exit
 for i in "${folders[@]}"
