@@ -1,26 +1,55 @@
+*.tmp
+.local/share/recently-used.xbel
+.config/.mono/
+.config/xbuild/
+.local/bin
+.local/state/
+.local/lib/
+.config/github-copilot/*
+
+# Windows reserved names
+con
+prn
+aux
+nul
+com1
+com2
+com3
+com4
+com5
+com6
+com7
+com8
+com9
+lpt1
+lpt2
+lpt3
+lpt4
+lpt5
+lpt6
+lpt7
+lpt8
+lpt9
+aux
 .config/wslu/
+
+# Caches
 .cache
+
+# Joplin
 .config/joplin-desktop/
 
 # Cinnamon // causes git changes
 .cinnamon/spices.cache
 
-.local/bin
-
-
-.config/com.corsair/
-.cache/emacs/var/lsp/
-.config/libreoffice/4/user/GraphicsRenderTests.log
-.local/state/
-.cache/emacs/var/eshell/
-.cache/emacs/var/spell-fu/
+# Jupyter
 .local/etc/jupyter/
-.cache/emacs/var/gamegrid-user-score/
-.local/lib/
-.config/chemacs/profile
-#Xmonad
+
+# Xmonad
 .xmonad/build-x86_64-linux/
-.config/github-copilot/*
+
+# LibreOffice
+.config/libreoffice/4/user/GraphicsRenderTests.log
 .config/libreoffice/4/user/autotext/
 .config/libreoffice/4/user/basic/
 .config/libreoffice/4/user/database/
@@ -30,13 +59,12 @@
 .config/libreoffice/4/user/registrymodifications.xcu
 .config/libreoffice/4/user/uno_packages/
 
-
-*.tmp
+# Linux
 .config/gtk-2.0/
-.local/share/recently-used.xbel
-.config/.mono/
-.config/xbuild/
+
+# VSCode
 *.vscode/
+
 # TexStudio
 # .config/texstudio/
 .config/texstudio/templates/
@@ -51,6 +79,11 @@
 .config/xm1/
 
 # Emacs
+.cache/emacs/var/lsp/
+.config/com.corsair/
+.cache/emacs/var/eshell/
+.cache/emacs/var/gamegrid-user-score/
+.cache/emacs/var/spell-fu/
 *.elc
 *~
 .\#*
@@ -69,6 +102,7 @@
 \#*\#
 auto-save-list
 tramp
+.config/chemacs/profile
 
 # Org-mode
 .org-id-locations
