@@ -224,9 +224,9 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     if [[ "$DISTRO" == "ubuntu" ]]; then
         updateall="sudo apt-get update; 
         sudo apt-get full-upgrade; 
-        brew update; 
-        brew upgrade;
         "$updateall
+        # brew update; 
+        # brew upgrade;
 
         update=$updateall
 
