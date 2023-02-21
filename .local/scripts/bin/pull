@@ -5,6 +5,29 @@ mac_key() {
     ssh-add -K ~/.ssh/imac
 }
 
+# Define a function to recursively search for git repositories
+function git_pull_recursive {
+    # Loop over all files and directories in the current directory
+    for file in *; do
+        # Check if the file is a directory
+        if [ -d "$file" ]; then
+            # Check if the directory is a git repository
+            if [ -d "$file/.git" ]; then
+                # Change into the directory and perform a git pull
+                cd "$file"
+                printf "Pulling $file\n"
+                git pull
+                cd ..
+            elif $recursive; then
+                # Recursively search this directory for git repositories
+                cd "$file"
+                git_pull_recursive
+                cd ..
+            fi
+        fi
+    done
+}
+
 usage() {
     echo "Usage: $0 [OPTION...] " 1>&2
     echo "-k Add ssh key" 1>&2
@@ -16,11 +39,15 @@ exit_abnormal() { # Function: Exit with error.
 }
 
 flag1=false
+recursive=false
 
 #https://www.computerhope.com/unix/bash/getopts.htm
-while getopts "k" options; do # Loop: Get the next option;
+while getopts "rk" options; do # Loop: Get the next option;
     # use silent error checking;
     case "${options}" in #
+    r)
+        recursive=true
+        ;;
     k)                   # If the option is n,
         flag1=true
         ;;
@@ -41,24 +68,5 @@ if $flag1; then
     mac_key
 fi
 
-pull() {
-    if [[ -d "$1" ]]
-    then
-        echo "$1 exists on your filesystem."
-        printf "Pulling $1\n"
-        cd "$1" || exit
-        git fetch
-        git merge
-        cd "$HOME" || exit
-        printf "\n"
-    fi
-}
-
-folders=("dev" "docs" "APA_Practica" "APA" "PAR" "fib" "dotfiles/dotfiles" "VC" "CAIM" "bitsXlaMarato" "MD" "ROB")
-
-cd "$HOME" || exit
-for i in "${folders[@]}"
-do
-    pull "$i"
-done
-
+# Call the function to start the recursive search
+git_pull_recursive

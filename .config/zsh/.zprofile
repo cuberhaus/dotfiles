@@ -1,7 +1,12 @@
 # ~/.config/zsh/.zprofile
-if [[ "$DISTRO" == "arch" ]]; then
+# if [[ "$DISTRO" == "arch" ]]; then
     # [[ -f ~/.config/zsh/.zshrc ]] && . ~/.config/zsh/.zshrc
+# fi
+
+if [[ "$DISTRO" == "ubuntu" ]]; then
+    setxkbmap -option caps:swapescape
 fi
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH="/opt/homebrew/bin:$PATH"
 fi
