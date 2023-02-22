@@ -29,8 +29,9 @@ function git_pull_recursive {
 }
 
 usage() {
-    echo "Usage: $0 [OPTION...] " 1>&2
+    echo "Usage: $0 [OPTION...]" 1>&2
     echo "-k Add ssh key" 1>&2
+    echo "-r Recursively search for Git repositories" 1>&2
 }
 
 exit_abnormal() { # Function: Exit with error.
