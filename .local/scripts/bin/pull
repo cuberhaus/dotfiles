@@ -2,7 +2,7 @@
 # Author: Pol Casacuberta
 # Date: 23/2/2023
 
-DEFAULT_DEPTH=2
+DEFAULT_DEPTH=1
 
 mac_key() {
     eval `ssh-agent -s`
@@ -13,7 +13,7 @@ mac_key() {
 function git_pull_recursive {
     local depth=$1
     # Find all directories containing a .git subdirectory, and loop over them
-    find . -maxdepth "$depth" -type d -name .git -print0 | while read -d $'\0' dir; do
+    find . -maxdepth "$depth" -type d -name .git -print0 2>/dev/null | while read -d $'\0' dir; do
         # Remove the .git subdirectory from the path
         dir=${dir%.git}
 
@@ -46,7 +46,7 @@ while getopts "rkd" options; do # Loop: Get the next option;
     # use silent error checking;
     case "${options}" in #
     r)
-        recursive=true
+        depth=2
         ;;
     k)                   # If the option is n,
         flag1=true
