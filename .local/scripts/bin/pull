@@ -2,7 +2,7 @@
 # Author: Pol Casacuberta
 # Date: 23/2/2023
 
-DEFAULT_DEPTH=1
+DEFAULT_DEPTH=2
 
 mac_key() {
     eval `ssh-agent -s`
@@ -10,10 +10,13 @@ mac_key() {
 }
 
 # Define a function to recursively search for git repositories
-function git_pull_recursive {
+function git_pull_recursive() {
+    # local depth="${1:-2}"
     local depth=$1
+    echo "depth: $depth "
     # Find all directories containing a .git subdirectory, and loop over them
     find . -maxdepth "$depth" -type d -name .git -print0 2>/dev/null | while read -d $'\0' dir; do
+    # find . -maxdepth "$depth" -type d -name .git -print0 | while read -d $'\0' dir; do
         # Remove the .git subdirectory from the path
         dir=${dir%.git}
 
@@ -42,17 +45,17 @@ recursive=false
 depth=$DEFAULT_DEPTH
 
 #https://www.computerhope.com/unix/bash/getopts.htm
-while getopts "rkd" options; do # Loop: Get the next option;
+while getopts "rkd:" options; do # Loop: Get the next option;
     # use silent error checking;
     case "${options}" in #
     r)
-        depth=2
+        depth=3
         ;;
     k)                   # If the option is n,
         flag1=true
         ;;
     d)
-        depth=$OPTARG
+        depth="${OPTARG}"
         ;;
     :) # If expected argument omitted: # there are no expected arguments so far
         echo "Error: -${OPTARG} requires an argument."
