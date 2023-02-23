@@ -26,9 +26,10 @@ function git_pull_recursive {
 }
 
 usage() {
-    echo "Usage: $0 [OPTION...] " 1>&2
+    echo "Usage: $0 [OPTION...]" 1>&2
     echo "-k Add ssh key" 1>&2
     echo "-d Specify the depth to search for git repositories (default: $DEFAULT_DEPTH)" 1>&2
+    echo "-r Recursively search for Git repositories" 1>&2
 }
 
 exit_abnormal() { # Function: Exit with error.
@@ -41,7 +42,7 @@ recursive=false
 depth=$DEFAULT_DEPTH
 
 #https://www.computerhope.com/unix/bash/getopts.htm
-while getopts "rk" options; do # Loop: Get the next option;
+while getopts "rkd" options; do # Loop: Get the next option;
     # use silent error checking;
     case "${options}" in #
     r)
@@ -59,9 +60,6 @@ while getopts "rk" options; do # Loop: Get the next option;
         ;;
     *)                # If unknown (any other) option:
         exit_abnormal # Exit abnormally.
-        ;;
-    ?)
-        exit_abnormal
         ;;
     esac
 done
