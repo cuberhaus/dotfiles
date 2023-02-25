@@ -222,13 +222,13 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
-        updateall="sudo apt-get update; 
+        update="sudo apt-get update; 
         sudo apt-get full-upgrade; 
-        "$updateall
+        "$update
         # brew update; 
         # brew upgrade;
 
-        update=$updateall
+        updateall=$update$updateall
 
         cleanup="sudo apt-get autoclean; 
         sudo apt-get clean; 
