@@ -1,4 +1,3 @@
-*.tmp
 .local/share/recently-used.xbel
 .config/.mono/
 .config/xbuild/
@@ -35,6 +34,7 @@ aux
 
 # Caches
 .cache
+*.tmp
 
 # Joplin
 .config/joplin-desktop/
