@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+orgname=cuberhaus
+
+gh repo list $orgname --limit 1000 | while read -r repo _; do
+    gh repo clone "$repo" "$repo"
+done
