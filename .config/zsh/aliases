@@ -37,6 +37,7 @@ scripts=$HOME/.local/scripts
 
 # Fix discord long calls
 # alias discord="discord --no-sandbox </dev/null &>/dev/null &"
+alias rs="open -a Rstudio"
 alias discord="discord --no-sandbox &"
 # xmonad can't find dependancies https://wiki.archlinux.org/title/Xmonad#Problems_with_finding_shared_libraries_after_update
 alias xmonad_fix="sudo ghc-pkg recache"

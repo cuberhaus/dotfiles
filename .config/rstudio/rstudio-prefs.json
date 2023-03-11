@@ -1,0 +1,6 @@
+{
+    "jobs_tab_visibility": "shown",
+    "initial_working_directory": "~",
+    "editor_keybindings": "vim",
+    "posix_terminal_shell": "bash"
+}

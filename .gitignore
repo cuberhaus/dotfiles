@@ -290,7 +290,7 @@ Thumbs.db
 ## Tomighty
 .tomighty/cache/
 ## R
-.config/rstudio/
+# .config/rstudio/
 .local/share/rstudio/
 ## QT
 .config/QtProject/
