@@ -84,6 +84,7 @@ alias disableSleep="sudo systemctl mask sleep.target suspend.target hibernate.ta
 alias enableSleep="sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target"
 
 # Easier navigation: .., ..., ...., ....., ~ and -
+alias cr="cd $HOME/repos"
 alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
