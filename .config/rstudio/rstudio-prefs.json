@@ -1,6 +1,9 @@
 {
     "jobs_tab_visibility": "shown",
     "initial_working_directory": "~",
+    "auto_save_on_blur": true,
     "editor_keybindings": "vim",
+    "auto_save_on_idle": "commit",
+    "auto_save_idle_ms": 500,
     "posix_terminal_shell": "bash"
 }
