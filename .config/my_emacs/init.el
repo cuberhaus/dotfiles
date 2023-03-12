@@ -66,7 +66,7 @@
   (interactive)
  (org-babel-tangle-file source-file target1-file "emacs-lisp")
 (copy-file target1-file target2-file t)   
-    ))
+    )
 
 ;; Initialize package sources
 (require 'package) ; bring in package module

@@ -155,7 +155,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
           (interactive)
          (org-babel-tangle-file source-file target1-file "emacs-lisp")
         (copy-file target1-file target2-file t)   
-            ))
+            )
 #+end_src
 
 ** Package System
