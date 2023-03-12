@@ -93,7 +93,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 
 #+begin_src emacs-lisp
     ;; Define the target file list
-     (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
+     ;; (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
      ;; Intermediate paths
      (setq home-dir (getenv "HOME"))
      (setq docs-dir (concat home-dir "/repos/docs"))
@@ -121,7 +121,6 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 #+end_src
 *** Customize System to different file
 #+begin_src emacs-lisp
-
     (cond ((eq system-type 'windows-nt)
            ;; Windows-specific code goes here.
           (setq custom-file custom-file-windows)
@@ -130,7 +129,6 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
            (setq target1-file (concat home-dir "/repos/dotfiles/.config/my_emacs/init.el"))
            (setq emacs-babel-config-file (concat home-dir "/repos/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
           )
-
            ;; Mac-specific code goes here.
           ((eq system-type 'darwin)
            (setq custom-file custom-file-unix)
