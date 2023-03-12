@@ -1,4 +1,5 @@
-#+PROPERTY: header-args:emacs-lisp :tangle ~/dotfiles/dotfiles/.config/my_emacs/init.el ~/repos/WinDotfiles/dot_emacs.d/init.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle (my-tangle-org-file-to-multiple-locations) :mkdirp yes
+#+PROPERTY: my-target-files ("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
 #+title Emacs!
 #+STARTUP: overview
 ~code~
@@ -84,7 +85,6 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
      ;;     file-name-handler-alist nil)
 #+end_src
 
-
 *** Debug packages and see startup time
 #+begin_src emacs-lisp
   (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
@@ -92,32 +92,43 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 
 *** Set path variables 
 #+begin_src emacs-lisp
-    ;; Intermediate paths
-    (setq home-dir (getenv "HOME"))
-    (setq docs-dir (concat home-dir "/repos/docs"))
-    (setq config-dir (concat  home-dir "/.config"))
-    (setq cache-dir (concat home-dir "/.cache"))
-    (setq org-dir-string "/org")
+    ;; Define the target file list
+     (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
 
-    ;; Paths that are used in the code
-    (setq user-emacs-dir (concat cache-dir "/emacs/"))
-    (setq desktop-dir (concat home-dir "/.emacs.d/"))
-    (setq org-roam-dir (concat docs-dir org-dir-string "/roam"))
-    (setq journal-dir (concat docs-dir org-dir-string "/Journal.org"))
-    (setq tasks-dir (concat docs-dir org-dir-string "/Tasks.org"))
-    (setq metrics-dir (concat docs-dir org-dir-string "/Metrics.org"))
-    (setq habits-dir (concat docs-dir org-dir-string "/Habits.org"))
-    (setq birthday-dir (concat docs-dir org-dir-string "/birthday.org"))
-    (setq custom-file-unix (concat config-dir "/my_emacs/custom.el"))
-    (setq custom-file-windows (concat home-dir "/.emacs.d/custom.el"))
-    (setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
-    (setq spell-fu-dir (concat config-dir "/spell_fu"))
-    (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
-    (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
-    (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
 
-    ;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
-    (setq doom-snippets-dir (concat config-dir "/snippets"))
+
+    ;; Define a function to tangle the Org file to the target files
+     (defun my-tangle-org-file-to-multiple-locations ()
+     (interactive)
+     (dolist (target-file my-target-files)
+      (with-temp-buffer
+       (org-babel-tangle-file "~/dotfiles/dotfiles/.config/emacs.org" target-file))))
+     ;; Intermediate paths
+     (setq home-dir (getenv "HOME"))
+     (setq docs-dir (concat home-dir "/repos/docs"))
+     (setq config-dir (concat  home-dir "/.config"))
+     (setq cache-dir (concat home-dir "/.cache"))
+     (setq org-dir-string "/org")
+
+     ;; Paths that are used in the code
+     (setq user-emacs-dir (concat cache-dir "/emacs/"))
+     (setq desktop-dir (concat home-dir "/.emacs.d/"))
+     (setq org-roam-dir (concat docs-dir org-dir-string "/roam"))
+     (setq journal-dir (concat docs-dir org-dir-string "/Journal.org"))
+     (setq tasks-dir (concat docs-dir org-dir-string "/Tasks.org"))
+     (setq metrics-dir (concat docs-dir org-dir-string "/Metrics.org"))
+     (setq habits-dir (concat docs-dir org-dir-string "/Habits.org"))
+     (setq birthday-dir (concat docs-dir org-dir-string "/birthday.org"))
+     (setq custom-file-unix (concat config-dir "/my_emacs/custom.el"))
+     (setq custom-file-windows (concat home-dir "/.emacs.d/custom.el"))
+     (setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+     (setq spell-fu-dir (concat config-dir "/spell_fu"))
+     (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
+     (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
+     (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
+
+     ;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
+     (setq doom-snippets-dir (concat config-dir "/snippets"))
 #+end_src
 *** Customize System to different file
 #+begin_src emacs-lisp

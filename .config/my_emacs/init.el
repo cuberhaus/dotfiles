@@ -7,6 +7,18 @@
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
+;; ~/dotfiles/dotfiles/.config/my_emacs/init.el
+    ;; Define the target file list
+     (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
+
+
+    ;; Define a function to tangle the Org file to the target files
+     (defun my-tangle-org-file-to-multiple-locations ()
+     (interactive)
+     (dolist (target-file my-target-files)
+      (with-temp-buffer
+       (org-babel-tangle-file "~/dotfiles/dotfiles/.config/emacs.org" target-file))))
+
 ;; Intermediate paths
 (setq home-dir (getenv "HOME"))
 (setq docs-dir (concat home-dir "/repos/docs"))
