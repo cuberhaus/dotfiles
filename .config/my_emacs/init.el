@@ -7,16 +7,6 @@
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
-(defun my/org-tangle-to-multiple-targets ()
-  "Tangle the source file to two target files."
-  (interactive)
-  (let ((source-file  "~/dotfiles/dotfiles/.config/emacs.org")
-        (target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
-        (target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el"))
- (org-babel-tangle-file source-file target1-file "emacs-lisp")
-(copy-file target1-file target2-file t)   
-    ))
-
 ;; Define the target file list
  (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
 
@@ -50,17 +40,33 @@
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
       (setq custom-file custom-file-windows)
-       )
+       (setq source-file  "~/repos/dotfiles/.config/emacs.org")
+       (setq target2-file "~/.local/share/chezmoi/home/dot_emacs.d/init.el")
+       (setq target1-file "~/repos/dotfiles/.config/my_emacs/init.el")
+      )
        ;; Mac-specific code goes here.
       ((eq system-type 'darwin)
-      (setq custom-file custom-file-unix)
+       (setq custom-file custom-file-unix)
+       (setq source-file  "~/dotfiles/dotfiles/.config/emacs.org")
+       (setq target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
+       (setq target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el")
        )
        ;; Linux-specific code goes here.
       ((eq system-type 'gnu/linux)
       (setq custom-file custom-file-unix)
+       (setq source-file  "~/dotfiles/dotfiles/.config/emacs.org")
+       (setq target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
+       (setq target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el")
        )
        )
     (load custom-file)
+
+(defun my/org-tangle-to-multiple-targets ()
+  "Tangle the source file to two target files."
+  (interactive)
+ (org-babel-tangle-file source-file target1-file "emacs-lisp")
+(copy-file target1-file target2-file t)   
+    ))
 
 ;; Initialize package sources
 (require 'package) ; bring in package module
