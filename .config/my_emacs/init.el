@@ -17,6 +17,11 @@
 (setq birthday-dir (concat docs-dir "/org/birthday.org"))
 (setq custom-file-unix "~/.config/my_emacs/custom.el")
 (setq custom-file-windows "~/.emacs.d/custom.el")
+(setq languagetool-server-dir (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+(setq spell-fu-dir "~/.config/spell_fu")
+(setq ispell-personal-dir "~/.config/spell_fu/.pws")
+(setq user-emacs-dir (expand-file-name "~/.cache/emacs/"))
+(setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
 
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
@@ -332,13 +337,12 @@
       :ensure t
       :hook (text-mode . flycheck-languagetool-setup)
       :init
-      (setq flycheck-languagetool-server-jar (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar")))
+      (setq flycheck-languagetool-server-jar languagetool-server-dir))
 (setq flycheck-languagetool-language "es")
 
 ;; in arch linux use languagetool path
                 ;; (setq langtool-java-classpath
                 ;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
-    (setq langtool-language-tool-server-jar (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
 (setq langtool-server-user-arguments '("-p" "8085")) ;; this makes it possible to run two servers, or rather two connections to the server from flycheck-languagetool for on the fly highlight and langtool for correction suggestions (GODLIKE)
                     (use-package langtool
                       :commands (langtool-check langtool-check-done))
@@ -368,8 +372,8 @@
     (setq ispell-dictionary "es") ;; sets spanish as default
       (setq ispell-program-name "aspell") ;; already points to aspell
       (setq ispell-extra-args '("--sug-mode=ultra" "--lang=es"))
-              (setq spell-fu-directory "~/.config/spell_fu") ;; Please create this directory manually. where spell_fu stores stuff
-              (setq ispell-personal-dictionary "~/.config/spell_fu/.pws") ;;spell_fu stores stuff here
+              (setq spell-fu-directory spell-fu-dir) ;; Please create this directory manually. where spell_fu stores stuff
+              (setq ispell-personal-dictionary ispell-personal-dir) ;;spell_fu stores stuff here
               ;; (spell-fu-dictionary-add (spell-fu-get-ispell "es"))
               ;; (spell-fu-dictionary-add (spell-fu-get-ispell "en"))
               ;; (spell-fu-dictionary-add (spell-fu-get-ispell "ca"))
@@ -390,8 +394,8 @@
 (flyspell-lazy-mode 1)
 
 ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
-(setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
-      url-history-file (expand-file-name "url/history" user-emacs-directory))
+(setq user-emacs-directory user-emacs-dir
+      url-history-file url-history-dir)
 
 ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
 ;; reliably, set `user-emacs-directory` before loading no-littering!

@@ -102,7 +102,11 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
     (setq birthday-dir (concat docs-dir "/org/birthday.org"))
     (setq custom-file-unix "~/.config/my_emacs/custom.el")
     (setq custom-file-windows "~/.emacs.d/custom.el")
-
+    (setq languagetool-server-dir (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+    (setq spell-fu-dir "~/.config/spell_fu")
+    (setq ispell-personal-dir "~/.config/spell_fu/.pws")
+    (setq user-emacs-dir (expand-file-name "~/.cache/emacs/"))
+    (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
 #+end_src
 *** Customize System to different file
 #+begin_src emacs-lisp
@@ -499,7 +503,7 @@ Highlight buffer on the fly will be done by this
           :ensure t
           :hook (text-mode . flycheck-languagetool-setup)
           :init
-          (setq flycheck-languagetool-server-jar (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar")))
+          (setq flycheck-languagetool-server-jar languagetool-server-dir))
     (setq flycheck-languagetool-language "es")
 #+end_src
 It is much better to use server-mode than console-mode, better suggestions
@@ -508,7 +512,6 @@ Buffer corrections will be done with this
                     ;; in arch linux use languagetool path
                     ;; (setq langtool-java-classpath
                     ;;       "/usr/share/languagetool:/usr/share/java/languagetool/*")
-        (setq langtool-language-tool-server-jar (concat (getenv "HOME") "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
     (setq langtool-server-user-arguments '("-p" "8085")) ;; this makes it possible to run two servers, or rather two connections to the server from flycheck-languagetool for on the fly highlight and langtool for correction suggestions (GODLIKE)
                         (use-package langtool
                           :commands (langtool-check langtool-check-done))
@@ -541,8 +544,8 @@ Use flycheck-verify-setup to check everything is up and running
         (setq ispell-dictionary "es") ;; sets spanish as default
           (setq ispell-program-name "aspell") ;; already points to aspell
           (setq ispell-extra-args '("--sug-mode=ultra" "--lang=es"))
-                  (setq spell-fu-directory "~/.config/spell_fu") ;; Please create this directory manually. where spell_fu stores stuff
-                  (setq ispell-personal-dictionary "~/.config/spell_fu/.pws") ;;spell_fu stores stuff here
+                  (setq spell-fu-directory spell-fu-dir) ;; Please create this directory manually. where spell_fu stores stuff
+                  (setq ispell-personal-dictionary ispell-personal-dir) ;;spell_fu stores stuff here
                   ;; (spell-fu-dictionary-add (spell-fu-get-ispell "es"))
                   ;; (spell-fu-dictionary-add (spell-fu-get-ispell "en"))
                   ;; (spell-fu-dictionary-add (spell-fu-get-ispell "ca"))
@@ -573,8 +576,8 @@ Emacs and the packages we use create a lot of “temporary” files for various 
 Let’s keep our folders clean!
 #+begin_src emacs-lisp
   ;; Change the user-emacs-directory to keep unwanted things out of ~/.emacs.d
-  (setq user-emacs-directory (expand-file-name "~/.cache/emacs/")
-        url-history-file (expand-file-name "url/history" user-emacs-directory))
+  (setq user-emacs-directory user-emacs-dir
+        url-history-file url-history-dir)
 
   ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
   ;; reliably, set `user-emacs-directory` before loading no-littering!
