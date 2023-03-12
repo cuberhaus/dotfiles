@@ -29,7 +29,7 @@
 (setq spell-fu-dir (concat config-dir "/spell_fu"))
 (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
 (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
-(setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org"))
+(setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
 
 ;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
 (setq doom-snippets-dir (concat config-dir "/snippets"))
