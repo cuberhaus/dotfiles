@@ -115,6 +115,7 @@ emacs_install () {
     # Doom
     $apt git ripgrep            # required dependencies
     $apt tar fd-find clang      # optional dependencies
+    $apt libtool                # vterm-module compilation
 
     # Chemacs installation to manage doom and personal
     [ -f ~/.emacs ] && mv ~/.emacs ~/.emacs.bak
