@@ -1,5 +1,4 @@
 ;; -*- lexical-binding: t; -*-
-
  ;; The default is 800 kilobytes.  Measured in bytes.
  ;; (defvar last-file-name-handler-alist file-name-handler-alist)
  ;; (setq gc-cons-threshold 402653184
@@ -8,12 +7,16 @@
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
+;; Intermediate paths
 (setq home-dir (getenv "HOME"))
 (setq docs-dir (concat home-dir "/repos/docs"))
 (setq config-dir (concat  home-dir "/.config"))
 (setq cache-dir (concat home-dir "/.cache"))
 (setq org-dir-string "/org")
 
+;; Paths that are used in the code
+(setq user-emacs-dir (concat cache-dir "/emacs/"))
+(setq desktop-dir (concat home-dir "/.emacs.d/"))
 (setq org-roam-dir (concat docs-dir org-dir-string "/roam"))
 (setq journal-dir (concat docs-dir org-dir-string "/Journal.org"))
 (setq tasks-dir (concat docs-dir org-dir-string "/Tasks.org"))
@@ -22,14 +25,14 @@
 (setq birthday-dir (concat docs-dir org-dir-string "/birthday.org"))
 (setq custom-file-unix (concat config-dir "/my_emacs/custom.el"))
 (setq custom-file-windows (concat home-dir "/.emacs.d/custom.el"))
-(setq languagetool-server-dir (concat home-dir "/.config/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+(setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
 (setq spell-fu-dir (concat config-dir "/spell_fu"))
 (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
-(setq user-emacs-dir (concat home-dir "/.cache/emacs/"))
 (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
-(setq desktop-dir (concat home-dir "/.emacs.d/"))
-(setq emacs-babel-config-file (concat config-dir "/emacs.org"))
-(setq doom-snippets-dir "~/.config/snippets")
+(setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org"))
+
+;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
+(setq doom-snippets-dir (concat config-dir "/snippets"))
 
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
@@ -1590,6 +1593,7 @@ _h_ decrease width    _l_ increase width
 (use-package eterm-256color
   :hook (term-mode . eterm-256color-mode))
 
+(setq vterm-always-compile-module t)
 (use-package vterm
   :commands vterm
   :config

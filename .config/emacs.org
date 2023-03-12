@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:emacs-lisp :tangle ~/dotfiles/dotfiles/.config/my_emacs/init.el :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle ~/dotfiles/dotfiles/.config/my_emacs/init.el ~/repos/WinDotfiles/dot_emacs.d/init.el :mkdirp yes
 #+title Emacs!
 #+STARTUP: overview
 ~code~
@@ -77,7 +77,6 @@ Lexical-binding has to with org-roam:
 https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 #+begin_src emacs-lisp
     ;; -*- lexical-binding: t; -*-
-
      ;; The default is 800 kilobytes.  Measured in bytes.
      ;; (defvar last-file-name-handler-alist file-name-handler-alist)
      ;; (setq gc-cons-threshold 402653184
@@ -115,7 +114,9 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
     (setq spell-fu-dir (concat config-dir "/spell_fu"))
     (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
     (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
-    (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
+    (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org"))
+
+    ;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
     (setq doom-snippets-dir (concat config-dir "/snippets"))
 #+end_src
 *** Customize System to different file
@@ -1987,12 +1988,13 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 #+end_src
 *** vterm
 #+begin_src emacs-lisp
-(use-package vterm
-  :commands vterm
-  :config
-  (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
-  ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
-  (setq vterm-max-scrollback 10000))
+    (setq vterm-always-compile-module t)
+    (use-package vterm
+      :commands vterm
+      :config
+      (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
+      ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
+      (setq vterm-max-scrollback 10000))
 #+end_src
 
 #+begin_src emacs-lisp
