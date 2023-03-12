@@ -8,14 +8,14 @@
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
 ;; Define the target file list
- (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
-
+ ;; (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
  ;; Intermediate paths
  (setq home-dir (getenv "HOME"))
  (setq docs-dir (concat home-dir "/repos/docs"))
  (setq config-dir (concat  home-dir "/.config"))
  (setq cache-dir (concat home-dir "/.cache"))
  (setq org-dir-string "/org")
+ (setq default-directory home-dir) ;; Search default directory
 
  ;; Paths that are used in the code
  (setq user-emacs-dir (concat cache-dir "/emacs/"))
@@ -43,7 +43,6 @@
        (setq target1-file (concat home-dir "/repos/dotfiles/.config/my_emacs/init.el"))
        (setq emacs-babel-config-file (concat home-dir "/repos/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
       )
-
        ;; Mac-specific code goes here.
       ((eq system-type 'darwin)
        (setq custom-file custom-file-unix)
@@ -61,6 +60,7 @@
  (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
        )
        )
+
     (load custom-file)
 
 (defun my/org-tangle-to-multiple-targets ()
