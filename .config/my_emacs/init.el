@@ -15,7 +15,7 @@
  (setq config-dir (concat  home-dir "/.config"))
  (setq cache-dir (concat home-dir "/.cache"))
  (setq org-dir-string "/org")
- (setq default-directory home-dir) ;; Search default directory
+ (setq default-directory (concat home-dir "/")) ;; Search default directory
 
  ;; Paths that are used in the code
  (setq user-emacs-dir (concat cache-dir "/emacs/"))
