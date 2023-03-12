@@ -28,8 +28,8 @@
  (rear-context-string . "05-04 Wednesday\n")
  (position . 338))
 ("org-capture-last-stored"
- (filename . "~/docs/org/Journal.org")
- (front-context-string . "**** 03:19 PM - ")
- (rear-context-string . "3-08 Wednesday\n\n")
- (position . 55923))
+ (filename . "~/docs/org/roam/20230311231452-r.org")
+ (front-context-string . "\n* Renv\nrenv::st")
+ (rear-context-string . "03-11 Sat 23:14]")
+ (position . 109))
 )

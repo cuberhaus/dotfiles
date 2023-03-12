@@ -8,17 +8,27 @@
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
+(setq docs-dir "~/repos/docs")
+(setq org-roam-dir (concat docs-dir "/org/roam"))
+(setq journal-dir (concat docs-dir "/org/Journal.org"))
+(setq tasks-dir (concat docs-dir "/org/Tasks.org"))
+(setq metrics-dir (concat docs-dir "/org/Metrics.org"))
+(setq habits-dir (concat docs-dir "/org/Habits.org"))
+(setq birthday-dir (concat docs-dir "/org/birthday.org"))
+(setq custom-file-unix "~/.config/my_emacs/custom.el")
+(setq custom-file-windows "~/.emacs.d/custom.el")
+
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
-      (setq custom-file "~/.emacs.d/custom.el")
+      (setq custom-file custom-file-windows)
        )
        ;; Mac-specific code goes here.
       ((eq system-type 'darwin)
-      (setq custom-file "~/.config/my_emacs/custom.el")
+      (setq custom-file custom-file-unix)
        )
        ;; Linux-specific code goes here.
       ((eq system-type 'gnu/linux)
-      (setq custom-file "~/.config/my_emacs/custom.el")
+      (setq custom-file custom-file-unix)
        )
        )
     (load custom-file)
@@ -932,9 +942,9 @@ _h_ decrease width    _l_ increase width
   (setq org-log-done 'time) ;; logs when a task goes to done C-h-v (describe variable)
   (setq org-log-into-drawer t) ;; collapse logs into a drawer
   (setq org-agenda-files
-        '("~/docs/org/birthday.org"
-          "~/docs/org/Tasks.org"
-          "~/docs/org/Habits.org"
+        (list birthday-dir
+          tasks-dir
+          habits-dir
           ))
 
   (require 'org-habit)
@@ -1017,28 +1027,28 @@ _h_ decrease width    _l_ increase width
 
  (setq org-capture-templates
     `(("t" "Tasks / Projects")
-      ("tt" "Task" entry (file+olp "~/docs/org/Tasks.org" "Inbox")
+      ("tt" "Task" entry (file+olp tasks-dir "Inbox")
            "* TODO %?\n  %U\n  %a\n  %i" :empty-lines 1)
 
       ("j" "Journal Entries")
       ("jj" "Journal" entry
-           (file+olp+datetree "~/docs/org/Journal.org")
+           (file+olp+datetree journal-dir)
            "\n* %<%I:%M %p> - Journal :journal:\n\n%?\n\n"
            ;; ,(dw/read-file-as-string "~/Notes/Templates/Daily.org")
            :clock-in :clock-resume
            :empty-lines 1)
       ("jm" "Meeting" entry
-           (file+olp+datetree "~/docs/org/Journal.org")
+           (file+olp+datetree journal-dir)
            "* %<%I:%M %p> - %a :meetings:\n\n%?\n\n"
            :clock-in :clock-resume
            :empty-lines 1)
 
       ("w" "Workflows")
-      ("we" "Checking Email" entry (file+olp+datetree "~/docs/org/Journal.org")
+      ("we" "Checking Email" entry (file+olp+datetree journal-dir)
            "* Checking Email :email:\n\n%?" :clock-in :clock-resume :empty-lines 1)
 
       ("m" "Metrics Capture")
-      ("mw" "Weight" table-line (file+headline "~/docs/org/Metrics.org" "Weight")
+      ("mw" "Weight" table-line (file+headline metrics-dir "Weight")
        "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
 
   )
@@ -1084,7 +1094,7 @@ _h_ decrease width    _l_ increase width
       :init
       (setq org-roam-v2-ack t)
       :custom
-      (org-roam-directory "~/docs/org/roam")
+      (org-roam-directory org-roam-dir)
       (org-roam-completion-everywhere t)
       (org-roam-capture-templates
        '(("d" "default" plain ;; first template should be default one cause keybindings ahead will use that for fast typing
@@ -1435,6 +1445,15 @@ _h_ decrease width    _l_ increase width
 
 (use-package ccls
   :hook (c-mode c++-mode objc-mode))
+
+(use-package matlab-mode
+  :ensure t
+  :mode "\\.m\\'"
+  :init
+  (setq matlab-indent-function t) ; if you want function bodies indented
+  (setq matlab-shell-command "matlab")
+  :config
+  (setq matlab-indent-level 4)) ; set indentation level to 2 spaces
 
 (use-package lsp-java
   :hook (java-mode . lsp-deferred))
