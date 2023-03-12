@@ -7,44 +7,45 @@
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
-;; ~/dotfiles/dotfiles/.config/my_emacs/init.el
-    ;; Define the target file list
-     (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
+(defun my/org-tangle-to-multiple-targets ()
+  "Tangle the source file to two target files."
+  (interactive)
+  (let ((source-file  "~/dotfiles/dotfiles/.config/emacs.org")
+        (target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
+        (target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el"))
+ (org-babel-tangle-file source-file target1-file "emacs-lisp")
+(copy-file target1-file target2-file t)   
+    ))
 
+;; Define the target file list
+ (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
 
-    ;; Define a function to tangle the Org file to the target files
-     (defun my-tangle-org-file-to-multiple-locations ()
-     (interactive)
-     (dolist (target-file my-target-files)
-      (with-temp-buffer
-       (org-babel-tangle-file "~/dotfiles/dotfiles/.config/emacs.org" target-file))))
+ ;; Intermediate paths
+ (setq home-dir (getenv "HOME"))
+ (setq docs-dir (concat home-dir "/repos/docs"))
+ (setq config-dir (concat  home-dir "/.config"))
+ (setq cache-dir (concat home-dir "/.cache"))
+ (setq org-dir-string "/org")
 
-;; Intermediate paths
-(setq home-dir (getenv "HOME"))
-(setq docs-dir (concat home-dir "/repos/docs"))
-(setq config-dir (concat  home-dir "/.config"))
-(setq cache-dir (concat home-dir "/.cache"))
-(setq org-dir-string "/org")
+ ;; Paths that are used in the code
+ (setq user-emacs-dir (concat cache-dir "/emacs/"))
+ (setq desktop-dir (concat home-dir "/.emacs.d/"))
+ (setq org-roam-dir (concat docs-dir org-dir-string "/roam"))
+ (setq journal-dir (concat docs-dir org-dir-string "/Journal.org"))
+ (setq tasks-dir (concat docs-dir org-dir-string "/Tasks.org"))
+ (setq metrics-dir (concat docs-dir org-dir-string "/Metrics.org"))
+ (setq habits-dir (concat docs-dir org-dir-string "/Habits.org"))
+ (setq birthday-dir (concat docs-dir org-dir-string "/birthday.org"))
+ (setq custom-file-unix (concat config-dir "/my_emacs/custom.el"))
+ (setq custom-file-windows (concat home-dir "/.emacs.d/custom.el"))
+ (setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+ (setq spell-fu-dir (concat config-dir "/spell_fu"))
+ (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
+ (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
+ (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
 
-;; Paths that are used in the code
-(setq user-emacs-dir (concat cache-dir "/emacs/"))
-(setq desktop-dir (concat home-dir "/.emacs.d/"))
-(setq org-roam-dir (concat docs-dir org-dir-string "/roam"))
-(setq journal-dir (concat docs-dir org-dir-string "/Journal.org"))
-(setq tasks-dir (concat docs-dir org-dir-string "/Tasks.org"))
-(setq metrics-dir (concat docs-dir org-dir-string "/Metrics.org"))
-(setq habits-dir (concat docs-dir org-dir-string "/Habits.org"))
-(setq birthday-dir (concat docs-dir org-dir-string "/birthday.org"))
-(setq custom-file-unix (concat config-dir "/my_emacs/custom.el"))
-(setq custom-file-windows (concat home-dir "/.emacs.d/custom.el"))
-(setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
-(setq spell-fu-dir (concat config-dir "/spell_fu"))
-(setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
-(setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
-(setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
-
-;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
-(setq doom-snippets-dir (concat config-dir "/snippets"))
+ ;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
+ (setq doom-snippets-dir (concat config-dir "/snippets"))
 
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
@@ -1112,8 +1113,10 @@ _h_ decrease width    _l_ increase width
                       (expand-file-name emacs-babel-config-file))
     ;; Dynamic scoping to the rescue
     (let ((org-confirm-babel-evaluate nil))
-      (org-babel-tangle))))
+      (my/org-tangle-to-multiple-targets) )))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config))) ;; add hook to org mode
+
+;; (org-babel-tangle)  instead of my/org-tangle, before
 
 (use-package org-roam
       ;; :ensure t
