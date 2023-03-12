@@ -91,7 +91,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
   (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 #+end_src
 
-*** asdf
+*** Set path variables 
 #+begin_src emacs-lisp
     (setq docs-dir "~/repos/docs")
     (setq org-roam-dir (concat docs-dir "/org/roam"))
@@ -107,6 +107,9 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
     (setq ispell-personal-dir "~/.config/spell_fu/.pws")
     (setq user-emacs-dir (expand-file-name "~/.cache/emacs/"))
     (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
+    (setq desktop-dir "~/.emacs.d/")
+    (setq emacs-babel-config-file "~/dotfiles/dotfiles/.config/emacs.org")
+    (setq doom-snippets-dir "~/.config/snippets")
 #+end_src
 *** Customize System to different file
 #+begin_src emacs-lisp
@@ -636,53 +639,54 @@ https://www.gnu.org/software/emacs/manual/html_node/emacs/Saving-Emacs-Sessions.
 By default desktop-save-mode automatically saves the session all the time and restores it when opened, we do not always want that.
 
 #+begin_src emacs-lisp
-  ;; (desktop-save-mode 1)
+    ;; (desktop-save-mode 1)
 
-  ;; use only one desktop
-  (setq desktop-path '("~/.emacs.d/"))
-  (setq desktop-dirname "~/.emacs.d/")
-  (setq desktop-base-file-name "emacs-desktop")
+    ;; use only one desktop
 
-  ;; remove desktop after it's been read
-  ;; (add-hook 'desktop-after-read-hook
-  ;;           '(lambda ()
-  ;;              ;; desktop-remove clears desktop-dirname
-  ;;              (setq desktop-dirname-tmp desktop-dirname)
-  ;;              (desktop-remove)
-  ;;              (setq desktop-dirname desktop-dirname-tmp)))
+    (setq desktop-path '(desktop-dir))
+    (setq desktop-dirname desktop-dir)
+    (setq desktop-base-file-name "emacs-desktop")
 
-  (defun saved-session ()
-    (file-exists-p (concat desktop-dirname "/" desktop-base-file-name)))
+    ;; remove desktop after it's been read
+    ;; (add-hook 'desktop-after-read-hook
+    ;;           '(lambda ()
+    ;;              ;; desktop-remove clears desktop-dirname
+    ;;              (setq desktop-dirname-tmp desktop-dirname)
+    ;;              (desktop-remove)
+    ;;              (setq desktop-dirname desktop-dirname-tmp)))
 
-  ;; use session-restore to restore the desktop manually
-  (defun session-restore ()
-    "Restore a saved emacs session."
-    (interactive)
-    (if (saved-session)
-        (desktop-read)
-      (message "No desktop found.")))
+    (defun saved-session ()
+      (file-exists-p (concat desktop-dirname "/" desktop-base-file-name)))
 
-  ;; use session-save to save the desktop manually
-  (defun session-save ()
-    "Save an emacs session."
-    (interactive)
-    (if (saved-session)
-        (if (y-or-n-p "Overwrite existing desktop? ")
-            (desktop-save-in-desktop-dir)
-          (message "Session not saved."))
-      (desktop-save-in-desktop-dir)))
+    ;; use session-restore to restore the desktop manually
+    (defun session-restore ()
+      "Restore a saved emacs session."
+      (interactive)
+      (if (saved-session)
+          (desktop-read)
+        (message "No desktop found.")))
 
-  ;; ask user whether to restore desktop at start-up
-  ;; (add-hook 'after-init-hook
-  ;;           '(lambda ()
-  ;;              (if (saved-session)
-  ;;                  (if (y-or-n-p "Restore desktop? ")
-  ;;                      (session-restore)))))
+    ;; use session-save to save the desktop manually
+    (defun session-save ()
+      "Save an emacs session."
+      (interactive)
+      (if (saved-session)
+          (if (y-or-n-p "Overwrite existing desktop? ")
+              (desktop-save-in-desktop-dir)
+            (message "Session not saved."))
+        (desktop-save-in-desktop-dir)))
 
-  ;; (add-hook 'kill-emacs-hook '(lambda ()
-  ;;                              (if (y-or-n-p "Save desktop? ")
-  ;;                               (desktop-save-in-desktop-dir))
-  ;;                              ))
+    ;; ask user whether to restore desktop at start-up
+    ;; (add-hook 'after-init-hook
+    ;;           '(lambda ()
+    ;;              (if (saved-session)
+    ;;                  (if (y-or-n-p "Restore desktop? ")
+    ;;                      (session-restore)))))
+
+    ;; (add-hook 'kill-emacs-hook '(lambda ()
+    ;;                              (if (y-or-n-p "Save desktop? ")
+    ;;                               (desktop-save-in-desktop-dir))
+    ;;                              ))
 #+end_src
 
 *** Ivy
@@ -1373,10 +1377,9 @@ Show markup symbols when cursor is placed inside of them
 *** Automatically tangle config file when we save it
 #+begin_src emacs-lisp
     ;; Automatically tangle our Emacs.org config file when we save it
-
     (defun efs/org-babel-tangle-config ()
       (when (string-equal (buffer-file-name)
-                          (expand-file-name "~/dotfiles/dotfiles/.config/emacs.org"))
+                          (expand-file-name emacs-babel-config-file))
         ;; Dynamic scoping to the rescue
         (let ((org-confirm-babel-evaluate nil))
           (org-babel-tangle))))
@@ -1813,7 +1816,7 @@ https://github.com/snyball/doom-snippets
     ;; ;; yasnippet code 'optional', before auto-complete
     (use-package yasnippet)
     (use-package doom-snippets ;; this gets you nice snippets to use just tab and they will complete for you
-      :load-path "~/.config/snippets"
+      :load-path doom-snippets-dir
       :after yasnippet)
     ;; (use-package yasnippets-latex)
     (yas-global-mode 1)

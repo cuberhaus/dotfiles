@@ -22,6 +22,9 @@
 (setq ispell-personal-dir "~/.config/spell_fu/.pws")
 (setq user-emacs-dir (expand-file-name "~/.cache/emacs/"))
 (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
+(setq desktop-dir "~/.emacs.d/")
+(setq emacs-babel-config-file "~/dotfiles/dotfiles/.config/emacs.org")
+(setq doom-snippets-dir "~/.config/snippets")
 
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
@@ -433,8 +436,9 @@
 ;; (desktop-save-mode 1)
 
 ;; use only one desktop
-(setq desktop-path '("~/.emacs.d/"))
-(setq desktop-dirname "~/.emacs.d/")
+
+(setq desktop-path '(desktop-dir))
+(setq desktop-dirname desktop-dir)
 (setq desktop-base-file-name "emacs-desktop")
 
 ;; remove desktop after it's been read
@@ -1083,10 +1087,9 @@ _h_ decrease width    _l_ increase width
 (add-hook 'org-mode-hook 'org-fragtog-mode) ;; This should enable org-fragtog when entering org-mode
 
 ;; Automatically tangle our Emacs.org config file when we save it
-
 (defun efs/org-babel-tangle-config ()
   (when (string-equal (buffer-file-name)
-                      (expand-file-name "~/dotfiles/dotfiles/.config/emacs.org"))
+                      (expand-file-name emacs-babel-config-file))
     ;; Dynamic scoping to the rescue
     (let ((org-confirm-babel-evaluate nil))
       (org-babel-tangle))))
@@ -1465,7 +1468,7 @@ _h_ decrease width    _l_ increase width
 ;; ;; yasnippet code 'optional', before auto-complete
 (use-package yasnippet)
 (use-package doom-snippets ;; this gets you nice snippets to use just tab and they will complete for you
-  :load-path "~/.config/snippets"
+  :load-path doom-snippets-dir
   :after yasnippet)
 ;; (use-package yasnippets-latex)
 (yas-global-mode 1)
