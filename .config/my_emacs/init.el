@@ -32,8 +32,6 @@
  (setq spell-fu-dir (concat config-dir "/spell_fu"))
  (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
  (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
- (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
-
  ;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
  (setq doom-snippets-dir (concat config-dir "/snippets"))
 
@@ -43,13 +41,16 @@
        (setq source-file  (concat home-dir "/repos/dotfiles/.config/emacs.org"))
        (setq target2-file (concat home-dir "/.local/share/chezmoi/home/dot_emacs.d/init.el"))
        (setq target1-file (concat home-dir "/repos/dotfiles/.config/my_emacs/init.el"))
+       (setq emacs-babel-config-file (concat home-dir "/repos/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
       )
+
        ;; Mac-specific code goes here.
       ((eq system-type 'darwin)
        (setq custom-file custom-file-unix)
        (setq source-file  "~/dotfiles/dotfiles/.config/emacs.org")
        (setq target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
        (setq target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el")
+ (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
        )
        ;; Linux-specific code goes here.
       ((eq system-type 'gnu/linux)
@@ -57,6 +58,7 @@
        (setq source-file  "~/dotfiles/dotfiles/.config/emacs.org")
        (setq target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
        (setq target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el")
+ (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
        )
        )
     (load custom-file)
@@ -66,6 +68,7 @@
   (interactive)
  (org-babel-tangle-file source-file target1-file "emacs-lisp")
 (copy-file target1-file target2-file t)   
+
     )
 
 ;; Initialize package sources
