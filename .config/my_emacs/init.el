@@ -40,9 +40,9 @@
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
       (setq custom-file custom-file-windows)
-       (setq source-file  "~/repos/dotfiles/.config/emacs.org")
-       (setq target2-file "~/.local/share/chezmoi/home/dot_emacs.d/init.el")
-       (setq target1-file "~/repos/dotfiles/.config/my_emacs/init.el")
+       (setq source-file  (concat home-dir "/repos/dotfiles/.config/emacs.org"))
+       (setq target2-file (concat home-dir "/.local/share/chezmoi/home/dot_emacs.d/init.el"))
+       (setq target1-file (concat home-dir "/repos/dotfiles/.config/my_emacs/init.el"))
       )
        ;; Mac-specific code goes here.
       ((eq system-type 'darwin)
