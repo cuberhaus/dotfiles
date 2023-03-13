@@ -808,15 +808,11 @@ _h_ decrease width    _l_ increase width
       :after evil)
 ;; (define-key evil-visual-state-map (kbd "C-a") 'evil-numbers/inc-at-pt) ;; vim classic
 ;; (define-key evil-visual-state-map (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental) ;; vim classic
-;; (define-key evil-visual-state-map (kbd "C-x") 'evil-numbers/dec-at-pt) ;; vim classic
-;; (define-key evil-visual-state-map (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental) ;; vim classic
-
-;; (define-key evil-normal-state-map (kbd "C-a") 'evil-numbers/inc-at-pt)
-;; (define-key evil-normal-state-map (kbd "C-x") 'evil-numbers/dec-at-pt)
+;; (define-key evil-visua
 
         ;; only in normal and insert vim classic bindings
         (evil-define-key '(normal visual) 'global (kbd "C-a") 'evil-numbers/inc-at-pt)
-        (evil-define-key '(normal visual) 'global (kbd "C-x") 'evil-numbers/dec-at-pt)
+        (evil-define-key '(visual) 'global (kbd "C-x") 'evil-numbers/dec-at-pt)
         (evil-define-key '(normal visual) 'global (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental)
         (evil-define-key '(normal visual) 'global (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental)
 
