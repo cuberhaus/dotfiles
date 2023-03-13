@@ -93,61 +93,64 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 ** Set path variables 
 
 #+begin_src emacs-lisp
-     ;; Intermediate paths
-     (setq home-dir (getenv "HOME"))
-     (setq docs-dir (concat home-dir "/repos/docs"))
-     (setq config-dir (concat  home-dir "/.config"))
-     (setq cache-dir (concat home-dir "/.cache"))
-     (setq org-dir-string "/org")
+    ;; Intermediate paths
+    (setq home-dir (getenv "HOME"))
+    (setq docs-dir (concat home-dir "/repos/docs"))
+    (setq config-dir (concat  home-dir "/.config"))
+    (setq cache-dir (concat home-dir "/.cache"))
+    (setq org-dir-string "/org")
+    (cond ((eq system-type 'windows-nt)
+           (setq unix-dotfiles-dir (concat home-dir "/repos/dotfiles"))
+           (setq windows-dotfiles-dir (concat home-dir "/.local/share/chezmoi/home/"))
+           )
+          ((eq system-type 'darwin)
+           (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
+           (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
+           )
+          ((eq system-type 'gnu/linux))
+           (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
+           (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
+          )
 
-     (setq default-directory (concat home-dir "/")) ;; Search default directory
+    (setq default-directory (concat home-dir "/")) ;; Search default directory
 
-     ;; Paths that are used in the code
-     (setq user-emacs-dir (concat cache-dir "/emacs/"))
-     (setq desktop-dir (concat home-dir "/.emacs.d/"))
-     (setq org-roam-dir (concat docs-dir org-dir-string "/roam"))
-     (setq journal-dir (concat docs-dir org-dir-string "/Journal.org"))
-     (setq tasks-dir (concat docs-dir org-dir-string "/Tasks.org"))
-     (setq metrics-dir (concat docs-dir org-dir-string "/Metrics.org"))
-     (setq habits-dir (concat docs-dir org-dir-string "/Habits.org"))
-     (setq birthday-dir (concat docs-dir org-dir-string "/birthday.org"))
-     (setq custom-file-unix (concat config-dir "/my_emacs/custom.el"))
-     (setq custom-file-windows (concat home-dir "/.emacs.d/custom.el"))
-     (setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
-     (setq spell-fu-dir (concat config-dir "/spell_fu"))
-     (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
-     (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
-     ;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
-     (setq doom-snippets-dir (concat config-dir "/snippets"))
+    ;; Paths that are used in the code
+    (setq user-emacs-dir (concat cache-dir "/emacs/"))
+    (setq desktop-dir (concat home-dir "/.emacs.d/"))
+    (setq org-roam-dir (concat docs-dir org-dir-string "/roam"))
+    (setq journal-dir (concat docs-dir org-dir-string "/Journal.org"))
+    (setq tasks-dir (concat docs-dir org-dir-string "/Tasks.org"))
+    (setq metrics-dir (concat docs-dir org-dir-string "/Metrics.org"))
+    (setq habits-dir (concat docs-dir org-dir-string "/Habits.org"))
+    (setq birthday-dir (concat docs-dir org-dir-string "/birthday.org"))
+    (setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+    (setq spell-fu-dir (concat config-dir "/spell_fu"))
+    (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
+    (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))
+    ;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
+    (setq doom-snippets-dir (concat config-dir "/snippets"))
 #+end_src
 *** Customize System to different file
 #+begin_src emacs-lisp
+    (setq source-file  (concat unix-dotfiles-dir "/.config/emacs.org"))
+    (setq target2-file (concat windows-dotfiles-dir "/dot_emacs.d/init.el"))
+    (setq target1-file (concat unix-dotfiles-dir "/.config/my_emacs/init.el"))
+    (setq emacs-babel-config-file (concat unix-dotfiles-dir "/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
+
     (cond ((eq system-type 'windows-nt)
            ;; Windows-specific code goes here.
-          (setq custom-file custom-file-windows)
-           (setq source-file  (concat home-dir "/repos/dotfiles/.config/emacs.org"))
-           (setq target2-file (concat home-dir "/.local/share/chezmoi/home/dot_emacs.d/init.el"))
-           (setq target1-file (concat home-dir "/repos/dotfiles/.config/my_emacs/init.el"))
-           (setq emacs-babel-config-file (concat home-dir "/repos/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
-      (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+          ;; (setq custom-file custom-file-windows)
+          (setq custom-file (concat home-dir "/.emacs.d/custom.el"))
           )
            ;; Mac-specific code goes here.
           ((eq system-type 'darwin)
-           (setq custom-file custom-file-unix)
-           (setq source-file  "~/dotfiles/dotfiles/.config/emacs.org")
-           (setq target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
-           (setq target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el")
-     (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
-      (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+           (setq custom-file (concat config-dir "/my_emacs/custom.el"))
+           ;; (setq custom-file custom-file-unix)
            )
            ;; Linux-specific code goes here.
           ((eq system-type 'gnu/linux)
-          (setq custom-file custom-file-unix)
-           (setq source-file  "~/dotfiles/dotfiles/.config/emacs.org")
-           (setq target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
-           (setq target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el")
-     (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
-      (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+           ;; (setq custom-file custom-file-unix)
+           (setq custom-file (concat config-dir "/my_emacs/custom.el"))
            )
            )
 
@@ -166,7 +169,6 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 
 ** Package System
 #+begin_src emacs-lisp
-
   ;; Initialize package sources
   (require 'package) ; bring in package module
   ; package repositories
@@ -214,17 +216,6 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 #+end_src
 ** Basic UI Settings
 *** Basic UI
-
-*MOVED TO EARLY INIT*
-#+begin_src emacs-lisp
-    ;; (setq inhibit-startup-message t) ; Disable startup menu
-    ;; (scroll-bar-mode -1) ; Disable the scrollbar
-    ;; (tool-bar-mode -1)
-    ;; ;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
-    ;; (set-fringe-mode 10) ; Make some space
-    ;; (menu-bar-mode -1) ;; remove top bar
-    
-#+end_src
 
 #+begin_src emacs-lisp
       ;; (setq vc-follow-symlinks nil) ;; or never follow them
@@ -1154,6 +1145,19 @@ Since I let evil-mode take over C-u for buffer scrolling, I need to re-bind the 
       :commands (org-capture org-agenda)
       :hook (org-mode . efs/org-mode-setup)
       :config
+    (cond ((eq system-type 'windows-nt)
+           ;; Windows-specific code goes here.
+      (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+          )
+           ;; Mac-specific code goes here.
+          ((eq system-type 'darwin)
+      (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+           )
+           ;; Linux-specific code goes here.
+          ((eq system-type 'gnu/linux)
+           (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+           )
+           )
       (message "Org mode loaded")
       (setq org-ellipsis " ▾"
             org-hide-emphasis-markers t ;; this hides emphasis markers like bold or itallics
@@ -1901,10 +1905,8 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
     :config
     (setq explicit-shell-file-name "zsh") ;; Change this to zsh, etc
     ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
-
     ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
     (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
-
 #+end_src
 **** Better term-mode colors
 #+begin_src emacs-lisp
@@ -2073,10 +2075,6 @@ Must be initialized on startup cause pomodoro-start needs pomodoro-add-to-mode-l
       (pomodoro-add-to-mode-line)
       (setq pomodoro-inhibit-prompting-messages nil)
       (setq pomodoro-desktop-notification nil)
-#+end_src
-
-#+begin_src emacs-lisp
-    ;; (use-package tomatinho)
 #+end_src
 ** Opening files externally
 Doesn't work properly

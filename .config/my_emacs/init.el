@@ -13,6 +13,18 @@
 (setq config-dir (concat  home-dir "/.config"))
 (setq cache-dir (concat home-dir "/.cache"))
 (setq org-dir-string "/org")
+(cond ((eq system-type 'windows-nt)
+       (setq unix-dotfiles-dir (concat home-dir "/repos/dotfiles"))
+       (setq windows-dotfiles-dir (concat home-dir "/.local/share/chezmoi/home/"))
+       )
+      ((eq system-type 'darwin)
+       (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
+       (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
+       )
+      ((eq system-type 'gnu/linux))
+       (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
+       (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
+      )
 
 (setq default-directory (concat home-dir "/")) ;; Search default directory
 
@@ -25,8 +37,6 @@
 (setq metrics-dir (concat docs-dir org-dir-string "/Metrics.org"))
 (setq habits-dir (concat docs-dir org-dir-string "/Habits.org"))
 (setq birthday-dir (concat docs-dir org-dir-string "/birthday.org"))
-(setq custom-file-unix (concat config-dir "/my_emacs/custom.el"))
-(setq custom-file-windows (concat home-dir "/.emacs.d/custom.el"))
 (setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
 (setq spell-fu-dir (concat config-dir "/spell_fu"))
 (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
@@ -34,32 +44,25 @@
 ;; (setq emacs-babel-config-file (concat config-dir "/emacs.org"))
 (setq doom-snippets-dir (concat config-dir "/snippets"))
 
+(setq source-file  (concat unix-dotfiles-dir "/.config/emacs.org"))
+(setq target2-file (concat windows-dotfiles-dir "/dot_emacs.d/init.el"))
+(setq target1-file (concat unix-dotfiles-dir "/.config/my_emacs/init.el"))
+(setq emacs-babel-config-file (concat unix-dotfiles-dir "/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
+
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
-      (setq custom-file custom-file-windows)
-       (setq source-file  (concat home-dir "/repos/dotfiles/.config/emacs.org"))
-       (setq target2-file (concat home-dir "/.local/share/chezmoi/home/dot_emacs.d/init.el"))
-       (setq target1-file (concat home-dir "/repos/dotfiles/.config/my_emacs/init.el"))
-       (setq emacs-babel-config-file (concat home-dir "/repos/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+      ;; (setq custom-file custom-file-windows)
+      (setq custom-file (concat home-dir "/.emacs.d/custom.el"))
       )
        ;; Mac-specific code goes here.
       ((eq system-type 'darwin)
-       (setq custom-file custom-file-unix)
-       (setq source-file  "~/dotfiles/dotfiles/.config/emacs.org")
-       (setq target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
-       (setq target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el")
- (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+       (setq custom-file (concat config-dir "/my_emacs/custom.el"))
+       ;; (setq custom-file custom-file-unix)
        )
        ;; Linux-specific code goes here.
       ((eq system-type 'gnu/linux)
-      (setq custom-file custom-file-unix)
-       (setq source-file  "~/dotfiles/dotfiles/.config/emacs.org")
-       (setq target2-file "~/repos/WinDotfiles/home/dot_emacs.d/init.el")
-       (setq target1-file "~/dotfiles/dotfiles/.config/my_emacs/init.el")
- (setq emacs-babel-config-file (concat home-dir "/dotfiles/dotfiles/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+       ;; (setq custom-file custom-file-unix)
+       (setq custom-file (concat config-dir "/my_emacs/custom.el"))
        )
        )
 
@@ -113,13 +116,6 @@
 ;; (straight-use-package 'use-package)
 
 ;; Clean up unused repos with `straight-remove-unused-repos'
-
-;; (setq inhibit-startup-message t) ; Disable startup menu
-;; (scroll-bar-mode -1) ; Disable the scrollbar
-;; (tool-bar-mode -1)
-;; ;(tooltip-mode -1) disable tooltips ;; (text displayed when hovering over an element)
-;; (set-fringe-mode 10) ; Make some space
-;; (menu-bar-mode -1) ;; remove top bar
 
 ;; (setq vc-follow-symlinks nil) ;; or never follow them
 
@@ -890,6 +886,19 @@ _h_ decrease width    _l_ increase width
   :commands (org-capture org-agenda)
   :hook (org-mode . efs/org-mode-setup)
   :config
+(cond ((eq system-type 'windows-nt)
+       ;; Windows-specific code goes here.
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+      )
+       ;; Mac-specific code goes here.
+      ((eq system-type 'darwin)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+       )
+       ;; Linux-specific code goes here.
+      ((eq system-type 'gnu/linux)
+       (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+       )
+       )
   (message "Org mode loaded")
   (setq org-ellipsis " ▾"
         org-hide-emphasis-markers t ;; this hides emphasis markers like bold or itallics
@@ -1526,7 +1535,6 @@ _h_ decrease width    _l_ increase width
   :config
   (setq explicit-shell-file-name "zsh") ;; Change this to zsh, etc
   ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
-
   ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
   (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *"))
 
@@ -1659,8 +1667,6 @@ _h_ decrease width    _l_ increase width
   (pomodoro-add-to-mode-line)
   (setq pomodoro-inhibit-prompting-messages nil)
   (setq pomodoro-desktop-notification nil)
-
-;; (use-package tomatinho)
 
 ;; (use-package openwith
 ;;   :commands (openwith-mode)
