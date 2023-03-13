@@ -1,6 +1,7 @@
-#+PROPERTY: header-args:emacs-lisp :tangle "~/dotfiles/dotfiles/.config/my_emacs/init.el"  :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle "~/repos/dotfiles/.config/my_emacs/init.el"  :mkdirp yes
 #+title Emacs!
 #+STARTUP: overview
+IN ORDER TO CHANGE WHO EDITS THIS, WINDOWS OR UNIX YOU NEED TO CHANGE THE TANGLE DIRECTORY ABOVE
 ~code~
 =verbatim=
 _underscored_
@@ -92,14 +93,13 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 ** Set path variables 
 
 #+begin_src emacs-lisp
-    ;; Define the target file list
-     ;; (setq my-target-files '("~/dotfiles/dotfiles/.config/my_emacs/init.el" "~/repos/WinDotfiles/home/dot_emacs.d/init.el"))
      ;; Intermediate paths
      (setq home-dir (getenv "HOME"))
      (setq docs-dir (concat home-dir "/repos/docs"))
      (setq config-dir (concat  home-dir "/.config"))
      (setq cache-dir (concat home-dir "/.cache"))
      (setq org-dir-string "/org")
+
      (setq default-directory (concat home-dir "/")) ;; Search default directory
 
      ;; Paths that are used in the code
