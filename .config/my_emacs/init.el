@@ -563,7 +563,8 @@
         :config
         (setq ivy-initial-inputs-alist nil))
 
-(use-package all-the-icons)
+(use-package all-the-icons
+  :ensure t)
 ;; custom command line
 (use-package doom-modeline
   :ensure t
