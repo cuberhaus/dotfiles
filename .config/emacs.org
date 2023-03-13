@@ -1883,26 +1883,15 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 **** Unused packages
 
 #+begin_src emacs-lisp
-  ;; (use-package diff-hl
-  ;;   :init
-  ;;   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
-  ;;   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-  ;;   :config
-  ;;   (global-diff-hl-mode)
-  ;;   (diff-hl-margin-mode)
-  ;;   )
   ;; NOTE: Make sure to configure a GitHub token before using this package!
   ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
   ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
   ;; (use-package forge) ;; more git functionality
-
-
 #+end_src
 
 *** Systemd
 #+begin_src emacs-lisp
-    (use-package
-      systemd)
+    (use-package systemd)
 #+end_src
 ** Terminals
 *** Term-mode
@@ -1919,10 +1908,8 @@ Company Mode provides a nicer in-buffer completion interface than completion-at-
 #+end_src
 **** Better term-mode colors
 #+begin_src emacs-lisp
-
   (use-package eterm-256color
     :hook (term-mode . eterm-256color-mode))
-
 #+end_src
 *** vterm
 #+begin_src emacs-lisp

@@ -1514,21 +1514,12 @@ _h_ decrease width    _l_ increase width
   (add-hook 'ruby-mode-hook 'git-gutter-mode)
   )
 
-;; (use-package diff-hl
-;;   :init
-;;   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
-;;   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
-;;   :config
-;;   (global-diff-hl-mode)
-;;   (diff-hl-margin-mode)
-;;   )
 ;; NOTE: Make sure to configure a GitHub token before using this package!
 ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
 ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
 ;; (use-package forge) ;; more git functionality
 
-(use-package
-  systemd)
+(use-package systemd)
 
 (use-package term
   :commands term
