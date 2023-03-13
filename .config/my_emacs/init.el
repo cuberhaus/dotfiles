@@ -270,11 +270,6 @@
                 shell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0 ))))
 
-;; has to install pdf2svg on pc first
-;; (use-package org-inline-pdf
-;;   :init
-;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
-
 ;; (use-package bufler
 ;;   ;; :commands (bufler-switch-buffer bufler-workspace-frame-set bufler-list)
 ;;   ;; :disabled
@@ -346,11 +341,6 @@
 ;;    ;; Group remaining buffers by directory, then major mode.
 ;;    (auto-directory)
 ;;    (auto-mode)))
-
-;; (use-package default-text-scale
-;;   :defer 1
-;;   :config
-;;   (default-text-scale-mode))
 
 ;; (use-package languagetool
 ;;   :ensure t
@@ -443,13 +433,6 @@
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
-;; ;; Keep customization settings in a temporary file (thanks Ambrevar!)
-;; (setq custom-file
-;;       (if (boundp 'server-socket-dir)
-;;           (expand-file-name "custom.el" server-socket-dir)
-;;         (expand-file-name (format "emacs-custom-%s.el" (user-uid)) temporary-file-directory)))
-;; (load custom-file t)
-
 (use-package restart-emacs)
 
 (use-package eyebrowse
@@ -466,9 +449,7 @@
 (winner-mode 1)
 
 ;; (desktop-save-mode 1)
-
 ;; use only one desktop
-
 (setq desktop-path '(desktop-dir))
 (setq desktop-dirname desktop-dir)
 (setq desktop-base-file-name "emacs-desktop")
@@ -576,9 +557,6 @@
 (use-package doom-themes) ;; counsel-load-theme to load a theme from the list
 (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 
-;; (use-package minions
-;;   :hook (doom-modeline-mode . minions-mode))
-
 ;; key bindings
 (when (eq system-type 'darwin) ;; mac specific settings
   (setq mac-option-modifier 'alt)
@@ -586,11 +564,6 @@
   (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
   (setq mac-right-option-modifier 'none) ;; so that you can write backslash and basically use alt gr (right option on mac)
   )
-    ;; (setq mac-command-modifier 'meta)
-    ;; (defun show-in-finder ()
-    ;;   (interactive)
-    ;;   (shell-command (concat "open -R "  buffer-file-name))
-    ;;   )
     (use-package reveal-in-osx-finder) ;; works well
 
 (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
@@ -608,14 +581,6 @@
       (general-create-definer pol/ctrl-c-keys
         :prefix "C-c"))
 
-        ;;,** Mode Keybindings
-        ;; (general-define-key
-        ;; :keymaps 'eyebrowse-mode-map
-        ;; :prefix "SPC a"
-        ;; ;; bind "C-c C-l"
-        ;; ;; "C-z" 'cider-switch-to-repl-buffer
-        ;; )
-
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
        )
@@ -626,6 +591,7 @@
        )
       ((eq system-type 'gnu/linux)
        ))
+
 ;; same as :bind-keymap
     ;; (general-define-key
     ;;  :prefix "SPC"
@@ -641,26 +607,16 @@
       "TAB ," '(eyebrowse-rename-window-config :which-key "Rename window")
       "TAB ." '(eyebrowse-switch-to-window-config :which-key "Switch to window")
       "TAB c" '(eyebrowse-create-window-config :which-key "Create window config")
-      ;; "0" '(eyebrowse-switch-to-window-config-0 :which-key "Switch to final workspace")
-      ;; "1" '(eyebrowse-switch-to-window-config-1 :which-key "Switch to 1st workspace")
-      ;; "2" '(eyebrowse-switch-to-window-config-2 :which-key "Switch to 2nd workspace")
-      ;; "3" '(eyebrowse-switch-to-window-config-3 :which-key "Switch to 3rd workspace")
-      ;; "4" '(eyebrowse-switch-to-window-config-4 :which-key "Switch to 4th workspace")
-      ;; "5" '(eyebrowse-switch-to-window-config-5 :which-key "Switch to 5th workspace")
-      ;; "6" '(eyebrowse-switch-to-window-config-6 :which-key "Switch to 6th workspace")
-      ;; "7" '(eyebrowse-switch-to-window-config-7 :which-key "Switch to 7th workspace")
-      ;; "8" '(eyebrowse-switch-to-window-config-8 :which-key "Switch to 8th workspace")
-      ;; "9" '(eyebrowse-switch-to-window-config-9 :which-key "Switch to 9th workspace")
       "0" '(eyebrowse-switch-to-window-config-0 :which-key "ws 0")
-      "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 0")
-      "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 0")
-      "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 0")
-      "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 0")
-      "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 0")
-      "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 0")
-      "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 0")
-      "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 0")
-      "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 0")
+      "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 1")
+      "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 2")
+      "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 3")
+      "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 4")
+      "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 5")
+      "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 6")
+      "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 7")
+      "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 8")
+      "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 9")
       )
 
     (pol/leader-key
@@ -669,8 +625,6 @@
       "nri" '(org-roam-node-insert :which-key "Inset node")
       "nrI" '(org-roam-node-insert-immediate :which-key "Insert Node quick")
       "nrd" '(:keymap org-roam-dailies-map :package org-roam :which-key "dailies")
-      ;; "nrdY" '( :keymap org-roam-dailies-map :package org-roam :which-key "dailies")
-      ;; "nrdT" '( :keymap org-roam-dailies-map :package org-roam :which-key "dailies")
       )
     (pol/leader-key ;; try to have similar keybindings in vim as well
       "<RET>" '(bookmark-jump :which-key "Jump to bookmark")
@@ -740,9 +694,6 @@
       "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
       )
 
-      ;; (global-unset-key (kbd "C-c C-w"))
-      ;; (global-unset-key (kbd "SPC a"))
-
 (global-set-key (kbd "C-M-u") 'universal-argument)
 
 (use-package hydra
@@ -773,72 +724,52 @@ _h_ decrease width    _l_ increase width
   ("q" nil))
 
 ;; vim keybindings for easier on the fingers typing :D
-                    (use-package evil
-                      :init
-                      (setq evil-want-integration t) ;; must have
-                      (setq evil-want-keybinding nil)
-                      (setq evil-want-C-u-scroll t)
-                      (setq evil-want-C-i-jump nil)
-                      ;;(setq evil-respect-visual-line-mode t) idk
-                      ;;(setq evil-undo-system 'undo-tree) idk
-                      :config
-                      (evil-mode 1)
-                      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-                      ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+(use-package evil
+  :init
+  (setq evil-want-integration t) ;; must have
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  ;;(setq evil-respect-visual-line-mode t) idk
+  ;;(setq evil-undo-system 'undo-tree) idk
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+;; to center screen on cursor, zz or emacs-style C-l
 
-                      ;; Use visual line motions even outside of visual-line-mode buffers
-                      (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
-                      (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
+;; https://github.com/linktohack/evil-commentary
+(use-package evil-commentary
+  :after evil
+  :config
+  (evil-commentary-mode))
 
-                      (evil-set-initial-state 'messages-buffer-mode 'normal)
-                      (evil-set-initial-state 'dashboard-mode 'normal))
-                    ;; to center screen on cursor, zz or emacs-style C-l
+(use-package evil-collection
+  :after evil ;; load after evil, must have
+  :config
+  (evil-collection-init))
 
-                    ;; https://github.com/linktohack/evil-commentary
-                    ;; use-package makes it so that it installs it from config and config section
-                    ;; activates the mode
-                    (use-package evil-commentary
-                      :after evil
-                      :config
-                      (evil-commentary-mode))
+;; glorious increment like in vim :D
+(use-package evil-numbers
+  :after evil)
 
-                    (use-package evil-collection
-                      :after evil ;; load after evil, must have
-                      :config
-                      (evil-collection-init))
+;; only in normal and insert vim classic bindings
+(evil-define-key '(normal visual) 'global (kbd "C-a") 'evil-numbers/inc-at-pt)
+(evil-define-key '(visual) 'global (kbd "C-x") 'evil-numbers/dec-at-pt)
+(evil-define-key '(normal visual) 'global (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental)
+(evil-define-key '(normal visual) 'global (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental)
 
-    ;; glorious increment like in vim :D
-    (use-package evil-numbers
-      :after evil)
-;; (define-key evil-visual-state-map (kbd "C-a") 'evil-numbers/inc-at-pt) ;; vim classic
-;; (define-key evil-visual-state-map (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental) ;; vim classic
-;; (define-key evil-visua
-
-        ;; only in normal and insert vim classic bindings
-        (evil-define-key '(normal visual) 'global (kbd "C-a") 'evil-numbers/inc-at-pt)
-        (evil-define-key '(visual) 'global (kbd "C-x") 'evil-numbers/dec-at-pt)
-        (evil-define-key '(normal visual) 'global (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental)
-        (evil-define-key '(normal visual) 'global (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental)
-
-    ;; without shadowing regular + -
-    ;;     (evil-define-key '(normal visual) 'global (kbd "<kp-add>") 'evil-numbers/inc-at-pt)
-    ;; (evil-define-key '(normal visual) 'global (kbd "<kp-subtract>") 'evil-numbers/dec-at-pt)
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-add>") 'evil-numbers/inc-at-pt-incremental)
-    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-subtract>") 'evil-numbers/dec-at-pt-incremental)
-
-                    ; C-z go back to EMACS MODE
-
-;; (use-package evil-goggles
-;;   :ensure t
-;;   :after evil
-;;   :config
-;;   (evil-goggles-mode)
-
-;;   ;; optionally use diff-mode's faces; as a result, deleted text
-;;   ;; will be highlighed with `diff-removed` face which is typically
-;;   ;; some red color (as defined by the color theme)
-;;   ;; other faces such as `diff-added` will be used for other actions
-;;   (evil-goggles-use-diff-faces))
+;; without shadowing regular + -
+;; (evil-define-key '(normal visual) 'global (kbd "<kp-add>") 'evil-numbers/inc-at-pt)
+;; (evil-define-key '(normal visual) 'global (kbd "<kp-subtract>") 'evil-numbers/dec-at-pt)
+;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-add>") 'evil-numbers/inc-at-pt-incremental)
+;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-subtract>") 'evil-numbers/dec-at-pt-incremental)
+;; C-z go back to EMACS MODE
 
 ;; (darkroom-mode 0) this makes keybinding work automatically but also runs on startup
 (use-package darkroom
@@ -864,9 +795,9 @@ _h_ decrease width    _l_ increase width
     (dw/enter-focus-mode)))
 
 (pol/leader-key
-  "tz" '(dw/toggle-focus-mode :which-key "Focus mode")
-  ;; "te" '(dw/enter-focus-mode :which-key "focus mode")
-  ;; "ta" '(dw/leave-focus-mode :which-key "focus mode")
+  "tzz" '(dw/toggle-focus-mode :which-key "Focus mode")
+  "tze" '(dw/enter-focus-mode :which-key "focus mode")
+  "tza" '(dw/leave-focus-mode :which-key "focus mode")
   )
 
 (use-package which-key ;; This shows which commands are available for current keypresses
@@ -959,7 +890,6 @@ _h_ decrease width    _l_ increase width
   :commands (org-capture org-agenda)
   :hook (org-mode . efs/org-mode-setup)
   :config
-
   (message "Org mode loaded")
   (setq org-ellipsis " ▾"
         org-hide-emphasis-markers t ;; this hides emphasis markers like bold or itallics
@@ -1086,12 +1016,9 @@ _h_ decrease width    _l_ increase width
       ("m" "Metrics Capture")
       ("mw" "Weight" table-line (file+headline metrics-dir "Weight")
        "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
-
   )
 
 (setq org-highlight-latex-and-related '(native))  ;; has to be set to native otherwise see some strange beheaviour, this way its colored green as in doom emacs
-
-
 
 (use-package org-appear
   :hook (org-mode . org-appear-mode))

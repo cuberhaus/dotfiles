@@ -427,14 +427,6 @@ or M-x all-the-icons-install-fonts to download them to a folder
                   shell-mode-hook))
     (add-hook mode (lambda () (display-line-numbers-mode 0 ))))
 #+end_src
-** Unused packages
-
-#+begin_src emacs-lisp
-;; has to install pdf2svg on pc first
-;; (use-package org-inline-pdf
-;;   :init
-;;   (add-hook 'org-mode-hook #'org-inline-pdf-mode))
-#+end_src
 ** Buffer Management with Bufler
 
 Have to wait for efficient integration with Ivy (currently this is what makes ivy startup early)
@@ -511,13 +503,7 @@ Have to wait for efficient integration with Ivy (currently this is what makes iv
   ;;    (auto-directory)
   ;;    (auto-mode)))
 #+end_src
-** Frame Scaling / Zooming
-#+begin_src emacs-lisp
-  ;; (use-package default-text-scale
-  ;;   :defer 1
-  ;;   :config
-  ;;   (default-text-scale-mode))
-#+end_src
+
 ** Spell-checking
 #+begin_src emacs-lisp
     ;; (use-package languagetool
@@ -631,18 +617,11 @@ Let’s keep our folders clean!
         `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 #+end_src
 
-#+begin_src emacs-lisp
-  ;; ;; Keep customization settings in a temporary file (thanks Ambrevar!)
-  ;; (setq custom-file
-  ;;       (if (boundp 'server-socket-dir)
-  ;;           (expand-file-name "custom.el" server-socket-dir)
-  ;;         (expand-file-name (format "emacs-custom-%s.el" (user-uid)) temporary-file-directory)))
-  ;; (load custom-file t)
-#+end_src
 ** Restart-emacs
 #+begin_src emacs-lisp
 (use-package restart-emacs)
 #+end_src
+
 ** UI settings
 *** eyebrowse
 Have an i3-like workspace management
@@ -677,9 +656,7 @@ By default desktop-save-mode automatically saves the session all the time and re
 
 #+begin_src emacs-lisp
     ;; (desktop-save-mode 1)
-
     ;; use only one desktop
-
     (setq desktop-path '(desktop-dir))
     (setq desktop-dirname desktop-dir)
     (setq desktop-base-file-name "emacs-desktop")
@@ -783,7 +760,6 @@ This Prescient configuration is optimized for use in System Crafters videos and 
 
 *** Counsel 
 #+begin_src emacs-lisp
-
       ;; With ivy-rich shows descriptions for commands 
       (use-package counsel
       :bind (("M-x" . counsel-M-x)
@@ -807,12 +783,6 @@ This Prescient configuration is optimized for use in System Crafters videos and 
       (use-package doom-themes) ;; counsel-load-theme to load a theme from the list
       (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 #+end_src
-
-*** Minions
-#+begin_src emacs-lisp
-  ;; (use-package minions
-  ;;   :hook (doom-modeline-mode . minions-mode))
-#+end_src
 ** Keybindings
 #+begin_src emacs-lisp
             ;; key bindings
@@ -822,11 +792,6 @@ This Prescient configuration is optimized for use in System Crafters videos and 
           (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
           (setq mac-right-option-modifier 'none) ;; so that you can write backslash and basically use alt gr (right option on mac)
           )
-            ;; (setq mac-command-modifier 'meta)
-            ;; (defun show-in-finder ()
-            ;;   (interactive)
-            ;;   (shell-command (concat "open -R "  buffer-file-name))
-            ;;   )
             (use-package reveal-in-osx-finder) ;; works well
 #+end_src
 
@@ -846,14 +811,6 @@ This Prescient configuration is optimized for use in System Crafters videos and 
           (general-create-definer pol/ctrl-c-keys
             :prefix "C-c"))
 
-            ;;,** Mode Keybindings
-            ;; (general-define-key
-            ;; :keymaps 'eyebrowse-mode-map
-            ;; :prefix "SPC a"
-            ;; ;; bind "C-c C-l"
-            ;; ;; "C-z" 'cider-switch-to-repl-buffer
-            ;; )
-
     (cond ((eq system-type 'windows-nt)
            ;; Windows-specific code goes here.
            )
@@ -864,6 +821,7 @@ This Prescient configuration is optimized for use in System Crafters videos and 
            )
           ((eq system-type 'gnu/linux)
            ))
+
     ;; same as :bind-keymap
         ;; (general-define-key
         ;;  :prefix "SPC"
@@ -879,26 +837,16 @@ This Prescient configuration is optimized for use in System Crafters videos and 
           "TAB ," '(eyebrowse-rename-window-config :which-key "Rename window")
           "TAB ." '(eyebrowse-switch-to-window-config :which-key "Switch to window")
           "TAB c" '(eyebrowse-create-window-config :which-key "Create window config")
-          ;; "0" '(eyebrowse-switch-to-window-config-0 :which-key "Switch to final workspace")
-          ;; "1" '(eyebrowse-switch-to-window-config-1 :which-key "Switch to 1st workspace")
-          ;; "2" '(eyebrowse-switch-to-window-config-2 :which-key "Switch to 2nd workspace")
-          ;; "3" '(eyebrowse-switch-to-window-config-3 :which-key "Switch to 3rd workspace")
-          ;; "4" '(eyebrowse-switch-to-window-config-4 :which-key "Switch to 4th workspace")
-          ;; "5" '(eyebrowse-switch-to-window-config-5 :which-key "Switch to 5th workspace")
-          ;; "6" '(eyebrowse-switch-to-window-config-6 :which-key "Switch to 6th workspace")
-          ;; "7" '(eyebrowse-switch-to-window-config-7 :which-key "Switch to 7th workspace")
-          ;; "8" '(eyebrowse-switch-to-window-config-8 :which-key "Switch to 8th workspace")
-          ;; "9" '(eyebrowse-switch-to-window-config-9 :which-key "Switch to 9th workspace")
           "0" '(eyebrowse-switch-to-window-config-0 :which-key "ws 0")
-          "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 0")
-          "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 0")
-          "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 0")
-          "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 0")
-          "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 0")
-          "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 0")
-          "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 0")
-          "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 0")
-          "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 0")
+          "1" '(eyebrowse-switch-to-window-config-1 :which-key "ws 1")
+          "2" '(eyebrowse-switch-to-window-config-2 :which-key "ws 2")
+          "3" '(eyebrowse-switch-to-window-config-3 :which-key "ws 3")
+          "4" '(eyebrowse-switch-to-window-config-4 :which-key "ws 4")
+          "5" '(eyebrowse-switch-to-window-config-5 :which-key "ws 5")
+          "6" '(eyebrowse-switch-to-window-config-6 :which-key "ws 6")
+          "7" '(eyebrowse-switch-to-window-config-7 :which-key "ws 7")
+          "8" '(eyebrowse-switch-to-window-config-8 :which-key "ws 8")
+          "9" '(eyebrowse-switch-to-window-config-9 :which-key "ws 9")
           )
 
         (pol/leader-key
@@ -907,8 +855,6 @@ This Prescient configuration is optimized for use in System Crafters videos and 
           "nri" '(org-roam-node-insert :which-key "Inset node")
           "nrI" '(org-roam-node-insert-immediate :which-key "Insert Node quick")
           "nrd" '(:keymap org-roam-dailies-map :package org-roam :which-key "dailies")
-          ;; "nrdY" '( :keymap org-roam-dailies-map :package org-roam :which-key "dailies")
-          ;; "nrdT" '( :keymap org-roam-dailies-map :package org-roam :which-key "dailies")
           )
         (pol/leader-key ;; try to have similar keybindings in vim as well
           "<RET>" '(bookmark-jump :which-key "Jump to bookmark")
@@ -977,14 +923,11 @@ This Prescient configuration is optimized for use in System Crafters videos and 
           "ln" '(langtool-goto-next-error :which-key "Go to next error") 
           "lp" '(langtool-goto-previous-error :which-key "Go to previous error") 
           )
-
-          ;; (global-unset-key (kbd "C-c C-w"))
-          ;; (global-unset-key (kbd "SPC a"))
 #+end_src
 *** Rebind C-u
 Since I let evil-mode take over C-u for buffer scrolling, I need to re-bind the universal-argument command to another key sequence. I’m choosing C-M-u for this purpose.
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-M-u") 'universal-argument)
+    (global-set-key (kbd "C-M-u") 'universal-argument)
 #+end_src
 *** Hydra
 #+begin_src emacs-lisp
@@ -1017,111 +960,87 @@ Since I let evil-mode take over C-u for buffer scrolling, I need to re-bind the 
 #+end_src
 *** Evil
 #+begin_src emacs-lisp
-                        ;; vim keybindings for easier on the fingers typing :D
-                        (use-package evil
-                          :init
-                          (setq evil-want-integration t) ;; must have
-                          (setq evil-want-keybinding nil)
-                          (setq evil-want-C-u-scroll t)
-                          (setq evil-want-C-i-jump nil)
-                          ;;(setq evil-respect-visual-line-mode t) idk
-                          ;;(setq evil-undo-system 'undo-tree) idk
-                          :config
-                          (evil-mode 1)
-                          (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-                          ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+    ;; vim keybindings for easier on the fingers typing :D
+    (use-package evil
+      :init
+      (setq evil-want-integration t) ;; must have
+      (setq evil-want-keybinding nil)
+      (setq evil-want-C-u-scroll t)
+      (setq evil-want-C-i-jump nil)
+      ;;(setq evil-respect-visual-line-mode t) idk
+      ;;(setq evil-undo-system 'undo-tree) idk
+      :config
+      (evil-mode 1)
+      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+      ;(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+      ;; Use visual line motions even outside of visual-line-mode buffers
+      (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
+      (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
+      (evil-set-initial-state 'messages-buffer-mode 'normal)
+      (evil-set-initial-state 'dashboard-mode 'normal))
+    ;; to center screen on cursor, zz or emacs-style C-l
 
-                          ;; Use visual line motions even outside of visual-line-mode buffers
-                          (evil-global-set-key 'motion "j" 'evil-next-visual-line) ;; both of these
-                          (evil-global-set-key 'motion "k" 'evil-previous-visual-line) ;; are needed for org mode where g-j doesn't work properly
+    ;; https://github.com/linktohack/evil-commentary
+    (use-package evil-commentary
+      :after evil
+      :config
+      (evil-commentary-mode))
 
-                          (evil-set-initial-state 'messages-buffer-mode 'normal)
-                          (evil-set-initial-state 'dashboard-mode 'normal))
-                        ;; to center screen on cursor, zz or emacs-style C-l
+    (use-package evil-collection
+      :after evil ;; load after evil, must have
+      :config
+      (evil-collection-init))
 
-                        ;; https://github.com/linktohack/evil-commentary
-                        ;; use-package makes it so that it installs it from config and config section
-                        ;; activates the mode
-                        (use-package evil-commentary
-                          :after evil
-                          :config
-                          (evil-commentary-mode))
+    ;; glorious increment like in vim :D
+    (use-package evil-numbers
+      :after evil)
 
-                        (use-package evil-collection
-                          :after evil ;; load after evil, must have
-                          :config
-                          (evil-collection-init))
+    ;; only in normal and insert vim classic bindings
+    (evil-define-key '(normal visual) 'global (kbd "C-a") 'evil-numbers/inc-at-pt)
+    (evil-define-key '(visual) 'global (kbd "C-x") 'evil-numbers/dec-at-pt)
+    (evil-define-key '(normal visual) 'global (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental)
+    (evil-define-key '(normal visual) 'global (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental)
 
-        ;; glorious increment like in vim :D
-        (use-package evil-numbers
-          :after evil)
-    ;; (define-key evil-visual-state-map (kbd "C-a") 'evil-numbers/inc-at-pt) ;; vim classic
-    ;; (define-key evil-visual-state-map (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental) ;; vim classic
-    ;; (define-key evil-visua
-
-            ;; only in normal and insert vim classic bindings
-            (evil-define-key '(normal visual) 'global (kbd "C-a") 'evil-numbers/inc-at-pt)
-            (evil-define-key '(visual) 'global (kbd "C-x") 'evil-numbers/dec-at-pt)
-            (evil-define-key '(normal visual) 'global (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental)
-            (evil-define-key '(normal visual) 'global (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental)
-
-        ;; without shadowing regular + -
-        ;;     (evil-define-key '(normal visual) 'global (kbd "<kp-add>") 'evil-numbers/inc-at-pt)
-        ;; (evil-define-key '(normal visual) 'global (kbd "<kp-subtract>") 'evil-numbers/dec-at-pt)
-        ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-add>") 'evil-numbers/inc-at-pt-incremental)
-        ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-subtract>") 'evil-numbers/dec-at-pt-incremental)
-
-                        ; C-z go back to EMACS MODE
-#+end_src
-*** evil-googles
-Displays a visual hint when editing with evil.
-#+begin_src emacs-lisp
-  ;; (use-package evil-goggles
-  ;;   :ensure t
-  ;;   :after evil
-  ;;   :config
-  ;;   (evil-goggles-mode)
-
-  ;;   ;; optionally use diff-mode's faces; as a result, deleted text
-  ;;   ;; will be highlighed with `diff-removed` face which is typically
-  ;;   ;; some red color (as defined by the color theme)
-  ;;   ;; other faces such as `diff-added` will be used for other actions
-  ;;   (evil-goggles-use-diff-faces))
+    ;; without shadowing regular + -
+    ;; (evil-define-key '(normal visual) 'global (kbd "<kp-add>") 'evil-numbers/inc-at-pt)
+    ;; (evil-define-key '(normal visual) 'global (kbd "<kp-subtract>") 'evil-numbers/dec-at-pt)
+    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-add>") 'evil-numbers/inc-at-pt-incremental)
+    ;; (evil-define-key '(normal visual) 'global (kbd "C-<kp-subtract>") 'evil-numbers/dec-at-pt-incremental)
+    ;; C-z go back to EMACS MODE
 #+end_src
 *** Distraction free writing
 #+begin_src emacs-lisp
-  ;; (darkroom-mode 0) this makes keybinding work automatically but also runs on startup
-  (use-package darkroom
-    :commands darkroom-mode
-    :config
-    (setq darkroom-text-scale-increase 0)
-    )
+    ;; (darkroom-mode 0) this makes keybinding work automatically but also runs on startup
+    (use-package darkroom
+      :commands darkroom-mode
+      :config
+      (setq darkroom-text-scale-increase 0)
+      )
 
-  (defun dw/enter-focus-mode ()
-    (interactive)
-    (darkroom-mode 1)
-    (display-line-numbers-mode 0))
+    (defun dw/enter-focus-mode ()
+      (interactive)
+      (darkroom-mode 1)
+      (display-line-numbers-mode 0))
 
-  (defun dw/leave-focus-mode ()
-    (interactive)
-    (darkroom-mode 0)
-    (display-line-numbers-mode 1))
+    (defun dw/leave-focus-mode ()
+      (interactive)
+      (darkroom-mode 0)
+      (display-line-numbers-mode 1))
 
-  (defun dw/toggle-focus-mode ()
-    (interactive)
-    (if (symbol-value darkroom-mode)
-      (dw/leave-focus-mode)
-      (dw/enter-focus-mode)))
+    (defun dw/toggle-focus-mode ()
+      (interactive)
+      (if (symbol-value darkroom-mode)
+        (dw/leave-focus-mode)
+        (dw/enter-focus-mode)))
 
-  (pol/leader-key
-    "tz" '(dw/toggle-focus-mode :which-key "Focus mode")
-    ;; "te" '(dw/enter-focus-mode :which-key "focus mode")
-    ;; "ta" '(dw/leave-focus-mode :which-key "focus mode")
-    )
+    (pol/leader-key
+      "tzz" '(dw/toggle-focus-mode :which-key "Focus mode")
+      "tze" '(dw/enter-focus-mode :which-key "focus mode")
+      "tza" '(dw/leave-focus-mode :which-key "focus mode")
+      )
 #+end_src
 ** Help
 #+begin_src emacs-lisp
-
   (use-package which-key ;; This shows which commands are available for current keypresses
     :commands(helpful-callable helpfull-variable helpful-command helpful-key)
     :defer 0
@@ -1139,7 +1058,6 @@ Displays a visual hint when editing with evil.
     ([remap describe-function] . counsel-describe-function) ;; remap keybinding to something different
     ([remap describe-command] . helpful-command) 
     ([remap describe-variable] . counsel-describe-variable))
-
 #+end_src
 
 ** Functions
@@ -1163,7 +1081,6 @@ Displays a visual hint when editing with evil.
 #+begin_src emacs-lisp
 (add-to-list 'dnd-protocol-alist
              '("^file:///.*\\.png" . org-insert-link))
-
 #+end_src
 *** Templates
 #+begin_src emacs-lisp
@@ -1182,7 +1099,6 @@ Displays a visual hint when editing with evil.
 #+begin_src emacs-lisp
   (use-package haskell-mode
     :after (org lsp) ) ;; needed for haskell snippets
-
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1238,7 +1154,6 @@ Displays a visual hint when editing with evil.
       :commands (org-capture org-agenda)
       :hook (org-mode . efs/org-mode-setup)
       :config
-
       (message "Org mode loaded")
       (setq org-ellipsis " ▾"
             org-hide-emphasis-markers t ;; this hides emphasis markers like bold or itallics
@@ -1365,7 +1280,6 @@ Displays a visual hint when editing with evil.
           ("m" "Metrics Capture")
           ("mw" "Weight" table-line (file+headline metrics-dir "Weight")
            "| %U | %^{Weight} | %^{Notes} |" :kill-buffer t)))
-
       )
 #+end_src
 
@@ -1373,9 +1287,6 @@ Displays a visual hint when editing with evil.
     (setq org-highlight-latex-and-related '(native))  ;; has to be set to native otherwise see some strange beheaviour, this way its colored green as in doom emacs
 #+end_src
 
-*** resize latex preview
-#+begin_src emacs-lisp
-#+end_src
 *** org-appear
 Show markup symbols when cursor is placed inside of them
 #+begin_src emacs-lisp
@@ -1383,6 +1294,7 @@ Show markup symbols when cursor is placed inside of them
   :hook (org-mode . org-appear-mode))
 (setq org-appear-inside-latex t)
 #+end_src
+
 *** Text in the middle
 #+begin_src emacs-lisp
 
@@ -1798,10 +1710,9 @@ lsp-treemacs-error-list - Show a tree view for the diagnostic messages in the pr
 #+end_src
 *** python
 Have to install
-# #+begin_src shell
-# pip install python-lsp-server
-# #+end_src
-
+#+begin_src shell
+pip install python-lsp-server
+#+end_src
 
 #+begin_src emacs-lisp
     (use-package python-mode
@@ -1859,9 +1770,9 @@ https://github.com/snyball/doom-snippets
 #+end_src
 *** Latex
 install LSP server
-# #+begin_src shell
-#   cargo install --locked --git https://github.com/latex-lsp/texlab.git
-# #+end_src
+#+begin_src shell
+  cargo install --locked --git https://github.com/latex-lsp/texlab.git
+#+end_src
 for autocompletion better to use lsp
 #+begin_src emacs-lisp
 
