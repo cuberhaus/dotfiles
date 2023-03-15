@@ -1,9 +1,9 @@
 ;; -*- lexical-binding: t; -*-
- ;; The default is 800 kilobytes.  Measured in bytes.
- ;; (defvar last-file-name-handler-alist file-name-handler-alist)
- ;; (setq gc-cons-threshold 402653184
- ;;     gc-cons-percentage 0.6
- ;;     file-name-handler-alist nil)
+;; The default is 800 kilobytes.  Measured in bytes.
+;; (defvar last-file-name-handler-alist file-name-handler-alist)
+;; (setq gc-cons-threshold 402653184
+;;     gc-cons-percentage 0.6
+;;     file-name-handler-alist nil)
 
 (setq use-package-verbose t) ;; debug to see which packages load, and maybe shouldn't, should be off
 
@@ -78,46 +78,22 @@
 
 ;; Initialize package sources
 (require 'package) ; bring in package module
-; package repositories
+                                        ; package repositories
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
                          ("elpa" . "https://elpa.gnu.org/packages/")))
 
 (package-initialize) ; Initializes package system
 (unless package-archive-contents ; unless package exists we refresh package list
- (package-refresh-contents)) 
+  (package-refresh-contents)) 
 
 ;; Initialize use-package on non-Linux platforms
 (unless (package-installed-p 'use-package) ; is this package installed, unless its installed install it
-   (package-install 'use-package))
+  (package-install 'use-package))
 (require 'use-package)
 
 (setq use-package-always-ensure t) ;; equivalent to writing :ensure t in all packages
 ;; makes sure that package is downloaded before use
-
-;; ;; Bootstrap straight.el
-;; (defvar bootstrap-version)
-;; (let ((bootstrap-file
-;;       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-;;       (bootstrap-version 5))
-;;   (unless (file-exists-p bootstrap-file)
-;;     (with-current-buffer
-;;         (url-retrieve-synchronously
-;;         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-;;         'silent 'inhibit-cookies)
-;;       (goto-char (point-max))
-;;       (eval-print-last-sexp)))
-;;   (load bootstrap-file nil 'nomessage))
-
-;; ;; Always use straight to install on systems other than Linux
-;; (setq straight-use-package-by-default (not (eq system-type 'gnu/linux)))
-
-;; ;; Use straight.el for use-package expressions
-;; (straight-use-package 'use-package)
-
-;; Clean up unused repos with `straight-remove-unused-repos'
-
-;; (setq vc-follow-symlinks nil) ;; or never follow them
 
 ;; You will most likely need to adjust this font size for your system!
 (defvar runemacs/default-font-size 110)
@@ -161,20 +137,16 @@
 (column-number-mode)
 (global-display-line-numbers-mode t) ;; display line numbers everywhere
 
-    (defun efs/display-startup-time ()
-      (message "Emacs loaded in %s with %d garbage collections."
-               (format "%.2f seconds"
-                       (float-time
-                       (time-subtract after-init-time before-init-time)))
-               gcs-done))
+(defun efs/display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+           (format "%.2f seconds"
+                   (float-time
+                    (time-subtract after-init-time before-init-time)))
+           gcs-done))
 
-    (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+(add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
 (global-hl-line-mode t)
-
-;; (require 'sublimity)
-;; (require 'sublimity-scroll)
-;; (sublimity-mode 1)
 
 ;; (use-package dashboard ;; for some reason activating this fixes python bug LOL have to debug that another time
 ;;   :ensure t
@@ -186,6 +158,7 @@
 
 ;; (setq ad-redefinition-action 'accept)
 
+;;(setq vc-follow-symlinks nil) ;; or never follow them
 (setq vc-follow-symlinks t) ;; always follow symlinks
 
 (setq large-file-warning-threshold nil)
@@ -195,7 +168,6 @@
 ;; Font Configuration -----------------------
   ;; (set-face-attribute 'default nil :font "SauceCodePro Nerd Font 11")
   ;; IF FONT LOOKS WEIRD (TOO SLIM) then it means the font is not working properly, CHANGE IT
-
        (defun aard-set-face (frame)
          "Configure faces on frame creation"
          (select-frame frame)
@@ -213,21 +185,16 @@
     )
       ((eq system-type 'darwin)
       (set-face-attribute 'default nil :font "FiraCode Nerd Font" :height 170)
-
-
       ;; Set the fixed pitch face
       (set-face-attribute 'fixed-pitch nil :font "FiraCode Nerd Font" :height 180)
-
       ;; Set the variable pitch face
       (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 180 :weight 'regular)
     )
     ((eq system-type 'gnu/linux)
       ;; (add-hook 'after-make-frame-functions 'aard-set-face)
       (set-face-attribute 'default nil :font "FuraCode Nerd Font" :height runemacs/default-font-size)
-
       ;; Set the fixed pitch face
       (set-face-attribute 'fixed-pitch nil :font "FuraCode Nerd Font" :height 120)
-
       ;; Set the variable pitch face
       (set-face-attribute 'variable-pitch nil :font "DejaVu Sans" :height 120 :weight 'regular)
     ))
@@ -251,7 +218,6 @@
 ;(use-package command-log-mode)
 
 (setq x-select-enable-clipboard-manager nil); weird emacs bug where it won't close
-
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
@@ -266,77 +232,77 @@
                 shell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0 ))))
 
-;; (use-package bufler
-;;   ;; :commands (bufler-switch-buffer bufler-workspace-frame-set bufler-list)
-;;   ;; :disabled
-;;   :bind (("C-M-j" . bufler-switch-buffer)
-;;          ("C-M-k" . bufler-workspace-frame-set))
-;;   :config
-;;   ;; (evil-collection-define-key 'normal 'bufler-list-mode-map
-;;   ;;   (kbd "RET")   'bufler-list-buffer-switch
-;;   ;;   (kbd "M-RET") 'bufler-list-buffer-peek
-;;   ;;   "D"           'bufler-list-buffer-kill)
+(use-package bufler
+  ;; :commands (bufler-switch-buffer bufler-workspace-frame-set bufler-list)
+  ;; :disabled
+  :bind (("C-M-j" . bufler-switch-buffer)
+         ("C-M-k" . bufler-workspace-frame-set))
+  :config
+  ;; (evil-collection-define-key 'normal 'bufler-list-mode-map
+  ;;   (kbd "RET")   'bufler-list-buffer-switch
+  ;;   (kbd "M-RET") 'bufler-list-buffer-peek
+  ;;   "D"           'bufler-list-buffer-kill)
 
-;;   (bufler-defgroups
-;;    (group
-;;     ;; Subgroup collecting all named workspaces.
-;;     (auto-workspace))
-;;    (group
-;;     ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
-;;     (group-or "*Help/Info*"
-;;               (mode-match "*Help*" (rx bos "help-"))
-;;               (mode-match "*Info*" (rx bos "info-"))))
-;;    (group
-;;     ;; Subgroup collecting all special buffers (i.e. ones that are not
-;;     ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
-;;     ;; through to other groups, so they end up grouped with their project buffers).
-;;     (group-and "*Special*"
-;;                (lambda (buffer)
-;;                  (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
-;;                                       buffer)
-;;                              (funcall (mode-match "Dired" (rx bos "dired"))
-;;                                       buffer)
-;;                              (funcall (auto-file) buffer))
-;;                    "*Special*")))
-;;     (group
-;;      ;; Subgroup collecting these "special special" buffers
-;;      ;; separately for convenience.
-;;      (name-match "**Special**"
-;;                  (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
-;;     (group
-;;      ;; Subgroup collecting all other Magit buffers, grouped by directory.
-;;      (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
-;;      (auto-directory))
-;;     ;; Subgroup for Helm buffers.
-;;     (mode-match "*Helm*" (rx bos "helm-"))
-;;     ;; Remaining special buffers are grouped automatically by mode.
-;;     (auto-mode))
-;;    ;; All buffers under "~/.emacs.d" (or wherever it is).
-;;    (dir user-emacs-directory)
-;;    (group
-;;     ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
-;;     ;; `org-directory' is not yet defined).
-;;     (dir (if (bound-and-true-p org-directory)
-;;              org-directory
-;;            "~/org"))
-;;     (group
-;;      ;; Subgroup collecting indirect Org buffers, grouping them by file.
-;;      ;; This is very useful when used with `org-tree-to-indirect-buffer'.
-;;      (auto-indirect)
-;;      (auto-file))
-;;     ;; Group remaining buffers by whether they're file backed, then by mode.
-;;     (group-not "*special*" (auto-file))
-;;     (auto-mode))
-;;    (group
-;;     ;; Subgroup collecting buffers in a projectile project.
-;;     (auto-projectile))
-;;    (group
-;;     ;; Subgroup collecting buffers in a version-control project,
-;;     ;; grouping them by directory.
-;;     (auto-project))
-;;    ;; Group remaining buffers by directory, then major mode.
-;;    (auto-directory)
-;;    (auto-mode)))
+  (bufler-defgroups
+   (group
+    ;; Subgroup collecting all named workspaces.
+    (auto-workspace))
+   (group
+    ;; Subgroup collecting all `help-mode' and `info-mode' buffers.
+    (group-or "*Help/Info*"
+              (mode-match "*Help*" (rx bos "help-"))
+              (mode-match "*Info*" (rx bos "info-"))))
+   (group
+    ;; Subgroup collecting all special buffers (i.e. ones that are not
+    ;; file-backed), except `magit-status-mode' buffers (which are allowed to fall
+    ;; through to other groups, so they end up grouped with their project buffers).
+    (group-and "*Special*"
+               (lambda (buffer)
+                 (unless (or (funcall (mode-match "Magit" (rx bos "magit-status"))
+                                      buffer)
+                             (funcall (mode-match "Dired" (rx bos "dired"))
+                                      buffer)
+                             (funcall (auto-file) buffer))
+                   "*Special*")))
+    (group
+     ;; Subgroup collecting these "special special" buffers
+     ;; separately for convenience.
+     (name-match "**Special**"
+                 (rx bos "*" (or "Messages" "Warnings" "scratch" "Backtrace") "*")))
+    (group
+     ;; Subgroup collecting all other Magit buffers, grouped by directory.
+     (mode-match "*Magit* (non-status)" (rx bos (or "magit" "forge") "-"))
+     (auto-directory))
+    ;; Subgroup for Helm buffers.
+    (mode-match "*Helm*" (rx bos "helm-"))
+    ;; Remaining special buffers are grouped automatically by mode.
+    (auto-mode))
+   ;; All buffers under "~/.emacs.d" (or wherever it is).
+   (dir user-emacs-directory)
+   (group
+    ;; Subgroup collecting buffers in `org-directory' (or "~/org" if
+    ;; `org-directory' is not yet defined).
+    (dir (if (bound-and-true-p org-directory)
+             org-directory
+           "~/org"))
+    (group
+     ;; Subgroup collecting indirect Org buffers, grouping them by file.
+     ;; This is very useful when used with `org-tree-to-indirect-buffer'.
+     (auto-indirect)
+     (auto-file))
+    ;; Group remaining buffers by whether they're file backed, then by mode.
+    (group-not "*special*" (auto-file))
+    (auto-mode))
+   (group
+    ;; Subgroup collecting buffers in a projectile project.
+    (auto-projectile))
+   (group
+    ;; Subgroup collecting buffers in a version-control project,
+    ;; grouping them by directory.
+    (auto-project))
+   ;; Group remaining buffers by directory, then major mode.
+   (auto-directory)
+   (auto-mode)))
 
 ;; (use-package languagetool
 ;;   :ensure t
