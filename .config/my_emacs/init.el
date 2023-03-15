@@ -1694,7 +1694,6 @@ _h_ decrease width    _l_ increase width
 ;; after startup, it is important you reset this to some reasonable default. A large 
 ;; gc-cons-threshold will cause freezing and stuttering during long-term 
 ;; interactive use. I find these are nice defaults:
-
   (setq gc-cons-threshold 16777216
         gc-cons-percentage 0.1
         file-name-handler-alist last-file-name-handler-alist)
