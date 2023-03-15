@@ -1088,6 +1088,7 @@ Since I let evil-mode take over C-u for buffer scrolling, I need to re-bind the 
 *** Org configuration
 
 #+begin_src emacs-lisp
+    (setq org-list-allow-alphabetical t) ;; should allow for alphabetical bullet points
     (defun efs/org-mode-setup ()
       (org-indent-mode)
       (variable-pitch-mode 1) ;; allows text to be of variable size

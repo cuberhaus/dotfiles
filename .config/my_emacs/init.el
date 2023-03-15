@@ -28,6 +28,7 @@
       )
 
 (setq default-directory (concat home-dir "/")) ;; Search default directory
+(setq bookmark-default-file (concat home-dir "/.emacs.d/bookmark-default.el")) ;; Search default directory
 
 ;; Paths that are used in the code
 (setq user-emacs-dir (concat cache-dir "/emacs/"))
@@ -519,14 +520,13 @@
 (use-package doom-themes) ;; counsel-load-theme to load a theme from the list
 (load-theme 'doom-one t) ;; if not using t will prompt if its safe to https://github.com/Malabarba/smart-mode-line/issues/100
 
-;; key bindings
 (when (eq system-type 'darwin) ;; mac specific settings
   (setq mac-option-modifier 'meta)
   (setq mac-command-modifier 'alt)
   (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
   (setq mac-right-option-modifier 'none) ;; so that you can write backslash and basically use alt gr (right option on mac)
   )
-    (use-package reveal-in-osx-finder) ;; works well
+(use-package reveal-in-osx-finder) ;; works well
 
 (global-set-key (kbd "C-M-j") 'counsel-switch-buffer) ;; easier command to switch buffers
     ;; example (define-key emacs-lisp-mode-map (kbd "C-x M-t") 'counsel-load-theme) define keybinding only in emacs-lisp-mode
@@ -842,6 +842,7 @@ _h_ decrease width    _l_ increase width
   (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch))
 
+(setq org-list-allow-alphabetical t) ;; should allow for alphabetical bullet points
 (defun efs/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode 1) ;; allows text to be of variable size
