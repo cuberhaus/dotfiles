@@ -53,29 +53,28 @@
 (cond ((eq system-type 'windows-nt)
        ;; Windows-specific code goes here.
       ;; (setq custom-file custom-file-windows)
-      (setq custom-file (concat home-dir "/.emacs.d/custom.el"))
-      )
-       ;; Mac-specific code goes here.
+       (setq custom-file (concat home-dir "/.emacs.d/custom.el"))
+       )
+      ;; Mac-specific code goes here.
       ((eq system-type 'darwin)
        (setq custom-file (concat config-dir "/my_emacs/custom.el"))
        ;; (setq custom-file custom-file-unix)
        )
-       ;; Linux-specific code goes here.
+      ;; Linux-specific code goes here.
       ((eq system-type 'gnu/linux)
        ;; (setq custom-file custom-file-unix)
        (setq custom-file (concat config-dir "/my_emacs/custom.el"))
        )
-       )
+      )
 
-    (load custom-file)
+(load custom-file)
 
 (defun my/org-tangle-to-multiple-targets ()
   "Tangle the source file to two target files."
   (interactive)
- (org-babel-tangle-file source-file target1-file "emacs-lisp")
-(copy-file target1-file target2-file t)   
-
-    )
+  (org-babel-tangle-file source-file target1-file "emacs-lisp")
+  (copy-file target1-file target2-file t)   
+  )
 
 ;; Initialize package sources
 (require 'package) ; bring in package module
