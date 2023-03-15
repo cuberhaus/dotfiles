@@ -25,6 +25,7 @@
        (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
        (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
       )
+      )
 
 (setq default-directory (concat home-dir "/")) ;; Search default directory
 
