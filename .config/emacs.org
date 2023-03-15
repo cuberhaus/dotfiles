@@ -730,14 +730,13 @@ This Prescient configuration is optimized for use in System Crafters videos and 
 #+end_src
 ** Keybindings
 #+begin_src emacs-lisp
-            ;; key bindings
-        (when (eq system-type 'darwin) ;; mac specific settings
-          (setq mac-option-modifier 'alt)
-          (setq mac-command-modifier 'meta)
-          (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
-          (setq mac-right-option-modifier 'none) ;; so that you can write backslash and basically use alt gr (right option on mac)
-          )
-            (use-package reveal-in-osx-finder) ;; works well
+    (when (eq system-type 'darwin) ;; mac specific settings
+      (setq mac-option-modifier 'meta)
+      (setq mac-command-modifier 'alt)
+      (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
+      (setq mac-right-option-modifier 'none) ;; so that you can write backslash and basically use alt gr (right option on mac)
+      )
+    (use-package reveal-in-osx-finder) ;; works well
 #+end_src
 
 #+begin_src emacs-lisp

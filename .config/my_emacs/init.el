@@ -521,8 +521,8 @@
 
 ;; key bindings
 (when (eq system-type 'darwin) ;; mac specific settings
-  (setq mac-option-modifier 'alt)
-  (setq mac-command-modifier 'meta)
+  (setq mac-option-modifier 'meta)
+  (setq mac-command-modifier 'alt)
   (global-set-key [kp-delete] 'delete-char) ;; sets fn-delete to be right-delete
   (setq mac-right-option-modifier 'none) ;; so that you can write backslash and basically use alt gr (right option on mac)
   )
