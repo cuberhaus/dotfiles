@@ -21,9 +21,10 @@
        (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
        (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
        )
-      ((eq system-type 'gnu/linux))
+      ((eq system-type 'gnu/linux)
        (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
        (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
+      )
       )
 
 (setq default-directory (concat home-dir "/")) ;; Search default directory
