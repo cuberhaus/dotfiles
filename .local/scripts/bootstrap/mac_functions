@@ -118,6 +118,7 @@ optional () {
     brew install tor-browser                    # Private and uncensored browsing
     brew install unetbootin                     # Burn iso's (or use dd command)
     brew install ghc                            # haskell compiler and ghci interpreter
+    brew install --cask microsoft-edge
 }
 
 vim_install () {
