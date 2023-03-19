@@ -1,0 +1,85 @@
+#!/bin/bash
+# Author: Pol Casacuberta
+# Date: 19/3/2023
+
+DEFAULT_DEPTH=2
+
+function mac_key() {
+    eval `ssh-agent -s`
+    ssh-add -K ~/.ssh/imac
+}
+
+function git_recursive() {
+    local cmd="$1"
+    local depth="${2:-2}"
+    echo "depth: $depth"
+    # Find all directories containing a .git subdirectory, and loop over them
+    find . -maxdepth "$depth" -type d -name .git -print0 2>/dev/null | while read -d $'\0' dir; do
+        # Remove the .git subdirectory from the path
+        dir=${dir%.git}
+
+        # Change into the directory and execute the specified command
+        pushd "$dir" > /dev/null
+        printf "Executing \"%s\" in %s\n" "$cmd" "$dir"
+        eval "$cmd"
+        popd > /dev/null
+    done
+}
+
+function usage() {
+    echo "Usage: $0 [OPTION...]" 1>&2
+    echo "-k Add ssh key" 1>&2
+    echo "-d Specify the depth to search for git repositories (default: $DEFAULT_DEPTH)" 1>&2
+    echo "-r Recursively search for Git repositories" 1>&2
+}
+
+function exit_abnormal() { # Function: Exit with error.
+    usage
+    exit 1
+}
+
+flag1=false
+recursive=false
+depth=$DEFAULT_DEPTH
+
+#https://www.computerhope.com/unix/bash/getopts.htm
+while getopts "hrc:kd:" options; do # Loop: Get the next option;
+    # use silent error checking;
+    case "${options}" in #
+    h)
+        usage
+        exit 0
+        ;;
+    r)
+        depth=3
+        ;;
+    k)                   # If the option is n,
+        flag1=true
+        ;;
+    d)
+        depth="${OPTARG}"
+        ;;
+    c)
+        cmd="${OPTARG}"
+        ;;
+    :) # If expected argument omitted: # there are no expected arguments so far
+        echo "Error: -${OPTARG} requires an argument."
+        exit_abnormal # Exit abnormally.
+        ;;
+    *)                # If unknown (any other) option:
+        exit_abnormal # Exit abnormally.
+        ;;
+    esac
+done
+
+if $flag1; then
+    mac_key
+fi
+
+if [[ -z "$cmd" ]]; then
+    echo "Error: -c flag is mandatory"
+    exit 1
+fi
+
+# Call the function to start the recursive search
+git_recursive "$cmd" "$depth"

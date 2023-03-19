@@ -122,6 +122,7 @@ alias gsu="git submodule update --recursive --remote"
 ## Alternative (makes easier finding out which commits have no message)
 yolo='git add -A; git commit -m "This is a placeholder"; git push'
 alias yolo=$yolo
+alias gr="git_recurse"
 # List files
 # using -a -a will show '.' and ".."
 # --git causes to crash when symbolic link is gone
