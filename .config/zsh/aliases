@@ -123,6 +123,7 @@ alias gsu="git submodule update --recursive --remote"
 # yolo='git add -A; git commit -m "This is a placeholder"; git push'
 # alias yolo=$yolo
 alias gr="git_recurse"
+alias absolute_yolo="git_recurse -r yolo"
 # List files
 # using -a -a will show '.' and ".."
 # --git causes to crash when symbolic link is gone
