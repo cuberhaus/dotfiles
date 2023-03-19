@@ -27,6 +27,7 @@ antigen bundle systemd
 antigen bundle archlinux
 antigen bundle command-not-found
 antigen bundle alias-finder
+# antigen bundle globalias # pressing space after an alias, expands it
 
 # Load the theme.
 # https://github.com/romkatv/powerlevel10k

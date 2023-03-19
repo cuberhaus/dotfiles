@@ -26,11 +26,12 @@ function git_recursive() {
     done
 }
 
-function usage() {
-    echo "Usage: $0 [OPTION...]" 1>&2
-    echo "-k Add ssh key" 1>&2
-    echo "-d Specify the depth to search for git repositories (default: $DEFAULT_DEPTH)" 1>&2
-    echo "-r Recursively search for Git repositories" 1>&2
+usage() {
+    echo "Usage: $0 [-k] [-d <depth>] [-r] <cmd>"
+    echo "  -k              Add ssh key"
+    echo "  -d <depth>      Specify the depth to search for git repositories (default: $DEFAULT_DEPTH)"
+    echo "  -r              Recursively search for Git repositories"
+    echo "  <cmd>           Command to execute in each Git repository found"
 }
 
 function exit_abnormal() { # Function: Exit with error.
@@ -71,6 +72,9 @@ while getopts "hrc:kd:" options; do # Loop: Get the next option;
         ;;
     esac
 done
+
+shift $((OPTIND-1))
+cmd="$@"
 
 if $flag1; then
     mac_key
