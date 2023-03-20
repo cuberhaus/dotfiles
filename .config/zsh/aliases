@@ -127,9 +127,21 @@ alias absolute_yolo="git_recurse -r yolo"
 # List files
 # using -a -a will show '.' and ".."
 # --git causes to crash when symbolic link is gone
-alias ls="exa --group-directories-first"
-alias la="exa --group-directories-first -a"
-alias l="exa -a -F --long --header --links --group --group-directories-first --git"
+
+if command -v exa &> /dev/null
+then
+    alias ls="exa --group-directories-first"
+    alias la="exa --group-directories-first -a"
+    alias l="exa -a -F --long --header --links --group --group-directories-first --git"
+else
+    alias ls="ls -l"
+    alias la="ls -a"
+    # alias l="ls"
+fi
+
+# Typos
+alias sl="ls"
+# alias s="ls" # It types it everytime as it is shorter
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
@@ -241,8 +253,6 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         brew cleanup; 
         "$cleanup
         alias tmux="tmux -f $HOME/.config/tmux/tmux.conf"
-        alias ls="ls -l"
-        alias la="ls -a"
     fi
 fi
 alias cleanup=$cleanup
