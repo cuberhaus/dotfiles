@@ -120,8 +120,6 @@ alias gsu="git submodule update --recursive --remote"
 ## Fun commit
 #alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
 ## Alternative (makes easier finding out which commits have no message)
-# yolo='git add -A; git commit -m "This is a placeholder"; git push'
-# alias yolo=$yolo
 alias gr="git_recurse"
 alias absolute_yolo="git_recurse -r yolo"
 # List files
@@ -195,6 +193,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     "$cleanup
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
+    yolo='git add -A; git commit -m "This is a placeholder"; git push'
     yolok="eval `ssh-agent -s`
     ssh-add -K ~/.ssh/imac; $yolo"
     alias yolok=$yolok
