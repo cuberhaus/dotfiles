@@ -12,7 +12,11 @@ function mac_key() {
 function git_recursive() {
     local cmd="$1"
     local depth="${2:-2}"
-    echo "depth: $depth"
+
+    local blue=$(tput setaf 4)
+    local normal=$(tput sgr0)
+
+    echo "${blue}depth: $depth ${normal}"
     # Find all directories containing a .git subdirectory, and loop over them
     find . -maxdepth "$depth" -type d -name .git -print0 2>/dev/null | while read -d $'\0' dir; do
         # Remove the .git subdirectory from the path
@@ -20,7 +24,7 @@ function git_recursive() {
 
         # Change into the directory and execute the specified command
         pushd "$dir" > /dev/null
-        printf "Executing \"%s\" in %s\n" "$cmd" "$dir"
+        printf "${blue}Executing \"%s\" in %s ${normal} \n" "$cmd" "$dir"
         eval "$cmd"
         popd > /dev/null
     done
