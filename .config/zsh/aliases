@@ -122,7 +122,8 @@ alias gsu="git submodule update --recursive --remote"
 ## Alternative (makes easier finding out which commits have no message)
 
 alias gr="git_recurse"
-alias yolor="git_recurse -c 'yolo'"
+yolor="git_recurse -c 'yolo' "
+alias yolor=$yolor
 alias pull="git_recurse -c 'git pull'"
 alias status="git_recurse -c 'git status'"
 
@@ -201,6 +202,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     yolok="eval `ssh-agent -s`
     ssh-add -K ~/.ssh/imac; $yolo"
     alias yolok=$yolok
+    alias yolor="$yolor -r -k"
 fi
 
 if [[ "$OSTYPE" == "linux"* ]]; then
