@@ -201,6 +201,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     yolok="eval `ssh-agent -s`
     ssh-add -K ~/.ssh/imac; $yolo"
     alias yolok=$yolok
+    alias yolor="git_recurse -k -r yolo"
 fi
 
 if [[ "$OSTYPE" == "linux"* ]]; then
