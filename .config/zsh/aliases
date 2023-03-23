@@ -138,7 +138,7 @@ else
 fi
 
 # Typos
-alias sl="ls"
+# alias sl="ls"
 # alias s="ls" # It types it everytime as it is shorter
 
 # Print each PATH entry on a separate line
