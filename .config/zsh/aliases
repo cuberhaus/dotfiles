@@ -122,9 +122,9 @@ alias gsu="git submodule update --recursive --remote"
 ## Alternative (makes easier finding out which commits have no message)
 
 alias gr="git_recurse"
-alias yolor="git_recurse -r yolo"
-alias pull="git_recurse git pull"
-alias status="git_recurse git status"
+alias yolor="git_recurse -c 'yolo'"
+alias pull="git_recurse -c 'git pull'"
+alias status="git_recurse -c 'git status'"
 
 # List files
 # using -a -a will show '.' and ".."

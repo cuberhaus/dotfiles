@@ -73,13 +73,11 @@ while getopts "hrc:kd:" options; do # Loop: Get the next option;
     esac
 done
 
-shift $((OPTIND-1))
-cmd="$@"
-
 if $flag1; then
     mac_key
 fi
 
+echo $cmd
 if [[ -z "$cmd" ]]; then
     echo "Error: -c flag is mandatory"
     exit 1
