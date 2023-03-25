@@ -125,7 +125,6 @@ alias gr="git_recurse"
 # yolor="git_recurse -c 'yolo' "
 # alias yolor=$yolor
 
-# yolo="git_recurse -c 'git add -A; git commit -m 'This is a placeholder'; git push' -d 1 "
 yolo="git_recurse -c \"git add -A; git commit -m 'This is a placeholder'; git push\" -d 1"
 alias yolo=$yolo
 # yolok="eval `ssh-agent -s`
