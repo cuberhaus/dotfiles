@@ -5,7 +5,7 @@
 DEFAULT_DEPTH=2
 
 function mac_key() {
-    eval `ssh-agent -s`
+    eval "$(ssh-agent -s)"
     ssh-add -K ~/.ssh/imac
 }
 
