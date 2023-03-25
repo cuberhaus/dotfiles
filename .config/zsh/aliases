@@ -122,8 +122,16 @@ alias gsu="git submodule update --recursive --remote"
 ## Alternative (makes easier finding out which commits have no message)
 
 alias gr="git_recurse"
-yolor="git_recurse -c 'yolo' "
-alias yolor=$yolor
+# yolor="git_recurse -c 'yolo' "
+# alias yolor=$yolor
+
+yolo="git_recurse -c 'git add -A; git commit -m 'This is a placeholder'; git push' -d 1 "
+alias yolo=$yolo
+# yolok="eval `ssh-agent -s`
+# ssh-add -K ~/.ssh/imac; $yolo"
+# alias yolok=$yolok
+# alias yolor="$yolor -r -k"
+
 alias pull="git_recurse -c 'git pull'"
 alias status="git_recurse -c 'git status'"
 
@@ -198,11 +206,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     "$cleanup
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
-    yolo='git add -A; git commit -m "This is a placeholder"; git push'
-    yolok="eval `ssh-agent -s`
-    ssh-add -K ~/.ssh/imac; $yolo"
-    alias yolok=$yolok
-    alias yolor="$yolor -r -k"
 fi
 
 if [[ "$OSTYPE" == "linux"* ]]; then

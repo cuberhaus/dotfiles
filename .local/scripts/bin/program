@@ -19,14 +19,14 @@ if [ "$#" -eq 2 ]; then
     MYPROG=$2
 fi
 
-echo $COMMAND
+echo "$COMMAND"
 
 sleep 0.5
 wmctrl -lx | awk '{print $3}' | grep -i "$MYPROG"
 
 if [ $? -eq 0 ]; then
     sleep 1         
-    wmctrl -xa $MYPROG
+    wmctrl -xa "$MYPROG"
    #as an alternative try the line bellow
    #wmctrl -a $MYPROG
     exit 1

@@ -23,10 +23,10 @@ function git_recursive() {
         dir=${dir%.git}
 
         # Change into the directory and execute the specified command
-        pushd "$dir" > /dev/null
+        pushd "$dir" > /dev/null || exit
         printf "${blue}Executing \"%s\" in %s ${normal} \n" "$cmd" "$dir"
         eval "$cmd"
-        popd > /dev/null
+        popd > /dev/null || exit
     done
 }
 
@@ -44,7 +44,6 @@ function exit_abnormal() { # Function: Exit with error.
 }
 
 flag1=false
-recursive=false
 depth=$DEFAULT_DEPTH
 
 #https://www.computerhope.com/unix/bash/getopts.htm
@@ -81,7 +80,7 @@ if $flag1; then
     mac_key
 fi
 
-echo $cmd
+echo "$cmd"
 if [[ -z "$cmd" ]]; then
     echo "Error: -c flag is mandatory"
     exit 1
