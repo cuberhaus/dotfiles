@@ -42,7 +42,7 @@ alias discord="discord --no-sandbox &"
 # xmonad can't find dependancies https://wiki.archlinux.org/title/Xmonad#Problems_with_finding_shared_libraries_after_update
 alias xmonad_fix="sudo ghc-pkg recache"
 # Recompile ycm (if autocompletion stops working execute this)
-alias ycminstall="python3 $HOME/.vim/plugged/YouCompleteMe/install.py"
+alias ycminstall='python3 $HOME/.vim/plugged/YouCompleteMe/install.py'
 # Rclone (be careful!) 
 # "rclone config" first, better to use copy instead of "rclone sync" so that I do not delete books on accident while pushing or pulling, it becomes a mess, since if I pull i will delete any extra books I have locally, and if I push I will delete the extra books I have remotely, overall, a fucking mess
 alias rclonepull_calibre="rclone -P copy drive:Calibre/Calibre\ Library ~/Calibre\ Library"
@@ -50,25 +50,25 @@ alias rclonepull_thunderbird="rclone -P copy drive:Thunderbird ~/.thunderbird"
 alias rclonepush_calibre="rclone -P copy ~/Calibre\ Library drive:Calibre/Calibre\ Library"
 alias rclonepush_thunderbird="rclone -P copy ~/.thunderbird drive:Thunderbird"
 
-alias colemak="$HOME/.local/scripts/BigBagKbdTrixXKB/setxkb.sh '5ca es ks'"
+alias colemak='$HOME/.local/scripts/BigBagKbdTrixXKB/setxkb.sh "5ca es ks"'
 # Config Files
-alias aliases="nvim $ZDOTDIR/aliases"
-alias arch="nvim $scripts/bootstrap/arch_functions"
-alias bashrc="nvim $HOME/.bashrc"
-alias dunstrc="nvim $HOME/.config/dunst/dunstrc"
-alias i3config="nvim $HOME/.config/i3/config"
-alias kitty.conf="nvim $HOME/.config/kitty/kitty.conf"
-alias mac="nvim $scripts/bootstrap/mac_functions"
-alias ubuntu="nvim $scripts/bootstrap/ubuntu_functions"
+alias aliases='nvim $ZDOTDIR/aliases'
+alias arch='nvim $scripts/bootstrap/arch_functions'
+alias bashrc='nvim $HOME/.bashrc'
+alias dunstrc='nvim $HOME/.config/dunst/dunstrc'
+alias i3config='nvim $HOME/.config/i3/config'
+alias kitty.conf='nvim $HOME/.config/kitty/kitty.conf'
+alias mac='nvim $scripts/bootstrap/mac_functions'
+alias ubuntu='nvim $scripts/bootstrap/ubuntu_functions'
 alias pacman.conf="sudo vim /etc/pacman.conf"
-alias tmux.conf="nvim $HOME/.config/tmux/tmux.conf"
-alias vimrc="nvim $HOME/.vim/vimrc"
-alias xinitrc="nvim $HOME/.xinitrc"
-alias xmonad.hs="nvim $HOME/.xmonad/xmonad.hs"
-alias xprofile="nvim $HOME/.xprofile"
-alias zprofile="nvim $ZDOTDIR/.zprofile"
-alias zshenv="nvim $HOME/.zshenv"
-alias zshrc="nvim $ZDOTDIR/.zshrc"
+alias tmux.conf='nvim $HOME/.config/tmux/tmux.conf'
+alias vimrc='nvim $HOME/.vim/vimrc'
+alias xinitrc='nvim $HOME/.xinitrc'
+alias xmonad.hs='nvim $HOME/.xmonad/xmonad.hs'
+alias xprofile='nvim $HOME/.xprofile'
+alias zprofile='nvim $ZDOTDIR/.zprofile'
+alias zshenv='nvim $HOME/.zshenv'
+alias zshrc='nvim $ZDOTDIR/.zshrc'
 #alias vconfgrub="sudo vim /boot/grub/grub.cfg"
 #alias vgrub="sudo vim /etc/default/grub"
 #alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
@@ -86,7 +86,7 @@ alias disableSleep="sudo systemctl mask sleep.target suspend.target hibernate.ta
 alias enableSleep="sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target"
 
 # Easier navigation: .., ..., ...., ....., ~ and -
-alias cr="cd $HOME/repos"
+alias cr='cd $HOME/repos'
 alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
@@ -123,7 +123,7 @@ alias gsu="git submodule update --recursive --remote"
 
 alias gr="git_recurse"
 yolo="git_recurse -c \"git add -A; git commit -m 'This is a placeholder'; git push\" -d 1"
-alias yolo=$yolo
+alias yolo="$yolo"
 
 alias pull="git_recurse -c 'git pull'"
 alias status="git_recurse -c 'git status'"
@@ -160,8 +160,8 @@ alias path='echo -e ${PATH//:/\\n}'
 alias userlist="cut -d: -f1 /etc/passwd"
 
 # Switch between bash and zsh
-alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
-alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"
+alias tobash='sudo chsh $USER -s /bin/bash && echo "Now log out."'
+alias tozsh='sudo chsh $USER -s /bin/zsh && echo "Now log out."'
 
 # Generalize commands
 cleanup="vim +PlugClean +qall;
@@ -253,15 +253,15 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         sudo apt-get autoremove; 
         brew cleanup; 
         "$cleanup
-        alias tmux="tmux -f $HOME/.config/tmux/tmux.conf"
+        alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
 fi
-alias cleanup=$cleanup
-alias updateall=$updateall
-alias update=$update
+alias cleanup='$cleanup'
+alias updateall='$updateall'
+alias update='$update'
 ###############################################################
 # => Clean home directory
 ###############################################################
 
-alias Xres="xrdb -load $HOME/.config/X11/xresources"
+alias Xres='xrdb -load $HOME/.config/X11/xresources'
 alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
