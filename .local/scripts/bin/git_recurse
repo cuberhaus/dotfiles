@@ -2,7 +2,7 @@
 # Author: Pol Casacuberta
 # Date: 19/3/2023
 
-DEFAULT_DEPTH=2
+DEFAULT_DEPTH=3
 
 function mac_key() {
     eval "$(ssh-agent -s)"
@@ -36,11 +36,10 @@ function git_recursive() {
 }
 
 usage() {
-    echo "Usage: $0 [-k] [-d <depth>] [-r] <cmd>"
+    echo "Usage: $0 [-k] [-d <depth>] [-c <cmd>]"
     echo "  -k              Add ssh key"
     echo "  -d <depth>      Specify the depth to search for git repositories (default: $DEFAULT_DEPTH)"
-    echo "  -r              Recursively search for Git repositories"
-    echo "  <cmd>           Command to execute in each Git repository found"
+    echo "  -c <cmd>           Command to execute in each Git repository found"
 }
 
 function exit_abnormal() { # Function: Exit with error.
@@ -58,9 +57,6 @@ while getopts "hrc:kd:" options; do # Loop: Get the next option;
     h)
         usage
         exit 0
-        ;;
-    r)
-        depth=3
         ;;
     k)                   # If the option is n,
         flag1=true
