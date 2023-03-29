@@ -179,24 +179,11 @@ updateall="python3 -m pip install --user --upgrade pynvim &;
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
-    updateall="sudo softwareupdate -i -a; 
-    xcode-select --install; 
-    brew update; 
-    brew upgrade; 
-    brew update --cask; 
-    npm install npm -g; 
-    "$updateall
-    update="sudo softwareupdate -i -a;
-    xcode-select --install; 
-    brew update; 
-    brew upgrade; 
-    brew update --cask; 
-    "$update
+    updateall="sudo softwareupdate -i -a; xcode-select --install; brew update; brew upgrade; brew update --cask;  npm install npm -g; "$updateall
+    update="sudo softwareupdate -i -a; xcode-select --install; brew update; brew upgrade; brew update --cask; "$update
     # sudo xcode-select -switch /Library/Developer/CommandLineTools
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
-    cleanup="brew cleanup;
-    sudo gem cleanup;
-    "$cleanup
+    cleanup="brew cleanup;sudo gem cleanup;"$cleanup
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete"
 fi
@@ -214,11 +201,8 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        update="sudo pacman -Syu;
-        "$update
-        updateall="yay -Syu;
-        npm update &;
-        "$updateall
+        update="sudo pacman -Syu;"$update
+        updateall="yay -Syu;npm update &;"$updateall
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         cleanup="yay -Sc;"$cleanup
@@ -240,9 +224,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
-        update="sudo apt-get update; 
-        sudo apt-get full-upgrade; 
-        "$update
+        update="sudo apt-get update; sudo apt-get full-upgrade; "$update
         # brew update; 
         # brew upgrade;
 
@@ -256,9 +238,11 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
 fi
-alias cleanup='$cleanup'
-alias updateall='$updateall'
-alias update='$update'
+
+# Do not surround with quotes
+alias cleanup=$cleanup
+alias updateall=$updateall
+alias update=$update
 ###############################################################
 # => Clean home directory
 ###############################################################
