@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
 
+#/etc/timeshift-autosnap.conf 
+
 #https://raymondjdouglas.com/blog/2019/airpods-on-arch/
 #Chrome disable this:
 #chrome://flags/#global-media-controls-modern-ui
