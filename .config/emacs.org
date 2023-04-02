@@ -99,6 +99,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
     (setq config-dir (concat  home-dir "/.config"))
     (setq cache-dir (concat home-dir "/.cache"))
     (setq org-dir-string "/org")
+    (setq org-dir (concat docs-dir org-dir-string))
     (cond ((eq system-type 'windows-nt)
            (setq unix-dotfiles-dir (concat home-dir "/repos/dotfiles"))
            (setq windows-dotfiles-dir (concat home-dir "/.local/share/chezmoi/home/"))
@@ -119,12 +120,12 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
     ;; Paths that are used in the code
     (setq user-emacs-dir (concat cache-dir "/emacs/"))
     (setq desktop-dir (concat home-dir "/.emacs.d/"))
-    (setq org-roam-dir (concat docs-dir org-dir-string "/roam"))
-    (setq journal-dir (concat docs-dir org-dir-string "/Journal.org"))
-    (setq tasks-dir (concat docs-dir org-dir-string "/Tasks.org"))
-    (setq metrics-dir (concat docs-dir org-dir-string "/Metrics.org"))
-    (setq habits-dir (concat docs-dir org-dir-string "/Habits.org"))
-    (setq birthday-dir (concat docs-dir org-dir-string "/birthday.org"))
+    (setq org-roam-dir (concat org-dir "/roam"))
+    (setq journal-dir (concat org-dir "/Journal.org"))
+    (setq tasks-dir (concat org-dir "/Tasks.org"))
+    (setq metrics-dir (concat org-dir "/Metrics.org"))
+    (setq habits-dir (concat org-dir "/Habits.org"))
+    (setq birthday-dir (concat org-dir "/birthday.org"))
     (setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
     (setq spell-fu-dir (concat config-dir "/spell_fu"))
     (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
@@ -135,14 +136,14 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 *** Customize System to different file
 #+begin_src emacs-lisp
     (setq source-file  (concat unix-dotfiles-dir "/.config/emacs.org"))
-    (setq target2-file (concat windows-dotfiles-dir "/dot_emacs.d/init.el"))
+    (setq target2-file (concat windows-dotfiles-dir ".config/my_emacs/init.el"))
     (setq target1-file (concat unix-dotfiles-dir "/.config/my_emacs/init.el"))
     (setq emacs-babel-config-file (concat unix-dotfiles-dir "/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
 
     (cond ((eq system-type 'windows-nt)
            ;; Windows-specific code goes here.
           ;; (setq custom-file custom-file-windows)
-           (setq custom-file (concat home-dir "/.emacs.d/custom.el"))
+           (setq custom-file (concat config-dir "/my_emacs/custom.el"))
            )
           ;; Mac-specific code goes here.
           ((eq system-type 'darwin)
