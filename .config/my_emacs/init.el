@@ -48,7 +48,7 @@
 (setq doom-snippets-dir (concat config-dir "/snippets"))
 
 (setq source-file  (concat unix-dotfiles-dir "/.config/emacs.org"))
-(setq target2-file (concat windows-dotfiles-dir ".config/my_emacs/init.el"))
+(setq target2-file (concat windows-dotfiles-dir "/dot_config/my_emacs/init.el"))
 (setq target1-file (concat unix-dotfiles-dir "/.config/my_emacs/init.el"))
 (setq emacs-babel-config-file (concat unix-dotfiles-dir "/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
 
