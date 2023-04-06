@@ -18,6 +18,32 @@
                 },
                 "rules": [
                     {
+                        "description": "Caps Lock to Escape on single press, Caps Lock on press and hold.",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "caps_lock",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "escape"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "caps_lock"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "Printscreen key to whole capture (command+shift+3)",
                         "manipulators": [
                             {
@@ -518,26 +544,6 @@
                     "to": [
                         {
                             "consumer_key_code": "fast_forward"
-                        }
-                    ]
-                },
-                {
-                    "from": {
-                        "key_code": "escape"
-                    },
-                    "to": [
-                        {
-                            "key_code": "caps_lock"
-                        }
-                    ]
-                },
-                {
-                    "from": {
-                        "key_code": "caps_lock"
-                    },
-                    "to": [
-                        {
-                            "key_code": "escape"
                         }
                     ]
                 }
