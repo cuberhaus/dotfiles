@@ -497,7 +497,7 @@
                     },
                     "to": [
                         {
-                            "consumer_key_code": "al_local_machine_browser"
+                            "consumer_key_code": "al_spreadsheet"
                         }
                     ]
                 },
@@ -517,7 +517,7 @@
                     },
                     "to": [
                         {
-                            "consumer_key_code": "rewind"
+                            "consumer_key_code": "al_text_editor"
                         }
                     ]
                 },
@@ -527,7 +527,7 @@
                     },
                     "to": [
                         {
-                            "consumer_key_code": "play_or_pause"
+                            "consumer_key_code": "al_presentation_app"
                         }
                     ]
                 },
@@ -538,6 +538,16 @@
                     "to": [
                         {
                             "key_code": "escape"
+                        }
+                    ]
+                },
+                {
+                    "from": {
+                        "key_code": "f21"
+                    },
+                    "to": [
+                        {
+                            "consumer_key_code": "al_word_processor"
                         }
                     ]
                 }
