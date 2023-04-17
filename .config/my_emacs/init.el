@@ -583,7 +583,7 @@
       "o" '(:ignore o :which-key "open") 
       "ot" '(vterm-toggle :which-key "Toggle vterm")
       "od" '(vterm-toggle-cd :which-key "Toggle vterm on current folder")
-      "o-" '(dired-jump :which-key "Toggle vterm")
+      "o-" '(dired-jump :which-key "Dired jump")
       "X" '(org-capture :which-key "Org-capture") ;; this is F*** awesome
       "c" '(:ignore c :which-key "code") 
       "cf" '(format-all-buffer :which-key "code") 
