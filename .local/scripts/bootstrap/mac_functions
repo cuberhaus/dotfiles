@@ -69,11 +69,9 @@ mac_install () {
     brew install discord                        # Group calls
     brew install google-chrome                  # Web browser
     brew install karabiner-elements             # Swap Esc with Caps_lock
-    brew install kdiff3                         # Git mergetool  
     brew install kitty                          # Best terminal
     brew install mactex                         # LaTex compiler
     brew install rectangle                      # Tiler
-    brew install skype                          # Videocalls
     brew install spotify                        # Music player
     brew install sublime-text                   # Fastest editor
     brew install telegram                       # Quickly transfer files
@@ -88,37 +86,43 @@ mac_install () {
 
 optional () {
     # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/brew.html
-    brew tap elastic/tap
-    brew install elastic/tap/elasticsearch-full
-    pip3 install --user elasticsearch_dsl        # APA
-    pip3 install --user elasticsearch_dsl        # APA
-    # pip install --user elasticsearch            # APA
-    # pip install --user elasticsearch            # APA
-    brew install xquartz                        # PAR
-    brew install jupyter                        # jupyter notebooks
     brew install adobe-acrobat-reader           # Pdf reader
-    brew install dbeaver-community adoptopenjdk       # BD
-    brew install eclipse-java                   # Java IDE
-    brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
-    brew install glfw                           # OpenGL
     brew install graphviz
     brew install intellij-idea                  # Paid, better java SQL IDE
     brew install intellij-idea-ce               # Free version
     brew install iterm2                         # Terminal emulator
+    brew install jupyter                        # jupyter notebooks
     brew install keka                           # Archiver open source
     brew install meld                           # Diff software
     brew install obs                            # Screen recorder //very complicated on mac
-    brew install qbittorrent                    # Torrent client  
     brew install qt5                            # Qt stuff
     brew install qtcreator                      # Qt IDE
     brew install r                              # Probabilitat i estadística
     brew install rstudio                        # Probabilitat i estadística IDE
     brew install slack                          # Work
-    brew install swi-prolog
     brew install tor-browser                    # Private and uncensored browsing
     brew install unetbootin                     # Burn iso's (or use dd command)
-    brew install ghc                            # haskell compiler and ghci interpreter
+    brew install xquartz                        # PAR use GUI through SSH
+}
+
+garbage() {
+    brew tap elastic/tap
+    brew install elastic/tap/elasticsearch-full
+
+    pip3 install --user elasticsearch_dsl        # APA
+    pip3 install --user elasticsearch_dsl        # APA
+    # pip install --user elasticsearch            # APA
+    # pip install --user elasticsearch            # APA
     brew install --cask microsoft-edge
+    brew install dbeaver-community adoptopenjdk       # BD
+    brew install eclipse-java                   # Java IDE
+    brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
+    brew install ghc                            # haskell compiler and ghci interpreter
+    brew install glfw                           # OpenGL
+    brew install qbittorrent                    # Torrent client  
+    brew install skype                          # Videocalls
+    brew install swi-prolog
+    brew install kdiff3                         # Git mergetool  
 }
 
 vim_install () {
