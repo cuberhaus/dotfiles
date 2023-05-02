@@ -325,7 +325,6 @@ bindsym $mod+w exec program whatsapp-nativefier, [class="whatsapp-nativefier-d40
 bindsym $mod+Shift+c exec program speedcrunch, [class="SpeedCrunch"] scratchpad show
 bindsym $mod+t exec --no-startup-id program "kitty --class='kittyPad'" kittyPad, [class="kittyPad"] scratchpad show
 
-
 # Rstudio creates multiple instances
 # bindsym $mod+Shift+p exec $HOME/.local/bin/program rstudio-bin, [class="RStudio"] scratchpad show
 # for_window [class="RStudio"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
@@ -345,7 +344,6 @@ for_window [class="thunderbird"] floating enable, move scratchpad, resize set 90
 # regex matches anything that ends in Mozilla Thunderbird
 for_window [title="^(.*?)\Mozilla Thunderbird"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 for_window [class="Spotify"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
-# for_window [class="whatsapp-nativefier-d40211"] floating enable, move scratchpad, resize set 70 ppt 70 ppt, move absolute position center
 
 #}}}
 # Theme {{{
