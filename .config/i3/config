@@ -321,7 +321,7 @@ bindsym $mod+Shift+0 move container to workspace $ws10
 bindsym $mod+d exec $HOME/.local/bin/program discord , [class="discord"] scratchpad show
 bindsym $mod+m exec $HOME/.local/bin/program thunderbird ,  [class="Thunderbird"] scratchpad show
 bindsym $mod+s exec $HOME/.local/bin/program spotify , [class="Spotify"] scratchpad show
-# bindsym $mod+w exec $HOME/.local/bin/program whatsapp-nativefier, [class="whatsapp-nativefier-d40211"] scratchpad show
+bindsym $mod+w exec $HOME/.local/bin/program whatsapp-nativefier, [class="whatsapp-nativefier-d40211"] scratchpad show
 bindsym $mod+Shift+c exec $HOME/.local/bin/program speedcrunch, [class="SpeedCrunch"] scratchpad show
 bindsym $mod+t exec --no-startup-id $HOME/.local/bin/program "kitty --class='kittyPad'" kittyPad, [class="kittyPad"] scratchpad show
 for_window [class="kittyPad"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
