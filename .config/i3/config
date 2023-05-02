@@ -324,7 +324,6 @@ bindsym $mod+s exec program spotify , [class="Spotify"] scratchpad show
 bindsym $mod+w exec program whatsapp-nativefier, [class="whatsapp-nativefier-d40211"] scratchpad show
 bindsym $mod+Shift+c exec program speedcrunch, [class="SpeedCrunch"] scratchpad show
 bindsym $mod+t exec --no-startup-id program "kitty --class='kittyPad'" kittyPad, [class="kittyPad"] scratchpad show
-for_window [class="kittyPad"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
 
 
 # Rstudio creates multiple instances
@@ -337,11 +336,12 @@ for_window [class="kittyPad"] floating enable, move scratchpad, resize set 50 pp
 
 # for_window [class="pythonCalc"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
 # for_window [class="Sublime_text"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
+for_window [class="kittyPad"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
 for_window [class="whatsapp-nativefier-d40211"]  floating enable, move scratchpad, resize set 70 ppt 70 ppt, move absolute position center
 for_window [class="SpeedCrunch"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
 for_window [class="discord"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 # for_window [title="New Event:"] floating enable
-for_window [class="thunderbird"] floating enable
+for_window [class="thunderbird"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 # regex matches anything that ends in Mozilla Thunderbird
 for_window [title="^(.*?)\Mozilla Thunderbird"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 for_window [class="Spotify"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
