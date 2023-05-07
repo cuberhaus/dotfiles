@@ -261,7 +261,7 @@ scratchpads =
     NS "WhatsApp" whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "SpeedCrunch" speedCrunchCommand isSpeedCrunch (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "Kitty" kittyCommand isKitty (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
-    NS "ChatGPT" chatGPTCommand isChatGPT (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
+    NS "ChatGPT" chatGPTCommand isChatGPT (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8)),
     NS "Thunderbird" thunderbirdCommand isThunderbird (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8)),
     NS "Discord" discordCommand isDiscord (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8))
   ]
