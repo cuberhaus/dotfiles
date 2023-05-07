@@ -29,7 +29,7 @@
  (position . 58226))
 ("org-capture-last-stored"
  (filename . "~/repos/docs/org/Journal.org")
- (front-context-string . "**** 11:50 AM - ")
- (rear-context-string . "04-29 Saturday\n\n")
- (position . 60909))
+ (front-context-string . "**** 05:16 pm - ")
+ (rear-context-string . "3-05-07 Sunday\n\n")
+ (position . 62983))
 )
