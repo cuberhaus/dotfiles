@@ -250,7 +250,6 @@ scratchpads =
   [ 
     NS "calculator" calculatorCommand isCalculator (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "Emacs" emacsCommand isEmacs (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (5 / 6)),
-
     NS "Spotify" spotifyMusicCommand isSpotifyMusic (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8)),
     -- NS "Spotify" cavaCommand isCava (customFloating $ W.RationalRect (1 / 12) (1 / 12) (5 / 6) (1 / 24)),
     NS "WhatsApp" whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
@@ -263,7 +262,6 @@ scratchpads =
 myWorkspaces :: [String]
 myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  ", "  0  "]
 
--- myWorkspaces = [" dev ", " www ", " spotify ", " chat ", " mail ", " doc ", " vbox ", " vid ", " game "]
 myWorkspaceIndices :: M.Map String Integer
 myWorkspaceIndices = M.fromList $ zip myWorkspaces [1 ..] -- zipWith (,) == \x y -> (x,y)
 
