@@ -215,6 +215,12 @@ discordCommand = "discord"
 isDiscord :: Query Bool
 isDiscord = className =? "discord"
 
+chatGPTCommand :: String
+chatGPTCommand = "chat-gpt"
+
+isChatGPT :: Query Bool
+isChatGPT = className =? "Chat-gpt"
+
 speedCrunchCommand :: String
 speedCrunchCommand =  "speedcrunch"
 
@@ -255,6 +261,7 @@ scratchpads =
     NS "WhatsApp" whatsappCommand isWhatsapp (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "SpeedCrunch" speedCrunchCommand isSpeedCrunch (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "Kitty" kittyCommand isKitty (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
+    NS "ChatGPT" chatGPTCommand isChatGPT (customFloating $ W.RationalRect (1 / 6) (1 / 6) (4 / 6) (4 / 6)),
     NS "Thunderbird" thunderbirdCommand isThunderbird (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8)),
     NS "Discord" discordCommand isDiscord (customFloating $ W.RationalRect (1 / 16) (1 / 16) (7 / 8) (7 / 8))
   ]
@@ -493,6 +500,7 @@ myEventHook =
   -- ewmhDesktopsEventHook
     dynamicPropertyChange "WM_NAME" (title =? "Spotify" --> floating)
     <+> dynamicPropertyChange "WM_NAME" (title =? "whatsapp-nativefier-d40211" --> floating2)
+    <+> dynamicPropertyChange "WM_NAME" (title =? "chat-gpt" --> floating2)
     <+> dynamicPropertyChange "WM_NAME" (title =? "discord" --> floating)
     <+> dynamicPropertyChange "WM_NAME" (title =? "EmacsScratch" --> floating)
     <+> dynamicPropertyChange "WM_NAME" (title =? "Kalk" --> floating2)
@@ -630,6 +638,7 @@ myEmacsKeys =
     ("M-,", onGroup W.focusDown'), -- Switch focus to prev tab
     ("M-s", allNamedScratchpadAction scratchpads "Spotify"),
     ("M-w", namedScratchpadAction scratchpads "WhatsApp"),
+    ("M-g", namedScratchpadAction scratchpads "ChatGPT"),
     ("M-d", namedScratchpadAction scratchpads "Discord"),
     ("M-m", namedScratchpadAction scratchpads "Thunderbird"),
     ("M-c", namedScratchpadAction scratchpads "SpeedCrunch"),
