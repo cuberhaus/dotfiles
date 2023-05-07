@@ -1,4 +1,5 @@
 Config {
+        -- The follwing line stopped working for some reason at some point
         -- font = "xft:Verdana:weight=regular:pixelsize=12:antialias=true:hinting=true"
         font = "Ubuntu Bold 10"
         , additionalFonts = [ "xft:Mononoki Nerd Font:pixelsize=11:antialias=true:hinting=true"
