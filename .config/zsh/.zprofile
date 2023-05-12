@@ -3,6 +3,9 @@
     # [[ -f ~/.config/zsh/.zshrc ]] && . ~/.config/zsh/.zshrc
 # fi
 
+# Activating numlock on startup
+setleds -D +num
+
 if [[ "$DISTRO" == "ubuntu" ]]; then
     setxkbmap -option caps:swapescape
 fi
