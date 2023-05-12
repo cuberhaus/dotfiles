@@ -125,4 +125,6 @@ bindkey '^e' edit-command-line
 bindkey -s '^f' 'cd "$(dirname "$(fzf)")"\n'
 # Accept suggestion ctrl+space
 bindkey '^ ' autosuggest-accept
+# Activating numlock on startup
+# setleds -D +num
 #}}}

@@ -404,6 +404,7 @@ bindsym $mod+Pause mode "$mode_system"
 
 ### REMINDER: always start applications in background to start programs simultaneously otherwise they wait until the last program opens, which is noticeably slower (Add '&' at the end)
 
+exec numlockx &
 # xss-lock displays betterlockscreen when lid is closed
 exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &
 exec betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &
