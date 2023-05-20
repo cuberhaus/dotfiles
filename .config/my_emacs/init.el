@@ -834,7 +834,7 @@ _h_ decrease width    _l_ increase width
   (variable-pitch-mode 1) ;; allows text to be of variable size
   (visual-line-mode 1) ;; makes emacs editing commands act on visual lines not logical ones, also word-wrapping, idk if i want this
   )
-
+ (setq org-hide-block-startup t)
 (use-package org  ;; org is already installed though
   :commands (org-capture org-agenda)
   :hook (org-mode . efs/org-mode-setup)
@@ -859,7 +859,7 @@ _h_ decrease width    _l_ increase width
         org-fontify-quote-and-verse-blocks t
         org-src-tab-acts-natively t
         org-edit-src-content-indentation 4
-        org-hide-block-startup nil
+        org-hide-block-startup t
         org-src-preserve-indentation nil
         org-startup-folded 'content
         org-cycle-separator-lines 2
