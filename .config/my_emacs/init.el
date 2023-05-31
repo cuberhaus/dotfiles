@@ -20,11 +20,11 @@
        )
       ((eq system-type 'darwin)
        (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
-       (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
+       (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles/home"))
        )
       ((eq system-type 'gnu/linux)
        (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
-       (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
+       (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles/home"))
       )
       )
 

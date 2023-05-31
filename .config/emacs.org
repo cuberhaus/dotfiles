@@ -106,13 +106,14 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
            )
           ((eq system-type 'darwin)
            (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
-           (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
+           (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles/home"))
            )
           ((eq system-type 'gnu/linux)
            (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
-           (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles"))
+           (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles/home"))
           )
           )
+
 
     (setq default-directory (concat home-dir "/")) ;; Search default directory
     (setq bookmark-default-file (concat home-dir "/.emacs.d/bookmark-default.el")) ;; Search default directory
@@ -121,7 +122,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
     (setq user-emacs-dir (concat cache-dir "/emacs/"))
     (setq desktop-dir (concat home-dir "/.emacs.d/"))
     (setq org-roam-dir (concat org-dir "/roam"))
-    (setq journal-dir (concat org-dir "/Journal.org"))
+    (setq journal-dir (concat org-dir "/Journal.org.gpg"))
     (setq tasks-dir (concat org-dir "/Tasks.org"))
     (setq metrics-dir (concat org-dir "/Metrics.org"))
     (setq habits-dir (concat org-dir "/Habits.org"))
@@ -135,6 +136,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 #+end_src
 *** Customize System to different file
 #+begin_src emacs-lisp
+
     (setq source-file  (concat unix-dotfiles-dir "/.config/emacs.org"))
     (setq target2-file (concat windows-dotfiles-dir "/dot_config/my_emacs/init.el"))
     (setq target1-file (concat unix-dotfiles-dir "/.config/my_emacs/init.el"))
