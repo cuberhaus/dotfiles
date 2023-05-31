@@ -28,6 +28,7 @@
       )
       )
 
+
 (setq default-directory (concat home-dir "/")) ;; Search default directory
 (setq bookmark-default-file (concat home-dir "/.emacs.d/bookmark-default.el")) ;; Search default directory
 
@@ -35,7 +36,7 @@
 (setq user-emacs-dir (concat cache-dir "/emacs/"))
 (setq desktop-dir (concat home-dir "/.emacs.d/"))
 (setq org-roam-dir (concat org-dir "/roam"))
-(setq journal-dir (concat org-dir "/Journal.org"))
+(setq journal-dir (concat org-dir "/Journal.org.gpg"))
 (setq tasks-dir (concat org-dir "/Tasks.org"))
 (setq metrics-dir (concat org-dir "/Metrics.org"))
 (setq habits-dir (concat org-dir "/Habits.org"))

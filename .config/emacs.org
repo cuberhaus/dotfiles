@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:emacs-lisp :tangle "~/repos/dotfiles/.config/my_emacs/init.el"  :mkdirp yes
+#+PROPERTY: header-args:emacs-lisp :tangle "~/dotfiles/dotfiles/.config/my_emacs/init.el"  :mkdirp yes
 #+title Emacs!
 #+STARTUP: overview
 IN ORDER TO CHANGE WHO EDITS THIS, WINDOWS OR UNIX YOU NEED TO CHANGE THE TANGLE DIRECTORY ABOVE
@@ -148,6 +148,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
 #+end_src
 
 #+begin_src emacs-lisp
+
     (defun my/org-tangle-to-multiple-targets ()
       "Tangle the source file to two target files."
       (interactive)
