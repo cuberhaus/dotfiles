@@ -36,7 +36,7 @@
 (setq user-emacs-dir (concat cache-dir "/emacs/"))
 (setq desktop-dir (concat home-dir "/.emacs.d/"))
 (setq org-roam-dir (concat org-dir "/roam"))
-(setq journal-dir (concat org-dir "/Journal.org.gpg"))
+(setq journal-dir (concat org-dir "/Journal.org"))
 (setq tasks-dir (concat org-dir "/Tasks.org"))
 (setq metrics-dir (concat org-dir "/Metrics.org"))
 (setq habits-dir (concat org-dir "/Habits.org"))
