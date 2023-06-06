@@ -294,6 +294,8 @@ vim_install () {
 
 # Best Tiling Window Manager
 i3_install () {
+    sudo usermod -a -G video pol                # Needed for light
+
     # AUR
     $yay cava                                   # https://github.com/karlstav/cava
     $yay kbdd-git                               # i3blocks keyboard layout
@@ -307,7 +309,6 @@ i3_install () {
     $pac i3-gaps                                # i3 with gaps
     $pac i3blocks                               # Bottom bar
     $pac light                                  # Brightness
-    sudo usermod -a -G video pol                # Needed for light
     $pac perl-anyevent-i3 python-dbus
     $pac picom                                  # Compositor, for transparencies
     # $pac pulseaudio alsa-utils                  # Audio
