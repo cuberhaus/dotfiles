@@ -115,7 +115,7 @@ garbage() {
     # pip install --user elasticsearch            # APA
     brew install --cask microsoft-edge
     brew install dbeaver-community adoptopenjdk       # BD
-    brew install eclipse-java                   # Java IDE
+    brew install --cask eclipse-java                   # Java IDE
     brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
     brew install ghc                            # haskell compiler and ghci interpreter
     brew install glfw                           # OpenGL
