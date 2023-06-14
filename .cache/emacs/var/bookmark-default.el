@@ -28,8 +28,8 @@
  (rear-context-string . "9] =>  0:00\n:END")
  (position . 58226))
 ("org-capture-last-stored"
- (filename . "~/repos/docs/org/Journal.org.gpg")
- (front-context-string . "**** 11:18 PM - ")
- (rear-context-string . "in my own head\n\n")
- (position . 70742))
+ (filename . "~/repos/docs/org/Journal.org")
+ (front-context-string . "**** 09:45 AM - ")
+ (rear-context-string . " on a bike :D.\n\n")
+ (position . 77382))
 )
