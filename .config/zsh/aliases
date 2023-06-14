@@ -179,8 +179,8 @@ updateall="python3 -m pip install --user --upgrade pynvim &;
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
-    updateall="sudo softwareupdate -i -a; xcode-select --install; brew update; brew upgrade; brew update --cask;  npm install npm -g; "$updateall
     update="sudo softwareupdate -i -a; xcode-select --install; brew update; brew upgrade; brew update --cask; "$update
+    updateall=$update"npm install npm -g; "$updateall
     # sudo xcode-select -switch /Library/Developer/CommandLineTools
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     cleanup="brew cleanup;sudo gem cleanup;"$cleanup
