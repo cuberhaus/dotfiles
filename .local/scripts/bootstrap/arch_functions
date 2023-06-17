@@ -117,6 +117,7 @@ base_install () {
     $pac tumbler ffmpegthumbnailer raw-thumbnailer        # IDK
     $pac udftools                               # Manage partitions
     $pac udiskie                                # Automater
+    $pac dolphin
     $pac udisks2                                # Daemon to manipulate storage devices
     $pac vlc                                    # Video player
     $pac w3m                                    # Preview images on ranger

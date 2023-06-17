@@ -108,7 +108,7 @@ whatsapp :: String
 whatsapp = "whatsapp-nativefier"
 
 explorer :: String
-explorer = "nemo"
+explorer = "dolphin"
 
 -- Brightness
 brightUp :: String
