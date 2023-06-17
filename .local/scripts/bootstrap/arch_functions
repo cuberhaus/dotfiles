@@ -163,6 +163,8 @@ base_install () {
     $yay whatsapp-nativefier                    # Whatsapp client
     $yay obsidian                               # Markdown editor
 
+    git config --global credential.helper store # stores password on pc (security hazzard)
+
     #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
     #https://wiki.archlinux.org/index.php/qt
 
@@ -170,6 +172,16 @@ base_install () {
     # Nemo "best filemanager"
     gsettings set org.cinnamon.desktop.default-applications.terminal exec $myTerminal # Tell Nemo to use Termite instead of gnome-terminal
     # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x
+}
+
+git_repos() {
+    mkdir $HOME/repos/
+    cd repos/
+    git clone https://github.com/cuberhaus/WinDotfiles.git
+    git clone https://github.com/cuberhaus/docs.git
+    git clone https://github.com/cuberhaus/dev.git
+    git clone https://github.com/cuberhaus/TFG.git
+    git clone https://github.com/cuberhaus/fib.git
 }
 
 arch_install() {
