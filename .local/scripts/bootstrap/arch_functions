@@ -11,12 +11,6 @@
 #npm by default is system-wide unless using npm_config_prefix then npm install packageName will install package in user
 ### VARIABLES
 
-# /etc/fstab
-# "
-# # pol_drive (dev/sda)
-# UUID=7ABE-E459  /run/media/
-# "
-
 scripts=$HOME/.local/scripts
 flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
