@@ -255,13 +255,14 @@ arch_and_manjaro() {
     # usershare owner only = yes
 }
 
-manjaro() {
+manjaro_install() {
     sudo timedatectl set-ntp true # eduroam doesn't work without this
     $pac manjaro-pipewire # $pac wireplumber
     # Make airpods work
     sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
 }
 
+# Call from base_install
 yay_install() {
     cd $HOME/
     git clone https://aur.archlinux.org/yay.git
@@ -513,37 +514,39 @@ optional() {
     $pac texstudio                              # Latex text editor
     $pac texlive-most                           #latex
     $pac tor; $yay tor-browser
-    $yay skypeforlinux-stable-bin               # Skype
     $yay slack-desktop                          # Slack
-    $yay youtube-dl                             # Download youtube videos
+    # $yay skypeforlinux-stable-bin               # Skype
     # $yay conky-cairo-no-nvidia                  # fix lua
     # $yay conky-manager2-git
     # $yay electron9-bin # idk what this does
 
     # Programming tools
-    $pac ff-planner # IA 3a practica (ff-planner -o definicion_dominio -f fichero_problema)
-    $yay ddd                          # debugging c++
-    $pac doxygen texlive-most graphviz          # Doxygen
+    # $pac cabal-install                          # Haskell build tools to compile haskell programs
+    # $pac doxygen texlive-most graphviz          # Doxygen
+    # $pac ff-planner # IA 3a practica (ff-planner -o definicion_dominio -f fichero_problema)
+    # $pac ghc                                    # Haskell compiler
+    # $pac haskell-language-server                # Haskell It provides IDE-like features such as code completion, “goto definition”, documentation on hover, linting, formatting or refactoring for any editor integrating with the LSP.It provides IDE-like features such as code completion, “goto definition”, documentation on hover, linting, formatting or refactoring for any editor integrating with the LSP.
+    # $pac hlint                                  # Haskell linter
+    # $pac protege # IA https://protege.stanford.edu/products.php better to download zip
+    # $pac qtcreator glm qt5-tools qt5-webkit     # OpenGL, QT, C++
+
     $pac jdk-openjdk # elasticsearch needs one of this idk which one
     $pac jdk11-openjdk
     $pac jdk17-openjdk
     $pac jdk8-openjdk
-    $pac protege # IA https://protege.stanford.edu/products.php better to download zip
-    $pac qtcreator glm qt5-tools qt5-webkit     # OpenGL, QT, C++
     $pac r                                      # Probabilitat i estadística
-    $pac ghc                                    # Haskell compiler
-    $pac cabal-install                          # Haskell build tools to compile haskell programs
-    $pac hlint                                  # Haskell linter
-    $pac haskell-language-server                # Haskell It provides IDE-like features such as code completion, “goto definition”, documentation on hover, linting, formatting or refactoring for any editor integrating with the LSP.It provides IDE-like features such as code completion, “goto definition”, documentation on hover, linting, formatting or refactoring for any editor integrating with the LSP.
-    $yay android-studio                         # Android Studio
+
+    # $yay android-studio                         # Android Studio
+    # $yay clips # IA SBC
+    # $yay ddd                          # debugging c++
+    # $yay swi-prolog-devel                       # Prolog programming language
+    # $yay visual-paradigm-community              # IES, PROP
+
     $yay clion clion-jre                        # C++ IDE
-    $yay clips # IA SBC
     $yay intellij-idea-ultimate-edition         # BD paid IntelliJ
     $yay intellij-idea-ultimate-edition-jre     # Best java IDE
     $yay pycharm-professional                   # One of the best python IDE besides vscode
     $yay rstudio-desktop-bin                    # Probabilitat i estadística IDE
-    $yay swi-prolog-devel                       # Prolog programming language
-    $yay visual-paradigm-community              # IES, PROP
 
     curl -O https://download.sublimetext.com/sublimehq-pub.gpg && sudo pacman-key --add sublimehq-pub.gpg && sudo pacman-key --lsign-key 8A8F901A && rm sublimehq-pub.gpg
 
@@ -554,20 +557,22 @@ optional() {
 
     #LP compiladors
     #https://wiki.archlinux.org/title/Timidity++#SoundFonts
-    $pac lilypond timidity ffmpeg
-    $pac freepats-general-midi # for timidity need to download a soundfont
-    sudo gpasswd -a pol audio
-    sudo echo "soundfont /usr/share/soundfonts/freepats-general-midi.sf2" >> /etc/timidity/timidity.cfg
+    # $pac lilypond timidity ffmpeg
+    # $pac freepats-general-midi # for timidity need to download a soundfont
+    # sudo gpasswd -a pol audio
+    # sudo echo "soundfont /usr/share/soundfonts/freepats-general-midi.sf2" >> /etc/timidity/timidity.cfg
 
-    sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
-    $pac install antlr4-python3-runtime
+    # sudo sed -i "s/#ControllerMode = dual/ControllerMode = bredr/" /etc/bluetooth/main.conf
+    # $pac install antlr4-python3-runtime
 
     # mathlab
-    $pac libxcrypt-compat
+    # $pac libxcrypt-compat
+
     #Fix installation: https://wiki.archlinux.org/title/MATLAB#Unable_to_launch_the_MATLABWindow_application
 
     # PAR
-    $yay xfig
+    # $yay xfig
+
     # pass files to boada https://forum.manjaro.org/t/scp-connection-closed/112991/10
     # scp -O par2107@boada.ac.upc.edu:lab1/arch/map-boada-11.fig .
     #ssh -X par2107@boada.ac.upc.edu
@@ -579,18 +584,19 @@ optional() {
     $pac jupyter-notebook
 
     #CAIM 
-    $yay elasticsearch
-    sudo elasticsearch-keystore create
-    # sudo systemctl start elasticsearch.service # to initialize
-    $pip elasticsearch
-    $pip elasticsearch_dsl
+    # $yay elasticsearch
+    # sudo elasticsearch-keystore create
+    # $pip elasticsearch
+    # $pip elasticsearch_dsl
+    # to initialize:
+    # sudo systemctl start elasticsearch.service 
 
     # Bibliografia
     $yay zotero
 
     # Bases de dades
     $pac pgadmin4
-    $pac dbeaver
+    # $pac dbeaver
     # Base de dades https://wiki.archlinux.org/index.php/Java#Switching_between_JVM https://bbs.archlinux.org/viewtopic.php?id=262107 https://wiki.archlinux.org/index.php/PostgreSQL https://wiki.archlinux.org/index.php/Dbeaver (if it doesn't work check used java version)
     #$pac  intellij-idea-community-edition  # BD free version (no SQL)
 
