@@ -19,7 +19,7 @@ brew_install
 ### ONLY CHANGE FROM HERE ON
 base_install
 vim_install
-emacs_install
+# emacs_install
 windows_install
 
 #albert_install

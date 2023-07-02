@@ -51,7 +51,7 @@ windows_install() {
     sudo add-apt-repository ppa:wslutilities/wslu
     sudo apt update
     sudo apt install wslu
-    wslc emacs
+    # wslc emacs # create shortcut from windows to ubuntu app
 }
 
 bloat_install () {
