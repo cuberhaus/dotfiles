@@ -267,7 +267,8 @@ scratchpads =
   ]
 
 myWorkspaces :: [String]
-myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  ", "  0  "]
+-- myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  ", "  0  "]
+myWorkspaces = ["  1  ", "  2  ", "  3  ", "  4  ", "  5  ", "  6  ", "  7  ", "  8  ", "  9  "]
 
 myWorkspaceIndices :: M.Map String Integer
 myWorkspaceIndices = M.fromList $ zip myWorkspaces [1 ..] -- zipWith (,) == \x y -> (x,y)
