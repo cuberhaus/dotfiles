@@ -232,7 +232,7 @@ write_defaults() {
 
     # Set a blazingly fast keyboard repeat rate
     defaults write NSGlobalDomain KeyRepeat -int 2 # How fast to reapeat, lower is faster
-    defaults write NSGlobalDomain InitialKeyRepeat -int 20 # Time before repeating higher is slower
+    defaults write NSGlobalDomain InitialKeyRepeat -int 25 # Time before repeating higher is slower
 
     # Set language and text formats
     # Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
