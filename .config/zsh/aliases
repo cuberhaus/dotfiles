@@ -202,7 +202,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
         update="sudo pacman -Syu;"$update
-        updateall="yay -Syu;npm update &;"$updateall
+        updateall="yay -Syu;npm update &;sudo snap refresh;"$updateall
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         cleanup="yay -Sc;"$cleanup
