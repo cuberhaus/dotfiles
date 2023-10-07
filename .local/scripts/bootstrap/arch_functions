@@ -262,20 +262,20 @@ arch_and_manjaro() {
 
 manjaro_install() {
     sudo ln -s /var/lib/snapd/snap /snap            # manjaro snaps --classic
-    sudo snap install spotify                           # Spotify only on manjaro
-    # sudo snap install code --classic        # Classic snaps cannot be installed
-    sudo snap install whatsie                    # Whatsapp client
-    sudo snap install pycharm-professional --classic
     sudo snap install intellij-idea-ultimate --classic
-    #sudo snap install clion --classic
-    # snap install eclipse --classic
-    sudo snap install sublime-text --classic
+    sudo snap install pycharm-professional --classic
+    sudo snap install spotify                           # Spotify only on manjaro
     sudo snap install sublime-merge --classic
-    # sudo snap install slack
-    # sudo snap install skype
+    sudo snap install sublime-text --classic
+    sudo snap install whatsie                    # Whatsapp client
     sudo snap install zotero-snap
-    #sudo snap install powershell --classic
+    # sudo snap install clion --classic
+    # sudo snap install code --classic        # Classic snaps cannot be installed
+    # sudo snap install eclipse --classic
     # sudo snap install minizinc --classic # Prolog like
+    # sudo snap install powershell --classic
+    # sudo snap install skype
+    # sudo snap install slack
 
     sudo timedatectl set-ntp true # eduroam doesn't work without this
     $pac manjaro-pipewire # $pac wireplumber
