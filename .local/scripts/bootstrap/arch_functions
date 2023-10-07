@@ -152,13 +152,15 @@ base_install () {
     $yay google-chrome                          # Best web browser
     $yay libreoffice-extension-languagetool     # Libre office Grammar
     # $yay spotify                                # Spotify
-    sudo snap install spotify                           # Spotify only on manjaro
+    
+    
     $yay timeshift                              # Backups (sudo timeshift-gtk)
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
-    sudo snap install code --classic
+    
     # $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
-    $yay whatsapp-nativefier                    # Whatsapp client
+    
+    #$yay whatsapp-nativefier                    # Whatsapp client
     #$yay obsidian                               # Markdown editor
     $pac obsidian                               # Markdown editor
 
@@ -261,6 +263,11 @@ arch_and_manjaro() {
 }
 
 manjaro_install() {
+    sudo ln -s /var/lib/snapd/snap /snap            # manjaro snaps --classic
+    sudo snap install spotify                           # Spotify only on manjaro
+    # sudo snap install code --classic        # Classic snaps cannot be installed
+    sudo snap install whatsie                    # Whatsapp client
+
     sudo timedatectl set-ntp true # eduroam doesn't work without this
     $pac manjaro-pipewire # $pac wireplumber
     # Make airpods work
