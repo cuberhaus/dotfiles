@@ -137,6 +137,7 @@ base_install () {
     $pac kalk
     $pac solaar # logitech unifying
     $pac telegram
+    $pac obsidian                               # Markdown editor
 
     # DO NOT CHANGE THIS ORDER YAY COMES AFTER pac
     yay_install
@@ -157,7 +158,6 @@ base_install () {
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
     
-    $pac obsidian                               # Markdown editor
 
     git config --global credential.helper store # stores password on pc (security hazzard)
 
@@ -271,6 +271,11 @@ manjaro_install() {
     # snap install eclipse --classic
     sudo snap install sublime-text --classic
     sudo snap install sublime-merge --classic
+    # sudo snap install slack
+    # sudo snap install skype
+    sudo snap install zotero-snap
+    #sudo snap install powershell --classic
+    # sudo snap install minizinc --classic # Prolog like
 
     sudo timedatectl set-ntp true # eduroam doesn't work without this
     $pac manjaro-pipewire # $pac wireplumber
@@ -530,7 +535,7 @@ optional() {
     $pac texstudio                              # Latex text editor
     $pac texlive-most                           #latex
     $pac tor; $yay tor-browser
-    $yay slack-desktop                          # Slack
+    # $yay slack-desktop                          # Slack
     # $yay skypeforlinux-stable-bin               # Skype
     # $yay conky-cairo-no-nvidia                  # fix lua
     # $yay conky-manager2-git
