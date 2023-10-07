@@ -83,6 +83,7 @@ aux
 .config/xm1/
 
 # Emacs
+.config/my_emacs/eln-cache
 .cache/emacs/var/lsp/
 .config/com.corsair/
 .cache/emacs/var/eshell/
