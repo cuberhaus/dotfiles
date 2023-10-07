@@ -158,7 +158,8 @@ base_install () {
     $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
     $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
     $yay whatsapp-nativefier                    # Whatsapp client
-    $yay obsidian                               # Markdown editor
+    #$yay obsidian                               # Markdown editor
+    $pac obsidian                               # Markdown editor
 
     git config --global credential.helper store # stores password on pc (security hazzard)
 
