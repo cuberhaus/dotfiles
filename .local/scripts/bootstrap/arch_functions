@@ -16,7 +16,8 @@ flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
 yay="yay $flags"
 myTerminal="kitty"
-pip="pip install --user" # in arch pip packages should be installed based on user or through arch packages
+pip="pip install --user --break-system-packages" # in arch pip packages should be installed based on user or through arch packages
+# --break-system-packages needed as of 2023 PEP 668
 
 ### FUNCTIONS
 ## Invariant: be at $HOME dir
@@ -151,17 +152,11 @@ base_install () {
     $pac virt-viewer
     $yay google-chrome                          # Best web browser
     $yay libreoffice-extension-languagetool     # Libre office Grammar
-    # $yay spotify                                # Spotify
-    
     
     $yay timeshift                              # Backups (sudo timeshift-gtk)
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
     
-    # $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
-    
-    #$yay whatsapp-nativefier                    # Whatsapp client
-    #$yay obsidian                               # Markdown editor
     $pac obsidian                               # Markdown editor
 
     git config --global credential.helper store # stores password on pc (security hazzard)
@@ -186,6 +181,9 @@ git_repos() {
 }
 
 arch_install() {
+    # $yay spotify                                # Spotify
+    # $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
+    # $yay whatsapp-nativefier                    # Whatsapp client
     $pac xorg-xrandr
     $pac arandr # visual interface for xrandr
     $pac autorandr # https://github.com/phillipberndt/autorandr
