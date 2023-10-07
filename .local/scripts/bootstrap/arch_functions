@@ -156,7 +156,7 @@ base_install () {
     $yay timeshift                              # Backups (sudo timeshift-gtk)
     $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
     $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
-    sudo snap install code 
+    sudo snap install code --classic
     # $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
     $yay whatsapp-nativefier                    # Whatsapp client
     #$yay obsidian                               # Markdown editor
