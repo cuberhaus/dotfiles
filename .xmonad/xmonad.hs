@@ -197,11 +197,13 @@ isSpotifyMusic = className =? "Spotify"
 
 -- whatsappCommand ="dex /usr/share/applications/whatsapp-nativefier.desktop"
 whatsappCommand :: String
-whatsappCommand = "whatsapp-nativefier"
+-- whatsappCommand = "whatsapp-nativefier" -- yay app
+whatsappCommand = "whatsie" -- snap app
 
 -- also works to write the name of the command
 isWhatsapp :: Query Bool
-isWhatsapp = className =? "whatsapp-nativefier-d40211"
+-- isWhatsapp = className =? "whatsapp-nativefier-d40211" -- yay app
+isWhatsapp = className =? "WhatSie" -- snap app
 
 thunderbirdCommand :: String
 thunderbirdCommand = "thunderbird"
