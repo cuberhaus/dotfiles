@@ -270,6 +270,7 @@ manjaro_install() {
     sudo snap install sublime-text --classic
     sudo snap install whatsie                    # Whatsapp client
     sudo snap install zotero-snap
+    $pac cinnamon-screensaver 
     # sudo snap install clion --classic
     # sudo snap install code --classic        # Classic snaps cannot be installed
     # sudo snap install eclipse --classic

@@ -537,8 +537,9 @@ myStartupHook :: X ()
 myStartupHook = do
   spawnOnce "numlockx &"
   spawnOnce "trayer --edge bottom --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --alpha 0 --tint 0x2f343f --height 19 &"
-  spawnOnce "exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &"
-  spawnOnce "betterlockscreen -u ~/.local/xdg/wallpapers/landscapes > /dev/null 2>&1 &"
+  -- spawnOnce "exec xss-lock --transfer-sleep-lock -- i3lock &"
+  spawnOnce "exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &" --  Not working properly
+  spawnOnce "betterlockscreen -u ~/.local/xdg/wallpapers/unsplash > /dev/null 2>&1 &"
   spawnOnce "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &"
   spawnOnce "nm-applet &"
   spawnOnce "picom &"
