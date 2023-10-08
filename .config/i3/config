@@ -29,13 +29,13 @@ set $browser "google-chrome-stable"
 set $calc '$term -n "pythonCalc" -o font_size=20 python3' # kitty specific command
 set $calculator "speedcrunch"
 set $discord "discord --no-sandbox"
+# set $discord "discord"
 set $filemanager "nemo"
 set $mail "thunderbird"
-set $term kitty
+set $term "kitty"
 set $whatsapp "whatsie"
 set $music "spotify"
 set $gpt "chat-gpt"
-set $discord "discord"
 set $emacs "emacs --name='EmacsScratch' --title=EmacsScratch"
 
 # set $applauncher "dmenu-run"
@@ -209,9 +209,6 @@ bindsym $mod+shift+d exec $commandlauncher
 # Lock screen
 bindsym $mod+shift+x exec $Locker
 
-# # reload the configuration file
-# bindsym $mod+Shift+c reload
-
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 
@@ -340,13 +337,22 @@ bindsym $mod+Shift+0 move container to workspace $ws10
 # program script checks if the program is already running, if it isn't it launches a new instance
 # bindsym $mod+t exec $HOME/.local/bin/program subl, [class="Sublime_text"] scratchpad show
 # Mod 1 = Alt
+
+# Cannot use variable to set another variable 
+set $whatsappClass "WhatSie"
+set $discordClass "discord"
+set $mailClass "thunderbird"
+set $musicClass "Spotify"
+set $gptClass "Chat-gpt"
+set $calculatorClass "SpeedCrunch"
+
 bindsym Mod1+e exec program $emacs  EmacsScratch, [title="EmacsScratch"] scratchpad show
-bindsym $mod+d exec program $discord , [class="discord"] scratchpad show
-bindsym $mod+m exec program $mail , [class="thunderbird"] scratchpad show
-bindsym $mod+g exec program $gpt , [class="Chat-gpt"] scratchpad show
-bindsym $mod+s exec program $music, [class="Spotify"] scratchpad show
-bindsym $mod+w exec program $whatsapp [class="whatsapp-nativefier-d40211"] scratchpad show
-bindsym $mod+Shift+c exec program $calculator , [class="SpeedCrunch"] scratchpad show
+bindsym $mod+d exec program $discord , [class=$discordClass] scratchpad show
+bindsym $mod+m exec program $mail, [class=$mailClass] scratchpad show
+bindsym $mod+g exec program $gpt , [class=$gptClass] scratchpad show
+bindsym $mod+s exec program $music, [class=$musicClass] scratchpad show
+bindsym $mod+w exec program $whatsapp, [class=$whatsappClass] scratchpad show
+bindsym $mod+Shift+c exec program $calculator , [class=$calculatorClass] scratchpad show
 bindsym $mod+t exec --no-startup-id program "kitty --class='kittyPad'" kittyPad, [class="kittyPad"] scratchpad show
 
 # Rstudio creates multiple instances
@@ -361,15 +367,15 @@ bindsym $mod+t exec --no-startup-id program "kitty --class='kittyPad'" kittyPad,
 # for_window [class="Sublime_text"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 for_window [title="EmacsScratch"] floating enable, move scratchpad, resize set 80 ppt 80 ppt, move absolute position center
 for_window [class="kittyPad"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
-for_window [class="whatsapp-nativefier-d40211"]  floating enable, move scratchpad, resize set 70 ppt 70 ppt, move absolute position center
-for_window [class="SpeedCrunch"] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
-for_window [class="discord"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
+for_window [class=$whatsappClass]  floating enable, move scratchpad, resize set 70 ppt 70 ppt, move absolute position center
+for_window [class=$calculatorClass] floating enable, move scratchpad, resize set 50 ppt 50 ppt, move absolute position center
+for_window [class=$discordClass] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 # for_window [title="New Event:"] floating enable
-for_window [class="thunderbird"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
+for_window [class=$mailClass] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 # regex matches anything that ends in Mozilla Thunderbird
 for_window [title="^(.*?)\Mozilla Thunderbird"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
-for_window [class="Spotify"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
-for_window [class="Chat-gpt"] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
+for_window [class=$musicClass] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
+for_window [class=$gptClass] floating enable, move scratchpad, resize set 90 ppt 90 ppt, move absolute position center
 
 #}}}
 # Theme {{{
@@ -465,22 +471,10 @@ exec flameshot &
 ## Show day in a classy way
 exec conky --config="$conky_day" &
 
-# Calculator
-exec $calculator &
+# # Calculator
+# exec $calculator &
 
 exec --no-startup-id "sh -c 'sleep 15; conky --config=$HOME/.conky/conkyrss & '"
-
-# # Moar messages
-# exec discord &
-
-# # Musicote
-# exec spotify &
-
-# # Messages
-# exec whatsapp-nativefier &
-
-# # Mails
-# exec thunderbird &
 
 ## Moar info
 # exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &
