@@ -19,9 +19,6 @@ source ~/.config/bash-git-prompt/gitprompt.sh
 # => Configuration
 ###############################################################
 
-# Make sure we swap keys (doesn't really slow down the terminal that much)
-setxkbmap -option caps:swapescape > /dev/null 2>&1
-
 # Enable Readline not waiting for additional input when a key is pressed.
 set keyseq-timeout 50
 
