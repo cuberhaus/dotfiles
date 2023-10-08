@@ -152,6 +152,7 @@ base_install () {
     $yay betterlockscreen                       # Lockscreen
     $pac virt-viewer
     $yay google-chrome                          # Best web browser
+    $yay microsoft-edge-stable-bin              # edge chatgpt 4
     $yay libreoffice-extension-languagetool     # Libre office Grammar
     
     $yay timeshift                              # Backups (sudo timeshift-gtk)
