@@ -62,6 +62,7 @@ aux
 .config/libreoffice/4/user/pack/
 .config/libreoffice/4/user/registrymodifications.xcu
 .config/libreoffice/4/user/uno_packages/
+.config/libreoffice/4/cache/
 
 # Linux
 .config/gtk-2.0/

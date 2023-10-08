@@ -240,6 +240,8 @@ arch_install() {
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable NetworkManager.service
     fi
+    # Poweroff is no longer handled by systemd so we now can map it to whatever we want
+    sudo sed -i '/HandlePowerKey/s/.*/HandlePowerKey=ignore/' /etc/systemd/logind.conf
 }
 
 arch_and_manjaro() {

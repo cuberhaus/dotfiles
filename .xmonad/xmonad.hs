@@ -56,12 +56,20 @@ import XMonad.Layout.ThreeColumns (ThreeCol (ThreeCol))
 import XMonad.Layout.WindowNavigation (windowNavigation)
 -- Utilities
 import qualified XMonad.StackSet as W
-import XMonad.Util.Dmenu (dmenu) -- https://bbs.archlinux.org/viewtopic.php?id=120298>
+import XMonad.Util.Dmenu (dmenu,menuArgs) -- https://bbs.archlinux.org/viewtopic.php?id=120298>
 import XMonad.Util.EZConfig (additionalKeysP)
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run (hPutStrLn, spawnPipe)
 import XMonad.Util.SpawnOnce
 import XMonad.Actions.SpawnOn
+
+-- This code works
+powerOffWithWarning :: X ()
+powerOffWithWarning = do
+  let o1 = "confirm poweroff"
+  let o2 = "cancel"
+  s <- dmenu [o2, o1]
+  when (o1 == s) (io $ spawn "poweroff")
 
 quitWithWarning :: X ()
 quitWithWarning = do
@@ -92,6 +100,9 @@ browser = "google-chrome-stable"
 
 -- emacs :: String 
 -- emacs = "emacs"
+
+mail :: String
+mail = "thunderbird"
 
 emacs :: String 
 emacs = "emacs"
@@ -307,13 +318,8 @@ myKeys conf@XConfig {XMonad.modMask = modm} =
       -- , ((modm,               xK_r     ), refresh)
 
       -- Push window back into tiling
-      ((modm, xK_t), withFocused $ windows . W.sink),
-      -- Quit xmonad
-      ((modm .|. shiftMask, xK_e), quitWithWarning),
-      -- -- Restart xmonad
-      ((modm .|. shiftMask, xK_r), spawn "xmonad --recompile; xmonad --restart") -- Will launch two errors due to recompiling and then restarting
-      -- Run xmessage with a summary of the default keybindings (useful for beginners)
-      -- ((modm .|. shiftMask, xK_h), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
+      ((modm, xK_t), withFocused $ windows . W.sink)
+
     ]
       ++
       --
@@ -537,9 +543,9 @@ myStartupHook :: X ()
 myStartupHook = do
   spawnOnce "numlockx &"
   spawnOnce "trayer --edge bottom --align right --SetDockType true --SetPartialStrut true --expand true --width 10 --alpha 0 --tint 0x2f343f --height 19 &"
-  -- spawnOnce "exec xss-lock --transfer-sleep-lock -- i3lock &"
-  spawnOnce "exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &" --  Not working properly
-  spawnOnce "betterlockscreen -u ~/.local/xdg/wallpapers/unsplash > /dev/null 2>&1 &"
+  spawnOnce "exec xss-lock --transfer-sleep-lock -- i3lock &"
+  -- spawnOnce "exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &" --  Not working properly
+  -- spawnOnce "betterlockscreen -u ~/.local/xdg/wallpapers/unsplash > /dev/null 2>&1 &"
   spawnOnce "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &"
   spawnOnce "nm-applet &"
   spawnOnce "picom &"
@@ -568,6 +574,13 @@ myEmacsKeys :: [(String, X ())]
 myEmacsKeys =
   [ -- Multimedia Keys
     ("<XF86Calculator>", namedScratchpadAction scratchpads "calculator"),
+    ("<XF86WWW>", spawn browser),
+    ("<XF86MyComputer>", spawn explorer),
+    ("<XF86Mail>", namedScratchpadAction scratchpads "Thunderbird"),
+    -- ("<XF86KbdBrightnessUp>", ),
+    -- ("<XF86KbdBrightnessDown>", ),
+    -- ("", ),
+
     ("<XF86AudioPlay>", spawn mediaPlay),
     ("<XF86AudioPrev>", spawn mediaPrev),
     ("<XF86AudioNext>", spawn mediaNext),
@@ -596,7 +609,11 @@ myEmacsKeys =
     -- Kill windows
     ("M-S-q", kill), -- Kill Current window
     ("M-S-a", closeAllWindows), -- Kill all windows on current workspace
-
+    -- ("M-S-e", quitWithWarning), -- Kill all windows on current workspace
+    ("M-S-e", quitWithWarning), -- Kill all windows on current workspace
+    ("M-S-r", spawn "xmonad --recompile; xmonad --restart"), -- Kill all windows on current workspace
+    ("<XF86PowerDown>", powerOffWithWarning), -- Kill all windows on current workspace
+    ("<XF86PowerOff>", powerOffWithWarning), -- Kill all windows on current workspace
     -- Layouts
     ("M-<Tab>", sendMessage NextLayout), -- Rotate through the available layout algorithms
     ("M-x", sendMessage $ Toggle MIRROR), -- Mirror current layout
