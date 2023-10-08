@@ -85,9 +85,6 @@ fi
 #https://superuser.com/questions/178587/how-do-i-detach-a-process-from-terminal-entirely
 setopt NOHUP
 
-# Make sure we swap keys (doesn't really slow down termite that much)
-# setxkbmap -option caps:swapescape > /dev/null 2>&1
-
 # History in cache directory:
 HISTSIZE=32768
 SAVEHIST=32768
