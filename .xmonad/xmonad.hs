@@ -115,8 +115,8 @@ doomEmacs = "emacs --with-profile doom"
 
 -- browser = "firefox"
 
-whatsapp :: String
-whatsapp = "whatsapp-nativefier"
+-- whatsapp :: String
+-- whatsapp = "whatsapp-nativefier"
 
 explorer :: String
 explorer = "nemo"

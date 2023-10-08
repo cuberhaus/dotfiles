@@ -21,18 +21,28 @@ set $ws7 "7: 7"
 set $ws8 "8: 8"
 set $ws9 "9: 9"
 set $ws10 "10: 10"
-set $term kitty
-set $calc '$term -n "pythonCalc" -o font_size=20 python3' # kitty specific command
-set $discord "discord --no-sandbox"
-#set $term "xfce4-terminal" # Alternative (Use Base16-OneDark not 16 bits):
-set $browser "google-chrome-stable"
+
+# Applications
 # set $browser "firefox"
-set $filemanager nemo 
+# set $term "xfce4-terminal" # Alternative (Use Base16-OneDark not 16 bits):
+set $browser "google-chrome-stable"
+set $calc '$term -n "pythonCalc" -o font_size=20 python3' # kitty specific command
+set $calculator "speedcrunch"
+set $discord "discord --no-sandbox"
+set $filemanager "nemo"
+set $mail "thunderbird"
+set $term kitty
+set $whatsapp "whatsie"
+set $music "spotify"
+set $gpt "chat-gpt"
+set $discord "discord"
+set $emacs "emacs --name='EmacsScratch' --title=EmacsScratch"
+
+# set $applauncher "dmenu-run"
 set $Locker "betterlockscreen -l"
 set $ScreenshotFast "flameshot full -p $HOME/Pictures"
 set $ScreenshotOptions "flameshot gui -p $HOME/Pictures"
 set $applauncher "rofi -modi window,drun,run -show drun -show-icons -terminal $term "
-# set $applauncher "dmenu-run"
 set $commandlauncher "rofi -modi window,drun,run -show run -show-icons -terminal $term "
 
 # i3blocks specific
@@ -55,6 +65,7 @@ set $caps "pkill -SIGRTMIN+11 i3blocks"
 set $NumLock  "pkill -SIGRTMIN+11 i3blocks"
 set $exit "i3-nagbar -t warning -m 'you pressed the exit shortcut. do you really want to exit i3? this will end your x session.' -b 'yes, exit i3' 'i3-msg exit'"
 set $poweroff "i3-nagbar -t warning -m 'Do you really want to power off?' -b 'Yes, power off' 'systemctl poweroff'"
+set $layoutScripts "$HOME/.config/i3/i3-layout-manager/layout_manager.sh"
 
 #}}}
 # Config {{{
@@ -91,7 +102,7 @@ bindsym $mod+b exec $browser
 bindsym $mod+n exec $filemanager
 
 # Layout Scripts
-bindsym $mod+shift+n exec $HOME/.config/i3/i3-layout-manager/layout_manager.sh
+bindsym $mod+shift+n exec $layoutScripts
 
 # Screen Printing
 bindsym Print exec $ScreenshotFast
@@ -112,6 +123,12 @@ bindsym XF86MonBrightnessDown exec $BrightDown
 
 bindsym XF86PowerDown exec --no-startup-id $poweroff
 bindsym XF86PowerOff exec --no-startup-id $poweroff
+
+# Applications
+bindsym XF86Calculator exec $calculator
+bindsym XF86WWW exec $browser
+bindsym XF86MyComputer $filemanager
+bindsym XF86Mail $mail
 
 # Touchpad controls
 bindsym XF86TouchpadToggle exec ./toggletouchpad.sh # toggle touchpad
@@ -323,13 +340,13 @@ bindsym $mod+Shift+0 move container to workspace $ws10
 # program script checks if the program is already running, if it isn't it launches a new instance
 # bindsym $mod+t exec $HOME/.local/bin/program subl, [class="Sublime_text"] scratchpad show
 # Mod 1 = Alt
-bindsym Mod1+e exec program "emacs --name='EmacsScratch' --title=EmacsScratch" EmacsScratch, [title="EmacsScratch"] scratchpad show
-bindsym $mod+d exec program discord , [class="discord"] scratchpad show
-bindsym $mod+m exec program thunderbird , [class="thunderbird"] scratchpad show
-bindsym $mod+g exec program chat-gpt , [class="Chat-gpt"] scratchpad show
-bindsym $mod+s exec program spotify , [class="Spotify"] scratchpad show
-bindsym $mod+w exec program whatsapp-nativefier, [class="whatsapp-nativefier-d40211"] scratchpad show
-bindsym $mod+Shift+c exec program speedcrunch, [class="SpeedCrunch"] scratchpad show
+bindsym Mod1+e exec program $emacs  EmacsScratch, [title="EmacsScratch"] scratchpad show
+bindsym $mod+d exec program $discord , [class="discord"] scratchpad show
+bindsym $mod+m exec program $mail , [class="thunderbird"] scratchpad show
+bindsym $mod+g exec program $gpt , [class="Chat-gpt"] scratchpad show
+bindsym $mod+s exec program $music, [class="Spotify"] scratchpad show
+bindsym $mod+w exec program $whatsapp [class="whatsapp-nativefier-d40211"] scratchpad show
+bindsym $mod+Shift+c exec program $calculator , [class="SpeedCrunch"] scratchpad show
 bindsym $mod+t exec --no-startup-id program "kitty --class='kittyPad'" kittyPad, [class="kittyPad"] scratchpad show
 
 # Rstudio creates multiple instances
@@ -449,7 +466,7 @@ exec flameshot &
 exec conky --config="$conky_day" &
 
 # Calculator
-exec speedcrunch &
+exec $calculator &
 
 exec --no-startup-id "sh -c 'sleep 15; conky --config=$HOME/.conky/conkyrss & '"
 
