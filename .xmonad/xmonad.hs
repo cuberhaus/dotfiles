@@ -609,11 +609,11 @@ myEmacsKeys =
     -- Kill windows
     ("M-S-q", kill), -- Kill Current window
     ("M-S-a", closeAllWindows), -- Kill all windows on current workspace
-    -- ("M-S-e", quitWithWarning), -- Kill all windows on current workspace
     ("M-S-e", quitWithWarning), -- Kill all windows on current workspace
     ("M-S-r", spawn "xmonad --recompile; xmonad --restart"), -- Kill all windows on current workspace
     ("<XF86PowerDown>", powerOffWithWarning), -- Kill all windows on current workspace
     ("<XF86PowerOff>", powerOffWithWarning), -- Kill all windows on current workspace
+
     -- Layouts
     ("M-<Tab>", sendMessage NextLayout), -- Rotate through the available layout algorithms
     ("M-x", sendMessage $ Toggle MIRROR), -- Mirror current layout
