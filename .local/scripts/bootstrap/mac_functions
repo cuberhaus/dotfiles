@@ -245,6 +245,9 @@ write_defaults() {
     # Show language menu in the top right corner of the boot screen
     sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
 
+    # bluetooth note wake up from sleep
+    defaults -currentHost write com.apple.Bluetooth RemoteWakeEnabled 0
+
     # Set the timezone; see `sudo systemsetup -listtimezones` for other values
     sudo systemsetup -settimezone "Europe/Madrid" > /dev/null
 
