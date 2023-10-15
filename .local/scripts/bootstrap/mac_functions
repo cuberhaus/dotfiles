@@ -87,7 +87,7 @@ mac_install () {
 optional () {
     # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/brew.html
     # brew install --cask anaconda              # This should be installed from the official site so that it installs correctly
-    brew install adobe-acrobat-reader           # Pdf reader
+    # brew install adobe-acrobat-reader           # Pdf reader
     brew install graphviz
     brew install intellij-idea                  # Paid, better java SQL IDE
     brew install intellij-idea-ce               # Free version
