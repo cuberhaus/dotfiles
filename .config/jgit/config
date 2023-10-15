@@ -1,6 +1,0 @@
-[filesystem "JetBrains s.r.o.|17.0.6|/dev/disk3s5"]
-	timestampResolution = 4000 nanoseconds
-	minRacyThreshold = 0 nanoseconds
-[filesystem "Eclipse Adoptium|17.0.8.1|/dev/disk3s5"]
-	timestampResolution = 2000 nanoseconds
-	minRacyThreshold = 0 nanoseconds
