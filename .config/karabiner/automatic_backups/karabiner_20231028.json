@@ -218,6 +218,16 @@
                     "simple_modifications": [
                         {
                             "from": {
+                                "key_code": "insert"
+                            },
+                            "to": [
+                                {
+                                    "consumer_key_code": "al_email_reader"
+                                }
+                            ]
+                        },
+                        {
+                            "from": {
                                 "key_code": "pause"
                             },
                             "to": [
@@ -614,6 +624,16 @@
                     "to": [
                         {
                             "consumer_key_code": "al_terminal_lock_or_screensaver"
+                        }
+                    ]
+                },
+                {
+                    "from": {
+                        "key_code": "insert"
+                    },
+                    "to": [
+                        {
+                            "consumer_key_code": "al_email_reader"
                         }
                     ]
                 }
