@@ -97,6 +97,7 @@ if [ -d "$HOME/.config/doom-emacs" ] ; then
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    export PYTORCH_ENABLE_MPS_FALLBACK=1 # MACHINE LEARNING
     # export JAVA_HOME=`/usr/libexec/java_home`
     export VISUAL=nvim
     export EDITOR="$VISUAL"

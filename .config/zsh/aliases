@@ -185,7 +185,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     cleanup="brew cleanup;sudo gem cleanup;"$cleanup
     # Recursively delete `.DS_Store` files
-    alias clean="find . -type f -name '*.DS_Store' -ls -delete"
+    alias clean="find . -type f -name '*.DS_Store' -ls -delete; find . -type f -name '._*' -exec rm -f {} \;
+"
 fi
 
 if [[ "$OSTYPE" == "linux"* ]]; then
