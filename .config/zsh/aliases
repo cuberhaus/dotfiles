@@ -74,8 +74,6 @@ alias zshrc='nvim $ZDOTDIR/.zshrc'
 #alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
 #alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
 #alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
-#alias voblogout="sudo vim /etc/oblogout.conf"
-#alias vslim="sudo vim /etc/slim.conf"
 
 alias vim="nvim"
 alias e="emacsclient -nc"
@@ -117,20 +115,14 @@ alias gc="git commit -m "
 alias gp="git push"
 alias gitsync="git submodule sync; git submodule update --init --recursive"
 alias gsu="git submodule update --recursive --remote"
-## Fun commit
-#alias yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
-## Alternative (makes easier finding out which commits have no message)
 
 alias gr="git_recurse"
+#yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
 yolo="git_recurse -c \"git add -A; git commit -m 'This is a placeholder'; git push\" -d 1"
 alias yolo="$yolo"
 
 alias pull="git_recurse -c 'git pull'"
 alias status="git_recurse -c 'git status'"
-
-# List files
-# using -a -a will show '.' and ".."
-# --git causes to crash when symbolic link is gone
 
 if command -v exa &> /dev/null
 then
@@ -143,18 +135,9 @@ else
     # alias l="ls"
 fi
 
-# Typos
-# alias sl="ls"
-# alias s="ls" # It types it everytime as it is shorter
-
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
 # Print enviroment variables: printenv
-
-# Cpp
-#alias eda++="g++ -std=c++11"
-# alias p1++="g++ -ansi -O2 -DNDEBUG -D_GLIBCXX_DEBUG -Wall -Wextra -Werror -Wno-uninitialized -Wno-sign-compare -Wshadow"
-# alias p2++="g++ -D GLIBCXX_DEBUG -O2 -Wall -Wextra -Werror -Wno-sign-compare -std=c++11"
 
 # Userlist
 alias userlist="cut -d: -f1 /etc/passwd"
@@ -226,11 +209,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
         update="sudo apt-get update; sudo apt-get full-upgrade; "$update
-        # brew update; 
-        # brew upgrade;
-
         updateall=$update$updateall
-
         cleanup="sudo apt-get autoclean; 
         sudo apt-get clean; 
         sudo apt-get autoremove; 
