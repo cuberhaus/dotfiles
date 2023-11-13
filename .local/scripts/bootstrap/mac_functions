@@ -86,7 +86,6 @@ mac_install () {
 
 optional () {
     # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/brew.html
-    # brew install --cask anaconda              # This should be installed from the official site so that it installs correctly
     # brew install adobe-acrobat-reader           # Pdf reader
     brew install graphviz
     brew install intellij-idea                  # Paid, better java SQL IDE
@@ -104,6 +103,7 @@ optional () {
     brew install tor-browser                    # Private and uncensored browsing
     brew install unetbootin                     # Burn iso's (or use dd command)
     brew install xquartz                        # PAR use GUI through SSH
+    brew install skype                          # Videocalls
 }
 
 garbage() {
@@ -111,19 +111,15 @@ garbage() {
     brew install elastic/tap/elasticsearch-full
 
     pip3 install --user elasticsearch_dsl        # APA
-    pip3 install --user elasticsearch_dsl        # APA
-    # pip install --user elasticsearch            # APA
-    # pip install --user elasticsearch            # APA
     brew install --cask microsoft-edge
     brew install dbeaver-community adoptopenjdk       # BD
     brew install --cask eclipse-java                   # Java IDE
     brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
     brew install ghc                            # haskell compiler and ghci interpreter
     brew install glfw                           # OpenGL
-    brew install qbittorrent                    # Torrent client  
-    brew install skype                          # Videocalls
     brew install swi-prolog
     brew install kdiff3                         # Git mergetool  
+    # brew install --cask anaconda              # This should be installed from the official site so that it installs correctly
 }
 
 vim_install () {
@@ -252,11 +248,6 @@ write_defaults() {
     # Set the timezone; see `sudo systemsetup -listtimezones` for other values
     sudo systemsetup -settimezone "Europe/Madrid" > /dev/null
 
-    # NEVER DO THIS, IT DISABLES KEYS ENTIRELY
-    # Stop iTunes from responding to the keyboard media keys
-    # launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
-    # launchctl load -w /System/Library/LaunchAgents/com.apple.rcd.plist
-
     ###############################################################################
     # Chrome                                                                      # 
     ###############################################################################
@@ -307,5 +298,12 @@ optional_defaults() {
 
     # Disable smart quotes as they’re annoying when typing code
     # defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+}
+
+garbage_defaults() {
+    # NEVER DO THIS, IT DISABLES KEYS ENTIRELY
+    # Stop iTunes from responding to the keyboard media keys
+    # launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
+    # launchctl load -w /System/Library/LaunchAgents/com.apple.rcd.plist
 }
 
