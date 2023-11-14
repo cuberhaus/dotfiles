@@ -91,7 +91,9 @@ optional () {
     brew install keka                           # Archiver open source
     brew install mactex                         # LaTex compiler
     brew install meld                           # Diff software
+    brew install neo4j                          # classes
     brew install obs                            # Screen recorder //very complicated on mac
+    brew install processing                     # Classes
     brew install qt5                            # Qt stuff
     brew install qtcreator                      # Qt IDE
     brew install r                              # Probabilitat i estadística
