@@ -16,13 +16,11 @@ mac_install () {
     touch ~/.bash_sessions_disable              # Share history through sessions
     sudo chown -R pol ~/.cache/zsh              # zsh history doesn't work when owner is wrong
     ### Terminal stuff
-    brew install pinentry-mac                   # for prompts git password
-    brew install smimesign                      # git with gpg
     brew install ack
     brew install astyle
     brew install bat                            # Cat on steroids (for ranger)
-    brew install bison
-    brew install cmake
+    brew install bison                          
+    brew install cmake                          # Some compilations use this
     brew install exa                            # "ls" on steroids
     brew install flex
     brew install fzf                            # Fuzzy Finder
@@ -35,15 +33,16 @@ mac_install () {
     brew install ncdu                           # Storage manager
     brew install neofetch                       # System info
     brew install p7zip                          # Extract function
+    brew install pinentry-mac                   # for prompts git password
     brew install pkg-config
     brew install ranger w3m                     # Ranger and previews
     brew install rclone                         # Automatic push and pull from drive
     brew install ripgrep
+    brew install smimesign                      # git with gpg
     brew install sox
     brew install stow                           # Stow dotfiles
     brew install swig
     brew install the_silver_searcher            # Grep on steroids
-    brew install tmux                           # Terminal multiplexer
     brew install unrar                          # Extract function
     brew install wget                           # Download from command line
     brew install yarn                           # Package manager
@@ -57,12 +56,7 @@ mac_install () {
     brew install font-meslo-lg-nerd-font
 
     ### GUI Applications
-    # brew install shortcuts                      # spotlight shutdown now THIS WILL BREAK YOUR MAC
-    # consider installing the logi options+ (first time installing it caused brightness buttons to not work? lol)
-    # brew install qview                          # image viewer (better than builtin mac) free and open source
-    brew install hammerspoon
-    brew install mos                            # Separate inverse scroll for mouse and trackpad, DUH!
-    brew install alfred                         # Better Spotlight
+    #brew install hammerspoon
     brew install ballast                        # Auto-corrects volume balance, (weird macOS stuff)
     brew install calibre                        # Book manager
     brew install ccleaner                       # CleanUp
@@ -70,11 +64,10 @@ mac_install () {
     brew install google-chrome                  # Web browser
     brew install karabiner-elements             # Swap Esc with Caps_lock
     brew install kitty                          # Best terminal
-    brew install mactex                         # LaTex compiler
+    brew install mos                            # Separate inverse scroll for mouse and trackpad, DUH!
     brew install rectangle                      # Tiler
     brew install spotify                        # Music player
     brew install sublime-text                   # Fastest editor
-    brew install telegram                       # Quickly transfer files
     brew install texstudio                      # Free and open source LaTex editor
     brew install the-unarchiver                 # Archiver "faster"
     brew install tomighty                       # Pomodoro timer
@@ -86,40 +79,46 @@ mac_install () {
 
 optional () {
     # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/brew.html
-    # brew install adobe-acrobat-reader           # Pdf reader
+    brew install alfred                         # Better Spotlight
+    brew install dbeaver-community adoptopenjdk       # BD
+    brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
+    brew install glfw                           # OpenGL
     brew install graphviz
     brew install intellij-idea                  # Paid, better java SQL IDE
     brew install intellij-idea-ce               # Free version
     brew install iterm2                         # Terminal emulator
     brew install jupyter                        # jupyter notebooks
     brew install keka                           # Archiver open source
+    brew install mactex                         # LaTex compiler
     brew install meld                           # Diff software
     brew install obs                            # Screen recorder //very complicated on mac
     brew install qt5                            # Qt stuff
     brew install qtcreator                      # Qt IDE
     brew install r                              # Probabilitat i estadística
     brew install rstudio                        # Probabilitat i estadística IDE
+    brew install skype                          # Videocalls
     brew install slack                          # Work
+    brew install swi-prolog
+    brew install telegram                       # Quickly transfer files
+    brew install tmux                           # Terminal multiplexer
     brew install tor-browser                    # Private and uncensored browsing
     brew install unetbootin                     # Burn iso's (or use dd command)
     brew install xquartz                        # PAR use GUI through SSH
-    brew install skype                          # Videocalls
+    brew tap elastic/tap
+    brew install elastic/tap/elasticsearch-full
+    pip3 install --user elasticsearch_dsl       # APA
+    brew install --cask microsoft-edge
+    brew install --cask eclipse-java            # Java IDE
 }
 
 garbage() {
-    brew tap elastic/tap
-    brew install elastic/tap/elasticsearch-full
-
-    pip3 install --user elasticsearch_dsl        # APA
-    brew install --cask microsoft-edge
-    brew install dbeaver-community adoptopenjdk       # BD
-    brew install --cask eclipse-java                   # Java IDE
-    brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
-    brew install ghc                            # haskell compiler and ghci interpreter
-    brew install glfw                           # OpenGL
-    brew install swi-prolog
-    brew install kdiff3                         # Git mergetool  
     # brew install --cask anaconda              # This should be installed from the official site so that it installs correctly
+    # brew install adobe-acrobat-reader           # Pdf reader
+    # brew install ghc                            # haskell compiler and ghci interpreter
+    # brew install kdiff3                         # Git mergetool  
+    # brew install qview                          # image viewer (better than builtin mac) free and open source (i uninstalled it for some reason)
+    # brew install shortcuts                      # spotlight shutdown now THIS WILL BREAK YOUR MAC
+    # consider installing the logi options+ (first time installing it caused brightness buttons to not work? lol)
 }
 
 vim_install () {
