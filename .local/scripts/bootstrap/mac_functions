@@ -80,6 +80,7 @@ mac_install () {
 optional () {
     # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/brew.html
     brew install alfred                         # Better Spotlight
+    brew install thunderbird                    #mail, but use imail 
     brew install dbeaver-community adoptopenjdk       # BD
     brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
     brew install glfw                           # OpenGL
