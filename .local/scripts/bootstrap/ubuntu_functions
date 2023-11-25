@@ -42,6 +42,7 @@ base_install () { ## For windows install it's good to have this
     $apt vim-gtk                # Vim with full functionality
     $apt yarn 
     $apt zsh
+    $apt eog                    # To view images, can launch it from terminal (works on windows)
     chsh -s $(which zsh)
     git config --global credential.helper store
 }
