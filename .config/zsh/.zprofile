@@ -10,6 +10,10 @@ if [[ "$DISTRO" == "ubuntu" ]]; then
     setxkbmap -option caps:swapescape
 fi
 
+if [[ "$DISTRO" == "ubuntu_windows" ]]; then
+    setxkbmap -option caps:swapescape
+fi
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH="/opt/homebrew/bin:$PATH"
 fi

@@ -68,6 +68,9 @@ elif [[ "$DISTRO" == "arch" ]]; then
 elif [[ "$DISTRO" == "ubuntu" ]]; then
     ubuntu_based_install
     ycm_install # Builds
+elif [[ "$DISTRO" == "ubuntu_windows" ]]; then
+    ubuntu_based_install
+    ycm_install # Builds
 elif [[ "$DISTRO" == "manjaro" ]]; then
     arch_based_install
     ycm_install # Builds

@@ -158,14 +158,15 @@ update=""
 updateall="python3 -m pip install --user --upgrade pynvim &;
     vim +PlugUpgrade +PlugUpdate +qall &; 
     antigen update &; 
-    emacs -f auto-package-update-now &;
     pip3 install --user --upgrade pip &
 "
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
     update="sudo softwareupdate -i -a; xcode-select --install; brew update; brew upgrade; brew update --cask; "$update
-    updateall=$update"npm install npm -g; "$updateall
+    updateall=$update"npm install npm -g;
+    emacs -f auto-package-update-now &;
+    "$updateall
     # sudo xcode-select -switch /Library/Developer/CommandLineTools
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     cleanup="brew cleanup;sudo gem cleanup;"$cleanup
@@ -188,7 +189,9 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
         update="sudo pacman -Syu;sudo snap refresh;"$update
-        updateall="yay -Syu;npm update &;sudo snap refresh;"$updateall
+        updateall="yay -Syu;npm update &;sudo snap refresh;
+        emacs -f auto-package-update-now &;
+        "$updateall
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
         cleanup="yay -Sc;"$cleanup
@@ -210,6 +213,18 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
+        update="sudo apt-get update; sudo apt-get full-upgrade; "$update
+        updateall=$update"emacs -f auto-package-update-now &;"$updateall
+        cleanup="sudo apt-get autoclean; 
+        sudo apt-get clean; 
+        sudo apt-get autoremove; 
+        brew cleanup; 
+        "$cleanup
+        alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
+    fi
+
+    ### Ubuntu_windows
+    if [[ "$DISTRO" == "ubuntu_windows" ]]; then
         update="sudo apt-get update; sudo apt-get full-upgrade; "$update
         updateall=$update$updateall
         cleanup="sudo apt-get autoclean; 
