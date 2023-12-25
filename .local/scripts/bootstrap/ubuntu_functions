@@ -209,6 +209,7 @@ vim_install () {
     sudo npm install -g neovim                  # npm on neovim
     python3 -m pip install --user --upgrade pynvim # Python for neovim
     sudo gem install neovim                     # Gem for neovim
+    python3 $HOME/.vim/plugged/YouCompleteMe/install.py
 }
 
 optional() {
