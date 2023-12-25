@@ -179,10 +179,12 @@ snaps_install() {
     #sudo snap install android-studio --classic
     sudo snap install code --classic
     sudo snap install discord
+    sudo snap install intellij-idea-community --classic
     sudo snap install pycharm-community --classic
     sudo snap install skype --classic
     sudo snap install slack --classic
     sudo snap install spotify
+    sudo snap install sublime-text --classic
     sudo snap install walc
 }
 
