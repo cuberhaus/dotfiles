@@ -21,6 +21,7 @@ base_install
 #emacs_install
 #steam_install
 
+clone_repos
 chrome_install
 #i3_install # Installing i3 requires manual input
 snaps_install
