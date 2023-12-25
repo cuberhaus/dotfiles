@@ -174,9 +174,13 @@ i3_install () {
     sudo make install
 }
 
+snaps_install_optional() {
+    sudo snap install android-studio --classic
+    sudo snap install eclipse --classic
+    sudo snap install postman
+}
+
 snaps_install() {
-    #sudo snap install ao
-    #sudo snap install android-studio --classic
     sudo snap install code --classic
     sudo snap install discord
     sudo snap install intellij-idea-community --classic
