@@ -219,3 +219,13 @@ clone_repos() {
     git clone https://github.com/cuberhaus/TFG $HOME/repos/TFG
     git clone https://github.com/cuberhaus/docs $HOME/repos/docs
 }
+
+high_dpi_screen() {
+    # To fix high dpi screens, two options, go to 200% scaling, or fractional scaling, fractional scaling causes blurry text, more power usage, lower speed.
+    # We instead increase text scaling
+    gsettings set org.gnome.desktop.interface text-scaling-factor 1.5
+    # Increase cursor size Settings-> Accesibility -> Cursor size -> Medium
+    gsettings set org.gnome.desktop.interface cursor-size 35
+    # Set icons to Large 'small' to set it smaller
+    gsettings set org.gnome.shell.extensions.ding icon-size 'large' 
+}
