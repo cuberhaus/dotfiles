@@ -212,5 +212,8 @@ optional() {
 }
 
 clone_repos() {
-    git clone https://github.com/cuberhaus/WinDotfiles
+    git clone https://github.com/cuberhaus/WinDotfiles $HOME/repos/WinDotfiles
+    git clone https://github.com/cuberhaus/dev $HOME/repos/dev
+    git clone https://github.com/cuberhaus/TFG $HOME/repos/TFG
+    git clone https://github.com/cuberhaus/docs $HOME/repos/docs
 }
