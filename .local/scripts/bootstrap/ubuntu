@@ -18,7 +18,7 @@ base_install
 
 #albert_install
 #bloat_install
-#emacs_install
+emacs_install
 #steam_install
 
 clone_repos
