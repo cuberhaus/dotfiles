@@ -69,6 +69,7 @@ ubuntu_install() {
     # GUI
     $apt LXAppearance           # Theme
     $apt arc-theme 
+    $apt audacity
     $apt calibre
     $apt cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
     $apt gnome-screensaver      # Screensaver
