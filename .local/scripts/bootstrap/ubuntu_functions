@@ -177,6 +177,8 @@ i3_install () {
 snaps_install_optional() {
     sudo snap install android-studio --classic
     sudo snap install eclipse --classic
+    sudo snap install flutter --classic
+    sudo snap install jupyter
     sudo snap install postman
 }
 
@@ -188,6 +190,7 @@ snaps_install() {
     sudo snap install skype --classic
     sudo snap install slack --classic
     sudo snap install spotify
+    sudo snap install sublime-merge --classic
     sudo snap install sublime-text --classic
     sudo snap install walc
 }
