@@ -210,3 +210,7 @@ optional() {
     $apt qttools5-dev
     $apt qttools5-dev-tools
 }
+
+clone_repos() {
+    git clone https://github.com/cuberhaus/WinDotfiles
+}
