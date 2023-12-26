@@ -74,11 +74,16 @@ ubuntu_install() {
     $apt cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
     $apt gnome-screensaver      # Screensaver
     $apt gparted                # Manage partitions
+    $apt kitty
     $apt pavucontrol            # Audio
     $apt thunderbird            # Email
     $apt timeshift              # Backups
     $apt transmission           # A simpler Torrent D.
     $apt vlc                    # Media player
+
+    # One dark profile for gnome-terminal
+    # https://github.com/denysdovhan/one-gnome-terminal
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/denysdovhan/gnome-terminal-one/master/one-dark.sh)"
 
     if [[ $FirstRun == y ]]; then
         sudo adduser `id -un` libvirt
