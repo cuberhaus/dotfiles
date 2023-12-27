@@ -182,6 +182,7 @@ snaps_install_optional() {
     sudo snap install flutter --classic
     sudo snap install jupyter
     sudo snap install postman
+    sudo snap install steam
 }
 
 snaps_install() {
@@ -197,11 +198,11 @@ snaps_install() {
     sudo snap install walc
 }
 
-steam_install () {
-    wget https://repo.steampowered.com/steam/archive/precise/steam_latest.deb
-    sudo apt install ./steam_latest.deb
-    rm steam_latest.deb
-}
+# steam_install () {
+#     wget https://repo.steampowered.com/steam/archive/precise/steam_latest.deb
+#     sudo apt install ./steam_latest.deb
+#     rm steam_latest.deb
+# }
 
 vim_install () {
     cd $HOME 
