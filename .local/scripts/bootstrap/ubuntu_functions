@@ -79,6 +79,12 @@ ubuntu_install() {
     $apt timeshift              # Backups
     $apt transmission           # A simpler Torrent D.
     $apt vlc                    # Media player
+    $apt dconf-editor           # advanced configs
+
+    # Install Rstudio
+    $apt r-base
+    wget https://rstudio.org/download/latest/daily/desktop/jammy/rstudio-latest-amd64.deb
+    sudo dpkg -i rstudio-latest-amd64.deb 
 
     # $apt kitty # cant even close it from gnome
 
@@ -235,3 +241,13 @@ high_dpi_screen() {
     # Set icons to Large 'small' to set it smaller
     gsettings set org.gnome.shell.extensions.ding icon-size 'large' 
 }
+
+touchpad_speed() {
+    $apt xinput
+    # xinput list (find device id)
+    # xinput list-props [device id]
+    # xinput set-prop [device id] [property id] [value]
+
+
+}
+

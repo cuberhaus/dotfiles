@@ -299,6 +299,7 @@ Thumbs.db
 ## R
 # .config/rstudio/
 .local/share/rstudio/
+.config/rstudio
 ## QT
 .config/QtProject/
 ## Meld
