@@ -233,6 +233,7 @@ clone_repos() {
     git clone https://github.com/cuberhaus/docs $HOME/repos/docs
 }
 
+# This has some problems with some apps that are seen very tiny, it is definitely not the perfect solution
 high_dpi_screen() {
     # To fix high dpi screens, two options, go to 200% scaling, or fractional scaling, fractional scaling causes blurry text, more power usage, lower speed.
     # We instead increase text scaling
@@ -243,12 +244,11 @@ high_dpi_screen() {
     gsettings set org.gnome.shell.extensions.ding icon-size 'large' 
 }
 
+# This has no solution in wayland yet, unfortunately
 touchpad_speed() {
     $apt xinput
     # xinput list (find device id)
     # xinput list-props [device id]
     # xinput set-prop [device id] [property id] [value]
-
-
 }
 
