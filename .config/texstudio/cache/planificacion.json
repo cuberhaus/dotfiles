@@ -1,0 +1,64 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/tex/planificacion.tex",
+    "labels": [
+        "fig:gantt",
+        "tab:tareas_tiempo_dependencias"
+    ],
+    "modified": "Sun Nov 19 11:57:04 2023",
+    "packages": [
+    ],
+    "refs": [
+    ],
+    "toc": [
+        "1#Planificación#0",
+        "2#Descripción de las tareas#6",
+        "3#GP - Gestión del proyecto#14",
+        "4#GP.1 - Alcance#20",
+        "4#GP.2 - Planificación#26",
+        "4#GP.3 - Presupuesto#32",
+        "4#GP.4 - Informe de sostenibilidad#38",
+        "4#GP.5 - Reuniones#45",
+        "3#FT - Fase de documentación y aprendizaje#53",
+        "4#FT.1 - Aprendizaje de PyTorch#59",
+        "4#FT.2 - Estudio del Estado-del-arte#65",
+        "4#FT.3 - Estudio de las complicaciones al entrenar los modelos#71",
+        "4#FT.4 - Elección de Métricas de evaluación#77",
+        "4#FT.5 - Diseño del Modelo de detección#83",
+        "4#FT.6 - Diseño del Modelo de aumentación de datos#89",
+        "4#FT.7 - Estimación del tiempo de Entrenamiento#95",
+        "3#FP - Fase de Diseño y Desarrollo de modelos#102",
+        "4#FP.1 - Preprocesamiento de los datos#108",
+        "4#FP.2 - Implementación de un modelo de segmentación#114",
+        "4#FP.2.1 - Ajuste y Optimización#120",
+        "4#FP.2.2 - Evaluación del modelo#126",
+        "4#FP.3 - Implementación del modelo de aumentación de datos#132",
+        "4#FP.3.1 - Ajuste y Optimización#138",
+        "4#FP.3.2 - Evaluación del modelo#144",
+        "4#FP.4 - Guardado de modelos#150",
+        "4#FP.5 - Experimentación#156",
+        "3#Documentación del proyecto#163",
+        "4#DP.1 - Documentación#165",
+        "4#DP.2 - Conclusiones#171",
+        "4#DP.3 - Presentación#177",
+        "4#DP.4 - Lectura#183",
+        "3#Recursos#190",
+        "4#Recursos humanos#192",
+        "4#Recursos materiales#201",
+        "4#Recursos software#208",
+        "2#Estimaciones#217",
+        "2#Gantt#306",
+        "2#Gestión del riesgo: Planes alternativos y obstáculos#317",
+        "3#Retraso en el Tiempo en la ejecución de tareas#320",
+        "3#Desafíos en la segmentación de Pólipos#327",
+        "3#Generación de Datos sintéticos insuficientemente realistas#333",
+        "3#Enfermedad#339"
+    ],
+    "usercommands": [
+    ]
+}

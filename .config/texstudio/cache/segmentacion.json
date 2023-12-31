@@ -1,0 +1,58 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/tex/segmentacion.tex",
+    "labels": [
+        "fig:rpn",
+        "fig:retinanet",
+        "fig:spade",
+        "fig:pix2pixHD",
+        "fig:fastrcnn",
+        "fig:ssd",
+        "fig:fasterrcnn",
+        "fig:pix2pixHD_gan",
+        "fig:normalizacion",
+        "fig:cyclegan"
+    ],
+    "modified": "Sun Nov 19 11:57:04 2023",
+    "packages": [
+    ],
+    "refs": [
+    ],
+    "toc": [
+        "1#Red de Segmentación#0",
+        "2#Modelos elegidos#1",
+        "3#FastRcnn / FasterRCNN#3",
+        "4#Faster R-CNN#27",
+        "3#SSD#58",
+        "3#RetinaNet / Detectron#87",
+        "4#Funcionamiento del modelo#100",
+        "4#Ventajas#118",
+        "2#Métricas de evaluación#126",
+        "1#Red de Aumentación de Datos#147",
+        "2#Modelos#149",
+        "3#CycleGAN#151",
+        "4#Componentes clave#156",
+        "4#Funcionamiento de CycleGAN#163",
+        "4#Aplicaciones#181",
+        "3#Pix2PixHD#188",
+        "4#Conceptos clave#190",
+        "4#Funcionamiento de Pix2PixHD#195",
+        "3#SPADE#222",
+        "4#Conceptos clave de SPADE#225",
+        "4#Funcionamiento de SPADE#230",
+        "2#Entrenamiento#257",
+        "2#Generación de datos#259",
+        "2#Problemas de convergencia#305",
+        "3#Mode collapse#308",
+        "3#Vanishing gradients#349"
+    ],
+    "usercommands": [
+        "theorem",
+        "theorem"
+    ]
+}

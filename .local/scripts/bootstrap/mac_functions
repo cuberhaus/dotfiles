@@ -89,6 +89,7 @@ optional () {
     brew install intellij-idea-ce               # Free version
     brew install iterm2                         # Terminal emulator
     brew install jupyter                        # jupyter notebooks
+    brew install --cask jupyterlab
     brew install keka                           # Archiver open source
     brew install mactex                         # LaTex compiler
     brew install meld                           # Diff software

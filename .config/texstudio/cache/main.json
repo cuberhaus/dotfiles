@@ -1,0 +1,51 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+        "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/bibliography.bib#bibliography.bib"
+    ],
+    "childdocs": [
+        "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/tex/alcance.tex",
+        "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/tex/sostenibilidad.tex",
+        "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/tex/segmentacion.tex",
+        "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/tex/planificacion.tex",
+        "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/tex/presupuesto.tex"
+    ],
+    "filename": "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/main.tex",
+    "labels": [
+    ],
+    "modified": "Sun Nov 19 13:29:34 2023",
+    "packages": [
+        "#pdflscape",
+        "spanish#babel",
+        "#eurosym",
+        "#amsfonts",
+        " backend=bibtex, %style=alphabetic,style=numeric, sorting=ynt #biblatex",
+        "inkscapeformat=png#svg",
+        "#pgfplotstable",
+        "#graphicx",
+        "#hyperref",
+        "#nameref",
+        "#csquotes",
+        "#float",
+        "#wrapfig",
+        "#csvsimple",
+        "#lscape",
+        "#class-report",
+        "#latex-document",
+        "#tex",
+        "#pdfpages",
+        "#adjustbox"
+    ],
+    "refs": [
+    ],
+    "toc": [
+        "-1#tex/alcance#54",
+        "-1#tex/planificacion#56",
+        "-1#tex/presupuesto#58",
+        "-1#tex/sostenibilidad#60",
+        "-1#tex/segmentacion#63"
+    ],
+    "usercommands": [
+    ]
+}

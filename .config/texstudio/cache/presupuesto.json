@@ -1,0 +1,39 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/tex/presupuesto.tex",
+    "labels": [
+        "tab:coste_entrenamiento",
+        "tab:costos_materiales",
+        "tab:costes_contingencia",
+        "tab:coste_por_tarea",
+        "tab:costes_imprevistos",
+        "tab:costes_genericos",
+        "tab:sueldos_rol",
+        "tab:coste_rol",
+        "tab:horas_humanas_tarea",
+        "tab:coste_total"
+    ],
+    "modified": "Sun Nov 19 11:57:04 2023",
+    "packages": [
+    ],
+    "refs": [
+    ],
+    "toc": [
+        "1#Gestión económica (presupuesto)#0",
+        "2#Identificación de los costes#1",
+        "3#Costos de personal#2",
+        "3#Costes generalmente calculados#240",
+        "4#Costes materiales: Amortizaciones#241",
+        "4#Costes computacionales#301",
+        "4#Costes indirectos#349",
+        "3#Contingencias#399",
+        "2#Control de gestión#548"
+    ],
+    "usercommands": [
+    ]
+}

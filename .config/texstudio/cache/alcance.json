@@ -1,0 +1,50 @@
+{
+    "bibitems": [
+    ],
+    "bibtexfiles": [
+    ],
+    "childdocs": [
+    ],
+    "filename": "/Users/pol/Library/Mobile Documents/com~apple~CloudDocs/TFG/tex/alcance.tex",
+    "labels": [
+        "fig:gan",
+        "fig:vae",
+        "fig:diffusion_models"
+    ],
+    "modified": "Sun Nov 19 11:57:04 2023",
+    "packages": [
+    ],
+    "refs": [
+    ],
+    "toc": [
+        "1#Alcance y contexto#0",
+        "2#Introduccion#1",
+        "2#Contexto#14",
+        "3#Centrar el proyecto en el marco de la FIB#15",
+        "3#Definición de conceptos#18",
+        "4#Datos artificiales#39",
+        "4#VAE#45",
+        "4#GAN#67",
+        "4#Modelo de difusión#89",
+        "3#Identificación del problema a resolver#101",
+        "3#Actores implicados#107",
+        "2#Justificación#117",
+        "2#Alcance#129",
+        "3#Objetivos del proyecto#130",
+        "4#Subobjetivos#137",
+        "3#Identificar otros requerimientos funcionales o no funcionales#153",
+        "4#Requerimientos funcionales#154",
+        "4#Requerimientos no funcionales#162",
+        "3#Obstáculos y riesgos#175",
+        "4#Obstáculos técnicos#176",
+        "4#Obstáculos Médicos#183",
+        "4#Riesgos de Ética y privacidad#188",
+        "4#Riesgos de Evaluación de resultados#194",
+        "4#Riesgos de Recursos#202",
+        "2#Metodología y rigor#207",
+        "3#Metodología#208",
+        "3#Metodología del desarrollo de código#220"
+    ],
+    "usercommands": [
+    ]
+}
