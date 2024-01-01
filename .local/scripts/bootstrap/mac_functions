@@ -75,12 +75,13 @@ mac_install () {
     brew install visual-studio-code             # Text editor / IDE
     brew install vlc                            # Media Player
     brew install whatsapp                       # Messaging 
+    brew install --cask obsidian
 }
 
 optional () {
-    # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/brew.html
+    brew install --cask jupyterlab
+    brew install --cask zettlr
     brew install alfred                         # Better Spotlight
-    brew install thunderbird                    #mail, but use imail 
     brew install dbeaver-community adoptopenjdk       # BD
     brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
     brew install glfw                           # OpenGL
@@ -89,8 +90,8 @@ optional () {
     brew install intellij-idea-ce               # Free version
     brew install iterm2                         # Terminal emulator
     brew install jupyter                        # jupyter notebooks
-    brew install --cask jupyterlab
     brew install keka                           # Archiver open source
+    brew install logseq
     brew install mactex                         # LaTex compiler
     brew install meld                           # Diff software
     brew install neo4j                          # classes
@@ -104,10 +105,14 @@ optional () {
     brew install slack                          # Work
     brew install swi-prolog
     brew install telegram                       # Quickly transfer files
+    brew install thunderbird                    #mail, but use imail 
     brew install tmux                           # Terminal multiplexer
     brew install tor-browser                    # Private and uncensored browsing
     brew install unetbootin                     # Burn iso's (or use dd command)
     brew install xquartz                        # PAR use GUI through SSH
+
+
+    # https://www.elastic.co/guide/en/elasticsearch/reference/7.17/brew.html
     brew tap elastic/tap
     brew install elastic/tap/elasticsearch-full
     pip3 install --user elasticsearch_dsl       # APA
