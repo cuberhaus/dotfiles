@@ -81,6 +81,7 @@ mac_install () {
 optional () {
     brew install --cask jupyterlab
     brew install --cask zettlr
+
     brew install alfred                         # Better Spotlight
     brew install dbeaver-community adoptopenjdk       # BD
     brew install firefox # Gave it a try but google-chrome has automatic hyperlink support, print preview is better, faster icon bar loading
@@ -95,6 +96,7 @@ optional () {
     brew install mactex                         # LaTex compiler
     brew install meld                           # Diff software
     brew install neo4j                          # classes
+    brew install notion
     brew install obs                            # Screen recorder //very complicated on mac
     brew install processing                     # Classes
     brew install qt5                            # Qt stuff
