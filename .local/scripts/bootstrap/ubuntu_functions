@@ -188,8 +188,10 @@ snaps_install_optional() {
 snaps_install() {
     sudo snap install code --classic
     sudo snap install discord
-    sudo snap install intellij-idea-community --classic
-    sudo snap install pycharm-community --classic
+    sudo snap install intellij-idea-professional --classic
+    #sudo snap install intellij-idea-community --classic
+    # sudo snap install pycharm-community --classic # Does not accept jupyter notebook
+    sudo snap install pycharm-professional --classic
     sudo snap install skype --classic
     sudo snap install slack --classic
     sudo snap install spotify
