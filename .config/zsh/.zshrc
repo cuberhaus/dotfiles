@@ -99,7 +99,10 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 #}}}
 
 # Vim / Has to be at the end of file {{{
-eval "$(/home/pol/anaconda3/bin/conda shell.zsh hook)"
+if [ -f "/home/pol/anaconda3/bin/conda" ]; then
+    eval "$(/home/pol/anaconda3/bin/conda shell.zsh hook)"
+fi
+
 
 #eval spaceship_vi_mode_enable
 
