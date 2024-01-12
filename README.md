@@ -22,6 +22,7 @@ Clone repo and its submodules:
 git clone --recurse-submodules https://github.com/cuberhaus/dotfiles ~/dotfiles/dotfiles
 sudo apt-get update
 sudo apt-get upgrade
+sudo apt install stow
 cd dotfiles
 stow -vt ~ dotfiles/
 ```
