@@ -20,6 +20,10 @@ Clone repo and its submodules:
 
 ```bash
 git clone --recurse-submodules https://github.com/cuberhaus/dotfiles ~/dotfiles/dotfiles
+sudo apt-get update
+sudo apt-get upgrade
+cd dotfiles
+stow -vt ~ dotfiles/
 ```
 
 Use Stow to symlink files:
