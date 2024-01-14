@@ -51,13 +51,6 @@ if [ -n "$DESKTOP_SESSION" ];then
     export SSH_AUTH_SOCK
 fi
 
-# # Homebrew env variables
-# if [[ "$DISTRO" == "ubuntu"* ]]; then
-#     if [ -d "/home/linuxbrew/.linuxbrew/bin" ] ; then
-#         PATH="/home/linuxbrew/.linuxbrew/bin/:$PATH"
-#         PATH="/home/linuxbrew/.linuxbrew/sbin/:$PATH"
-#     fi
-# fi
 ###############################################################
 # => Variables
 ###############################################################
@@ -90,6 +83,18 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         setxkbmap es
     fi
     export PATH=/home/pol/fib/LI/picosat-965/bin:$PATH
+fi
+
+if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
+    flags="-S --noconfirm --needed"
+    pac="sudo pacman $flags"
+    yay="yay $flags"
+fi
+
+if [[ "$DISTRO" == "ubuntu"* ]]; then
+    flags="-y"
+    apt="sudo apt-get $flags install"
+    export apt=$apt
 fi
 
 if [ -d "$HOME/.config/doom-emacs" ] ; then
