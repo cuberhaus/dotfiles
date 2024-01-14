@@ -85,17 +85,6 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export PATH=/home/pol/fib/LI/picosat-965/bin:$PATH
 fi
 
-if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-    flags="-S --noconfirm --needed"
-    pac="sudo pacman $flags"
-    yay="yay $flags"
-fi
-
-if [[ "$DISTRO" == "ubuntu"* ]]; then
-    flags="-y"
-    apt="sudo apt-get $flags install"
-    export apt=$apt
-fi
 
 if [ -d "$HOME/.config/doom-emacs" ] ; then
     export PATH="$HOME/.config/doom-emacs/bin/:$PATH"

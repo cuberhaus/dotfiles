@@ -234,6 +234,19 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         "$cleanup
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
+
+    if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
+        flags="-S --noconfirm --needed"
+        alias \$pac="sudo pacman $flags"
+        alias \$yay="yay $flags"
+    fi
+
+    if [[ "$DISTRO" == "ubuntu"* ]]; then
+        # This works, its generally not recomended since now i cannot access variable with the same name, but that does not matter to me
+        flags="-y"
+        apt="sudo apt-get $flags install"
+        alias \$apt=$apt
+    fi
 fi
 
 # Do not surround with quotes
