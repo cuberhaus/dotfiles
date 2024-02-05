@@ -79,6 +79,7 @@ mac_install () {
 }
 
 optional () {
+    brew install --cask ganttproject
     brew install --cask jupyterlab
     brew install --cask zettlr
 
