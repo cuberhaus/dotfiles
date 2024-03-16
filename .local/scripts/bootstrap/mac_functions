@@ -82,6 +82,7 @@ optional () {
     brew install --cask ganttproject
     brew install --cask jupyterlab
     brew install --cask zettlr
+    brew install workflowy
 
     brew install alfred                         # Better Spotlight
     brew install dbeaver-community adoptopenjdk       # BD
