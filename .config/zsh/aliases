@@ -165,8 +165,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
     update="sudo softwareupdate -i -a; xcode-select --install; brew update; brew upgrade; brew update --cask; "$update
     updateall=$update"npm install npm -g;
-    emacs -f auto-package-update-now &;
     "$updateall
+    #emacs -f auto-package-update-now &;
+
     # sudo xcode-select -switch /Library/Developer/CommandLineTools
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     cleanup="brew cleanup;sudo gem cleanup;"$cleanup

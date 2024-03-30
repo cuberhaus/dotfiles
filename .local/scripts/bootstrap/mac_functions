@@ -75,7 +75,10 @@ mac_install () {
     brew install visual-studio-code             # Text editor / IDE
     brew install vlc                            # Media Player
     brew install whatsapp                       # Messaging 
-    brew install --cask obsidian
+    brew install --cask notion                  # Manage projects, personal CRM, note-taking etc.
+    brew install --cask notion-calendar         # Nice UI for Google calendar, can also link to notion
+    brew install --cask obsidian                # Journal, Reading highlights and book notes
+    brew install --cask todoist                 # Task manager
 }
 
 optional () {
