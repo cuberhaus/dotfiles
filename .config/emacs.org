@@ -1010,6 +1010,10 @@ Since I let evil-mode take over C-u for buffer scrolling, I need to re-bind the 
 #+end_src
 
 ** Org
+#+begin_src emacs-lisp
+        (eval-after-load "org"
+          '(require 'ox-md nil t))
+#+end_src
 *** images org
 #+begin_src emacs-lisp
 (add-to-list 'dnd-protocol-alist
