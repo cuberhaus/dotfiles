@@ -1,3 +1,4 @@
+.local/share/man/
 .config/jgit/config
 # Anaconda
 .config/fish/
