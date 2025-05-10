@@ -163,7 +163,7 @@ updateall="python3 -m pip install --user --upgrade pynvim &;
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
-    update="brew update; brew upgrade; brew update --cask ;sudo softwareupdate -i -a; xcode-select --install; "$update
+    update="brew update; brew upgrade; sudo softwareupdate -i -a; xcode-select --install; "$update
     updateall=$update"npm install npm -g;
     "$updateall
     #emacs -f auto-package-update-now &;
