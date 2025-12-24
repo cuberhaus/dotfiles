@@ -3,7 +3,7 @@ set -e
 
 # Description:
 # This script applies the fix for the PC not shutting down properly.
-# 1. It adds 'acpi=force' and 'nvidia-drm.modeset=1' to handle power management and graphics drivers.
+# 1. It adds 'acpi=force', 'nvidia-drm.modeset=1', 'pcie_port_pm=off' and 'acpi_osi=Linux' to handle power management and graphics drivers.
 # 2. It REMOVES 'quiet splash' to enable VERBOSE LOGGING during shutdown.
 #    This ensures you can see the commands executing while the system shuts down.
 
@@ -16,8 +16,8 @@ sudo cp --no-clobber /etc/default/grub /etc/default/grub.bak.$(date +%F_%T) || e
 # 2. Apply the GRUB configuration
 # We explicitly overwrite the line to ensure 'quiet splash' is GONE and our parameters are PRESENT.
 echo "Configuring GRUB parameters..."
-echo "Setting GRUB_CMDLINE_LINUX_DEFAULT to 'nvidia-drm.modeset=1 acpi=force'"
-sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="nvidia-drm.modeset=1 acpi=force"/' /etc/default/grub
+echo "Setting GRUB_CMDLINE_LINUX_DEFAULT to 'nvidia-drm.modeset=1 acpi=force pcie_port_pm=off acpi_osi=Linux'"
+sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="nvidia-drm.modeset=1 acpi=force pcie_port_pm=off acpi_osi=Linux"/' /etc/default/grub
 
 # 3. Verify the change
 echo "Verification - Current GRUB Line:"
