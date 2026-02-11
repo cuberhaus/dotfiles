@@ -99,8 +99,8 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 #}}}
 
 # Vim / Has to be at the end of file {{{
-if [ -f "/home/pol/anaconda3/bin/conda" ]; then
-    eval "$(/home/pol/anaconda3/bin/conda shell.zsh hook)"
+if [ -f "$HOME/anaconda3/bin/conda" ]; then
+    eval "$("$HOME/anaconda3/bin/conda" shell.zsh hook)"
 fi
 
 

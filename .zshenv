@@ -82,7 +82,9 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if laptop-detect ; then
         setxkbmap es
     fi
-    export PATH=/home/pol/fib/LI/picosat-965/bin:$PATH
+    if [ -d "$HOME/fib/LI/picosat-965/bin" ] ; then
+        export PATH="$HOME/fib/LI/picosat-965/bin:$PATH"
+    fi
 fi
 
 
@@ -96,7 +98,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export VISUAL=nvim
     export EDITOR="$VISUAL"
     export PATH="$HOME/.emacs.d/bin/:$PATH"
-    export PATH="/Users/pol/bin:$PATH"
+    if [ -d "$HOME/bin" ] ; then
+        export PATH="$HOME/bin:$PATH"
+    fi
     #https://stackoverflow.com/questions/603785/environment-variables-in-mac-os-x
     export KITTY_CONFIG_DIRECTORY="$HOME/dotfiles/dotfiles/.config/kitty/mac"
     #launchctl setenv KITTY_CONFIG_DIRECTORY $KITTY_CONFIG_DIRECTORY
@@ -107,9 +111,18 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     PATH="/usr/local/opt/llvm/bin:$PATH"
     export PATH=/opt/homebrew/sbin:$PATH
     export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
-    export PATH=/Users/pol/fib/LI/picosat-965-mac/bin:$PATH
+    if [ -d "$HOME/fib/LI/picosat-965-mac/bin" ] ; then
+        export PATH="$HOME/fib/LI/picosat-965-mac/bin:$PATH"
+    fi
     export PYTHONPATH
-    export PATH="/Users/pol/Library/Python/3.10/bin:$PATH"
+    # Add the most recent Python user bin to PATH
+    if command -v python3 &> /dev/null; then
+        _pyver=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+        if [ -d "$HOME/Library/Python/$_pyver/bin" ] ; then
+            export PATH="$HOME/Library/Python/$_pyver/bin:$PATH"
+        fi
+        unset _pyver
+    fi
 fi
 
 ###############################################################
