@@ -1,6 +1,7 @@
 ^/README.*
 ^/LICENSE.*
 ^/COPYING
+^/\.editorconfig
 
 .+~          # emacs backup files
 \#.*\#       # emacs autosave files
