@@ -133,7 +133,6 @@ base_install () {
     $pac zathura-pdf-mupdf
     $pac zathura-ps
     $pac zathura
-    $pac gnome-calculator
     $pac kalk
     $pac solaar # logitech unifying
     $pac telegram
@@ -501,7 +500,6 @@ emacs() {
     #format all
     $pac prettier
     #https://wiki.archlinux.org/title/Language_checking
-    $pac aspell
     $pac aspell-ca
     $pac aspell-de
     $pac aspell-en
@@ -512,7 +510,6 @@ emacs() {
     systemctl --user enable emacs # this enables emacs as a daemon
 
     # DOOM
-    $pac emacs-nativecomp
     $pac ripgrep
     $pac fd
     # sudo mkdir -p /home/ineu/.emacs.d/.local/

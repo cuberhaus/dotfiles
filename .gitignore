@@ -38,7 +38,6 @@ lpt6
 lpt7
 lpt8
 lpt9
-aux
 .config/wslu/
 
 # Caches
@@ -220,7 +219,6 @@ Calibre Library/metadata_db_prefs_backup.json
 
 # Windows
 *.swp
-*~
 
 # Tmux
 .config/tmux/plugins/tmux-battery/
