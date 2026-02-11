@@ -1,22 +1,28 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
+set -euo pipefail
 
 ### WARNING: If this script is to be changed, beware of the order of execution of every command
 
 ### VARIABLES
-scripts=$HOME/.local/scripts
-source $scripts/bootstrap/arch_functions        # Include functions
-source $scripts/bootstrap/base_functions # Include functions
+scripts="$HOME/.local/scripts"
+source "$scripts/bootstrap/base_functions"
+source "$scripts/bootstrap/arch_functions"
+
+### FIRST RUN
+read -rp "Is this a first-time install? (y/n): " FirstRun
+export FirstRun
 
 ### INSTALLATION
-# merge this two scripts in the future
-#echo "Run manjaro script with compilation?"
+info "Updating system..."
 sudo pacman -Syu
+
 install_preparation
+
 echo "#! /bin/sh
-export DISTRO=manjaro" > $HOME/.config/distro   # Distro variable
-sudo cp $HOME/dotfiles/dotfiles/.local/share/icons/Avatar.jpg /usr/share/icons/Avatar.jpg # Move avatar picture so that LightDM can find it
-sudo cp $HOME/dotfiles/dotfiles/.local/share/icons/Avatar.jpg $HOME/.face # Move avatar picture so mugshot can find it
+export DISTRO=manjaro" > "$HOME/.config/distro"   # Distro variable
+sudo cp "$HOME/dotfiles/dotfiles/.local/share/icons/Avatar.jpg" /usr/share/icons/Avatar.jpg # Move avatar picture so that LightDM can find it
+sudo cp "$HOME/dotfiles/dotfiles/.local/share/icons/Avatar.jpg" "$HOME/.face" # Move avatar picture so mugshot can find it
 
 ### ONLY CHANGE FROM HERE ON
 base_install
@@ -42,4 +48,6 @@ vim_install
 emacs
 
 #wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
-chsh -s $(which zsh)                            # Change default shell to zsh
+chsh -s "$(which zsh)"                          # Change default shell to zsh
+
+info "Bootstrap complete!"

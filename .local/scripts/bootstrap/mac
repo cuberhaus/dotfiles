@@ -1,10 +1,11 @@
-#!/bash/sh
+#!/usr/bin/env bash
 # Author: https://github.com/cuberhaus
+set -euo pipefail
 
 ### VARIABLES
-scripts=$HOME/.local/scripts
-source $scripts/bootstrap/mac_functions # Include functions
-source $scripts/bootstrap/base_functions # Include functions
+scripts="$HOME/.local/scripts"
+source "$scripts/bootstrap/base_functions"
+source "$scripts/bootstrap/mac_functions"
 
 ### INSTALLATION
 install_preparation
@@ -14,3 +15,5 @@ mac_install
 vim_install
 #bloat_install
 #doom_emacs_install
+
+info "Bootstrap complete!"

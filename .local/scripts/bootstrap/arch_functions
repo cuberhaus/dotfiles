@@ -11,7 +11,7 @@
 #npm by default is system-wide unless using npm_config_prefix then npm install packageName will install package in user
 ### VARIABLES
 
-scripts=$HOME/.local/scripts
+scripts="$HOME/.local/scripts"
 flags="-S --noconfirm --needed"
 pac="sudo pacman $flags"
 yay="yay $flags"
@@ -45,7 +45,7 @@ base_install () {
     $pac dnsutils                               # Ip
     $pac dunst                                  # Notifications
     $pac dunstify                               # dunst notification
-    $pac exa                                    # "ls" on steroids
+    $pac eza                                    # "ls" on steroids (exa replacement)
     $pac exfat-utils                            # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
     $pac file-roller                            # Archive Manager (extract, unzip...)
     $pac firefox                                # chrome doesn't redirect to wifi page's
@@ -172,8 +172,8 @@ base_install () {
 }
 
 git_repos() {
-    mkdir $HOME/repos/
-    cd repos/
+    mkdir -p "$HOME/repos/"
+    cd "$HOME/repos/"
     git clone https://github.com/cuberhaus/WinDotfiles.git
     git clone https://github.com/cuberhaus/docs.git
     git clone https://github.com/cuberhaus/dev.git
@@ -252,7 +252,7 @@ arch_and_manjaro() {
     sudo groupadd -r sambashare
     sudo chown root:sambashare /var/lib/samba/usershares
     sudo chmod 1770 /var/lib/samba/usershares
-    sudo gpasswd sambashare -a your_username
+    sudo gpasswd sambashare -a "$USER"
     git config --global credential.helper store # Remember git password
 
     # /etc/samba/smb.conf
@@ -289,25 +289,31 @@ manjaro_install() {
 
 # Call from base_install
 yay_install() {
-    cd $HOME/
-    git clone https://aur.archlinux.org/yay.git
-    cd yay
-    makepkg -si
-    sudo rm -r $HOME/yay
+    if ! command -v yay &>/dev/null; then
+        info "Installing yay..."
+        cd "$HOME/"
+        git clone https://aur.archlinux.org/yay.git
+        cd yay
+        makepkg -si
+        sudo rm -r "$HOME/yay"
+    else
+        info "yay already installed, skipping."
+    fi
 }
 
 vim_install () {
+    info "Installing vim/neovim plugins..."
     $pac  neovim
-    cd $HOME
+    cd "$HOME"
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
-    bash $scripts/ycm.sh
+    bash "$scripts/ycm.sh"
     $pac python-pip
     $pip wheel
     npm install neovim
     python3 -m $pip --upgrade pynvim
     sudo gem install neovim
-    sudo chmod +w $HOME/.vim/cache/viminfo
+    sudo chmod +w "$HOME/.vim/cache/viminfo"
 
 
     $pac ctags
@@ -317,7 +323,7 @@ vim_install () {
     $pac autopep8
     $pac yapf
     npm install js-beautify
-    $pac install cmake-format
+    $pac cmake-format
     npm install remark-cli
     $pac shfmt
     $pac stylish-haskell
@@ -327,7 +333,7 @@ vim_install () {
 
 # Best Tiling Window Manager
 i3_install () {
-    sudo usermod -a -G video pol                # Needed for light
+    sudo usermod -a -G video "$USER"            # Needed for light
 
     # AUR
     $yay cava                                   # https://github.com/karlstav/cava
@@ -358,7 +364,7 @@ xmonad_install () {
     $pac xmobar                                 # Best bar for xmonad
     $pac xmonad-contrib                         # Xmonad with extra plugins
     $pac xorg-xmessage                          # xmonad send messages
-    sudo mkdir /etc/pacman.d/hooks/
+    sudo mkdir -p /etc/pacman.d/hooks/
     # https://stackoverflow.com/questions/84882/sudo-echo-something-etc-privilegedfile-doesnt-work
     echo "[Trigger]
 Operation = Upgrade
@@ -368,7 +374,7 @@ Target = xmonad
 [Action]
 Description = Recompiling xmonad...
 When = PostTransaction
-Exec = /usr/bin/sudo -u pol /usr/bin/xmonad --recompile"  | sudo tee /etc/pacman.d/hooks/xmonad.hook
+Exec = /usr/bin/sudo -u $USER /usr/bin/xmonad --recompile"  | sudo tee /etc/pacman.d/hooks/xmonad.hook
 }
 
 # Best Desktop
@@ -460,13 +466,14 @@ laptop_install() {
 }
 
 dwall() {
-    cd $HOME
+    info "Installing dynamic wallpapers..."
+    cd "$HOME"
     git clone https://github.com/adi1090x/dynamic-wallpaper.git
     cd dynamic-wallpaper
     chmod +x install.sh
     ./install.sh
-    cd $HOME
-    sudo rm -r $HOME/dynamic-wallpaper
+    cd "$HOME"
+    sudo rm -r "$HOME/dynamic-wallpaper"
 }
 
 emacs() {
@@ -476,7 +483,7 @@ emacs() {
     [ -d ~/.emacs.d ] && mv ~/.emacs.d ~/.emacs.default
     git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
 
-    echo "default" | tee $HOME/.config/chemacs/profile
+    echo "default" | tee "$HOME/.config/chemacs/profile"
     $pip ptvsd                          # for python dap
     $pip grip                            # real time preview compiler 
     # npm install marked  

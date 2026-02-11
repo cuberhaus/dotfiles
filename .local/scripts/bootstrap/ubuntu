@@ -1,16 +1,24 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
+set -euo pipefail
 
 ### VARIABLES
-scripts=$HOME/.local/scripts
-source $scripts/bootstrap/ubuntu_functions  # Include functions
-source $scripts/bootstrap/base_functions # Include functions
+scripts="$HOME/.local/scripts"
+source "$scripts/bootstrap/base_functions"
+source "$scripts/bootstrap/ubuntu_functions"
+
+### FIRST RUN
+read -rp "Is this a first-time install? (y/n): " FirstRun
+export FirstRun
 
 ### INSTALLATION
-sudo apt-get update; sudo apt-get full-upgrade
+info "Updating system..."
+sudo apt-get update && sudo apt-get full-upgrade -y
+
 install_preparation
+
 echo "#! /bin/sh
-export DISTRO=ubuntu" > $HOME/.config/distro
+export DISTRO=ubuntu" > "$HOME/.config/distro"
 
 ### ONLY CHANGE FROM HERE ON
 brew_install
@@ -27,4 +35,6 @@ chrome_install
 snaps_install
 ubuntu_install
 vim_install
-chsh -s $(which zsh)                        # Change default shell to zsh
+chsh -s "$(which zsh)"                      # Change default shell to zsh
+
+info "Bootstrap complete!"

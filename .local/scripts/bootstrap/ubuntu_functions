@@ -3,6 +3,7 @@
 flags="-y"
 apt="sudo apt-get $flags install"
 ycm="$HOME/.local/scripts/ycm.sh" # make sure it's there
+scripts="$HOME/.local/scripts"
 
 base_install () { ## For windows install it's good to have this
     # System tools
@@ -12,7 +13,7 @@ base_install () { ## For windows install it's good to have this
     $apt build-essential 
     $apt cmake                  # To install ycm
     $apt curl 
-    $apt exa                    # ls on steroids
+    $apt eza                    # ls on steroids (exa replacement)
     $apt file 
     $apt fonts-powerline 
     $apt fzf                    # Fuzzy finder
@@ -44,7 +45,7 @@ base_install () { ## For windows install it's good to have this
     $apt zsh
     $apt eog                    # To view images, can launch it from terminal (works on windows)
     $apt sshfs                  # To mount a remote file system with ssh (usefull to manipulate files with any ubuntu programs that you cannot install in remote) sshfs username@remote_host:/remote_directory ~/remote_dir
-    chsh -s $(which zsh)
+    chsh -s "$(which zsh)"
     git config --global credential.helper store
 }
 
@@ -100,7 +101,7 @@ ubuntu_install() {
 
 albert_install () {
     if ! command -v albert 2>/dev/null; then
-        cd $HOME
+        cd "$HOME"
         curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
         echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_20.04/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
         sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_20.04/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
@@ -127,7 +128,7 @@ emacs_install () {
     [ -d ~/.emacs.d ] && mv ~/.emacs.d ~/.emacs.default
     git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
 
-    echo "default" | tee $HOME/.config/chemacs/profile
+    echo "default" | tee "$HOME/.config/chemacs/profile"
 
     # systemctl --user enable emacs # this enables emacs as a daemon
 
@@ -166,9 +167,9 @@ i3_install () {
     # Add current user to group video, type groups to see which groups you are in
     sudo usermod -a -G video $LOGNAME
     # Light setup | Enables brightness controls
-    cd $HOME
+    cd "$HOME"
     git clone https://github.com/haikarainen/light
-    cd light
+    cd "$HOME/light"
     ./autogen.sh
     ./configure && make
     sudo make install
@@ -207,9 +208,10 @@ snaps_install() {
 # }
 
 vim_install () {
-    cd $HOME 
+    info "Installing vim/neovim plugins..."
+    cd "$HOME"
     vim +PlugInstall +qall                      # Update plugins
-    bash $ycm                     # Vim YouCompleteMe plugin install
+    bash "$ycm"                   # Vim YouCompleteMe plugin install
     sudo npm install -g neovim                  # npm on neovim
     python3 -m pip install --user --upgrade pynvim # Python for neovim
     sudo gem install neovim                     # Gem for neovim
@@ -229,10 +231,12 @@ optional() {
 }
 
 clone_repos() {
-    git clone https://github.com/cuberhaus/WinDotfiles $HOME/repos/WinDotfiles
-    git clone https://github.com/cuberhaus/dev $HOME/repos/dev
-    git clone https://github.com/cuberhaus/TFG $HOME/repos/TFG
-    git clone https://github.com/cuberhaus/docs $HOME/repos/docs
+    info "Cloning repos..."
+    mkdir -p "$HOME/repos"
+    git clone https://github.com/cuberhaus/WinDotfiles "$HOME/repos/WinDotfiles" || true
+    git clone https://github.com/cuberhaus/dev "$HOME/repos/dev" || true
+    git clone https://github.com/cuberhaus/TFG "$HOME/repos/TFG" || true
+    git clone https://github.com/cuberhaus/docs "$HOME/repos/docs" || true
 }
 
 # This has some problems with some apps that are seen very tiny, it is definitely not the perfect solution
