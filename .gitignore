@@ -1,62 +1,280 @@
-.local/share/man/
-.config/jgit/config
-# Anaconda
-.config/fish/
+# =============================================================================
+# Whitelist gitignore — ignore everything, then un-ignore what we track.
+# New apps that write to ~/.config or ~/.local are invisible by default.
+# =============================================================================
 
-.config/pulse/
-# github 
-.config/gh/
+# Ignore everything
+*
 
-.local/share/recently-used.xbel
-.config/.mono/
-.config/xbuild/
-.local/bin
-.local/state/
-.local/lib/
-.config/github-copilot/*
+# =============================================================================
+# Top-level files
+# =============================================================================
+!.zshenv
+!.bashrc
+!.bash_profile
+!.xinitrc
+!.xprofile
+!.Xresources
+!.Xmodmap
+!.screenrc
+!.editorconfig
+!.gitignore
+!.gitmodules
+!.stow-local-ignore
+!README.md
+!LICENSE
 
-# Windows reserved names
-con
-prn
-aux
-nul
-com1
-com2
-com3
-com4
-com5
-com6
-com7
-com8
-com9
-lpt1
-lpt2
-lpt3
-lpt4
-lpt5
-lpt6
-lpt7
-lpt8
-lpt9
-.config/wslu/
+# =============================================================================
+# Top-level directories (fully tracked)
+# =============================================================================
+!.vim/
+!.vim/**
+!.doom.d/
+!.doom.d/**
+!.xmonad/
+!.xmonad/**
+!.cinnamon/
+!.cinnamon/**
+!.conky/
+!.conky/**
+!.hammerspoon/
+!.hammerspoon/**
+!.tomighty/
+!.tomighty/**
 
-# Caches
-.cache
-*.tmp
+# =============================================================================
+# .cache/ — only emacs bookmarks
+# =============================================================================
+!.cache/
+.cache/*
+!.cache/emacs/
+.cache/emacs/*
+!.cache/emacs/var/
+.cache/emacs/var/*
+!.cache/emacs/var/bookmark-default.el
 
-# Joplin
-.config/joplin-desktop/
+# =============================================================================
+# .config/ — un-ignore tracked subdirs and standalone files
+# =============================================================================
+!.config/
+.config/*
 
-# Cinnamon // causes git changes
-.cinnamon/spices.cache
+# Standalone files in .config/
+!.config/.p10k.zsh
+!.config/.git-prompt-colors.sh
+!.config/birdtray-config.json
+!.config/emacs.org
+!.config/inputrc
+!.config/stick
+!.config/stickyKeys
+!.config/libinput-gestures.conf
+!.config/Colemak DH ISO KS.keylayout
+!.config/colemak DH ISO ES.bundle/
+!.config/colemak DH ISO ES.bundle/**
 
-# Jupyter
-.local/etc/jupyter/
+# Shell
+!.config/zsh/
+!.config/zsh/**
+!.config/antigen/
+!.config/antigen/**
+!.config/base16-shell
+!.config/bash-git-prompt
+
+# Editors
+!.config/nvim/
+!.config/nvim/**
+!.config/my_emacs/
+!.config/my_emacs/**
+!.config/chemacs/
+!.config/chemacs/**
+!.config/snippets
+!.config/sublime-text-3/
+!.config/sublime-text-3/**
+
+# Terminals
+!.config/kitty/
+!.config/kitty/**
+!.config/alacritty/
+!.config/alacritty/**
+!.config/termite/
+!.config/termite/**
+!.config/iterm2/
+!.config/iterm2/**
+
+# Window managers / bars
+!.config/i3/
+!.config/i3/**
+!.config/i3blocks/
+!.config/i3blocks/**
+!.config/i3-layout-manager/
+!.config/i3-layout-manager/**
+!.config/sway/
+!.config/sway/**
+!.config/qtile/
+!.config/qtile/**
+!.config/xmobar/
+!.config/xmobar/**
+!.config/polybar/
+!.config/polybar/**
+!.config/rofi/
+!.config/rofi/**
+!.config/rasi/
+!.config/rasi/**
+
+# Notifications / compositor
+!.config/dunst/
+!.config/dunst/**
+!.config/picom/
+!.config/picom/**
+
+# Desktop environment
+!.config/cinnamon/
+!.config/cinnamon/**
+!.config/dconf/
+!.config/dconf/**
+
+# Utilities
+!.config/ranger/
+!.config/ranger/**
+!.config/tmux/
+!.config/tmux/**
+!.config/albert/
+!.config/albert/**
+!.config/karabiner/
+!.config/karabiner/**
+!.config/htop/
+!.config/htop/**
+!.config/betterlockscreen/
+!.config/betterlockscreen/**
+
+# Apps
+!.config/vlc/
+!.config/vlc/**
+!.config/cava/
+!.config/cava/**
+!.config/glava/
+!.config/glava/**
+!.config/conky/
+!.config/conky/**
+!.config/neofetch/
+!.config/neofetch/**
+!.config/nvidia/
+!.config/nvidia/**
+!.config/rstudio/
+!.config/rstudio/**
+!.config/zathura/
+!.config/zathura/**
+!.config/texstudio/
+!.config/texstudio/**
+!.config/libreoffice/
+!.config/libreoffice/**
+!.config/composer/
+!.config/composer/**
+!.config/wget/
+!.config/wget/**
+
+# Icons / dictionaries
+!.config/icons/
+!.config/icons/**
+!.config/Dictionary/
+!.config/Dictionary/**
+
+# =============================================================================
+# .local/ — un-ignore tracked subdirs
+# =============================================================================
+!.local/
+.local/*
+
+!.local/README.md
+!.local/scripts/
+!.local/scripts/**
+!.local/etc/
+!.local/etc/**
+!.local/LibreOfficePluggins/
+!.local/LibreOfficePluggins/**
+!.local/Mini/
+!.local/Mini/**
+!.local/xdg/
+!.local/xdg/**
+
+!.local/share/
+.local/share/*
+!.local/share/fonts/
+!.local/share/fonts/**
+!.local/share/icons/
+!.local/share/icons/**
+!.local/share/nvim/
+!.local/share/nvim/**
+!.local/share/xfce4/
+!.local/share/xfce4/**
+!.local/share/composer/
+!.local/share/composer/**
+!.local/share/man/
+!.local/share/man/**
+!.local/share/firefox_shortcuts.md
+
+# =============================================================================
+# Build artifacts inside tracked dirs
+# =============================================================================
 
 # Xmonad
+.xmonad/xmonad-x86_64-linux
+.xmonad/xmonad.errors
+.xmonad/*.hi
+.xmonad/*.o
 .xmonad/build-x86_64-linux/
 
-# LibreOffice
+# Vim (plugin dirs installed by package managers)
+.vim/autoload/
+.vim/plugged/
+.vim/spell/
+.vim/cache/
+.vim/theme
+
+# Antigen runtime
+.config/antigen/bundles/
+.config/antigen/init.zsh
+.config/antigen/init.zsh.zwc
+.config/antigen/.zcompdump*
+.config/antigen/debug.log
+.config/antigen/.resources
+.config/antigen/revert-info
+
+# Zsh runtime
+.config/zsh/.zcompdump*
+.config/zsh/.zsh_history
+.config/zsh/.zshrc.zwc
+.config/zsh/.zsh_sessions/
+
+# Nvim plugin dirs
+.config/nvim/autoload/
+.config/nvim/plugged/
+
+# Tmux plugins (installed by tpm, except tpm itself which is a submodule)
+.config/tmux/plugins/tmux-battery/
+.config/tmux/plugins/tmux-continuum/
+.config/tmux/plugins/tmux-pain-control/
+.config/tmux/plugins/tmux-prefix-highlight/
+.config/tmux/plugins/tmux-resurrect/
+.config/tmux/plugins/tmux-sensible/
+
+# Emacs
+.config/my_emacs/eln-cache/
+.config/my_emacs/elpa/
+.config/my_emacs/.last-package-update-day
+.config/chemacs/profile
+
+# Texstudio runtime
+.config/texstudio/templates/
+.config/texstudio/macro/
+.config/texstudio/completion/
+.config/texstudio/lastSession.txss
+.config/texstudio/lastSession.txss2
+.config/texstudio/packageCache.dat
+.config/texstudio/template_resources.xml
+.config/texstudio/wordCount.usage
+
+# LibreOffice runtime
 .config/libreoffice/4/user/GraphicsRenderTests.log
 .config/libreoffice/4/user/autotext/
 .config/libreoffice/4/user/basic/
@@ -68,248 +286,21 @@ lpt9
 .config/libreoffice/4/user/uno_packages/
 .config/libreoffice/4/cache/
 
-# Linux
-.config/gtk-2.0/
-
-# VSCode
-*.vscode/
-
-# TexStudio
-# .config/texstudio/
-.config/texstudio/templates/
-.config/texstudio/macro/
-.config/texstudio/completion/
-.config/texstudio/lastSession.txss
-.config/texstudio/lastSession.txss2
-.config/texstudio/packageCache.dat
-.config/texstudio/template_resources.xml
-.config/texstudio/wordCount.usage
-# Texmaker ?
-.config/xm1/
-
-# Emacs
-.config/my_emacs/eln-cache
-.cache/emacs/var/lsp/
-.config/com.corsair/
-.cache/emacs/var/eshell/
-.cache/emacs/var/gamegrid-user-score/
-.cache/emacs/var/spell-fu/
-*.elc
-*~
-.\#*
-.cache/emacs/var/auto-package-update-last-update-day
-.cache/emacs/var/org/
-.cache/emacs/var/prescient-save.el
-.cache/emacs/var/projectile/
-.cache/emacs/var/recentf-save.el
-.cache/emacs/var/transient/
-.cache/emacs/var/treemacs/
-.config/doom-emacs/
-.config/my_emacs/.last-package-update-day
-.config/my_emacs/elpa/
-/.emacs.desktop
-/.emacs.desktop.lock
-\#*\#
-auto-save-list
-tramp
-.config/chemacs/profile
-
-# Org-mode
-.org-id-locations
-*_archive
-# flymake-mode
-*_flymake.*
-# eshell files
-/eshell/history
-/eshell/lastdir
-# elpa packages
-/elpa/
-# reftex files
-*.rel
-# AUCTeX auto folder
-/auto/
-# Flycheck
-flycheck_*.el
-
-# cask packages
-.cask/
-dist/
-
-# server auth directory
-/server/
-
-# projectiles files
-.projectile
-
-# directory configuration
-.dir-locals.el
-
-# network security
-/network-security.data
-
-# Sublime Text
+# Sublime Text runtime
 .config/sublime-text-3/Installed Packages/
 .config/sublime-text-3/Local/
 .config/sublime-text-3/Packages/SublimeCodeIntel/
 
-# Icons
-.local/share/icons/hicolor/
-
-# Termite
-.config/termite/config
-
-# XFCE
-.local/share/xfce4/helpers/
-
-# xmonad
-.xmonad/xmonad-x86_64-linux
-.xmonad/xmonad.errors
-.xmonad/xmonad.hi
-.xmonad/xmonad.o
-
-# bin
-.local/include/
-.local/lib/python3.9/
-
-# KDE
-.config/okularrc
-.config/plasmashellrc
-.config/kconf_updaterc
-.config/kde.org/
-.config/ksmserverrc
-.config/kactivitymanagerd-statsrc
-.config/kactivitymanagerdrc
-.config/kded5rc
-.config/ksplashrc
-.config/ktimezonedrc
-.config/kwalletrc
-.config/okularpartrc
-.config/plasma-localerc
-.config/plasma-nm
-.config/plasma.emojierrc
-.config/plasmanotifyrc
-.config/powermanagementprofilesrc
-.config/kateschemarc
-.config/kcminputrc
-.config/kwinrulesrc
-.config/kxkbrc
-.config/plasmarc
-
-# Antigen
-.config/antigen/.zcompdump*
-.config/antigen/debug.log
-.config/antigen/init.zsh
-.config/antigen/init.zsh.zwc
-.config/antigen/bundles/
-.config/antigen/.resources
-.config/antigen/revert-info
-
-# Zsh
-.config/zsh/.zshrc.zwc
-.config/zsh/.zcompdump*
-.config/zsh/.zsh_history
-.config/zsh/.zsh_sessions/
-
-# Distro
-.config/distro
-
-# Calibre
-Calibre Library/metadata_db_prefs_backup.json
-.config/Calibre Library/
-
-# Windows
-*.swp
-
-# Tmux
-.config/tmux/plugins/tmux-battery/
-.config/tmux/plugins/tmux-continuum/
-.config/tmux/plugins/tmux-pain-control/
-.config/tmux/plugins/tmux-prefix-highlight/
-.config/tmux/plugins/tmux-resurrect/
-.config/tmux/plugins/tmux-sensible/
-
-# Vim
-vim/
-.local/share/vim/viminfo
-.vim/autoload/
-.vim/plugged/
-.vim/spell/
-.config/nvim/autoload/
-.config/nvim/plugged/
-.vim/cache/
-.vim/theme
-#.local/share/vim/
-
-# Fonts
-*.uuid
-
-# Nvidia
-.config/nvidia/settings
-
-# Compiled Python files
-*.pyc
-
-# Folder view configuration files
-.DS_Store
-Desktop.ini
-
-# Thumbnail cache files
-._*
-Thumbs.db
-
-# Files that might appear on external disks
-.Spotlight-V100
-.Trashes
-
-# Git merge files
-*orig
-
-# CACHE FILES
-## Ranger
-.config/ranger/plugins/__init__.py
-.local/share/ranger/
-## Albert files
+# Albert runtime
 .config/albert/core.db
 .config/albert/org.albert*
 .config/albert/last_used_version
-## Vifm files
-.config/vifm/scripts
-.config/vifm/colors
-.config/vifm/vifminfo
-.config/vifm/vifm-help.txt
-## Stretchly
-.config/stretchly/Cache/
-.config/stretchly/Code Cache/
-.config/stretchly/Cookies
-.config/stretchly/Cookies-journal
-.config/stretchly/GPUCache/
-.config/stretchly/Network Persistent State
-.config/stretchly/Session Storage/
-.config/stretchly/TransportSecurity
-## Transmission
-.config/transmission/dht.dat
-.config/transmission/resume/
-.config/transmission/stats.json
-.config/transmission/torrents/
-## Prolog
-.config/swi-prolog/
-## Tomighty
-.tomighty/cache/
-## R
-# .config/rstudio/
-.local/share/rstudio/
-.config/rstudio
-## QT
-.config/QtProject/
-## Meld
-.local/share/meld/
-## Rclone
-.config/rclone/
-## Iterm 2
-.config/iterm2/AppSupport
-## Karabiner
-# .config/karabiner/
-.local/share/karabiner/
-## Git
-.gitconfig
 
+# Ranger runtime
+.config/ranger/plugins/__init__.py
+
+# Cinnamon runtime
+.cinnamon/spices.cache
+
+# Distro (generated by bootstrap scripts)
+.config/distro
