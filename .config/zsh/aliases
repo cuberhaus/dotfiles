@@ -126,7 +126,12 @@ alias yolo="$yolo"
 alias pull="git_recurse -c 'git pull'"
 alias status="git_recurse -c 'git status'"
 
-if command -v exa &> /dev/null
+if command -v eza &> /dev/null
+then
+    alias ls="eza --group-directories-first"
+    alias la="eza --group-directories-first -a"
+    alias l="eza -a -F --long --header --links --group --group-directories-first --git"
+elif command -v exa &> /dev/null
 then
     alias ls="exa --group-directories-first"
     alias la="exa --group-directories-first -a"

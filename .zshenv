@@ -3,6 +3,15 @@
 # IN MAC YOU MAY HAVE TO PUT HOMEBREW IN zprofile
 # path_helper is executed from /etc/zprofile and sources /etc/paths then /etc/path.d
 # zshrc and zprofile go after that, check order to make sure
+
+###############################################################
+# => XDG Base Directories (must be set before anything else)
+###############################################################
+
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+
 ###############################################################
 # => Path
 ###############################################################
@@ -56,7 +65,7 @@ fi
 ###############################################################
 
 # Zsh files:
-export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh" # For more information RTFM https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
+export ZDOTDIR="$XDG_CONFIG_HOME/zsh" # For more information RTFM https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
 export DOTFILES="$HOME/dotfiles/dotfiles"
 export WALLPAPER_LIGHT="$HOME/.local/xdg/wallpapers/doggo.jpeg"
 export WALLPAPER_DARK="$HOME/Downloads/wallpapers/pexels-eberhard-grossgasteiger-1612351.jpg"
@@ -131,25 +140,20 @@ fi
 
 #export GEM_HOME="$XDG_DATA_HOME"/gem
 #export GEM_SPEC_CACHE="$XDG_CACHE_HOME"/gem
-export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_DATA_HOME="$HOME/.local/share"
-export XDG_CACHE_HOME="$HOME/.cache"
 #export XAUTHORITY="$XDG_RUNTIME_DIR/Xauthority" # This line will break some DMs.
-export NOTMUCH_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/notmuch-config"
-export GTK2_RC_FILES="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-2.0/gtkrc-2.0"
+export NOTMUCH_CONFIG="$XDG_CONFIG_HOME/notmuch-config"
 export LESSHISTFILE="-"
-export WGETRC="${XDG_CONFIG_HOME:-$HOME/.config}/wget/wgetrc"
-export INPUTRC="${XDG_CONFIG_HOME:-$HOME/.config}/inputrc"
+export WGETRC="$XDG_CONFIG_HOME/wget/wgetrc"
+export INPUTRC="$XDG_CONFIG_HOME/inputrc"
 #export GNUPGHOME="$XDG_DATA_HOME/gnupg"
-export WINEPREFIX="${XDG_DATA_HOME:-$HOME/.local/share}/wineprefixes/default"
-export KODI_DATA="${XDG_DATA_HOME:-$HOME/.local/share}/kodi"
-export PASSWORD_STORE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/password-store"
+export WINEPREFIX="$XDG_DATA_HOME/wineprefixes/default"
+export KODI_DATA="$XDG_DATA_HOME/kodi"
+export PASSWORD_STORE_DIR="$XDG_DATA_HOME/password-store"
 export TMUX_TMPDIR="$XDG_RUNTIME_DIR"
-export ANDROID_SDK_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/android"
-export CARGO_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/cargo"
-export GOPATH="${XDG_DATA_HOME:-$HOME/.local/share}/go"
-export ANSIBLE_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/ansible/ansible.cfg"
-export UNISON="${XDG_DATA_HOME:-$HOME/.local/share}/unison"
+export CARGO_HOME="$XDG_DATA_HOME/cargo"
+export GOPATH="$XDG_DATA_HOME/go"
+export ANSIBLE_CONFIG="$XDG_CONFIG_HOME/ansible/ansible.cfg"
+export UNISON="$XDG_DATA_HOME/unison"
 export HISTFILE="$XDG_DATA_HOME"/bash/.bash_history
 export ATOM_HOME="$XDG_DATA_HOME"/atom
 # Android sdk
