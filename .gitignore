@@ -209,6 +209,7 @@
 .local/share/*
 !.local/share/fonts/
 !.local/share/fonts/**
+.local/share/fonts/**/.uuid
 !.local/share/icons/
 !.local/share/icons/**
 !.local/share/nvim/
