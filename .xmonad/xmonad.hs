@@ -1,7 +1,7 @@
 -- My XMonad configuration
 -- WARNING: May need to shut down XMonad completely to see changes,
 -- try to exit if not working properly with some change.
--- Author: https://github.com/cuberhaus/dotfiles
+-- Repository: https://github.com/cuberhaus/dotfiles
 
 -- IMPORTS
 import Data.List (sortBy)
