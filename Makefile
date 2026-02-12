@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check hooks update submodules antigen-update bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac
+.PHONY: help install uninstall restow dry-run lint check hooks update submodules antigen-update bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac bootstrap-work
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
@@ -89,3 +89,6 @@ bootstrap-ubuntu: ## Run Ubuntu bootstrap
 
 bootstrap-mac: ## Run macOS bootstrap
 	bash .local/scripts/bootstrap/mac
+
+bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA)
+	bash .local/scripts/bootstrap/work

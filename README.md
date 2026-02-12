@@ -80,7 +80,7 @@ make lint              # Run shellcheck on all scripts
 make check             # Run all linters (shellcheck + markdownlint + vint)
 make submodules        # Init and update submodules
 make update            # Pull latest for every submodule
-make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac)
+make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac, work)
 ```
 
 ## Bootstrap
@@ -94,6 +94,7 @@ make bootstrap-arch      # Arch
 make bootstrap-manjaro   # Manjaro
 make bootstrap-ubuntu    # Ubuntu
 make bootstrap-mac       # macOS
+make bootstrap-work      # Work machine (Ubuntu + NVIDIA, minimal)
 ```
 
 Each bootstrap entrypoint follows the same pattern:
