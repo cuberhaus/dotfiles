@@ -5,7 +5,7 @@ dir="$1"
 # No directory has been provided, use current
 if [ -z "$dir" ]
 then
-    dir="`pwd`"
+    dir="$(pwd)"
 fi
 
 # Make sure directory ends with "/"
@@ -30,10 +30,10 @@ do
     if [ -d "$f/.git" ]
     then
         mod=0
-        cd $f
+        cd "$f" || exit
 
         # Check for modified files
-        if [ $(git status | grep modified -c) -ne 0 ]
+        if [ "$(git status | grep modified -c)" -ne 0 ]
         then
             mod=1
             echo -en "\033[0;31m"
@@ -42,7 +42,7 @@ do
         fi
 
         # Check for untracked files
-        if [ $(git status | grep Untracked -c) -ne 0 ]
+        if [ "$(git status | grep Untracked -c)" -ne 0 ]
         then
             mod=1
             echo -en "\033[0;31m"
@@ -51,7 +51,7 @@ do
         fi
 
         # Check for unpushed changes
-        if [ $(git status | grep 'Your branch is ahead' -c) -ne 0 ]
+        if [ "$(git status | grep 'Your branch is ahead' -c)" -ne 0 ]
         then
             mod=1
             echo -en "\033[0;31m"

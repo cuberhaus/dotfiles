@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2086,SC2016,SC2059
 # Displays the default device, volume, and mute status for i3blocks
 
 set -a
@@ -29,6 +30,7 @@ MIXER=${MIXER:-""}
 SCONTROL=${SCONTROL:-""}
 
 while getopts F:Sf:adH:M:L:X:T:t:C:c:i:m:s:h opt; do
+    # shellcheck disable=SC2220
     case "$opt" in
         S) SUBSCRIBE=1 ;;
         F) LONG_FORMAT="$OPTARG" ;;
@@ -88,7 +90,7 @@ CAPABILITY=$(amixer -D $MIXER get $SCONTROL | sed -n "s/  Capabilities:.*cvolume
 
 function move_sinks_to_new_default {
     DEFAULT_SINK=$1
-    pactl list sink-inputs | grep 'Sink Input #' | grep -o '[0-9]\+' | while read SINK
+    pactl list sink-inputs | grep 'Sink Input #' | grep -o '[0-9]\+' | while read -r SINK
     do
         pactl move-sink-input $SINK $DEFAULT_SINK
     done
@@ -97,10 +99,10 @@ function move_sinks_to_new_default {
 function set_default_playback_device_next {
     inc=${1:-1}
     num_devices=$(pactl list sinks | grep -c Name:)
-    sink_arr=($(pactl list sinks | grep Name: | sed -r 's/\s+Name: (.+)/\1/'))
+    mapfile -t sink_arr < <(pactl list sinks | grep Name: | sed -r 's/\s+Name: (.+)/\1/')
     default_sink=$(pactl get-default-sink)
     default_sink_index=$(for i in "${!sink_arr[@]}"; do if [[ "$default_sink" = "${sink_arr[$i]}" ]]; then echo "$i"; fi done)
-    default_sink_index=$(( ($default_sink_index + $num_devices + $inc) % $num_devices ))
+    default_sink_index=$(( (default_sink_index + num_devices + inc) % num_devices ))
     default_sink=${sink_arr[$default_sink_index]}
     pactl set-default-sink $default_sink
     move_sinks_to_new_default $default_sink
@@ -121,7 +123,7 @@ function print_format {
 function print_block {
     ACTIVE=$(pactl list sinks  | grep "State\: RUNNING" -B4 -A55 | grep "Name:\|Volume: \(front-left\|mono\)\|Mute:\|api.alsa.pcm.card = \|node.nick = ")
     for Name in NAME MUTED VOL INDEX NICK; do
-        read $Name
+        IFS= read -r "${Name?}"
     done < <(echo "$ACTIVE")
     INDEX=$(echo "$INDEX"  | grep -o '".*"' | sed 's/"//g')
     VOL=$(echo "$VOL" | grep -o "[0-9]*%" | head -1 )

@@ -13,8 +13,10 @@ function git_recursive() {
     local cmd="$1"
     local depth="${2:-2}"
 
-    local blue=$(tput setaf 4)
-    local normal=$(tput sgr0)
+    local blue
+    local normal
+    blue=$(tput setaf 4)
+    normal=$(tput sgr0)
 
     echo "${blue}depth: $depth ${normal}"
     if [[ $depth -eq 1 ]]; then

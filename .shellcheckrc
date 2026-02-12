@@ -1,0 +1,15 @@
+# ShellCheck configuration — https://www.shellcheck.net/wiki/
+# Place in repo root; shellcheck picks it up automatically.
+
+# Follow sourced files (resolve `source` / `.` commands)
+external-sources=true
+
+# Default shell dialect (most scripts are bash)
+shell=bash
+
+# Disabled warnings:
+# SC1091 — "Not following: file not found" — sourced files may not exist at lint time
+# SC2034 — "variable appears unused" — many variables are used by sourced scripts
+# SC2154 — "variable is referenced but not assigned" — same reason (cross-file vars)
+# SC1090 — "Can't follow non-constant source" — dynamic source paths are common in dotfiles
+disable=SC1091,SC2034,SC2154,SC1090

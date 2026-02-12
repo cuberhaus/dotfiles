@@ -56,7 +56,7 @@ fi
 #PATH=".:$PATH" # Better not add '.' to PATH
 
 if [ -n "$DESKTOP_SESSION" ];then
-    eval $(gnome-keyring-daemon --start)
+    eval "$(gnome-keyring-daemon --start)"
     export SSH_AUTH_SOCK
 fi
 
@@ -87,7 +87,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 
     export TERMINAL="kitty"
     export QT_QPA_PLATFORMTHEME="qt5ct"
-    source $HOME/.config/distro     # DISTRO variable
+    source "$HOME/.config/distro"    # DISTRO variable
     if laptop-detect ; then
         setxkbmap es
     fi

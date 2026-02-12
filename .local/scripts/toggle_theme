@@ -31,9 +31,9 @@ TERMITE_THEME_LIGHT="onelight"
 
 function update_wallpaper {
     if [ "$1" == "light" ]; then
-        feh --bg-scale $WALLPAPER_LIGHT &
+        feh --bg-scale "$WALLPAPER_LIGHT" &
     elif [ "$1" == "dark" ]; then
-        feh --bg-scale $WALLPAPER_DARK &
+        feh --bg-scale "$WALLPAPER_DARK" &
     fi
 }
 
@@ -43,11 +43,11 @@ function update_vim {
         # sed -i "s/set background=dark/set background=light/" $VIM_CONFIG
         # sed -i "s/colorscheme onedark/colorscheme solarized8/" $VIM_CONFIG
         echo "colorscheme $VIM_COLORSCHEME_LIGHT
-set background=light" > $VIM_FOLDER/theme
+set background=light" > "$VIM_FOLDER/theme"
 
     elif [ "$1" == "dark" ]; then
         echo "colorscheme $VIM_COLORSCHEME_DARK
-set background=dark" > $VIM_FOLDER/theme
+set background=dark" > "$VIM_FOLDER/theme"
         # sed -i "s/set background=light/set background=dark/" $VIM_CONFIG
         # sed -i "s/colorscheme solarized8/colorscheme onedark/" $VIM_CONFIG
     fi
@@ -61,23 +61,23 @@ function update_gtk_theme {
         # .* match any character till the end of line
 
         # GTK 3
-        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$LIGHT_GTK_THEME/" $XDG_CONFIG_HOME/gtk-3.0/settings.ini
-        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME_LIGHT/" $GTK3_CONFIG
+        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$LIGHT_GTK_THEME/" "$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
+        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME_LIGHT/" "$GTK3_CONFIG"
 
         # GTK 2
-        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$LIGHT_GTK_THEME\"/" $GTK_CONFIG
-        sed -i "s/gtk-icon-theme-name=\"[^\"]*\"/gtk-icon-theme-name=\"$ICON_THEME_LIGHT\"/" $GTK_CONFIG
+        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$LIGHT_GTK_THEME\"/" "$GTK_CONFIG"
+        sed -i "s/gtk-icon-theme-name=\"[^\"]*\"/gtk-icon-theme-name=\"$ICON_THEME_LIGHT\"/" "$GTK_CONFIG"
 
     elif [ "$1" == "dark" ]; then
         # GTK 3
-        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$DARK_GTK_THEME/" $XDG_CONFIG_HOME/gtk-3.0/settings.ini
+        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$DARK_GTK_THEME/" "$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
 
-        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME_DARK/" $GTK3_CONFIG
+        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME_DARK/" "$GTK3_CONFIG"
 
         # GTK 2
-        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$DARK_GTK_THEME\"/" $GTK_CONFIG
+        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$DARK_GTK_THEME\"/" "$GTK_CONFIG"
 
-        sed -i "s/gtk-icon-theme-name=\"[^\"]*\"/gtk-icon-theme-name=\"$ICON_THEME_DARK\"/" $GTK_CONFIG
+        sed -i "s/gtk-icon-theme-name=\"[^\"]*\"/gtk-icon-theme-name=\"$ICON_THEME_DARK\"/" "$GTK_CONFIG"
     fi
 }
 
@@ -98,14 +98,14 @@ function change_theme {
     # [ -f "$VIM_CONFIG" ] && update_vim $1
 
     if [ -f "$GTK_CONFIG" ]; then 
-        update_gtk_theme $1
+        update_gtk_theme "$1"
     else 
         # Create the config file to satisfy pre condition
         echo 'gtk-theme-name="" 
-        gtk-icon-theme-name="" ' > $GTK_CONFIG
-        update_gtk_theme $1
+        gtk-icon-theme-name="" ' > "$GTK_CONFIG"
+        update_gtk_theme "$1"
     fi
-    update_wallpaper $1
+    update_wallpaper "$1"
 
     # if [ "$(uname)" == "Linux" ]; then
     #     [ -d "$TERMITE_FOLDER" ] && update_termite $1

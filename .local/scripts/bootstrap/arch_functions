@@ -166,13 +166,13 @@ base_install () {
 
     # This has to go after installing nemo
     # Nemo "best filemanager"
-    gsettings set org.cinnamon.desktop.default-applications.terminal exec $myTerminal # Tell Nemo to use Termite instead of gnome-terminal
+    gsettings set org.cinnamon.desktop.default-applications.terminal exec "$myTerminal" # Tell Nemo to use Termite instead of gnome-terminal
     # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x
 }
 
 git_repos() {
     mkdir -p "$HOME/repos/"
-    cd "$HOME/repos/"
+    cd "$HOME/repos/" || exit
     git clone https://github.com/cuberhaus/WinDotfiles.git
     git clone https://github.com/cuberhaus/docs.git
     git clone https://github.com/cuberhaus/dev.git
@@ -211,7 +211,7 @@ arch_install() {
     fi
 
     # Bluetooth
-    $pac  bluez bluez-utils $pac  blueberry     # Linux Mint GNOME Bluetooth
+    $pac  bluez bluez-utils blueberry            # Linux Mint GNOME Bluetooth
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
     fi
@@ -290,9 +290,9 @@ manjaro_install() {
 yay_install() {
     if ! command -v yay &>/dev/null; then
         info "Installing yay..."
-        cd "$HOME/"
+        cd "$HOME/" || exit
         git clone https://aur.archlinux.org/yay.git
-        cd yay
+        cd yay || exit
         makepkg -si
         sudo rm -r "$HOME/yay"
     else
@@ -303,14 +303,14 @@ yay_install() {
 vim_install () {
     info "Installing vim/neovim plugins..."
     $pac  neovim
-    cd "$HOME"
+    cd "$HOME" || exit
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
     bash "$scripts/ycm.sh"
     $pac python-pip
     $pip wheel
     npm install neovim
-    python3 -m $pip --upgrade pynvim
+    python3 -m "$pip" --upgrade pynvim
     sudo gem install neovim
     sudo chmod +w "$HOME/.vim/cache/viminfo"
 
@@ -365,6 +365,7 @@ xmonad_install () {
     $pac xorg-xmessage                          # xmonad send messages
     sudo mkdir -p /etc/pacman.d/hooks/
     # https://stackoverflow.com/questions/84882/sudo-echo-something-etc-privilegedfile-doesnt-work
+    # shellcheck disable=SC2024,SC2086
     echo "[Trigger]
 Operation = Upgrade
 Type = Package
@@ -466,12 +467,12 @@ laptop_install() {
 
 dwall() {
     info "Installing dynamic wallpapers..."
-    cd "$HOME"
+    cd "$HOME" || exit
     git clone https://github.com/adi1090x/dynamic-wallpaper.git
-    cd dynamic-wallpaper
+    cd dynamic-wallpaper || exit
     chmod +x install.sh
     ./install.sh
-    cd "$HOME"
+    cd "$HOME" || exit
     sudo rm -r "$HOME/dynamic-wallpaper"
 }
 

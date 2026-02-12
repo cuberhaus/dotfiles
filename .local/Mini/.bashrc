@@ -91,5 +91,7 @@ alias path='echo -e ${PATH//:/\\n}'
 alias userlist="cut -d: -f1 /etc/passwd"
 
 # Switch between bash and zsh
+# shellcheck disable=SC2139
 alias tobash="sudo chsh $USER -s /bin/bash && echo 'Now log out.'"
+# shellcheck disable=SC2139
 alias tozsh="sudo chsh $USER -s /bin/zsh && echo 'Now log out.'"

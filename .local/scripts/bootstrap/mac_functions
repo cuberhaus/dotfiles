@@ -137,13 +137,14 @@ garbage() {
     # brew install qview                          # image viewer (better than builtin mac) free and open source (i uninstalled it for some reason)
     # brew install shortcuts                      # spotlight shutdown now THIS WILL BREAK YOUR MAC
     # consider installing the logi options+ (first time installing it caused brightness buttons to not work? lol)
+    true
 }
 
 vim_install () {
     info "Installing vim/neovim plugins..."
     brew install macvim                         # Vim
     brew install neovim                         # NeoVim
-    cd "$HOME"
+    cd "$HOME" || exit
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
     bash "$HOME/.local/scripts/ycm.sh"
@@ -316,6 +317,7 @@ optional_defaults() {
 
     # Disable smart quotes as they’re annoying when typing code
     # defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+true
 }
 
 garbage_defaults() {
@@ -323,5 +325,6 @@ garbage_defaults() {
     # Stop iTunes from responding to the keyboard media keys
     # launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist
     # launchctl load -w /System/Library/LaunchAgents/com.apple.rcd.plist
+    true
 }
 

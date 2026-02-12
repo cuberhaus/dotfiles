@@ -11,7 +11,7 @@ echo "Starting shutdown fix application..."
 
 # 1. Backup existing GRUB config
 echo "Backing up /etc/default/grub to /etc/default/grub.bak.$(date +%F_%T)..."
-sudo cp --no-clobber /etc/default/grub /etc/default/grub.bak.$(date +%F_%T) || echo "Backup already exists for this second, skipping copy."
+sudo cp --no-clobber /etc/default/grub "/etc/default/grub.bak.$(date +%F_%T)" || echo "Backup already exists for this second, skipping copy."
 
 # 2. Apply the GRUB configuration
 # We explicitly overwrite the line to ensure 'quiet splash' is GONE and our parameters are PRESENT.

@@ -22,9 +22,8 @@ fi
 echo "$COMMAND"
 
 sleep 0.5
-wmctrl -lx | awk '{print $3}' | grep -i "$MYPROG"
 
-if [ $? -eq 0 ]; then
+if wmctrl -lx | awk '{print $3}' | grep -qi "$MYPROG"; then
     sleep 1         
     wmctrl -xa "$MYPROG"
    #as an alternative try the line bellow

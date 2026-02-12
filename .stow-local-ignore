@@ -2,6 +2,7 @@
 ^/LICENSE.*
 ^/COPYING
 ^/\.editorconfig
+^/\.shellcheckrc
 
 .+~          # emacs backup files
 \#.*\#       # emacs autosave files

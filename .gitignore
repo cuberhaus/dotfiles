@@ -18,6 +18,7 @@
 !.Xmodmap
 !.screenrc
 !.editorconfig
+!.shellcheckrc
 !.gitignore
 !.gitmodules
 !.stow-local-ignore

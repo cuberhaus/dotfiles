@@ -37,19 +37,19 @@ mac_install () {
 }
 
 ycm_ubuntu_install () {
-    cd ~/.vim/bundle/YouCompleteMe
+    cd ~/.vim/bundle/YouCompleteMe || exit
     python3 install.py --all
 }
 
 ycm_install () {
-    cd $HOME
-    mkdir ycm_build
-    cd ycm_build
-    cmake -G "Unix Makefiles" . $HOME/.vim/plugged/YouCompleteMe/third_party/ycmd/cpp
+    cd "$HOME" || exit
+    mkdir -p ycm_build
+    cd ycm_build || exit
+    cmake -G "Unix Makefiles" . "$HOME/.vim/plugged/YouCompleteMe/third_party/ycmd/cpp"
     cmake --build . --target ycm_core --config Release
-    cd $HOME/.vim/plugged/YouCompleteMe
+    cd "$HOME/.vim/plugged/YouCompleteMe" || exit
     python3 install.py --all
-    cd $HOME
+    cd "$HOME" || exit
     sudo rm -r ycm_build # Clean Up
 }
 
@@ -75,4 +75,4 @@ elif [[ "$DISTRO" == "manjaro" ]]; then
     arch_based_install
     ycm_install # Builds
 fi
-rm -r $HOME/ycm_build # Cleanup
+rm -r "$HOME/ycm_build" # Cleanup

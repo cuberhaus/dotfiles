@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mac_key() {
-    eval `ssh-agent -s`
+    eval "$(ssh-agent -s)"
     ssh-add -K ~/.ssh/imac
 }
 
@@ -31,9 +31,6 @@ while getopts "k" options; do # Loop: Get the next option;
     *)                # If unknown (any other) option:
         exit_abnormal # Exit abnormally.
         ;;
-    ?)
-        exit_abnormal
-        ;;
     esac
 done
 
@@ -45,7 +42,7 @@ pull() {
     if [[ -d "$1" ]]
     then
         echo "$1 exists on your filesystem."
-        printf "Pulling $1\n"
+        printf "Pulling %s\n" "$1"
         cd "$1" || exit
         git fetch
         git merge

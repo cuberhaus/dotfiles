@@ -94,14 +94,14 @@ ubuntu_install() {
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/denysdovhan/gnome-terminal-one/master/one-dark.sh)"
 
     if [[ $FirstRun == y ]]; then
-        sudo adduser `id -un` libvirt
-        sudo adduser `id -un` kvm
+        sudo adduser "$(id -un)" libvirt
+        sudo adduser "$(id -un)" kvm
     fi
 }
 
 albert_install () {
     if ! command -v albert 2>/dev/null; then
-        cd "$HOME"
+        cd "$HOME" || exit
         curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
         echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_20.04/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
         sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_20.04/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
@@ -165,11 +165,11 @@ i3_install () {
     $apt zenity
 
     # Add current user to group video, type groups to see which groups you are in
-    sudo usermod -a -G video $LOGNAME
+    sudo usermod -a -G video "$LOGNAME"
     # Light setup | Enables brightness controls
-    cd "$HOME"
+    cd "$HOME" || exit
     git clone https://github.com/haikarainen/light
-    cd "$HOME/light"
+    cd "$HOME/light" || exit
     ./autogen.sh
     ./configure && make
     sudo make install
@@ -209,13 +209,13 @@ snaps_install() {
 
 vim_install () {
     info "Installing vim/neovim plugins..."
-    cd "$HOME"
+    cd "$HOME" || exit
     vim +PlugInstall +qall                      # Update plugins
     bash "$ycm"                   # Vim YouCompleteMe plugin install
     sudo npm install -g neovim                  # npm on neovim
     python3 -m pip install --user --upgrade pynvim # Python for neovim
     sudo gem install neovim                     # Gem for neovim
-    python3 $HOME/.vim/plugged/YouCompleteMe/install.py
+    python3 "$HOME/.vim/plugged/YouCompleteMe/install.py"
 }
 
 optional() {

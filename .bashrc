@@ -62,10 +62,10 @@ shopt -s globstar
 # => Aliases and functions
 ###############################################################
 
-if [ -f $ZDOTDIR/aliases ]; then
-    source $ZDOTDIR/aliases
+if [ -f "$ZDOTDIR/aliases" ]; then
+    source "$ZDOTDIR/aliases"
 fi
 
-if [ -f $ZDOTDIR/functions ]; then
-    source $ZDOTDIR/functions
+if [ -f "$ZDOTDIR/functions" ]; then
+    source "$ZDOTDIR/functions"
 fi
