@@ -59,3 +59,7 @@ Makefile    text eol=lf
 *.gz        binary
 *.tar       binary
 *.zip       binary
+
+# ── GitHub Linguist overrides ────────────────────────────────
+# Hide HTML from language stats (vendored config files, not source code)
+*.html      linguist-vendored
