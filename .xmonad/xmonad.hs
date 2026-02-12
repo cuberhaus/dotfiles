@@ -1,6 +1,6 @@
--- My take on Xmonad WM
--- WARNING: MAY NEED TO SHUT DOWN XMONAD COMPLETELY TO SEE CHANGES,
--- TRY TO EXIT IF NOT WORKING PROPERLY WITH SOME CHANGE
+-- My XMonad configuration
+-- WARNING: May need to shut down XMonad completely to see changes,
+-- try to exit if not working properly with some change.
 -- Author: https://github.com/cuberhaus/dotfiles
 
 -- IMPORTS
