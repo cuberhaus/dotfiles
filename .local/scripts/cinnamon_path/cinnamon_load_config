@@ -43,9 +43,6 @@ while getopts ":ld" options; do # Loop: Get the next option;
     *)                # If unknown (any other) option:
         exit_abnormal # Exit abnormally.
         ;;
-    ?)
-        exit_abnormal
-        ;;
     esac
 done
 
@@ -53,13 +50,11 @@ done
 if ! $flag1 && ! $flag2; then
   echo "Error: one of the flags -l or -d must be present." >&2
   exit_abnormal
-  exit 1
 fi
 
 if $flag1 && $flag2; then
   echo "Use just one flag at a time" >&2
   exit_abnormal
-  exit 1
 fi
 
 if $flag1; then

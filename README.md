@@ -4,6 +4,7 @@
 
 - [Cuberhaus's dotfiles](#cuberhauss-dotfiles)
     - [Installation](#installation)
+    - [Usage](#usage)
     - [Bootstrap](#bootstrap)
     - [Supported OS](#supported-os)
     - [Window Managers](#window-managers)
@@ -19,10 +20,9 @@ Clone the repo with its submodules and use [GNU Stow](https://www.gnu.org/softwa
 
 ```bash
 cd ~
-mkdir -p dotfiles
-cd dotfiles
 git clone --recurse-submodules https://github.com/cuberhaus/dotfiles
-stow -vt ~ dotfiles/
+cd dotfiles
+make install
 ```
 
 > If you don't have `stow` installed, grab it first:
@@ -30,22 +30,30 @@ stow -vt ~ dotfiles/
 > - **Ubuntu/Debian:** `sudo apt install stow`
 > - **macOS:** `brew install stow`
 
+## Usage
+
+Common tasks are available via `make`:
+
+```
+make help              # Show all targets
+make install           # Symlink dotfiles into $HOME
+make uninstall         # Remove symlinks from $HOME
+make restow            # Re-stow (cleans stale links)
+make lint              # Run shellcheck on all scripts
+make submodules        # Init and update submodules
+make update            # Pull latest for every submodule
+make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac)
+```
+
 ## Bootstrap
 
 OS-specific bootstrap scripts are located in `.local/scripts/bootstrap/`. Read the script for your OS before running it:
 
 ```bash
-# Arch
-bash .local/scripts/bootstrap/arch
-
-# Manjaro
-bash .local/scripts/bootstrap/manjaro
-
-# Ubuntu
-bash .local/scripts/bootstrap/ubuntu
-
-# macOS
-bash .local/scripts/bootstrap/mac
+make bootstrap-arch      # Arch
+make bootstrap-manjaro   # Manjaro
+make bootstrap-ubuntu    # Ubuntu
+make bootstrap-mac       # macOS
 ```
 
 ## Supported OS

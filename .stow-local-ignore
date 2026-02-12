@@ -3,6 +3,7 @@
 ^/COPYING
 ^/\.editorconfig
 ^/\.shellcheckrc
+^/Makefile
 
 .+~          # emacs backup files
 \#.*\#       # emacs autosave files

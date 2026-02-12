@@ -36,9 +36,12 @@ done < <(
         '.local/scripts/bin/*' \
         '.local/scripts/*.sh' \
         '.local/scripts/applets' \
+        '.local/scripts/desklets' \
         '.local/scripts/toggle_theme' \
         '.local/scripts/spot' \
         '.local/scripts/spoti' \
+        '.local/scripts/volume-change-output' \
+        '.local/scripts/cinnamon_path/*' \
         '.local/Mini/.bashrc' \
     | grep -v \
         -e 'texstudio/dictionaries' \
