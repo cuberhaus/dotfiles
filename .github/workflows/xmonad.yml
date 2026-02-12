@@ -21,14 +21,14 @@ jobs:
       - name: Setup Haskell
         uses: haskell-actions/setup@v2
         with:
-          ghc-version: 'latest'
+          ghc-version: '9.6'
           cabal-version: 'latest'
 
       - name: Install X11 development libraries
         run: sudo apt-get update && sudo apt-get install -y libx11-dev libxft-dev libxinerama-dev libxrandr-dev libxss-dev
 
       - name: Install XMonad libraries
-        run: cabal install --lib xmonad xmonad-contrib
+        run: cabal install --lib xmonad xmonad-contrib containers
 
       - name: Verify xmonad.hs compiles
         run: ghc -fno-code .xmonad/xmonad.hs
