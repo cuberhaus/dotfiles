@@ -20,6 +20,7 @@
 !.editorconfig
 !.markdownlint.json
 !.shellcheckrc
+!.gitattributes
 !.gitignore
 !.gitmodules
 !.stow-local-ignore

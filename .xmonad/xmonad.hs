@@ -1,7 +1,35 @@
--- My XMonad configuration
--- WARNING: May need to shut down XMonad completely to see changes,
--- try to exit if not working properly with some change.
+-- ==========================================================================
+-- XMonad Configuration
 -- Author: https://github.com/cuberhaus/dotfiles
+-- ==========================================================================
+--
+-- Keybinding philosophy: Vim-style hjkl navigation via Navigation2D.
+--   Mod            = Super (Windows key)
+--   Mod + hjkl     = move focus between windows
+--   Mod + Shift + hjkl = swap windows
+--   Mod + Alt + hjkl   = resize windows
+--   Mod + Ctrl + hjkl  = merge/split tabbed sublayouts
+--   Mod + Tab      = cycle layouts
+--   Mod + f        = toggle fullscreen
+--   Mod + x        = mirror layout;  Mod + z = reflect layout
+--   Mod + Space    = rofi launcher
+--   Mod + <letter> = named scratchpads (s=Spotify, w=WhatsApp, etc.)
+--   Mod + Shift + q = close window;  Mod + Shift + e = quit XMonad
+--   Mod + Shift + r = recompile & restart
+--   Full list: press  Mod + Shift + '  to show all keybindings.
+--
+-- Layouts: tall (ResizableTall) → threeCol → spirals → accordion
+--   All layouts support sublayout tabs (Ctrl + merge/unmerge).
+--   smartBorders removes borders when only one window is visible.
+--
+-- Monitors: Mod + w switches physical screens.
+--
+-- Bar: xmobar (config at .config/xmobar/xmobarrc) with a trayer
+--   system tray on the bottom-right.
+--
+-- WARNING: May need to shut down XMonad completely to see changes;
+--   try Mod+Shift+e to exit if Mod+Shift+r doesn't pick up changes.
+-- ==========================================================================
 
 -- IMPORTS
 import Data.List (sortBy)

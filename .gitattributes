@@ -1,0 +1,61 @@
+# Auto-detect text files and normalise line endings (LF in repo, native on checkout)
+* text=auto
+
+# ── Shell / Scripts ──────────────────────────────────────────
+*.sh        text eol=lf
+*.bash      text eol=lf
+*.zsh       text eol=lf
+.zshenv     text eol=lf
+.bashrc     text eol=lf
+.bash_profile text eol=lf
+.xinitrc    text eol=lf
+.xprofile   text eol=lf
+
+# ── Config files ─────────────────────────────────────────────
+*.conf      text eol=lf
+*.cfg       text eol=lf
+*.ini       text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.json      text eol=lf
+*.toml      text eol=lf
+*.xml       text eol=lf
+
+# ── Source code ──────────────────────────────────────────────
+*.hs        text eol=lf
+*.el        text eol=lf
+*.org       text eol=lf
+*.vim       text eol=lf
+*.lua       text eol=lf
+*.py        text eol=lf
+
+# ── Documentation ────────────────────────────────────────────
+*.md        text eol=lf
+*.txt       text eol=lf
+LICENSE     text eol=lf
+
+# ── Makefiles (require tabs, must stay LF) ───────────────────
+Makefile    text eol=lf
+
+# ── Fonts (binary) ──────────────────────────────────────────
+*.ttf       binary
+*.otf       binary
+*.woff      binary
+*.woff2     binary
+*.eot       binary
+
+# ── Images (binary) ─────────────────────────────────────────
+*.jpg       binary
+*.jpeg      binary
+*.png       binary
+*.gif       binary
+*.ico       binary
+*.svg       text eol=lf
+*.xpm       text eol=lf
+
+# ── Archives / misc binary ──────────────────────────────────
+*.jar       binary
+*.oxt       binary
+*.gz        binary
+*.tar       binary
+*.zip       binary

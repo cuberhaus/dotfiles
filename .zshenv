@@ -73,7 +73,7 @@ export ZDOTDIR="$XDG_CONFIG_HOME/zsh" # For more information RTFM https://wiki.a
 if [ -L "$HOME/.zshenv" ]; then
     DOTFILES="$(cd "$(dirname "$(readlink -f "$HOME/.zshenv")")" && pwd)"
 else
-    DOTFILES="$HOME/dotfiles/dotfiles"  # fallback
+    DOTFILES="$HOME/dotfiles/dotfiles"  # fallback (repo cloned to ~/dotfiles/dotfiles so stow works)
 fi
 export DOTFILES
 # Wallpapers (fall back to a bundled wallpaper if the preferred one is missing)

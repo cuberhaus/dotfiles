@@ -1,3 +1,33 @@
+# ==========================================================================
+# i3 Configuration
+# Author: https://github.com/cuberhaus/dotfiles
+# ==========================================================================
+#
+# Keybinding philosophy: Vim-style hjkl navigation.
+#   Mod            = Super (Windows key)
+#   Mod + hjkl     = move focus between windows
+#   Mod + Shift + hjkl = move windows
+#   Mod + r        = enter resize mode (hjkl / arrows to resize)
+#   Mod + f        = toggle fullscreen
+#   Mod + Shift + Space = toggle floating
+#   Mod + Space    = rofi launcher (drun)
+#   Mod + Shift + d = rofi command launcher (run)
+#   Mod + <letter> = named scratchpads (s=Spotify, w=WhatsApp, etc.)
+#   Mod + Shift + q = close window
+#   Mod + Shift + r = restart i3 in place
+#   Mod + Shift + e = exit i3
+#   Mod + Shift + x = lock screen (betterlockscreen)
+#   Mod + Pause    = system mode menu (lock, logout, suspend, reboot, shutdown)
+#   Mod + Shift + g = gap adjustment mode
+#
+# Layouts: split horizontal/vertical (Mod+o), stacking, tabbed, toggle split.
+#   Gaps: 6px inner, smart gaps (hidden when only 1 window).
+#
+# Bar: i3blocks (config at .config/i3blocks/i3blocks.conf).
+#
+# Theme: Custom Arc Dark with Dracula accent (#bd93f9).
+# ==========================================================================
+
 # Variables {{{
 
 # Set windows key as mod

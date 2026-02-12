@@ -9,9 +9,11 @@
 ## Table of Contents
 
 - [Cuberhaus's dotfiles](#cuberhauss-dotfiles)
+    - [How it works](#how-it-works)
     - [Installation](#installation)
     - [Usage](#usage)
     - [Bootstrap](#bootstrap)
+    - [What's inside](#whats-inside)
     - [Supported OS](#supported-os)
     - [Window Managers](#window-managers)
     - [WIP](#wip)
@@ -20,14 +22,42 @@
 
 Opinionated defaults. This repo is not meant to be used by everyone, just a personal configuration to take ideas out of. However, if you are brave enough you can install it with the instructions below. You are advised to read the installation scripts beforehand.
 
+## How it works
+
+The repo is cloned into `~/dotfiles/dotfiles` so that stow treats it as
+a package called `dotfiles` inside the `~/dotfiles` parent directory:
+
+```
+ ~/dotfiles/
+ └── dotfiles/   (this repo)
+     ├── .config/       ──┐
+     ├── .local/         │  GNU Stow symlinks
+     ├── .vim/           ├──────────────────►  $HOME/
+     ├── .xmonad/        │                     ├── .config/ → ~/dotfiles/dotfiles/.config/
+     ├── .zshenv        ──┘                    ├── .local/  → ~/dotfiles/dotfiles/.local/
+     ├── Makefile  (make targets)              └── ...
+     └── .local/scripts/
+         └── bootstrap/  (OS-specific setup)
+```
+
+[GNU Stow](https://www.gnu.org/software/stow/) creates symlinks from `$HOME`
+into this repo so that every config file stays version-controlled in one place.
+The `Makefile` wraps stow and exposes common tasks. Bootstrap scripts install
+packages and perform one-time setup for each supported OS.
+
+The `$DOTFILES` variable (exported by `.zshenv`) points to the repo root,
+auto-detected by resolving the `.zshenv` symlink. Scripts and configs that
+need to reference the repo should use `$DOTFILES`.
+
 ## Installation
 
 Clone the repo with its submodules and use [GNU Stow](https://www.gnu.org/software/stow/) to symlink everything into `$HOME`:
 
 ```bash
 cd ~
-git clone --recurse-submodules https://github.com/cuberhaus/dotfiles
-cd dotfiles
+mkdir -p dotfiles
+git clone --recurse-submodules https://github.com/cuberhaus/dotfiles dotfiles/dotfiles
+cd dotfiles/dotfiles
 make install
 ```
 
@@ -47,6 +77,7 @@ make install           # Symlink dotfiles into $HOME
 make uninstall         # Remove symlinks from $HOME
 make restow            # Re-stow (cleans stale links)
 make lint              # Run shellcheck on all scripts
+make check             # Run all linters (shellcheck + markdownlint + vint)
 make submodules        # Init and update submodules
 make update            # Pull latest for every submodule
 make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac)
@@ -54,7 +85,9 @@ make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac)
 
 ## Bootstrap
 
-OS-specific bootstrap scripts are located in `.local/scripts/bootstrap/`. Read the script for your OS before running it:
+OS-specific bootstrap scripts live in `.local/scripts/bootstrap/`.
+**Read the script for your OS before running it** — they install hundreds
+of packages and change system settings.
 
 ```bash
 make bootstrap-arch      # Arch
@@ -62,6 +95,30 @@ make bootstrap-manjaro   # Manjaro
 make bootstrap-ubuntu    # Ubuntu
 make bootstrap-mac       # macOS
 ```
+
+Each bootstrap entrypoint follows the same pattern:
+
+1. Sources `base_functions` (shared logging helpers and `$DOTFILES` auto-detection).
+2. Sources the OS-specific `*_functions` file (package lists and installer functions).
+3. Asks whether this is a first-time install (enables services, sets up hardware, etc.).
+4. Runs a system update.
+5. Calls installer functions in dependency order (base packages, WM-specific, optional apps).
+6. Switches the default shell to zsh.
+
+See [`.local/README.md`](.local/README.md) for a detailed breakdown of the
+scripts directory.
+
+## What's inside
+
+| Category | Tool / Config | Notes |
+|---|---|---|
+| **Shells** | zsh (antigen, p10k), bash | XDG-compliant `$ZDOTDIR` in `.config/zsh/` |
+| **Editors** | Vim, Neovim, Doom Emacs, personal Emacs (chemacs) | Vim config at `.vim/vimrc`; Emacs literate config in `.config/emacs.org` |
+| **Terminals** | kitty, Alacritty, termite | |
+| **Window Managers** | XMonad (+xmobar), i3 (+i3blocks +polybar), qtile, sway | XMonad is the primary config; i3 is the secondary |
+| **Desktop Environments** | Cinnamon, GNOME | |
+| **Utilities** | tmux, ranger, dunst, picom, rofi, fzf, bat, eza | |
+| **Themes** | Arc, Dracula, OneDark, base16 | Managed via `toggle_theme` script |
 
 ## Supported OS
 

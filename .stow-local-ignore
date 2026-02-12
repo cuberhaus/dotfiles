@@ -4,6 +4,7 @@
 ^/\.editorconfig
 ^/\.markdownlint\.json
 ^/\.shellcheckrc
+^/\.gitattributes
 ^/Makefile
 
 .+~          # emacs backup files
