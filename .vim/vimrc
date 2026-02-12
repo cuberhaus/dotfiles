@@ -1,6 +1,6 @@
 " General {{{
 
-" With a map leader it's possible to do extra key combinations
+" Leader key for custom key combinations
 let mapleader=" "
 " Activate folds
 set foldmethod=marker
