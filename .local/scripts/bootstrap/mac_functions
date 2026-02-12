@@ -8,6 +8,10 @@
 
 #delete .xinitrc shortcut because it conflicts with xquartz and will open and close indefinitely.
 brew_install() {
+    if command -v brew &>/dev/null; then
+        info "Homebrew already installed, skipping."
+        return
+    fi
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 }
 
@@ -156,7 +160,11 @@ vim_install () {
 
 doom_emacs_install() {
     #chemacs
-    git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
+    if [ ! -d ~/.emacs.d ] || [ ! -f ~/.emacs.d/chemacs.el ]; then
+        git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
+    else
+        info "Chemacs2 already installed, skipping."
+    fi
     # required dependencies
     brew install git ripgrep
     # optional dependencies
@@ -169,8 +177,12 @@ doom_emacs_install() {
 
     brew tap d12frosted/emacs-plus
     brew install emacs-plus --with-native-comp
-    git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/doom-emacs
-    ~/.config/doom-emacs/bin/doom install
+    if [ ! -d ~/.config/doom-emacs ]; then
+        git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.config/doom-emacs
+        ~/.config/doom-emacs/bin/doom install
+    else
+        info "Doom Emacs already installed, skipping."
+    fi
     # ghcup installer for the general purpose language Haskell
     curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
     # Optional

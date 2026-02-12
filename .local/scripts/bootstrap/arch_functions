@@ -173,11 +173,11 @@ base_install () {
 git_repos() {
     mkdir -p "$HOME/repos/"
     cd "$HOME/repos/" || exit
-    git clone https://github.com/cuberhaus/WinDotfiles.git
-    git clone https://github.com/cuberhaus/docs.git
-    git clone https://github.com/cuberhaus/dev.git
-    git clone https://github.com/cuberhaus/TFG.git
-    git clone https://github.com/cuberhaus/fib.git
+    [ -d WinDotfiles ] || git clone https://github.com/cuberhaus/WinDotfiles.git
+    [ -d docs ]        || git clone https://github.com/cuberhaus/docs.git
+    [ -d dev ]         || git clone https://github.com/cuberhaus/dev.git
+    [ -d TFG ]         || git clone https://github.com/cuberhaus/TFG.git
+    [ -d fib ]         || git clone https://github.com/cuberhaus/fib.git
 }
 
 arch_install() {
@@ -247,8 +247,8 @@ arch_and_manjaro() {
     $pac hplip # hp printer
     $yay epson-inkjet-printer-escpr # epson printer
     # samba
-    sudo mkdir /var/lib/samba/usershares
-    sudo groupadd -r sambashare
+    sudo mkdir -p /var/lib/samba/usershares
+    getent group sambashare &>/dev/null || sudo groupadd -r sambashare
     sudo chown root:sambashare /var/lib/samba/usershares
     sudo chmod 1770 /var/lib/samba/usershares
     sudo gpasswd sambashare -a "$USER"
@@ -263,14 +263,14 @@ arch_and_manjaro() {
 }
 
 manjaro_install() {
-    sudo ln -s /var/lib/snapd/snap /snap            # manjaro snaps --classic
-    sudo snap install intellij-idea-ultimate --classic
-    sudo snap install pycharm-professional --classic
-    sudo snap install spotify                           # Spotify only on manjaro
-    sudo snap install sublime-merge --classic
-    sudo snap install sublime-text --classic
-    sudo snap install whatsie                    # Whatsapp client
-    sudo snap install zotero-snap
+    [ -L /snap ] || sudo ln -s /var/lib/snapd/snap /snap  # manjaro snaps --classic
+    snap list intellij-idea-ultimate &>/dev/null || sudo snap install intellij-idea-ultimate --classic
+    snap list pycharm-professional &>/dev/null   || sudo snap install pycharm-professional --classic
+    snap list spotify &>/dev/null                || sudo snap install spotify
+    snap list sublime-merge &>/dev/null          || sudo snap install sublime-merge --classic
+    snap list sublime-text &>/dev/null           || sudo snap install sublime-text --classic
+    snap list whatsie &>/dev/null                || sudo snap install whatsie
+    snap list zotero-snap &>/dev/null            || sudo snap install zotero-snap
     $pac cinnamon-screensaver 
     # sudo snap install clion --classic
     # sudo snap install code --classic        # Classic snaps cannot be installed
@@ -444,17 +444,26 @@ games_install () {
 ### DO ONCE
 # This function enables NaturalScrolling for the touchpad
 trackpad_scrolling () {
-    sudo touch /etc/X11/xorg.conf.d/30-touchpad.conf
+    local conf="/etc/X11/xorg.conf.d/30-touchpad.conf"
+    if [ -f "$conf" ] && grep -q 'NaturalScrolling' "$conf"; then
+        info "Touchpad natural scrolling already configured, skipping."
+        return
+    fi
+    sudo mkdir -p /etc/X11/xorg.conf.d
     echo 'Section "InputClass"
     Identifier "libinput touchpad catchall"
     MatchIsTouchpad "on"
     MatchDevicePath "/dev/input/event*"
     Driver "libinput"
     Option "NaturalScrolling" "true"
-    EndSection' | sudo tee -a /etc/X11/xorg.conf.d/30-touchpad.conf
+    EndSection' | sudo tee "$conf" > /dev/null
 }
 
 activate_reisub () {
+    if grep -q 'kernel.sysrq=1' /etc/sysctl.d/99-sysctl.conf 2>/dev/null; then
+        info "REISUB already enabled, skipping."
+        return
+    fi
     echo kernel.sysrq=1 | sudo tee --append /etc/sysctl.d/99-sysctl.conf
     sudo update-grub
 }
@@ -466,6 +475,10 @@ laptop_install() {
 }
 
 dwall() {
+    if [ -d /usr/share/dynamic-wallpaper ] || [ -d "$HOME/.local/share/dynamic-wallpaper" ]; then
+        info "Dynamic wallpapers already installed, skipping."
+        return
+    fi
     info "Installing dynamic wallpapers..."
     cd "$HOME" || exit
     git clone https://github.com/adi1090x/dynamic-wallpaper.git
@@ -479,9 +492,13 @@ dwall() {
 emacs() {
     $pac emacs-nativecomp
     # Chemacs installation to manage doom and personal
-    [ -f ~/.emacs ] && mv ~/.emacs ~/.emacs.bak
-    [ -d ~/.emacs.d ] && mv ~/.emacs.d ~/.emacs.default
-    git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
+    if [ ! -d ~/.emacs.d ] || [ ! -f ~/.emacs.d/chemacs.el ]; then
+        [ -f ~/.emacs ] && mv ~/.emacs ~/.emacs.bak
+        [ -d ~/.emacs.d ] && mv ~/.emacs.d ~/.emacs.default
+        git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
+    else
+        info "Chemacs2 already installed, skipping."
+    fi
 
     echo "default" | tee "$HOME/.config/chemacs/profile"
     $pip ptvsd                          # for python dap
@@ -515,8 +532,12 @@ emacs() {
     $pac fd
     # sudo mkdir -p /home/ineu/.emacs.d/.local/
     # sudo touch /home/ineu/.emacs.d/.local/autoloads.28.1
-    git clone https://github.com/hlissner/doom-emacs ~/.config/doom-emacs
-    ~/.config/doom-emacs/bin/doom install
+    if [ ! -d ~/.config/doom-emacs ]; then
+        git clone https://github.com/hlissner/doom-emacs ~/.config/doom-emacs
+        ~/.config/doom-emacs/bin/doom install
+    else
+        info "Doom Emacs already installed, skipping."
+    fi
 }
 
 ### All packages in here should be handpicked

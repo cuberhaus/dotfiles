@@ -84,8 +84,14 @@ ubuntu_install() {
 
     # Install Rstudio
     $apt r-base
-    wget https://rstudio.org/download/latest/daily/desktop/jammy/rstudio-latest-amd64.deb
-    sudo dpkg -i rstudio-latest-amd64.deb 
+    if ! command -v rstudio &>/dev/null; then
+        local rstudio_deb="/tmp/rstudio-latest-amd64.deb"
+        wget -O "$rstudio_deb" https://rstudio.org/download/latest/daily/desktop/jammy/rstudio-latest-amd64.deb
+        sudo dpkg -i "$rstudio_deb"
+        rm -f "$rstudio_deb"
+    else
+        info "RStudio already installed, skipping."
+    fi
 
     # $apt kitty # cant even close it from gnome
 
@@ -113,9 +119,14 @@ albert_install () {
 }
 
 chrome_install () {
-    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    sudo apt install ./google-chrome-stable_current_amd64.deb
-    rm google-chrome-stable_current_amd64.deb
+    if command -v google-chrome-stable &>/dev/null; then
+        info "Google Chrome already installed, skipping."
+        return
+    fi
+    local chrome_deb="/tmp/google-chrome-stable_current_amd64.deb"
+    wget -O "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    sudo apt install -y "$chrome_deb"
+    rm -f "$chrome_deb"
 }
 
 emacs_install () {
@@ -126,21 +137,29 @@ emacs_install () {
     $apt libtool                # vterm-module compilation
 
     # Chemacs installation to manage doom and personal
-    [ -f ~/.emacs ] && mv ~/.emacs ~/.emacs.bak
-    [ -d ~/.emacs.d ] && mv ~/.emacs.d ~/.emacs.default
-    git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
+    if [ ! -d ~/.emacs.d ] || [ ! -f ~/.emacs.d/chemacs.el ]; then
+        [ -f ~/.emacs ] && mv ~/.emacs ~/.emacs.bak
+        [ -d ~/.emacs.d ] && mv ~/.emacs.d ~/.emacs.default
+        git clone https://github.com/plexus/chemacs2.git ~/.emacs.d
+    else
+        info "Chemacs2 already installed, skipping."
+    fi
 
     echo "default" | tee "$HOME/.config/chemacs/profile"
 
     # systemctl --user enable emacs # this enables emacs as a daemon
 
-    git clone https://github.com/hlissner/doom-emacs ~/.config/doom-emacs
-    ~/.config/doom-emacs/bin/doom install
+    if [ ! -d ~/.config/doom-emacs ]; then
+        git clone https://github.com/hlissner/doom-emacs ~/.config/doom-emacs
+        ~/.config/doom-emacs/bin/doom install
+    else
+        info "Doom Emacs already installed, skipping."
+    fi
 }
 
 i3_install () {
     # Add repository and refresh apt
-    sudo add-apt-repository ppa:kgilmer/speed-ricer
+    sudo add-apt-repository -y ppa:kgilmer/speed-ricer
     sudo apt-get update
     $apt i3-gaps
     # Dependancies
@@ -169,14 +188,20 @@ i3_install () {
     # Add current user to group video, type groups to see which groups you are in
     sudo usermod -a -G video "$LOGNAME"
     # Light setup | Enables brightness controls
-    cd "$HOME" || exit
-    git clone https://github.com/haikarainen/light
-    cd "$HOME/light" || exit
-    ./autogen.sh
-    ./configure && make
-    sudo make install
-    ./configure --with-udev && make
-    sudo make install
+    if ! command -v light &>/dev/null; then
+        cd "$HOME" || exit
+        git clone https://github.com/haikarainen/light
+        cd "$HOME/light" || exit
+        ./autogen.sh
+        ./configure && make
+        sudo make install
+        ./configure --with-udev && make
+        sudo make install
+        cd "$HOME" || exit
+        rm -rf "$HOME/light"
+    else
+        info "light already installed, skipping."
+    fi
 }
 
 snaps_install_optional() {
@@ -189,18 +214,18 @@ snaps_install_optional() {
 }
 
 snaps_install() {
-    sudo snap install code --classic
-    sudo snap install discord
-    sudo snap install intellij-idea-professional --classic
-    #sudo snap install intellij-idea-community --classic
-    # sudo snap install pycharm-community --classic # Does not accept jupyter notebook
-    sudo snap install pycharm-professional --classic
-    sudo snap install skype --classic
-    sudo snap install slack --classic
-    sudo snap install spotify
-    sudo snap install sublime-merge --classic
-    sudo snap install sublime-text --classic
-    sudo snap install walc
+    snap list code &>/dev/null                    || sudo snap install code --classic
+    snap list discord &>/dev/null                 || sudo snap install discord
+    snap list intellij-idea-professional &>/dev/null || sudo snap install intellij-idea-professional --classic
+    #snap list intellij-idea-community &>/dev/null || sudo snap install intellij-idea-community --classic
+    # snap list pycharm-community &>/dev/null     || sudo snap install pycharm-community --classic # Does not accept jupyter notebook
+    snap list pycharm-professional &>/dev/null    || sudo snap install pycharm-professional --classic
+    snap list skype &>/dev/null                   || sudo snap install skype --classic
+    snap list slack &>/dev/null                   || sudo snap install slack --classic
+    snap list spotify &>/dev/null                 || sudo snap install spotify
+    snap list sublime-merge &>/dev/null           || sudo snap install sublime-merge --classic
+    snap list sublime-text &>/dev/null            || sudo snap install sublime-text --classic
+    snap list walc &>/dev/null                    || sudo snap install walc
 }
 
 # steam_install () {

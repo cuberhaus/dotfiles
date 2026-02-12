@@ -35,6 +35,8 @@ chrome_install
 snaps_install
 ubuntu_install
 vim_install
-chsh -s "$(which zsh)"                      # Change default shell to zsh
+if [ "$(basename "$SHELL")" != "zsh" ]; then
+    chsh -s "$(which zsh)"                  # Change default shell to zsh
+fi
 
 info "Bootstrap complete!"
