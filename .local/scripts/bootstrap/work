@@ -14,6 +14,10 @@ sudo apt-get update && sudo apt-get full-upgrade -y
 
 install_preparation
 
+echo "#! /bin/sh
+export DISTRO=ubuntu" > "$HOME/.config/distro"
+
+
 nvidia_install
 dev_tools_install
 node_install
