@@ -28,6 +28,7 @@ done < <(
         '.xprofile' \
         '.config/zsh/aliases' \
         '.config/zsh/functions' \
+        '.config/zsh/env.d/*.zsh' \
         '.config/.git-prompt-colors.sh' \
         '.config/i3-layout-manager/layouts/*.sh' \
         '.config/i3/*.sh' \
