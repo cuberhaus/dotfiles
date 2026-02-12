@@ -20,7 +20,6 @@ while IFS= read -r f; do
     case "$f" in
         *.sh|.zshenv|.bashrc|.bash_profile|.xinitrc|.xprofile) scripts+=("$f") ;;
         .config/zsh/aliases|.config/zsh/functions) scripts+=("$f") ;;
-        .config/zsh/env.d/*.zsh) scripts+=("$f") ;;
         .local/scripts/bootstrap/*|.local/scripts/bin/*) scripts+=("$f") ;;
         .local/scripts/cinnamon_path/*) scripts+=("$f") ;;
         .local/scripts/applets|.local/scripts/desklets) scripts+=("$f") ;;

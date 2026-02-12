@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow lint hooks update submodules bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac
+.PHONY: help install uninstall restow lint hooks update submodules antigen-update bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
@@ -46,6 +46,10 @@ submodules: ## Init and update all git submodules
 
 update: submodules ## Pull latest for every submodule
 	git submodule foreach --recursive git pull origin HEAD
+
+antigen-update: ## Fetch the latest antigen.zsh from GitHub
+	curl -fsSL https://git.io/antigen > .config/antigen/antigen.zsh
+	@echo "antigen.zsh updated. Restart your shell to pick up changes."
 
 # ---------------------------------------------------------------------------
 # Bootstrap (OS-specific)
