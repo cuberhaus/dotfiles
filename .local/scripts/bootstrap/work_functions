@@ -251,6 +251,12 @@ EOF
         info "Warp terminal already installed, skipping."
     fi
 
+    # Spotify
+    sudo snap install spotify
+
+    # Discord
+    sudo snap install discord
+
     # Caffeine (prevent screen from going to sleep)
     $apt caffeine
 
