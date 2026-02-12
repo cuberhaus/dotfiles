@@ -604,7 +604,7 @@ myEmacsKeys =
     ("M-b", spawn browser), -- Windows + g (meta key is windows key)
     ("M-n", spawn explorer), -- open explorer
     ("M-<Return>", spawn myTerminal), -- Spawn terminal
-    ("M-<Space>", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal termite "),
+    ("M-<Space>", spawn "rofi -modi window,drun,run -show drun -show-icons -terminal kitty "),
 
     -- Kill windows
     ("M-S-q", kill), -- Kill Current window

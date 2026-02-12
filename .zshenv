@@ -1,4 +1,4 @@
-#!/bin/sh
+# shellcheck shell=bash
 # best python linter is pylint
 # IN MAC YOU MAY HAVE TO PUT HOMEBREW IN zprofile
 # path_helper is executed from /etc/zprofile and sources /etc/paths then /etc/path.d
@@ -76,8 +76,17 @@ else
     DOTFILES="$HOME/dotfiles/dotfiles"  # fallback
 fi
 export DOTFILES
-export WALLPAPER_LIGHT="$HOME/.local/xdg/wallpapers/doggo.jpeg"
-export WALLPAPER_DARK="$HOME/Downloads/wallpapers/pexels-eberhard-grossgasteiger-1612351.jpg"
+# Wallpapers (fall back to a bundled wallpaper if the preferred one is missing)
+_wp_light="$HOME/.local/xdg/wallpapers/doggo.jpeg"
+_wp_dark="$HOME/Downloads/wallpapers/pexels-eberhard-grossgasteiger-1612351.jpg"
+_wp_fallback="$HOME/.local/xdg/wallpapers/doggo.jpeg"
+export WALLPAPER_LIGHT="${_wp_light}"
+if [ -f "$_wp_dark" ]; then
+    export WALLPAPER_DARK="$_wp_dark"
+else
+    export WALLPAPER_DARK="$_wp_fallback"
+fi
+unset _wp_light _wp_dark _wp_fallback
 
 #INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
 #OBJECTES=/Users/$USER/assig/pro2/objectes
