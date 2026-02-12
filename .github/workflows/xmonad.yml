@@ -24,6 +24,9 @@ jobs:
           ghc-version: 'latest'
           cabal-version: 'latest'
 
+      - name: Install X11 development libraries
+        run: sudo apt-get update && sudo apt-get install -y libx11-dev libxft-dev libxinerama-dev libxrandr-dev libxss-dev
+
       - name: Install XMonad libraries
         run: cabal install --lib xmonad xmonad-contrib
 
