@@ -62,6 +62,12 @@ dev_tools_install() {
     $apt shellcheck                # Shell script linter
     $apt unzip
 
+    # Utilities
+    $apt eog                       # Image viewer (quick terminal launch)
+    $apt flameshot                 # Screenshot tool
+    $apt rclone                    # Sync files to/from cloud storage
+    $apt sshfs                     # Mount remote filesystems over SSH
+
     # Git config
     git config --global credential.helper store
 
