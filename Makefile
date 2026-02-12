@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow lint hooks update submodules antigen-update bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac
+.PHONY: help install uninstall restow dry-run lint hooks update submodules antigen-update bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
@@ -23,6 +23,9 @@ uninstall: ## Remove symlinks from $HOME
 
 restow: ## Re-stow (uninstall then install — cleans stale links)
 	$(STOW) -v -R -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
+
+dry-run: ## Simulate stow and report conflicts (no changes made)
+	$(STOW) -v -n -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR)) 2>&1
 
 # ---------------------------------------------------------------------------
 # Quality
