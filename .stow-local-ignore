@@ -2,6 +2,7 @@
 ^/LICENSE.*
 ^/COPYING
 ^/\.editorconfig
+^/\.markdownlint\.json
 ^/\.shellcheckrc
 ^/Makefile
 

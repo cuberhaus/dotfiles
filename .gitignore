@@ -18,6 +18,7 @@
 !.Xmodmap
 !.screenrc
 !.editorconfig
+!.markdownlint.json
 !.shellcheckrc
 !.gitignore
 !.gitmodules

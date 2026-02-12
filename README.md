@@ -1,6 +1,9 @@
 # Cuberhaus's dotfiles
 
 [![Lint](https://github.com/cuberhaus/dotfiles/actions/workflows/lint.yml/badge.svg)](https://github.com/cuberhaus/dotfiles/actions/workflows/lint.yml)
+[![Markdown](https://github.com/cuberhaus/dotfiles/actions/workflows/markdown.yml/badge.svg)](https://github.com/cuberhaus/dotfiles/actions/workflows/markdown.yml)
+[![XMonad](https://github.com/cuberhaus/dotfiles/actions/workflows/xmonad.yml/badge.svg)](https://github.com/cuberhaus/dotfiles/actions/workflows/xmonad.yml)
+[![Vim](https://github.com/cuberhaus/dotfiles/actions/workflows/vim.yml/badge.svg)](https://github.com/cuberhaus/dotfiles/actions/workflows/vim.yml)
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**

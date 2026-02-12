@@ -1,0 +1,46 @@
+name: Vim
+
+on:
+  push:
+    branches: [master]
+    paths: ['.vim/vimrc']
+  pull_request:
+    branches: [master]
+    paths: ['.vim/vimrc']
+
+jobs:
+  syntax-check:
+    name: Vimscript syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Install Vim and vint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y vim
+          pip install --user vim-vint
+
+      - name: Create stub files so vimrc can be parsed
+        run: |
+          mkdir -p ~/.vim
+          touch ~/.vim/theme
+
+      - name: Lint vimrc with vint
+        run: ~/.local/bin/vint --style-problem --color .vim/vimrc || true
+
+      - name: Verify vimrc loads without errors
+        run: |
+          # Start vim in ex mode, source the vimrc (skipping plugins), and quit
+          vim -u .vim/vimrc -N -e -s \
+            --cmd 'let g:skip_plug=1' \
+            -c 'qa!' 2>&1 | tee /tmp/vim-output
+          # Fail if vim printed any errors
+          if grep -qi 'E[0-9]\+:' /tmp/vim-output; then
+            echo "Vim reported errors:"
+            cat /tmp/vim-output
+            exit 1
+          fi
