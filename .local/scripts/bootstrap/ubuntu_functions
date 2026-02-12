@@ -101,12 +101,14 @@ ubuntu_install() {
 
 albert_install () {
     if ! command -v albert 2>/dev/null; then
-        cd "$HOME" || exit
-        curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
-        echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_20.04/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
-        sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_20.04/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
+        # Import the signing key into a dedicated keyring (apt-key is deprecated)
+        curl -fsSL https://build.opensuse.org/projects/home:manuelschneid3r/public_key \
+            | gpg --dearmor \
+            | sudo tee /etc/apt/trusted.gpg.d/home-manuelschneid3r.gpg > /dev/null
+        echo 'deb [signed-by=/etc/apt/trusted.gpg.d/home-manuelschneid3r.gpg] http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_20.04/ /' \
+            | sudo tee /etc/apt/sources.list.d/home-manuelschneid3r.list
         sudo apt-get update
-        sudo apt-get install albert
+        sudo apt-get install -y albert
     fi
 }
 
@@ -233,10 +235,25 @@ optional() {
 clone_repos() {
     info "Cloning repos..."
     mkdir -p "$HOME/repos"
-    git clone https://github.com/cuberhaus/WinDotfiles "$HOME/repos/WinDotfiles" || true
-    git clone https://github.com/cuberhaus/dev "$HOME/repos/dev" || true
-    git clone https://github.com/cuberhaus/TFG "$HOME/repos/TFG" || true
-    git clone https://github.com/cuberhaus/docs "$HOME/repos/docs" || true
+    local failures=0
+    local repos=(
+        "cuberhaus/WinDotfiles"
+        "cuberhaus/dev"
+        "cuberhaus/TFG"
+        "cuberhaus/docs"
+    )
+    for repo in "${repos[@]}"; do
+        local name="${repo##*/}"
+        if [ -d "$HOME/repos/$name" ]; then
+            info "$name already exists, skipping"
+        elif ! git clone "https://github.com/$repo" "$HOME/repos/$name"; then
+            warn "Failed to clone $repo"
+            ((failures++)) || true
+        fi
+    done
+    if [ "$failures" -gt 0 ]; then
+        warn "$failures repo(s) failed to clone"
+    fi
 }
 
 # This has some problems with some apps that are seen very tiny, it is definitely not the perfect solution

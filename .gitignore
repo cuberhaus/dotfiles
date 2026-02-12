@@ -33,6 +33,7 @@
 # =============================================================================
 !.vim/
 !.vim/**
+.vim/.netrwhist
 !.doom.d/
 !.doom.d/**
 !.xmonad/
@@ -210,6 +211,7 @@
 !.local/share/icons/**
 !.local/share/nvim/
 !.local/share/nvim/**
+.local/share/nvim/.netrwhist
 !.local/share/xfce4/
 !.local/share/xfce4/**
 !.local/share/composer/
