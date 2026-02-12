@@ -24,6 +24,8 @@
 !.stow-local-ignore
 !README.md
 !LICENSE
+!.github/
+!.github/**
 
 # =============================================================================
 # Top-level directories (fully tracked)

@@ -8,6 +8,7 @@
 \#.*\#       # emacs autosave files
 
 /.git
+/.github
 /.gitignore
 
 # It didn't respect this:
