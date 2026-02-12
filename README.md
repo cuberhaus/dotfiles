@@ -6,7 +6,7 @@
 [![Vim](https://github.com/cuberhaus/dotfiles/actions/workflows/vim.yml/badge.svg)](https://github.com/cuberhaus/dotfiles/actions/workflows/vim.yml)
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
-**Table of Contents**
+## Table of Contents
 
 - [Cuberhaus's dotfiles](#cuberhauss-dotfiles)
     - [Installation](#installation)
@@ -32,6 +32,7 @@ make install
 ```
 
 > If you don't have `stow` installed, grab it first:
+>
 > - **Arch/Manjaro:** `sudo pacman -S stow`
 > - **Ubuntu/Debian:** `sudo apt install stow`
 > - **macOS:** `brew install stow`
@@ -64,22 +65,22 @@ make bootstrap-mac       # macOS
 
 ## Supported OS
 
-* ![Arch\_icon][arch_icon] Arch
-* ![Manjaro\_icon][manjaro_icon] Manjaro
-* ![Ubuntu\_icon][ubuntu_icon] Ubuntu
-* ![MacOS\_icon][macos_icon] macOS
+- ![Arch\_icon][arch_icon] Arch
+- ![Manjaro\_icon][manjaro_icon] Manjaro
+- ![Ubuntu\_icon][ubuntu_icon] Ubuntu
+- ![MacOS\_icon][macos_icon] macOS
 
 ## Window Managers
 
-* Xmonad (Main config)
-* i3 (Second best)
-* Cinnamon desktop
-* Gnome
+- Xmonad (Main config)
+- i3 (Second best)
+- Cinnamon desktop
+- Gnome
 
 ## WIP
 
-* ![Gentoo\_icon][gentoo_icon] Gentoo
-* Openbox
+- ![Gentoo\_icon][gentoo_icon] Gentoo
+- Openbox
 
 [manjaro_icon]: https://i.imgur.com/rfuvfYo.png
 [arch_icon]: https://upload.wikimedia.org/wikipedia/commons/a/a5/Archlinux-icon-crystal-64.svg
