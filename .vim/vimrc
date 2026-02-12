@@ -39,7 +39,6 @@ if has('unix') || has('macunix')
 endif
 " Specify a directory for plugins
 call plug#begin('~/.vim/plugged')
-call plug#begin()
 " Plug 'godlygeek/tabular'
 " Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
 " Plug 'lervag/vimtex'
@@ -167,8 +166,6 @@ set hlsearch
 
 " Makes search act like search in modern browsers
 set incsearch
-" Same but for neovim
-set is hls
 
 " Don't redraw while executing macros (good performance config)
 set lazyredraw

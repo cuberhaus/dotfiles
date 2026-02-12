@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow lint update submodules bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac
+.PHONY: help install uninstall restow lint hooks update submodules bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
@@ -30,6 +30,11 @@ restow: ## Re-stow (uninstall then install — cleans stale links)
 
 lint: ## Run shellcheck on all shell scripts
 	bash .local/scripts/lint.sh
+
+hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
+	cp .local/scripts/hooks/pre-commit .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit
+	@echo "Pre-commit hook installed."
 
 # ---------------------------------------------------------------------------
 # Submodules

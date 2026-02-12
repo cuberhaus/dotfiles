@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Pre-commit hook: lint staged shell scripts with shellcheck.
+# Install with: make hooks
+
+set -euo pipefail
+
+if ! command -v shellcheck &>/dev/null; then
+    echo "shellcheck not found — skipping pre-commit lint."
+    exit 0
+fi
+
+# Get staged files that are shell scripts (using the same patterns as lint.sh)
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$staged" ] && exit 0
+
+# Filter to only shell scripts we care about
+scripts=()
+while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    case "$f" in
+        *.sh|.zshenv|.bashrc|.bash_profile|.xinitrc|.xprofile) scripts+=("$f") ;;
+        .config/zsh/aliases|.config/zsh/functions) scripts+=("$f") ;;
+        .local/scripts/bootstrap/*|.local/scripts/bin/*) scripts+=("$f") ;;
+        .local/scripts/cinnamon_path/*) scripts+=("$f") ;;
+        .local/scripts/applets|.local/scripts/desklets) scripts+=("$f") ;;
+        .local/scripts/toggle_theme|.local/scripts/spot|.local/scripts/spoti) scripts+=("$f") ;;
+        .local/scripts/volume-change-output) scripts+=("$f") ;;
+        .config/i3/*.sh|.config/xmobar/*.sh) scripts+=("$f") ;;
+        .config/i3-layout-manager/layouts/*.sh) scripts+=("$f") ;;
+        .local/Mini/.bashrc) scripts+=("$f") ;;
+    esac
+done <<< "$staged"
+
+if [ ${#scripts[@]} -eq 0 ]; then
+    exit 0
+fi
+
+failures=0
+for script in "${scripts[@]}"; do
+    if ! shellcheck "$script"; then
+        ((failures++)) || true
+    fi
+done
+
+if [ "$failures" -gt 0 ]; then
+    echo ""
+    echo "$failures file(s) failed shellcheck. Fix the issues or commit with --no-verify to skip."
+    exit 1
+fi

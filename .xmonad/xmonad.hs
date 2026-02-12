@@ -736,7 +736,7 @@ barColor = "#2f343f"
 main :: IO ()
 main = do
   -- Execute xmobar with its config and pipe xmonad output to xmobar
-  xmproc <- spawnPipe "xmobar .config/xmobar/xmobarrc"
+  xmproc <- spawnPipe "xmobar $HOME/.config/xmobar/xmobarrc"
   -- forM_ [".xmonad-workspace-log", ".xmonad-title-log"] $ \file -> do
   --   safeSpawn "mkfifo" ["/tmp/" ++ file]
 
