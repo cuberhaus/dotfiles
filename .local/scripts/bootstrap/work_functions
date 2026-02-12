@@ -12,12 +12,16 @@ nvidia_install() {
     info "Installing NVIDIA drivers..."
 
     $apt ubuntu-drivers-common
-    sudo ubuntu-drivers install
+
+    if ! nvidia-smi &>/dev/null; then
+        sudo ubuntu-drivers install
+        info "NVIDIA drivers installed. A reboot is required to load them."
+    else
+        info "NVIDIA driver already loaded ($(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1)), skipping."
+    fi
 
     $apt nvidia-settings
     $apt nvidia-prime              # Optimus GPU switching (prime-select nvidia|intel|on-demand)
-
-    info "NVIDIA drivers installed. A reboot is required to load them."
 }
 
 ###############################################################
@@ -81,7 +85,8 @@ node_install() {
     fi
 
     info "Installing global npm packages..."
-    sudo npm install -g cline
+    command -v cline &>/dev/null || sudo npm install -g cline
+    command -v markdownlint-cli2 &>/dev/null || sudo npm install -g markdownlint-cli2
 
     # Add more global npm packages below as needed:
     # sudo npm install -g <package>
@@ -101,6 +106,9 @@ python_install() {
 
     # Ensure pipx path is available
     pipx ensurepath || true
+
+    # Linter for vimrc
+    command -v vint &>/dev/null || pip install --user vim-vint || python3 -m pip install --user vim-vint
 
     # Add pip/pipx packages below as needed:
     # pipx install <package>
@@ -252,10 +260,10 @@ EOF
     fi
 
     # Spotify
-    sudo snap install spotify
+    snap list spotify &>/dev/null 2>&1 || sudo snap install spotify
 
     # Discord
-    sudo snap install discord
+    snap list discord &>/dev/null 2>&1 || sudo snap install discord
 
     # LibreOffice (full office suite)
     $apt libreoffice
