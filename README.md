@@ -1,4 +1,7 @@
 # Cuberhaus's dotfiles
+
+[![Lint](https://github.com/cuberhaus/dotfiles/actions/workflows/lint.yml/badge.svg)](https://github.com/cuberhaus/dotfiles/actions/workflows/lint.yml)
+
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
 
