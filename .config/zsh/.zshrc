@@ -92,10 +92,11 @@ fi
 #https://superuser.com/questions/178587/how-do-i-detach-a-process-from-terminal-entirely
 setopt NOHUP
 
-# History in cache directory:
+# History in XDG data directory:
 HISTSIZE=32768
 SAVEHIST=32768
-HISTFILE=~/.cache/zsh/history
+HISTFILE="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/history"
+mkdir -p "$(dirname "$HISTFILE")" 2>/dev/null
 
 # History substring search
 bindkey -M vicmd 'k' history-substring-search-up

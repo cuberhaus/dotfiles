@@ -20,7 +20,7 @@ source ~/.config/bash-git-prompt/gitprompt.sh
 ###############################################################
 
 # Enable Readline not waiting for additional input when a key is pressed.
-set keyseq-timeout 50
+bind 'set keyseq-timeout 50'
 
 export HISTCONTROL=ignoredups:erasedups   # no duplicate entries
 
@@ -62,10 +62,12 @@ shopt -s globstar
 # => Aliases and functions
 ###############################################################
 
-if [ -f "$ZDOTDIR/aliases" ]; then
-    source "$ZDOTDIR/aliases"
+_zshdir="$HOME/.config/zsh"
+if [ -f "$_zshdir/aliases" ]; then
+    source "$_zshdir/aliases"
 fi
 
-if [ -f "$ZDOTDIR/functions" ]; then
-    source "$ZDOTDIR/functions"
+if [ -f "$_zshdir/functions" ]; then
+    source "$_zshdir/functions"
 fi
+unset _zshdir

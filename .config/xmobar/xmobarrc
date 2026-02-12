@@ -6,7 +6,7 @@ Config {
         , "xft:Font Awesome 5 Free Solid:pixelsize=12"
         , "xft:Font Awesome 5 Brands:pixelsize=12"
         ]
-        , iconRoot = "/home/pol/.xmonad/xpm/"  -- default: "."
+        , iconRoot = "~/.xmonad/xpm/"  -- default: "."
         , bgColor = "#2f343f"
         , fgColor = "#f3f4f5"
         , position = BottomW L 90

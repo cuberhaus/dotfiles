@@ -54,7 +54,7 @@ conky.config = {
 	font = 'Freesans:pixelsize=20',
 
 -- ${diskiograph /dev/sda 15,180 a7a7a7 a7a7a7} # wskaznik pracy dysku
--- ${image /home/didisoft/.conky/didisoft.jpg -p 0,80 -s 26x28} # obrazki w conky
+-- ${image ~/.conky/image.jpg -p 0,80 -s 26x28} # obrazki w conky
 
 
 };

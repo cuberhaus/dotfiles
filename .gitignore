@@ -153,7 +153,8 @@
 
 # Apps
 !.config/vlc/
-!.config/vlc/**
+!.config/vlc/vlcrc
+# vlc-qt-interface.conf contains recent file paths and window geometry — don't track
 !.config/cava/
 !.config/cava/**
 !.config/glava/
