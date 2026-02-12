@@ -47,9 +47,12 @@ fi
 if [ -d "$HOME/.config/i3/i3-layout-manager" ] ; then
     PATH="$HOME/.config/i3/i3-layout-manager:$PATH"
 fi
-if [ -d "$HOME/.gem/ruby/2.7.0/bin" ] ; then
-    PATH="$HOME/.gem/ruby/2.7.0/bin:$PATH"
+# Add the most recent Ruby gem bin to PATH
+_rubydir=$(find "$HOME/.gem/ruby" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | sort -V | tail -1)
+if [ -n "$_rubydir" ] && [ -d "$_rubydir/bin" ]; then
+    PATH="$_rubydir/bin:$PATH"
 fi
+unset _rubydir
 if [ -d "/usr/local/sbin" ] ; then
     PATH="/usr/local/sbin:$PATH"
 fi
@@ -66,7 +69,13 @@ fi
 
 # Zsh files:
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh" # For more information RTFM https://wiki.archlinux.org/index.php/Zsh#Startup/Shutdown_files
-export DOTFILES="$HOME/dotfiles/dotfiles"
+# Auto-detect the dotfiles repo by resolving the real path of this .zshenv
+if [ -L "$HOME/.zshenv" ]; then
+    DOTFILES="$(cd "$(dirname "$(readlink -f "$HOME/.zshenv")")" && pwd)"
+else
+    DOTFILES="$HOME/dotfiles/dotfiles"  # fallback
+fi
+export DOTFILES
 export WALLPAPER_LIGHT="$HOME/.local/xdg/wallpapers/doggo.jpeg"
 export WALLPAPER_DARK="$HOME/Downloads/wallpapers/pexels-eberhard-grossgasteiger-1612351.jpg"
 
@@ -111,7 +120,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
         export PATH="$HOME/bin:$PATH"
     fi
     #https://stackoverflow.com/questions/603785/environment-variables-in-mac-os-x
-    export KITTY_CONFIG_DIRECTORY="$HOME/dotfiles/dotfiles/.config/kitty/mac"
+    export KITTY_CONFIG_DIRECTORY="$DOTFILES/.config/kitty/mac"
     #launchctl setenv KITTY_CONFIG_DIRECTORY $KITTY_CONFIG_DIRECTORY
     export SHELL_SESSION_HISTORY=0
     export SHELL_SESSIONS_DISABLE=1

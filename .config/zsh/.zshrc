@@ -68,6 +68,13 @@ fi
 [[ ! -f ~/.config/.p10k.zsh ]] || source ~/.config/.p10k.zsh
 #}}}
 
+# Distro guard {{{
+if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ ! -f "$HOME/.config/distro" ]]; then
+    echo "\033[1;33m[WARN]\033[0m  ~/.config/distro not found. Run the bootstrap script for your OS first."
+    echo "        See: ~/.local/scripts/bootstrap/"
+fi
+#}}}
+
 # Aliases and functions {{{
 
 if [ -f $ZDOTDIR/aliases ]; then
