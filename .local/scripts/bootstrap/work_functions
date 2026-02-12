@@ -257,6 +257,9 @@ EOF
     # Discord
     sudo snap install discord
 
+    # LibreOffice (full office suite)
+    $apt libreoffice
+
     # Caffeine (prevent screen from going to sleep)
     $apt caffeine
 
