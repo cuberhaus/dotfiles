@@ -20,7 +20,7 @@ source ~/.config/bash-git-prompt/gitprompt.sh
 ###############################################################
 
 # Enable Readline not waiting for additional input when a key is pressed.
-bind 'set keyseq-timeout 50'
+#bind 'set keyseq-timeout 50'
 
 export HISTCONTROL=ignoredups:erasedups   # no duplicate entries
 

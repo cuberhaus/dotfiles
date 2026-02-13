@@ -58,8 +58,10 @@ if [ -d "/usr/local/sbin" ] ; then
 fi
 #PATH=".:$PATH" # Better not add '.' to PATH
 
-if [ -n "$DESKTOP_SESSION" ];then
-    eval "$(gnome-keyring-daemon --start)"
+# Only start gnome-keyring-daemon when no instance is running.
+# On GNOME/Cinnamon the session manager launches it; on i3/xmonad it does not.
+if [ -n "$DESKTOP_SESSION" ] && ! pgrep -u "$USER" gnome-keyring-daemon >/dev/null 2>&1; then
+    eval "$(gnome-keyring-daemon --start 2>/dev/null)"
     export SSH_AUTH_SOCK
 fi
 
