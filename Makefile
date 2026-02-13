@@ -19,8 +19,8 @@ install: ## Symlink dotfiles into $HOME via stow (backs up conflicts first)
 	@bash .local/scripts/stow-backup-conflicts
 	$(STOW) -v -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
 
-uninstall: ## Remove symlinks from $HOME
-	$(STOW) -v -D -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
+uninstall: ## Remove symlinks from $HOME and restore backed-up files
+	@bash .local/scripts/stow-uninstall
 
 restow: ## Re-stow (uninstall then install — cleans stale links)
 	$(STOW) -v -R -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
