@@ -18,6 +18,7 @@ echo "#! /bin/sh
 export DISTRO=ubuntu" > "$HOME/.config/distro"
 
 
+shutdown_fix
 nvidia_install
 dev_tools_install
 node_install

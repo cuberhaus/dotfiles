@@ -258,17 +258,17 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         flags="-y"
         apt="sudo apt-get $flags install"
         # shellcheck disable=SC2139,SC2086
-        alias \$apt=$apt
+        alias \$apt="$apt"
     fi
 fi
 
 # Do not surround with quotes
 # shellcheck disable=SC2139,SC2086
-alias cleanup=$cleanup
+alias cleanup="$cleanup"
 # shellcheck disable=SC2139,SC2086
-alias updateall=$updateall
+alias updateall="$updateall"
 # shellcheck disable=SC2139,SC2086
-alias update=$update
+alias update="$update"
 ###############################################################
 # => Clean home directory
 ###############################################################

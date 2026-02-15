@@ -5,6 +5,14 @@
 apt="sudo apt-get install -y"
 
 ###############################################################
+# => ROG Strix shutdown fix (GRUB power-management params)
+###############################################################
+
+shutdown_fix() {
+    bash "$HOME/.local/scripts/permanent_shutdown_fix.sh"
+}
+
+###############################################################
 # => NVIDIA drivers
 ###############################################################
 
