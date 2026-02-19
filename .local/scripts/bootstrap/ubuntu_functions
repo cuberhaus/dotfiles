@@ -80,6 +80,7 @@ ubuntu_install() {
     $apt timeshift              # Backups
     $apt transmission           # A simpler Torrent D.
     $apt vlc                    # Media player
+    $apt caffeine               # Prevent screen from going to sleep
     $apt dconf-editor           # advanced configs
 
     # Install Rstudio

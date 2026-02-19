@@ -62,6 +62,7 @@ mac_install () {
 
     ### GUI Applications
     #brew install hammerspoon
+    brew install --cask caffeine                 # Prevent screen from going to sleep
     brew install ballast                        # Auto-corrects volume balance, (weird macOS stuff)
     brew install calibre                        # Book manager
     brew install ccleaner                       # CleanUp

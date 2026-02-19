@@ -143,6 +143,7 @@ base_install () {
     
     # $yay tgpt-bin # terminal chatgpt
     # $yay chatgpt-desktop-bin #chatgpt
+    $yay caffeine-ng                              # Prevent screen from going to sleep
     $yay florence # virtual keyboard
     $yay downgrade # sudo DOWNGRADE_FROM_ALA=1 downgrade packageName to downgrade a package to a selected package in the list
     # $yay balena-etcher                          # "Rufus" on linux
