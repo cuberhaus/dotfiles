@@ -246,19 +246,12 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     fi
 
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        flags="-S --noconfirm --needed"
-        # shellcheck disable=SC2139
-        alias \$pac="sudo pacman $flags"
-        # shellcheck disable=SC2139
-        alias \$yay="yay $flags"
+        \$pac() { sudo pacman -S --noconfirm --needed "$@"; }
+        \$yay() { yay -S --noconfirm --needed "$@"; }
     fi
 
     if [[ "$DISTRO" == "ubuntu"* ]]; then
-        # This works, its generally not recomended since now i cannot access variable with the same name, but that does not matter to me
-        flags="-y"
-        apt="sudo apt-get $flags install"
-        # shellcheck disable=SC2139,SC2086
-        alias \$apt="$apt"
+        \$apt() { sudo apt-get -y install "$@"; }
     fi
 fi
 
