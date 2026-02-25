@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Ubuntu bootstrap UNINSTALL
+# Author: https://github.com/cuberhaus
+set -euo pipefail
+
+### VARIABLES
+scripts="$HOME/.local/scripts"
+source "$scripts/bootstrap/base_functions"
+source "$scripts/bootstrap/uninstall_ubuntu_functions"
+
+### UNINSTALLATION
+info "Preparing to uninstall Ubuntu bootstrap dependencies..."
+
+read -r -p "This will remove dev tools, emacs, snaps, GUI apps, Chrome, and Homebrew. Are you sure? [y/N] " response
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    vim_uninstall
+    emacs_uninstall
+    snaps_uninstall
+    chrome_uninstall
+    ubuntu_gui_uninstall
+    base_uninstall
+    brew_uninstall
+    cleanup
+
+    if [ "$(basename "$SHELL")" == "zsh" ]; then
+        info "Currently using zsh. To revert to bash, run: chsh -s \$(which bash)"
+    fi
+
+    info "Uninstallation complete. A system reboot is recommended."
+else
+    info "Uninstallation aborted."
+fi

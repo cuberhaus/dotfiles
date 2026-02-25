@@ -1,0 +1,36 @@
+#! /usr/bin/env bash
+# Manjaro bootstrap UNINSTALL functions
+# Author: https://github.com/cuberhaus
+
+pac_remove="sudo pacman -Rns --noconfirm"
+yay_remove="yay -Rns --noconfirm"
+
+###############################################################
+# => Manjaro-specific packages uninstall
+###############################################################
+manjaro_uninstall() {
+    info "Uninstalling Manjaro-specific packages..."
+
+    sudo snap remove intellij-idea-ultimate 2>/dev/null || true
+    sudo snap remove pycharm-professional 2>/dev/null || true
+    sudo snap remove spotify 2>/dev/null || true
+    sudo snap remove sublime-merge 2>/dev/null || true
+    sudo snap remove sublime-text 2>/dev/null || true
+    sudo snap remove whatsie 2>/dev/null || true
+    sudo snap remove zotero-snap 2>/dev/null || true
+
+    $pac_remove cinnamon-screensaver manjaro-pipewire || true
+}
+
+###############################################################
+# => Arch+Manjaro shared packages uninstall
+###############################################################
+arch_and_manjaro_uninstall() {
+    info "Uninstalling shared Arch/Manjaro packages..."
+
+    $pac_remove hplip || true
+    $yay_remove epson-inkjet-printer-escpr || true
+
+    sudo gpasswd -d "$USER" sambashare 2>/dev/null || true
+    git config --global --unset credential.helper || true
+}

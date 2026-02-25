@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Work machine bootstrap UNINSTALL (Asus ROG Strix / Ubuntu + NVIDIA)
+# Author: https://github.com/cuberhaus
+set -euo pipefail
+
+### VARIABLES
+scripts="$HOME/.local/scripts"
+source "$scripts/bootstrap/base_functions"
+source "$scripts/bootstrap/uninstall_work_functions"
+
+### UNINSTALLATION
+info "Preparing to uninstall work bootstrap dependencies..."
+
+read -r -p "This will remove development tools, docker, node, python, cursor, and GUI apps. Are you sure? [y/N] " response
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    nvidia_uninstall
+    dev_tools_uninstall
+    node_uninstall
+    python_uninstall
+    docker_uninstall
+    gui_apps_uninstall
+
+    if [ "$(basename "$SHELL")" == "zsh" ]; then
+        info "Currently using zsh. To revert to bash, run: chsh -s \$(which bash)"
+    fi
+
+    info "Uninstallation complete. A system reboot is recommended."
+else
+    info "Uninstallation aborted."
+fi

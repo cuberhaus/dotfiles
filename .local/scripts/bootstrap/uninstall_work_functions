@@ -1,0 +1,110 @@
+#! /usr/bin/env bash
+# Work machine bootstrap UNINSTALL functions
+# Author: https://github.com/cuberhaus
+
+apt_remove="sudo apt-get remove --purge -y"
+apt_autoremove="sudo apt-get autoremove -y"
+
+###############################################################
+# => Revert ROG Strix shutdown fix
+###############################################################
+shutdown_restore() {
+    # If the script has an uninstall or revert mechanism, use it here.
+    info "Skipping shutdown_fix reversal as it modifies GRUB and requires manual review."
+}
+
+###############################################################
+# => NVIDIA drivers uninstall
+###############################################################
+nvidia_uninstall() {
+    info "Uninstalling NVIDIA tools..."
+    $apt_remove ubuntu-drivers-common nvidia-settings nvidia-prime || true
+}
+
+###############################################################
+# => Core dev tools uninstall
+###############################################################
+dev_tools_uninstall() {
+    info "Uninstalling dev tools..."
+    $apt_remove build-essential cmake curl git jq tree wget zsh stow vim-gtk3 neovim \
+        bat eza fzf htop ncdu ranger ripgrep fd-find silversearcher-ag w3m shellcheck \
+        unzip eog flameshot rclone sshfs
+    
+    # Unset global git config
+    git config --global --unset credential.helper || true
+}
+
+###############################################################
+# => Node.js uninstall
+###############################################################
+node_uninstall() {
+    info "Uninstalling Node.js and global packages..."
+    sudo npm uninstall -g cline markdownlint-cli2 || true
+    $apt_remove nodejs || true
+    
+    # Remove NodeSource repo
+    sudo rm -f /etc/apt/sources.list.d/nodesource.list
+    sudo rm -f /etc/apt/keyrings/nodesource.gpg
+}
+
+###############################################################
+# => Python uninstall
+###############################################################
+python_uninstall() {
+    info "Uninstalling Python and pipx packages..."
+    $apt_remove python3 python3-pip python3-venv pipx || true
+    
+    # Uninstall vim-vint
+    python3 -m pip uninstall -y vim-vint || true
+    
+    # Uninstall all pipx packages
+    if command -v pipx &>/dev/null; then
+        pipx uninstall-all || true
+    fi
+}
+
+###############################################################
+# => Docker CE uninstall
+###############################################################
+docker_uninstall() {
+    info "Uninstalling Docker..."
+    $apt_remove docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin || true
+    
+    # Remove Docker apt repo and key
+    sudo rm -f /etc/apt/sources.list.d/docker.list
+    sudo rm -f /etc/apt/keyrings/docker.gpg
+    
+    # Remove user from docker group
+    sudo gpasswd -d "$USER" docker || true
+}
+
+###############################################################
+# => GUI applications uninstall
+###############################################################
+gui_apps_uninstall() {
+    info "Uninstalling GUI applications..."
+    
+    # apt packages
+    $apt_remove firefox vlc google-chrome-stable code antigravity warp-terminal libreoffice caffeine libfuse2 || true
+    
+    # Snaps
+    sudo snap remove obsidian || true
+    sudo snap remove spotify || true
+    sudo snap remove discord || true
+    
+    # Remove VS Code repo
+    sudo rm -f /etc/apt/sources.list.d/vscode.list
+    sudo rm -f /etc/apt/keyrings/packages.microsoft.gpg
+    
+    # Remove Antigravity repo
+    sudo rm -f /etc/apt/sources.list.d/antigravity.list
+    sudo rm -f /etc/apt/keyrings/antigravity-repo-key.gpg
+    
+    # Cursor AppImage removal
+    rm -f "$HOME/Applications/cursor.AppImage"
+    rm -f "$HOME/.local/share/applications/cursor.desktop"
+    
+    # Clean up apt caches
+    sudo apt-get update
+    $apt_autoremove
+}
