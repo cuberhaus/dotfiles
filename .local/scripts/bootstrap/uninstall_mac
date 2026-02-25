@@ -6,22 +6,17 @@ set -euo pipefail
 ### VARIABLES
 scripts="$HOME/.local/scripts"
 source "$scripts/bootstrap/base_functions"
+source "$scripts/bootstrap/uninstall_tui"
 source "$scripts/bootstrap/uninstall_mac_functions"
 
 ### UNINSTALLATION
-info "Preparing to uninstall macOS bootstrap dependencies..."
+run_selected_uninstalls "macOS Uninstaller" \
+    cli_uninstall       "CLI tools (bat, fzf, ripgrep, stow, ...)"         OFF \
+    fonts_uninstall     "Nerd Fonts (Fira Code, Iosevka, Meslo, ...)"      OFF \
+    gui_apps_uninstall  "GUI applications (Chrome, Spotify, VS Code, ...)" OFF \
+    vim_uninstall       "Vim / Neovim (macvim, neovim, plugins)"           OFF \
+    brew_cleanup        "Run brew cleanup"                                  OFF
 
-read -r -p "This will remove CLI tools, fonts, GUI apps, and vim/neovim via Homebrew. Are you sure? [y/N] " response
-if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-    vim_uninstall
-    gui_apps_uninstall
-    fonts_uninstall
-    cli_uninstall
-    brew_cleanup
-
-    info "Uninstallation complete."
-    info "To fully remove Homebrew itself, run:"
-    info "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\""
-else
-    info "Uninstallation aborted."
-fi
+info "Uninstallation complete."
+info "To fully remove Homebrew itself, run:"
+info "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\""

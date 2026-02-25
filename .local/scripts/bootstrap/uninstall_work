@@ -6,25 +6,20 @@ set -euo pipefail
 ### VARIABLES
 scripts="$HOME/.local/scripts"
 source "$scripts/bootstrap/base_functions"
+source "$scripts/bootstrap/uninstall_tui"
 source "$scripts/bootstrap/uninstall_work_functions"
 
 ### UNINSTALLATION
-info "Preparing to uninstall work bootstrap dependencies..."
+run_selected_uninstalls "Work Machine Uninstaller" \
+    nvidia_uninstall        "NVIDIA drivers & tools"                           OFF \
+    dev_tools_uninstall     "Development tools (build-essential, git, ...)"    OFF \
+    node_uninstall          "Node.js & global npm packages"                   OFF \
+    python_uninstall        "Python, pip & pipx packages"                     OFF \
+    docker_uninstall        "Docker CE & compose"                             OFF \
+    gui_apps_uninstall      "GUI apps (Chrome, VS Code, Cursor, Spotify, ...)" OFF
 
-read -r -p "This will remove development tools, docker, node, python, cursor, and GUI apps. Are you sure? [y/N] " response
-if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-    nvidia_uninstall
-    dev_tools_uninstall
-    node_uninstall
-    python_uninstall
-    docker_uninstall
-    gui_apps_uninstall
-
-    if [ "$(basename "$SHELL")" == "zsh" ]; then
-        info "Currently using zsh. To revert to bash, run: chsh -s \$(which bash)"
-    fi
-
-    info "Uninstallation complete. A system reboot is recommended."
-else
-    info "Uninstallation aborted."
+if [ "$(basename "$SHELL")" == "zsh" ]; then
+    info "Currently using zsh. To revert to bash, run: chsh -s \$(which bash)"
 fi
+
+info "Uninstallation complete. A system reboot is recommended."
