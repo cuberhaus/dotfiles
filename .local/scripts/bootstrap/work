@@ -26,6 +26,11 @@ python_install
 docker_install
 gui_apps_install
 
+read -r -p "Do you have a high DPI screen? [y/N] " hidpi
+if [[ "$hidpi" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    high_dpi_screen
+fi
+
 if [ "$(basename "$SHELL")" != "zsh" ]; then
     chsh -s "$(which zsh)"
 fi
