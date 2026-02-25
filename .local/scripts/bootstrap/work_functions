@@ -227,12 +227,13 @@ gui_apps_install() {
     fi
 
     # Cursor (AI IDE — AppImage)
-    if [ ! -f "$HOME/Applications/cursor.AppImage" ]; then
+    if [ ! -f "$HOME/Applications/cursor.AppImage" ] || [ "$(stat -c%s "$HOME/Applications/cursor.AppImage")" -lt 1048576 ]; then
         info "Installing Cursor..."
         $apt libfuse2
         mkdir -p "$HOME/Applications"
-        curl -fsSL "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable" \
-            -o "$HOME/Applications/cursor.AppImage"
+        local cursor_url
+        cursor_url=$(curl -fsSL "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable" | jq -r '.downloadUrl')
+        curl -fsSL "$cursor_url" -o "$HOME/Applications/cursor.AppImage"
         chmod +x "$HOME/Applications/cursor.AppImage"
         # Desktop entry
         cat > "$HOME/.local/share/applications/cursor.desktop" <<EOF
