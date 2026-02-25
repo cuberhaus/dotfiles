@@ -12,7 +12,7 @@ base_uninstall() {
     info "Uninstalling base packages..."
 
     $apt_remove autoconf automake bat build-essential cmake curl eza file \
-        fonts-powerline fzf git gnome-shell htop inkscape laptop-detect \
+        fonts-powerline fzf git gh gnome-shell htop inkscape laptop-detect \
         libgtk-3-dev ncdu neovim nodejs npm optipng pkg-config python3 \
         python3-pip ranger w3m rclone ruby-dev samba-common-bin sassc \
         silversearcher-ag stow subversion tmux vim-gtk yarn zsh eog sshfs || true

@@ -9,7 +9,7 @@ cli_uninstall() {
     info "Uninstalling CLI tools..."
 
     local formulae=(
-        ack astyle bat bison cmake eza flex fzf git go gpg htop llvm mono
+        ack astyle bat bison cmake eza flex fzf gh git go gpg htop llvm mono
         ncdu neofetch p7zip pinentry-mac pkg-config ranger w3m rclone
         ripgrep smimesign sox stow swig the_silver_searcher unrar wget yarn
     )

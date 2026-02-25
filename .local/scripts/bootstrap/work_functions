@@ -76,11 +76,10 @@ dev_tools_install() {
     $apt rclone                    # Sync files to/from cloud storage
     $apt sshfs                     # Mount remote filesystems over SSH
 
+    $apt gh                        # GitHub CLI
+
     # Git config
     git config --global credential.helper store
-
-    # Add more dev tools below as needed:
-    # $apt <package>
 }
 
 ###############################################################
@@ -286,6 +285,15 @@ EOF
     # Caffeine (prevent screen from going to sleep)
     $apt caffeine
 
-    # Add more GUI apps below as needed:
-    # $apt <package>
+    # GNOME advanced settings
+    $apt dconf-editor
+
+    # Sublime Text
+    snap list sublime-text &>/dev/null 2>&1 || sudo snap install sublime-text --classic
+
+    # Sublime Merge
+    snap list sublime-merge &>/dev/null 2>&1 || sudo snap install sublime-merge --classic
+
+    # Walc (WhatsApp Linux client)
+    snap list walc &>/dev/null 2>&1 || sudo snap install walc
 }

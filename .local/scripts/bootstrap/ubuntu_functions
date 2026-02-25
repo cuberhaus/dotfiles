@@ -17,7 +17,8 @@ base_install () { ## For windows install it's good to have this
     $apt file 
     $apt fonts-powerline 
     $apt fzf                    # Fuzzy finder
-    $apt git 
+    $apt git
+    $apt gh                      # GitHub CLI
     $apt gnome-shell 
     $apt htop                   # Show system resources
     $apt inkscape 

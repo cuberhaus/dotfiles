@@ -29,6 +29,7 @@ mac_install () {
     brew install eza                            # "ls" on steroids (exa replacement)
     brew install flex
     brew install fzf                            # Fuzzy Finder
+    brew install gh                             # GitHub CLI
     brew install git                            # Git
     brew install go
     brew install gpg

@@ -13,7 +13,7 @@ base_uninstall() {
 
     $pac_remove cmake opencl-headers bazel cudnn cuda conky \
         adapta-gtk-theme arc-gtk-theme arc-icon-theme \
-        bat biber breeze calibre cron dconf-editor dex discord dnsutils \
+        bat biber breeze calibre cron dconf-editor dex discord dnsutils github-cli \
         dunst eza exfat-utils file-roller firefox fzf gcc gdb \
         gnome-calculator gnome-font-viewer gnome-keyring gtk2 gtk3 \
         gucharmap gvim hardinfo cpu-x htop inotify-tools kcolorchooser \
