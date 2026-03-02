@@ -28,7 +28,7 @@ dev_tools_uninstall() {
     info "Uninstalling dev tools..."
     $apt_remove build-essential cmake curl git jq tree wget zsh stow vim-gtk3 neovim \
         bat eza fzf htop ncdu ranger ripgrep fd-find silversearcher-ag w3m shellcheck \
-        unzip eog flameshot rclone sshfs gh || true
+        unzip eog flameshot rclone sshfs gh hardinfo cpu-x neofetch || true
 
     # Unset global git config
     git config --global --unset credential.helper || true

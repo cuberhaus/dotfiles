@@ -78,6 +78,11 @@ dev_tools_install() {
 
     $apt gh                        # GitHub CLI
 
+    # Hardware info
+    $apt hardinfo                  # GUI hardware info & benchmarks
+    $apt cpu-x                     # CPU-Z style hardware viewer
+    $apt neofetch                  # Terminal system info summary
+
     # Git config
     git config --global credential.helper store
 }
