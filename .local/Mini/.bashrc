@@ -41,6 +41,16 @@ shopt -s checkwinsize
 # match all files and zero or more directories and subdirectories.
 shopt -s globstar
 
+###############################################################
+# => Prompt
+###############################################################
+
+if [ "$(id -u)" -eq 0 ]; then
+    PS1='\[\e[1;31m\]\u\[\e[0m\]@\[\e[1;33m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ '
+else
+    PS1='\[\e[1;32m\]\u\[\e[0m\]@\[\e[1;33m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\$ '
+fi
+
 ### ALIASES
 
 # Easier navigation: .., ..., ...., ....., ~ and -
