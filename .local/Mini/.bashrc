@@ -62,19 +62,49 @@ shopt -s cdspell
 [ -d "$HOME/.local/scripts/bin" ] && PATH="$HOME/.local/scripts/bin:$PATH"
 
 ###############################################################
-# => Prompt (with git branch)
+# => Prompt
 ###############################################################
 
-__git_branch() {
+__prompt_git() {
     local branch
     branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
-    [[ -n "$branch" ]] && printf ' (%s)' "$branch"
+    [[ -z "$branch" ]] && return
+
+    local marks=""
+    [[ -n $(git status --porcelain -uno 2>/dev/null) ]] && marks+="*"
+    [[ -n $(git diff --cached --quiet 2>/dev/null; echo $?) && $(git diff --cached --name-only 2>/dev/null) ]] && marks+="+"
+    [[ -n $(git status --porcelain 2>/dev/null | grep '^\?\?') ]] && marks+="?"
+
+    printf ' (%s%s)' "$branch" "$marks"
 }
 
+__prompt_ssh() {
+    [[ -n "$SSH_CLIENT" || -n "$SSH_TTY" || -n "$SSH_CONNECTION" ]] && printf '(ssh) '
+}
+
+__prompt_msys() {
+    [[ -n "$MSYSTEM" ]] && printf '%s ' "$MSYSTEM"
+}
+
+__prompt_jobs() {
+    local n
+    n=$(jobs -p 2>/dev/null | wc -l)
+    (( n > 0 )) && printf ' [%s]' "$n"
+}
+
+__prompt_exitcode() {
+    local code=$1
+    (( code != 0 )) && printf ' \[\e[1;31m\]✘ %s\[\e[0m\]' "$code"
+}
+
+# Capture exit code before PROMPT_COMMAND overwrites it
+__prompt_cmd_original="${PROMPT_COMMAND}"
+PROMPT_COMMAND='__last_exit=$?;'"${__prompt_cmd_original}"
+
 if [ "$(id -u)" -eq 0 ]; then
-    PS1='\[\e[1;31m\]\u\[\e[0m\]@\[\e[1;33m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0;35m\]$(__git_branch)\[\e[0m\]\$ '
+    PS1='\[\e[0;36m\]$(__prompt_ssh)\[\e[1;35m\]$(__prompt_msys)\[\e[1;31m\]\u\[\e[0m\]@\[\e[1;33m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0;35m\]$(__prompt_git)\[\e[0;33m\]$(__prompt_jobs)\[\e[0m\]$(__prompt_exitcode $__last_exit)\n\$ '
 else
-    PS1='\[\e[1;32m\]\u\[\e[0m\]@\[\e[1;33m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0;35m\]$(__git_branch)\[\e[0m\]\$ '
+    PS1='\[\e[0;36m\]$(__prompt_ssh)\[\e[1;35m\]$(__prompt_msys)\[\e[1;32m\]\u\[\e[0m\]@\[\e[1;33m\]\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0;35m\]$(__prompt_git)\[\e[0;33m\]$(__prompt_jobs)\[\e[0m\]$(__prompt_exitcode $__last_exit)\n\$ '
 fi
 
 ###############################################################
