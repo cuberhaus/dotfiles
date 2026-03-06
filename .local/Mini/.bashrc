@@ -194,7 +194,7 @@ elif command -v exa &>/dev/null; then
     alias la="exa --group-directories-first -a"
     alias l="exa -a -F --long --header --links --group --group-directories-first --git"
 else
-    alias ls="ls -l --color=auto"
+    alias ls="ls --color=auto"
     alias la="ls -a --color=auto"
 fi
 
