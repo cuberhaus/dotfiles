@@ -1,4 +1,8 @@
-" With a map leader it's possible to do extra key combinations
+" General {{{
+
+set nocompatible
+
+" Leader key for custom key combinations
 let mapleader=" "
 
 " Activate folds
@@ -24,23 +28,24 @@ endif
 " Enable filetype plugins
 filetype plugin indent on
 
-"Fa que el escape sigui instantani
+" Instant escape
 set timeoutlen=1000 ttimeoutlen=0
 
-" Número relatiu a la teva posició en la barra de l'esquerra
+" Relative line numbers
 set number relativenumber
 
-"activa suport de mouse
+" Mouse support
 set mouse=a
 
-" Disable auto comments
+" Disable auto comments on new lines
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
-" Set 4 lines to the cursor - when moving vertically using j/k
+" Keep 4 lines visible above/below cursor when scrolling
 set so=4
 
-" Turn on the Wild menu, better autocompletion
+" Turn on the Wild menu, better command autocompletion
 set wildmenu
+set wildmode=longest:full,full
 
 " Ignore compiled files
 set wildignore=*.o,*~,*.pyc
@@ -50,11 +55,11 @@ else
     set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
 endif
 
-"Always show current position
+" Always show current position
 set ruler
 
-" Configure backspace so it acts as it should act
-"set backspace=eol,start,indent
+" Fix backspace on some systems
+set backspace=indent,eol,start
 
 " Ignore case when searching
 set ignorecase
@@ -65,11 +70,12 @@ set smartcase
 " Highlight search results
 set hlsearch
 
-" Makes search act like search in modern browsers
+" Incremental search (search as you type)
 set incsearch
 
 " Don't redraw while executing macros (good performance config)
 set lazyredraw
+set ttyfast
 
 " For regular expressions turn magic on
 set magic
@@ -77,12 +83,24 @@ set magic
 " Show matching brackets when text indicator is over them
 set showmatch
 
-"This one is the one that works
+" Disable all bells
 set belloff=all
 
-" Change cursor to a vertical thin line while in insert mode and underscore while replacing
+" Allow switching buffers without saving
+set hidden
+
+" Ask to save instead of failing
+set confirm
+
+" More natural split directions
+set splitbelow
+set splitright
+
+" Highlight current line
+set cursorline
+
+" Change cursor shape per mode (works in most modern terminals)
 if system('uname -s') == "Darwin\n"
-    "Mode Settings
     let &t_SI.="\e[5 q" "SI = INSERT mode
     let &t_SR.="\e[4 q" "SR = REPLACE mode
     let &t_EI.="\e[1 q" "EI = NORMAL mode (ELSE)
@@ -95,16 +113,46 @@ endif
 " Changes current directory for new files
 set autochdir
 
-" Return to last edit position when opening files (You want this!)
+" Return to last edit position when opening files
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
-" Colors and Fonts
+" Fuzzy find files with :find (no plugins needed)
+set path+=**
+
+" }}}
+
+" Colors and Fonts {{{
+
+" True color support
+if (empty($TMUX))
+  if (has("nvim"))
+    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+  endif
+  if (has("termguicolors"))
+    set termguicolors
+  endif
+endif
+
+if exists('$TMUX') && has("nvim")
+    set termguicolors
+endif
 
 " Enable syntax highlighting
 syntax enable
-
-"Activar sintàxis de programació
 syntax on
+
+" Pick the best available built-in colorscheme
+try
+    colorscheme habamax
+catch
+    try
+        colorscheme slate
+    catch
+        colorscheme desert
+    endtry
+endtry
+
+set background=dark
 
 " Set utf8 as standard encoding and en_US as the standard language
 set encoding=utf8
@@ -116,10 +164,59 @@ set ffs=unix,dos,mac
 " :help updatetime
 set updatetime=1500
 
+" Enable italics for comments
+highlight Comment cterm=italic gui=italic
+
+" }}}
+
+" Statusline (no plugins needed) {{{
+
+set laststatus=2
+set statusline=
+set statusline+=\ %{toupper(mode())}              " Current mode
+set statusline+=\ \ %f                             " File path
+set statusline+=%m%r                               " Modified/readonly flags
+set statusline+=%=                                 " Right align
+set statusline+=\ %y                               " Filetype
+set statusline+=\ %{&fileencoding?&fileencoding:&encoding}
+set statusline+=\ \ %l:%c                          " Line:column
+set statusline+=\ %p%%\                            " Percentage
+
+" }}}
+
+" Netrw (built-in file explorer) {{{
+
+let g:netrw_banner = 0
+let g:netrw_liststyle = 3
+let g:netrw_browse_split = 4
+let g:netrw_altv = 1
+let g:netrw_winsize = 25
+
+" Toggle netrw sidebar with Ctrl+Space / Ctrl+@ (same key as NERDTree in big vimrc)
+function! ToggleNetrw()
+    if exists("t:netrw_bufnr")
+        silent! execute "bd " . t:netrw_bufnr
+        unlet t:netrw_bufnr
+    else
+        Vexplore
+        let t:netrw_bufnr = bufnr("%")
+    endif
+endfunction
+
+if has('nvim')
+    nmap <C-Space> :call ToggleNetrw()<CR>
+else
+    nmap <NUL> :call ToggleNetrw()<CR>
+endif
+
+" }}}
+
+" Text, tab and indent related {{{
+
 " Use spaces instead of tabs
 set expandtab
 
-" Be smart when using tabs ;)
+" Be smart when using tabs
 set smarttab
 
 " 1 tab == 4 spaces
@@ -135,7 +232,9 @@ set si "Smart indent
 set wrap "Wrap lines
 set breakindent "Indent after line wrapped
 
-" Keybindings
+" }}}
+
+" Keybindings {{{
 
 function! GotoJump()
   jumps
@@ -152,6 +251,21 @@ function! GotoJump()
 endfunction
 
 nmap <Leader>j :call GotoJump()<CR>
+
+" Make Y behave like D and C (yank to end of line)
+nnoremap Y y$
+
+" Keep visual selection after indenting
+vnoremap < <gv
+vnoremap > >gv
+
+" Move visual selection up/down
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
+
+" Center screen after search navigation
+nnoremap n nzzzv
+nnoremap N Nzzzv
 
 " Toggle paste mode on and off
 nnoremap <leader>pp :setlocal paste!<cr>
@@ -191,7 +305,9 @@ map <leader>tn :tabnew<cr>
 map <leader>tc :tabclose<cr>
 map <leader>t<leader> :tabnext <cr>
 
-" Editing mappings
+" }}}
+
+" Editing mappings {{{
 
 " Press F5 to eliminate trailing whitespaces
 :nnoremap <silent> <F5> :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl <Bar> :unlet _s <CR>
@@ -199,28 +315,24 @@ map <leader>t<leader> :tabnext <cr>
 " Remap VIM 0 to first non-blank character
 map 0 ^
 
-" Turn persistent undo on
-" means that you can undo even when you close a buffer/VIM
-try
-    set undodir=~/.vim_runtime/temp_dirs/undodir
-    set undofile
-catch
-endtry
+" Turn persistent undo on (auto-create directory if missing)
+if !isdirectory($HOME . "/.vim_undo")
+    call mkdir($HOME . "/.vim_undo", "p", 0700)
+endif
+set undodir=~/.vim_undo
+set undofile
 
-" Spelling 
+" }}}
 
-" Demana per descarregar el fixter corresponent
+" Spelling {{{
+
 let g:spellfile_URL = 'http://ftp.vim.org/vim/runtime/spell'
-"setlocal spell spelllang=en
 map <leader>ss :setlocal spell! spelllang=en<cr>
 map <leader>se :setlocal spell! spelllang=es<cr>
 map <leader>sc :setlocal spell! spelllang=ca<cr>
 
 map <leader>sn ]s
 map <leader>sp [s
-" zg accepts a word, zug undoes
-"map <leader>sa zg
 map <leader>? z=
 
-" Enable italics
-highlight Comment cterm=italic gui=italic
+" }}}
