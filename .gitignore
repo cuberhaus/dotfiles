@@ -99,6 +99,10 @@
 !.config/sublime-text-3/**
 !.config/Cursor/
 !.config/Cursor/**
+!.config/Antigravity/
+!.config/Antigravity/**
+!.config/warp-terminal/
+!.config/warp-terminal/**
 
 # Terminals
 !.config/kitty/

@@ -1,0 +1,10 @@
+{
+  "git.confirmSync": false,
+  "terminal.integrated.inheritEnv": false,
+  "workbench.sideBar.location": "right",
+  "git.autofetch": true,
+  "agCockpit.profileHidden": false,
+  "agCockpit.groupingEnabled": true,
+  "explorer.confirmDragAndDrop": false,
+  "makefile.configureOnOpen": true
+}
