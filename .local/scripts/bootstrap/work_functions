@@ -273,6 +273,35 @@ EOF
         info "Warp terminal already installed, skipping."
     fi
 
+    # LM Studio (local LLM runner — AppImage)
+    if [ ! -f "$HOME/Applications/LMStudio.AppImage" ]; then
+        info "Installing LM Studio..."
+        $apt libfuse2
+        mkdir -p "$HOME/Applications"
+        wget -O "$HOME/Applications/LMStudio.AppImage" \
+            "https://lmstudio.ai/releases/latest/linux/x86_64/LMStudio.AppImage"
+        chmod +x "$HOME/Applications/LMStudio.AppImage"
+        cat > "$HOME/.local/share/applications/lmstudio.desktop" <<EOF
+[Desktop Entry]
+Name=LM Studio
+Exec=$HOME/Applications/LMStudio.AppImage --no-sandbox %U
+Icon=lmstudio
+Type=Application
+Categories=Development;Science;
+StartupWMClass=LM Studio
+EOF
+    else
+        info "LM Studio already installed, skipping."
+    fi
+
+    # Ollama (local LLM serving)
+    if ! command -v ollama &>/dev/null; then
+        info "Installing Ollama..."
+        curl -fsSL https://ollama.com/install.sh | sh
+    else
+        info "Ollama already installed, skipping."
+    fi
+
     # Spotify
     snap list spotify &>/dev/null 2>&1 || sudo snap install spotify
 

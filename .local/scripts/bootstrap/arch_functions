@@ -541,6 +541,86 @@ emacs() {
     fi
 }
 
+ai_tools_install() {
+    info "Installing AI tools..."
+
+    # Cursor (AI IDE — AppImage)
+    if [ ! -f "$HOME/Applications/cursor.AppImage" ]; then
+        info "Installing Cursor..."
+        mkdir -p "$HOME/Applications"
+        curl -fsSL "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable" \
+            -o "$HOME/Applications/cursor.AppImage"
+        chmod +x "$HOME/Applications/cursor.AppImage"
+        cat > "$HOME/.local/share/applications/cursor.desktop" <<EOF
+[Desktop Entry]
+Name=Cursor
+Exec=$HOME/Applications/cursor.AppImage --no-sandbox %U
+Icon=cursor
+Type=Application
+Categories=Development;IDE;
+StartupWMClass=Cursor
+EOF
+    else
+        info "Cursor already installed, skipping."
+    fi
+
+    # Antigravity (Google AI IDE — AppImage)
+    if [ ! -f "$HOME/Applications/antigravity.AppImage" ]; then
+        info "Installing Antigravity..."
+        mkdir -p "$HOME/Applications"
+        curl -fsSL "https://antigravity.dev/api/download?platform=linux-x64" \
+            -o "$HOME/Applications/antigravity.AppImage"
+        chmod +x "$HOME/Applications/antigravity.AppImage"
+        cat > "$HOME/.local/share/applications/antigravity.desktop" <<EOF
+[Desktop Entry]
+Name=Antigravity
+Exec=$HOME/Applications/antigravity.AppImage --no-sandbox %U
+Icon=antigravity
+Type=Application
+Categories=Development;IDE;
+StartupWMClass=Antigravity
+EOF
+    else
+        info "Antigravity already installed, skipping."
+    fi
+
+    # Warp (AI terminal)
+    if ! command -v warp-terminal &>/dev/null; then
+        info "Installing Warp terminal..."
+        $yay warp-terminal-bin
+    else
+        info "Warp terminal already installed, skipping."
+    fi
+
+    # LM Studio (local LLM runner — AppImage)
+    if [ ! -f "$HOME/Applications/LMStudio.AppImage" ]; then
+        info "Installing LM Studio..."
+        mkdir -p "$HOME/Applications"
+        wget -O "$HOME/Applications/LMStudio.AppImage" \
+            "https://lmstudio.ai/releases/latest/linux/x86_64/LMStudio.AppImage"
+        chmod +x "$HOME/Applications/LMStudio.AppImage"
+        cat > "$HOME/.local/share/applications/lmstudio.desktop" <<EOF
+[Desktop Entry]
+Name=LM Studio
+Exec=$HOME/Applications/LMStudio.AppImage --no-sandbox %U
+Icon=lmstudio
+Type=Application
+Categories=Development;Science;
+StartupWMClass=LM Studio
+EOF
+    else
+        info "LM Studio already installed, skipping."
+    fi
+
+    # Ollama (local LLM serving)
+    if ! command -v ollama &>/dev/null; then
+        info "Installing Ollama..."
+        curl -fsSL https://ollama.com/install.sh | sh
+    else
+        info "Ollama already installed, skipping."
+    fi
+}
+
 ### All packages in here should be handpicked
 optional() {
     # Trash

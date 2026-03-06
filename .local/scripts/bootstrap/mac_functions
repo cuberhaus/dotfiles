@@ -88,6 +88,22 @@ mac_install () {
     brew install --cask todoist                 # Task manager
 }
 
+ai_tools_install() {
+    info "Installing AI tools..."
+    brew install --cask cursor               # AI IDE
+    brew install --cask warp                 # AI terminal
+    brew install --cask lm-studio            # Local LLM runner
+    # Antigravity: install manually from https://antigravity.dev if needed
+
+    # Ollama (local LLM serving)
+    if ! command -v ollama &>/dev/null; then
+        info "Installing Ollama..."
+        curl -fsSL https://ollama.com/install.sh | sh
+    else
+        info "Ollama already installed, skipping."
+    fi
+}
+
 optional () {
     brew install --cask ganttproject
     brew install --cask jupyterlab

@@ -12,6 +12,7 @@ install_preparation
 #app_store_install
 brew_install
 mac_install
+ai_tools_install
 vim_install
 #bloat_install
 #doom_emacs_install

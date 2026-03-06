@@ -34,6 +34,7 @@ chrome_install
 #i3_install # Installing i3 requires manual input
 snaps_install
 ubuntu_install
+ai_tools_install
 vim_install
 if [ "$(basename "$SHELL")" != "zsh" ]; then
     chsh -s "$(which zsh)"                  # Change default shell to zsh

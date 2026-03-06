@@ -42,6 +42,7 @@ if [[ "${FirstRun}" == y || "${FirstRun}" == Y ]]; then
     laptop_install # DO ONLY ONCE
     activate_reisub # DO ONLY ONCE
 fi
+ai_tools_install
 vim_install
 wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders
 if [ "$(basename "$SHELL")" != "zsh" ]; then
