@@ -97,6 +97,8 @@
 !.config/snippets
 !.config/sublime-text-3/
 !.config/sublime-text-3/**
+!.config/Cursor/
+!.config/Cursor/**
 
 # Terminals
 !.config/kitty/
