@@ -23,152 +23,169 @@ pip="pip install --user --break-system-packages" # in arch pip packages should b
 ## Invariant: be at $HOME dir
 
 base_install () {
-    # $pac tensorflow
-    $pac cmake  # ycm
-    $pac opencl-headers
-    $pac bazel
-    $pac cudnn
-    $pac cuda                                   # GPU
-    $pac conky
-    $pac adapta-gtk-theme                       # Alternative theme
-    $pac arc-gtk-theme                          # Arc theme and its icon's
-    $pac arc-icon-theme                         # Doesn't install in manjaro
-    $pac base-devel                             # AUR
-    $pac bat                                    # "Cat" on steroids
-    $pac biber                                  # Latex bibliography
-    $pac breeze                                 # theme
-    $pac calibre                                # Book manager
-    $pac cron                                   # Backups (sudo timeshift-gtk)
-    $pac dconf-editor                           # Edit gnome configuration
-    $pac dex
-    $pac discord
-    $pac dnsutils                               # Ip
-    $pac dunst                                  # Notifications
-    $pac dunstify                               # dunst notification
-    $pac eza                                    # "ls" on steroids (exa replacement)
-    $pac exfat-utils                            # Add support for exfat https://wiki.archlinux.org/index.php/file_systems
-    $pac file-roller                            # Archive Manager (extract, unzip...)
-    $pac firefox                                # chrome doesn't redirect to wifi page's
-    $pac fzf                                    # Fuzzy finder
-    $pac gcc                                    # Cpp
-    $pac gdb                                    # debugging c++
-    $pac git                                    # It's git bro
-    $pac gnome-calculator                       # Calculator
-    $pac gnome-font-viewer                      # Font viewer
-    $pac gnome-keyring                          # https://wiki.archlinux.org/title/GNOME/Keyring
-    $pac gtk2 gtk3
-    $pac gucharmap                              # Characters keyboard
-    $pac gvim                                   # Vim version with extra features
-    $pac hardinfo cpu-x                         # pc information
-    $pac htop                                   # Show system resources
-    $pac inotify-tools                          # inotifywatch -r $file (to watch if those files have been accessed)
-    $pac kcolorchooser                          # Color picker
-    $pac kdiff3                                 # git best mergetool (complex merges are better than meld)
-    $pac kitty                                  # Terminal emulator
-    $pac kvantum-qt5                            # Qt5 Custom themes
-    $pac laptop-detect                          # Detect if using a laptop
-    $pac libmythes mythes-en mythes-es  # Libre office Synonyms
-    $pac libreoffice-still libreoffice-still-ca # (install plugins located on .local)
-    $pac lxappearance                           # Gtk configuration utility
-    # $pac meld                                   # Best diff viewer
-    $pac ncdu                                   # Manage storage
-    $pac nemo
-    $pac nemo-fileroller
-    $pac nemo-preview
-    $pac nemo-seahorse
-    $pac nemo-share
-    $pac net-tools                              # Ips
-    $pac nilfs-utils                            # Manage partitions
-    $pac nomacs                                 # Image viewer (da best)
-    $pac noto-fonts-emoji                       # Classic Emoji
-    $pac npm                                    # Package manager
-    $pac ntfs-3g                                # Read/write support for ntfs https://wiki.archlinux.org/index.php/NTFS-3G
-    $pac okular                                 # Best pdf viewer
-    $pac papirus-icon-theme                     # Best icon theme!
-    $pac partitionmanager                       # Partition manager for KDE
-    $pac perl-file-mimeinfo                     # mimeopen -d $file and type whatever app you want to open that with
-    xdg-mime default nemo.desktop inode/directory # xdg-mime default nemo.desktop inode/directory when mimeopen doesn't work https://unix.stackexchange.com/questions/77136/xdg-open-default-applications-behavior
-    $pac playerctl                              # Audio
-    $pac polkit                                 # Policy kit
-    $pac polkit-gnome                           # https://wiki.archlinux.org/index.php/Polkit
-    $pac python
-    $pac python-pipenv
-    $pac python3
-    $pac qt5ct                                  # Qt5 configuration utility
-    $pac ranger                                 # Ranger
-    $pac rclone                                 # Rsync to remote
-    $pac reflector                              # Update Arch mirrors
-    $pac remmina freerdp libvncserver           # Remote conexions
-    $pac ruby                                   # Package manager
-    $pac seahorse                               # Password keeper
-    $pac speedcrunch                            # Fast calculations
-    $pac stow                                   # To deploy dotfiles
-    $pac svn                                    # Similar to git
-    $pac the_silver_searcher                    # Better and faster ack (and grep)
-    $pac thunderbird                            # $yay  thunderbird-bin
-    $pac tmux                                   # Terminal multiplexer
-    $pac transmission-gtk                       # A simpler Torrent D.
-    $pac trash-cli                              # https://wiki.archlinux.org/index.php/Trash_management
-    $pac ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts        # Fonts
-    $pac tumbler ffmpegthumbnailer raw-thumbnailer        # IDK
-    $pac udftools                               # Manage partitions
-    $pac udiskie                                # Automater
-    $pac dolphin
-    $pac udisks2                                # Daemon to manipulate storage devices
-    $pac vlc                                    # Video player
-    $pac w3m                                    # Preview images on ranger
-    $pac wget                                   # Download stuff
-    $pac wireshark                              # View incoming/outgoing connections
-    $pac wmctrl                                 #used for scripting
-    $pac xclip                                  # Clipboard
-    $pac xdg-user-dirs                          # Manage user directories like "Downloads" https://wiki.archlinux.org/index.php/XDG_user_directories
-    $pac xfce4-clipman-plugin                   # Clipboard manager (persistant clip even when application is closed)
-    $pac xorg                                   # Display server
-    $pac xorg-xinit                             # Start X11 without LightDM "startx"  https://wiki.archlinux.org/index.php/Xinit
-    $pac xss-lock                               # Lockscreen
-    $pac yarn                                   # Package installer
-    $pac zsh                                    # Zsh shell
-    $pac zathura-cb # zathura needs plugins
-    $pac zathura-djvu
-    $pac zathura-pdf-mupdf
-    $pac zathura-ps
-    $pac zathura
-    $pac kalk
-    $pac solaar # logitech unifying
-    $pac telegram
-    $pac obsidian                               # Markdown editor
+    local pac_packages=(
+        # Build / dev
+        cmake                   # ycm
+        opencl-headers
+        bazel
+        cudnn
+        cuda                    # GPU
+        base-devel              # AUR
+        gcc                     # C++
+        gdb                     # Debugging C++
+        git
+        npm
+        python
+        python-pipenv
+        python3
+        ruby
+        svn                     # Subversion
+        yarn
 
-    # DO NOT CHANGE THIS ORDER YAY COMES AFTER pac
+        # Themes & appearance
+        conky
+        adapta-gtk-theme        # Alternative theme
+        arc-gtk-theme           # Arc theme
+        arc-icon-theme
+        breeze                  # Theme
+        gtk2
+        gtk3
+        kvantum-qt5             # Qt5 custom themes
+        lxappearance            # Gtk configuration utility
+        noto-fonts-emoji        # Classic emoji
+        papirus-icon-theme      # Best icon theme
+        qt5ct                   # Qt5 configuration utility
+        ttf-dejavu              # Fonts
+        ttf-liberation
+        ttf-droid
+        ttf-ubuntu-font-family
+        ttf-roboto
+        noto-fonts
+
+        # CLI tools
+        bat                     # Cat on steroids
+        eza                     # ls on steroids (exa replacement)
+        fzf                     # Fuzzy finder
+        htop                    # Show system resources
+        ncdu                    # Manage storage
+        ranger                  # Ranger
+        rclone                  # Rsync to remote
+        reflector               # Update Arch mirrors
+        stow                    # Deploy dotfiles
+        the_silver_searcher     # Better grep
+        tmux                    # Terminal multiplexer
+        trash-cli               # Trash management
+        w3m                     # Preview images on ranger
+        wget                    # Download stuff
+        wmctrl                  # Used for scripting
+        xclip                   # Clipboard
+        zsh                     # Zsh shell
+
+        # GUI apps
+        biber                   # LaTeX bibliography
+        calibre                 # Book manager
+        cron                    # Backups (sudo timeshift-gtk)
+        dconf-editor            # Edit gnome configuration
+        dex
+        discord
+        dnsutils                # IP
+        dunst                   # Notifications
+        dunstify                # Dunst notification
+        exfat-utils             # Exfat support
+        file-roller             # Archive manager
+        firefox
+        gnome-calculator
+        gnome-font-viewer
+        gnome-keyring
+        gucharmap               # Characters keyboard
+        gvim                    # Vim with extra features
+        hardinfo                # PC information
+        cpu-x                   # PC information
+        inotify-tools           # Watch file access
+        kcolorchooser           # Color picker
+        kdiff3                  # Git best mergetool
+        kitty                   # Terminal emulator
+        laptop-detect
+        libmythes               # LibreOffice synonyms
+        mythes-en
+        mythes-es
+        libreoffice-still       # (install plugins located on .local)
+        libreoffice-still-ca
+        nemo
+        nemo-fileroller
+        nemo-preview
+        nemo-seahorse
+        nemo-share
+        net-tools               # IPs
+        nilfs-utils             # Manage partitions
+        nomacs                  # Image viewer
+        ntfs-3g                 # NTFS read/write
+        okular                  # Best PDF viewer
+        partitionmanager        # KDE partition manager
+        perl-file-mimeinfo      # mimeopen
+        playerctl               # Audio
+        polkit
+        polkit-gnome
+        remmina                 # Remote connections
+        freerdp
+        libvncserver
+        seahorse                # Password keeper
+        speedcrunch             # Fast calculations
+        thunderbird             # Email
+        transmission-gtk        # Torrent client
+        tumbler
+        ffmpegthumbnailer
+        raw-thumbnailer
+        udftools                # Manage partitions
+        udiskie                 # Automounter
+        dolphin
+        udisks2                 # Storage daemon
+        vlc                     # Video player
+        wireshark               # Network connections
+        xdg-user-dirs           # User directories
+        xfce4-clipman-plugin    # Clipboard manager
+        xorg                    # Display server
+        xorg-xinit              # Start X11 without LightDM
+        xss-lock                # Lockscreen
+        zathura                 # Document viewer
+        zathura-cb              # Zathura comic book plugin
+        zathura-djvu
+        zathura-pdf-mupdf
+        zathura-ps
+        kalk
+        solaar                  # Logitech unifying
+        telegram
+        obsidian                # Markdown editor
+        virt-viewer
+    )
+    $pac "${pac_packages[@]}"
+
+    xdg-mime default nemo.desktop inode/directory
+
+    # yay must come after pacman
     yay_install
-    
-    # $yay tgpt-bin # terminal chatgpt
-    # $yay chatgpt-desktop-bin #chatgpt
-    $yay caffeine-ng                              # Prevent screen from going to sleep
-    $yay florence # virtual keyboard
-    $yay downgrade # sudo DOWNGRADE_FROM_ALA=1 downgrade packageName to downgrade a package to a selected package in the list
-    # $yay balena-etcher                          # "Rufus" on linux
-    $yay balena-etcher-appimage                 # much faster to install and actually works
-    $yay woeusb-ng                              # create windows bootable device installation
-    $yay betterlockscreen                       # Lockscreen
-    $pac virt-viewer
-    $yay google-chrome                          # Best web browser
-    $yay microsoft-edge-stable-bin              # edge chatgpt 4
-    $yay libreoffice-extension-languagetool     # Libre office Grammar
-    
-    $yay timeshift                              # Backups (sudo timeshift-gtk)
-    $yay tomighty                               # Pomodoro timer (take a break from life, read a book, contemplate life, make coffee...)
-    $yay ttf-ms-fonts                           # Microsoft fonts ##deprecated
-    
 
-    git config --global credential.helper store # stores password on pc (security hazzard)
+    local yay_packages=(
+        caffeine-ng             # Prevent screen from going to sleep
+        florence                # Virtual keyboard
+        downgrade               # Downgrade packages
+        # balena-etcher
+        balena-etcher-appimage  # USB image writer
+        woeusb-ng               # Windows bootable USB
+        betterlockscreen        # Lockscreen
+        google-chrome           # Best web browser
+        microsoft-edge-stable-bin
+        libreoffice-extension-languagetool   # LibreOffice grammar
+        timeshift               # Backups
+        tomighty                # Pomodoro timer
+        ttf-ms-fonts            # Microsoft fonts
+    )
+    $yay "${yay_packages[@]}"
 
-    #https://wiki.archlinux.org/index.php/Uniform_look_for_Qt_and_GTK_applications
-    #https://wiki.archlinux.org/index.php/qt
+    git config --global credential.helper store
 
-    # This has to go after installing nemo
-    # Nemo "best filemanager"
-    gsettings set org.cinnamon.desktop.default-applications.terminal exec "$myTerminal" # Tell Nemo to use Termite instead of gnome-terminal
-    # gsettings set org.cinnamon.desktop.default-applications.terminal exec-arg  -e # Termite execute argument is -e in gnome-terminal its -x
+    # Nemo: use kitty as terminal
+    gsettings set org.cinnamon.desktop.default-applications.terminal exec "$myTerminal"
 }
 
 git_repos() {
@@ -197,65 +214,57 @@ git_repos() {
 }
 
 arch_install() {
-    # $yay spotify                                # Spotify
-    # $yay visual-studio-code-bin                 # Microsoft's Visual Code /not #$pac  code
-    # $yay whatsapp-nativefier                    # Whatsapp client
-    $pac xorg-xrandr
-    $pac arandr # visual interface for xrandr
-    $pac autorandr # https://github.com/phillipberndt/autorandr
-    # Drivers
-    $pac linux
-    $pac linux-headers
-    # LTS release
-    #$pac linux-lts
-    #$pac linux-lts-headers
-    #$pac nvidia-lts
-    # $pac nvidia-dkms #very slow
-    $pac nvidia nvidia-utils                    # Nvidia
-    $pac xf86-video-intel mesa lib32-mesa       # Intel
-    $pac lib32-nvidia-utils                     # Requires adding multilib libraries
-    $pac nvidia-settings                        # Add force composition pipeline in nvidia-settings
+    local packages=(
+        # Display
+        xorg-xrandr
+        arandr                  # Visual interface for xrandr
+        autorandr               # Auto display profiles
 
-    # Printers
-    # https://wiki.archlinux.org/index.php/CUPS
-    # https://wiki.archlinux.org/title/CUPS#Web_interface
-    # https://wiki.archlinux.org/title/Avahi#Hostname_resolution
-    $pac cups system-config-printer # printers
+        # Drivers
+        linux
+        linux-headers
+        nvidia                  # NVIDIA
+        nvidia-utils
+        xf86-video-intel        # Intel
+        mesa
+        lib32-mesa
+        lib32-nvidia-utils      # Requires adding multilib libraries
+        nvidia-settings
+
+        # Printers
+        cups                    # Printers
+        system-config-printer
+
+        # Bluetooth
+        bluez
+        bluez-utils
+        blueberry               # Linux Mint GNOME Bluetooth
+
+        # Display manager
+        lightdm
+        lightdm-gtk-greeter
+        lightdm-gtk-greeter-settings
+
+        # Network
+        networkmanager
+        nm-connection-editor    # GUI
+        # nm-applet             # Applet (provided by network-manager-applet)
+    )
+    $pac "${packages[@]}"
+
+    $yay pulseaudio-modules-bt  # High quality audio codecs
+
     if [[ $FirstRun == y || $FirstRun == Y ]]; then
         sudo systemctl enable org.cups.cupsd.service
         sudo systemctl start org.cups.cupsd.service
-    fi
-
-    # Bluetooth
-    $pac  bluez bluez-utils blueberry            # Linux Mint GNOME Bluetooth
-    if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable bluetooth.service
-    fi
-    $yay pulseaudio-modules-bt  # High quality audio codecs
-
-    # Display manager
-    if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable lightdm.service
-    fi
-    $pac lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings
-
-    # Ntp for time syncro
-    #https://wiki.archlinux.org/index.php/Systemd-timesyncd
-    if [[ $FirstRun == y || $FirstRun == Y ]]; then
-        systemctl enable systemd-timesyncd.service   # systemd time service
-        sudo timedatectl set-ntp true                # Enable ntp
+        systemctl enable systemd-timesyncd.service
+        sudo timedatectl set-ntp true
         systemctl disable ntpd.service
-    fi
-    # https://wiki.archlinux.org/index.php/USB_storage_devices
-
-    # Network Manager and enable daemon on startup
-    $pac networkmanager
-    $pac nm-connection-editor # Gui
-    $pac nm-applet # Applet
-    if [[ $FirstRun == y || $FirstRun == Y ]]; then
         systemctl enable NetworkManager.service
     fi
-    # Poweroff is no longer handled by systemd so we now can map it to whatever we want
+
     sudo sed -i '/HandlePowerKey/s/.*/HandlePowerKey=ignore/' /etc/systemd/logind.conf
 }
 
@@ -318,67 +327,72 @@ yay_install() {
 
 vim_install () {
     info "Installing vim/neovim plugins..."
-    $pac  neovim
+    local packages=(
+        neovim
+        python-pip
+        ctags
+        astyle                  # Auto format
+        autopep8
+        yapf
+        cmake-format
+        shfmt
+        stylish-haskell
+        tidy
+    )
+    $pac "${packages[@]}"
+
     cd "$HOME" || exit
     vim +PlugInstall +qall
-    # Vim YouCompleteMe plugin install
     bash "$scripts/ycm.sh"
-    $pac python-pip
     $pip wheel
+    $pip black
     npm install neovim
     python3 -m "$pip" --upgrade pynvim
     sudo gem install neovim
     sudo chmod +w "$HOME/.vim/cache/viminfo"
-
-
-    $pac ctags
-    # auto format plugin
-    $pac astyle
-    $pip black
-    $pac autopep8
-    $pac yapf
     npm install js-beautify
-    $pac cmake-format
     npm install remark-cli
-    $pac shfmt
-    $pac stylish-haskell
-    $pac tidy
-    npm install js-beautify # css html javascript
 }
 
-# Best Tiling Window Manager
 i3_install () {
-    sudo usermod -a -G video "$USER"            # Needed for light
+    sudo usermod -a -G video "$USER"
 
-    # AUR
-    $yay cava                                   # https://github.com/karlstav/cava
-    $yay kbdd-git                               # i3blocks keyboard layout
+    local yay_packages=(
+        cava                    # https://github.com/karlstav/cava
+        kbdd-git                # i3blocks keyboard layout
+    )
+    $yay "${yay_packages[@]}"
 
-    # GUI/Terminal
-    # $pac pipewire-pulse                         # New and improved sound, uses SBC and ACC out of the box (pulseaudio deprecated)
-    $pac acpi
-    $pac awk bc upower                          # Battery plus
-    $pac feh                                    # Wallpaper
-    $pac flameshot                              # Screenshots
-    $pac i3-gaps                                # i3 with gaps
-    $pac i3blocks                               # Bottom bar
-    $pac light                                  # Brightness
-    $pac perl-anyevent-i3 python-dbus
-    $pac picom                                  # Compositor, for transparencies
-    # $pac pulseaudio alsa-utils                  # Audio
-    # $pac pulseaudio pulseaudio-equalizer         pulseaudio-bluetooth        # Audio
-    $pac rofi                                   # App menu Super+d
-    $pac yad xdotool                            # Calendar
-    $pac zenity                                 # Poweroff menu i3blocks
-    #$yay installs this: $pac  jq xdotool indent perl-anyevent-i3        # cava dependancies
+    local packages=(
+        acpi
+        awk                     # Battery plus
+        bc
+        upower
+        feh                     # Wallpaper
+        flameshot               # Screenshots
+        i3-gaps                 # i3 with gaps
+        i3blocks                # Bottom bar
+        light                   # Brightness
+        perl-anyevent-i3
+        python-dbus
+        picom                   # Compositor, for transparencies
+        rofi                    # App menu Super+d
+        yad                     # Calendar
+        xdotool
+        zenity                  # Poweroff menu i3blocks
+    )
+    $pac "${packages[@]}"
 }
 
 xmonad_install () {
-    $pac dmenu
-    $pac trayer                                 # xmonad add a tray for apps
-    $pac xmobar                                 # Best bar for xmonad
-    $pac xmonad-contrib                         # Xmonad with extra plugins
-    $pac xorg-xmessage                          # xmonad send messages
+    local packages=(
+        dmenu
+        trayer                  # Tray for apps
+        xmobar                  # Best bar for xmonad
+        xmonad-contrib          # Xmonad with extra plugins
+        xorg-xmessage           # Xmonad messages
+    )
+    $pac "${packages[@]}"
     sudo mkdir -p /etc/pacman.d/hooks/
     # https://stackoverflow.com/questions/84882/sudo-echo-something-etc-privilegedfile-doesnt-work
     # shellcheck disable=SC2024,SC2086
@@ -393,18 +407,24 @@ When = PostTransaction
 Exec = /usr/bin/sudo -u $USER /usr/bin/xmonad --recompile"  | sudo tee /etc/pacman.d/hooks/xmonad.hook
 }
 
-# Best Desktop
 cinnamon_install() {
-    # GUI
-    $pac cinnamon                               # Desktop
-    $pac gnome-screenshot                       # Take screenshots with impr pant
-    $pac gnome-shell                            # Fallback mode in case cinnamon crashes, to have a taskbar
-    $pac metacity                               # Fallback mode in case cinnamon crashes
-    $pac python-numpy python-xlib               # Color pick applet
+    local packages=(
+        cinnamon                # Desktop
+        gnome-screenshot        # Screenshots
+        gnome-shell             # Fallback mode
+        metacity                # Fallback mode
+        python-numpy            # Color pick applet
+        python-xlib
+    )
+    $pac "${packages[@]}"
 
-    # AUR
-    $yay cinnamon-sound-effects                 # Sound effects
-    $yay mint-themes mint-y-icons mint-backgrounds        # Themes
+    local yay_packages=(
+        cinnamon-sound-effects  # Sound effects
+        mint-themes             # Themes
+        mint-y-icons
+        mint-backgrounds
+    )
+    $yay "${yay_packages[@]}"
 
     gsettings set org.cinnamon.desktop.wm.preferences resize-with-right-button true # alt + rightclick to resize windows
     # Uninstall  xf86-video-intel
@@ -431,30 +451,44 @@ plasma_install() {
 }
 
 bloat_install () {
-    $pac cmatrix                                # Bloat
-    $pac cowsay                                 # A cow displaying text
-    $pac fortune-mod                            # Random quote
-    $pac lolcat
-    $pac ponysay asciiquarium
-    $pac sl                                     # Steam locomotor, (Did you mean to type ls?)
-    $yay figlet toilet                          # Cool letters
-    $yay pipes.sh                               # Lockscreens
+    local packages=(
+        cmatrix                 # Bloat
+        cowsay                  # A cow displaying text
+        fortune-mod             # Random quote
+        lolcat
+        ponysay
+        asciiquarium
+        sl                      # Steam locomotor (Did you mean to type ls?)
+    )
+    $pac "${packages[@]}"
+
+    local yay_packages=(
+        figlet                  # Cool letters
+        toilet
+        pipes.sh                # Lockscreens
+    )
+    $yay "${yay_packages[@]}"
 }
 
 #https://wiki.manjaro.org/index.php/VirtualBox
 virtualbox_install() {
-    $pac virtualbox # Need to activate virtualization in bios
-    $pac virtualbox-host-modules-arch # 'linux' kernel
-    $pac virtualbox-host-dkms # other kernels including linux-lts
+    local packages=(
+        virtualbox              # Need to activate virtualization in bios
+        virtualbox-host-modules-arch    # 'linux' kernel
+        virtualbox-host-dkms    # Other kernels including linux-lts
+    )
+    $pac "${packages[@]}"
 }
 
 games_install () {
-    $pac dnsmasq
-    $pac lutris
-    $pac minecraft
-    $pac steam
-    #$pac steam-manjaro
-    $pac vulkan-tools
+    local packages=(
+        dnsmasq
+        lutris
+        minecraft
+        steam
+        vulkan-tools
+    )
+    $pac "${packages[@]}"
 }
 
 ### DO ONCE
@@ -506,7 +540,23 @@ dwall() {
 }
 
 emacs() {
-    $pac emacs-nativecomp
+    local packages=(
+        emacs-nativecomp
+        pandoc                  # Universal converter
+        languagetool            # Grammar checking
+        mplayer                 # Pomodoro sound
+        aspell
+        shellcheck
+        python-pipenv
+        prettier                # Format all
+        aspell-ca               # Language checking
+        aspell-de
+        aspell-en
+        aspell-es
+        ispell
+    )
+    $pac "${packages[@]}"
+
     # Chemacs installation to manage doom and personal
     if [ ! -d ~/.emacs.d ] || [ ! -f ~/.emacs.d/chemacs.el ]; then
         [ -f ~/.emacs ] && mv ~/.emacs ~/.emacs.bak
@@ -517,30 +567,11 @@ emacs() {
     fi
 
     echo "default" | tee "$HOME/.config/chemacs/profile"
-    $pip ptvsd                          # for python dap
-    $pip grip                            # real time preview compiler 
-    # npm install marked  
-    $pac pandoc                                 # universal converter
-    # $pac marked                                 #"fast" markdown preview compiler
-    npm install markdownlint
-    $pac languagetool                           # languagetool for emacs
-    $pac mplayer                                # for pomodoro sound
-    # managing emacs with chemacs
-    #https://github.com/plexus/chemacs2
-    #doom
-    $pac aspell
-    $pac shellcheck
-    $pac python-pipenv
-    #format all
-    $pac prettier
-    #https://wiki.archlinux.org/title/Language_checking
-    $pac aspell-ca
-    $pac aspell-de
-    $pac aspell-en
-    $pac aspell-es
-    $pac ispell
-    npm install textlint
+    $pip ptvsd                          # For python dap
+    $pip grip                           # Real time preview compiler
     $pip proselint
+    npm install markdownlint
+    npm install textlint
     systemctl --user enable emacs # this enables emacs as a daemon
 
     # DOOM
