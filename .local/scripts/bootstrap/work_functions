@@ -39,48 +39,47 @@ nvidia_install() {
 dev_tools_install() {
     info "Installing dev tools..."
 
-    # Essentials
-    $apt build-essential
-    $apt cmake
-    $apt curl
-    $apt git
-    $apt jq
-    $apt tree
-    $apt wget
+    local packages=(
+        # Essentials
+        build-essential
+        cmake
+        curl
+        git
+        jq
+        tree
+        wget
 
-    # Shell & terminal
-    $apt zsh
-    $apt stow
+        # Shell & terminal
+        zsh
+        stow
 
-    # Editors
-    $apt vim-gtk3
-    $apt neovim
+        # Editors
+        vim-gtk3
+        neovim
 
-    # Modern CLI tools
-    $apt bat                       # Better cat
-    $apt eza                       # Better ls (exa replacement)
-    $apt fzf                       # Fuzzy finder
-    $apt htop                      # System monitor
-    $apt ncdu                      # Disk usage analyzer
-    $apt ranger                    # File manager
-    $apt ripgrep                   # Better grep
-    $apt fd-find                   # Better find
-    $apt silversearcher-ag         # ag (another grep alternative)
-    $apt w3m                       # Terminal browser (ranger image previews)
-    $apt shellcheck                # Shell script linter
-    $apt unzip
+        # Modern CLI tools
+        bat                     # Better cat
+        eza                     # Better ls (exa replacement)
+        fzf                     # Fuzzy finder
+        htop                    # System monitor
+        ncdu                    # Disk usage analyzer
+        ranger                  # File manager
+        ripgrep                 # Better grep
+        fd-find                 # Better find
+        silversearcher-ag       # ag (another grep alternative)
+        w3m                     # Terminal browser (ranger image previews)
+        shellcheck              # Shell script linter
+        unzip
 
-    # Utilities
-    $apt eog                       # Image viewer (quick terminal launch)
-    $apt flameshot                 # Screenshot tool
-    $apt rclone                    # Sync files to/from cloud storage
-    $apt sshfs                     # Mount remote filesystems over SSH
+        # Utilities
+        eog                     # Image viewer
+        flameshot               # Screenshot tool
+        rclone                  # Sync files to/from cloud storage
+        sshfs                   # Mount remote filesystems over SSH
+    )
+    $apt "${packages[@]}"
 
-    # Git config
     git config --global credential.helper store
-
-    # Add more dev tools below as needed:
-    # $apt <package>
 }
 
 ###############################################################

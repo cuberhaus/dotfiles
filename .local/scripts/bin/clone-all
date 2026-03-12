@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 orgname=cuberhaus
+max_jobs=8
 
-gh repo list "$orgname" --limit 1000 | while read -r repo _; do
-    gh repo clone "$repo" "$repo"
-done
+gh repo list "$orgname" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' \
+    | xargs -P "$max_jobs" -I {} gh repo clone {} {}

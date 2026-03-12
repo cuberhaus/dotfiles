@@ -17,75 +17,87 @@ brew_install() {
 
 mac_install () {
     info "Installing mac packages..."
-    touch "$HOME/.hushlogin"                    # Avoid terminal prompts
-    touch ~/.bash_sessions_disable              # Share history through sessions
-    sudo chown -R "$USER" "$HOME/.cache/zsh"    # zsh history doesn't work when owner is wrong
-    ### Terminal stuff
-    brew install ack
-    brew install astyle
-    brew install bat                            # Cat on steroids (for ranger)
-    brew install bison                          
-    brew install cmake                          # Some compilations use this
-    brew install eza                            # "ls" on steroids (exa replacement)
-    brew install flex
-    brew install fzf                            # Fuzzy Finder
-    brew install git                            # Git
-    brew install go
-    brew install gpg
-    brew install htop                           # Resource viewer
-    brew install llvm                           # Compiler
-    brew install mono
-    brew install ncdu                           # Storage manager
-    brew install neofetch                       # System info
-    brew install p7zip                          # Extract function
-    brew install pinentry-mac                   # for prompts git password
-    brew install pkg-config
-    brew install ranger w3m                     # Ranger and previews
-    brew install rclone                         # Automatic push and pull from drive
-    brew install ripgrep
-    brew install smimesign                      # git with gpg
-    brew install sox
-    brew install stow                           # Stow dotfiles
-    brew install swig
-    brew install the_silver_searcher            # Grep on steroids
-    brew install unrar                          # Extract function
-    brew install wget                           # Download from command line
-    brew install yarn                           # Package manager
+    touch "$HOME/.hushlogin"
+    touch ~/.bash_sessions_disable
+    sudo chown -R "$USER" "$HOME/.cache/zsh"
 
-    ### Terminal Font
+    ### CLI tools
+    local cli_tools=(
+        ack
+        astyle
+        bat                     # Cat on steroids
+        bison
+        cmake
+        eza                     # ls on steroids (exa replacement)
+        flex
+        fzf                     # Fuzzy finder
+        git
+        go
+        gpg
+        htop                    # Resource viewer
+        llvm                    # Compiler
+        mono
+        ncdu                    # Storage manager
+        neofetch                # System info
+        p7zip                   # Extract function
+        pinentry-mac            # Git password prompts
+        pkg-config
+        ranger w3m              # Ranger and previews
+        rclone                  # Push/pull from cloud storage
+        ripgrep
+        smimesign               # Git with gpg
+        sox
+        stow                    # Stow dotfiles
+        swig
+        the_silver_searcher     # Grep on steroids
+        unrar
+        wget
+        yarn
+    )
+    brew install "${cli_tools[@]}"
+
+    ### Nerd Fonts
     brew tap homebrew/cask-fonts
-    # Open sauce has to be installed manually
-    brew install font-fira-code-nerd-font
-    brew install font-inconsolata-nerd-font
-    brew install font-iosevka-nerd-font
-    brew install font-meslo-lg-nerd-font
+    local fonts=(
+        font-fira-code-nerd-font
+        font-inconsolata-nerd-font
+        font-iosevka-nerd-font
+        font-meslo-lg-nerd-font
+    )
+    brew install "${fonts[@]}"
 
     ### GUI Applications
-    #brew install hammerspoon
-    brew install --cask caffeine                 # Prevent screen from going to sleep
-    brew install ballast                        # Auto-corrects volume balance, (weird macOS stuff)
-    brew install calibre                        # Book manager
-    brew install ccleaner                       # CleanUp
-    brew install discord                        # Group calls
-    brew install google-chrome                  # Web browser
-    brew install karabiner-elements             # Swap Esc with Caps_lock
-    brew install kitty                          # Best terminal
-    brew install mos                            # Separate inverse scroll for mouse and trackpad, DUH!
-    brew install rectangle                      # Tiler
-    brew install spotify                        # Music player
-    brew install sublime-text                   # Fastest editor
-    brew install texstudio                      # Free and open source LaTex editor
-    brew install the-unarchiver                 # Archiver "faster"
-    brew install tomighty                       # Pomodoro timer
-    brew install transmission                   # Torrent Downloader
-    brew install visual-studio-code             # Text editor / IDE
-    brew install vlc                            # Media Player
-    brew install whatsapp                       # Messaging 
-    brew install --cask anki                    # Flashcards
-    brew install --cask notion                  # Manage projects, personal CRM, note-taking etc.
-    brew install --cask notion-calendar         # Nice UI for Google calendar, can also link to notion
-    brew install --cask obsidian                # Journal, Reading highlights and book notes
-    brew install --cask todoist                 # Task manager
+    local gui_apps=(
+        ballast                 # Auto-corrects volume balance
+        calibre                 # Book manager
+        ccleaner                # Cleanup
+        discord                 # Group calls
+        google-chrome           # Web browser
+        karabiner-elements      # Swap Esc with Caps_lock
+        kitty                   # Terminal emulator
+        mos                     # Separate scroll for mouse and trackpad
+        rectangle               # Tiler
+        spotify                 # Music player
+        sublime-text            # Fastest editor
+        texstudio               # LaTeX editor
+        the-unarchiver          # Archiver
+        tomighty                # Pomodoro timer
+        transmission            # Torrent downloader
+        visual-studio-code      # Text editor / IDE
+        vlc                     # Media player
+        whatsapp                # Messaging
+    )
+    brew install "${gui_apps[@]}"
+
+    local cask_apps=(
+        caffeine                # Prevent sleep
+        anki                    # Flashcards
+        notion                  # Project management, notes
+        notion-calendar         # Google Calendar UI
+        obsidian                # Journal, book notes
+        todoist                 # Task manager
+    )
+    brew install --cask "${cask_apps[@]}"
 }
 
 ai_tools_install() {
@@ -202,20 +214,22 @@ doom_emacs_install() {
     fi
     # ghcup installer for the general purpose language Haskell
     curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
-    # Optional
-    brew install gnuplot # doom org 
-    brew install jq
-    brew install black # python code formatting
-    brew install pipenv # python 
-    brew install shellcheck # shell script linting
-    brew install hlint # flycheck for haskell
-    brew install cabal # haskell-mode
-    brew install aspell #  spell checker
-    brew install editorconfig # elisp
-    brew install glslang # elisp
-    brew install cabal-install #haskell
-    brew install dante
-    brew install haskell-language-server
+    local doom_deps=(
+        gnuplot                 # Doom org
+        jq
+        black                   # Python code formatting
+        pipenv                  # Python
+        shellcheck              # Shell script linting
+        hlint                   # Flycheck for Haskell
+        cabal                   # Haskell-mode
+        aspell                  # Spell checker
+        editorconfig
+        glslang
+        cabal-install           # Haskell
+        dante
+        haskell-language-server
+    )
+    brew install "${doom_deps[@]}"
     echo "doom" | tee "$HOME/.config/chemacs/profile"
 }
 
@@ -233,8 +247,7 @@ app_store_install() {
 }
 
 bloat_install() {
-    brew install cowsay fortune coreutils       # Cows
-    brew install cmatrix                        # Matrix
+    brew install cowsay fortune coreutils cmatrix
 }
 
 write_defaults() {

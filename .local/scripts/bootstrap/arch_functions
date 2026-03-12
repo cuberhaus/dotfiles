@@ -172,13 +172,28 @@ base_install () {
 }
 
 git_repos() {
+    info "Cloning repos in parallel..."
     mkdir -p "$HOME/repos/"
     cd "$HOME/repos/" || exit
-    [ -d WinDotfiles ] || git clone https://github.com/cuberhaus/WinDotfiles.git
-    [ -d docs ]        || git clone https://github.com/cuberhaus/docs.git
-    [ -d dev ]         || git clone https://github.com/cuberhaus/dev.git
-    [ -d TFG ]         || git clone https://github.com/cuberhaus/TFG.git
-    [ -d fib ]         || git clone https://github.com/cuberhaus/fib.git
+    local pids=() names=()
+    local repos=(WinDotfiles docs dev TFG fib)
+    for name in "${repos[@]}"; do
+        if [ ! -d "$name" ]; then
+            git clone "https://github.com/cuberhaus/${name}.git" &
+            pids+=($!)
+            names+=("$name")
+        fi
+    done
+    local failures=0
+    for i in "${!pids[@]}"; do
+        if ! wait "${pids[$i]}"; then
+            warn "Failed to clone ${names[$i]}"
+            ((failures++)) || true
+        fi
+    done
+    if [ "$failures" -gt 0 ]; then
+        warn "$failures repo(s) failed to clone"
+    fi
 }
 
 arch_install() {
