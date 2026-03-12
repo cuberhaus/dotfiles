@@ -12,56 +12,100 @@ function mac_key() {
 function git_recursive() {
     local cmd="$1"
     local depth="${2:-2}"
+    local parallel="${3:-false}"
 
-    local blue
-    local normal
+    local blue green red normal
     blue=$(tput setaf 4)
+    green=$(tput setaf 2)
+    red=$(tput setaf 1)
     normal=$(tput sgr0)
 
     echo "${blue}depth: $depth ${normal}"
     if [[ $depth -eq 1 ]]; then
-        printf "${blue}Executing \"%s\" in %s ${normal} \n" "$cmd" "$(pwd)"
+        printf "${blue}Executing \"%s\" in %s ${normal}\n" "$cmd" "$(pwd)"
         eval "$cmd"
-    else
-        # Find all directories containing a .git subdirectory, and loop over them
-        find . -maxdepth "$depth" -type d -name .git -print0 2>/dev/null | while read -r -d $'\0' dir; do
-            # Remove the .git subdirectory from the path
-            dir=${dir%.git}
+        return
+    fi
 
-            # Change into the directory and execute the specified command
-            pushd "$dir" > /dev/null || exit
-            printf "${blue}Executing \"%s\" in %s ${normal} \n" "$cmd" "$dir"
-            eval "$cmd"
-            popd > /dev/null || exit
+    local dirs=()
+    while IFS= read -r -d $'\0' dir; do
+        dirs+=("${dir%.git}")
+    done < <(find . -maxdepth "$depth" -type d -name .git -print0 2>/dev/null)
+
+    if [[ ${#dirs[@]} -eq 0 ]]; then
+        echo "${red}No git repositories found${normal}"
+        return
+    fi
+
+    if [[ "$parallel" == true ]]; then
+        local tmpdir
+        tmpdir=$(mktemp -d)
+        local pids=()
+
+        for dir in "${dirs[@]}"; do
+            (
+                cd "$dir" 2>/dev/null || exit 1
+                eval "$cmd" > "$tmpdir/$(echo "$dir" | tr '/' '_').out" 2>&1
+            ) &
+            pids+=($!)
         done
+
+        local failures=0
+        for i in "${!pids[@]}"; do
+            local pid=${pids[$i]}
+            local dir=${dirs[$i]}
+            local outfile="$tmpdir/$(echo "$dir" | tr '/' '_').out"
+            if wait "$pid"; then
+                printf "${green}✓ %s${normal}\n" "$dir"
+            else
+                printf "${red}✗ %s${normal}\n" "$dir"
+                ((failures++)) || true
+            fi
+            cat "$outfile" 2>/dev/null
+        done
+
+        rm -rf "$tmpdir"
+        if ((failures > 0)); then
+            printf "\n${red}%d repo(s) failed${normal}\n" "$failures"
         fi
+    else
+        for dir in "${dirs[@]}"; do
+            pushd "$dir" > /dev/null || continue
+            printf "${blue}Executing \"%s\" in %s ${normal}\n" "$cmd" "$dir"
+            eval "$cmd"
+            popd > /dev/null || continue
+        done
+    fi
 }
 
 usage() {
-    echo "Usage: $0 [-k] [-d <depth>] [-c <cmd>]"
+    echo "Usage: $0 [-k] [-p] [-d <depth>] [-c <cmd>]"
     echo "  -k              Add ssh key"
+    echo "  -p              Run in parallel (all repos at once)"
     echo "  -d <depth>      Specify the depth to search for git repositories (default: $DEFAULT_DEPTH)"
-    echo "  -c <cmd>           Command to execute in each Git repository found"
+    echo "  -c <cmd>        Command to execute in each Git repository found"
 }
 
-function exit_abnormal() { # Function: Exit with error.
+function exit_abnormal() {
     usage
     exit 1
 }
 
-flag1=false
+flag_key=false
+flag_parallel=false
 depth=$DEFAULT_DEPTH
 
-#https://www.computerhope.com/unix/bash/getopts.htm
-while getopts "hrc:kd:" options; do # Loop: Get the next option;
-    # use silent error checking;
-    case "${options}" in #
+while getopts "hprc:kd:" options; do
+    case "${options}" in
     h)
         usage
         exit 0
         ;;
-    k)                   # If the option is n,
-        flag1=true
+    k)
+        flag_key=true
+        ;;
+    p)
+        flag_parallel=true
         ;;
     d)
         depth="${OPTARG}"
@@ -69,17 +113,17 @@ while getopts "hrc:kd:" options; do # Loop: Get the next option;
     c)
         cmd="${OPTARG}"
         ;;
-    :) # If expected argument omitted: # there are no expected arguments so far
+    :)
         echo "Error: -${OPTARG} requires an argument."
-        exit_abnormal # Exit abnormally.
+        exit_abnormal
         ;;
-    *)                # If unknown (any other) option:
-        exit_abnormal # Exit abnormally.
+    *)
+        exit_abnormal
         ;;
     esac
 done
 
-if $flag1; then
+if $flag_key; then
     mac_key
 fi
 
@@ -89,5 +133,4 @@ if [[ -z "$cmd" ]]; then
     exit 1
 fi
 
-# Call the function to start the recursive search
-git_recursive "$cmd" "$depth"
+git_recursive "$cmd" "$depth" "$flag_parallel"

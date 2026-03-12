@@ -273,10 +273,14 @@ EOF
         info "Warp terminal already installed, skipping."
     fi
 
-    # LM Studio (local LLM runner)
-    if ! command -v lms &>/dev/null; then
+    # LM Studio (local LLM runner — update version at https://lmstudio.ai/changelog)
+    if ! dpkg -l lm-studio &>/dev/null 2>&1; then
         info "Installing LM Studio..."
-        curl -fsSL https://lmstudio.ai/install.sh | bash
+        local lms_ver="0.4.4-1"
+        local lms_deb="/tmp/LM-Studio-${lms_ver}-x64.deb"
+        wget -O "$lms_deb" "https://installers.lmstudio.ai/linux/x64/${lms_ver}/LM-Studio-${lms_ver}-x64.deb"
+        sudo apt-get install -y "$lms_deb"
+        rm -f "$lms_deb"
     else
         info "LM Studio already installed, skipping."
     fi
@@ -295,6 +299,37 @@ EOF
         curl -f https://zed.dev/install.sh | sh
     else
         info "Zed already installed, skipping."
+    fi
+
+    # # OpenClaw (personal AI assistant)
+    # if ! command -v openclaw &>/dev/null; then
+    #     info "Installing OpenClaw..."
+    #     curl -fsSL https://openclaw.ai/install.sh | bash
+    # else
+    #     info "OpenClaw already installed, skipping."
+    # fi
+
+    # GPT4All (local LLM chat — desktop app)
+    if ! command -v gpt4all &>/dev/null && [ ! -d "$HOME/gpt4all" ] && [ ! -d /opt/gpt4all ]; then
+        info "Installing GPT4All..."
+        local gpt4all_ver
+        gpt4all_ver=$(curl -sI https://github.com/nomic-ai/gpt4all/releases/latest | grep -i location | sed 's|.*/v||;s/\r//')
+        local gpt4all_run="/tmp/gpt4all-installer.run"
+        wget -O "$gpt4all_run" "https://github.com/nomic-ai/gpt4all/releases/download/v${gpt4all_ver}/gpt4all-installer-linux-v${gpt4all_ver}.run"
+        chmod +x "$gpt4all_run"
+        "$gpt4all_run" --install "$HOME/gpt4all" --accept-licenses --default-answer --auto
+        rm -f "$gpt4all_run"
+        cat > "$HOME/.local/share/applications/gpt4all.desktop" <<EOF
+[Desktop Entry]
+Name=GPT4All
+Exec=$HOME/gpt4all/bin/chat
+Icon=$HOME/gpt4all/logo-48.png
+Type=Application
+Categories=Development;Science;
+Comment=Run LLMs locally
+EOF
+    else
+        info "GPT4All already installed, skipping."
     fi
 
     # Spotify
