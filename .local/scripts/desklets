@@ -29,11 +29,12 @@ echo "Do you want to install cinnamon desklets? [y/n]"
 read -r install
 if [[ "$install" == y ]]; then
     cd ~/.local/share/cinnamon/desklets || exit
-    # Calendar
-    wget https://cinnamon-spices.linuxmint.com/files/desklets/calendar@deeppradhan.zip
+    # Download in parallel
+    wget https://cinnamon-spices.linuxmint.com/files/desklets/calendar@deeppradhan.zip &
+    wget https://cinnamon-spices.linuxmint.com/files/desklets/diskspace@schorschii.zip &
+    wait
+    # Extract
     ex calendar@deeppradhan.zip
-    # Disk Space
-    wget https://cinnamon-spices.linuxmint.com/files/desklets/diskspace@schorschii.zip
     ex diskspace@schorschii.zip
 fi
 

@@ -18,7 +18,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── changeBrightness   # Brightness control (used by i3/xmonad)
 │   │   ├── changeVolume       # Volume control with notification
 │   │   ├── clone-all          # Clone all repos from a GitHub user
-│   │   ├── git_recurse        # Run git commands across multiple repos
+│   │   ├── git-recurse        # Run git commands across multiple repos
 │   │   ├── pfetch             # Minimal system info display
 │   │   ├── program            # Launch-or-focus helper for scratchpads
 │   │   ├── prompt             # Custom prompt helper

@@ -120,14 +120,14 @@ alias gp="git push"
 alias gitsync="git submodule sync; git submodule update --init --recursive"
 alias gsu="git submodule update --recursive --remote"
 
-alias gr="git_recurse"
+alias gr="git-recurse"
 #yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
-yolo="git_recurse -c \"git add -A; git commit -m 'This is a placeholder'; git push\" -d 1"
+yolo="git-recurse -d 1 'git add -A; git commit -m \"This is a placeholder\"; git push'"
 # shellcheck disable=SC2139
 alias yolo="$yolo"
 
-alias pull="git_recurse -p -c 'git pull'"
-alias status="git_recurse -c 'git status'"
+alias pull="git-recurse -p git pull"
+alias status="git-recurse git status"
 
 if command -v eza &> /dev/null
 then

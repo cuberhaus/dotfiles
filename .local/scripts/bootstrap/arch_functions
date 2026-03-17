@@ -289,6 +289,7 @@ arch_and_manjaro() {
 
 manjaro_install() {
     [ -L /snap ] || sudo ln -s /var/lib/snapd/snap /snap  # manjaro snaps --classic
+
     snap list intellij-idea-ultimate &>/dev/null || sudo snap install intellij-idea-ultimate --classic
     snap list pycharm-professional &>/dev/null   || sudo snap install pycharm-professional --classic
     snap list spotify &>/dev/null                || sudo snap install spotify
@@ -296,7 +297,7 @@ manjaro_install() {
     snap list sublime-text &>/dev/null           || sudo snap install sublime-text --classic
     snap list whatsie &>/dev/null                || sudo snap install whatsie
     snap list zotero-snap &>/dev/null            || sudo snap install zotero-snap
-    $pac cinnamon-screensaver 
+    $pac cinnamon-screensaver
     # sudo snap install clion --classic
     # sudo snap install code --classic        # Classic snaps cannot be installed
     # sudo snap install eclipse --classic
@@ -344,14 +345,29 @@ vim_install () {
     cd "$HOME" || exit
     vim +PlugInstall +qall
     bash "$scripts/ycm.sh"
-    $pip wheel
-    $pip black
-    npm install neovim
-    python3 -m "$pip" --upgrade pynvim
-    sudo gem install neovim
     sudo chmod +w "$HOME/.vim/cache/viminfo"
-    npm install js-beautify
-    npm install remark-cli
+
+    # Parallel language provider installs (pip, npm, gem are independent)
+    (
+        $pip wheel
+        $pip black
+        python3 -m "$pip" --upgrade pynvim
+    ) &
+    local pid_pip=$!
+
+    (
+        npm install neovim
+        npm install js-beautify
+        npm install remark-cli
+    ) &
+    local pid_npm=$!
+
+    sudo gem install neovim &
+    local pid_gem=$!
+
+    wait "$pid_pip" || warn "pip installs had errors"
+    wait "$pid_npm" || warn "npm installs had errors"
+    wait "$pid_gem" || warn "gem install had errors"
 }
 
 i3_install () {
@@ -589,13 +605,40 @@ emacs() {
 
 ai_tools_install() {
     info "Installing AI tools..."
+    mkdir -p "$HOME/Applications"
+
+    # ── Parallel downloads (AppImages) ───────────────────────────
+    local pids=() names=()
 
     # Cursor (AI IDE — AppImage)
     if [ ! -f "$HOME/Applications/cursor.AppImage" ]; then
-        info "Installing Cursor..."
-        mkdir -p "$HOME/Applications"
+        info "Downloading Cursor..."
         curl -fsSL "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable" \
-            -o "$HOME/Applications/cursor.AppImage"
+            -o "$HOME/Applications/cursor.AppImage" &
+        pids+=($!); names+=("Cursor")
+    fi
+
+    # Antigravity (Google AI IDE — AppImage)
+    if [ ! -f "$HOME/Applications/antigravity.AppImage" ]; then
+        info "Downloading Antigravity..."
+        curl -fsSL "https://antigravity.dev/api/download?platform=linux-x64" \
+            -o "$HOME/Applications/antigravity.AppImage" &
+        pids+=($!); names+=("Antigravity")
+    fi
+
+    # Wait for parallel downloads
+    local failures=0
+    for i in "${!pids[@]}"; do
+        if ! wait "${pids[$i]}"; then
+            warn "Failed to download ${names[$i]}"
+            ((failures++)) || true
+        else
+            info "${names[$i]} download complete."
+        fi
+    done
+
+    # ── Set up downloaded AppImages ──────────────────────────────
+    if [ -f "$HOME/Applications/cursor.AppImage" ]; then
         chmod +x "$HOME/Applications/cursor.AppImage"
         cat > "$HOME/.local/share/applications/cursor.desktop" <<EOF
 [Desktop Entry]
@@ -606,16 +649,9 @@ Type=Application
 Categories=Development;IDE;
 StartupWMClass=Cursor
 EOF
-    else
-        info "Cursor already installed, skipping."
     fi
 
-    # Antigravity (Google AI IDE — AppImage)
-    if [ ! -f "$HOME/Applications/antigravity.AppImage" ]; then
-        info "Installing Antigravity..."
-        mkdir -p "$HOME/Applications"
-        curl -fsSL "https://antigravity.dev/api/download?platform=linux-x64" \
-            -o "$HOME/Applications/antigravity.AppImage"
+    if [ -f "$HOME/Applications/antigravity.AppImage" ]; then
         chmod +x "$HOME/Applications/antigravity.AppImage"
         cat > "$HOME/.local/share/applications/antigravity.desktop" <<EOF
 [Desktop Entry]
@@ -626,10 +662,9 @@ Type=Application
 Categories=Development;IDE;
 StartupWMClass=Antigravity
 EOF
-    else
-        info "Antigravity already installed, skipping."
     fi
 
+    # ── Sequential installs (yay / curl|sh) ──────────────────────
     # Warp (AI terminal)
     if ! command -v warp-terminal &>/dev/null; then
         info "Installing Warp terminal..."

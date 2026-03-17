@@ -85,20 +85,39 @@ ubuntu_install() {
         r-base
     )
     $apt "${packages[@]}"
+
+    # Parallel: download RStudio + gnome-terminal theme at the same time
+    local rstudio_deb="/tmp/rstudio-latest-amd64.deb"
+    local theme_script="/tmp/one-dark-gnome.sh"
+
     if ! command -v rstudio &>/dev/null; then
-        local rstudio_deb="/tmp/rstudio-latest-amd64.deb"
-        wget -O "$rstudio_deb" https://rstudio.org/download/latest/daily/desktop/jammy/rstudio-latest-amd64.deb
-        sudo dpkg -i "$rstudio_deb"
-        rm -f "$rstudio_deb"
+        wget -qO "$rstudio_deb" https://rstudio.org/download/latest/daily/desktop/jammy/rstudio-latest-amd64.deb &
+        local pid_rstudio=$!
+    fi
+
+    # One dark profile for gnome-terminal
+    # https://github.com/denysdovhan/one-gnome-terminal
+    curl -fsSL https://raw.githubusercontent.com/denysdovhan/gnome-terminal-one/master/one-dark.sh \
+        -o "$theme_script" &
+    local pid_theme=$!
+
+    if [ -n "${pid_rstudio:-}" ]; then
+        if wait "$pid_rstudio"; then
+            sudo dpkg -i "$rstudio_deb"
+            rm -f "$rstudio_deb"
+        else
+            warn "Failed to download RStudio"
+        fi
     else
         info "RStudio already installed, skipping."
     fi
 
-    # $apt kitty # cant even close it from gnome
-
-    # One dark profile for gnome-terminal
-    # https://github.com/denysdovhan/one-gnome-terminal
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/denysdovhan/gnome-terminal-one/master/one-dark.sh)"
+    if wait "$pid_theme" && [ -f "$theme_script" ]; then
+        bash "$theme_script"
+        rm -f "$theme_script"
+    else
+        warn "Failed to download gnome-terminal theme"
+    fi
 
     if [[ $FirstRun == y ]]; then
         sudo adduser "$(id -un)" libvirt
@@ -238,14 +257,41 @@ snaps_install() {
 
 ai_tools_install() {
     info "Installing AI tools..."
+    $apt libfuse2
+    mkdir -p "$HOME/Applications"
+
+    # ── Parallel downloads ───────────────────────────────────────
+    local pids=() names=()
+    local warp_deb="/tmp/warp-terminal.deb"
 
     # Cursor (AI IDE — AppImage)
     if [ ! -f "$HOME/Applications/cursor.AppImage" ]; then
-        info "Installing Cursor..."
-        $apt libfuse2
-        mkdir -p "$HOME/Applications"
+        info "Downloading Cursor..."
         curl -fsSL "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable" \
-            -o "$HOME/Applications/cursor.AppImage"
+            -o "$HOME/Applications/cursor.AppImage" &
+        pids+=($!); names+=("Cursor")
+    fi
+
+    # Warp (AI terminal — .deb download)
+    if ! command -v warp-terminal &>/dev/null; then
+        info "Downloading Warp terminal..."
+        wget -qO "$warp_deb" "https://app.warp.dev/download?package=deb" &
+        pids+=($!); names+=("Warp")
+    fi
+
+    # Wait for parallel downloads
+    local failures=0
+    for i in "${!pids[@]}"; do
+        if ! wait "${pids[$i]}"; then
+            warn "Failed to download ${names[$i]}"
+            ((failures++)) || true
+        else
+            info "${names[$i]} download complete."
+        fi
+    done
+
+    # ── Install from downloaded files ────────────────────────────
+    if [ -f "$HOME/Applications/cursor.AppImage" ]; then
         chmod +x "$HOME/Applications/cursor.AppImage"
         cat > "$HOME/.local/share/applications/cursor.desktop" <<EOF
 [Desktop Entry]
@@ -256,10 +302,16 @@ Type=Application
 Categories=Development;IDE;
 StartupWMClass=Cursor
 EOF
-    else
-        info "Cursor already installed, skipping."
+        info "Cursor installed."
     fi
 
+    if [ -f "$warp_deb" ]; then
+        info "Installing Warp terminal..."
+        sudo apt-get install -y "$warp_deb"
+        rm -f "$warp_deb"
+    fi
+
+    # ── Apt-repo-based installs ──────────────────────────────────
     # Antigravity (Google AI IDE — apt repo)
     if ! command -v antigravity &>/dev/null; then
         info "Installing Antigravity..."
@@ -274,17 +326,7 @@ EOF
         info "Antigravity already installed, skipping."
     fi
 
-    # Warp (AI terminal — .deb download)
-    if ! command -v warp-terminal &>/dev/null; then
-        info "Installing Warp terminal..."
-        local warp_deb="/tmp/warp-terminal.deb"
-        wget -O "$warp_deb" "https://app.warp.dev/download?package=deb"
-        sudo apt-get install -y "$warp_deb"
-        rm -f "$warp_deb"
-    else
-        info "Warp terminal already installed, skipping."
-    fi
-
+    # ── curl|sh installers ───────────────────────────────────────
     # LM Studio (local LLM runner)
     if ! command -v lms &>/dev/null; then
         info "Installing LM Studio..."
@@ -305,11 +347,23 @@ EOF
 vim_install () {
     info "Installing vim/neovim plugins..."
     cd "$HOME" || exit
-    vim +PlugInstall +qall                      # Update plugins
-    bash "$ycm"                   # Vim YouCompleteMe plugin install
-    sudo npm install -g neovim                  # npm on neovim
-    python3 -m pip install --user --upgrade pynvim # Python for neovim
-    sudo gem install neovim                     # Gem for neovim
+    vim +PlugInstall +qall
+    bash "$ycm"
+
+    # Parallel language provider installs (npm, pip, gem are independent)
+    sudo npm install -g neovim &
+    local pid_npm=$!
+
+    python3 -m pip install --user --upgrade pynvim &
+    local pid_pip=$!
+
+    sudo gem install neovim &
+    local pid_gem=$!
+
+    wait "$pid_npm" || warn "npm neovim install had errors"
+    wait "$pid_pip" || warn "pip pynvim install had errors"
+    wait "$pid_gem" || warn "gem neovim install had errors"
+
     python3 "$HOME/.vim/plugged/YouCompleteMe/install.py"
 }
 

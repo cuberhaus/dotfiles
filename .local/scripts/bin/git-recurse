@@ -79,11 +79,20 @@ function git_recursive() {
 }
 
 usage() {
-    echo "Usage: $0 [-k] [-p] [-d <depth>] [-c <cmd>]"
-    echo "  -k              Add ssh key"
+    echo "git-recurse - Run a git command in all repositories under the current directory"
+    echo ""
+    echo "Usage: $0 [options] <command> [args...]"
+    echo ""
+    echo "The command and its args are passed as positional arguments. Examples:"
+    echo "  $0 git status"
+    echo "  $0 git pull"
+    echo "  $0 -p git fetch"
+    echo ""
+    echo "Options:"
+    echo "  -h              Show this help"
+    echo "  -k              Add ssh key (macOS)"
     echo "  -p              Run in parallel (all repos at once)"
-    echo "  -d <depth>      Specify the depth to search for git repositories (default: $DEFAULT_DEPTH)"
-    echo "  -c <cmd>        Command to execute in each Git repository found"
+    echo "  -d <depth>      Max depth to search for .git dirs (default: $DEFAULT_DEPTH)"
 }
 
 function exit_abnormal() {
@@ -95,7 +104,7 @@ flag_key=false
 flag_parallel=false
 depth=$DEFAULT_DEPTH
 
-while getopts "hprc:kd:" options; do
+while getopts "hpkd:" options; do
     case "${options}" in
     h)
         usage
@@ -110,9 +119,6 @@ while getopts "hprc:kd:" options; do
     d)
         depth="${OPTARG}"
         ;;
-    c)
-        cmd="${OPTARG}"
-        ;;
     :)
         echo "Error: -${OPTARG} requires an argument."
         exit_abnormal
@@ -123,14 +129,18 @@ while getopts "hprc:kd:" options; do
     esac
 done
 
+shift $((OPTIND - 1)) || true
+cmd="$*"
+
 if $flag_key; then
     mac_key
 fi
 
-echo "$cmd"
-if [[ -z "$cmd" ]]; then
-    echo "Error: -c flag is mandatory"
+if [[ -z "${cmd// }" ]]; then
+    echo "Error: missing command. Pass a command after the options, e.g. git status"
+    echo ""
+    usage
     exit 1
 fi
 
-git_recursive "$cmd" "$depth" "$flag_parallel"
+git_recursive "$cmd" "${depth}" "$flag_parallel"
