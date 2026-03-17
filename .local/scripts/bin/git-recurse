@@ -101,7 +101,7 @@ function exit_abnormal() {
 }
 
 flag_key=false
-flag_parallel=false
+flag_parallel=true
 depth=$DEFAULT_DEPTH
 
 while getopts "hpkd:" options; do
