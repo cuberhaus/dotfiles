@@ -7,5 +7,6 @@
     "git.autofetch": true,
     "python.defaultInterpreterPath": "/bin/python3",
     "explorer.confirmPasteNative": false,
-    "window.zoomLevel": 1
+    "window.zoomLevel": 1,
+    "cursor.composer.shouldChimeAfterChatFinishes": true
 }

@@ -20,6 +20,10 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+if [ -d "$HOME/.npm-global/bin" ] ; then
+    PATH="$HOME/.npm-global/bin:$PATH"
+fi
+
 if [ -d "$HOME/.local/share/cargo/bin" ] ; then
     PATH="$HOME/.local/share/cargo/bin:$PATH"
 fi
