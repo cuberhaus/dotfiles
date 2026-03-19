@@ -125,6 +125,39 @@ o() {
     fi
 }
 
+# Pull current repo or recursively pull child repos (parallel)
+pull() {
+    if [ -d .git ]; then
+        git pull "$@"
+    else
+        local tmpdir pids=() repos=()
+        tmpdir=$(mktemp -d)
+        
+        while IFS= read -r -d $'\0' dot_git; do
+            local dir
+            dir=$(dirname "$dot_git")
+            repos+=("$dir")
+            (
+                git -C "$dir" pull > "$tmpdir/$(echo "$dir" | tr '/' '_').out" 2>&1
+            ) &
+            pids+=($!)
+        done < <(find . -maxdepth 2 -type d -name .git -print0 2>/dev/null)
+        
+        for i in "${!pids[@]}"; do
+            local pid="${pids[$i]}" repo="${repos[$i]}"
+            local outfile="$tmpdir/$(echo "$repo" | tr '/' '_').out"
+            wait "$pid"
+            if [ $? -eq 0 ]; then
+                printf "\033[32m✓ %s\033[0m\n" "$(basename "$repo")"
+            else
+                printf "\033[31m✗ %s (failed)\033[0m\n" "$(basename "$repo")"
+            fi
+            cat "$outfile"
+        done
+        rm -rf "$tmpdir"
+    fi
+}
+
 ###############################################################
 # => Colored man pages
 ###############################################################
