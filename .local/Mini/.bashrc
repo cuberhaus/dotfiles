@@ -133,6 +133,7 @@ pull() {
         local tmpdir pids=() repos=() failures=0
         printf "\033[34mdepth: 2 \033[0m\n"
         tmpdir=$(mktemp -d)
+        set +m  # disable job control notifications
         
         while IFS= read -r -d $'\0' dot_git; do
             local dir
@@ -156,6 +157,7 @@ pull() {
             fi
             cat "$outfile" 2>/dev/null
         done
+        set -m  # re-enable job control
         rm -rf "$tmpdir"
         if ((failures > 0)); then
             printf "\n\033[31m%d repo(s) failed\033[0m\n" "$failures"
