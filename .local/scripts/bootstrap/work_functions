@@ -184,6 +184,7 @@ gui_apps_install() {
         vlc \
         libfuse2 \
         libreoffice \
+        obs-studio \
         caffeine                # Prevent screen from going to sleep
 
     # ── Phase 1: parallel downloads ──────────────────────────────
