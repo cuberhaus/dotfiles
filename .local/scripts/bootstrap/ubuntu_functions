@@ -82,6 +82,7 @@ ubuntu_install() {
         vlc                     # Media player
         caffeine                # Prevent screen from going to sleep
         dconf-editor            # Advanced configs
+        obs-studio              # Video recording
         r-base
     )
     $apt "${packages[@]}"
