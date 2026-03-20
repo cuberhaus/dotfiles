@@ -125,6 +125,78 @@ o() {
     fi
 }
 
+# Pull current repo or recursively pull child repos (parallel)
+pull() {
+    if [ -d .git ]; then
+        git pull "$@"
+    else
+        local tmpdir pids=() repos=() failures=0
+        printf "\033[34mdepth: 2 \033[0m\n"
+        tmpdir=$(mktemp -d)
+        set +m  # disable job control notifications
+        
+        while IFS= read -r -d $'\0' dot_git; do
+            local dir
+            dir=$(dirname "$dot_git")
+            repos+=("$dir")
+            printf "\033[34mDownloading %s...\033[0m\n" "$dir"
+            (
+                git -C "$dir" pull > "$tmpdir/$(echo "$dir" | tr '/' '_').out" 2>&1
+            ) &
+            pids+=($!)
+        done < <(find . -maxdepth 2 -type d -name .git -print0 2>/dev/null)
+        
+        for i in "${!pids[@]}"; do
+            local pid="${pids[$i]}" repo="${repos[$i]}"
+            local outfile="$tmpdir/$(echo "$repo" | tr '/' '_').out"
+            if wait "$pid"; then
+                printf "\033[32m✓ %s\033[0m\n" "$repo"
+            else
+                printf "\033[31m✗ %s\033[0m\n" "$repo"
+                ((failures++)) || true
+            fi
+            cat "$outfile" 2>/dev/null
+        done
+        set -m  # re-enable job control
+        rm -rf "$tmpdir"
+        if ((failures > 0)); then
+            printf "\n\033[31m%d repo(s) failed\033[0m\n" "$failures"
+        fi
+    fi
+}
+
+# Recursively add a GitHub PAT token to all repositories
+add_pat() {
+    local pat="$1"
+    if [ -z "$pat" ]; then
+        echo "Usage: add_pat <token>"
+        echo "Recursively changes all https://github.com/... remotes to use the defined PAT."
+        return 1
+    fi
+    printf "\033[34mdepth: 2 \033[0m\n"
+    while IFS= read -r -d $'\0' dot_git; do
+        local dir
+        dir=$(dirname "$dot_git")
+        local remote_url
+        remote_url=$(git -C "$dir" remote get-url origin 2>/dev/null)
+        if [ -n "$remote_url" ]; then
+            if [[ "$remote_url" == *"github.com"* && "$remote_url" == https://* ]]; then
+                # Remove any existing credentials and insert new formatting
+                local new_url
+                new_url=$(echo "$remote_url" | sed -E "s|https://([^@]+@)?github\\.com|https://$pat@github.com|")
+                if [ "$remote_url" != "$new_url" ]; then
+                    git -C "$dir" remote set-url origin "$new_url"
+                    printf "\033[32m✓ %s\033[0m (remote updated)\n" "$dir"
+                else
+                    printf "\033[34m- %s\033[0m (already using this token)\n" "$dir"
+                fi
+            else
+                printf "\033[33m! %s\033[0m (ignored: not an HTTPS GitHub remote)\n" "$dir"
+            fi
+        fi
+    done < <(find . -maxdepth 2 -type d -name .git -print0 2>/dev/null)
+}
+
 ###############################################################
 # => Colored man pages
 ###############################################################
