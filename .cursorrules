@@ -22,3 +22,6 @@ You are working on the `dotfiles` repository, which contains the configuration a
 4. **Safety & Execution**:
    - Do NOT run scripts that globally install packages (`sudo apt install`) or alter system-wide configs (`/etc/`) without asking the user first.
    - When writing loops that modify files or git remotes, always provide clear usage instructions and ideally a "dry-run" capability if the operation is destructive.
+
+5. **Performance**:
+   - When possible, write parallelizable scripts or commands (e.g., using `xargs -P`, `wait`, or background processes `&`) to optimize execution time, especially for tasks iterating over multiple repositories or files.
