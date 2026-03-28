@@ -70,6 +70,7 @@ dev_tools_install() {
         w3m                     # Terminal browser (ranger image previews)
         shellcheck              # Shell script linter
         unzip
+        unrar
 
         # Utilities
         eog                     # Image viewer
@@ -350,6 +351,14 @@ EOF
         curl -f https://zed.dev/install.sh | sh
     else
         info "Zed already installed, skipping."
+    fi
+
+    # Claude Code (Anthropic CLI)
+    if ! command -v claude &>/dev/null; then
+        info "Installing Claude Code..."
+        curl -fsSL https://claude.ai/install.sh | sh
+    else
+        info "Claude Code already installed, skipping."
     fi
 
     # ── Phase 5: snaps ───────────────────────────────────────────
