@@ -12,6 +12,7 @@
     - [How it works](#how-it-works)
     - [Installation](#installation)
     - [Usage](#usage)
+    - [Volatile config files](#volatile-config-files)
     - [Bootstrap](#bootstrap)
     - [What's inside](#whats-inside)
     - [Supported OS](#supported-os)
@@ -84,7 +85,30 @@ make lint              # Run shellcheck on all scripts
 make check             # Run all linters (shellcheck + markdownlint + vint)
 make submodules        # Init and update submodules
 make update            # Pull latest for every submodule
+make skip-worktree     # Ignore runtime changes to volatile config files (run once after cloning)
 make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac, work)
+```
+
+### Volatile config files
+
+Some tracked files (e.g. `user_preferences.json` for Warp, `javasettings_Linux_X86_64.xml` for LibreOffice) are **rewritten by their apps on every launch**. They are kept in the repo so the settings you care about are versioned, but the constant runtime changes make `git status` noisy and block `git pull`.
+
+After cloning, run once:
+
+```bash
+make skip-worktree
+```
+
+This applies `git update-index --skip-worktree` to those files — git keeps the committed version but stops noticing local changes.
+
+When you **intentionally** want to update one of them in the repo:
+
+```bash
+git update-index --no-skip-worktree .config/warp-terminal/user_preferences.json
+# edit / copy the new settings you want to keep
+git add .config/warp-terminal/user_preferences.json
+git commit -m "update warp settings"
+git update-index --skip-worktree .config/warp-terminal/user_preferences.json  # re-apply
 ```
 
 ## Bootstrap
