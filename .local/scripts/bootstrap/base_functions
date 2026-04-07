@@ -43,3 +43,31 @@ install_preparation() {
     sudo mkdir -p /var/lib/samba/usershares
 }
 
+###############################################################
+# => Volatile file handling
+###############################################################
+
+# Files that are tracked in the repo for their initial settings but are
+# rewritten by their apps on every launch.  skip-worktree keeps the committed
+# version visible in the repo while silencing constant runtime noise.
+apply_skip_worktree() {
+    local dotfiles_root
+    dotfiles_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+    local files=(
+        .config/warp-terminal/user_preferences.json
+        .config/libreoffice/4/user/config/javasettings_Linux_X86_64.xml
+    )
+
+    info "Applying skip-worktree to volatile config files..."
+    for f in "${files[@]}"; do
+        if [ -f "$dotfiles_root/$f" ]; then
+            git -C "$dotfiles_root" update-index --skip-worktree "$f" \
+                && info "  skip-worktree: $f" \
+                || warn "  Could not apply skip-worktree to $f"
+        else
+            info "  Skipping (not yet present): $f"
+        fi
+    done
+}
+

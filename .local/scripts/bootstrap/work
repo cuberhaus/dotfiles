@@ -31,4 +31,5 @@ if [ "$(basename "$SHELL")" != "zsh" ]; then
     chsh -s "$(which zsh)"
 fi
 
+apply_skip_worktree
 info "Bootstrap complete! Reboot to load NVIDIA drivers."

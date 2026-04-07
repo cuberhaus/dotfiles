@@ -17,4 +17,5 @@ vim_install
 #bloat_install
 #doom_emacs_install
 
+apply_skip_worktree
 info "Bootstrap complete!"

@@ -40,4 +40,5 @@ if [ "$(basename "$SHELL")" != "zsh" ]; then
     chsh -s "$(which zsh)"                  # Change default shell to zsh
 fi
 
+apply_skip_worktree
 info "Bootstrap complete!"
