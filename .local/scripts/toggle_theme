@@ -30,6 +30,7 @@ TERMITE_THEME_LIGHT="onelight"
 # WALLPAPER_DARK=""
 
 function update_wallpaper {
+    if ! command -v feh &>/dev/null; then return; fi
     if [ "$1" == "light" ]; then
         feh --bg-scale "$WALLPAPER_LIGHT" &
     elif [ "$1" == "dark" ]; then

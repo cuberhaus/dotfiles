@@ -2,5 +2,10 @@
 orgname=cuberhaus
 max_jobs=8
 
+if ! command -v gh &>/dev/null; then
+    echo "error: gh (GitHub CLI) is not installed" >&2
+    exit 1
+fi
+
 gh repo list "$orgname" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' \
     | xargs -P "$max_jobs" -I {} gh repo clone {} {}
