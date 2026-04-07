@@ -371,6 +371,7 @@ vim_install () {
 optional() {
     $apt texlive-full doxygen   # Doxygen
     $apt virtualbox-qt          # Virtual machines
+    $apt mangohud               # FPS overlay for games
     # Qt G
     $apt build-essential libgl1-mesa-dev libglu1-mesa-dev
     $apt mesa-common-dev

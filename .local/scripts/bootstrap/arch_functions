@@ -500,6 +500,7 @@ games_install () {
     local packages=(
         dnsmasq
         lutris
+        mangohud
         minecraft
         steam
         vulkan-tools
