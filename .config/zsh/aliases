@@ -80,7 +80,7 @@ alias zshrc='nvim $ZDOTDIR/.zshrc'
 #alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
 #alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
 
-alias vim="nvim"
+command -v nvim &>/dev/null && alias vim="nvim"
 alias e="emacsclient -nc"
 # modify in  /usr/share/applications as well
 alias rstudio="rstudio-bin --no-sandbox"
@@ -160,10 +160,10 @@ alias tozsh='sudo chsh $USER -s /bin/zsh && echo "Now log out."'
 
 # Generalize commands
 # shellcheck disable=SC1078,SC1079,SC2139
-cleanup="vim +PlugClean +qall;
-    pip3 cache purge;
-    yarn cache clean
-    npm cache clean --force
+cleanup="command -v nvim &>/dev/null && nvim +PlugClean +qall;
+    command -v pip3 &>/dev/null && pip3 cache purge;
+    command -v yarn &>/dev/null && yarn cache clean;
+    command -v npm &>/dev/null && npm cache clean --force
     "
 update=""
 updateall="command -v python3 &>/dev/null && python3 -m pip install --user --upgrade pynvim &;
@@ -181,7 +181,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
     # sudo xcode-select -switch /Library/Developer/CommandLineTools
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
-    cleanup="brew cleanup;sudo gem cleanup;"$cleanup
+    cleanup="command -v brew &>/dev/null && brew cleanup; command -v gem &>/dev/null && sudo gem cleanup;"$cleanup
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete; find . -type f -name '._*' -exec rm -f {} \;
 "
@@ -191,8 +191,12 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     alias rm="rm -vI"
     # Lock screen
-    LockScreens=('pipes.sh' 'cmatrix')
-    alias lock='${LockScreens[$RANDOM % 2]}'
+    LockScreens=()
+    command -v pipes.sh &>/dev/null && LockScreens+=('pipes.sh')
+    command -v cmatrix &>/dev/null && LockScreens+=('cmatrix')
+    if (( ${#LockScreens[@]} > 0 )); then
+        alias lock='${LockScreens[$RANDOM % ${#LockScreens[@]}]}'
+    fi
     # Get the error messages from journalctl
     alias jctl="journalctl -p 3 -xb"
     # Check vulnerabilities microcode
@@ -206,7 +210,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         "$updateall
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
-        cleanup="yay -Sc;"$cleanup
+        cleanup="command -v yay &>/dev/null && yay -Sc;"$cleanup
         #sudo pacman -R $(pacman -Qdtq)
         alias unlock="sudo rm /var/lib/pacman/db.lck" #pacman unlock
     fi
@@ -230,7 +234,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         cleanup="sudo apt-get autoclean; 
         sudo apt-get clean; 
         sudo apt-get autoremove; 
-        brew cleanup; 
+        command -v brew &>/dev/null && brew cleanup; 
         "$cleanup
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
@@ -241,8 +245,8 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         updateall=$update$updateall
         cleanup="sudo apt-get autoclean; 
         sudo apt-get clean; 
-        sudo apt-get autoremove; 
-        brew cleanup; 
+        sudo apt-get autoremove;
+        command -v brew &>/dev/null && brew cleanup; 
         "$cleanup
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi

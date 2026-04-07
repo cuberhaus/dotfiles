@@ -17,7 +17,11 @@ ADOTDIR=~/.config/antigen/
 ANTIGEN_CHECK_FILES=(~/.config/zsh/.zshrc)
 
 # START ANTIGEN
-source ~/.config/antigen/antigen.zsh
+if [ -f ~/.config/antigen/antigen.zsh ]; then
+    source ~/.config/antigen/antigen.zsh
+else
+    echo "[warn] antigen.zsh not found — run 'git submodule update --init'"
+fi
 
 # Load the oh-my-zsh's library.
 antigen use oh-my-zsh
