@@ -101,6 +101,7 @@ node_install() {
     info "Installing global npm packages..."
     command -v cline &>/dev/null || sudo npm install -g cline
     command -v markdownlint-cli2 &>/dev/null || sudo npm install -g markdownlint-cli2
+    command -v copilot &>/dev/null || sudo npm install -g @github/copilot
 
     # Add more global npm packages below as needed:
     # sudo npm install -g <package>
@@ -186,21 +187,13 @@ gcloud_install() {
         return
     fi
 
-    $apt apt-transport-https ca-certificates gnupg
-
-    if [ ! -f /etc/apt/keyrings/cloud.google.gpg ]; then
-        curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
-            | sudo gpg --dearmor -o /etc/apt/keyrings/cloud.google.gpg
-        sudo chmod a+r /etc/apt/keyrings/cloud.google.gpg
-    fi
-
-    if [ ! -f /etc/apt/sources.list.d/google-cloud-sdk.list ]; then
-        echo "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
-            | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
-        sudo apt-get update
-    fi
-
-    $apt google-cloud-cli
+    local tarball="/tmp/google-cloud-cli-linux-x86_64.tar.gz"
+    info "Downloading Google Cloud CLI..."
+    curl -fsSL "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz" \
+        -o "$tarball"
+    tar -xf "$tarball" -C "$HOME"
+    rm -f "$tarball"
+    "$HOME/google-cloud-sdk/install.sh" --quiet
 
     info "Google Cloud SDK installed. Run 'gcloud init' to configure."
 }
@@ -260,7 +253,9 @@ gui_apps_install() {
     fi
 
     # GPT4All (local LLM chat)
-    if ! command -v gpt4all &>/dev/null && [ ! -d "$HOME/gpt4all" ] && [ ! -d /opt/gpt4all ]; then
+    if command -v gpt4all &>/dev/null || [ -d "$HOME/gpt4all" ] || [ -d /opt/gpt4all ]; then
+        info "GPT4All already installed, skipping."
+    else
         info "Downloading GPT4All..."
         (
             local ver
@@ -317,7 +312,7 @@ EOF
         info "Cursor installed."
     fi
 
-    if [ -f "$gpt4all_run" ]; then
+    if [ -f "$gpt4all_run" ] && ! command -v gpt4all &>/dev/null && [ ! -d "$HOME/gpt4all" ] && [ ! -d /opt/gpt4all ]; then
         info "Installing GPT4All..."
         chmod +x "$gpt4all_run"
         "$gpt4all_run" --install "$HOME/gpt4all" --accept-licenses --default-answer --auto
