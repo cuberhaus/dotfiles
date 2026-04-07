@@ -166,16 +166,16 @@ cleanup="vim +PlugClean +qall;
     npm cache clean --force
     "
 update=""
-updateall="python3 -m pip install --user --upgrade pynvim &;
-    vim +PlugUpgrade +PlugUpdate +qall &; 
-    antigen update &; 
-    pip3 install --user --upgrade pip &
+updateall="command -v python3 &>/dev/null && python3 -m pip install --user --upgrade pynvim &;
+    command -v nvim &>/dev/null && nvim +PlugUpgrade +PlugUpdate +qall &; 
+    type antigen &>/dev/null && antigen update &; 
+    command -v pip3 &>/dev/null && pip3 install --user --upgrade pip &
 "
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
-    update="brew update; brew upgrade; sudo softwareupdate -i -a; xcode-select --install; "$update
-    updateall=$update"npm install npm -g;
+    update="command -v brew &>/dev/null && { brew update; brew upgrade; }; sudo softwareupdate -i -a; xcode-select --install; "$update
+    updateall=$update"command -v npm &>/dev/null && npm install npm -g;
     "$updateall
     #emacs -f auto-package-update-now &;
 
@@ -200,9 +200,9 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        update="sudo pacman -Syu;sudo snap refresh;"$update
-        updateall="yay -Syu;npm update &;sudo snap refresh;
-        emacs -f auto-package-update-now &;
+        update="sudo pacman -Syu; command -v snap &>/dev/null && sudo snap refresh; "$update
+        updateall="command -v yay &>/dev/null && yay -Syu; command -v npm &>/dev/null && npm update &; command -v snap &>/dev/null && sudo snap refresh;
+        command -v emacs &>/dev/null && emacs -f auto-package-update-now &;
         "$updateall
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
@@ -226,7 +226,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
         update="sudo apt-get update; sudo apt-get full-upgrade; "$update
-        updateall=$update"emacs -f auto-package-update-now &; gcloud components update --quiet;"$updateall
+        updateall=$update"command -v emacs &>/dev/null && emacs -f auto-package-update-now &; command -v gcloud &>/dev/null && gcloud components update --quiet;"$updateall
         cleanup="sudo apt-get autoclean; 
         sudo apt-get clean; 
         sudo apt-get autoremove; 
