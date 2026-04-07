@@ -1,0 +1,27 @@
+You are working on the `dotfiles` repository, which contains the configuration and setup scripts for Linux/Unix environments.
+
+# Project Scope
+- **OS Target**: Linux (Ubuntu/Debian primarily) / Unix
+- **Primary Shell**: Zsh (with bash fallbacks)
+- **Key Focus**: Terminal workflows, dotfile management (stow/symlinks), aliases, and developer tooling.
+
+# Development Rules & Guidelines
+1. **Shell Scripting Standards**:
+   - Write POSIX-compliant bash scripts or explicitly state when a feature requires Zsh.
+   - When modifying aliases or functions (e.g., in `.config/zsh/aliases` or `.config/zsh/functions`), ensure they do not clash with standard Unix commands.
+   - Use standard tools (`awk`, `sed`, `grep`, `find`) and prefer robust syntax (e.g., `find . -print0 | xargs -0` or `while IFS= read -r -d ''`).
+
+2. **User Feedback (Color Output)**:
+   - When writing functions that modify system state or iterate over repositories (like `add_pat`), use ANSI escape codes to provide colorized output for success (`\033[32m`), warnings (`\033[33m`), and info (`\033[34m`).
+   - Remember to reset colors at the end of output (`\033[0m`).
+
+3. **Dotfile Architecture**:
+   - Understand that dotfiles are likely managed via symlinking (e.g., GNU Stow) or bare git repositories. Do not write scripts that indiscriminately overwrite files in the user's `$HOME` directory; symlink or backup existing files first.
+   - Keep platform-specific configurations separate (e.g., WSL vs native Linux vs macOS).
+
+4. **Safety & Execution**:
+   - Do NOT run scripts that globally install packages (`sudo apt install`) or alter system-wide configs (`/etc/`) without asking the user first.
+   - When writing loops that modify files or git remotes, always provide clear usage instructions and ideally a "dry-run" capability if the operation is destructive.
+
+5. **Performance**:
+   - When possible, write parallelizable scripts or commands (e.g., using `xargs -P`, `wait`, or background processes `&`) to optimize execution time, especially for tasks iterating over multiple repositories or files.
