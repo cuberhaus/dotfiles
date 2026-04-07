@@ -175,6 +175,37 @@ docker_install() {
 }
 
 ###############################################################
+# => Google Cloud SDK
+###############################################################
+
+gcloud_install() {
+    info "Installing Google Cloud SDK..."
+
+    if command -v gcloud &>/dev/null; then
+        info "gcloud already installed ($(gcloud version 2>/dev/null | head -1)), skipping."
+        return
+    fi
+
+    $apt apt-transport-https ca-certificates gnupg
+
+    if [ ! -f /etc/apt/keyrings/cloud.google.gpg ]; then
+        curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+            | sudo gpg --dearmor -o /etc/apt/keyrings/cloud.google.gpg
+        sudo chmod a+r /etc/apt/keyrings/cloud.google.gpg
+    fi
+
+    if [ ! -f /etc/apt/sources.list.d/google-cloud-sdk.list ]; then
+        echo "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
+            | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list > /dev/null
+        sudo apt-get update
+    fi
+
+    $apt google-cloud-cli
+
+    info "Google Cloud SDK installed. Run 'gcloud init' to configure."
+}
+
+###############################################################
 # => GUI applications
 ###############################################################
 

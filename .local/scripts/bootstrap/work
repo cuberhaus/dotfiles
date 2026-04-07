@@ -24,6 +24,7 @@ dev_tools_install
 node_install
 python_install
 docker_install
+gcloud_install
 gui_apps_install
 
 if [ "$(basename "$SHELL")" != "zsh" ]; then
