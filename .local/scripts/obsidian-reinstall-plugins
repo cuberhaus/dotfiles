@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+# Reinstall all Obsidian community plugins by re-downloading from GitHub releases.
+#
+# The obsidian CLI plugin:install command doesn't reliably re-download plugin
+# files, so this script fetches main.js + styles.css + manifest.json directly
+# from each plugin's GitHub release.  Downloads run in parallel.
+#
+# Usage:
+#   obsidian-reinstall-plugins                              # auto-detect vault
+#   obsidian-reinstall-plugins /path/to/vault/.obsidian/plugins
+#   obsidian-reinstall-plugins -j8 /path/to/...            # limit to 8 jobs
+
+set -euo pipefail
+
+REGISTRY_URL="https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugins.json"
+MAX_JOBS=16
+
+# ── Args ──────────────────────────────────────────────────────────────────────
+
+plugins_dir=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -j[0-9]*) MAX_JOBS="${1#-j}"; shift ;;
+    -j)       MAX_JOBS="$2"; shift 2 ;;
+    -h|--help)
+      echo "Usage: $(basename "$0") [-j JOBS] [/path/to/.obsidian/plugins]"
+      exit 0 ;;
+    *) plugins_dir="$1"; shift ;;
+  esac
+done
+
+# ── Locate plugins directory ──────────────────────────────────────────────────
+
+if [[ -z "$plugins_dir" ]]; then
+  candidates=(
+    "$HOME/obsidian_vault/.obsidian/plugins"
+    "$HOME/Documents/Obsidian/.obsidian/plugins"
+    "$HOME/Obsidian/.obsidian/plugins"
+  )
+  for c in "${candidates[@]}"; do
+    if [[ -d "$c" ]]; then plugins_dir="$c"; break; fi
+  done
+  if [[ -z "$plugins_dir" ]]; then
+    plugins_dir="$(find "$HOME" -maxdepth 5 -path '*/.obsidian/plugins' -type d 2>/dev/null | head -1)"
+  fi
+  if [[ -z "$plugins_dir" || ! -d "$plugins_dir" ]]; then
+    echo "Error: could not find an Obsidian plugins directory." >&2
+    echo "Usage: $(basename "$0") /path/to/vault/.obsidian/plugins" >&2
+    exit 1
+  fi
+fi
+
+echo "Plugins directory: $plugins_dir"
+echo "Parallel jobs:     $MAX_JOBS"
+
+# ── Fetch community plugin registry (maps plugin ID → GitHub repo) ────────────
+
+echo "Fetching community plugin registry..."
+registry_file="$(mktemp)"
+trap 'rm -f "$registry_file"' EXIT
+curl -fsSL "$REGISTRY_URL" | python3 -c "
+import json, sys
+for p in json.load(sys.stdin):
+    print(p['id'] + '|' + p['repo'])
+" > "$registry_file"
+
+echo "Registry: $(wc -l < "$registry_file") plugins indexed."
+echo
+
+# ── Worker function (called per plugin, in a subshell) ────────────────────────
+
+download_plugin() {
+  local plugin_id="$1" dir="$2" registry="$3"
+  local manifest="$dir/manifest.json"
+
+  [[ ! -f "$manifest" ]] && echo "SKIP $plugin_id: no manifest.json" && return 0
+
+  local version repo
+  version="$(python3 -c "import json; print(json.load(open('$manifest'))['version'])")"
+  repo="$(grep "^${plugin_id}|" "$registry" | cut -d'|' -f2)"
+
+  [[ -z "$repo" ]] && echo "SKIP $plugin_id: not in community registry" && return 0
+
+  local base tag
+  for tag in "$version" "v$version"; do
+    base="https://github.com/$repo/releases/download/$tag"
+    if curl -fsSL --connect-timeout 10 --max-time 120 "$base/main.js" -o "$dir/main.js" 2>/dev/null; then
+      curl -fsSL --connect-timeout 10 --max-time 30 "$base/manifest.json" -o "$dir/manifest.json" 2>/dev/null || true
+      curl -fsSL --connect-timeout 10 --max-time 30 "$base/styles.css" -o "$dir/styles.css" 2>/dev/null || true
+      echo "✓ $plugin_id ($tag)"
+      return 0
+    fi
+  done
+
+  base="https://github.com/$repo/releases/latest/download"
+  if curl -fsSL -L --connect-timeout 10 --max-time 120 "$base/main.js" -o "$dir/main.js" 2>/dev/null; then
+    curl -fsSL -L --connect-timeout 10 --max-time 30 "$base/manifest.json" -o "$dir/manifest.json" 2>/dev/null || true
+    curl -fsSL -L --connect-timeout 10 --max-time 30 "$base/styles.css" -o "$dir/styles.css" 2>/dev/null || true
+    echo "✓ $plugin_id (latest)"
+    return 0
+  fi
+
+  echo "✗ $plugin_id"
+  return 1
+}
+
+export -f download_plugin
+
+# ── Launch parallel downloads ─────────────────────────────────────────────────
+
+results_file="$(mktemp)"
+trap 'rm -f "$registry_file" "$results_file"' EXIT
+
+job_count=0
+pids=()
+
+for dir in "$plugins_dir"/*/; do
+  [[ ! -d "$dir" ]] && continue
+  plugin_id="$(basename "$dir")"
+
+  download_plugin "$plugin_id" "$dir" "$registry_file" >> "$results_file" &
+  pids+=($!)
+  job_count=$((job_count + 1))
+
+  # Throttle to MAX_JOBS
+  if [[ $job_count -ge $MAX_JOBS ]]; then
+    wait "${pids[0]}" 2>/dev/null || true
+    pids=("${pids[@]:1}")
+    job_count=$((job_count - 1))
+  fi
+done
+
+# Wait for remaining
+for pid in "${pids[@]}"; do
+  wait "$pid" 2>/dev/null || true
+done
+
+# ── Report ────────────────────────────────────────────────────────────────────
+
+sort "$results_file"
+echo
+succeeded="$(grep -c '^✓' "$results_file" || true)"
+failed="$(grep -c '^✗' "$results_file" || true)"
+skipped="$(grep -c '^SKIP' "$results_file" || true)"
+total=$((succeeded + failed))
+
+echo "Done: $succeeded/$total succeeded, $failed failed, $skipped skipped."
+
+if [[ $failed -gt 0 ]]; then
+  echo "Failed:" >&2
+  grep '^✗' "$results_file" | sed 's/^✗ /  /' >&2
+  exit 1
+fi
