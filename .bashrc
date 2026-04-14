@@ -73,3 +73,4 @@ if [ -f "$_zshdir/functions" ]; then
     source "$_zshdir/functions"
 fi
 unset _zshdir
+. "/home/pol/.local/share/cargo/env"

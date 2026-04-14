@@ -203,3 +203,4 @@ export GTK2_RC_FILES="$XDG_CONFIG_HOME"/gtk-2.0/gtkrc
 
 # shellcheck disable=SC1091
 [ -r "$HOME/.zshenv.local" ] && source "$HOME/.zshenv.local"
+. "/home/pol/.local/share/cargo/env"
