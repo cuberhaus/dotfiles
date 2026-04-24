@@ -5,7 +5,7 @@
 ###############################################################
 # Info:
 # & send a process to background. Example: discord &
-# ! disown a process. Example: discord ! 
+# ! disown a process. Example: discord !
 # </dev/null &>/dev/null completely silence a process.
 # Combinations are possible. Example: discord &!
 # alias="" Is created during shell startup and won't change
@@ -48,7 +48,7 @@ alias discord="discord --no-sandbox &"
 alias xmonad_fix="sudo ghc-pkg recache"
 # Recompile ycm (if autocompletion stops working execute this)
 alias ycminstall='python3 $HOME/.vim/plugged/YouCompleteMe/install.py'
-# Rclone (be careful!) 
+# Rclone (be careful!)
 # "rclone config" first, better to use copy instead of "rclone sync" so that I do not delete books on accident while pushing or pulling, it becomes a mess, since if I pull i will delete any extra books I have locally, and if I push I will delete the extra books I have remotely, overall, a fucking mess
 alias rclonepull_calibre="rclone -P copy drive:Calibre/Calibre\ Library ~/Calibre\ Library"
 alias rclonepull_thunderbird="rclone -P copy drive:Thunderbird ~/.thunderbird"
@@ -163,12 +163,15 @@ alias tozsh='sudo chsh $USER -s /bin/zsh && echo "Now log out."'
 cleanup="command -v nvim &>/dev/null && nvim +PlugClean +qall;
     command -v pip3 &>/dev/null && pip3 cache purge;
     command -v yarn &>/dev/null && yarn cache clean;
-    command -v npm &>/dev/null && npm cache clean --force
+    command -v npm &>/dev/null && npm cache clean --force;
+    command -v docker &>/dev/null && docker builder prune -af --filter 'until=168h';
+    command -v docker &>/dev/null && docker image prune -af --filter 'until=168h';
+    command -v docker &>/dev/null && docker container prune -f --filter 'until=168h'
     "
 update=""
 updateall="command -v python3 &>/dev/null && python3 -m pip install --user --upgrade pynvim &;
-    command -v nvim &>/dev/null && nvim +PlugUpgrade +PlugUpdate +qall &; 
-    type antigen &>/dev/null && antigen update &; 
+    command -v nvim &>/dev/null && nvim +PlugUpgrade +PlugUpdate +qall &;
+    type antigen &>/dev/null && antigen update &;
     command -v pip3 &>/dev/null && pip3 install --user --upgrade pip &
 "
 ### MacOS
@@ -231,10 +234,10 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     if [[ "$DISTRO" == "ubuntu" ]]; then
         update="sudo apt-get update; sudo apt-get full-upgrade; "$update
         updateall=$update"command -v emacs &>/dev/null && emacs -f auto-package-update-now &; command -v gcloud &>/dev/null && gcloud components update --quiet;"$updateall
-        cleanup="sudo apt-get autoclean; 
-        sudo apt-get clean; 
-        sudo apt-get autoremove; 
-        command -v brew &>/dev/null && brew cleanup; 
+        cleanup="sudo apt-get autoclean;
+        sudo apt-get clean;
+        sudo apt-get autoremove;
+        command -v brew &>/dev/null && brew cleanup;
         "$cleanup
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
@@ -243,10 +246,10 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     if [[ "$DISTRO" == "ubuntu_windows" ]]; then
         update="sudo apt-get update; sudo apt-get full-upgrade; "$update
         updateall=$update$updateall
-        cleanup="sudo apt-get autoclean; 
-        sudo apt-get clean; 
+        cleanup="sudo apt-get autoclean;
+        sudo apt-get clean;
         sudo apt-get autoremove;
-        command -v brew &>/dev/null && brew cleanup; 
+        command -v brew &>/dev/null && brew cleanup;
         "$cleanup
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
