@@ -127,9 +127,9 @@ yolo='git add -A; git commit -m "This is a placeholder"; git push'
 # shellcheck disable=SC2139
 alias yolo="$yolo"
 
-alias pull="git-recurse git pull"
+pull() { git-recurse "$@" git pull; }
 alias add-pat="add_pat"
-alias status="git-recurse git status"
+status() { git-recurse "$@" git status; }
 
 if command -v eza &> /dev/null
 then
