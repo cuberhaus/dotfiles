@@ -40,7 +40,7 @@ process_repo() {
     local output status label
 
     if [ -d "$dir/.git" ]; then
-        if output=$(git -C "$dir" pull --ff-only --quiet 2>&1); then
+        if output=$(git -C "$dir" pull --ff-only --quiet --jobs=4 2>&1); then
             if [ -z "$output" ]; then
                 label="${C_DIM}up-to-date${C_RESET}"
             else
