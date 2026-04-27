@@ -230,6 +230,26 @@
 !.local/share/firefox_shortcuts.md
 
 # =============================================================================
+# Noise — auto-generated files that should never be tracked
+# =============================================================================
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# npm man pages auto-installed into .local/share/man
+.local/share/man/man1/npm-*.1
+
+# iterm2 runtime data (not config)
+.config/iterm2/AppSupport/
+
+# kitty bad XDG path written by app
+.config/kitty/$XDG_DATA_HOME/
+
+# emacs init.el with bad path suffix written by app
+.config/my_emacs/init.el ~/
+
+# =============================================================================
 # Build artifacts inside tracked dirs
 # =============================================================================
 
