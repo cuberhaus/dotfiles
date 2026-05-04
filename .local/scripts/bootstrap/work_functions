@@ -33,6 +33,63 @@ nvidia_install() {
 }
 
 ###############################################################
+# => NVIDIA display config (anti-tearing & FreeSync)
+###############################################################
+
+nvidia_display_config() {
+    info "Configuring NVIDIA display settings..."
+
+    local xorg_conf="/etc/X11/xorg.conf.d/20-nvidia.conf"
+
+    # ── ForceFullCompositionPipeline ─────────────────────────────
+    # Eliminates screen tearing by compositing every frame before
+    # scanout. Adds ~1 frame of input lag — negligible outside
+    # competitive FPS games.
+    #
+    # ── FreeSync / G-Sync Compatible ────────────────────────────
+    # AllowGSYNCCompatible lets NVIDIA use your monitor's FreeSync
+    # for variable refresh rate (VRR), eliminating tearing WITHOUT
+    # the extra input lag of the composition pipeline.
+    #
+    # ⚠ REQUIREMENT: FreeSync over NVIDIA on Linux requires a
+    # DisplayPort connection. HDMI is NOT supported.
+    # If you switch to DisplayPort and want FreeSync, set
+    # ENABLE_FREESYNC=true below and disable ForceFullCompositionPipeline
+    # (they conflict — FreeSync is the better solution when available).
+
+    local ENABLE_FREESYNC=false          # Set to true when using DisplayPort
+
+    sudo mkdir -p /etc/X11/xorg.conf.d
+
+    if [ "$ENABLE_FREESYNC" = true ]; then
+        info "Enabling FreeSync (G-Sync Compatible) — requires DisplayPort."
+        sudo tee "$xorg_conf" > /dev/null <<'EOF'
+# NVIDIA anti-tearing & FreeSync — managed by bootstrap
+# FreeSync/G-Sync Compatible mode (requires DisplayPort, not HDMI)
+Section "Device"
+    Identifier "NVIDIA"
+    Driver     "nvidia"
+    Option     "AllowGSYNCCompatible" "true"
+EndSection
+EOF
+    else
+        info "Enabling ForceFullCompositionPipeline (HDMI — no FreeSync)."
+        sudo tee "$xorg_conf" > /dev/null <<'EOF'
+# NVIDIA anti-tearing — managed by bootstrap
+# ForceFullCompositionPipeline: composites every frame to prevent tearing.
+# Adds ~1 frame of input lag. If you switch to DisplayPort, enable
+# FreeSync instead (set ENABLE_FREESYNC=true in work_functions).
+Section "Screen"
+    Identifier "Screen0"
+    Option     "metamodes" "nvidia-auto-select +0+0 { ForceFullCompositionPipeline = On }"
+EndSection
+EOF
+    fi
+
+    info "NVIDIA display config written to $xorg_conf (takes effect after reboot/re-login)."
+}
+
+###############################################################
 # => Core dev tools
 ###############################################################
 

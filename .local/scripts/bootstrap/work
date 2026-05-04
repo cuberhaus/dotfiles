@@ -20,6 +20,7 @@ export DISTRO=ubuntu" > "$HOME/.config/distro"
 
 shutdown_fix
 nvidia_install
+nvidia_display_config
 dev_tools_install
 node_install
 python_install
