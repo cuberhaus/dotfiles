@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
 
-#/etc/timeshift-autosnap.conf 
+#/etc/timeshift-autosnap.conf
 
 #https://raymondjdouglas.com/blog/2019/airpods-on-arch/
 #Chrome disable this:
@@ -704,7 +704,7 @@ optional() {
     # $pac pix
     # $yay birdtray                               # Thunderbird tray (obsolete with shortcuts)
     # $yay eclipse-java                           # BD
-    
+
     # conexio remota
     # $yay f5fpc                                  # Connexio a UPClink
     $yay f5vpn
@@ -778,20 +778,20 @@ optional() {
     # pass files to boada https://forum.manjaro.org/t/scp-connection-closed/112991/10
     # scp -O par2107@boada.ac.upc.edu:lab1/arch/map-boada-11.fig .
     #ssh -X par2107@boada.ac.upc.edu
-    #ssh -Y par2107@boada.ac.upc.edu works better with -Y 
+    #ssh -Y par2107@boada.ac.upc.edu works better with -Y
     # ON MAC use default terminal
 
     #APA
     $pac jupyterlab
     $pac jupyter-notebook
 
-    #CAIM 
+    #CAIM
     # $yay elasticsearch
     # sudo elasticsearch-keystore create
     # $pip elasticsearch
     # $pip elasticsearch_dsl
     # to initialize:
-    # sudo systemctl start elasticsearch.service 
+    # sudo systemctl start elasticsearch.service
 
     # Bibliografia
     $yay zotero

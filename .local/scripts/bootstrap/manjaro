@@ -27,6 +27,7 @@ sudo cp "$HOME/dotfiles/dotfiles/.local/share/icons/Avatar.jpg" "$HOME/.face" # 
 ### ONLY CHANGE FROM HERE ON
 base_install
 arch_and_manjaro
+nvidia_display_config
 manjaro_install
 i3_install
 xmonad_install

@@ -34,6 +34,7 @@ chrome_install
 #i3_install # Installing i3 requires manual input
 snaps_install
 ubuntu_install
+nvidia_display_config
 ai_tools_install
 vim_install
 if [ "$(basename "$SHELL")" != "zsh" ]; then
