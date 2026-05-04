@@ -41,12 +41,17 @@ function git_recursive() {
         local tmpdir
         tmpdir=$(mktemp -d)
         local pids=()
+        local dim reset
+        dim=$(tput dim 2>/dev/null || true)
+        reset=$(tput sgr0)
+
+        printf "${blue}Launching \"%s\" in %d repo(s) in parallel...${normal}\n" "$cmd" "${#dirs[@]}"
 
         for dir in "${dirs[@]}"; do
             (
                 cd "$dir" 2>/dev/null || exit 1
-                eval "$cmd" > "$tmpdir/$(echo "$dir" | tr '/' '_').out" 2>&1
-            ) &
+                eval "$cmd"
+            ) > "$tmpdir/$(echo "$dir" | tr '/' '_').out" 2>&1 &
             pids+=($!)
         done
 
@@ -55,18 +60,30 @@ function git_recursive() {
             local pid=${pids[$i]}
             local dir=${dirs[$i]}
             local outfile="$tmpdir/$(echo "$dir" | tr '/' '_').out"
-            if wait "$pid"; then
+            local status=0
+            wait "$pid" || status=$?
+
+            if [[ $status -eq 0 ]]; then
                 printf "${green}✓ %s${normal}\n" "$dir"
             else
-                printf "${red}✗ %s${normal}\n" "$dir"
+                printf "${red}✗ %s (exit %d)${normal}\n" "$dir" "$status"
                 ((failures++)) || true
             fi
-            cat "$outfile" 2>/dev/null
+
+            # Print captured logs indented under the status line so
+            # output is grouped per-repo instead of arriving asynchronously.
+            if [[ -s "$outfile" ]]; then
+                sed 's/^/    /' "$outfile"
+            else
+                printf "    ${dim}(no output)${reset}\n"
+            fi
         done
 
         rm -rf "$tmpdir"
+        printf "\n${blue}Done: %d ok, %d failed (of %d)${normal}\n" \
+            "$(( ${#dirs[@]} - failures ))" "$failures" "${#dirs[@]}"
         if ((failures > 0)); then
-            printf "\n${red}%d repo(s) failed${normal}\n" "$failures"
+            return 1
         fi
     else
         for dir in "${dirs[@]}"; do
