@@ -46,6 +46,8 @@ base_install () {
         zsh
         eog                     # Image viewer
         sshfs                   # Mount remote filesystems over SSH
+        net-tools               # Network utilities (ifconfig, netstat, etc.)
+        nmap                    # Network exploration and security auditing
     )
     $apt "${packages[@]}"
 
@@ -424,13 +426,13 @@ high_dpi_screen() {
     # Increase cursor size Settings-> Accesibility -> Cursor size -> Medium
     gsettings set org.gnome.desktop.interface cursor-size 35
     # Set icons to Large 'small' to set it smaller
-    gsettings set org.gnome.shell.extensions.ding icon-size 'large' 
+    gsettings set org.gnome.shell.extensions.ding icon-size 'large'
 }
 
 anaconda () {
     # Pre-requisites
     apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6
-    
+
     # Install anaconda
     curl -O https://repo.anaconda.com/archive/Anaconda3-2023.09-0-Linux-x86_64.sh
 }

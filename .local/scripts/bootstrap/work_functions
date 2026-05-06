@@ -77,6 +77,8 @@ dev_tools_install() {
         flameshot               # Screenshot tool
         rclone                  # Sync files to/from cloud storage
         sshfs                   # Mount remote filesystems over SSH
+        net-tools               # Network utilities (ifconfig, netstat, etc.)
+        nmap                    # Network exploration and security auditing
     )
     $apt "${packages[@]}"
 
