@@ -14,6 +14,7 @@ base_install () {
         cmake                   # To install ycm
         curl
         eza                     # ls on steroids (exa replacement)
+        ffmpeg
         file
         fonts-powerline
         fzf                     # Fuzzy finder
