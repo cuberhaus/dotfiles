@@ -124,9 +124,11 @@ apply_skip_worktree() {
     info "Applying skip-worktree to volatile config files..."
     for f in "${files[@]}"; do
         if [ -f "$dotfiles_root/$f" ]; then
-            git -C "$dotfiles_root" update-index --skip-worktree "$f" \
-                && info "  skip-worktree: $f" \
-                || warn "  Could not apply skip-worktree to $f"
+            if git -C "$dotfiles_root" update-index --skip-worktree "$f"; then
+                info "  skip-worktree: $f"
+            else
+                warn "  Could not apply skip-worktree to $f"
+            fi
         else
             info "  Skipping (not yet present): $f"
         fi

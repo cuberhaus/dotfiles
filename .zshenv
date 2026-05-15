@@ -198,9 +198,17 @@ export GTK_RC_FILES="$XDG_CONFIG_HOME"/gtk-1.0/gtkrc
 export GTK2_RC_FILES="$XDG_CONFIG_HOME"/gtk-2.0/gtkrc
 
 ###############################################################
+# => Cargo (sourced before local overrides so they can adjust it)
+###############################################################
+
+_cargo_env="${CARGO_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/cargo}/env"
+# shellcheck disable=SC1090
+[ -r "$_cargo_env" ] && . "$_cargo_env"
+unset _cargo_env
+
+###############################################################
 # => Local overrides (machine-specific, not tracked by git)
 ###############################################################
 
 # shellcheck disable=SC1091
 [ -r "$HOME/.zshenv.local" ] && source "$HOME/.zshenv.local"
-. "/home/pol/.local/share/cargo/env"
