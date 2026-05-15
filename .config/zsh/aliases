@@ -122,6 +122,7 @@ alias gitsync="git submodule sync; git submodule update --init --recursive"
 alias gsu="git submodule update --recursive --remote"
 
 alias gr="git-recurse"
+alias gah="git-ahead"
 #yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
 yolo='git add -A; git commit -m "This is a placeholder"; git push'
 # shellcheck disable=SC2139

@@ -7,13 +7,20 @@ TARGET    := $(HOME)
 
 .PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
 
-help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*##"}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+.DEFAULT_GOAL := help
 
-# ---------------------------------------------------------------------------
-# Stow
-# ---------------------------------------------------------------------------
+##@ General
+
+help: ## Show this help
+	@awk ' \
+		/^##@/      { printf "\n\033[1m%s\033[0m\n", substr($$0, 5); next } \
+		/^[a-zA-Z_-]+:.*##/ { \
+			split($$0, parts, ":.*## *"); \
+			printf "  \033[36m%-18s\033[0m %s\n", parts[1], parts[2] \
+		} \
+	' $(MAKEFILE_LIST)
+
+##@ Stow
 
 install: ## Symlink dotfiles into $HOME via stow (backs up conflicts first)
 	@bash .local/scripts/stow-backup-conflicts
@@ -28,9 +35,7 @@ restow: ## Re-stow (uninstall then install — cleans stale links)
 dry-run: ## Simulate stow and report conflicts (no changes made)
 	$(STOW) -v -n -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR)) 2>&1
 
-# ---------------------------------------------------------------------------
-# Quality
-# ---------------------------------------------------------------------------
+##@ Quality
 
 lint: ## Run shellcheck on all shell scripts
 	bash .local/scripts/lint.sh
@@ -70,6 +75,8 @@ fix: ## Auto-fix markdown issues (markdownlint --fix)
 doctor: ## Report missing lint tools and broken symlinks in $$HOME
 	@bash .local/scripts/doctor.sh
 
+##@ Setup
+
 hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
 	cp .local/scripts/hooks/pre-commit .git/hooks/pre-commit
 	chmod +x .git/hooks/pre-commit
@@ -89,9 +96,7 @@ skip-worktree: ## Ignore runtime changes to volatile config files (run once afte
 	@for f in $(SKIP_WORKTREE_FILES); do echo "  $$f"; done
 	@echo "To commit a real settings change: git update-index --no-skip-worktree <file>"
 
-# ---------------------------------------------------------------------------
-# Submodules
-# ---------------------------------------------------------------------------
+##@ Submodules
 
 submodules: ## Init and update all git submodules
 	git submodule sync --recursive
@@ -104,9 +109,7 @@ antigen-update: ## Fetch the latest antigen.zsh from GitHub
 	curl -fsSL https://git.io/antigen > .config/antigen/antigen.zsh
 	@echo "antigen.zsh updated. Restart your shell to pick up changes."
 
-# ---------------------------------------------------------------------------
-# Bootstrap (OS-specific)
-# ---------------------------------------------------------------------------
+##@ Bootstrap (OS-specific)
 
 bootstrap-arch: ## Run Arch bootstrap
 	bash .local/scripts/bootstrap/arch
@@ -123,9 +126,7 @@ bootstrap-mac: ## Run macOS bootstrap
 bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA)
 	bash .local/scripts/bootstrap/work
 
-# ---------------------------------------------------------------------------
-# Uninstall (OS-specific)
-# ---------------------------------------------------------------------------
+##@ Uninstall (OS-specific)
 
 uninstall-arch: ## Run Arch uninstaller
 	bash .local/scripts/bootstrap/uninstall_arch

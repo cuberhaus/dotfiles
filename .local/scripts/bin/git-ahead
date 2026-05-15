@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# git-ahead: scan all git repos under a directory, fetch all remotes, and
+# report any remote branch that has commits ahead of remote main/master.
+#
+# Usage:
+#   git-ahead [dir]            # scan dir (default: .), fetching all remotes
+#   git-ahead -n|--no-fetch    # skip fetch (use cached refs)
+#   git-ahead --depth N        # max search depth for repos (default: 4)
+#
+# Output per repo: only branches that are ahead of the base. Silent for clean
+# repos unless --verbose. Exit code is non-zero only on fatal error.
+
+set -uo pipefail
+
+depth=4
+fetch=1
+verbose=0
+root="."
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -n|--no-fetch) fetch=0; shift ;;
+        --depth)       depth="$2"; shift 2 ;;
+        -v|--verbose)  verbose=1; shift ;;
+        -h|--help)
+            sed -n '2,11p' "$0" | sed 's/^# \?//'
+            exit 0
+            ;;
+        -*)
+            echo "Unknown option: $1" >&2
+            exit 2
+            ;;
+        *) root="$1"; shift ;;
+    esac
+done
+
+if [ ! -d "$root" ]; then
+    echo "Not a directory: $root" >&2
+    exit 1
+fi
+
+green=$'\033[32m'
+yellow=$'\033[33m'
+red=$'\033[31m'
+dim=$'\033[2m'
+bold=$'\033[1m'
+reset=$'\033[0m'
+
+# Pick the "main" ref to compare branches against.
+# Prefers symbolic origin/HEAD, then origin/main, then origin/master, else "".
+detect_base() {
+    local base
+    base=$(git symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null) || true
+    if [ -n "$base" ]; then
+        echo "${base#refs/remotes/}"
+        return
+    fi
+    if git rev-parse --verify --quiet origin/main >/dev/null; then
+        echo "origin/main"; return
+    fi
+    if git rev-parse --verify --quiet origin/master >/dev/null; then
+        echo "origin/master"; return
+    fi
+    echo ""
+}
+
+scan_repo() {
+    local repo="$1"
+    local rel="${repo#"$root"/}"
+    [ "$rel" = "$repo" ] && rel="$repo"
+
+    if [ "$fetch" -eq 1 ]; then
+        if ! git -C "$repo" fetch --all --prune --quiet 2>/dev/null; then
+            printf "%s✗%s %s %s(fetch failed)%s\n" "$red" "$reset" "$rel" "$dim" "$reset"
+            return
+        fi
+    fi
+
+    local base
+    base=$(cd "$repo" && detect_base)
+    if [ -z "$base" ]; then
+        if [ "$verbose" -eq 1 ]; then
+            printf "%s•%s %s %s(no origin/main or origin/master)%s\n" \
+                "$dim" "$reset" "$rel" "$dim" "$reset"
+        fi
+        return
+    fi
+
+    # Iterate every remote branch except the base itself, count commits ahead.
+    local report=""
+    while IFS= read -r ref; do
+        [ "$ref" = "$base" ] && continue
+        # Skip remote HEAD pointers like origin/HEAD
+        case "$ref" in */HEAD) continue ;; esac
+        local ahead
+        ahead=$(git -C "$repo" rev-list --count "$base..$ref" 2>/dev/null) || continue
+        if [ "$ahead" -gt 0 ]; then
+            report+=$(printf "    %s↑ %3d%s  %s\n" "$yellow" "$ahead" "$reset" "$ref")
+            report+=$'\n'
+        fi
+    done < <(git -C "$repo" for-each-ref --format='%(refname:short)' refs/remotes/)
+
+    if [ -n "$report" ]; then
+        printf "%s%s%s %s(base: %s)%s\n" "$bold" "$rel" "$reset" "$dim" "$base" "$reset"
+        printf "%s" "$report"
+    elif [ "$verbose" -eq 1 ]; then
+        printf "%s✓%s %s %s(base: %s, all remotes merged)%s\n" \
+            "$green" "$reset" "$rel" "$dim" "$base" "$reset"
+    fi
+}
+
+# Find every git repo under root, capped at $depth, skipping nested .git dirs
+# inside other repos (find prunes by not descending into already-found .git dirs).
+mapfile -t repos < <(
+    find "$root" -maxdepth "$depth" -type d -name .git -prune 2>/dev/null \
+        | sed 's|/\.git$||' | sort
+)
+
+if [ ${#repos[@]} -eq 0 ]; then
+    echo "No git repos found under $root (depth $depth)."
+    exit 0
+fi
+
+[ "$verbose" -eq 1 ] && echo "Scanning ${#repos[@]} repos..."
+
+for r in "${repos[@]}"; do
+    scan_repo "$r"
+done
