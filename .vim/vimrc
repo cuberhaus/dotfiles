@@ -1,5 +1,3 @@
-scriptencoding utf-8
-
 " General {{{
 
 " Leader key for custom key combinations
@@ -242,6 +240,7 @@ syntax on
 
 " Set utf8 as standard encoding and en_US as the standard language
 set encoding=utf8
+scriptencoding utf-8
 set fileencoding=utf-8
 
 " Configuració per a vim-airline
