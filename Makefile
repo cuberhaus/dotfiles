@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
+.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
 
 .DEFAULT_GOAL := help
 
@@ -119,6 +119,9 @@ bootstrap-manjaro: ## Run Manjaro bootstrap
 
 bootstrap-ubuntu: ## Run Ubuntu bootstrap
 	bash .local/scripts/bootstrap/ubuntu
+
+bootstrap-ubuntu-windows: ## Run Ubuntu-on-WSL bootstrap (no GUI apps)
+	bash .local/scripts/bootstrap/ubuntu_windows
 
 bootstrap-mac: ## Run macOS bootstrap
 	bash .local/scripts/bootstrap/mac
