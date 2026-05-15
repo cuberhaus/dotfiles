@@ -255,8 +255,8 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     fi
 
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        \$pac() { sudo pacman -S --noconfirm --needed "$@"; }
-        \$yay() { yay -S --noconfirm --needed "$@"; }
+        pac() { sudo pacman -S --noconfirm --needed "$@"; }
+        yay() { command yay -S --noconfirm --needed "$@"; }
     fi
 
     if [[ "$DISTRO" == "ubuntu"* ]]; then
