@@ -13,7 +13,9 @@ BASE16_SHELL="$HOME/.config/base16-shell/"
 GIT_PROMPT_ONLY_IN_REPO=0 # Set config variables first
 GIT_PROMPT_THEME_FILE=~/.config/.git-prompt-colors.sh
 GIT_PROMPT_THEME=Custom
-source ~/.config/bash-git-prompt/gitprompt.sh
+if [ -f ~/.config/bash-git-prompt/gitprompt.sh ]; then
+    source ~/.config/bash-git-prompt/gitprompt.sh
+fi
 
 ###############################################################
 # => Configuration
@@ -71,3 +73,7 @@ if [ -f "$_zshdir/functions" ]; then
     source "$_zshdir/functions"
 fi
 unset _zshdir
+
+_cargo_env="${CARGO_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/cargo}/env"
+[ -r "$_cargo_env" ] && . "$_cargo_env"
+unset _cargo_env

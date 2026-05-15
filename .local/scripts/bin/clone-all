@@ -1,6 +1,78 @@
 #!/usr/bin/env bash
-orgname=cuberhaus
+# Clone all repos in an org, or fast-forward update the ones already present.
+# One concise status line per repo; error output is indented underneath.
 
-gh repo list "$orgname" --limit 1000 | while read -r repo _; do
-    gh repo clone "$repo" "$repo"
-done
+orgname=cuberhaus
+# Cloning/pulling is network + disk bound, not CPU bound, so parallelism
+# well above core count is fine. Default: detected cores (min 4, cap 32).
+# Override with CLONE_ALL_JOBS=N.
+detect_jobs() {
+    local n
+    n=$(nproc 2>/dev/null) \
+        || n=$(getconf _NPROCESSORS_ONLN 2>/dev/null) \
+        || n=$(sysctl -n hw.ncpu 2>/dev/null) \
+        || n=4
+    [ "$n" -lt 4 ] && n=4
+    [ "$n" -gt 32 ] && n=32
+    echo "$n"
+}
+max_jobs=${CLONE_ALL_JOBS:-$(detect_jobs)}
+
+if ! command -v gh &>/dev/null; then
+    echo "error: gh (GitHub CLI) is not installed" >&2
+    exit 1
+fi
+
+if [ -t 1 ]; then
+    C_RESET=$'\033[0m'
+    C_GREEN=$'\033[32m'
+    C_BLUE=$'\033[34m'
+    C_YELLOW=$'\033[33m'
+    C_RED=$'\033[31m'
+    C_DIM=$'\033[2m'
+else
+    C_RESET=''; C_GREEN=''; C_BLUE=''; C_YELLOW=''; C_RED=''; C_DIM=''
+fi
+
+process_repo() {
+    local nameWithOwner="$1"
+    local dir="$nameWithOwner"
+    local output status label
+
+    if [ -d "$dir/.git" ]; then
+        if output=$(git -C "$dir" pull --ff-only --quiet --jobs=4 2>&1); then
+            if [ -z "$output" ]; then
+                label="${C_DIM}up-to-date${C_RESET}"
+            else
+                label="${C_GREEN}updated${C_RESET}"
+            fi
+            status=0
+        else
+            label="${C_RED}pull failed${C_RESET}"
+            status=1
+        fi
+    elif [ -e "$dir" ]; then
+        label="${C_YELLOW}skipped (not a git repo)${C_RESET}"
+        output=""
+        status=0
+    else
+        if output=$(gh repo clone "$nameWithOwner" "$dir" -- --quiet 2>&1); then
+            label="${C_BLUE}cloned${C_RESET}"
+            status=0
+        else
+            label="${C_RED}clone failed${C_RESET}"
+            status=1
+        fi
+    fi
+
+    printf '%-22b %s\n' "$label" "$nameWithOwner"
+    if [ -n "$output" ] && [ "$status" -ne 0 ]; then
+        printf '%s\n' "$output" | sed 's/^/    /'
+    fi
+    return $status
+}
+export -f process_repo
+export C_RESET C_GREEN C_BLUE C_YELLOW C_RED C_DIM
+
+gh repo list "$orgname" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' \
+    | xargs -P "$max_jobs" -I {} bash -c 'process_repo "$@"' _ {}

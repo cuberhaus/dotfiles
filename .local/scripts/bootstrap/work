@@ -20,10 +20,12 @@ export DISTRO=ubuntu" > "$HOME/.config/distro"
 
 shutdown_fix
 nvidia_install
+nvidia_display_config
 dev_tools_install
 node_install
 python_install
 docker_install
+gcloud_install
 gui_apps_install
 
 current_scale=$(gsettings get org.gnome.desktop.interface text-scaling-factor 2>/dev/null || echo "1.0")
@@ -38,4 +40,5 @@ if [ "$(basename "$SHELL")" != "zsh" ]; then
     chsh -s "$(which zsh)"
 fi
 
+apply_skip_worktree
 info "Bootstrap complete! Reboot to load NVIDIA drivers."

@@ -12,6 +12,7 @@
     - [How it works](#how-it-works)
     - [Installation](#installation)
     - [Usage](#usage)
+    - [Volatile config files](#volatile-config-files)
     - [Bootstrap](#bootstrap)
     - [What's inside](#whats-inside)
     - [Supported OS](#supported-os)
@@ -24,8 +25,13 @@ Opinionated defaults. This repo is not meant to be used by everyone, just a pers
 
 ## How it works
 
-The repo is cloned into `~/dotfiles/dotfiles` so that stow treats it as
-a package called `dotfiles` inside the `~/dotfiles` parent directory:
+### Why `dotfiles/dotfiles`?
+
+You might wonder why the repository isn't just cloned directly into `~/dotfiles`. The nested `~/dotfiles/dotfiles` structure is required by how **[GNU Stow](https://www.gnu.org/software/stow/)** manages packages. Stow expects a "stow directory" (the parent, `~/dotfiles`) containing one or more "packages" (the child, `dotfiles`, which is this repo).
+
+By cloning into `~/dotfiles/dotfiles`, stow correctly treats the inner `dotfiles` folder as the package name, allowing it to safely symlink the contents (like `.config/`, `.vim/`) directly into your `$HOME` directory without confusing the repository root with the target deployment.
+
+So, the structure looks like this:
 
 ```
  ~/dotfiles/
@@ -80,7 +86,30 @@ make lint              # Run shellcheck on all scripts
 make check             # Run all linters (shellcheck + markdownlint + vint)
 make submodules        # Init and update submodules
 make update            # Pull latest for every submodule
+make skip-worktree     # Ignore runtime changes to volatile config files (run once after cloning)
 make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac, work)
+```
+
+### Volatile config files
+
+Some tracked files (e.g. `user_preferences.json` for Warp, `javasettings_Linux_X86_64.xml` for LibreOffice) are **rewritten by their apps on every launch**. They are kept in the repo so the settings you care about are versioned, but the constant runtime changes make `git status` noisy and block `git pull`.
+
+After cloning, run once:
+
+```bash
+make skip-worktree
+```
+
+This applies `git update-index --skip-worktree` to those files — git keeps the committed version but stops noticing local changes.
+
+When you **intentionally** want to update one of them in the repo:
+
+```bash
+git update-index --no-skip-worktree .config/warp-terminal/user_preferences.json
+# edit / copy the new settings you want to keep
+git add .config/warp-terminal/user_preferences.json
+git commit -m "update warp settings"
+git update-index --skip-worktree .config/warp-terminal/user_preferences.json  # re-apply
 ```
 
 ## Bootstrap
@@ -112,7 +141,7 @@ scripts directory.
 ## What's inside
 
 | Category | Tool / Config | Notes |
-|---|---|---|
+| --- | --- | --- |
 | **Shells** | zsh (antigen, p10k), bash | XDG-compliant `$ZDOTDIR` in `.config/zsh/` |
 | **Editors** | Vim, Neovim, Doom Emacs, personal Emacs (chemacs) | Vim config at `.vim/vimrc`; Emacs literate config in `.config/emacs.org` |
 | **Terminals** | kitty, Alacritty, termite | |

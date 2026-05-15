@@ -28,35 +28,43 @@ ex ()
 echo "Do you want to install cinnamon applets? [y/n]"
 read -r install
 if [[ "$install" == y ]]; then
-    cd ~/.local/share/cinnamon/applets || exit
-    # SpicesUpdate
-    wget https://cinnamon-spices.linuxmint.com/files/applets/SpicesUpdate@claudiux.zip -P ~/.local/share/cinnamon/applets
-    ex SpicesUpdate@claudiux.zip
-    # Clean Show Desktop
-    wget https://cinnamon-spices.linuxmint.com/files/applets/clean-show-desktop@filipetorresbr.zip
-    ex clean-show-desktop@filipetorresbr.zip
-    # Weather
-    wget https://cinnamon-spices.linuxmint.com/files/applets/weather@mockturtl.zip
-    ex weather@mockturtl.zip
-    # Color-picker
-    wget https://cinnamon-spices.linuxmint.com/files/applets/color-picker@fmete.zip
-    ex color-picker@fmete.zip
-    # Drawer
-    https://cinnamon-spices.linuxmint.com/files/applets/show-hide-applets@mohammad-sn.zip
-    ex show-hide-applets@mohammad-sn.zip
-    # Force Quit
-    wget https://cinnamon-spices.linuxmint.com/files/applets/force-quit@cinnamon.org.zip
-    ex force-quit@cinnamon.org.zip
-    # Num Lock/Caps Lock indicators
-    wget https://cinnamon-spices.linuxmint.com/files/applets/betterlock.zip
-    ex betterlock.zip
-    # Cinnamenu
-    wget https://cinnamon-spices.linuxmint.com/files/applets/Cinnamenu@json.zip
-    ex Cinnamenu@json.zip
-    # Calendar
-    wget https://cinnamon-spices.linuxmint.com/files/desklets/calendar@deeppradhan.zip
-    ex calendar@deeppradhan.zip
-    # Disk Space
-    wget https://cinnamon-spices.linuxmint.com/files/desklets/diskspace@schorschii.zip
-    ex diskspace@schorschii.zip
+    dest="$HOME/.local/share/cinnamon/applets"
+    mkdir -p "$dest"
+    cd "$dest" || exit
+
+    urls=(
+        "https://cinnamon-spices.linuxmint.com/files/applets/SpicesUpdate@claudiux.zip"
+        "https://cinnamon-spices.linuxmint.com/files/applets/clean-show-desktop@filipetorresbr.zip"
+        "https://cinnamon-spices.linuxmint.com/files/applets/weather@mockturtl.zip"
+        "https://cinnamon-spices.linuxmint.com/files/applets/color-picker@fmete.zip"
+        "https://cinnamon-spices.linuxmint.com/files/applets/show-hide-applets@mohammad-sn.zip"
+        "https://cinnamon-spices.linuxmint.com/files/applets/force-quit@cinnamon.org.zip"
+        "https://cinnamon-spices.linuxmint.com/files/applets/betterlock.zip"
+        "https://cinnamon-spices.linuxmint.com/files/applets/Cinnamenu@json.zip"
+        "https://cinnamon-spices.linuxmint.com/files/desklets/calendar@deeppradhan.zip"
+        "https://cinnamon-spices.linuxmint.com/files/desklets/diskspace@schorschii.zip"
+    )
+
+    echo "Downloading applets in parallel..."
+    pids=()
+    files=()
+    for url in "${urls[@]}"; do
+        file="${url##*/}"
+        wget -q "$url" -O "$file" &
+        pids+=($!)
+        files+=("$file")
+    done
+
+    failures=0
+    for i in "${!pids[@]}"; do
+        if wait "${pids[$i]}"; then
+            ex "${files[$i]}"
+        else
+            echo "Failed to download ${files[$i]}"
+            ((failures++)) || true
+        fi
+    done
+    if [ "$failures" -gt 0 ]; then
+        echo "$failures download(s) failed"
+    fi
 fi

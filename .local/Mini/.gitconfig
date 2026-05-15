@@ -1,0 +1,62 @@
+# Mini portable .gitconfig — copy to ~/.gitconfig on any machine
+# Update [user] section with the appropriate identity
+
+[user]
+    name = Pol Casacuberta Gil
+    email = polcg10@gmail.com
+
+[core]
+    editor = vim
+    autocrlf = input
+    whitespace = trailing-space,space-before-tab
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = false
+
+[push]
+    default = current
+    autoSetupRemote = true
+
+[fetch]
+    prune = true
+
+[merge]
+    conflictstyle = diff3
+    # tool = vscode
+# [mergetool "vscode"]
+    # cmd = code --wait --merge $REMOTE $LOCAL $BASE $MERGED
+
+[diff]
+    colorMoved = default
+    # tool = vscode
+# [difftool "vscode"]
+    # cmd = code --wait --diff $LOCAL $REMOTE
+
+[color]
+    ui = auto
+
+[credential]
+    helper = store
+
+[alias]
+    s  = status
+    f  = fetch
+    l  = pull
+    a  = add
+    m  = merge
+    c  = commit -m
+    p  = push
+    d  = diff
+    ds = diff --staged
+    co = checkout
+    cb = checkout -b
+    br = branch
+    lg = log --oneline --graph --decorate --all
+    last = log -1 --stat
+    undo = reset HEAD~1 --mixed
+    amend = commit --amend --no-edit
+    stash-all = stash save --include-untracked
+    aliases = config --get-regexp alias

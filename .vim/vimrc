@@ -1,7 +1,7 @@
 " General {{{
 
 " Leader key for custom key combinations
-let mapleader=" "
+let mapleader=' '
 " Activate folds
 set foldmethod=marker
 
@@ -80,18 +80,18 @@ Plug 'ycm-core/YouCompleteMe'
 call plug#end()
 "Acaben els plugins
 autocmd! User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
-let g:UltiSnipsExpandTrigger="<S-e>" " insert snippet !!
-let g:UltiSnipsJumpForwardTrigger="<c-b>"
-let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+let g:UltiSnipsExpandTrigger='<S-e>' " insert snippet !!
+let g:UltiSnipsJumpForwardTrigger='<c-b>'
+let g:UltiSnipsJumpBackwardTrigger='<c-z>'
 
 "Configuracions del plugin YouCompleteMe
 let g:ycm_confirm_extra_conf = 0 "Disables prompting for script every time
 
 if has('unix')
-    let g:ycm_clangd_binary_path = exepath("clangd")
+    let g:ycm_clangd_binary_path = exepath('clangd')
 endif
 if has('macunix')
-    let g:ycm_clangd_binary_path = exepath("clangd")
+    let g:ycm_clangd_binary_path = exepath('clangd')
 endif
 
 let g:ycm_autoclose_preview_window_after_insertion = 1
@@ -136,14 +136,14 @@ set mouse=a
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 
 " Set 4 lines to the cursor - when moving vertically using j/k
-set so=4 " margin
+set scrolloff=4 " margin
 
 " Turn on the Wild menu, better autocompletion
 set wildmenu
 
 " Ignore compiled files
 set wildignore=*.o,*~,*.pyc
-if has("win16") || has("win32")
+if has('win16') || has('win32')
     set wildignore+=.git\*,.hg\*,.svn\*
 else
     set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
@@ -211,10 +211,10 @@ let g:which_key_map.f = { 'name' : '+file' }
 
 " Use 24-bit (true-color) mode in Vim/Neovim when outside tmux IN LINUX, ( do not remove. )
 if (empty($TMUX))
-  if (has("nvim"))
+  if (has('nvim'))
     let $NVIM_TUI_ENABLE_TRUE_COLOR=1
   endif
-  if (has("termguicolors"))
+  if (has('termguicolors'))
     set termguicolors
   endif
 endif
@@ -222,7 +222,7 @@ endif
 " set t_Co=256
 
 if exists('$TMUX')
-    if (has("nvim")) 
+    if (has('nvim'))
         set termguicolors " Nvim colors look good on tmux with this
     else
     endif
@@ -240,19 +240,20 @@ syntax on
 
 " Set utf8 as standard encoding and en_US as the standard language
 set encoding=utf8
+scriptencoding utf-8
 set fileencoding=utf-8
 
 " Configuració per a vim-airline
 let g:airline#extensions#tabline#enabled = 1 "fica automaticament els buffers a la barreta
 
 " Use Unix as the standard file type
-set ffs=unix,dos,mac
+set fileformats=unix,dos,mac
 
 " :help updatetime
 set updatetime=1500
 
 " Set font for gvim
-if has("gui_running")
+if has('gui_running')
     set guifont=SauceCodePro\ Nerd\ Font\ 11
 endif
 " }}}
@@ -283,11 +284,11 @@ set shiftwidth=4
 set tabstop=4
 
 " Linebreak on 500 characters
-set lbr
-set tw=500
+set linebreak
+set textwidth=500
 
-set ai "Auto indent
-set si "Smart indent
+set autoindent "Auto indent
+set smartindent "Smart indent
 set wrap "Wrap lines
 set breakindent "Indent after line wrapped
 "}}}
@@ -296,14 +297,14 @@ set breakindent "Indent after line wrapped
 nmap <leader>tt :TagbarToggle<CR>
 function! GotoJump()
   jumps
-  let j = input("Please select your jump: ")
+  let j = input('Please select your jump: ')
   if j != ''
     let pattern = '\v\c^\+'
     if j =~ pattern
       let j = substitute(j, pattern, '', 'g')
-      execute "normal " . j . "\<c-i>"
+      execute 'normal ' . j . "\<c-i>"
     else
-      execute "normal " . j . "\<c-o>"
+      execute 'normal ' . j . "\<c-o>"
     endif
   endif
 endfunction
@@ -449,7 +450,7 @@ map <leader>? z=
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Nerd Tree
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:NERDTreeWinPos = "right"
+let g:NERDTreeWinPos = 'right'
 let NERDTreeShowHidden=0
 let g:NERDTreeWinSize=35
 """"""""""""""""""""""""""""""

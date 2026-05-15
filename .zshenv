@@ -20,6 +20,10 @@ if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
 
+if [ -d "$HOME/.npm-global/bin" ] ; then
+    PATH="$HOME/.npm-global/bin:$PATH"
+fi
+
 if [ -d "$HOME/.local/share/cargo/bin" ] ; then
     PATH="$HOME/.local/share/cargo/bin:$PATH"
 fi
@@ -97,11 +101,19 @@ unset _wp_light _wp_dark _wp_fallback
 #INCLUSIONS="/Users/$USER/assig/pro2/inclusions"
 #OBJECTES=/Users/$USER/assig/pro2/objectes
 export DICPATH="$XDG_CONFIG_HOME/Dictionary"
-export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
-export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
+if command -v ag &>/dev/null; then
+    export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+fi
+if command -v bat &>/dev/null; then
+    export FZF_DEFAULT_OPTS='--preview "bat --style=numbers --color=always --line-range :500 {}" --height 60% --border -m'
+else
+    export FZF_DEFAULT_OPTS='--height 60% --border -m'
+fi
 # export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\"" # SET VIM AS MANPAGER
 # export MANPAGER="vim -M +MANPAGER -"
-export MANPAGER='nvim +Man!' # use neovim as manpager
+if command -v nvim &>/dev/null; then
+    export MANPAGER='nvim +Man!' # use neovim as manpager
+fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     #If you are using openjdk6 >= 1.6.1, the cleanest way to work around the hardcoded list is to warn the vm that xmonad is non-reparenting by exporting the appropriate environment variable:
@@ -112,7 +124,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export TERMINAL="kitty"
     export QT_QPA_PLATFORMTHEME="qt5ct"
     source "$HOME/.config/distro"    # DISTRO variable
-    if laptop-detect ; then
+    if command -v laptop-detect &>/dev/null && laptop-detect ; then
         setxkbmap es
     fi
     if [ -d "$HOME/fib/LI/picosat-965/bin" ] ; then
@@ -188,6 +200,15 @@ export ADB_VENDOR_KEY="$XDG_CONFIG_HOME"/android
 # GTK
 export GTK_RC_FILES="$XDG_CONFIG_HOME"/gtk-1.0/gtkrc
 export GTK2_RC_FILES="$XDG_CONFIG_HOME"/gtk-2.0/gtkrc
+
+###############################################################
+# => Cargo (sourced before local overrides so they can adjust it)
+###############################################################
+
+_cargo_env="${CARGO_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/cargo}/env"
+# shellcheck disable=SC1090
+[ -r "$_cargo_env" ] && . "$_cargo_env"
+unset _cargo_env
 
 ###############################################################
 # => Local overrides (machine-specific, not tracked by git)

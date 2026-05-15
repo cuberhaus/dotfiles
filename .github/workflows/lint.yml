@@ -21,3 +21,57 @@ jobs:
 
       - name: Run lint
         run: bash .local/scripts/lint.sh
+
+  hardcoded-paths:
+    name: Hardcoded user paths
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Scan for /home/<user>/ and /Users/<user>/ in tracked files
+        run: |
+          # Fail on any tracked file containing an absolute /home/<user>/ or
+          # /Users/<user>/ path. Excludes:
+          #  - documentation (*.md, SECURITY.md, .gitignore) where examples are fine
+          #  - configs that are intentionally per-user runtime state and would
+          #    otherwise need to be re-removed from git on every machine
+          if git grep -InE '(/home/[a-z][a-z0-9_-]*/|/Users/[a-z][a-z0-9_-]*/)' \
+              -- ':!*.md' \
+                 ':!.gitignore' \
+                 ':!SECURITY.md' \
+                 ':!.config/warp-terminal/user_preferences.json' \
+                 ':!.config/birdtray-config.json' \
+                 ':!.config/texstudio/texstudio.ini' \
+                 ':!.config/texstudio/cache/' \
+                 ':!.config/texstudio/dictionaries/' \
+                 ':!.cinnamon/backgrounds/user-folders.lst' \
+                 ':!.config/cinnamon/dark/gnome.dconf' \
+                 ':!.config/cinnamon/light/gnome.dconf' \
+                 ':!.config/.p10k.zsh' \
+                 ':!.config/zsh/.p10k.zsh' \
+                 ':!.config/vlc/vlc-qt-interface.conf' \
+                 ':!.vim/.netrwhist' \
+                 ':!.local/scripts/bootstrap/arch_functions'; then
+            echo ""
+            echo "ERROR: hardcoded user paths found in tracked files (see above)."
+            echo "Use \$HOME, ~/, or XDG variables instead."
+            exit 1
+          fi
+
+  stow-dryrun:
+    name: Stow dry-run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Install stow
+        run: sudo apt-get update && sudo apt-get install -y stow
+
+      - name: Dry-run stow into a scratch HOME
+        run: |
+          scratch="$(mktemp -d)"
+          make dry-run TARGET="$scratch"

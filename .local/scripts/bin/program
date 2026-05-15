@@ -11,6 +11,11 @@
 # command to run
 # name of the class $2
 
+if ! command -v wmctrl &>/dev/null; then
+    echo "error: wmctrl is not installed" >&2
+    exit 1
+fi
+
 COMMAND=$1
 MYPROG=$1
 # If theres two arguments second argument is taken as the command to run

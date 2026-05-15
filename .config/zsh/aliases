@@ -5,7 +5,7 @@
 ###############################################################
 # Info:
 # & send a process to background. Example: discord &
-# ! disown a process. Example: discord ! 
+# ! disown a process. Example: discord !
 # </dev/null &>/dev/null completely silence a process.
 # Combinations are possible. Example: discord &!
 # alias="" Is created during shell startup and won't change
@@ -43,11 +43,12 @@ scripts=$HOME/.local/scripts
 # alias discord="discord --no-sandbox </dev/null &>/dev/null &"
 alias rs="open -a Rstudio"
 alias discord="discord --no-sandbox &"
+
 # xmonad can't find dependancies https://wiki.archlinux.org/title/Xmonad#Problems_with_finding_shared_libraries_after_update
 alias xmonad_fix="sudo ghc-pkg recache"
 # Recompile ycm (if autocompletion stops working execute this)
 alias ycminstall='python3 $HOME/.vim/plugged/YouCompleteMe/install.py'
-# Rclone (be careful!) 
+# Rclone (be careful!)
 # "rclone config" first, better to use copy instead of "rclone sync" so that I do not delete books on accident while pushing or pulling, it becomes a mess, since if I pull i will delete any extra books I have locally, and if I push I will delete the extra books I have remotely, overall, a fucking mess
 alias rclonepull_calibre="rclone -P copy drive:Calibre/Calibre\ Library ~/Calibre\ Library"
 alias rclonepull_thunderbird="rclone -P copy drive:Thunderbird ~/.thunderbird"
@@ -79,7 +80,7 @@ alias zshrc='nvim $ZDOTDIR/.zshrc'
 #alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
 #alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
 
-alias vim="nvim"
+command -v nvim &>/dev/null && alias vim="nvim"
 alias e="emacsclient -nc"
 # modify in  /usr/share/applications as well
 alias rstudio="rstudio-bin --no-sandbox"
@@ -120,14 +121,15 @@ alias gp="git push"
 alias gitsync="git submodule sync; git submodule update --init --recursive"
 alias gsu="git submodule update --recursive --remote"
 
-alias gr="git_recurse"
+alias gr="git-recurse"
 #yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
-yolo="git_recurse -c \"git add -A; git commit -m 'This is a placeholder'; git push\" -d 1"
+yolo='git add -A; git commit -m "This is a placeholder"; git push'
 # shellcheck disable=SC2139
 alias yolo="$yolo"
 
-alias pull="git_recurse -c 'git pull'"
-alias status="git_recurse -c 'git status'"
+pull() { git-recurse "$@" git pull; }
+alias add-pat="add_pat"
+status() { git-recurse "$@" git status; }
 
 if command -v eza &> /dev/null
 then
@@ -158,28 +160,31 @@ alias tozsh='sudo chsh $USER -s /bin/zsh && echo "Now log out."'
 
 # Generalize commands
 # shellcheck disable=SC1078,SC1079,SC2139
-cleanup="vim +PlugClean +qall;
-    pip3 cache purge;
-    yarn cache clean
-    npm cache clean --force
+cleanup="command -v nvim &>/dev/null && nvim +PlugClean +qall;
+    command -v pip3 &>/dev/null && pip3 cache purge;
+    command -v yarn &>/dev/null && yarn cache clean;
+    command -v npm &>/dev/null && npm cache clean --force;
+    command -v docker &>/dev/null && docker builder prune -af --filter 'until=168h';
+    command -v docker &>/dev/null && docker image prune -af --filter 'until=168h';
+    command -v docker &>/dev/null && docker container prune -f --filter 'until=168h'
     "
 update=""
-updateall="python3 -m pip install --user --upgrade pynvim &;
-    vim +PlugUpgrade +PlugUpdate +qall &; 
-    antigen update &; 
-    pip3 install --user --upgrade pip &
+updateall="command -v python3 &>/dev/null && python3 -m pip install --user --upgrade pynvim &;
+    command -v nvim &>/dev/null && nvim +PlugUpgrade +PlugUpdate +qall &;
+    type antigen &>/dev/null && antigen update &;
+    command -v pip3 &>/dev/null && pip3 install --user --upgrade pip &
 "
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
-    update="brew update; brew upgrade; sudo softwareupdate -i -a; xcode-select --install; "$update
-    updateall=$update"npm install npm -g;
+    update="command -v brew &>/dev/null && { brew update; brew upgrade; }; sudo softwareupdate -i -a; xcode-select --install; "$update
+    updateall=$update"command -v npm &>/dev/null && npm install npm -g;
     "$updateall
     #emacs -f auto-package-update-now &;
 
     # sudo xcode-select -switch /Library/Developer/CommandLineTools
     # xcode-select --install installs developer tools that need to be updated with every update to MacOS
-    cleanup="brew cleanup;sudo gem cleanup;"$cleanup
+    cleanup="command -v brew &>/dev/null && brew cleanup; command -v gem &>/dev/null && sudo gem cleanup;"$cleanup
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete; find . -type f -name '._*' -exec rm -f {} \;
 "
@@ -189,8 +194,12 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     alias rm="rm -vI"
     # Lock screen
-    LockScreens=('pipes.sh' 'cmatrix')
-    alias lock='${LockScreens[$RANDOM % 2]}'
+    LockScreens=()
+    command -v pipes.sh &>/dev/null && LockScreens+=('pipes.sh')
+    command -v cmatrix &>/dev/null && LockScreens+=('cmatrix')
+    if (( ${#LockScreens[@]} > 0 )); then
+        alias lock='${LockScreens[$RANDOM % ${#LockScreens[@]}]}'
+    fi
     # Get the error messages from journalctl
     alias jctl="journalctl -p 3 -xb"
     # Check vulnerabilities microcode
@@ -198,13 +207,13 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        update="sudo pacman -Syu;sudo snap refresh;"$update
-        updateall="yay -Syu;npm update &;sudo snap refresh;
-        emacs -f auto-package-update-now &;
+        update="sudo pacman -Syu; command -v snap &>/dev/null && sudo snap refresh; "$update
+        updateall="command -v yay &>/dev/null && yay -Syu; command -v npm &>/dev/null && npm update &; command -v snap &>/dev/null && sudo snap refresh;
+        command -v emacs &>/dev/null && emacs -f auto-package-update-now &;
         "$updateall
         # This breaks pacman sudo npm install -g npm; sudo gem update;
         # Cleans pacman and AUR cache and vim no longer used plugins
-        cleanup="yay -Sc;"$cleanup
+        cleanup="command -v yay &>/dev/null && yay -Sc;"$cleanup
         #sudo pacman -R $(pacman -Qdtq)
         alias unlock="sudo rm /var/lib/pacman/db.lck" #pacman unlock
     fi
@@ -224,11 +233,11 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
         update="sudo apt-get update; sudo apt-get full-upgrade; "$update
-        updateall=$update"emacs -f auto-package-update-now &;"$updateall
-        cleanup="sudo apt-get autoclean; 
-        sudo apt-get clean; 
-        sudo apt-get autoremove; 
-        brew cleanup; 
+        updateall=$update"command -v emacs &>/dev/null && emacs -f auto-package-update-now &; command -v gcloud &>/dev/null && gcloud components update --quiet;"$updateall
+        cleanup="sudo apt-get autoclean;
+        sudo apt-get clean;
+        sudo apt-get autoremove;
+        command -v brew &>/dev/null && brew cleanup;
         "$cleanup
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
@@ -237,10 +246,10 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     if [[ "$DISTRO" == "ubuntu_windows" ]]; then
         update="sudo apt-get update; sudo apt-get full-upgrade; "$update
         updateall=$update$updateall
-        cleanup="sudo apt-get autoclean; 
-        sudo apt-get clean; 
-        sudo apt-get autoremove; 
-        brew cleanup; 
+        cleanup="sudo apt-get autoclean;
+        sudo apt-get clean;
+        sudo apt-get autoremove;
+        command -v brew &>/dev/null && brew cleanup;
         "$cleanup
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi

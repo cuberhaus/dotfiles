@@ -1,6 +1,10 @@
 #!/bin/bash
 running=$(pidof spotify)
 if [ "$running" != "" ]; then
+    if ! command -v playerctl &>/dev/null; then
+        echo "playerctl not installed" >&2
+        exit 1
+    fi
     artist=$(playerctl metadata artist)
     song=$(playerctl metadata title | cut -c 1-60)
     echo -n "$artist · $song"

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+for cmd in wmctrl pgrep; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "error: $cmd is not installed" >&2
+        exit 1
+    fi
+done
+
 spotify_pid=$(pgrep spotify | head -1)
 
 if [[ -n "$spotify_pid" ]]; then

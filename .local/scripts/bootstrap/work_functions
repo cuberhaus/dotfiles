@@ -28,8 +28,8 @@ nvidia_install() {
         info "NVIDIA driver already loaded ($(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1)), skipping."
     fi
 
-    $apt nvidia-settings
-    $apt nvidia-prime              # Optimus GPU switching (prime-select nvidia|intel|on-demand)
+    $apt nvidia-settings \
+        nvidia-prime            # Optimus GPU switching (prime-select nvidia|intel|on-demand)
 }
 
 ###############################################################
@@ -39,49 +39,54 @@ nvidia_install() {
 dev_tools_install() {
     info "Installing dev tools..."
 
-    # Essentials
-    $apt build-essential
-    $apt cmake
-    $apt curl
-    $apt git
-    $apt jq
-    $apt tree
-    $apt wget
+    local packages=(
+        # Essentials
+        build-essential
+        cmake
+        curl
+        git
+        jq
+        tree
+        wget
 
-    # Shell & terminal
-    $apt zsh
-    $apt stow
+        # Shell & terminal
+        zsh
+        stow
 
-    # Editors
-    $apt vim-gtk3
-    $apt neovim
+        # Editors
+        vim-gtk3
+        neovim
 
-    # Modern CLI tools
-    $apt bat                       # Better cat
-    $apt eza                       # Better ls (exa replacement)
-    $apt fzf                       # Fuzzy finder
-    $apt htop                      # System monitor
-    $apt ncdu                      # Disk usage analyzer
-    $apt ranger                    # File manager
-    $apt ripgrep                   # Better grep
-    $apt fd-find                   # Better find
-    $apt silversearcher-ag         # ag (another grep alternative)
-    $apt w3m                       # Terminal browser (ranger image previews)
-    $apt shellcheck                # Shell script linter
-    $apt unzip
+        # Modern CLI tools
+        bat                     # Better cat
+        eza                     # Better ls (exa replacement)
+        fzf                     # Fuzzy finder
+        gh                      # GitHub CLI
+        htop                    # System monitor
+        ncdu                    # Disk usage analyzer
+        ranger                  # File manager
+        ripgrep                 # Better grep
+        fd-find                 # Better find
+        silversearcher-ag       # ag (another grep alternative)
+        w3m                     # Terminal browser (ranger image previews)
+        shellcheck              # Shell script linter
+        unzip
+        unrar
 
-    # Utilities
-    $apt eog                       # Image viewer (quick terminal launch)
-    $apt flameshot                 # Screenshot tool
-    $apt rclone                    # Sync files to/from cloud storage
-    $apt sshfs                     # Mount remote filesystems over SSH
+        # Utilities
+        eog                     # Image viewer
+        flameshot               # Screenshot tool
+        rclone                  # Sync files to/from cloud storage
+        sshfs                   # Mount remote filesystems over SSH
+        net-tools               # Network utilities (ifconfig, netstat, etc.)
+        nmap                    # Network exploration and security auditing
 
-    $apt gh                        # GitHub CLI
-
-    # Hardware info
-    $apt hardinfo                  # GUI hardware info & benchmarks
-    $apt cpu-x                     # CPU-Z style hardware viewer
-    $apt neofetch                  # Terminal system info summary
+        # Hardware info
+        hardinfo                # GUI hardware info & benchmarks
+        cpu-x                   # CPU-Z style hardware viewer
+        neofetch                # Terminal system info summary
+    )
+    $apt "${packages[@]}"
 
     # Git config
     git config --global credential.helper store
@@ -105,6 +110,7 @@ node_install() {
     info "Installing global npm packages..."
     command -v cline &>/dev/null || sudo npm install -g cline
     command -v markdownlint-cli2 &>/dev/null || sudo npm install -g markdownlint-cli2
+    command -v copilot &>/dev/null || sudo npm install -g @github/copilot
 
     # Add more global npm packages below as needed:
     # sudo npm install -g <package>
@@ -117,10 +123,10 @@ node_install() {
 python_install() {
     info "Installing Python..."
 
-    $apt python3
-    $apt python3-pip
-    $apt python3-venv
-    $apt pipx
+    $apt python3 \
+        python3-pip \
+        python3-venv \
+        pipx
 
     # Ensure pipx path is available
     pipx ensurepath || true
@@ -166,17 +172,39 @@ docker_install() {
         sudo apt-get update
     fi
 
-    # Install Docker
-    $apt docker-ce
-    $apt docker-ce-cli
-    $apt containerd.io
-    $apt docker-buildx-plugin
-    $apt docker-compose-plugin
+    $apt docker-ce \
+        docker-ce-cli \
+        containerd.io \
+        docker-buildx-plugin \
+        docker-compose-plugin
 
     # Allow running docker without sudo
     sudo usermod -aG docker "$USER"
 
     info "Docker installed. Log out and back in for group changes to take effect."
+}
+
+###############################################################
+# => Google Cloud SDK
+###############################################################
+
+gcloud_install() {
+    info "Installing Google Cloud SDK..."
+
+    if command -v gcloud &>/dev/null; then
+        info "gcloud already installed ($(gcloud version 2>/dev/null | head -1)), skipping."
+        return
+    fi
+
+    local tarball="/tmp/google-cloud-cli-linux-x86_64.tar.gz"
+    info "Downloading Google Cloud CLI..."
+    curl -fsSL "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz" \
+        -o "$tarball"
+    tar -xf "$tarball" -C "$HOME"
+    rm -f "$tarball"
+    "$HOME/google-cloud-sdk/install.sh" --quiet
+
+    info "Google Cloud SDK installed. Run 'gcloud init' to configure."
 }
 
 ###############################################################
@@ -186,23 +214,121 @@ docker_install() {
 gui_apps_install() {
     info "Installing GUI applications..."
 
-    # Firefox
-    $apt firefox
+    $apt firefox \
+        vlc \
+        libfuse2 \
+        libreoffice \
+        obs-studio \
+        caffeine                # Prevent screen from going to sleep
 
-    # VLC
-    $apt vlc
+    # ── Phase 1: parallel downloads ──────────────────────────────
+    # Download all .deb/.AppImage/.run files in parallel, then install sequentially
+    # (apt/dpkg needs exclusive lock so installs can't overlap).
+    local pids=() names=()
+    local chrome_deb="/tmp/google-chrome-stable_current_amd64.deb"
+    local warp_deb="/tmp/warp-terminal.deb"
+    local lms_ver="0.4.4-1"
+    local lms_deb="/tmp/LM-Studio-${lms_ver}-x64.deb"
+    local cursor_deb="/tmp/cursor.deb"
+    local gpt4all_run="/tmp/gpt4all-installer.run"
 
     # Google Chrome
     if ! command -v google-chrome-stable &>/dev/null; then
-        info "Installing Google Chrome..."
-        local chrome_deb="/tmp/google-chrome-stable_current_amd64.deb"
-        wget -O "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo apt-get install -y "$chrome_deb"
-        rm -f "$chrome_deb"
-    else
-        info "Google Chrome already installed, skipping."
+        info "Downloading Google Chrome..."
+        wget -qO "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb &
+        pids+=($!); names+=("Chrome")
     fi
 
+    # Warp (AI terminal)
+    if ! command -v warp-terminal &>/dev/null; then
+        info "Downloading Warp terminal..."
+        wget -qO "$warp_deb" "https://app.warp.dev/download?package=deb" &
+        pids+=($!); names+=("Warp")
+    fi
+
+    # LM Studio (local LLM runner — update version at https://lmstudio.ai/changelog)
+    if ! dpkg -l lm-studio &>/dev/null 2>&1; then
+        info "Downloading LM Studio..."
+        wget -qO "$lms_deb" "https://installers.lmstudio.ai/linux/x64/${lms_ver}/LM-Studio-${lms_ver}-x64.deb" &
+        pids+=($!); names+=("LM Studio")
+    fi
+
+    # Cursor (AI IDE — .deb)
+    if ! command -v cursor &>/dev/null; then
+        info "Downloading Cursor..."
+        wget -qO "$cursor_deb" "https://api2.cursor.sh/updates/download/golden/linux-x64-deb/cursor/stable" &
+        pids+=($!); names+=("Cursor")
+    fi
+
+    # GPT4All (local LLM chat)
+    if command -v gpt4all &>/dev/null || [ -d "$HOME/gpt4all" ] || [ -d /opt/gpt4all ]; then
+        info "GPT4All already installed, skipping."
+    else
+        info "Downloading GPT4All..."
+        (
+            local ver
+            ver=$(curl -sI https://github.com/nomic-ai/gpt4all/releases/latest | grep -i location | sed 's|.*/v||;s/\r//')
+            wget -qO "$gpt4all_run" "https://github.com/nomic-ai/gpt4all/releases/download/v${ver}/gpt4all-installer-linux-v${ver}.run"
+        ) &
+        pids+=($!); names+=("GPT4All")
+    fi
+
+    # Wait for all downloads to finish
+    local failures=0
+    for i in "${!pids[@]}"; do
+        if ! wait "${pids[$i]}"; then
+            warn "Failed to download ${names[$i]}"
+            ((failures++)) || true
+        else
+            info "${names[$i]} download complete."
+        fi
+    done
+    if [ "$failures" -gt 0 ]; then
+        warn "$failures download(s) failed — some apps may not install."
+    fi
+
+    # ── Phase 2: install from downloaded files ───────────────────
+    if [ -f "$chrome_deb" ]; then
+        info "Installing Google Chrome..."
+        sudo apt-get install -y "$chrome_deb"
+        rm -f "$chrome_deb"
+    fi
+
+    if [ -f "$warp_deb" ]; then
+        info "Installing Warp terminal..."
+        sudo apt-get install -y "$warp_deb"
+        rm -f "$warp_deb"
+    fi
+
+    if [ -f "$lms_deb" ]; then
+        info "Installing LM Studio..."
+        sudo apt-get install -y "$lms_deb"
+        rm -f "$lms_deb"
+    fi
+
+    if [ -f "$cursor_deb" ]; then
+        info "Installing Cursor..."
+        sudo apt-get install -y "$cursor_deb"
+        rm -f "$cursor_deb"
+    fi
+
+    if [ -f "$gpt4all_run" ] && ! command -v gpt4all &>/dev/null && [ ! -d "$HOME/gpt4all" ] && [ ! -d /opt/gpt4all ]; then
+        info "Installing GPT4All..."
+        chmod +x "$gpt4all_run"
+        "$gpt4all_run" --install "$HOME/gpt4all" --accept-licenses --default-answer --auto
+        rm -f "$gpt4all_run"
+        cat > "$HOME/.local/share/applications/gpt4all.desktop" <<EOF
+[Desktop Entry]
+Name=GPT4All
+Exec=$HOME/gpt4all/bin/chat
+Icon=$HOME/gpt4all/logo-48.png
+Type=Application
+Categories=Development;Science;
+Comment=Run LLMs locally
+EOF
+    fi
+
+    # ── Phase 3: apt-repo-based installs ─────────────────────────
     # VS Code
     if ! command -v code &>/dev/null; then
         info "Installing VS Code..."
@@ -253,6 +379,7 @@ EOF
         info "Cursor already installed, skipping."
     fi
 
+
     # Antigravity (Google AI IDE — apt repo)
     if ! command -v antigravity &>/dev/null; then
         info "Installing Antigravity..."
@@ -267,22 +394,30 @@ EOF
         info "Antigravity already installed, skipping."
     fi
 
-    # Warp (AI terminal — .deb download)
-    if ! command -v warp-terminal &>/dev/null; then
-        info "Installing Warp terminal..."
-        local warp_deb="/tmp/warp-terminal.deb"
-        wget -O "$warp_deb" "https://app.warp.dev/download?package=deb"
-        sudo apt-get install -y "$warp_deb"
-        rm -f "$warp_deb"
+    # ── Phase 4: curl|sh installers ──────────────────────────────
+    # Ollama (local LLM serving)
+    if ! command -v ollama &>/dev/null; then
+        info "Installing Ollama..."
+        curl -fsSL https://ollama.com/install.sh | sh
     else
-        info "Warp terminal already installed, skipping."
+        info "Ollama already installed, skipping."
     fi
 
-    # Spotify
-    snap list spotify &>/dev/null 2>&1 || sudo snap install spotify
+    # Zed (fast AI-powered editor)
+    if ! command -v zed &>/dev/null; then
+        info "Installing Zed..."
+        curl -f https://zed.dev/install.sh | sh
+    else
+        info "Zed already installed, skipping."
+    fi
 
-    # Discord
-    snap list discord &>/dev/null 2>&1 || sudo snap install discord
+    # Claude Code (Anthropic CLI)
+    if ! command -v claude &>/dev/null; then
+        info "Installing Claude Code..."
+        curl -fsSL https://claude.ai/install.sh | sh
+    else
+        info "Claude Code already installed, skipping."
+    fi
 
     # LibreOffice (full office suite)
     $apt libreoffice
@@ -301,6 +436,10 @@ EOF
 
     # Walc (WhatsApp Linux client)
     snap list walc &>/dev/null 2>&1 || sudo snap install walc
+
+    # Spotify and Discord (snap)
+    snap list spotify &>/dev/null 2>&1 || sudo snap install spotify
+    snap list discord &>/dev/null 2>&1 || sudo snap install discord
 }
 
 ###############################################################

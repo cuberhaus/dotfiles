@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check hooks update submodules antigen-update bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
+.PHONY: help install uninstall restow dry-run lint check fix hooks update submodules antigen-update skip-worktree bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
@@ -55,10 +55,34 @@ check: lint ## Run all linters (shellcheck + markdownlint + vint)
 	@echo ""
 	@echo "==> All checks complete."
 
+fix: ## Auto-fix markdown issues (markdownlint --fix)
+	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
+		markdownlint-cli2 --fix README.md .local/README.md .local/xdg/wallpapers/README.md; \
+	elif command -v markdownlint >/dev/null 2>&1; then \
+		markdownlint --fix README.md .local/README.md .local/xdg/wallpapers/README.md; \
+	else \
+		echo "markdownlint not found (npm install -g markdownlint-cli2)"; \
+		exit 1; \
+	fi
+
 hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
 	cp .local/scripts/hooks/pre-commit .git/hooks/pre-commit
 	chmod +x .git/hooks/pre-commit
 	@echo "Pre-commit hook installed."
+
+# Files that are intentionally tracked (for the settings we care about) but
+# change constantly at runtime — apps rewrite them on every launch.
+# skip-worktree tells git to stop noticing local changes while keeping the
+# committed version in the repo.  Run this once after cloning.
+SKIP_WORKTREE_FILES := \
+	.config/warp-terminal/user_preferences.json \
+	.config/libreoffice/4/user/config/javasettings_Linux_X86_64.xml
+
+skip-worktree: ## Ignore runtime changes to volatile config files (run once after cloning)
+	git update-index --skip-worktree $(SKIP_WORKTREE_FILES)
+	@echo "skip-worktree applied to:"
+	@for f in $(SKIP_WORKTREE_FILES); do echo "  $$f"; done
+	@echo "To commit a real settings change: git update-index --no-skip-worktree <file>"
 
 # ---------------------------------------------------------------------------
 # Submodules

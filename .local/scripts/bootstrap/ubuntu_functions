@@ -5,47 +5,54 @@ apt="sudo apt-get $flags install"
 ycm="$HOME/.local/scripts/ycm.sh" # make sure it's there
 scripts="$HOME/.local/scripts"
 
-base_install () { ## For windows install it's good to have this
-    # System tools
-    $apt autoconf 
-    $apt automake 
-    $apt bat                    # Better cat
-    $apt build-essential 
-    $apt cmake                  # To install ycm
-    $apt curl 
-    $apt eza                    # ls on steroids (exa replacement)
-    $apt file 
-    $apt fonts-powerline 
-    $apt fzf                    # Fuzzy finder
-    $apt git
-    $apt gh                      # GitHub CLI
-    $apt gnome-shell 
-    $apt htop                   # Show system resources
-    $apt inkscape 
-    $apt laptop-detect
-    $apt libgtk-3-dev 
-    $apt ncdu                   # Manage storage
-    $apt neovim                 # Neovim
-    $apt nodejs
-    $apt npm 
-    $apt optipng 
-    $apt pkg-config 
-    $apt python3 
-    $apt python3-pip 
-    $apt ranger w3m             # Ranger
-    $apt rclone
-    $apt ruby-dev
-    $apt samba-common-bin 
-    $apt sassc 
-    $apt silversearcher-ag      # Better and faster ack (and grep)
-    $apt stow
-    $apt subversion             # To download repos
-    $apt tmux                   # Terminal multiplexer
-    $apt vim-gtk                # Vim with full functionality
-    $apt yarn 
-    $apt zsh
-    $apt eog                    # To view images, can launch it from terminal (works on windows)
-    $apt sshfs                  # To mount a remote file system with ssh (usefull to manipulate files with any ubuntu programs that you cannot install in remote) sshfs username@remote_host:/remote_directory ~/remote_dir
+base_install () {
+    local packages=(
+        autoconf
+        automake
+        bat                     # Better cat
+        build-essential
+        cmake                   # To install ycm
+        curl
+        eza                     # ls on steroids (exa replacement)
+        ffmpeg
+        file
+        fonts-powerline
+        fzf                     # Fuzzy finder
+        gh                      # GitHub CLI
+        git
+        git-lfs
+        gnome-shell
+        htop                    # Show system resources
+        inkscape
+        laptop-detect
+        libgtk-3-dev
+        ncdu                    # Manage storage
+        neovim
+        nodejs
+        npm
+        optipng
+        pkg-config
+        python3
+        python3-pip
+        ranger w3m              # Ranger and previews
+        rclone
+        ruby-dev
+        samba-common-bin
+        sassc
+        silversearcher-ag       # Better and faster ack (and grep)
+        stow
+        subversion              # To download repos
+        tmux                    # Terminal multiplexer
+        vim-gtk                 # Vim with full functionality
+        yarn
+        zsh
+        eog                     # Image viewer
+        sshfs                   # Mount remote filesystems over SSH
+        net-tools               # Network utilities (ifconfig, netstat, etc.)
+        nmap                    # Network exploration and security auditing
+    )
+    $apt "${packages[@]}"
+
     chsh -s "$(which zsh)"
     git config --global credential.helper store
 }
@@ -61,45 +68,62 @@ windows_install() {
 
 bloat_install () {
     brew install pipes-sh
-    $apt cmatrix
-    $apt cowsay                 # A cow displaying text
-    $apt fortune                # Random quotes
-    $apt neofetch 
+    $apt cmatrix cowsay fortune neofetch   # A cow, random quotes, system info
 }
 
 ubuntu_install() {
-    # GUI
-    $apt LXAppearance           # Theme
-    $apt arc-theme 
-    $apt audacity
-    $apt calibre
-    $apt cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
-    $apt gnome-screensaver      # Screensaver
-    $apt gparted                # Manage partitions
-    $apt pavucontrol            # Audio
-    $apt thunderbird            # Email
-    $apt timeshift              # Backups
-    $apt transmission           # A simpler Torrent D.
-    $apt vlc                    # Media player
-    $apt caffeine               # Prevent screen from going to sleep
-    $apt dconf-editor           # advanced configs
+    local packages=(
+        LXAppearance            # Theme
+        arc-theme
+        audacity
+        calibre
+        cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+        gnome-screensaver       # Screensaver
+        gparted                 # Manage partitions
+        pavucontrol             # Audio
+        thunderbird             # Email
+        timeshift               # Backups
+        transmission            # A simpler Torrent client
+        vlc                     # Media player
+        caffeine                # Prevent screen from going to sleep
+        dconf-editor            # Advanced configs
+        obs-studio              # Video recording
+        r-base
+    )
+    $apt "${packages[@]}"
 
-    # Install Rstudio
-    $apt r-base
+    # Parallel: download RStudio + gnome-terminal theme at the same time
+    local rstudio_deb="/tmp/rstudio-latest-amd64.deb"
+    local theme_script="/tmp/one-dark-gnome.sh"
+
     if ! command -v rstudio &>/dev/null; then
-        local rstudio_deb="/tmp/rstudio-latest-amd64.deb"
-        wget -O "$rstudio_deb" https://rstudio.org/download/latest/daily/desktop/jammy/rstudio-latest-amd64.deb
-        sudo dpkg -i "$rstudio_deb"
-        rm -f "$rstudio_deb"
+        wget -qO "$rstudio_deb" https://rstudio.org/download/latest/daily/desktop/jammy/rstudio-latest-amd64.deb &
+        local pid_rstudio=$!
+    fi
+
+    # One dark profile for gnome-terminal
+    # https://github.com/denysdovhan/one-gnome-terminal
+    curl -fsSL https://raw.githubusercontent.com/denysdovhan/gnome-terminal-one/master/one-dark.sh \
+        -o "$theme_script" &
+    local pid_theme=$!
+
+    if [ -n "${pid_rstudio:-}" ]; then
+        if wait "$pid_rstudio"; then
+            sudo dpkg -i "$rstudio_deb"
+            rm -f "$rstudio_deb"
+        else
+            warn "Failed to download RStudio"
+        fi
     else
         info "RStudio already installed, skipping."
     fi
 
-    # $apt kitty # cant even close it from gnome
-
-    # One dark profile for gnome-terminal
-    # https://github.com/denysdovhan/one-gnome-terminal
-    bash -c "$(curl -fsSL https://raw.githubusercontent.com/denysdovhan/gnome-terminal-one/master/one-dark.sh)"
+    if wait "$pid_theme" && [ -f "$theme_script" ]; then
+        bash "$theme_script"
+        rm -f "$theme_script"
+    else
+        warn "Failed to download gnome-terminal theme"
+    fi
 
     if [[ $FirstRun == y ]]; then
         sudo adduser "$(id -un)" libvirt
@@ -160,32 +184,33 @@ emacs_install () {
 }
 
 i3_install () {
-    # Add repository and refresh apt
     sudo add-apt-repository -y ppa:kgilmer/speed-ricer
     sudo apt-get update
-    $apt i3-gaps
-    # Dependancies
-    $apt alsa-utils
-    $apt compton 
-    $apt conky 
-    $apt feh 
-    $apt flameshot 
-    $apt i3blocks 
-    $apt kitty 
-    $apt picom
-    $apt player-ctl 
-    $apt pulseaudio
-    $apt pulseaudio 
-    $apt pulseaudio-equalizer
-    $apt python-dbus 
-    $apt rofi 
-    $apt udiskie
-    $apt xbacklight
-    $apt xdotool
-    $apt xfce4-clipman
-    $apt xss-lock
-    $apt yad
-    $apt zenity
+
+    local packages=(
+        i3-gaps
+        alsa-utils
+        compton
+        conky
+        feh
+        flameshot
+        i3blocks
+        kitty
+        picom
+        player-ctl
+        pulseaudio
+        pulseaudio-equalizer
+        python-dbus
+        rofi
+        udiskie
+        xbacklight
+        xdotool
+        xfce4-clipman
+        xss-lock
+        yad
+        zenity
+    )
+    $apt "${packages[@]}"
 
     # Add current user to group video, type groups to see which groups you are in
     sudo usermod -a -G video "$LOGNAME"
@@ -236,20 +261,122 @@ snaps_install() {
 #     rm steam_latest.deb
 # }
 
+ai_tools_install() {
+    info "Installing AI tools..."
+    $apt libfuse2
+    mkdir -p "$HOME/Applications"
+
+    # ── Parallel downloads ───────────────────────────────────────
+    local pids=() names=()
+    local warp_deb="/tmp/warp-terminal.deb"
+
+    # Cursor (AI IDE — AppImage)
+    if [ ! -f "$HOME/Applications/cursor.AppImage" ]; then
+        info "Downloading Cursor..."
+        curl -fsSL "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable" \
+            -o "$HOME/Applications/cursor.AppImage" &
+        pids+=($!); names+=("Cursor")
+    fi
+
+    # Warp (AI terminal — .deb download)
+    if ! command -v warp-terminal &>/dev/null; then
+        info "Downloading Warp terminal..."
+        wget -qO "$warp_deb" "https://app.warp.dev/download?package=deb" &
+        pids+=($!); names+=("Warp")
+    fi
+
+    # Wait for parallel downloads
+    local failures=0
+    for i in "${!pids[@]}"; do
+        if ! wait "${pids[$i]}"; then
+            warn "Failed to download ${names[$i]}"
+            ((failures++)) || true
+        else
+            info "${names[$i]} download complete."
+        fi
+    done
+
+    # ── Install from downloaded files ────────────────────────────
+    if [ -f "$HOME/Applications/cursor.AppImage" ]; then
+        chmod +x "$HOME/Applications/cursor.AppImage"
+        cat > "$HOME/.local/share/applications/cursor.desktop" <<EOF
+[Desktop Entry]
+Name=Cursor
+Exec=$HOME/Applications/cursor.AppImage --no-sandbox %U
+Icon=cursor
+Type=Application
+Categories=Development;IDE;
+StartupWMClass=Cursor
+EOF
+        info "Cursor installed."
+    fi
+
+    if [ -f "$warp_deb" ]; then
+        info "Installing Warp terminal..."
+        sudo apt-get install -y "$warp_deb"
+        rm -f "$warp_deb"
+    fi
+
+    # ── Apt-repo-based installs ──────────────────────────────────
+    # Antigravity (Google AI IDE — apt repo)
+    if ! command -v antigravity &>/dev/null; then
+        info "Installing Antigravity..."
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://us-central1-apt.pkg.dev/doc/repo-signing-key.gpg \
+            | sudo gpg --dearmor --yes -o /etc/apt/keyrings/antigravity-repo-key.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/antigravity-repo-key.gpg] https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/ antigravity-debian main" \
+            | sudo tee /etc/apt/sources.list.d/antigravity.list > /dev/null
+        sudo apt-get update
+        $apt antigravity
+    else
+        info "Antigravity already installed, skipping."
+    fi
+
+    # ── curl|sh installers ───────────────────────────────────────
+    # LM Studio (local LLM runner)
+    if ! command -v lms &>/dev/null; then
+        info "Installing LM Studio..."
+        curl -fsSL https://lmstudio.ai/install.sh | bash
+    else
+        info "LM Studio already installed, skipping."
+    fi
+
+    # Ollama (local LLM serving)
+    if ! command -v ollama &>/dev/null; then
+        info "Installing Ollama..."
+        curl -fsSL https://ollama.com/install.sh | sh
+    else
+        info "Ollama already installed, skipping."
+    fi
+}
+
 vim_install () {
     info "Installing vim/neovim plugins..."
     cd "$HOME" || exit
-    vim +PlugInstall +qall                      # Update plugins
-    bash "$ycm"                   # Vim YouCompleteMe plugin install
-    sudo npm install -g neovim                  # npm on neovim
-    python3 -m pip install --user --upgrade pynvim # Python for neovim
-    sudo gem install neovim                     # Gem for neovim
+    vim +PlugInstall +qall
+    bash "$ycm"
+
+    # Parallel language provider installs (npm, pip, gem are independent)
+    sudo npm install -g neovim &
+    local pid_npm=$!
+
+    python3 -m pip install --user --upgrade pynvim &
+    local pid_pip=$!
+
+    sudo gem install neovim &
+    local pid_gem=$!
+
+    wait "$pid_npm" || warn "npm neovim install had errors"
+    wait "$pid_pip" || warn "pip pynvim install had errors"
+    wait "$pid_gem" || warn "gem neovim install had errors"
+
     python3 "$HOME/.vim/plugged/YouCompleteMe/install.py"
 }
 
 optional() {
     $apt texlive-full doxygen   # Doxygen
     $apt virtualbox-qt          # Virtual machines
+    $apt mangohud               # FPS overlay for games
     # Qt G
     $apt build-essential libgl1-mesa-dev libglu1-mesa-dev
     $apt mesa-common-dev
@@ -260,21 +387,29 @@ optional() {
 }
 
 clone_repos() {
-    info "Cloning repos..."
+    info "Cloning repos in parallel..."
     mkdir -p "$HOME/repos"
-    local failures=0
     local repos=(
         "cuberhaus/WinDotfiles"
         "cuberhaus/dev"
         "cuberhaus/TFG"
         "cuberhaus/docs"
     )
+    local pids=() names=()
     for repo in "${repos[@]}"; do
         local name="${repo##*/}"
         if [ -d "$HOME/repos/$name" ]; then
             info "$name already exists, skipping"
-        elif ! git clone "https://github.com/$repo" "$HOME/repos/$name"; then
-            warn "Failed to clone $repo"
+        else
+            git clone "https://github.com/$repo" "$HOME/repos/$name" &
+            pids+=($!)
+            names+=("$repo")
+        fi
+    done
+    local failures=0
+    for i in "${!pids[@]}"; do
+        if ! wait "${pids[$i]}"; then
+            warn "Failed to clone ${names[$i]}"
             ((failures++)) || true
         fi
     done
@@ -293,13 +428,13 @@ high_dpi_screen() {
     # Increase cursor size Settings-> Accesibility -> Cursor size -> Medium
     gsettings set org.gnome.desktop.interface cursor-size 35
     # Set icons to Large 'small' to set it smaller
-    gsettings set org.gnome.shell.extensions.ding icon-size 'large' 
+    gsettings set org.gnome.shell.extensions.ding icon-size 'large'
 }
 
 anaconda () {
     # Pre-requisites
     apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6
-    
+
     # Install anaconda
     curl -O https://repo.anaconda.com/archive/Anaconda3-2023.09-0-Linux-x86_64.sh
 }

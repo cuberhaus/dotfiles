@@ -69,11 +69,11 @@ set $gpt "chat-gpt"
 set $emacs "emacs --name='EmacsScratch' --title=EmacsScratch"
 
 # set $applauncher "dmenu-run"
-set $Locker "betterlockscreen -l"
+set $Locker "command -v betterlockscreen &>/dev/null && betterlockscreen -l"
 set $ScreenshotFast "flameshot full -p $HOME/Pictures"
 set $ScreenshotOptions "flameshot gui -p $HOME/Pictures"
-set $applauncher "rofi -modi window,drun,run -show drun -show-icons -terminal $term "
-set $commandlauncher "rofi -modi window,drun,run -show run -show-icons -terminal $term "
+set $applauncher "command -v rofi &>/dev/null && rofi -modi window,drun,run -show drun -show-icons -terminal $term "
+set $commandlauncher "command -v rofi &>/dev/null && rofi -modi window,drun,run -show run -show-icons -terminal $term "
 
 # i3blocks specific
 # set $BrightUp "light -A 5 && pkill -SIGRTMIN+2 i3blocks"
@@ -87,10 +87,10 @@ set $VolumeDown  "changeVolume -5 unmute && pkill -SIGRTMIN+1 i3blocks"
 set $AudioMute  "pactl set-sink-mute @DEFAULT_SINK@ toggle && changeVolume && pkill -SIGRTMIN+1 i3blocks"
 set $MicMute "pactl set-source-mute @DEFAULT_SOURCE@ toggle && pkill -SIGRTMIN+1 i3blocks"
 #https://wiki.archlinux.org/index.php/MPRIS how to use bluetooth media controls
-set $play "playerctl play-pause"
-set $pause "playerctl pause"
-set $next "playerctl next"
-set $prev "playerctl previous"
+set $play "command -v playerctl &>/dev/null && playerctl play-pause"
+set $pause "command -v playerctl &>/dev/null && playerctl pause"
+set $next "command -v playerctl &>/dev/null && playerctl next"
+set $prev "command -v playerctl &>/dev/null && playerctl previous"
 set $caps "pkill -SIGRTMIN+11 i3blocks"
 set $NumLock  "pkill -SIGRTMIN+11 i3blocks"
 set $exit "i3-nagbar -t warning -m 'you pressed the exit shortcut. do you really want to exit i3? this will end your x session.' -b 'yes, exit i3' 'i3-msg exit'"
@@ -461,50 +461,50 @@ bindsym $mod+Pause mode "$mode_system"
 
 ### REMINDER: always start applications in background to start programs simultaneously otherwise they wait until the last program opens, which is noticeably slower (Add '&' at the end)
 
-exec numlockx &
+exec --no-startup-id sh -c 'command -v numlockx && numlockx' &
 # xss-lock displays betterlockscreen when lid is closed
-exec xss-lock --transfer-sleep-lock -- betterlockscreen -l &
-exec betterlockscreen -u ~/.local/xdg/wallpapers/unsplash > /dev/null 2>&1 &
+exec --no-startup-id sh -c 'command -v xss-lock && command -v betterlockscreen && xss-lock --transfer-sleep-lock -- betterlockscreen -l' &
+exec --no-startup-id sh -c 'command -v betterlockscreen && betterlockscreen -u ~/.local/xdg/wallpapers/unsplash > /dev/null 2>&1' &
 
 # https://wiki.archlinux.org/index.php/Polkit
 exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 
 # NetworkManager is the most popular way to manage wireless networks on Linux,
 # and nm-applet is a desktop environment-independent system tray GUI for it.
-exec --no-startup-id nm-applet &
+exec --no-startup-id sh -c 'command -v nm-applet && nm-applet' &
 
 # Compositor for Xorg
-exec picom &
+exec --no-startup-id sh -c 'command -v picom && picom' &
 
 # Bluetooth "blueman"
-exec blueman-applet &
+exec --no-startup-id sh -c 'command -v blueman-applet && blueman-applet' &
 
 # Mounts external disks automatically
-exec udiskie &
+exec --no-startup-id sh -c 'command -v udiskie && udiskie' &
 
 # Clipboard manager
-exec xfce4-clipman &
+exec --no-startup-id sh -c 'command -v xfce4-clipman && xfce4-clipman' &
 
 # Wallpaper
 #exec dwall -s room &
-exec feh --bg-scale $wallpaper &
+exec --no-startup-id sh -c 'command -v feh && feh --bg-scale $wallpaper' &
 
 # Printer service
-exec hp-systray & 
+exec --no-startup-id sh -c 'command -v hp-systray && hp-systray' &
 
 # Pomodoro Timer
-exec tomighty &
+exec --no-startup-id sh -c 'command -v tomighty && tomighty' &
 
 # Screenshots
-exec flameshot &
+exec --no-startup-id sh -c 'command -v flameshot && flameshot' &
 
 ## Show day in a classy way
-exec conky --config="$conky_day" &
+exec --no-startup-id sh -c 'command -v conky && conky --config="$conky_day"' &
 
 # # Calculator
 # exec $calculator &
 
-exec --no-startup-id "sh -c 'sleep 15; conky --config=$HOME/.conky/conkyrss & '"
+exec --no-startup-id "sh -c 'sleep 15; command -v conky && conky --config=$HOME/.conky/conkyrss & '"
 
 ## Moar info
 # exec conky --config=$HOME/.conky/conky_grey/conkyrc_grey &

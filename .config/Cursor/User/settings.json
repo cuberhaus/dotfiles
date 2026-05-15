@@ -1,0 +1,13 @@
+{
+    "git.confirmSync": false,
+    "terminal.integrated.inheritEnv": false,
+    "workbench.sideBar.location": "right",
+    "gitlens.ai.model": "vscode",
+    "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+    "git.autofetch": true,
+    "python.defaultInterpreterPath": "/bin/python3",
+    "explorer.confirmPasteNative": false,
+    "window.zoomLevel": 1,
+    "cursor.composer.shouldChimeAfterChatFinishes": true,
+    "explorer.confirmDragAndDrop": false
+}

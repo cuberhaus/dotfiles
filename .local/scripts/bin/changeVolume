@@ -5,6 +5,13 @@
 # Arbitrary but unique message id
 msgId="991049"
 
+for cmd in pactl amixer dunstify; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "error: $cmd is not installed" >&2
+        exit 1
+    fi
+done
+
 # Change the volume using alsa(might differ if you use pulseaudio)
 # amixer -c 0 set Master "$@" > /dev/null
 # echo "$@"
