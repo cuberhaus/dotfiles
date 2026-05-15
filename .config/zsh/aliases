@@ -123,6 +123,7 @@ alias gsu="git submodule update --recursive --remote"
 
 alias gr="git-recurse"
 alias gah="git-ahead"
+ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
 #yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
 yolo='git add -A; git commit -m "This is a placeholder"; git push'
 # shellcheck disable=SC2139
