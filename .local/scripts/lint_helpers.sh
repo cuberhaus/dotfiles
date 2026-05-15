@@ -49,3 +49,32 @@ lint_get_scripts() {
     done
     git ls-files -- "${LINT_PATTERNS[@]}" | grep -v "${grep_args[@]}"
 }
+
+# Pathspecs for files allowed to contain `/home/<user>/` or `/Users/<user>/`.
+# Shared by lint.yml's hardcoded-paths job and the pre-commit hook.
+HARDCODED_PATHS_EXCLUDES=(
+    ':!*.md'
+    ':!.gitignore'
+    ':!SECURITY.md'
+    ':!.config/warp-terminal/user_preferences.json'
+    ':!.config/birdtray-config.json'
+    ':!.config/texstudio/texstudio.ini'
+    ':!.config/texstudio/cache/'
+    ':!.config/texstudio/dictionaries/'
+    ':!.cinnamon/backgrounds/user-folders.lst'
+    ':!.config/cinnamon/dark/gnome.dconf'
+    ':!.config/cinnamon/light/gnome.dconf'
+    ':!.config/.p10k.zsh'
+    ':!.config/zsh/.p10k.zsh'
+    ':!.config/vlc/vlc-qt-interface.conf'
+    ':!.vim/.netrwhist'
+    ':!.local/scripts/bootstrap/arch_functions'
+)
+HARDCODED_PATHS_REGEX='(/home/[a-z][a-z0-9_-]*/|/Users/[a-z][a-z0-9_-]*/)'
+
+# Markdown files that markdownlint should check.
+LINT_MARKDOWN_FILES=(
+    'README.md'
+    '.local/README.md'
+    '.local/xdg/wallpapers/README.md'
+)

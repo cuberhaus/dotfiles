@@ -8,6 +8,10 @@ on:
     branches: [master]
     paths: ['.xmonad/xmonad.hs']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   compile-check:
     name: Compile check

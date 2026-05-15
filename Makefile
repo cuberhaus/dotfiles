@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check fix hooks update submodules antigen-update skip-worktree bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
+.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
@@ -35,7 +35,7 @@ dry-run: ## Simulate stow and report conflicts (no changes made)
 lint: ## Run shellcheck on all shell scripts
 	bash .local/scripts/lint.sh
 
-check: lint ## Run all linters (shellcheck + markdownlint + vint)
+check: lint ## Run all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.
 	@echo ""
 	@echo "==> Running markdownlint..."
 	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
@@ -43,14 +43,16 @@ check: lint ## Run all linters (shellcheck + markdownlint + vint)
 	elif command -v markdownlint >/dev/null 2>&1; then \
 		markdownlint README.md .local/README.md .local/xdg/wallpapers/README.md; \
 	else \
-		echo "  markdownlint not found, skipping (npm install -g markdownlint-cli2)"; \
+		echo "  markdownlint not found (npm install -g markdownlint-cli2 or run 'make doctor')"; \
+		exit 1; \
 	fi
 	@echo ""
 	@echo "==> Running vint (vimrc)..."
 	@if command -v vint >/dev/null 2>&1; then \
 		vint --style-problem .vim/vimrc || true; \
 	else \
-		echo "  vint not found, skipping (pip install vim-vint)"; \
+		echo "  vint not found (pip install vim-vint or run 'make doctor')"; \
+		exit 1; \
 	fi
 	@echo ""
 	@echo "==> All checks complete."
@@ -64,6 +66,9 @@ fix: ## Auto-fix markdown issues (markdownlint --fix)
 		echo "markdownlint not found (npm install -g markdownlint-cli2)"; \
 		exit 1; \
 	fi
+
+doctor: ## Report missing lint tools and broken symlinks in $$HOME
+	@bash .local/scripts/doctor.sh
 
 hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
 	cp .local/scripts/hooks/pre-commit .git/hooks/pre-commit

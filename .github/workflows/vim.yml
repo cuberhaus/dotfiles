@@ -8,6 +8,10 @@ on:
     branches: [master]
     paths: ['.vim/vimrc']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   syntax-check:
     name: Vimscript syntax check

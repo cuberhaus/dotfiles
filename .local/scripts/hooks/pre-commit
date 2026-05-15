@@ -1,39 +1,85 @@
 #!/usr/bin/env bash
-# Pre-commit hook: lint staged shell scripts with shellcheck.
+# Pre-commit hook: mirror CI checks locally on staged files.
+#  - shellcheck on staged shell scripts
+#  - hardcoded /home/<user>/ or /Users/<user>/ paths in any staged file
+#  - markdownlint on staged markdown files
 # Install with: make hooks
 
 set -euo pipefail
-
-if ! command -v shellcheck &>/dev/null; then
-    echo "shellcheck not found — skipping pre-commit lint."
-    exit 0
-fi
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
 # shellcheck source=../lint_helpers.sh
 source "$REPO_ROOT/.local/scripts/lint_helpers.sh"
 
-# Intersect staged files with the lintable set
 staged=$(git diff --cached --name-only --diff-filter=ACM)
 [ -z "$staged" ] && exit 0
 
-lintable=$(lint_get_scripts)
+fail=0
 
-scripts=()
-while IFS= read -r f; do
-    # Only lint if the staged file is in the lintable set
-    if echo "$lintable" | grep -qxF "$f"; then
-        scripts+=("$f")
+# ── shellcheck ───────────────────────────────────────────────
+if command -v shellcheck &>/dev/null; then
+    lintable=$(lint_get_scripts)
+    scripts=()
+    while IFS= read -r f; do
+        if echo "$lintable" | grep -qxF "$f"; then
+            scripts+=("$f")
+        fi
+    done <<< "$staged"
+
+    if [ ${#scripts[@]} -gt 0 ]; then
+        if ! shellcheck "${scripts[@]}"; then
+            echo ""
+            echo "shellcheck failed."
+            fail=1
+        fi
     fi
-done <<< "$staged"
-
-if [ ${#scripts[@]} -eq 0 ]; then
-    exit 0
+else
+    echo "shellcheck not found — skipping shell lint."
 fi
 
-if ! shellcheck "${scripts[@]}"; then
+# ── hardcoded user paths ─────────────────────────────────────
+# Scan only the staged subset, applying the same excludes as CI.
+staged_zlist=$(git diff --cached --name-only -z --diff-filter=ACM)
+if [ -n "$staged_zlist" ]; then
+    # shellcheck disable=SC2016
+    hits=$(printf '%s' "$staged_zlist" \
+        | xargs -0 -I{} git grep -InE "$HARDCODED_PATHS_REGEX" -- {} "${HARDCODED_PATHS_EXCLUDES[@]}" 2>/dev/null \
+        || true)
+    if [ -n "$hits" ]; then
+        echo ""
+        echo "Hardcoded user paths in staged files:"
+        echo "$hits"
+        echo "Use \$HOME, ~/, or XDG variables instead."
+        fail=1
+    fi
+fi
+
+# ── markdownlint ─────────────────────────────────────────────
+md_staged=()
+while IFS= read -r f; do
+    case "$f" in
+        *.md) md_staged+=("$f") ;;
+    esac
+done <<< "$staged"
+
+if [ ${#md_staged[@]} -gt 0 ]; then
+    if command -v markdownlint-cli2 &>/dev/null; then
+        if ! markdownlint-cli2 "${md_staged[@]}"; then
+            echo "markdownlint failed."
+            fail=1
+        fi
+    elif command -v markdownlint &>/dev/null; then
+        if ! markdownlint "${md_staged[@]}"; then
+            echo "markdownlint failed."
+            fail=1
+        fi
+    fi
+    # If neither tool is installed, just skip — CI will catch it.
+fi
+
+if [ "$fail" -ne 0 ]; then
     echo ""
-    echo "shellcheck failed. Fix the issues or commit with --no-verify to skip."
+    echo "Pre-commit checks failed. Fix the issues or commit with --no-verify to skip."
     exit 1
 fi
