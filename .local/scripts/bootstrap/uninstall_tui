@@ -1,0 +1,129 @@
+#! /usr/bin/env bash
+# TUI checklist helper for uninstall scripts
+# Tries whiptail, then dialog, then a plain-text fallback.
+# Author: https://github.com/cuberhaus
+
+# show_checklist TITLE  TAG1 DESC1 ON/OFF  TAG2 DESC2 ON/OFF  ...
+#   Displays a checkbox list and prints the selected tags (space-separated)
+#   to stdout.  Returns 1 if the user cancels.
+show_checklist() {
+    local title="$1"; shift
+    local -a items=("$@")
+    local count=$(( ${#items[@]} / 3 ))
+    local height=$(( count + 8 ))
+    (( height < 15 )) && height=15
+    (( height > 24 )) && height=24
+
+    if command -v whiptail &>/dev/null; then
+        _checklist_whiptail "$title" "$height" "$count" "${items[@]}"
+    elif command -v dialog &>/dev/null; then
+        _checklist_dialog "$title" "$height" "$count" "${items[@]}"
+    else
+        _checklist_text "$title" "${items[@]}"
+    fi
+}
+
+_checklist_whiptail() {
+    local title="$1" height="$2" count="$3"; shift 3
+    local result
+    result=$(whiptail --title "$title" \
+        --checklist "Use SPACE to toggle, ENTER to confirm:" \
+        "$height" 76 "$count" "$@" 3>&1 1>&2 2>&3) || return 1
+    echo "$result" | tr -d '"'
+}
+
+_checklist_dialog() {
+    local title="$1" height="$2" count="$3"; shift 3
+    # dialog expects on/off in lowercase
+    local -a fixed=()
+    for arg in "$@"; do
+        case "$arg" in
+            ON)  fixed+=("on")  ;;
+            OFF) fixed+=("off") ;;
+            *)   fixed+=("$arg") ;;
+        esac
+    done
+    local tmpfile
+    tmpfile=$(mktemp)
+    dialog --title "$title" \
+        --checklist "Use SPACE to toggle, ENTER to confirm:" \
+        "$height" 76 "$count" "${fixed[@]}" 2>"$tmpfile"
+    local rc=$?
+    local result
+    result=$(<"$tmpfile")
+    rm -f "$tmpfile"
+    (( rc != 0 )) && return 1
+    echo "$result" | tr -d '"'
+}
+
+_checklist_text() {
+    local title="$1"; shift
+    local -a tags=() descs=() defaults=()
+    while (( $# >= 3 )); do
+        tags+=("$1"); descs+=("$2"); defaults+=("$3")
+        shift 3
+    done
+
+    echo "" >&2
+    echo "=== $title ===" >&2
+    echo "" >&2
+    local j
+    for (( j = 0; j < ${#tags[@]}; j++ )); do
+        local marker=" "
+        [[ "${defaults[$j]}" == "ON" ]] && marker="*"
+        printf "  [%s] %d) %s\n" "$marker" $(( j + 1 )) "${descs[$j]}" >&2
+    done
+    echo "" >&2
+    echo "Enter numbers to uninstall (space-separated), 'all' for [*] defaults, or 'q' to cancel:" >&2
+    read -r selection
+
+    [[ "$selection" == "q" || "$selection" == "Q" ]] && return 1
+
+    local -a selected=()
+    if [[ "$selection" == "all" || -z "$selection" ]]; then
+        for (( j = 0; j < ${#tags[@]}; j++ )); do
+            [[ "${defaults[$j]}" == "ON" ]] && selected+=("${tags[$j]}")
+        done
+    else
+        for num in $selection; do
+            local idx=$(( num - 1 ))
+            if (( idx >= 0 && idx < ${#tags[@]} )); then
+                selected+=("${tags[$idx]}")
+            fi
+        done
+    fi
+    echo "${selected[*]}"
+}
+
+# run_selected_uninstalls TITLE  TAG1 DESC1 ON/OFF  TAG2 DESC2 ON/OFF  ...
+#   Shows the checklist, asks for final confirmation, then calls each
+#   selected tag as a bash function.
+run_selected_uninstalls() {
+    local title="$1"; shift
+    local choices
+    choices=$(show_checklist "$title" "$@") || {
+        info "Uninstallation aborted."
+        exit 0
+    }
+
+    if [[ -z "$choices" ]]; then
+        info "Nothing selected. Exiting."
+        exit 0
+    fi
+
+    info "Selected: $choices"
+    echo ""
+    read -r -p "Proceed with uninstallation? [y/N] " confirm
+    if [[ ! "$confirm" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+        info "Uninstallation aborted."
+        exit 0
+    fi
+
+    for func in $choices; do
+        if declare -f "$func" &>/dev/null; then
+            "$func"
+        else
+            warn "Unknown component: $func — skipping."
+        fi
+    done
+}

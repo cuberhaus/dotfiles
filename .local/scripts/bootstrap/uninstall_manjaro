@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Manjaro bootstrap UNINSTALL
+# Author: https://github.com/cuberhaus
+set -euo pipefail
+
+### VARIABLES
+scripts="$HOME/.local/scripts"
+source "$scripts/bootstrap/base_functions"
+source "$scripts/bootstrap/uninstall_tui"
+source "$scripts/bootstrap/uninstall_arch_functions"
+source "$scripts/bootstrap/uninstall_manjaro_functions"
+
+### UNINSTALLATION
+run_selected_uninstalls "Manjaro Uninstaller" \
+    base_uninstall              "Base packages (cmake, bat, fzf, kitty, vim, ...)"      OFF \
+    arch_uninstall              "Arch drivers & services (NVIDIA, CUPS, Bluetooth)"     OFF \
+    arch_and_manjaro_uninstall  "Shared Arch/Manjaro (printers, Samba)"                 OFF \
+    manjaro_uninstall           "Manjaro snaps & packages (IDEs, Spotify, ...)"         OFF \
+    i3_uninstall                "i3 window manager (i3-gaps, i3blocks, rofi, ...)"      OFF \
+    xmonad_uninstall            "xmonad window manager (xmobar, trayer, dmenu)"         OFF \
+    vim_uninstall               "Vim / Neovim extras (ctags, formatters, ...)"          OFF \
+    emacs_uninstall             "Emacs & Doom Emacs"                                    OFF \
+    laptop_uninstall            "Laptop packages (TLP)"                                 OFF
+
+if [ "$(basename "$SHELL")" == "zsh" ]; then
+    info "Currently using zsh. To revert to bash, run: chsh -s \$(which bash)"
+fi
+
+info "Uninstallation complete. A system reboot is recommended."

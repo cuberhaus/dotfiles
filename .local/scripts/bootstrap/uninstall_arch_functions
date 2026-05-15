@@ -1,0 +1,151 @@
+#! /usr/bin/env bash
+# Arch bootstrap UNINSTALL functions
+# Author: https://github.com/cuberhaus
+
+pac_remove="sudo pacman -Rns --noconfirm"
+yay_remove="yay -Rns --noconfirm"
+
+###############################################################
+# => Base packages uninstall
+###############################################################
+base_uninstall() {
+    info "Uninstalling base packages..."
+
+    $pac_remove cmake opencl-headers bazel cudnn cuda conky \
+        adapta-gtk-theme arc-gtk-theme arc-icon-theme \
+        bat biber breeze calibre cron dconf-editor dex discord dnsutils github-cli \
+        dunst eza exfat-utils file-roller firefox fzf gcc gdb \
+        gnome-calculator gnome-font-viewer gnome-keyring gtk2 gtk3 \
+        gucharmap gvim hardinfo cpu-x htop inotify-tools kcolorchooser \
+        kdiff3 kitty kvantum-qt5 laptop-detect \
+        libmythes mythes-en mythes-es \
+        libreoffice-still libreoffice-still-ca lxappearance ncdu \
+        nemo nemo-fileroller nemo-preview nemo-seahorse nemo-share \
+        net-tools nilfs-utils nomacs noto-fonts-emoji npm ntfs-3g \
+        okular papirus-icon-theme partitionmanager perl-file-mimeinfo \
+        playerctl polkit polkit-gnome python python-pipenv python3 \
+        qt5ct ranger rclone reflector remmina freerdp libvncserver \
+        ruby seahorse speedcrunch stow svn the_silver_searcher \
+        thunderbird tmux transmission-gtk trash-cli \
+        ttf-dejavu ttf-liberation ttf-droid ttf-ubuntu-font-family ttf-roboto noto-fonts \
+        tumbler ffmpegthumbnailer raw-thumbnailer udftools udiskie \
+        dolphin udisks2 vlc w3m wget wireshark wmctrl xclip xdg-user-dirs \
+        xfce4-clipman-plugin xorg xorg-xinit xss-lock yarn zsh \
+        zathura-cb zathura-djvu zathura-pdf-mupdf zathura-ps zathura \
+        kalk solaar telegram obsidian virt-viewer || true
+
+    # AUR packages
+    $yay_remove caffeine-ng florence downgrade balena-etcher-appimage \
+        woeusb-ng betterlockscreen google-chrome microsoft-edge-stable-bin \
+        libreoffice-extension-languagetool timeshift tomighty ttf-ms-fonts || true
+
+    git config --global --unset credential.helper || true
+}
+
+###############################################################
+# => Arch-specific packages uninstall
+###############################################################
+arch_uninstall() {
+    info "Uninstalling Arch-specific packages..."
+
+    $pac_remove xorg-xrandr arandr autorandr \
+        linux-headers nvidia nvidia-utils xf86-video-intel mesa lib32-mesa \
+        lib32-nvidia-utils nvidia-settings \
+        cups system-config-printer \
+        bluez bluez-utils blueberry \
+        lightdm-gtk-greeter lightdm lightdm-gtk-greeter-settings \
+        networkmanager nm-connection-editor || true
+
+    $yay_remove pulseaudio-modules-bt || true
+
+    # Disable services (ignore errors if already disabled)
+    sudo systemctl disable org.cups.cupsd.service 2>/dev/null || true
+    sudo systemctl disable bluetooth.service 2>/dev/null || true
+    sudo systemctl disable lightdm.service 2>/dev/null || true
+    sudo systemctl disable NetworkManager.service 2>/dev/null || true
+}
+
+###############################################################
+# => i3 uninstall
+###############################################################
+i3_uninstall() {
+    info "Uninstalling i3..."
+
+    $pac_remove acpi awk bc upower feh flameshot i3-gaps i3blocks \
+        light picom rofi yad xdotool zenity \
+        perl-anyevent-i3 python-dbus || true
+
+    $yay_remove cava kbdd-git || true
+}
+
+###############################################################
+# => xmonad uninstall
+###############################################################
+xmonad_uninstall() {
+    info "Uninstalling xmonad..."
+
+    $pac_remove dmenu trayer xmobar xmonad-contrib xorg-xmessage || true
+
+    sudo rm -f /etc/pacman.d/hooks/xmonad.hook
+}
+
+###############################################################
+# => Vim/neovim uninstall
+###############################################################
+vim_uninstall() {
+    info "Uninstalling vim/neovim extras..."
+
+    $pac_remove neovim ctags astyle autopep8 yapf cmake-format shfmt \
+        stylish-haskell tidy python-pip || true
+
+    sudo npm uninstall -g neovim js-beautify remark-cli 2>/dev/null || true
+    sudo gem uninstall neovim 2>/dev/null || true
+}
+
+###############################################################
+# => Laptop packages uninstall
+###############################################################
+laptop_uninstall() {
+    info "Uninstalling laptop packages..."
+
+    $pac_remove tlp || true
+    sudo systemctl disable tlp.service 2>/dev/null || true
+}
+
+###############################################################
+# => Dynamic wallpapers uninstall
+###############################################################
+dwall_uninstall() {
+    info "Removing dynamic wallpapers..."
+    sudo rm -rf /usr/share/dynamic-wallpaper 2>/dev/null || true
+    rm -rf "$HOME/.local/share/dynamic-wallpaper" 2>/dev/null || true
+}
+
+###############################################################
+# => Papirus folders uninstall
+###############################################################
+papirus_uninstall() {
+    info "Removing papirus-folders..."
+    if [ -x /usr/local/bin/papirus-folders ]; then
+        wget -qO- https://git.io/papirus-folders-install | env uninstall=true sh || true
+    fi
+}
+
+###############################################################
+# => Emacs uninstall
+###############################################################
+emacs_uninstall() {
+    info "Uninstalling Emacs..."
+
+    systemctl --user disable emacs 2>/dev/null || true
+
+    $pac_remove emacs-nativecomp aspell aspell-ca aspell-de aspell-en aspell-es \
+        ispell pandoc languagetool mplayer shellcheck python-pipenv prettier \
+        ripgrep fd || true
+
+    sudo npm uninstall -g markdownlint textlint 2>/dev/null || true
+
+    rm -rf "$HOME/.emacs.d" 2>/dev/null || true
+    rm -rf "$HOME/.config/doom-emacs" 2>/dev/null || true
+    rm -f "$HOME/.config/chemacs/profile" 2>/dev/null || true
+}

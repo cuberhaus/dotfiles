@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# macOS bootstrap UNINSTALL
+# Author: https://github.com/cuberhaus
+set -euo pipefail
+
+### VARIABLES
+scripts="$HOME/.local/scripts"
+source "$scripts/bootstrap/base_functions"
+source "$scripts/bootstrap/uninstall_tui"
+source "$scripts/bootstrap/uninstall_mac_functions"
+
+### UNINSTALLATION
+run_selected_uninstalls "macOS Uninstaller" \
+    cli_uninstall       "CLI tools (bat, fzf, ripgrep, stow, ...)"         OFF \
+    fonts_uninstall     "Nerd Fonts (Fira Code, Iosevka, Meslo, ...)"      OFF \
+    gui_apps_uninstall  "GUI applications (Chrome, Spotify, VS Code, ...)" OFF \
+    vim_uninstall       "Vim / Neovim (macvim, neovim, plugins)"           OFF \
+    brew_cleanup        "Run brew cleanup"                                  OFF
+
+info "Uninstallation complete."
+info "To fully remove Homebrew itself, run:"
+info "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\""

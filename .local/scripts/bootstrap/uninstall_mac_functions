@@ -1,0 +1,78 @@
+#! /usr/bin/env bash
+# macOS bootstrap UNINSTALL functions
+# Author: https://github.com/cuberhaus
+
+###############################################################
+# => CLI tools uninstall
+###############################################################
+cli_uninstall() {
+    info "Uninstalling CLI tools..."
+
+    local formulae=(
+        ack astyle bat bison cmake eza flex fzf gh git go gpg htop llvm mono
+        ncdu neofetch p7zip pinentry-mac pkg-config ranger w3m rclone
+        ripgrep smimesign sox stow swig the_silver_searcher unrar wget yarn
+    )
+
+    for pkg in "${formulae[@]}"; do
+        brew uninstall "$pkg" 2>/dev/null || true
+    done
+}
+
+###############################################################
+# => Fonts uninstall
+###############################################################
+fonts_uninstall() {
+    info "Uninstalling fonts..."
+
+    local fonts=(
+        font-fira-code-nerd-font
+        font-inconsolata-nerd-font
+        font-iosevka-nerd-font
+        font-meslo-lg-nerd-font
+    )
+
+    for font in "${fonts[@]}"; do
+        brew uninstall "$font" 2>/dev/null || true
+    done
+}
+
+###############################################################
+# => GUI applications uninstall
+###############################################################
+gui_apps_uninstall() {
+    info "Uninstalling GUI applications..."
+
+    local casks=(
+        caffeine ballast calibre ccleaner discord google-chrome
+        karabiner-elements kitty mos rectangle spotify sublime-text
+        texstudio the-unarchiver tomighty transmission visual-studio-code
+        vlc whatsapp anki notion notion-calendar obsidian todoist
+    )
+
+    for cask in "${casks[@]}"; do
+        brew uninstall --cask "$cask" 2>/dev/null || true
+    done
+}
+
+###############################################################
+# => Vim/neovim uninstall
+###############################################################
+vim_uninstall() {
+    info "Uninstalling vim/neovim..."
+
+    brew uninstall macvim 2>/dev/null || true
+    brew uninstall neovim 2>/dev/null || true
+
+    sudo npm uninstall -g neovim 2>/dev/null || true
+    python3 -m pip uninstall -y pynvim 2>/dev/null || true
+    sudo gem uninstall neovim 2>/dev/null || true
+}
+
+###############################################################
+# => Homebrew cleanup
+###############################################################
+brew_cleanup() {
+    info "Running brew cleanup..."
+    brew cleanup --prune=all 2>/dev/null || true
+}
