@@ -59,7 +59,8 @@ function git_recursive() {
         for i in "${!pids[@]}"; do
             local pid=${pids[$i]}
             local dir=${dirs[$i]}
-            local outfile="$tmpdir/$(echo "$dir" | tr '/' '_').out"
+            local outfile
+            outfile="$tmpdir/$(echo "$dir" | tr '/' '_').out"
             local status=0
             wait "$pid" || status=$?
 
@@ -75,7 +76,7 @@ function git_recursive() {
             if [[ -s "$outfile" ]]; then
                 sed 's/^/    /' "$outfile"
             else
-                printf "    ${dim}(no output)${reset}\n"
+                printf "    %s(no output)%s\n" "$dim" "$reset"
             fi
         done
 

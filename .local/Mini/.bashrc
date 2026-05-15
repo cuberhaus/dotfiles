@@ -148,7 +148,8 @@ pull() {
         
         for i in "${!pids[@]}"; do
             local pid="${pids[$i]}" repo="${repos[$i]}"
-            local outfile="$tmpdir/$(echo "$repo" | tr '/' '_').out"
+            local outfile
+            outfile="$tmpdir/$(echo "$repo" | tr '/' '_').out"
             if wait "$pid"; then
                 printf "\033[32m✓ %s\033[0m\n" "$repo"
             else
