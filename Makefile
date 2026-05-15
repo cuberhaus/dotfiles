@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check hooks update submodules antigen-update skip-worktree bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac bootstrap-work
+.PHONY: help install uninstall restow dry-run lint check fix hooks update submodules antigen-update skip-worktree bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-mac bootstrap-work
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
@@ -54,6 +54,16 @@ check: lint ## Run all linters (shellcheck + markdownlint + vint)
 	fi
 	@echo ""
 	@echo "==> All checks complete."
+
+fix: ## Auto-fix markdown issues (markdownlint --fix)
+	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
+		markdownlint-cli2 --fix README.md .local/README.md .local/xdg/wallpapers/README.md; \
+	elif command -v markdownlint >/dev/null 2>&1; then \
+		markdownlint --fix README.md .local/README.md .local/xdg/wallpapers/README.md; \
+	else \
+		echo "markdownlint not found (npm install -g markdownlint-cli2)"; \
+		exit 1; \
+	fi
 
 hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
 	cp .local/scripts/hooks/pre-commit .git/hooks/pre-commit

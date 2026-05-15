@@ -26,7 +26,8 @@ Opinionated defaults. This repo is not meant to be used by everyone, just a pers
 ## How it works
 
 ### Why `dotfiles/dotfiles`?
-You might wonder why the repository isn't just cloned directly into `~/dotfiles`. The nested `~/dotfiles/dotfiles` structure is required by how **[GNU Stow](https://www.gnu.org/software/stow/)** manages packages. Stow expects a "stow directory" (the parent, `~/dotfiles`) containing one or more "packages" (the child, `dotfiles`, which is this repo). 
+
+You might wonder why the repository isn't just cloned directly into `~/dotfiles`. The nested `~/dotfiles/dotfiles` structure is required by how **[GNU Stow](https://www.gnu.org/software/stow/)** manages packages. Stow expects a "stow directory" (the parent, `~/dotfiles`) containing one or more "packages" (the child, `dotfiles`, which is this repo).
 
 By cloning into `~/dotfiles/dotfiles`, stow correctly treats the inner `dotfiles` folder as the package name, allowing it to safely symlink the contents (like `.config/`, `.vim/`) directly into your `$HOME` directory without confusing the repository root with the target deployment.
 
@@ -140,7 +141,7 @@ scripts directory.
 ## What's inside
 
 | Category | Tool / Config | Notes |
-|---|---|---|
+| --- | --- | --- |
 | **Shells** | zsh (antigen, p10k), bash | XDG-compliant `$ZDOTDIR` in `.config/zsh/` |
 | **Editors** | Vim, Neovim, Doom Emacs, personal Emacs (chemacs) | Vim config at `.vim/vimrc`; Emacs literate config in `.config/emacs.org` |
 | **Terminals** | kitty, Alacritty, termite | |
