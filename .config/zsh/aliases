@@ -262,7 +262,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     fi
 
     if [[ "$DISTRO" == "ubuntu"* ]]; then
-        \$apt() { sudo apt-get -y install "$@"; }
+        apt() { sudo apt-get -y install "$@"; }
     fi
 fi
 

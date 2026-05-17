@@ -34,7 +34,7 @@ broken=$(find "$HOME" -maxdepth 4 -xtype l 2>/dev/null \
     | grep -v -e '/.cache/' -e '/.local/share/Trash/' || true)
 if [ -n "$broken" ]; then
     printf "  %s⚠%s broken symlinks found:\n" "$YELLOW" "$RESET"
-    echo "$broken" | sed 's/^/    /'
+    while IFS= read -r line; do printf '    %s\n' "$line"; done <<< "$broken"
 else
     printf "  %s✓%s no broken symlinks\n" "$GREEN" "$RESET"
 fi
