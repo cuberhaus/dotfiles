@@ -111,6 +111,7 @@ alias free="free -m"      # show sizes in MB
 alias c="clear"
 
 # Git
+alias g="git"
 alias gs="git status"
 alias gf="git fetch"
 alias gl="git pull"
@@ -118,6 +119,7 @@ alias ga="git add "
 alias gm="git merge"
 alias gc="git commit -m "
 alias gp="git push"
+alias gpf="git push --force-with-lease"
 alias gitsync="git submodule sync; git submodule update --init --recursive"
 alias gsu="git submodule update --recursive --remote"
 
