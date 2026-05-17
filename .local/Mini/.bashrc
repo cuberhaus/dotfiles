@@ -254,8 +254,81 @@ alias gc="git commit -m "
 alias gp="git push"
 alias gitsync="git submodule sync; git submodule update --init --recursive"
 alias gsu="git submodule update --recursive --remote"
+alias gr="git-recurse"
+alias gah="git-ahead"
 ## Alternative (makes easier finding out which commits have no message)
 alias yolo='git add -A; git commit -m "This is a placeholder"; git push'
+
+# Git functions
+ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
+add-pat() {
+    local pat="$1"
+    if [ -z "$pat" ]; then
+        echo "Usage: add-pat <token>"
+        echo "Recursively changes all https://github.com/... remotes to use the defined PAT."
+        return 1
+    fi
+    printf "\033[34mdepth: 2 \033[0m\n"
+    while IFS= read -r -d $'\0' dot_git; do
+        local dir
+        dir=$(dirname "$dot_git")
+        local remote_url
+        remote_url=$(git -C "$dir" remote get-url origin 2>/dev/null)
+        if [ -n "$remote_url" ]; then
+            if [[ "$remote_url" == *"github.com"* && "$remote_url" == https://* ]]; then
+                local new_url
+                new_url=$(echo "$remote_url" | sed -E "s|https://([^@]+@)?github\\.com|https://$pat@github.com|")
+                if [ "$remote_url" != "$new_url" ]; then
+                    git -C "$dir" remote set-url origin "$new_url"
+                    printf "\033[32m✓ %s\033[0m (remote updated)\n" "$dir"
+                else
+                    printf "\033[34m- %s\033[0m (already using this token)\n" "$dir"
+                fi
+            else
+                printf "\033[33m! %s\033[0m (ignored: not an HTTPS GitHub remote)\n" "$dir"
+            fi
+        fi
+    done < <(find . -maxdepth 2 -type d -name .git -print0 2>/dev/null)
+}
+alias add-pat="add-pat"
+status() { git-recurse "$@" git status; }
+
+# System maintenance
+update() {
+    if command -v apt-get &>/dev/null; then
+        sudo apt-get update && sudo apt-get full-upgrade -y
+    elif command -v pacman &>/dev/null; then
+        sudo pacman -Syu
+    elif command -v brew &>/dev/null; then
+        brew update && brew upgrade
+    else
+        echo "No supported package manager found"
+        return 1
+    fi
+}
+
+updateall() {
+    update
+    if command -v nvim &>/dev/null; then
+        nvim +PlugUpgrade +PlugUpdate +qall 2>/dev/null || true
+    fi
+}
+
+cleanup() {
+    if command -v choco-cleaner &>/dev/null; then
+        choco-cleaner
+    fi
+    if command -v nvim &>/dev/null; then
+        nvim +PlugClean +qall 2>/dev/null || true
+    fi
+    if command -v apt-get &>/dev/null; then
+        sudo apt-get autoclean && sudo apt-get autoremove -y
+    elif command -v pacman &>/dev/null; then
+        sudo pacman -Sc
+    elif command -v brew &>/dev/null; then
+        brew cleanup
+    fi
+}
 
 # List files -- prefer eza > exa > ls
 if command -v eza &>/dev/null; then
@@ -289,6 +362,29 @@ alias enableSleep="sudo systemctl unmask sleep.target suspend.target hibernate.t
 
 # Get error messages from journalctl
 alias jctl="journalctl -p 3 -xb"
+
+# Lock screen (Linux only - picks random animation if available)
+if [ "$(uname -s)" = 'Linux' ]; then
+    LockScreens=()
+    command -v pipes.sh &>/dev/null && LockScreens+=("pipes.sh")
+    command -v cmatrix &>/dev/null && LockScreens+=("cmatrix")
+    if [ ${#LockScreens[@]} -gt 0 ]; then
+        lock() { ${LockScreens[$((RANDOM % ${#LockScreens[@]}))]]}; }
+        export -f lock
+    fi
+    
+    # Mirror update (distro-specific)
+    if command -v reflector &>/dev/null; then
+        # Arch Linux
+        alias mirror="sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist"
+    elif command -v pacman-mirrors &>/dev/null; then
+        # Manjaro
+        alias mirror="sudo pacman-mirrors -f && sudo pacman -Syyu"
+    elif command -v apt-get &>/dev/null; then
+        # Ubuntu/Debian - no mirror alias needed, apt handles it
+        alias mirror="sudo apt-get update"
+    fi
+fi
 
 ###############################################################
 # => Tool integrations
