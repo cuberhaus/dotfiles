@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+# git-clean-branches: scan all git repos under a directory and delete local
+# branches that have no remote tracking branch and no commits ahead of the
+# default branch.
+#
+# Usage:
+#   git-clean-branches [dir]           # clean stale branches (default: .)
+#   git-clean-branches -n|--dry-run    # preview what would be deleted
+#   git-clean-branches --no-fetch      # skip fetch (use cached refs)
+#   git-clean-branches --depth N       # max search depth for repos (default: 4)
+#
+# Only uses `git branch -d` (safe delete) — refuses to delete unmerged work.
+# Base branch is detected per repo: origin/HEAD -> origin/main -> origin/master.
+
+set -uo pipefail
+
+depth=4
+fetch=1
+dry_run=0
+root="."
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -n|--dry-run)  dry_run=1; shift ;;
+        --no-fetch)    fetch=0; shift ;;
+        --depth)       depth="$2"; shift 2 ;;
+        -h|--help)
+            sed -n '2,12p' "$0" | sed 's/^# \?//'
+            exit 0
+            ;;
+        -*)
+            echo "Unknown option: $1" >&2
+            exit 2
+            ;;
+        *) root="$1"; shift ;;
+    esac
+done
+
+if [ ! -d "$root" ]; then
+    echo "Not a directory: $root" >&2
+    exit 1
+fi
+
+green=$'\033[32m'
+yellow=$'\033[33m'
+red=$'\033[31m'
+dim=$'\033[2m'
+bold=$'\033[1m'
+cyan=$'\033[36m'
+reset=$'\033[0m'
+
+if [ "$dry_run" -eq 1 ]; then
+    mode="DRY RUN"
+else
+    mode="CLEAN"
+fi
+
+# Pick the default branch for a repo.
+detect_default() {
+    local default
+    default=$(git symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null) || true
+    if [ -n "$default" ]; then
+        echo "${default#refs/remotes/origin/}"
+        return
+    fi
+    if git rev-parse --verify --quiet origin/main >/dev/null 2>&1; then
+        echo "main"; return
+    fi
+    if git rev-parse --verify --quiet origin/master >/dev/null 2>&1; then
+        echo "master"; return
+    fi
+    echo ""
+}
+
+scan_repo() {
+    local repo="$1"
+    local rel="${repo#"$root"/}"
+    [ "$rel" = "$repo" ] && rel=$(basename "$repo")
+
+    if [ "$fetch" -eq 1 ]; then
+        git -C "$repo" fetch --all --prune --quiet 2>/dev/null || true
+    fi
+
+    local default
+    default=$(cd "$repo" && detect_default)
+    if [ -z "$default" ]; then
+        return
+    fi
+
+    local current
+    current=$(git -C "$repo" rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+    local printed_header=0
+    local count=0
+    while IFS= read -r branch; do
+        [ -z "$branch" ] && continue
+        [ "$branch" = "$current" ] && continue
+        [ "$branch" = "$default" ] && continue
+
+        # Skip if remote tracking branch exists
+        if git -C "$repo" rev-parse --verify --quiet "origin/$branch" >/dev/null 2>&1; then
+            continue
+        fi
+
+        # Check commits ahead of default
+        local ahead
+        ahead=$(git -C "$repo" rev-list --count "$default..$branch" 2>/dev/null)
+        if [ $? -ne 0 ]; then
+            ahead=$(git -C "$repo" rev-list --count "origin/$default..$branch" 2>/dev/null)
+        fi
+
+        if [ "$ahead" = "0" ]; then
+            if [ "$printed_header" -eq 0 ]; then
+                printf "%s%s%s %s(default: %s, current: %s)%s\n" \
+                    "$bold" "$rel" "$reset" "$dim" "$default" "$current" "$reset"
+                printed_header=1
+            fi
+            if [ "$dry_run" -eq 1 ]; then
+                printf "    %swould delete: %s%s\n" "$yellow" "$branch" "$reset"
+            else
+                git -C "$repo" branch -d "$branch" >/dev/null 2>&1
+                printf "    %sdeleted: %s%s\n" "$red" "$branch" "$reset"
+            fi
+            ((count++)) || true
+        fi
+    done < <(git -C "$repo" for-each-ref --format='%(refname:short)' refs/heads/ 2>/dev/null)
+
+    echo "$count"
+}
+
+mapfile -t repos < <(
+    find "$root" -maxdepth "$depth" -type d -name .git -prune 2>/dev/null \
+        | sed 's|/\.git$||' | sort
+)
+
+if [ ${#repos[@]} -eq 0 ]; then
+    echo "No git repos found under $root (depth $depth)."
+    exit 0
+fi
+
+printf "%s[%s] Scanning %d repos...%s\n" "$dim" "$mode" "${#repos[@]}" "$reset"
+
+total_deleted=0
+for r in "${repos[@]}"; do
+    result=$(scan_repo "$r")
+    if [ -n "$result" ]; then
+        ((total_deleted += result)) || true
+    fi
+done
+
+if [ "$total_deleted" -eq 0 ]; then
+    printf "%sNo stale branches found.%s\n" "$green" "$reset"
+else
+    printf "\n%s%s: %d branch(es) across %d repos.%s\n" \
+        "$cyan" "$mode" "$total_deleted" "${#repos[@]}" "$reset"
+fi

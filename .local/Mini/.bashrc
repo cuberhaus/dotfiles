@@ -259,6 +259,85 @@ alias gah="git-ahead"
 ## Alternative (makes easier finding out which commits have no message)
 alias yolo='git add -A; git commit -m "This is a placeholder"; git push'
 
+# Recursively find and delete local branches with no remote and no commits ahead
+gclean() {
+    local dry_run=false
+    if [ "$1" = "--dry-run" ] || [ "$1" = "-n" ]; then
+        dry_run=true
+        shift
+    fi
+    local search_path="${1:-.}"
+    local total_deleted=0
+
+    if $dry_run; then
+        printf "\033[32m[DRY RUN] Scanning for stale local branches...\033[0m\n"
+    else
+        printf "\033[32m[CLEAN] Scanning for stale local branches...\033[0m\n"
+    fi
+
+    while IFS= read -r -d $'\0' dot_git; do
+        local dir
+        dir=$(dirname "$dot_git")
+        local repo_name
+        repo_name=$(basename "$dir")
+
+        git -C "$dir" fetch --all --prune --quiet 2>/dev/null
+
+        # Detect default branch
+        local default_branch
+        default_branch=$(git -C "$dir" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|^refs/remotes/origin/||')
+        if [ -z "$default_branch" ]; then
+            if git -C "$dir" rev-parse --verify --quiet origin/main &>/dev/null; then
+                default_branch="main"
+            else
+                default_branch="master"
+            fi
+        fi
+
+        local current
+        current=$(git -C "$dir" rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+        local printed_header=false
+        while IFS= read -r branch; do
+            [ -z "$branch" ] && continue
+            [ "$branch" = "$current" ] && continue
+            [ "$branch" = "$default_branch" ] && continue
+
+            # Skip if remote tracking branch exists
+            if git -C "$dir" rev-parse --verify --quiet "origin/$branch" &>/dev/null; then
+                continue
+            fi
+
+            # Check commits ahead of default
+            local ahead
+            ahead=$(git -C "$dir" rev-list --count "$default_branch..$branch" 2>/dev/null)
+            if [ $? -ne 0 ]; then
+                ahead=$(git -C "$dir" rev-list --count "origin/$default_branch..$branch" 2>/dev/null)
+            fi
+
+            if [ "$ahead" = "0" ]; then
+                if ! $printed_header; then
+                    printf "\033[37m%s\033[0m (default: %s, current: %s)\n" "$repo_name" "$default_branch" "$current"
+                    printed_header=true
+                fi
+                if $dry_run; then
+                    printf "    \033[33mwould delete: %s\033[0m\n" "$branch"
+                else
+                    git -C "$dir" branch -d "$branch" &>/dev/null
+                    printf "    \033[31mdeleted: %s\033[0m\n" "$branch"
+                fi
+                ((total_deleted++)) || true
+            fi
+        done < <(git -C "$dir" for-each-ref --format='%(refname:short)' refs/heads/ 2>/dev/null)
+    done < <(find "$search_path" -maxdepth 3 -type d -name .git -print0 2>/dev/null)
+
+    if [ "$total_deleted" -eq 0 ]; then
+        printf "\033[32mNo stale branches found.\033[0m\n"
+    else
+        printf "\n\033[36m%d branch(es) processed.\033[0m\n" "$total_deleted"
+    fi
+}
+
 # Git functions
 ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
 add-pat() {
