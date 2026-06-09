@@ -1,0 +1,56 @@
+name: Check workspace parity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cuberhaus-workspace/**'
+      - '.github/workflows/check-workspace-parity.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cuberhaus-workspace/**'
+      - '.github/workflows/check-workspace-parity.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+        with:
+          path: self
+
+      - name: Determine peer repo
+        id: peer
+        shell: bash
+        run: |
+          case "$GITHUB_REPOSITORY" in
+            cuberhaus/dotfiles)    echo "name=cuberhaus/WinDotfiles" >> "$GITHUB_OUTPUT" ;;
+            cuberhaus/WinDotfiles) echo "name=cuberhaus/dotfiles"   >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::Unknown repo: $GITHUB_REPOSITORY"; exit 1 ;;
+          esac
+
+      - name: Checkout peer repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.peer.outputs.name }}
+          path: peer
+
+      - name: Verify cuberhaus-workspace/ is byte-identical
+        shell: bash
+        run: |
+          set -euo pipefail
+          diff_out=$(diff -r --brief \
+            --exclude=sync.sh --exclude=sync.ps1 --exclude=README.md \
+            self/cuberhaus-workspace/ peer/cuberhaus-workspace/ || true)
+          if [[ -n "$diff_out" ]]; then
+            echo "::error::Drift detected between $GITHUB_REPOSITORY and ${{ steps.peer.outputs.name }} cuberhaus-workspace/"
+            echo "$diff_out"
+            exit 1
+          fi
+          echo "OK: cuberhaus-workspace/ is byte-identical with ${{ steps.peer.outputs.name }} (sync.sh/sync.ps1/README.md excluded)."
