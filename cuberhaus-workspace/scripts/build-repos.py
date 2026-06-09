@@ -209,6 +209,22 @@ def main() -> int:
         encoding="utf-8",
     )
     print(f"[build-repos] Wrote {out_path} ({len(enriched)} repos)", file=sys.stderr)
+
+    # Also write to the tracked source-of-truth copy in WinDotfiles, so the
+    # audit script (which reads from cuberhaus-workspace/repos.json) sees the
+    # same data after `make update-repos`. Best-effort; silently skip if the
+    # tracked copy isn't reachable (e.g. running from a clone outside the
+    # cuberhaus workspace).
+    tracked = workspace_root / "WinDotfiles" / "cuberhaus-workspace" / "repos.json"
+    if tracked.parent.is_dir() and tracked != out_path:
+        try:
+            tracked.write_text(
+                json.dumps(enriched, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            print(f"[build-repos] Mirrored to {tracked}", file=sys.stderr)
+        except OSError as e:
+            print(f"[build-repos] WARN: could not mirror to {tracked}: {e}", file=sys.stderr)
     return 0
 
 
