@@ -49,13 +49,21 @@ if [[ ! -d "$WORKSPACE_ROOT" ]]; then
     exit 1
 fi
 
-# Pairs of "source-relative|dest-relative". Add new files here.
+# Top-level pairs of "source-relative|dest-relative". AGENTS.md needs
+# special header handling, so it stays explicit. Files under
+# .github/skills/ are auto-discovered below — new skills get picked up
+# with no edits here.
 pairs=(
     "AGENTS.md|AGENTS.md"
-    ".github/skills/init-repo/SKILL.md|.github/skills/init-repo/SKILL.md"
-    ".github/skills/init-repo/references/template.md|.github/skills/init-repo/references/template.md"
-    ".github/skills/bulk-sweep/SKILL.md|.github/skills/bulk-sweep/SKILL.md"
 )
+
+# Auto-discover everything under .github/skills/ (SKILL.md, references, etc).
+if [[ -d "${source_dir}/.github/skills" ]]; then
+    while IFS= read -r -d '' f; do
+        rel="${f#${source_dir}/}"
+        pairs+=("${rel}|${rel}")
+    done < <(find "${source_dir}/.github/skills" -type f -print0 | sort -z)
+fi
 
 changed=0
 same=0
