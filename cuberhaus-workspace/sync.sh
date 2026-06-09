@@ -149,3 +149,46 @@ else
     printf '%sSync complete: %d change(s), %d already in sync, %d missing source(s).%s\n' \
         "$C_GREEN" "$changed" "$same" "$missing" "$C_RESET"
 fi
+
+# Deploy VS Code user prompts (separate destination root).
+# Source: cuberhaus-workspace/prompts/*.prompt.md
+# Dest:   $HOME/.config/Code/User/prompts/
+prompts_source="${source_dir}/prompts"
+prompts_dest="${HOME}/.config/Code/User/prompts"
+
+if [[ -d "$prompts_source" ]]; then
+    prompt_changed=0
+    prompt_same=0
+    echo
+    printf '%sVS Code prompts: %s -> %s%s\n' "$C_DIM" "$prompts_source" "$prompts_dest" "$C_RESET"
+    if [[ ! -d "$prompts_dest" ]]; then
+        if (( DRY_RUN )); then
+            printf '%s[mkdir]   %s (dry run)%s\n' "$C_CYAN" "$prompts_dest" "$C_RESET"
+        else
+            mkdir -p -- "$prompts_dest"
+        fi
+    fi
+    shopt -s nullglob
+    for prompt in "$prompts_source"/*.prompt.md; do
+        name="$(basename -- "$prompt")"
+        dst="${prompts_dest}/${name}"
+        needs_copy=1
+        if [[ -f "$dst" ]] && [[ "$(sha256_of "$prompt")" == "$(sha256_of "$dst")" ]]; then
+            needs_copy=0
+        fi
+        if (( needs_copy == 0 )); then
+            printf '%s[same]    prompts/%s%s\n' "$C_DIM" "$name" "$C_RESET"
+            ((prompt_same++)) || true
+        elif (( DRY_RUN )); then
+            printf '%s[copy]    prompts/%s (dry run)%s\n' "$C_CYAN" "$name" "$C_RESET"
+            ((prompt_changed++)) || true
+        else
+            cp -f -- "$prompt" "$dst"
+            printf '%s[copied]  prompts/%s%s\n' "$C_GREEN" "$name" "$C_RESET"
+            ((prompt_changed++)) || true
+        fi
+    done
+    shopt -u nullglob
+    printf '%sPrompts: %d change(s), %d already in sync.%s\n' \
+        "$C_GREEN" "$prompt_changed" "$prompt_same" "$C_RESET"
+fi

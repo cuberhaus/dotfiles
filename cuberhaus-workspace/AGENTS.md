@@ -24,9 +24,15 @@ Multi-root VS Code workspace at `~/cuberhaus` containing **~50 independent git r
 
 - **`/init-repo`** — scaffold an `AGENTS.md` for a newly cloned repo. Migrates substantive `.cursorrules` content (then deletes it, since Cursor reads AGENTS.md natively), removes the legacy 15-byte `copilot-instructions.md → ../.cursorrules` stub pattern, and writes a concrete AGENTS.md using the project-tested template. See [.github/skills/init-repo/SKILL.md](.github/skills/init-repo/SKILL.md).
 
+## VS Code user prompts
+
+User-scoped prompt files live in `cuberhaus-workspace/prompts/` (byte-identical in both repos). `make sync-workspace` deploys them to the platform's VS Code user prompts dir (`%APPDATA%\Code\User\prompts\` on Windows, `~/.config/Code/User/prompts/` on Linux), so they're available in every workspace as slash commands.
+
+- **`/skills-install`** — walk through installing an agent skill end-to-end (lockfile, `.gitignore`, Makefile targets, AGENTS.md `## Agent skills` section, commit, push or PR). Advisory: pauses before any commit or push.
+
 ## Reproducibility
 
-This file and the `/init-repo` skill are git-tracked in [WinDotfiles/cuberhaus-workspace/](WinDotfiles/cuberhaus-workspace/) (Windows) and [dotfiles/cuberhaus-workspace/](dotfiles/cuberhaus-workspace/) (Linux), and copied here by `make sync-workspace` from either repo. Treat the copies under `~/cuberhaus/` as **generated** — edit the source files in WinDotfiles or dotfiles, then re-sync. Keep the two source folders byte-identical for `AGENTS.md`, `SKILL.md`, `template.md`, and `assets/pre-push`.
+This file and the `/init-repo` skill are git-tracked in [WinDotfiles/cuberhaus-workspace/](WinDotfiles/cuberhaus-workspace/) (Windows) and [dotfiles/cuberhaus-workspace/](dotfiles/cuberhaus-workspace/) (Linux), and copied here by `make sync-workspace` from either repo. Treat the copies under `~/cuberhaus/` as **generated** — edit the source files in WinDotfiles or dotfiles, then re-sync. Keep the two source folders byte-identical for `AGENTS.md`, `SKILL.md`, `template.md`, `scripts/build-repos.py`, `prompts/*.prompt.md`, and `assets/pre-push`. Run `make check-parity` from either repo to verify (excludes `sync.sh`/`sync.ps1`/`README.md` which are intentionally platform-specific).
 
 ---
 

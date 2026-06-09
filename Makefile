@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run update-repos bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run check-parity update-repos bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -117,6 +117,20 @@ sync-workspace: ## Copy cuberhaus-workspace/ sources into $$HOME/cuberhaus (work
 
 sync-workspace-dry-run: ## Show what sync-workspace would change without writing
 	bash cuberhaus-workspace/sync.sh -n
+
+check-parity: ## Verify cuberhaus-workspace/ is byte-identical with the WinDotfiles peer
+	@if [ ! -d "$$HOME/cuberhaus/WinDotfiles/cuberhaus-workspace" ]; then \
+		echo "WinDotfiles peer not found at $$HOME/cuberhaus/WinDotfiles/cuberhaus-workspace; skipping."; exit 0; \
+	fi; \
+	diff_out=$$(diff -r --brief \
+		--exclude=sync.sh --exclude=sync.ps1 --exclude=README.md \
+		cuberhaus-workspace/ "$$HOME/cuberhaus/WinDotfiles/cuberhaus-workspace/" || true); \
+	if [ -n "$$diff_out" ]; then \
+		echo "Drift detected between dotfiles and WinDotfiles cuberhaus-workspace/:"; \
+		echo "$$diff_out"; exit 1; \
+	else \
+		echo "OK: cuberhaus-workspace/ is byte-identical with WinDotfiles peer (sync.sh/sync.ps1/README.md excluded)."; \
+	fi
 
 update-repos: ## Refresh repos.json in $$HOME/cuberhaus (GitHub API + local enrichment; needs gh auth + python3)
 	python3 cuberhaus-workspace/scripts/build-repos.py
