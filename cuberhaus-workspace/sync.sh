@@ -54,6 +54,7 @@ pairs=(
     "AGENTS.md|AGENTS.md"
     ".github/skills/init-repo/SKILL.md|.github/skills/init-repo/SKILL.md"
     ".github/skills/init-repo/references/template.md|.github/skills/init-repo/references/template.md"
+    ".github/skills/bulk-sweep/SKILL.md|.github/skills/bulk-sweep/SKILL.md"
 )
 
 changed=0

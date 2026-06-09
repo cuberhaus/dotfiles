@@ -23,6 +23,7 @@ Multi-root VS Code workspace at `~/cuberhaus` containing **~50 independent git r
 ## Skills
 
 - **`/init-repo`** — scaffold an `AGENTS.md` for a newly cloned repo. Migrates substantive `.cursorrules` content (then deletes it, since Cursor reads AGENTS.md natively), removes the legacy 15-byte `copilot-instructions.md → ../.cursorrules` stub pattern, and writes a concrete AGENTS.md using the project-tested template. See [.github/skills/init-repo/SKILL.md](.github/skills/init-repo/SKILL.md).
+- **`/bulk-sweep`** — apply the same small change across many active workspace repos at once, filtered by `repos.json` state. Encodes the workspace safety rules (FROZEN coursework protection, direct-push-to-main with branch+PR fallback when lefthook blocks, no `--no-verify`). Use for policy-drift cleanup, rolling out config files, or one-shot `npm audit fix` / `gh api` sweeps. See [.github/skills/bulk-sweep/SKILL.md](.github/skills/bulk-sweep/SKILL.md).
 
 ## VS Code user prompts
 
@@ -45,7 +46,7 @@ Workspace-wide defaults agents should treat as the baseline for any active repo.
 
 ## Reproducibility
 
-This file and the `/init-repo` skill are git-tracked in [WinDotfiles/cuberhaus-workspace/](WinDotfiles/cuberhaus-workspace/) (Windows) and [dotfiles/cuberhaus-workspace/](dotfiles/cuberhaus-workspace/) (Linux), and copied here by `make sync-workspace` from either repo. Treat the copies under `~/cuberhaus/` as **generated** — edit the source files in WinDotfiles or dotfiles, then re-sync. Keep the two source folders byte-identical for `AGENTS.md`, `SKILL.md`, `template.md`, `scripts/build-repos.py`, `prompts/*.prompt.md`, and `assets/pre-push`. Run `make check-parity` from either repo to verify (excludes `sync.sh`/`sync.ps1`/`README.md` which are intentionally platform-specific).
+This file and the `/init-repo` and `/bulk-sweep` skills are git-tracked in [WinDotfiles/cuberhaus-workspace/](WinDotfiles/cuberhaus-workspace/) (Windows) and [dotfiles/cuberhaus-workspace/](dotfiles/cuberhaus-workspace/) (Linux), and copied here by `make sync-workspace` from either repo. Treat the copies under `~/cuberhaus/` as **generated** — edit the source files in WinDotfiles or dotfiles, then re-sync. Keep the two source folders byte-identical for `AGENTS.md`, `SKILL.md` (init-repo and bulk-sweep), `template.md`, `scripts/build-repos.py`, `prompts/*.prompt.md`, and `assets/pre-push`. Run `make check-parity` from either repo to verify (excludes `sync.sh`/`sync.ps1`/`README.md` which are intentionally platform-specific).
 
 ---
 
