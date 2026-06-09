@@ -4,6 +4,7 @@ Multi-root VS Code workspace at `~/cuberhaus` containing **~50 independent git r
 
 ## Working in this workspace
 
+- **Before workspace-wide tasks, refresh the catalog.** Run `make update-repos` from `WinDotfiles/` or `dotfiles/` to update [repos.json](repos.json).
 - **Scope work to one repo at a time.** Every git-tracked subfolder has its own `AGENTS.md`, its own conventions, and its own `.git/`. Do not refactor across repo boundaries.
 - **Read the per-repo `AGENTS.md` first** when you enter a repo. All 50 have one.
 - **Most repos are FROZEN graded coursework** (FIB-UPC). Do not modernize, refactor, or "improve" coursework code unless explicitly asked. Each course repo's `AGENTS.md` encodes this rule individually.
