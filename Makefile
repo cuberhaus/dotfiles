@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run update-repos bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
+.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run update-repos bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -95,6 +95,20 @@ skip-worktree: ## Ignore runtime changes to volatile config files (run once afte
 	@echo "skip-worktree applied to:"
 	@for f in $(SKIP_WORKTREE_FILES); do echo "  $$f"; done
 	@echo "To commit a real settings change: git update-index --no-skip-worktree <file>"
+
+##@ Skills
+
+skills-list: ## List project skills installed via skills-lock.json
+	@npx skills list -p
+
+skills-update: ## Update project skills and show what changed
+	@npx skills update -p -y
+	@echo ""
+	@echo "Changed skill files:"
+	@git diff --name-only -- .agents/skills skills-lock.json || true
+
+skills-restore: ## Download/restore pinned skills from skills-lock.json
+	@npx skills experimental_install
 
 ##@ Workspace integration (cuberhaus multi-root)
 
