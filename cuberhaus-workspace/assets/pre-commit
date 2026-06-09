@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Block direct commits on protected branches (main/master).
+# Bypass with `git commit --no-verify` only when you know what you're doing.
+
+set -euo pipefail
+
+protected='^(main|master)$'
+
+# Resolve current branch; detached HEAD has no symbolic ref and is allowed
+# (used for rebases, bisects, worktree operations, etc.).
+branch="$(git symbolic-ref --short -q HEAD || true)"
+[[ -z "$branch" ]] && exit 0
+
+if [[ "$branch" =~ $protected ]]; then
+    printf '\033[31mBLOCKED:\033[0m direct commit on \033[33m%s\033[0m.\n' "$branch" >&2
+    printf '\nThis branch is protected. Commit on a feature branch instead:\n\n' >&2
+    printf '  git switch -c feat/<short-name>\n' >&2
+    printf '  git add -p && git commit\n' >&2
+    printf '  git push -u origin feat/<short-name>\n' >&2
+    printf '  gh pr create --fill\n\n' >&2
+    printf 'If you already staged changes, move them to a new branch:\n' >&2
+    printf '  git switch -c feat/<short-name>      # keeps staged changes\n' >&2
+    printf '  git commit\n\n' >&2
+    printf 'Override (last resort): git commit --no-verify\n' >&2
+    exit 1
+fi
+
+exit 0
