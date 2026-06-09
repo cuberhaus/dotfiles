@@ -1,0 +1,36 @@
+name: Update agent skills
+
+on:
+  schedule:
+    # 09:00 UTC on the 1st of each month
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Update pinned skills
+        run: npx -y skills update -p -y
+      - name: Open PR if skills-lock.json changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'chore(skills): monthly agent skills update'
+          title: 'chore(skills): monthly agent skills update'
+          body: |
+            Automated monthly update via `npx skills update -p -y`.
+
+            Review the `skills-lock.json` diff and any new skill READMEs before merging.
+            Restore the unpacked skills locally with `make skills-restore`.
+          branch: chore/skills-monthly-update
+          delete-branch: true
+          add-paths: |
+            skills-lock.json

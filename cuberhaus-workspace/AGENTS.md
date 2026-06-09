@@ -9,7 +9,7 @@ Multi-root VS Code workspace at `~/cuberhaus` containing **~50 independent git r
 - **Read the per-repo `AGENTS.md` first** when you enter a repo. All 50 have one.
 - **Most repos are FROZEN graded coursework** (FIB-UPC). Do not modernize, refactor, or "improve" coursework code unless explicitly asked. Each course repo's `AGENTS.md` encodes this rule individually.
 - **Prefer dedicated sibling repos over [fib/](fib/).** Many courses in `fib/` have a more current dedicated sibling: `APA`, `MD`, `MD2`, `ROB`, `PAR`, `AS`, `CAIM`, `VC`, `SBC_IA`, `desastresIA`, `Practica_de_Planificacion`, `SpringUnitTesting`, `joc_eda`, `pracpro2`, `projectA`, `projectA2`, `subgrup-prop7.1`, `ANTLR4_JSBach`, `waslab01..04`. Use those when they exist.
-- **5 repos have `.cursorrules`** (`cuberhaus`, `dotfiles`, `PersonalPortfolio`, `TFG`, `WinDotfiles`) mirrored from their `AGENTS.md` for Cursor compatibility. When you change one, mirror the change in the other.
+- **`AGENTS.md` is the single source of agent guidance.** Modern Cursor reads it natively; the workspace no longer maintains parallel `.cursorrules` files.
 
 ## Active vs frozen — quick map
 
@@ -22,7 +22,7 @@ Multi-root VS Code workspace at `~/cuberhaus` containing **~50 independent git r
 
 ## Skills
 
-- **`/init-repo`** — scaffold an `AGENTS.md` for a newly cloned repo. Migrates substantive `.cursorrules` content, deletes the legacy 15-byte `copilot-instructions.md → ../.cursorrules` stub pattern, and writes a concrete AGENTS.md using the project-tested template. See [.github/skills/init-repo/SKILL.md](.github/skills/init-repo/SKILL.md).
+- **`/init-repo`** — scaffold an `AGENTS.md` for a newly cloned repo. Migrates substantive `.cursorrules` content (then deletes it, since Cursor reads AGENTS.md natively), removes the legacy 15-byte `copilot-instructions.md → ../.cursorrules` stub pattern, and writes a concrete AGENTS.md using the project-tested template. See [.github/skills/init-repo/SKILL.md](.github/skills/init-repo/SKILL.md).
 
 ## Reproducibility
 

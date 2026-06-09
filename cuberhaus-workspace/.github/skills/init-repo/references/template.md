@@ -29,7 +29,6 @@ Use this as the structure to fill in for a per-repo AGENTS.md. **OMIT any sectio
 - Frozen-coursework boundaries.
 - OS-only constraints (macOS-only build, Windows-only GUI).
 - Pre-commit hook quirks (interactive prompts, /dev/tty reads).
-- `.cursorrules` mirror obligation (when a sibling `.cursorrules` exists).
 }
 
 See [README.md](README.md) for full setup.

@@ -34,7 +34,7 @@ Scaffold a focused, concrete `AGENTS.md` at the root of a single git repository.
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `AGENTS.md` (root)                    | If present, read it, ask whether to **refine** (edit in place) or **replace** (rewrite). Default: refine.                 |
 | `.github/copilot-instructions.md`     | If ≤ 50 bytes (typical stub: `../.cursorrules`), plan to **delete** after creating AGENTS.md. If substantive, migrate it. |
-| `.cursorrules`                        | If present, read it. If > 200 bytes, **migrate its rules** into AGENTS.md. **Do not delete** — Cursor still reads it.     |
+| `.cursorrules`                        | If present, read it. If > 200 bytes, **migrate its rules** into AGENTS.md, then **delete it** — modern Cursor reads AGENTS.md natively.        |
 | `CLAUDE.md`, `.windsurfrules`, etc.   | Read for content; mention in summary but don't delete.                                                                    |
 
 ### 3. Explore the repo (cap at ~10 file reads)
@@ -62,7 +62,7 @@ Use [references/template.md](references/template.md). Key principles:
 
 - Extract the rules (not the prose).
 - Re-phrase concisely for AGENTS.md.
-- **Preserve `.cursorrules` in place** — Cursor reads it. Add a Pitfall noting the two files must be kept in sync.
+- **Delete `.cursorrules` after migrating** — modern Cursor reads AGENTS.md natively, so maintaining both is duplicated work.
 
 ### 6. Delete the legacy stub if applicable
 
@@ -76,7 +76,7 @@ After writing:
 
 - File exists at `<repo>/AGENTS.md`.
 - Stub `.github/copilot-instructions.md` is gone (if applicable).
-- `.cursorrules` is untouched (if it existed).
+- `.cursorrules` is gone (if it existed and was migrated).
 - Line count is reasonable: 10–50 lines for most repos; up to ~60 for information-dense active projects.
 
 ### 8. Report
