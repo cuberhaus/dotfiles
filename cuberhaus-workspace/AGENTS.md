@@ -1,10 +1,10 @@
 # cuberhaus workspace
 
-Multi-root VS Code workspace at `~/cuberhaus` containing **~50 independent git repositories** cloned side-by-side. This folder is **not a git repo itself** — it just collects clones in one place for the editor. The authoritative catalog is [repos.json](repos.json) (name, description, topics, archive/fork status).
+Multi-root VS Code workspace at `~/cuberhaus` containing **~50 independent git repositories** cloned side-by-side. This folder is **not a git repo itself** — it just collects clones in one place for the editor. The authoritative catalog is [repos.json](repos.json) (GitHub metadata + per-clone facts: `state`, `cloned`, `has_agents_md`, `has_makefile`, `has_pr_template`, `has_skills`, `consumed_by`).
 
 ## Working in this workspace
 
-- **Before workspace-wide tasks, refresh the catalog.** Run `make update-repos` from `WinDotfiles/` or `dotfiles/` to update [repos.json](repos.json).
+- **Before workspace-wide tasks, refresh the catalog.** Run `make update-repos` from `WinDotfiles/` or `dotfiles/` to update [repos.json](repos.json). The catalog is regenerated end-to-end (curated `STATE` / `CONSUMED_BY` maps live in [cuberhaus-workspace/scripts/build-repos.py](WinDotfiles/cuberhaus-workspace/scripts/build-repos.py)) — edit the script when a repo changes purpose, then re-run.
 - **Scope work to one repo at a time.** Every git-tracked subfolder has its own `AGENTS.md`, its own conventions, and its own `.git/`. Do not refactor across repo boundaries.
 - **Read the per-repo `AGENTS.md` first** when you enter a repo. All 50 have one.
 - **Most repos are FROZEN graded coursework** (FIB-UPC). Do not modernize, refactor, or "improve" coursework code unless explicitly asked. Each course repo's `AGENTS.md` encodes this rule individually.

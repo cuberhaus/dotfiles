@@ -118,8 +118,8 @@ sync-workspace: ## Copy cuberhaus-workspace/ sources into $$HOME/cuberhaus (work
 sync-workspace-dry-run: ## Show what sync-workspace would change without writing
 	bash cuberhaus-workspace/sync.sh -n
 
-update-repos: ## Refresh repos.json in $$HOME/cuberhaus via GitHub CLI (needs gh auth)
-	gh repo list cuberhaus --json name,description,isArchived,isFork,visibility,repositoryTopics --limit 100 > "$$HOME/cuberhaus/repos.json"
+update-repos: ## Refresh repos.json in $$HOME/cuberhaus (GitHub API + local enrichment; needs gh auth + python3)
+	python3 cuberhaus-workspace/scripts/build-repos.py
 
 ##@ Submodules
 
