@@ -16,11 +16,14 @@ updates:
       prefix: "chore(submodules)"
 
   # Keep GitHub Actions used in this repo (actions/checkout, peter-evans/create-pull-request, etc.)
-  # pinned to their latest minor/patch.
+  # pinned to their latest minor/patch. Grouped so weekly bumps land as one PR.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
+    groups:
+      actions:
+        patterns: ["*"]
     commit-message:
       prefix: "chore(actions)"

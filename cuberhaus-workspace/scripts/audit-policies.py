@@ -54,6 +54,15 @@ def audit_repo(repo: dict, policies: dict) -> list[str]:
         if actual_truthy != expected:
             drift.append(f"`{key}`: expected `{expected}`, got `{actual}`")
 
+    # Conditional: repos with skills installed should have the monthly
+    # skills-update workflow. Catches "installed skills but forgot the
+    # automation". Not a flat policy because it only applies when has_skills.
+    if repo.get("has_skills") and not repo.get("has_skills_workflow"):
+        drift.append(
+            "`has_skills_workflow`: required because `has_skills` is truthy, "
+            "but `.github/workflows/skills-update.yml` is missing"
+        )
+
     # GitHub settings checks (fetch live)
     setting_policies = policies.get("settings", {})
     if setting_policies:

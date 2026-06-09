@@ -118,6 +118,9 @@ def enrich(record: dict, workspace_root: Path) -> dict:
     record["has_pr_template"] = (
         repo_path / ".github" / "pull_request_template.md"
     ).is_file()
+    record["has_skills_workflow"] = (
+        repo_path / ".github" / "workflows" / "skills-update.yml"
+    ).is_file()
     if (repo_path / "skills-lock.json").is_file():
         record["has_skills"] = "root"
     elif (repo_path / "web" / "skills-lock.json").is_file():
