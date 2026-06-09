@@ -41,6 +41,19 @@ def gh_api(path: str) -> dict | None:
         return None
 
 
+def dotted_get(data: dict, key: str):
+    """Walk `data` by dotted-path key. Returns None if any segment is missing.
+
+    Example: dotted_get(repo, 'security_and_analysis.secret_scanning.status')
+    """
+    current = data
+    for part in key.split("."):
+        if not isinstance(current, dict) or part not in current:
+            return None
+        current = current[part]
+    return current
+
+
 def audit_repo(repo: dict, policies: dict) -> list[str]:
     """Return list of human-readable drift messages for one repo."""
     name = repo["name"]
@@ -63,17 +76,23 @@ def audit_repo(repo: dict, policies: dict) -> list[str]:
             "but `.github/workflows/skills-update.yml` is missing"
         )
 
-    # GitHub settings checks (fetch live)
+    # GitHub settings checks (fetch live). Keys may use dotted paths to walk
+    # nested fields like 'security_and_analysis.secret_scanning.status'.
     setting_policies = policies.get("settings", {})
-    if setting_policies:
+    non_empty_policies = policies.get("non_empty", [])
+    if setting_policies or non_empty_policies:
         live = gh_api(f"repos/cuberhaus/{name}")
         if live is None:
             drift.append("(could not fetch live settings)")
         else:
             for key, expected in setting_policies.items():
-                actual = live.get(key)
+                actual = dotted_get(live, key) if "." in key else live.get(key)
                 if actual != expected:
                     drift.append(f"`{key}`: expected `{expected}`, got `{actual}`")
+            for key in non_empty_policies:
+                actual = dotted_get(live, key) if "." in key else live.get(key)
+                if not actual:
+                    drift.append(f"`{key}`: expected non-empty value, got `{actual}`")
 
     return drift
 

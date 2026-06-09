@@ -1,5 +1,5 @@
 {
-  "_comment": "Declarative policies for cuberhaus workspace repos. Audited weekly by .github/workflows/policies-audit.yml. Only repos with state in audited_states are checked. Edit and commit to change the contract.",
+  "_comment": "Declarative policies for cuberhaus workspace repos. Audited weekly by .github/workflows/policies-audit.yml. Only repos with state in audited_states are checked. Edit and commit to change the contract. Settings keys may use dotted paths to walk nested GitHub API fields (e.g. 'security_and_analysis.secret_scanning_push_protection.status').",
   "audited_states": [
     "active",
     "active-research",
@@ -9,11 +9,19 @@
     "allow_auto_merge": true,
     "delete_branch_on_merge": true,
     "has_wiki": false,
-    "has_projects": false
+    "has_projects": false,
+    "default_branch": "main",
+    "security_and_analysis.secret_scanning_push_protection.status": "enabled",
+    "security_and_analysis.dependabot_security_updates.status": "enabled"
   },
+  "non_empty": [
+    "description",
+    "license.spdx_id"
+  ],
   "files": {
     "has_agents_md": true,
     "has_pr_template": true,
-    "has_makefile": true
+    "has_makefile": true,
+    "has_security_md": true
   }
 }
