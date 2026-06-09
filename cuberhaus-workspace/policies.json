@@ -1,0 +1,19 @@
+{
+  "_comment": "Declarative policies for cuberhaus workspace repos. Audited weekly by .github/workflows/policies-audit.yml. Only repos with state in audited_states are checked. Edit and commit to change the contract.",
+  "audited_states": [
+    "active",
+    "active-research",
+    "mixed"
+  ],
+  "settings": {
+    "allow_auto_merge": true,
+    "delete_branch_on_merge": true,
+    "has_wiki": false,
+    "has_projects": false
+  },
+  "files": {
+    "has_agents_md": true,
+    "has_pr_template": true,
+    "has_makefile": true
+  }
+}
