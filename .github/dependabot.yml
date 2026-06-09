@@ -1,0 +1,26 @@
+version: 2
+updates:
+  # Bump git submodules weekly. Grouped into a single PR.
+  # Submodules are upstream code (i3blocks-contrib, tpm, base16-shell, etc.)
+  # that gets sourced into the shell; do NOT auto-merge — review the diff.
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      submodules:
+        patterns: ["*"]
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(submodules)"
+
+  # Keep GitHub Actions used in this repo (actions/checkout, peter-evans/create-pull-request, etc.)
+  # pinned to their latest minor/patch.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "chore(actions)"
