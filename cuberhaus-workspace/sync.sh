@@ -81,6 +81,14 @@ sha256_of() {
     fi
 }
 
+sha256_stdin() {
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum | awk '{print $1}'
+    else
+        shasum -a 256 | awk '{print $1}'
+    fi
+}
+
 for pair in "${pairs[@]}"; do
     src_rel="${pair%%|*}"
     dst_rel="${pair##*|}"
@@ -94,8 +102,18 @@ for pair in "${pairs[@]}"; do
     fi
 
     needs_copy=1
-    if [[ -f "$dst_path" ]] && [[ "$(sha256_of "$src_path")" == "$(sha256_of "$dst_path")" ]]; then
-        needs_copy=0
+    if [[ -f "$dst_path" ]]; then
+        if [[ "$dst_rel" == "AGENTS.md" ]]; then
+            # Destination has a prepended GENERATED header. Compare body
+            # (after the first blank line) to source to stay idempotent.
+            if head -n 1 -- "$dst_path" | grep -q '^<!-- GENERATED FILE'; then
+                dst_body_hash=$(sed '1,/^$/d' -- "$dst_path" | sha256_stdin)
+                src_hash=$(sha256_of "$src_path")
+                [[ "$dst_body_hash" == "$src_hash" ]] && needs_copy=0
+            fi
+        elif [[ "$(sha256_of "$src_path")" == "$(sha256_of "$dst_path")" ]]; then
+            needs_copy=0
+        fi
     fi
 
     if (( needs_copy == 0 )); then
@@ -112,7 +130,18 @@ for pair in "${pairs[@]}"; do
         printf '%s[copy]    %s (dry run)%s\n' "$C_CYAN" "$dst_rel" "$C_RESET"
     else
         mkdir -p -- "$dst_dir"
-        cp -f -- "$src_path" "$dst_path"
+        # For AGENTS.md, prepend a GENERATED warning so direct edits at the
+        # workspace root are obviously wrong. Source files stay clean.
+        if [[ "$dst_rel" == "AGENTS.md" ]]; then
+            {
+                printf '<!-- GENERATED FILE - DO NOT EDIT.\n'
+                printf '     Source: dotfiles/cuberhaus-workspace/AGENTS.md (or WinDotfiles peer).\n'
+                printf '     Re-sync with `make sync-workspace` from either repo. -->\n\n'
+                cat -- "$src_path"
+            } > "$dst_path"
+        else
+            cp -f -- "$src_path" "$dst_path"
+        fi
         printf '%s[copied]  %s%s\n' "$C_GREEN" "$dst_rel" "$C_RESET"
     fi
     ((changed++)) || true

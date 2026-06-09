@@ -19,8 +19,12 @@ The output is pretty-printed, sorted by name, UTF-8 without BOM. Run via
 `make update-repos` from dotfiles/ or WinDotfiles/; needs `gh` authenticated.
 
 Usage:
-    python3 build-repos.py                 # writes $HOME/cuberhaus/repos.json
-    python3 build-repos.py /tmp/foo.json   # custom output path
+    python3 build-repos.py                                # writes $HOME/cuberhaus/repos.json
+    python3 build-repos.py /tmp/foo.json                  # custom output path
+    python3 build-repos.py /tmp/foo.json --preserve-from existing.json
+                                                          # keep entries from existing.json
+                                                          # for repos the API didn't return (e.g.
+                                                          # private repos unavailable in CI)
 """
 
 from __future__ import annotations
@@ -129,8 +133,17 @@ def default_workspace_root() -> Path:
 
 
 def main() -> int:
+    args = [a for a in sys.argv[1:] if a != '--preserve-from' and not a.startswith('--preserve-from=')]
+    preserve_from: Path | None = None
+    for i, a in enumerate(sys.argv[1:], start=1):
+        if a == '--preserve-from' and i + 1 < len(sys.argv):
+            preserve_from = Path(sys.argv[i + 1])
+            args = [x for x in args if x != sys.argv[i + 1]]
+        elif a.startswith('--preserve-from='):
+            preserve_from = Path(a.split('=', 1)[1])
+
     out_path = (
-        Path(sys.argv[1]) if len(sys.argv) > 1 else default_workspace_root() / "repos.json"
+        Path(args[0]) if args else default_workspace_root() / "repos.json"
     )
     workspace_root = out_path.parent
 
@@ -150,6 +163,24 @@ def main() -> int:
     )
 
     enriched = [enrich(r, workspace_root) for r in records]
+
+    # Preserve entries from an existing file for repos the API didn't return
+    # (e.g. private repos unavailable to CI's default GITHUB_TOKEN).
+    if preserve_from and preserve_from.is_file():
+        api_names = {r["name"] for r in records}
+        try:
+            existing = json.loads(preserve_from.read_text(encoding="utf-8"))
+            preserved = [r for r in existing if r.get("name") not in api_names]
+            if preserved:
+                print(
+                    f"[build-repos] Preserving {len(preserved)} entries from {preserve_from} "
+                    f"not returned by API: {', '.join(r['name'] for r in preserved)}",
+                    file=sys.stderr,
+                )
+                enriched.extend(preserved)
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"[build-repos] WARN: could not read --preserve-from {preserve_from}: {e}", file=sys.stderr)
+
     enriched.sort(key=lambda r: r["name"].lower())
 
     # Warn about curated entries that no longer match a real repo.

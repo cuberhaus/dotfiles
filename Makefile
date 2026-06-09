@@ -123,13 +123,13 @@ check-parity: ## Verify cuberhaus-workspace/ is byte-identical with the WinDotfi
 		echo "WinDotfiles peer not found at $$HOME/cuberhaus/WinDotfiles/cuberhaus-workspace; skipping."; exit 0; \
 	fi; \
 	diff_out=$$(diff -r --brief \
-		--exclude=sync.sh --exclude=sync.ps1 --exclude=README.md \
+		--exclude=sync.sh --exclude=sync.ps1 --exclude=README.md --exclude=repos.json \
 		cuberhaus-workspace/ "$$HOME/cuberhaus/WinDotfiles/cuberhaus-workspace/" || true); \
 	if [ -n "$$diff_out" ]; then \
 		echo "Drift detected between dotfiles and WinDotfiles cuberhaus-workspace/:"; \
 		echo "$$diff_out"; exit 1; \
 	else \
-		echo "OK: cuberhaus-workspace/ is byte-identical with WinDotfiles peer (sync.sh/sync.ps1/README.md excluded)."; \
+		echo "OK: cuberhaus-workspace/ is byte-identical with WinDotfiles peer (sync.sh/sync.ps1/README.md/repos.json excluded)."; \
 	fi
 
 update-repos: ## Refresh repos.json in $$HOME/cuberhaus (GitHub API + local enrichment; needs gh auth + python3)

@@ -30,6 +30,19 @@ User-scoped prompt files live in `cuberhaus-workspace/prompts/` (byte-identical 
 
 - **`/skills-install`** — walk through installing an agent skill end-to-end (lockfile, `.gitignore`, Makefile targets, AGENTS.md `## Agent skills` section, commit, push or PR). Advisory: pauses before any commit or push.
 
+## Workspace policies
+
+Workspace-wide defaults agents should treat as the baseline for any active repo. Per-repo `AGENTS.md` can override but should call out the exception.
+
+- **Single source of agent guidance**: `AGENTS.md` only. No `.cursorrules`, no `copilot-instructions.md` stubs. Modern Cursor reads `AGENTS.md` natively.
+- **Skills as dependencies**: skills are installed via `npx skills add owner/repo@skill-name`, pinned in `skills-lock.json` (committed), and unpacked into `.agents/skills/` (gitignored). Restore reproducibly with `make skills-restore`. Each repo with skills exposes `skills-list` / `skills-update` / `skills-restore` Makefile targets.
+- **Skills documentation**: each repo with installed skills has a `## Agent skills` section in `AGENTS.md` listing each skill and **when to invoke it** (not just what it does). Agents should consult these before doing the matching kind of work.
+- **Monthly skills refresh**: every repo with skills has a `.github/workflows/skills-update.yml` cron job that opens a PR on the 1st of each month if `skills-lock.json` changed.
+- **PR template**: every active repo has `.github/pull_request_template.md` with a checklist covering AGENTS.md updates, tests, and secrets.
+- **Push policy**: prefer direct push to `main` when branches are unprotected and no client hook blocks it. Some repos enforce branch+PR via a `no-commit-on-main` lefthook — detect via the commit-time error, switch to branch + PR. **Never `--no-verify`** to bypass hooks.
+- **Coursework freeze**: FIB-UPC course repos are frozen. Do not refactor, modernize, or restructure their code unless explicitly asked. Each course `AGENTS.md` encodes this rule individually.
+- **Workspace catalog**: [repos.json](repos.json) is the authoritative cross-repo index. Refresh before workspace-wide tasks (`make update-repos`). Curated `STATE` / `CONSUMED_BY` maps live in [cuberhaus-workspace/scripts/build-repos.py](WinDotfiles/cuberhaus-workspace/scripts/build-repos.py).
+
 ## Reproducibility
 
 This file and the `/init-repo` skill are git-tracked in [WinDotfiles/cuberhaus-workspace/](WinDotfiles/cuberhaus-workspace/) (Windows) and [dotfiles/cuberhaus-workspace/](dotfiles/cuberhaus-workspace/) (Linux), and copied here by `make sync-workspace` from either repo. Treat the copies under `~/cuberhaus/` as **generated** — edit the source files in WinDotfiles or dotfiles, then re-sync. Keep the two source folders byte-identical for `AGENTS.md`, `SKILL.md`, `template.md`, `scripts/build-repos.py`, `prompts/*.prompt.md`, and `assets/pre-push`. Run `make check-parity` from either repo to verify (excludes `sync.sh`/`sync.ps1`/`README.md` which are intentionally platform-specific).
