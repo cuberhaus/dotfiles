@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Block direct pushes to protected branches (main/master).
+# Bypass with `git push --no-verify` only when you know what you're doing.
+
+set -euo pipefail
+
+protected='^(main|master)$'
+remote="${1:-}"
+zero='0000000000000000000000000000000000000000'
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    branch="${remote_ref##refs/heads/}"
+
+    if [[ "$branch" =~ $protected ]]; then
+        # Allow branch deletion (local_sha = zero) — not a content push.
+        [[ "$local_sha" == "$zero" ]] && continue
+
+        printf '\033[31mBLOCKED:\033[0m direct push to \033[33m%s\033[0m on remote \033[33m%s\033[0m.\n' "$branch" "$remote" >&2
+        printf '\nThis branch is protected. Use a feature branch + pull request.\n\n' >&2
+        printf 'To recover a commit made directly on %s:\n' "$branch" >&2
+        printf '  git branch rescue/<short-name> HEAD\n' >&2
+        printf '  git reset --hard origin/%s\n' "$branch" >&2
+        printf '  git switch rescue/<short-name>\n' >&2
+        printf '  git push -u origin rescue/<short-name>\n' >&2
+        printf '  gh pr create --fill\n\n' >&2
+        printf 'Override (last resort): git push --no-verify\n' >&2
+        exit 1
+    fi
+done
+
+exit 0

@@ -27,6 +27,8 @@
 !Makefile
 !README.md
 !LICENSE
+!AGENTS.md
+!.cursorrules
 !.github/
 !.github/**
 
@@ -48,6 +50,8 @@
 !.hammerspoon/**
 !.tomighty/
 !.tomighty/**
+!cuberhaus-workspace/
+!cuberhaus-workspace/**
 
 # =============================================================================
 # .cache/ — only emacs bookmarks
