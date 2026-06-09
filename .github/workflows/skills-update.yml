@@ -21,6 +21,7 @@ jobs:
       - name: Update pinned skills
         run: npx -y skills update -p -y
       - name: Open PR if skills-lock.json changed
+        id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: 'chore(skills): monthly agent skills update'
@@ -34,3 +35,9 @@ jobs:
           delete-branch: true
           add-paths: |
             skills-lock.json
+
+      - name: Enable auto-merge on the PR
+        if: steps.cpr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --auto --squash --delete-branch
