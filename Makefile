@@ -152,24 +152,33 @@ antigen-update: ## Fetch the latest antigen.zsh from GitHub
 	@echo "antigen.zsh updated. Restart your shell to pick up changes."
 
 ##@ Bootstrap (OS-specific)
+# Each bootstrap target runs the OS-specific bash script, then chains
+# `sync-workspace` so the cuberhaus-workspace/ sources land in ~/cuberhaus
+# without a separate manual step. Setup remains one command per OS.
 
-bootstrap-arch: ## Run Arch bootstrap
+bootstrap-arch: ## Run Arch bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/arch
+	@$(MAKE) --no-print-directory sync-workspace
 
-bootstrap-manjaro: ## Run Manjaro bootstrap
+bootstrap-manjaro: ## Run Manjaro bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/manjaro
+	@$(MAKE) --no-print-directory sync-workspace
 
-bootstrap-ubuntu: ## Run Ubuntu bootstrap
+bootstrap-ubuntu: ## Run Ubuntu bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/ubuntu
+	@$(MAKE) --no-print-directory sync-workspace
 
-bootstrap-ubuntu-windows: ## Run Ubuntu-on-WSL bootstrap (no GUI apps)
+bootstrap-ubuntu-windows: ## Run Ubuntu-on-WSL bootstrap (no GUI apps, chains sync-workspace)
 	bash .local/scripts/bootstrap/ubuntu_windows
+	@$(MAKE) --no-print-directory sync-workspace
 
-bootstrap-mac: ## Run macOS bootstrap
+bootstrap-mac: ## Run macOS bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/mac
+	@$(MAKE) --no-print-directory sync-workspace
 
-bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA)
+bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA, chains sync-workspace)
 	bash .local/scripts/bootstrap/work
+	@$(MAKE) --no-print-directory sync-workspace
 
 ##@ Uninstall (OS-specific)
 
