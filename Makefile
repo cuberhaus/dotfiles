@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
+.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run update-repos bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work
 
 .DEFAULT_GOAL := help
 
@@ -103,6 +103,9 @@ sync-workspace: ## Copy cuberhaus-workspace/ sources into $$HOME/cuberhaus (work
 
 sync-workspace-dry-run: ## Show what sync-workspace would change without writing
 	bash cuberhaus-workspace/sync.sh -n
+
+update-repos: ## Refresh repos.json in $$HOME/cuberhaus via GitHub CLI (needs gh auth)
+	gh repo list cuberhaus --json name,description,isArchived,isFork,visibility,repositoryTopics --limit 100 > "$$HOME/cuberhaus/repos.json"
 
 ##@ Submodules
 
