@@ -27,6 +27,13 @@ Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS — shell, edi
 - User-facing output uses ANSI colors: success `\033[32m`, warning `\033[33m`, info `\033[34m`, always reset with `\033[0m`.
 - Parallelize repo/file iteration with `xargs -P`, backgrounded `&` jobs + `wait`, especially for multi-repo helpers like `add_pat`.
 
+## Agent skills
+
+Installable skills live under `.agents/skills/` (gitignored; restore with `make skills-restore`). Pinned versions are in [skills-lock.json](skills-lock.json).
+
+- **bash-defensive-patterns** — consult when writing or refactoring bash scripts under `.local/scripts/` (bootstrap, helpers, hooks).
+- **shellcheck-configuration** — consult when configuring `.shellcheckrc` or addressing findings from `make lint` / `make check`.
+
 ## Pitfalls
 
 - **Never overwrite `$HOME` files blindly** — symlink via stow or back up first; `make install` already handles conflict backups.
