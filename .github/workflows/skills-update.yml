@@ -22,7 +22,7 @@ jobs:
         run: npx -y skills update -p -y
       - name: Open PR if skills-lock.json changed
         id: cpr
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: 'chore(skills): monthly agent skills update'
           title: 'chore(skills): monthly agent skills update'
