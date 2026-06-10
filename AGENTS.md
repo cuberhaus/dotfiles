@@ -43,8 +43,8 @@ Installable skills live under `.agents/skills/` (gitignored; restore with `make 
 
 ## Workspace integration (cuberhaus multi-root)
 
-[cuberhaus-workspace/](cuberhaus-workspace/) is the git-tracked source for files that need to live at the workspace root (`~/cuberhaus`) but couldn't otherwise be versioned, because that root is a plain folder collecting ~50 sibling repos. `make sync-workspace` copies `AGENTS.md`, the `/init-repo` skill, and its template into the root and removes legacy stubs.
+The sibling [cuberhaus-workspace/](../cuberhaus-workspace/) repo holds the files that live at the workspace root (`~/cuberhaus`) but couldn't otherwise be versioned, because that root is a plain folder collecting ~50 sibling repos. `make sync-workspace` from here delegates to `../cuberhaus-workspace/sync.sh` to copy `AGENTS.md`, the `/init-repo` skill, hooks, and prompts into the root and remove legacy stubs.
 
-This is the Linux peer of `WinDotfiles/cuberhaus-workspace/`. Content files (`AGENTS.md`, `SKILL.md`, `template.md`, `assets/pre-push`) must stay byte-identical across the two; only the sync driver differs (`sync.sh` here, `sync.ps1` there). See [cuberhaus-workspace/README.md](cuberhaus-workspace/README.md) for the parity-check command.
+The `cuberhaus-workspace/` repo is the single source of truth on both Windows (via WinDotfiles) and Linux (via this repo); only the sync driver invocation differs (`sync.sh` here, `sync.ps1` on Windows). See [../cuberhaus-workspace/README.md](../cuberhaus-workspace/README.md).
 
 See [README.md](README.md) for full setup and [.local/README.md](.local/README.md) for the scripts layout.
