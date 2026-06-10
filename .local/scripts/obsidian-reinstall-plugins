@@ -6,7 +6,7 @@
 # Canonical copy:
 #   <vault>/scripts/obsidian-reinstall-plugins
 # Invoked via:
-#   make plugin-reinstall   (from inside the vault)
+#   make plugin-install     (from inside the vault)
 #
 # This wrapper just locates the vault and re-execs the canonical script.
 
@@ -31,6 +31,6 @@ $(printf '  %s\n' "${candidates[@]}")
 Clone the vault first:
   git clone https://github.com/cuberhaus/obsidian_vault ~/cuberhaus/obsidian_vault
 
-Then re-run this command, or use 'make plugin-reinstall' from inside the vault.
+Then re-run this command, or use 'make plugin-install' from inside the vault.
 EOF
 exit 1
