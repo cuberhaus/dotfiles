@@ -1,29 +1,34 @@
-version: 2
-updates:
-  # Bump git submodules weekly. Grouped into a single PR.
-  # Submodules are upstream code (i3blocks-contrib, tpm, base16-shell, etc.)
-  # that gets sourced into the shell; do NOT auto-merge — review the diff.
-  - package-ecosystem: "gitsubmodule"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    groups:
-      submodules:
-        patterns: ["*"]
-    open-pull-requests-limit: 3
-    commit-message:
-      prefix: "chore(submodules)"
+# Weekly dependency-bump PRs against main. One multi-ecosystem group so
+# git submodule (i3blocks-contrib, tpm, base16-shell, etc.) and
+# github-actions bumps land in a single PR per week instead of one PR
+# per ecosystem.
+#
+# Submodules are upstream code sourced into the shell; do NOT auto-merge —
+# review the diff.
 
-  # Keep GitHub Actions used in this repo (actions/checkout, peter-evans/create-pull-request, etc.)
-  # pinned to their latest minor/patch. Grouped so weekly bumps land as one PR.
-  - package-ecosystem: "github-actions"
-    directory: "/"
+version: 2
+
+multi-ecosystem-groups:
+  weekly-dependency-refresh:
     schedule:
-      interval: "weekly"
-      day: "monday"
-    groups:
-      actions:
-        patterns: ["*"]
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+    open-pull-requests-limit: 5
     commit-message:
-      prefix: "chore(actions)"
+      prefix: chore(deps)
+      include: scope
+
+updates:
+  - package-ecosystem: gitsubmodule
+    directory: /
+    multi-ecosystem-group: weekly-dependency-refresh
+    patterns:
+      - '*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    multi-ecosystem-group: weekly-dependency-refresh
+    patterns:
+      - '*'
