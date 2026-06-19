@@ -1,0 +1,272 @@
+{
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\applets": {
+    "mtime": 1778874027.871767,
+    "ast_hash": "c5b5ffdbb88cfa46c875fd8918524a56",
+    "semantic_hash": "c5b5ffdbb88cfa46c875fd8918524a56"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\changeBrightness": {
+    "mtime": 1778874027.8757668,
+    "ast_hash": "e87c062eea71c39352ddaf67f92f7adc",
+    "semantic_hash": "e87c062eea71c39352ddaf67f92f7adc"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\changeVolume": {
+    "mtime": 1778874027.880768,
+    "ast_hash": "2060240c80fbc96f934bafb678333808",
+    "semantic_hash": "2060240c80fbc96f934bafb678333808"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\clone-all": {
+    "mtime": 1778874027.8837667,
+    "ast_hash": "5a9f84a55a4748ddea636a16d2ee1ae8",
+    "semantic_hash": "5a9f84a55a4748ddea636a16d2ee1ae8"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\git-ahead": {
+    "mtime": 1778875471.7331495,
+    "ast_hash": "401837b8d690a97828875ee30688ade2",
+    "semantic_hash": "401837b8d690a97828875ee30688ade2"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\git-clean-branches": {
+    "mtime": 1779034576.0743897,
+    "ast_hash": "31b977d6bb42d76f311d4aa9921d0346",
+    "semantic_hash": "31b977d6bb42d76f311d4aa9921d0346"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\git-recurse": {
+    "mtime": 1778874027.8897681,
+    "ast_hash": "2630faf2ec070a0e34c51a74cb0f32c5",
+    "semantic_hash": "2630faf2ec070a0e34c51a74cb0f32c5"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\pfetch": {
+    "mtime": 1778767716.5866325,
+    "ast_hash": "b3bdb6b6ccdf6095477a038ac5c32e8a",
+    "semantic_hash": "b3bdb6b6ccdf6095477a038ac5c32e8a"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\program": {
+    "mtime": 1778874027.8927672,
+    "ast_hash": "f7f66362a5ee65b6ad033e72e87996b8",
+    "semantic_hash": "f7f66362a5ee65b6ad033e72e87996b8"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\prompt": {
+    "mtime": 1778767716.5866325,
+    "ast_hash": "31c32d6fcf71dd73a702fa6dbe1f31c6",
+    "semantic_hash": "31c32d6fcf71dd73a702fa6dbe1f31c6"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bin\\yolo": {
+    "mtime": 1778767716.5866325,
+    "ast_hash": "869eb239bf964066dbe5aa0692777a82",
+    "semantic_hash": "869eb239bf964066dbe5aa0692777a82"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\arch": {
+    "mtime": 1778874027.8967671,
+    "ast_hash": "538559dd7f54fc0b0c95f4f5b884ac50",
+    "semantic_hash": "538559dd7f54fc0b0c95f4f5b884ac50"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\arch_functions": {
+    "mtime": 1778874650.0495248,
+    "ast_hash": "2bdedce4ac578f84e88d85036314124f",
+    "semantic_hash": "2bdedce4ac578f84e88d85036314124f"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\base_functions": {
+    "mtime": 1778874027.908771,
+    "ast_hash": "0776bb8d53c53dcf63f612e1d87fcd53",
+    "semantic_hash": "0776bb8d53c53dcf63f612e1d87fcd53"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\mac": {
+    "mtime": 1778874027.912772,
+    "ast_hash": "276c0edae331a741848246452b705d31",
+    "semantic_hash": "276c0edae331a741848246452b705d31"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\mac_functions": {
+    "mtime": 1778874650.0505252,
+    "ast_hash": "dc8f37bb0e71947fd47a5e2e0d215805",
+    "semantic_hash": "dc8f37bb0e71947fd47a5e2e0d215805"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\manjaro": {
+    "mtime": 1778874027.9202826,
+    "ast_hash": "922f328d7346fcd2d9fc05e73f959025",
+    "semantic_hash": "922f328d7346fcd2d9fc05e73f959025"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\ubuntu": {
+    "mtime": 1778874027.9242816,
+    "ast_hash": "75d8e06735cb673a01687acfcbcf955f",
+    "semantic_hash": "75d8e06735cb673a01687acfcbcf955f"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\ubuntu_functions": {
+    "mtime": 1778874650.0505252,
+    "ast_hash": "dcd3bec2669d5f89e25ade2d49c1e5ed",
+    "semantic_hash": "dcd3bec2669d5f89e25ade2d49c1e5ed"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\ubuntu_windows": {
+    "mtime": 1778767716.5901418,
+    "ast_hash": "bddaf74a2af2828edb3a0a396e5bf564",
+    "semantic_hash": "bddaf74a2af2828edb3a0a396e5bf564"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_arch": {
+    "mtime": 1778874650.0505252,
+    "ast_hash": "caa2d6547eaf32854c5b7140129b1477",
+    "semantic_hash": "caa2d6547eaf32854c5b7140129b1477"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_arch_functions": {
+    "mtime": 1778874650.0515256,
+    "ast_hash": "79463de6c90b1c6c7cf47b28290b0091",
+    "semantic_hash": "79463de6c90b1c6c7cf47b28290b0091"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_mac": {
+    "mtime": 1778874650.0515256,
+    "ast_hash": "978f61093326dbcce363dad1c026a72f",
+    "semantic_hash": "978f61093326dbcce363dad1c026a72f"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_mac_functions": {
+    "mtime": 1778874650.0515256,
+    "ast_hash": "780677f85e88841a2e18ee8c33060647",
+    "semantic_hash": "780677f85e88841a2e18ee8c33060647"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_manjaro": {
+    "mtime": 1778874650.0515256,
+    "ast_hash": "d05b81ec756bded7c2c7fa1a8d7b6c18",
+    "semantic_hash": "d05b81ec756bded7c2c7fa1a8d7b6c18"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_manjaro_functions": {
+    "mtime": 1778874650.0515256,
+    "ast_hash": "3b0e289cbb161842a9306286dfc50ad9",
+    "semantic_hash": "3b0e289cbb161842a9306286dfc50ad9"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_tui": {
+    "mtime": 1778874650.052526,
+    "ast_hash": "c14f75878ed4e5b6c18d0879294af594",
+    "semantic_hash": "c14f75878ed4e5b6c18d0879294af594"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_ubuntu": {
+    "mtime": 1778874650.052526,
+    "ast_hash": "72cc283a4a943a9a19501ff136f2d107",
+    "semantic_hash": "72cc283a4a943a9a19501ff136f2d107"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_ubuntu_functions": {
+    "mtime": 1778874650.052526,
+    "ast_hash": "de86e964000c5712676a87c9738601d9",
+    "semantic_hash": "de86e964000c5712676a87c9738601d9"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_work": {
+    "mtime": 1778874650.052526,
+    "ast_hash": "b56cfb75d9d6e980c3cae258241dc734",
+    "semantic_hash": "b56cfb75d9d6e980c3cae258241dc734"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\uninstall_work_functions": {
+    "mtime": 1778874650.052526,
+    "ast_hash": "c35b095bb03144139f206704d309acd5",
+    "semantic_hash": "c35b095bb03144139f206704d309acd5"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\work": {
+    "mtime": 1778874650.0535264,
+    "ast_hash": "0fef2ce73121b07c09b5d2c6f815a37d",
+    "semantic_hash": "0fef2ce73121b07c09b5d2c6f815a37d"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\bootstrap\\work_functions": {
+    "mtime": 1778874650.0535264,
+    "ast_hash": "01a27f677cac5bb125508360ab37789a",
+    "semantic_hash": "01a27f677cac5bb125508360ab37789a"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\cinnamon_path\\cinnamon_dump_config": {
+    "mtime": 1778767716.591155,
+    "ast_hash": "f69a8c44d0ce4b083d83f55cfd56a9bd",
+    "semantic_hash": "f69a8c44d0ce4b083d83f55cfd56a9bd"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\cinnamon_path\\cinnamon_load_config": {
+    "mtime": 1778767716.591155,
+    "ast_hash": "a09802f085a1511cb9fb896623a10903",
+    "semantic_hash": "a09802f085a1511cb9fb896623a10903"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\cinnamon_path\\dark-theme": {
+    "mtime": 1778767716.591155,
+    "ast_hash": "522d6e461799464a9f0720f796117c30",
+    "semantic_hash": "522d6e461799464a9f0720f796117c30"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\cinnamon_path\\light-theme": {
+    "mtime": 1778767716.591155,
+    "ast_hash": "2c23585e2cd9a6b249d443ac0e75eed6",
+    "semantic_hash": "2c23585e2cd9a6b249d443ac0e75eed6"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\claude-cost-stats.py": {
+    "mtime": 1778874027.9422817,
+    "ast_hash": "05b04ff462192022a0b55e181ac36795",
+    "semantic_hash": "05b04ff462192022a0b55e181ac36795"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\desklets": {
+    "mtime": 1778874027.9452834,
+    "ast_hash": "3aa6ec1e156d823cb447b82b229da1c6",
+    "semantic_hash": "3aa6ec1e156d823cb447b82b229da1c6"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\discord_fix.py": {
+    "mtime": 1778767716.5921526,
+    "ast_hash": "932c354f93742e07a589319893ba5034",
+    "semantic_hash": "932c354f93742e07a589319893ba5034"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\doctor.sh": {
+    "mtime": 1781195256.014694,
+    "ast_hash": "4f3de0cd3af24513789b70d373ff93a8",
+    "semantic_hash": "4f3de0cd3af24513789b70d373ff93a8"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\hooks\\pre-commit": {
+    "mtime": 1778875096.5266979,
+    "ast_hash": "716a4f034cc42d95de6c021e3f5baa8c",
+    "semantic_hash": "716a4f034cc42d95de6c021e3f5baa8c"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\lint.sh": {
+    "mtime": 1778874027.9522839,
+    "ast_hash": "2bade025a38b3ef3fb6b8647684239aa",
+    "semantic_hash": "2bade025a38b3ef3fb6b8647684239aa"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\lint_helpers.sh": {
+    "mtime": 1778875072.5193934,
+    "ast_hash": "c0eafa7095e557b29076e223154cc409",
+    "semantic_hash": "c0eafa7095e557b29076e223154cc409"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\obsidian-reinstall-plugins": {
+    "mtime": 1781078026.7712507,
+    "ast_hash": "2201d7ec144b1674cbe3003ad0092592",
+    "semantic_hash": "2201d7ec144b1674cbe3003ad0092592"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\permanent_shutdown_fix.sh": {
+    "mtime": 1778767716.5934775,
+    "ast_hash": "01d78824cafd2b5119013a9e5d653d9a",
+    "semantic_hash": "01d78824cafd2b5119013a9e5d653d9a"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\pipewire.sh": {
+    "mtime": 1778767716.5934775,
+    "ast_hash": "19509d06408734e7e2bbcbbd33c2bc22",
+    "semantic_hash": "19509d06408734e7e2bbcbbd33c2bc22"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\spot": {
+    "mtime": 1778874027.9602816,
+    "ast_hash": "df390b9d4e8da7251f381823e2616c91",
+    "semantic_hash": "df390b9d4e8da7251f381823e2616c91"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\spoti": {
+    "mtime": 1778874027.9622822,
+    "ast_hash": "8c42900ab0caea44fde20046772d1be5",
+    "semantic_hash": "8c42900ab0caea44fde20046772d1be5"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\stow-backup-conflicts": {
+    "mtime": 1778767716.5944812,
+    "ast_hash": "d49ceb8289d9e24d07a3b556438f86f2",
+    "semantic_hash": "d49ceb8289d9e24d07a3b556438f86f2"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\stow-uninstall": {
+    "mtime": 1778767716.5944812,
+    "ast_hash": "4d78ccb467671491b5330291eca59722",
+    "semantic_hash": "4d78ccb467671491b5330291eca59722"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\toggle_theme": {
+    "mtime": 1778874027.9652815,
+    "ast_hash": "a0f31a291e27b52c5619a55969082acf",
+    "semantic_hash": "a0f31a291e27b52c5619a55969082acf"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\volume-change-output": {
+    "mtime": 1778767716.5944812,
+    "ast_hash": "9cf2caaca5ee344ddb9b2a4d09c0ce72",
+    "semantic_hash": "9cf2caaca5ee344ddb9b2a4d09c0ce72"
+  },
+  "C:\\Users\\lara\\cuberhaus\\dotfiles\\.local\\scripts\\ycm.sh": {
+    "mtime": 1778767716.5954812,
+    "ast_hash": "7c25e48158986ea8b5cd9ecfe98402f6",
+    "semantic_hash": "7c25e48158986ea8b5cd9ecfe98402f6"
+  }
+}

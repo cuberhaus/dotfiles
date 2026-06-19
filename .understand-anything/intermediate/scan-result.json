@@ -1,0 +1,512 @@
+{
+  "name": "dotfiles",
+  "description": "Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS, managed via GNU Stow. This analysis is scoped to the repo operations backbone: OS bootstrap/provisioning scripts, helper utilities, the GNU Make stow lifecycle, GitHub Actions CI, and project docs.",
+  "languages": [
+    "makefile",
+    "markdown",
+    "python",
+    "shell",
+    "yaml"
+  ],
+  "frameworks": [
+    "GitHub Actions",
+    "GNU Stow"
+  ],
+  "files": [
+    {
+      "path": ".github/dependabot.yml",
+      "language": "yaml",
+      "sizeLines": 34,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".github/FUNDING.yml",
+      "language": "yaml",
+      "sizeLines": 4,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".github/pull_request_template.md",
+      "language": "markdown",
+      "sizeLines": 22,
+      "fileCategory": "docs"
+    },
+    {
+      "path": ".github/workflows/check-workspace-parity.yml",
+      "language": "yaml",
+      "sizeLines": 56,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/lint.yml",
+      "language": "yaml",
+      "sizeLines": 81,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/markdown.yml",
+      "language": "yaml",
+      "sizeLines": 31,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/secrets.yml",
+      "language": "yaml",
+      "sizeLines": 29,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/skills-update.yml",
+      "language": "yaml",
+      "sizeLines": 43,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/vim.yml",
+      "language": "yaml",
+      "sizeLines": 50,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/xmonad.yml",
+      "language": "yaml",
+      "sizeLines": 38,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".local/scripts/applets",
+      "language": "unknown",
+      "sizeLines": 70,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/changeBrightness",
+      "language": "unknown",
+      "sizeLines": 62,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/changeVolume",
+      "language": "unknown",
+      "sizeLines": 55,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/clone-all",
+      "language": "unknown",
+      "sizeLines": 78,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/git-ahead",
+      "language": "unknown",
+      "sizeLines": 128,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/git-clean-branches",
+      "language": "unknown",
+      "sizeLines": 156,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/git-recurse",
+      "language": "unknown",
+      "sizeLines": 164,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/pfetch",
+      "language": "unknown",
+      "sizeLines": 1611,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/program",
+      "language": "unknown",
+      "sizeLines": 40,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/prompt",
+      "language": "unknown",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bin/yolo",
+      "language": "unknown",
+      "sizeLines": 4,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/arch",
+      "language": "unknown",
+      "sizeLines": 54,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/arch_functions",
+      "language": "unknown",
+      "sizeLines": 808,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/base_functions",
+      "language": "unknown",
+      "sizeLines": 137,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/mac",
+      "language": "unknown",
+      "sizeLines": 21,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/mac_functions",
+      "language": "unknown",
+      "sizeLines": 373,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/manjaro",
+      "language": "unknown",
+      "sizeLines": 56,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/ubuntu",
+      "language": "unknown",
+      "sizeLines": 45,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/ubuntu_functions",
+      "language": "unknown",
+      "sizeLines": 449,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/ubuntu_windows",
+      "language": "unknown",
+      "sizeLines": 33,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_arch",
+      "language": "unknown",
+      "sizeLines": 28,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_arch_functions",
+      "language": "unknown",
+      "sizeLines": 151,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_mac",
+      "language": "unknown",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_mac_functions",
+      "language": "unknown",
+      "sizeLines": 78,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_manjaro",
+      "language": "unknown",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_manjaro_functions",
+      "language": "unknown",
+      "sizeLines": 36,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_tui",
+      "language": "unknown",
+      "sizeLines": 129,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_ubuntu",
+      "language": "unknown",
+      "sizeLines": 27,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "language": "unknown",
+      "sizeLines": 108,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_work",
+      "language": "unknown",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/uninstall_work_functions",
+      "language": "unknown",
+      "sizeLines": 114,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/work",
+      "language": "unknown",
+      "sizeLines": 44,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/bootstrap/work_functions",
+      "language": "unknown",
+      "sizeLines": 460,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/cinnamon_path/cinnamon_dump_config",
+      "language": "unknown",
+      "sizeLines": 63,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/cinnamon_path/cinnamon_load_config",
+      "language": "unknown",
+      "sizeLines": 68,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/cinnamon_path/dark-theme",
+      "language": "unknown",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/cinnamon_path/light-theme",
+      "language": "unknown",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/claude-cost-stats.py",
+      "language": "python",
+      "sizeLines": 292,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/desklets",
+      "language": "unknown",
+      "sizeLines": 40,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/discord_fix.py",
+      "language": "python",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/doctor.sh",
+      "language": "shell",
+      "sizeLines": 46,
+      "fileCategory": "script"
+    },
+    {
+      "path": ".local/scripts/gnome_path/gnome_dump_config",
+      "language": "unknown",
+      "sizeLines": 1,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/gnome_path/gnome_load_config",
+      "language": "unknown",
+      "sizeLines": 1,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/hooks/pre-commit",
+      "language": "unknown",
+      "sizeLines": 85,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/lint_helpers.sh",
+      "language": "shell",
+      "sizeLines": 80,
+      "fileCategory": "script"
+    },
+    {
+      "path": ".local/scripts/lint.sh",
+      "language": "shell",
+      "sizeLines": 40,
+      "fileCategory": "script"
+    },
+    {
+      "path": ".local/scripts/obsidian-reinstall-plugins",
+      "language": "unknown",
+      "sizeLines": 36,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/permanent_shutdown_fix.sh",
+      "language": "shell",
+      "sizeLines": 42,
+      "fileCategory": "script"
+    },
+    {
+      "path": ".local/scripts/pipewire.sh",
+      "language": "shell",
+      "sizeLines": 174,
+      "fileCategory": "script"
+    },
+    {
+      "path": ".local/scripts/spot",
+      "language": "unknown",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/spoti",
+      "language": "unknown",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/stow-backup-conflicts",
+      "language": "unknown",
+      "sizeLines": 66,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/stow-uninstall",
+      "language": "unknown",
+      "sizeLines": 119,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/toggle_theme",
+      "language": "unknown",
+      "sizeLines": 138,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/volume-change-output",
+      "language": "unknown",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".local/scripts/ycm.sh",
+      "language": "shell",
+      "sizeLines": 78,
+      "fileCategory": "script"
+    },
+    {
+      "path": "AGENTS.md",
+      "language": "markdown",
+      "sizeLines": 50,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "Makefile",
+      "language": "makefile",
+      "sizeLines": 184,
+      "fileCategory": "infra"
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "sizeLines": 176,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "SECURITY.md",
+      "language": "markdown",
+      "sizeLines": 32,
+      "fileCategory": "docs"
+    }
+  ],
+  "totalFiles": 70,
+  "filteredByIgnore": 2328,
+  "estimatedComplexity": "moderate",
+  "importMap": {
+    ".github/dependabot.yml": [],
+    ".github/FUNDING.yml": [],
+    ".github/pull_request_template.md": [],
+    ".github/workflows/check-workspace-parity.yml": [],
+    ".github/workflows/lint.yml": [],
+    ".github/workflows/markdown.yml": [],
+    ".github/workflows/secrets.yml": [],
+    ".github/workflows/skills-update.yml": [],
+    ".github/workflows/vim.yml": [],
+    ".github/workflows/xmonad.yml": [],
+    ".local/scripts/applets": [],
+    ".local/scripts/bin/changeBrightness": [],
+    ".local/scripts/bin/changeVolume": [],
+    ".local/scripts/bin/clone-all": [],
+    ".local/scripts/bin/git-ahead": [],
+    ".local/scripts/bin/git-clean-branches": [],
+    ".local/scripts/bin/git-recurse": [],
+    ".local/scripts/bin/pfetch": [],
+    ".local/scripts/bin/program": [],
+    ".local/scripts/bin/prompt": [],
+    ".local/scripts/bin/yolo": [],
+    ".local/scripts/bootstrap/arch": [],
+    ".local/scripts/bootstrap/arch_functions": [],
+    ".local/scripts/bootstrap/base_functions": [],
+    ".local/scripts/bootstrap/mac": [],
+    ".local/scripts/bootstrap/mac_functions": [],
+    ".local/scripts/bootstrap/manjaro": [],
+    ".local/scripts/bootstrap/ubuntu": [],
+    ".local/scripts/bootstrap/ubuntu_functions": [],
+    ".local/scripts/bootstrap/ubuntu_windows": [],
+    ".local/scripts/bootstrap/uninstall_arch": [],
+    ".local/scripts/bootstrap/uninstall_arch_functions": [],
+    ".local/scripts/bootstrap/uninstall_mac": [],
+    ".local/scripts/bootstrap/uninstall_mac_functions": [],
+    ".local/scripts/bootstrap/uninstall_manjaro": [],
+    ".local/scripts/bootstrap/uninstall_manjaro_functions": [],
+    ".local/scripts/bootstrap/uninstall_tui": [],
+    ".local/scripts/bootstrap/uninstall_ubuntu": [],
+    ".local/scripts/bootstrap/uninstall_ubuntu_functions": [],
+    ".local/scripts/bootstrap/uninstall_work": [],
+    ".local/scripts/bootstrap/uninstall_work_functions": [],
+    ".local/scripts/bootstrap/work": [],
+    ".local/scripts/bootstrap/work_functions": [],
+    ".local/scripts/cinnamon_path/cinnamon_dump_config": [],
+    ".local/scripts/cinnamon_path/cinnamon_load_config": [],
+    ".local/scripts/cinnamon_path/dark-theme": [],
+    ".local/scripts/cinnamon_path/light-theme": [],
+    ".local/scripts/claude-cost-stats.py": [],
+    ".local/scripts/desklets": [],
+    ".local/scripts/discord_fix.py": [],
+    ".local/scripts/doctor.sh": [],
+    ".local/scripts/gnome_path/gnome_dump_config": [],
+    ".local/scripts/gnome_path/gnome_load_config": [],
+    ".local/scripts/hooks/pre-commit": [],
+    ".local/scripts/lint_helpers.sh": [],
+    ".local/scripts/lint.sh": [],
+    ".local/scripts/obsidian-reinstall-plugins": [],
+    ".local/scripts/permanent_shutdown_fix.sh": [],
+    ".local/scripts/pipewire.sh": [],
+    ".local/scripts/spot": [],
+    ".local/scripts/spoti": [],
+    ".local/scripts/stow-backup-conflicts": [],
+    ".local/scripts/stow-uninstall": [],
+    ".local/scripts/toggle_theme": [],
+    ".local/scripts/volume-change-output": [],
+    ".local/scripts/ycm.sh": [],
+    "AGENTS.md": [],
+    "Makefile": [],
+    "README.md": [],
+    "SECURITY.md": []
+  }
+}

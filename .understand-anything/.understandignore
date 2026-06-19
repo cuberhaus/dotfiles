@@ -1,0 +1,26 @@
+# .understandignore — scoped to "repo operations"
+# Strategy: ignore everything, then allowlist the operational backbone:
+#   - .local/scripts  (bootstrap/provisioning + helper scripts)
+#   - .github         (CI workflows + dependabot)
+#   - root build/docs (Makefile, README.md, AGENTS.md, SECURITY.md)
+# Uses gitignore semantics (the `ignore` package): un-ignore parent dirs,
+# re-exclude their other children, then re-include the wanted subtree.
+
+# Ignore everything by default
+*
+
+# --- Root build & docs ---
+!Makefile
+!README.md
+!AGENTS.md
+!SECURITY.md
+
+# --- CI / GitHub ---
+!.github/
+!.github/**
+
+# --- Automation scripts ---
+!.local/
+.local/*
+!.local/scripts/
+!.local/scripts/**

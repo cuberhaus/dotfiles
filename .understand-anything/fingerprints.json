@@ -1,0 +1,907 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "8de38ec63d9e84d07fae70b45c95fc39e25de196",
+  "generatedAt": "2026-06-19T12:43:27.573Z",
+  "files": {
+    ".github/dependabot.yml": {
+      "filePath": ".github/dependabot.yml",
+      "contentHash": "cbed38927c4525016ad2de6996d22c41c1b9790dc1b4507992d2bf7f7738c9c5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": true
+    },
+    ".github/FUNDING.yml": {
+      "filePath": ".github/FUNDING.yml",
+      "contentHash": "03ed7b961af7fb7614d2a1a5575e7510f8b94032b310ca5e5bb46cf2a228e6a6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": true
+    },
+    ".github/pull_request_template.md": {
+      "filePath": ".github/pull_request_template.md",
+      "contentHash": "be61f8569f825afd8bd30d7f62f78174c1e6a7e95b3b6b4d90cd716297a93b36",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/check-workspace-parity.yml": {
+      "filePath": ".github/workflows/check-workspace-parity.yml",
+      "contentHash": "3255ff0e7b7f21e61c73f023c4362b0c192774b074eaf4f76c35041dab2f9372",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 57,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/lint.yml": {
+      "filePath": ".github/workflows/lint.yml",
+      "contentHash": "0ed254288b575e4bfeda4f91b539693c661970df2b61334ad779d33ada87b549",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 82,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/markdown.yml": {
+      "filePath": ".github/workflows/markdown.yml",
+      "contentHash": "ea4bdf663b389551d8ac0c78a4307c53d57bb00809a69d06bebfb56ad6485d76",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 32,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/secrets.yml": {
+      "filePath": ".github/workflows/secrets.yml",
+      "contentHash": "09eff3cd896357b895db221847f77445070759c31fd70173134af2569a3d41b1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/skills-update.yml": {
+      "filePath": ".github/workflows/skills-update.yml",
+      "contentHash": "a834b44fc2c80448ebc1f6414c55debb40bc802e9f79cf4a576bb65e25516deb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 44,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/vim.yml": {
+      "filePath": ".github/workflows/vim.yml",
+      "contentHash": "fdddd3b4771fcbde88079e6422c8e7f53ebdfa21183f690fed09caa82d305968",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/xmonad.yml": {
+      "filePath": ".github/workflows/xmonad.yml",
+      "contentHash": "2a15ffc4a75a8abe1cc44797f8cb43cf9dc7b2d6e1fcb0e283d6244f989abcae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 39,
+      "hasStructuralAnalysis": true
+    },
+    ".local/scripts/applets": {
+      "filePath": ".local/scripts/applets",
+      "contentHash": "6285ef660b9349ec903ba98e7ed8fb96370eba0934f04f110df622f9206104af",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 71,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/changeBrightness": {
+      "filePath": ".local/scripts/bin/changeBrightness",
+      "contentHash": "8eab28bd20889d6e303eb4ed9b09ca3ddc74e7af4132f380ab608c1152375957",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 63,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/changeVolume": {
+      "filePath": ".local/scripts/bin/changeVolume",
+      "contentHash": "bf2ef08cead0269461fe82d56f2bca76beeb9be84d085a375615d777ab00c5bb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 56,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/clone-all": {
+      "filePath": ".local/scripts/bin/clone-all",
+      "contentHash": "5430c3f3691d58c5a051a749372a4a5ee2a79fe513a5ff954dad092959f76c85",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 79,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/git-ahead": {
+      "filePath": ".local/scripts/bin/git-ahead",
+      "contentHash": "035178f7835bab6493b601a960883bbedfdfd34028235eb885814cf83aeb0524",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 129,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/git-clean-branches": {
+      "filePath": ".local/scripts/bin/git-clean-branches",
+      "contentHash": "87f9d2e5bb36d53d7bd24d63f2f0c8c092d1d9a1ffb85c417a3c5ba64dcf479b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 157,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/git-recurse": {
+      "filePath": ".local/scripts/bin/git-recurse",
+      "contentHash": "9f676489890e94bd35fb96e7bd99ecacbeb3a98b81feebacf7bd9cbad2e706f5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 165,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/pfetch": {
+      "filePath": ".local/scripts/bin/pfetch",
+      "contentHash": "54387c82b7cff273666f67221b9a0075a07f4b41bb05370b200079850b890e5a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1612,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/program": {
+      "filePath": ".local/scripts/bin/program",
+      "contentHash": "76f7adf21cddedc194ed897d39751ea872630ec02406abeb571255b726d8eee9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/prompt": {
+      "filePath": ".local/scripts/bin/prompt",
+      "contentHash": "b79067b35c67233c71929172835a5e7c3b3ddb22551499ddcb26bbb3348589c1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 14,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bin/yolo": {
+      "filePath": ".local/scripts/bin/yolo",
+      "contentHash": "dc8215aca042db97ee81f49058cdbcdd0a0290d82ddf3b0819348bf6fcee7328",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/arch": {
+      "filePath": ".local/scripts/bootstrap/arch",
+      "contentHash": "a1d300ecfbac6e22e67b2103f77bc7f708ce9f9be252f37690fd220f5122e04a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 55,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/arch_functions": {
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "contentHash": "fa73a3ae42388e79df4d30322981d3b50cae8feee396498fa2ccb71830c4b417",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 809,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/base_functions": {
+      "filePath": ".local/scripts/bootstrap/base_functions",
+      "contentHash": "5c977f0baccca3ef7ed89d4f0c3af65c29d17a9a358b41b66985d34b6f3a0c5b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 138,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/mac": {
+      "filePath": ".local/scripts/bootstrap/mac",
+      "contentHash": "a45dc21fa46262b52c71a7134f5a57205e34fa1a6f2044d158652a957de7dfb7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/mac_functions": {
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "contentHash": "cec9c099e979779963cf44d986399816b97ab605f28a58e6cea8ebfce3d11147",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 374,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/manjaro": {
+      "filePath": ".local/scripts/bootstrap/manjaro",
+      "contentHash": "b6520b5b3a87e726086650ba83703adf2629132624bc6bc0078631f32f7ba632",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 57,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/ubuntu": {
+      "filePath": ".local/scripts/bootstrap/ubuntu",
+      "contentHash": "9442ad70baff72680da748e4dcf37adda1fca3d8216a2ec6e67f89e6477bdc3e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 46,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/ubuntu_functions": {
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "contentHash": "4a2b0ad8cf52d3d730e271c0c8fe755096b4afb6c1427c3111e071e81d1ea409",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 450,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/ubuntu_windows": {
+      "filePath": ".local/scripts/bootstrap/ubuntu_windows",
+      "contentHash": "16c4136c05519e7ede1321f0953ec8252d5af1412fc0d4b629cb21f809406596",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_arch": {
+      "filePath": ".local/scripts/bootstrap/uninstall_arch",
+      "contentHash": "94ec3e1a7276a6a433109d263b6a30a905edaa531e9d3a5c77177744a8e9329e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_arch_functions": {
+      "filePath": ".local/scripts/bootstrap/uninstall_arch_functions",
+      "contentHash": "322164458bca246f85bd611a16c310d4962f0dac5510f36d8e88f4bcbc079788",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 152,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_mac": {
+      "filePath": ".local/scripts/bootstrap/uninstall_mac",
+      "contentHash": "5a7c38da64dfc1168d9abd2076c6d94b1c9d23d1513d1c6166680cc1f8323b7c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_mac_functions": {
+      "filePath": ".local/scripts/bootstrap/uninstall_mac_functions",
+      "contentHash": "572266c4cdb6935af4a64e30ffd795c9e8f31f25fbf7b6103a29798e0886b529",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 79,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_manjaro": {
+      "filePath": ".local/scripts/bootstrap/uninstall_manjaro",
+      "contentHash": "4601d41c0290a6a5f24038c7ffeb090fcd16d606ed5b6dc4a768fa549585f253",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_manjaro_functions": {
+      "filePath": ".local/scripts/bootstrap/uninstall_manjaro_functions",
+      "contentHash": "1eb1ff8c4f21bd1a7a68ebfe68e6d480b5f1acf76de7414849d11657755fbe3f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_tui": {
+      "filePath": ".local/scripts/bootstrap/uninstall_tui",
+      "contentHash": "bdb2e1042a6c3f64f6e72e865448e22b714e28dab5917f9eba952abf9053afa8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 130,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_ubuntu": {
+      "filePath": ".local/scripts/bootstrap/uninstall_ubuntu",
+      "contentHash": "75a29632c518337d5cb36f9fc333871de64fb8125f6d6007fb0a597631e06472",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_ubuntu_functions": {
+      "filePath": ".local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "contentHash": "7a1459e431f785057fc3cf8b039d74a59666f6c7469507b432016c415e0bf543",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 109,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_work": {
+      "filePath": ".local/scripts/bootstrap/uninstall_work",
+      "contentHash": "cbf043844734727f43fc9a2029de1afd7f044dbddb077f2513f1e741857a4b57",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/uninstall_work_functions": {
+      "filePath": ".local/scripts/bootstrap/uninstall_work_functions",
+      "contentHash": "cfaa9af7181989ef8e878e459241bbf13d5181a3fa77ce4eda9ca894d2a766f4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 115,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/work": {
+      "filePath": ".local/scripts/bootstrap/work",
+      "contentHash": "f2ea595f11802735bdb474ed410dbd5e2a0669311e870b7de301330b8631651b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/bootstrap/work_functions": {
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "contentHash": "0e2958d732f594fcb94527a1936662890b4db9bbddff4f27a3c2e949b2dc62d3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 461,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/cinnamon_path/cinnamon_dump_config": {
+      "filePath": ".local/scripts/cinnamon_path/cinnamon_dump_config",
+      "contentHash": "80260b355b00176bf1d92c910b5982292f0691e06eb9a9cd8bcf39f77f196250",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/cinnamon_path/cinnamon_load_config": {
+      "filePath": ".local/scripts/cinnamon_path/cinnamon_load_config",
+      "contentHash": "af59dfc1722ebfce301bb1b2e957ed9f927fc58ab0bf2e9d2fb74b461d8f7964",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 69,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/cinnamon_path/dark-theme": {
+      "filePath": ".local/scripts/cinnamon_path/dark-theme",
+      "contentHash": "a0cf3cebcf670c7902cbaeb58e5e23ffce98701ef2f50ef7c9e6a1a90551ea74",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/cinnamon_path/light-theme": {
+      "filePath": ".local/scripts/cinnamon_path/light-theme",
+      "contentHash": "d2370aaa48e1ae400d1c214723b24304aa92f3e41184fb40e2acba5769e604fb",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/claude-cost-stats.py": {
+      "filePath": ".local/scripts/claude-cost-stats.py",
+      "contentHash": "b178fc6f6657a182d2bc1a557eaaa14a5552f1b90b091446158f3164f339b20b",
+      "functions": [
+        {
+          "name": "find_transcripts",
+          "params": [
+            "root"
+          ],
+          "returnType": "list[Path]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "parse_since",
+          "params": [
+            "spec"
+          ],
+          "returnType": "datetime | None",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "event_timestamp",
+          "params": [
+            "e"
+          ],
+          "returnType": "datetime | None",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "cost_for",
+          "params": [
+            "usage",
+            "rates"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "humanize",
+          "params": [
+            "n"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 148
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "collections",
+          "specifiers": [
+            "defaultdict"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timedelta",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        }
+      ],
+      "exports": [
+        "find_transcripts",
+        "parse_since",
+        "event_timestamp",
+        "cost_for",
+        "humanize",
+        "main"
+      ],
+      "totalLines": 293,
+      "hasStructuralAnalysis": true
+    },
+    ".local/scripts/desklets": {
+      "filePath": ".local/scripts/desklets",
+      "contentHash": "72d1abe0742970f2a0963b99b95ebd87a4dfd4eb10782c1a615897019bafc4e3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/discord_fix.py": {
+      "filePath": ".local/scripts/discord_fix.py",
+      "contentHash": "53a9ac701418d18427275dc27ee240c35ea078ec1fb8f7b6474e14f662234d62",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    ".local/scripts/doctor.sh": {
+      "filePath": ".local/scripts/doctor.sh",
+      "contentHash": "fab4cb41c1b39a8ebc0a677c900794a832af728d3eb6262a0c4d19997d5e0b9e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 47,
+      "hasStructuralAnalysis": true
+    },
+    ".local/scripts/gnome_path/gnome_dump_config": {
+      "filePath": ".local/scripts/gnome_path/gnome_dump_config",
+      "contentHash": "44b8f2771001cc1324a0226661334165c164e0db4e61924d74019dc3f35484ff",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/gnome_path/gnome_load_config": {
+      "filePath": ".local/scripts/gnome_path/gnome_load_config",
+      "contentHash": "80fd62d3851de2662fc7e1a42cb130f8099187d5af84c0a172304996bc04d302",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/hooks/pre-commit": {
+      "filePath": ".local/scripts/hooks/pre-commit",
+      "contentHash": "1f189363c0299a946f8d0175dc558a044450a97a2d3a38f22a7f81ccc0721fd0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 86,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/lint_helpers.sh": {
+      "filePath": ".local/scripts/lint_helpers.sh",
+      "contentHash": "b2770a3b9afb7af05f4fa66b42c4393230c2e8bcae0f6510f8a3ba51af864c4a",
+      "functions": [
+        {
+          "name": "lint_get_scripts",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 81,
+      "hasStructuralAnalysis": true
+    },
+    ".local/scripts/lint.sh": {
+      "filePath": ".local/scripts/lint.sh",
+      "contentHash": "42e85f5adbfcc5a47a8c1f94d787b9117eba914230803ca36dfc687fa99f8a0e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": true
+    },
+    ".local/scripts/obsidian-reinstall-plugins": {
+      "filePath": ".local/scripts/obsidian-reinstall-plugins",
+      "contentHash": "6bbc7a53d33bcc8cd4c37be79a39ba7f1f802d10c727d92793d9d724e3ef8ea9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/permanent_shutdown_fix.sh": {
+      "filePath": ".local/scripts/permanent_shutdown_fix.sh",
+      "contentHash": "e7a77479eeef8b45e49d9ffacbece8c07410a2af8160ad55600e6024432705f7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 43,
+      "hasStructuralAnalysis": true
+    },
+    ".local/scripts/pipewire.sh": {
+      "filePath": ".local/scripts/pipewire.sh",
+      "contentHash": "dcd602bf5360a90e507102d05521a07c94361493415f0d9e47b770a3dede4a02",
+      "functions": [
+        {
+          "name": "move_sinks_to_new_default",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "set_default_playback_device_next",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "print_format",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "print_block",
+          "params": [],
+          "exported": false,
+          "lineCount": 45
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 175,
+      "hasStructuralAnalysis": true
+    },
+    ".local/scripts/spot": {
+      "filePath": ".local/scripts/spot",
+      "contentHash": "f29691e33510c51d19b822504167bbedb225cee2bcbf65bb3f50eb39d53f76d8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 12,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/spoti": {
+      "filePath": ".local/scripts/spoti",
+      "contentHash": "17043185d887de4bf382153508976c79f029f1c26b1019179e8444c9aa3fea02",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/stow-backup-conflicts": {
+      "filePath": ".local/scripts/stow-backup-conflicts",
+      "contentHash": "dadbf18eb2ad2de76135d4bd4af71e4aa75d27f79141e77afce8aaebee030776",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 67,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/stow-uninstall": {
+      "filePath": ".local/scripts/stow-uninstall",
+      "contentHash": "af99987d7b08940ab42aa47e3c4adacaa60644e0c0e66a237573783f0d8d1be0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 120,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/toggle_theme": {
+      "filePath": ".local/scripts/toggle_theme",
+      "contentHash": "db147f8b99a58c26af2c9e1e3b1112280d2cb5697dae069d86f48f67f61a7591",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 139,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/volume-change-output": {
+      "filePath": ".local/scripts/volume-change-output",
+      "contentHash": "172c5d3998d9ae4e32241cccc10e68ed999758192a7a28ca9ddfacbef4afdd21",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": false
+    },
+    ".local/scripts/ycm.sh": {
+      "filePath": ".local/scripts/ycm.sh",
+      "contentHash": "d005909693ff3063ad8ccba87db31ed795419d82759f2e78d252153c44925057",
+      "functions": [
+        {
+          "name": "Help",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "arch_based_install",
+          "params": [],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "ubuntu_based_install",
+          "params": [],
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "mac_install",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "ycm_ubuntu_install",
+          "params": [],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "ycm_install",
+          "params": [],
+          "exported": false,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 79,
+      "hasStructuralAnalysis": true
+    },
+    "AGENTS.md": {
+      "filePath": "AGENTS.md",
+      "contentHash": "898074a4892217b285a79d841d2424a2d41838982a5d8653bcd236e807d24b21",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": true
+    },
+    "Makefile": {
+      "filePath": "Makefile",
+      "contentHash": "d7e632823d7a024e4625197d42f0c621c24ba3b3833ab9f4e2dc0123d5cc1cb1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 185,
+      "hasStructuralAnalysis": true
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "812f22d80e9fa46deaada1b1f68325ba9fd3a40bd0dd2f50cdf3eb37d11a20a2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 177,
+      "hasStructuralAnalysis": true
+    },
+    "SECURITY.md": {
+      "filePath": "SECURITY.md",
+      "contentHash": "7bc282e793ac4a7093b314bedada1e6e4b7a3cbe28229c2e27ee46b5408f1abc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": true
+    }
+  }
+}

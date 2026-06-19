@@ -1,0 +1,3785 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "dotfiles",
+    "languages": [
+      "makefile",
+      "markdown",
+      "python",
+      "shell",
+      "yaml"
+    ],
+    "frameworks": [
+      "GitHub Actions",
+      "GNU Stow"
+    ],
+    "description": "Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS, managed via GNU Stow. This analysis is scoped to the repo operations backbone: OS bootstrap/provisioning scripts, helper utilities, the GNU Make stow lifecycle, GitHub Actions CI, and project docs.",
+    "analyzedAt": "2026-06-19T12:42:56.073510+00:00",
+    "gitCommitHash": "8de38ec63d9e84d07fae70b45c95fc39e25de196"
+  },
+  "nodes": [
+    {
+      "id": "pipeline:.github/workflows/check-workspace-parity.yml",
+      "type": "pipeline",
+      "name": "check-workspace-parity.yml",
+      "filePath": ".github/workflows/check-workspace-parity.yml",
+      "summary": "CI workflow that checks out this repo and its peer (dotfiles ↔ WinDotfiles) and asserts the shared cuberhaus-workspace/ directory is byte-identical, failing on any drift (excluding sync.sh/sync.ps1/README.md/repos.json).",
+      "tags": [
+        "ci-cd",
+        "parity-check",
+        "cross-repo-sync",
+        "workspace",
+        "diff"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "pipeline:.github/workflows/lint.yml",
+      "type": "pipeline",
+      "name": "lint.yml",
+      "filePath": ".github/workflows/lint.yml",
+      "summary": "CI workflow with three jobs: ShellCheck via .local/scripts/lint.sh, a scan rejecting hardcoded /home/<user> and /Users/<user> paths in tracked files, and a stow dry-run (make dry-run) into a scratch HOME.",
+      "tags": [
+        "ci-cd",
+        "shellcheck",
+        "linting",
+        "stow",
+        "quality-gate"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "pipeline:.github/workflows/markdown.yml",
+      "type": "pipeline",
+      "name": "markdown.yml",
+      "filePath": ".github/workflows/markdown.yml",
+      "summary": "CI workflow that runs markdownlint-cli2 against the repo's own Markdown files (README.md, .local/README.md, wallpapers README) on changes to *.md files.",
+      "tags": [
+        "ci-cd",
+        "markdownlint",
+        "documentation",
+        "linting"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "pipeline:.github/workflows/secrets.yml",
+      "type": "pipeline",
+      "name": "secrets.yml",
+      "filePath": ".github/workflows/secrets.yml",
+      "summary": "CI workflow that runs gitleaks over the full git history on push, pull request, and a weekly schedule to detect committed secrets.",
+      "tags": [
+        "ci-cd",
+        "security",
+        "gitleaks",
+        "secret-scanning"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "pipeline:.github/workflows/skills-update.yml",
+      "type": "pipeline",
+      "name": "skills-update.yml",
+      "filePath": ".github/workflows/skills-update.yml",
+      "summary": "Scheduled monthly workflow that runs npx skills update to refresh pinned agent skills, then opens (and auto-merges) a pull request when skills-lock.json changes.",
+      "tags": [
+        "ci-cd",
+        "automation",
+        "agent-skills",
+        "scheduled",
+        "auto-merge"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "pipeline:.github/workflows/vim.yml",
+      "type": "pipeline",
+      "name": "vim.yml",
+      "filePath": ".github/workflows/vim.yml",
+      "summary": "CI workflow that lints .vim/vimrc with vint and verifies it loads in Vim's ex mode without errors when the vimrc file changes.",
+      "tags": [
+        "ci-cd",
+        "vim",
+        "vimscript",
+        "linting",
+        "syntax-check"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "pipeline:.github/workflows/xmonad.yml",
+      "type": "pipeline",
+      "name": "xmonad.yml",
+      "filePath": ".github/workflows/xmonad.yml",
+      "summary": "CI workflow that sets up Haskell and XMonad libraries and compiles .xmonad/xmonad.hs with ghc -fno-code to verify the window-manager config builds when it changes.",
+      "tags": [
+        "ci-cd",
+        "xmonad",
+        "haskell",
+        "compile-check",
+        "window-manager"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.github/dependabot.yml",
+      "type": "config",
+      "name": "dependabot.yml",
+      "filePath": ".github/dependabot.yml",
+      "summary": "Dependabot v2 config that opens weekly dependency-bump PRs against main, grouping git submodule and github-actions updates into a single multi-ecosystem group so they land as one PR per week.",
+      "tags": [
+        "dependabot",
+        "dependencies",
+        "automation",
+        "github-actions",
+        "git-submodule"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.github/FUNDING.yml",
+      "type": "config",
+      "name": "FUNDING.yml",
+      "filePath": ".github/FUNDING.yml",
+      "summary": "GitHub sponsor metadata declaring funding platforms (GitHub Sponsors and Buy Me a Coffee) for the cuberhaus account.",
+      "tags": [
+        "funding",
+        "sponsors",
+        "github",
+        "metadata"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:.github/pull_request_template.md",
+      "type": "document",
+      "name": "pull_request_template.md",
+      "filePath": ".github/pull_request_template.md",
+      "summary": "Pull request template documenting the contribution process with Summary, Type of change, Checklist, and Notes-for-reviewers sections, prompting contributors to update AGENTS.md and avoid committing secrets.",
+      "tags": [
+        "pull-request",
+        "template",
+        "contribution",
+        "checklist",
+        "docs"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/doctor.sh",
+      "type": "file",
+      "name": "doctor.sh",
+      "filePath": ".local/scripts/doctor.sh",
+      "summary": "Bash health-check run via `make doctor` that verifies required CLI tools (stow, git, shellcheck, markdownlint-cli2, vint) are installed and scans $HOME for broken symlinks. Exits non-zero when any tool is missing.",
+      "tags": [
+        "health-check",
+        "diagnostics",
+        "symlinks",
+        "shell",
+        "make-target"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/lint.sh",
+      "type": "file",
+      "name": "lint.sh",
+      "filePath": ".local/scripts/lint.sh",
+      "summary": "Lints all tracked shell scripts in the repo with shellcheck; sources lint_helpers.sh to enumerate the script list and exits non-zero if any warnings are reported.",
+      "tags": [
+        "lint",
+        "shellcheck",
+        "quality",
+        "shell",
+        "make-target"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/lint_helpers.sh",
+      "type": "file",
+      "name": "lint_helpers.sh",
+      "filePath": ".local/scripts/lint_helpers.sh",
+      "summary": "Single source of truth for shell-lint file patterns, vendored-path exclusions, and hardcoded-path rules shared by lint.sh, the pre-commit hook, and CI. Exposes lint_get_scripts to list tracked shell scripts.",
+      "tags": [
+        "lint",
+        "shared-config",
+        "shellcheck",
+        "patterns",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/permanent_shutdown_fix.sh",
+      "type": "file",
+      "name": "permanent_shutdown_fix.sh",
+      "filePath": ".local/scripts/permanent_shutdown_fix.sh",
+      "summary": "Idempotently patches /etc/default/grub with power-management and graphics kernel parameters and removes 'quiet splash' for verbose shutdown logging, backing up the config and running update-grub.",
+      "tags": [
+        "grub",
+        "shutdown",
+        "power-management",
+        "idempotent",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/pipewire.sh",
+      "type": "file",
+      "name": "pipewire.sh",
+      "filePath": ".local/scripts/pipewire.sh",
+      "summary": "i3blocks audio block that displays the default sink's device, volume, and mute status and supports cycling the default playback device, toggling mute, and adjusting volume via pactl and amixer.",
+      "tags": [
+        "audio",
+        "pipewire",
+        "pulseaudio",
+        "i3blocks",
+        "volume"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/ycm.sh",
+      "type": "file",
+      "name": "ycm.sh",
+      "filePath": ".local/scripts/ycm.sh",
+      "summary": "Installs YouCompleteMe and its build dependencies for the detected OS/distro (Arch, Ubuntu, macOS, Manjaro) and compiles ycm_core, cleaning up the temporary build directory afterward.",
+      "tags": [
+        "youcompleteme",
+        "vim",
+        "installer",
+        "cross-distro",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/lint_helpers.sh:lint_get_scripts",
+      "type": "function",
+      "name": "lint_get_scripts",
+      "lineRange": [
+        45,
+        51
+      ],
+      "summary": "Lists all git-tracked shell scripts matching LINT_PATTERNS while filtering out vendored and submodule paths via LINT_EXCLUDES; consumed by lint.sh and the pre-commit hook.",
+      "tags": [
+        "lint",
+        "git-ls-files",
+        "filter",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/pipewire.sh:set_default_playback_device_next",
+      "type": "function",
+      "name": "set_default_playback_device_next",
+      "lineRange": [
+        99,
+        109
+      ],
+      "summary": "Cycles the default PulseAudio/PipeWire sink forward or backward by the given increment and migrates active sink inputs to the new default device.",
+      "tags": [
+        "audio",
+        "sink",
+        "default-device",
+        "pactl"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/pipewire.sh:print_block",
+      "type": "function",
+      "name": "print_block",
+      "lineRange": [
+        123,
+        167
+      ],
+      "summary": "Builds the i3blocks output for the running sink by resolving its name, volume, and mute state, then emits the formatted long/short text plus the status color.",
+      "tags": [
+        "i3blocks",
+        "audio",
+        "render",
+        "volume"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/ycm.sh:ubuntu_based_install",
+      "type": "function",
+      "name": "ubuntu_based_install",
+      "lineRange": [
+        17,
+        33
+      ],
+      "summary": "Installs the apt build dependencies (compilers, JDK, Go, mono, node, python) required to compile YouCompleteMe on Ubuntu-based systems.",
+      "tags": [
+        "ubuntu",
+        "apt",
+        "dependencies",
+        "installer"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/ycm.sh:ycm_install",
+      "type": "function",
+      "name": "ycm_install",
+      "lineRange": [
+        44,
+        54
+      ],
+      "summary": "Builds ycm_core with cmake and runs YouCompleteMe's install.py with all completers, then cleans up the temporary build directory.",
+      "tags": [
+        "youcompleteme",
+        "cmake",
+        "build",
+        "installer"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "pipeline:Makefile",
+      "type": "pipeline",
+      "name": "Makefile",
+      "filePath": "Makefile",
+      "summary": "Central task orchestrator wrapping GNU Stow for the dotfiles symlink lifecycle (install/uninstall/restow/dry-run) plus quality (lint/check/fix/doctor), git hooks, skills, workspace sync, submodules, and per-OS bootstrap/uninstall targets. Each target delegates to a `.local/scripts` helper, `stow`, or an OS bootstrap entrypoint.",
+      "tags": [
+        "makefile",
+        "stow",
+        "orchestration",
+        "infra",
+        "bootstrap"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:AGENTS.md",
+      "type": "document",
+      "name": "AGENTS.md",
+      "filePath": "AGENTS.md",
+      "summary": "Agent-facing guide describing the dotfiles architecture (nested stow layout, `$DOTFILES`, bootstrap segregation), build/test commands via make, bash conventions, installed agent skills, pitfalls, and the cuberhaus-workspace multi-root integration.",
+      "tags": [
+        "docs",
+        "agents",
+        "conventions",
+        "architecture",
+        "guide"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Primary project README explaining the `dotfiles/dotfiles` GNU Stow layout, installation, make-based usage, volatile config handling, per-OS bootstrap flow, the tooling inventory, and supported operating systems and window managers.",
+      "tags": [
+        "docs",
+        "readme",
+        "stow",
+        "installation",
+        "bootstrap"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:SECURITY.md",
+      "type": "document",
+      "name": "SECURITY.md",
+      "filePath": "SECURITY.md",
+      "summary": "Security policy covering vulnerability reporting plus considerations for reviewing scripts before running, sudo privilege-escalation awareness, GPG commit verification, and keeping sensitive data out of the dotfiles repo.",
+      "tags": [
+        "docs",
+        "security",
+        "policy",
+        "sudo",
+        "secrets"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/applets",
+      "type": "file",
+      "name": "applets",
+      "filePath": ".local/scripts/applets",
+      "summary": "Interactive installer that downloads a curated set of Cinnamon applets/desklets from the Linux Mint spices site in parallel and extracts them into the user's local Cinnamon applets directory. Includes a generic ex() archive-extraction helper.",
+      "tags": [
+        "cinnamon",
+        "applets",
+        "installer",
+        "parallel-download",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bin/changeBrightness",
+      "type": "file",
+      "name": "changeBrightness",
+      "filePath": ".local/scripts/bin/changeBrightness",
+      "summary": "Adjusts laptop backlight brightness via `light` by a signed integer step and shows a dunst notification with a progress bar. Validates the numeric argument and checks for required commands.",
+      "tags": [
+        "brightness",
+        "hardware-control",
+        "notification",
+        "dunst",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bin/changeVolume",
+      "type": "file",
+      "name": "changeVolume",
+      "filePath": ".local/scripts/bin/changeVolume",
+      "summary": "Sets or adjusts the default sink volume via pactl, queries amixer for the current level/mute state, and displays a dunst notification (muted or with a volume bar). Refreshes i3blocks after changes.",
+      "tags": [
+        "volume",
+        "hardware-control",
+        "notification",
+        "pulseaudio",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bin/clone-all",
+      "type": "file",
+      "name": "clone-all",
+      "filePath": ".local/scripts/bin/clone-all",
+      "summary": "Clones every repository in a GitHub org (via gh) or fast-forwards the ones already present, running per-repo work in parallel with xargs and printing one colored status line per repo.",
+      "tags": [
+        "git",
+        "github-cli",
+        "parallel",
+        "clone",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bin/git-ahead",
+      "type": "file",
+      "name": "git-ahead",
+      "filePath": ".local/scripts/bin/git-ahead",
+      "summary": "Scans all git repos under a directory, optionally fetches all remotes, and reports any remote branch with commits ahead of the detected base (origin/HEAD, main, or master). Color-coded output, configurable depth.",
+      "tags": [
+        "git",
+        "repo-scan",
+        "branches",
+        "fetch",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bin/git-clean-branches",
+      "type": "file",
+      "name": "git-clean-branches",
+      "filePath": ".local/scripts/bin/git-clean-branches",
+      "summary": "Scans git repos under a directory and safely deletes local branches that have no remote tracking branch and no commits ahead of the default branch, using `git branch -d`. Supports dry-run and depth options.",
+      "tags": [
+        "git",
+        "branch-cleanup",
+        "repo-scan",
+        "dry-run",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bin/git-recurse",
+      "type": "file",
+      "name": "git-recurse",
+      "filePath": ".local/scripts/bin/git-recurse",
+      "summary": "Runs an arbitrary git command across all repositories found under the current directory up to a configurable depth, optionally in parallel with grouped per-repo output. Includes a macOS ssh-key helper.",
+      "tags": [
+        "git",
+        "recursive",
+        "parallel",
+        "repo-scan",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bin/pfetch",
+      "type": "file",
+      "name": "pfetch",
+      "filePath": ".local/scripts/bin/pfetch",
+      "summary": "Vendored POSIX sh system-information fetch tool (neofetch-style) that prints distro ASCII art alongside OS, kernel, uptime, packages, memory and other details via dozens of internal getter functions.",
+      "tags": [
+        "fetch",
+        "system-info",
+        "ascii-art",
+        "vendored",
+        "posix-shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:.local/scripts/bin/program",
+      "type": "file",
+      "name": "program",
+      "filePath": ".local/scripts/bin/program",
+      "summary": "Launcher that uses wmctrl to focus an existing window of a program if one is open, otherwise starts a new instance. Accepts an optional second argument for the window class to match.",
+      "tags": [
+        "launcher",
+        "wmctrl",
+        "window-management",
+        "x11",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bin/prompt",
+      "type": "file",
+      "name": "prompt",
+      "filePath": ".local/scripts/bin/prompt",
+      "summary": "Tiny helper that prints `user@host` with the username colored red and the hostname green using tput. Used as a minimal prompt/identity display.",
+      "tags": [
+        "prompt",
+        "tput",
+        "shell",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bin/yolo",
+      "type": "file",
+      "name": "yolo",
+      "filePath": ".local/scripts/bin/yolo",
+      "summary": "Three-line convenience script that stages all changes, commits with a placeholder message, and pushes. A quick throwaway-commit helper.",
+      "tags": [
+        "git",
+        "commit",
+        "shortcut",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/arch",
+      "type": "file",
+      "name": "arch",
+      "filePath": ".local/scripts/bootstrap/arch",
+      "summary": "Arch Linux bootstrap entrypoint. Sources base_functions and arch_functions, updates the system, then orchestrates the full install sequence (base, arch drivers, i3, xmonad, AUR apps, vim, AI tools) and sets zsh as the default shell.",
+      "tags": [
+        "bootstrap",
+        "arch",
+        "installer",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/arch_functions",
+      "type": "file",
+      "name": "arch_functions",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "summary": "Large library of Arch/Manjaro install functions sourced by the arch and manjaro entrypoints: base packages, AUR/yay setup, window managers (i3, xmonad), desktop environments, vim, emacs, AI tools, games and optional extras.",
+      "tags": [
+        "bootstrap",
+        "arch",
+        "manjaro",
+        "install-functions",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/base_functions",
+      "type": "file",
+      "name": "base_functions",
+      "filePath": ".local/scripts/bootstrap/base_functions",
+      "summary": "Shared bootstrap library sourced by every OS entrypoint. Provides logging helpers (info/warn/error), XDG defaults, environment preparation, NVIDIA anti-tearing/FreeSync display config, and skip-worktree handling for volatile config files.",
+      "tags": [
+        "bootstrap",
+        "shared-library",
+        "logging",
+        "nvidia",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/mac",
+      "type": "file",
+      "name": "mac",
+      "filePath": ".local/scripts/bootstrap/mac",
+      "summary": "macOS bootstrap entrypoint. Sources base_functions and mac_functions, then runs install preparation, Homebrew install, the macOS package set, AI tools and vim before applying skip-worktree.",
+      "tags": [
+        "bootstrap",
+        "macos",
+        "installer",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/mac_functions",
+      "type": "file",
+      "name": "mac_functions",
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "summary": "Library of macOS install functions sourced by the mac entrypoint: Homebrew bootstrap, the main brew bundle (mac_install), AI tools, vim, Doom Emacs, App Store apps, and an extensive `defaults write` system-preferences configurator.",
+      "tags": [
+        "bootstrap",
+        "macos",
+        "homebrew",
+        "install-functions",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/manjaro",
+      "type": "file",
+      "name": "manjaro",
+      "filePath": ".local/scripts/bootstrap/manjaro",
+      "summary": "Manjaro bootstrap entrypoint. Sources base_functions and arch_functions, updates the system, then runs the shared Arch/Manjaro install path plus Manjaro-specific packages, window managers, laptop tweaks and vim.",
+      "tags": [
+        "bootstrap",
+        "manjaro",
+        "installer",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/ubuntu",
+      "type": "file",
+      "name": "ubuntu",
+      "filePath": ".local/scripts/bootstrap/ubuntu",
+      "summary": "Ubuntu bootstrap entrypoint. Sources base_functions and ubuntu_functions, runs apt update/upgrade, then orchestrates brew, base packages, emacs, repo cloning, Chrome, snaps, NVIDIA config, AI tools and vim.",
+      "tags": [
+        "bootstrap",
+        "ubuntu",
+        "installer",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "type": "file",
+      "name": "ubuntu_functions",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "summary": "Library of Ubuntu install functions sourced by the ubuntu and ubuntu_windows entrypoints: base packages, apt/snap/Chrome/emacs installs, i3, AI tools, vim, repo cloning, high-DPI and touchpad tweaks, and WSL windows_install.",
+      "tags": [
+        "bootstrap",
+        "ubuntu",
+        "apt",
+        "install-functions",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/ubuntu_windows",
+      "type": "file",
+      "name": "ubuntu_windows",
+      "filePath": ".local/scripts/bootstrap/ubuntu_windows",
+      "summary": "WSL (Ubuntu-on-Windows) bootstrap entrypoint. Sources ubuntu_functions and base_functions, updates apt, installs brew, base packages, vim and the WSL-specific windows_install set, then switches the shell to zsh.",
+      "tags": [
+        "bootstrap",
+        "ubuntu",
+        "wsl",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_arch",
+      "type": "file",
+      "name": "uninstall_arch",
+      "filePath": ".local/scripts/bootstrap/uninstall_arch",
+      "summary": "Arch uninstall entrypoint. Sources base_functions, the uninstall_tui menu and uninstall_arch_functions, then presents a checklist of uninstall actions (base, drivers, i3, xmonad, vim, laptop, dwall, papirus, emacs).",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "arch",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_arch_functions",
+      "type": "file",
+      "name": "uninstall_arch_functions",
+      "filePath": ".local/scripts/bootstrap/uninstall_arch_functions",
+      "summary": "Library of Arch/Manjaro uninstall functions (base, arch drivers, i3, xmonad, vim, laptop, dwall, papirus, emacs) sourced by the uninstall_arch and uninstall_manjaro entrypoints.",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "arch",
+        "manjaro",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_mac",
+      "type": "file",
+      "name": "uninstall_mac",
+      "filePath": ".local/scripts/bootstrap/uninstall_mac",
+      "summary": "macOS uninstall entrypoint. Sources base_functions, uninstall_tui and uninstall_mac_functions, then offers a checklist to remove CLI tools, Nerd Fonts, GUI apps, vim, and run brew cleanup.",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "macos",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_mac_functions",
+      "type": "file",
+      "name": "uninstall_mac_functions",
+      "filePath": ".local/scripts/bootstrap/uninstall_mac_functions",
+      "summary": "Library of macOS uninstall functions sourced by the uninstall_mac entrypoint: remove CLI tools, Nerd Fonts, GUI applications, vim/neovim, and a brew cleanup helper.",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "macos",
+        "homebrew",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_manjaro",
+      "type": "file",
+      "name": "uninstall_manjaro",
+      "filePath": ".local/scripts/bootstrap/uninstall_manjaro",
+      "summary": "Manjaro uninstall entrypoint. Sources base_functions, uninstall_tui, uninstall_arch_functions and uninstall_manjaro_functions, then presents a checklist combining shared Arch and Manjaro-specific uninstall actions.",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "manjaro",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bin/clone-all:process_repo",
+      "type": "function",
+      "name": "process_repo",
+      "filePath": ".local/scripts/bin/clone-all",
+      "lineRange": [
+        35,
+        76
+      ],
+      "summary": "Handles a single repository: pulls with --ff-only if it is already a git repo, skips non-repo paths, or clones it fresh via gh, emitting a colored status label and indented error output.",
+      "tags": [
+        "git",
+        "clone",
+        "pull",
+        "worker",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bin/git-ahead:scan_repo",
+      "type": "function",
+      "name": "scan_repo",
+      "filePath": ".local/scripts/bin/git-ahead",
+      "lineRange": [
+        66,
+        113
+      ],
+      "summary": "For one repo, optionally fetches all remotes, detects the base branch, and iterates every remote branch counting commits ahead of the base, printing only branches that are ahead.",
+      "tags": [
+        "git",
+        "branches",
+        "ahead-count",
+        "repo-scan",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bin/git-clean-branches:scan_repo",
+      "type": "function",
+      "name": "scan_repo",
+      "filePath": ".local/scripts/bin/git-clean-branches",
+      "lineRange": [
+        76,
+        132
+      ],
+      "summary": "For one repo, detects the default branch and iterates local branches, deleting (or previewing) those with no remote tracking branch and zero commits ahead of the default. Returns the deletion count.",
+      "tags": [
+        "git",
+        "branch-cleanup",
+        "safe-delete",
+        "repo-scan",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bin/git-recurse:git_recursive",
+      "type": "function",
+      "name": "git_recursive",
+      "filePath": ".local/scripts/bin/git-recurse",
+      "lineRange": [
+        15,
+        109
+      ],
+      "summary": "Core engine of git-recurse: finds all .git dirs up to a depth and runs the given command in each, either sequentially with pushd/popd or in parallel with per-repo temp logs, summarizing successes and failures.",
+      "tags": [
+        "git",
+        "recursive",
+        "parallel",
+        "engine",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/base_functions:install_preparation",
+      "type": "function",
+      "name": "install_preparation",
+      "filePath": ".local/scripts/bootstrap/base_functions",
+      "lineRange": [
+        23,
+        44
+      ],
+      "summary": "Prepares the environment before installation: writes a default vim theme, creates and chowns vim/zsh/vlc cache directories, touches viminfo files, and creates the Samba usershares directory.",
+      "tags": [
+        "bootstrap",
+        "preparation",
+        "setup",
+        "filesystem",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/base_functions:nvidia_display_config",
+      "type": "function",
+      "name": "nvidia_display_config",
+      "filePath": ".local/scripts/bootstrap/base_functions",
+      "lineRange": [
+        57,
+        113
+      ],
+      "summary": "Writes an Xorg NVIDIA config to eliminate screen tearing, choosing between ForceFullCompositionPipeline (HDMI) and FreeSync/G-Sync-compatible mode (DisplayPort). Skips silently if no NVIDIA driver is present.",
+      "tags": [
+        "nvidia",
+        "xorg",
+        "display-config",
+        "anti-tearing",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/base_functions:apply_skip_worktree",
+      "type": "function",
+      "name": "apply_skip_worktree",
+      "filePath": ".local/scripts/bootstrap/base_functions",
+      "lineRange": [
+        115,
+        137
+      ],
+      "summary": "Applies git update-index --skip-worktree to volatile, app-rewritten config files (Warp prefs, LibreOffice settings) so they stay tracked but silence runtime noise. Skips files not yet present.",
+      "tags": [
+        "git",
+        "skip-worktree",
+        "volatile-files",
+        "bootstrap",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:base_install",
+      "type": "function",
+      "name": "base_install",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        25,
+        191
+      ],
+      "summary": "Installs the large core package set common to Arch/Manjaro (CLI tools, fonts, dev tooling, fzf, kitty, etc.) via pacman, configuring services and base utilities used across the dotfiles.",
+      "tags": [
+        "arch",
+        "packages",
+        "pacman",
+        "core-install",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:git_repos",
+      "type": "function",
+      "name": "git_repos",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        192,
+        216
+      ],
+      "summary": "Clones the user's personal git repositories into the expected locations during Arch/Manjaro bootstrap.",
+      "tags": [
+        "arch",
+        "git",
+        "clone",
+        "repos",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:arch_install",
+      "type": "function",
+      "name": "arch_install",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        217,
+        271
+      ],
+      "summary": "Installs Arch-specific drivers and services (NVIDIA, CUPS printing, Bluetooth) and related configuration during bootstrap.",
+      "tags": [
+        "arch",
+        "drivers",
+        "services",
+        "nvidia",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:arch_and_manjaro",
+      "type": "function",
+      "name": "arch_and_manjaro",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        272,
+        290
+      ],
+      "summary": "Installs configuration shared between Arch and Manjaro (printers, Samba and similar) invoked by both entrypoints.",
+      "tags": [
+        "arch",
+        "manjaro",
+        "shared",
+        "samba",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:manjaro_install",
+      "type": "function",
+      "name": "manjaro_install",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        291,
+        316
+      ],
+      "summary": "Installs Manjaro-specific packages and tweaks (IDEs, snaps, Spotify and other extras) called from the manjaro entrypoint.",
+      "tags": [
+        "manjaro",
+        "packages",
+        "install",
+        "extras",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:yay_install",
+      "type": "function",
+      "name": "yay_install",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        317,
+        329
+      ],
+      "summary": "Bootstraps the yay AUR helper by cloning and building it so that AUR packages can be installed later in the bootstrap.",
+      "tags": [
+        "arch",
+        "aur",
+        "yay",
+        "build",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:vim_install",
+      "type": "function",
+      "name": "vim_install",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        330,
+        373
+      ],
+      "summary": "Installs Vim/Neovim extras and supporting tooling (ctags, formatters, language servers) and bootstraps plugin setup on Arch/Manjaro.",
+      "tags": [
+        "arch",
+        "vim",
+        "neovim",
+        "editor",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:i3_install",
+      "type": "function",
+      "name": "i3_install",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        374,
+        403
+      ],
+      "summary": "Installs the i3 window-manager stack (i3-gaps, i3blocks, rofi and related utilities) and its configuration during Arch/Manjaro bootstrap.",
+      "tags": [
+        "arch",
+        "i3",
+        "window-manager",
+        "install",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:xmonad_install",
+      "type": "function",
+      "name": "xmonad_install",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        404,
+        426
+      ],
+      "summary": "Installs the xmonad window manager and companion tools (xmobar, trayer, dmenu) during Arch/Manjaro bootstrap.",
+      "tags": [
+        "arch",
+        "xmonad",
+        "window-manager",
+        "install",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:cinnamon_install",
+      "type": "function",
+      "name": "cinnamon_install",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        427,
+        454
+      ],
+      "summary": "Installs the Cinnamon desktop environment and its dependencies during Arch/Manjaro bootstrap.",
+      "tags": [
+        "arch",
+        "cinnamon",
+        "desktop-environment",
+        "install",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:emacs",
+      "type": "function",
+      "name": "emacs",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        560,
+        607
+      ],
+      "summary": "Installs Emacs and bootstraps the Doom Emacs configuration during Arch/Manjaro setup.",
+      "tags": [
+        "arch",
+        "emacs",
+        "doom-emacs",
+        "editor",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:ai_tools_install",
+      "type": "function",
+      "name": "ai_tools_install",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        608,
+        695
+      ],
+      "summary": "Installs AI/LLM CLI tooling (such as Claude/Copilot helpers and supporting Node/npm packages) during Arch/Manjaro bootstrap.",
+      "tags": [
+        "arch",
+        "ai-tools",
+        "cli",
+        "install",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/arch_functions:optional",
+      "type": "function",
+      "name": "optional",
+      "filePath": ".local/scripts/bootstrap/arch_functions",
+      "lineRange": [
+        696,
+        808
+      ],
+      "summary": "Large catch-all of optional, manually-invoked Arch/Manjaro install snippets and extras not run by default during the standard bootstrap.",
+      "tags": [
+        "arch",
+        "optional",
+        "extras",
+        "install",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:base_install",
+      "type": "function",
+      "name": "base_install",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        8,
+        59
+      ],
+      "summary": "Installs the core Ubuntu package set via apt (CLI tools, dev tooling and utilities) that underpins the rest of the dotfiles setup.",
+      "tags": [
+        "ubuntu",
+        "apt",
+        "packages",
+        "core-install",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:ubuntu_install",
+      "type": "function",
+      "name": "ubuntu_install",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        74,
+        133
+      ],
+      "summary": "Installs Ubuntu-specific applications and configuration (GUI apps, desktop tweaks and extra packages) during bootstrap.",
+      "tags": [
+        "ubuntu",
+        "apps",
+        "install",
+        "desktop",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:chrome_install",
+      "type": "function",
+      "name": "chrome_install",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        147,
+        157
+      ],
+      "summary": "Downloads and installs Google Chrome from the official .deb package on Ubuntu.",
+      "tags": [
+        "ubuntu",
+        "chrome",
+        "browser",
+        "deb-install",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:emacs_install",
+      "type": "function",
+      "name": "emacs_install",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        158,
+        185
+      ],
+      "summary": "Installs Emacs and bootstraps the Doom Emacs configuration on Ubuntu.",
+      "tags": [
+        "ubuntu",
+        "emacs",
+        "doom-emacs",
+        "editor",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:i3_install",
+      "type": "function",
+      "name": "i3_install",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        186,
+        233
+      ],
+      "summary": "Installs and configures the i3 window-manager stack on Ubuntu, building components that require manual input where needed.",
+      "tags": [
+        "ubuntu",
+        "i3",
+        "window-manager",
+        "install",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:snaps_install",
+      "type": "function",
+      "name": "snaps_install",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        243,
+        263
+      ],
+      "summary": "Installs the default set of snap packages on Ubuntu during bootstrap.",
+      "tags": [
+        "ubuntu",
+        "snap",
+        "packages",
+        "install",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:ai_tools_install",
+      "type": "function",
+      "name": "ai_tools_install",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        264,
+        352
+      ],
+      "summary": "Installs AI/LLM CLI tooling and supporting Node/npm packages on Ubuntu during bootstrap.",
+      "tags": [
+        "ubuntu",
+        "ai-tools",
+        "cli",
+        "install",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:vim_install",
+      "type": "function",
+      "name": "vim_install",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        353,
+        375
+      ],
+      "summary": "Installs Vim/Neovim and supporting tooling (ctags, formatters) and bootstraps plugins on Ubuntu.",
+      "tags": [
+        "ubuntu",
+        "vim",
+        "neovim",
+        "editor",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:clone_repos",
+      "type": "function",
+      "name": "clone_repos",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        389,
+        421
+      ],
+      "summary": "Clones the user's personal git repositories into their expected locations during Ubuntu bootstrap.",
+      "tags": [
+        "ubuntu",
+        "git",
+        "clone",
+        "repos",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/ubuntu_functions:high_dpi_screen",
+      "type": "function",
+      "name": "high_dpi_screen",
+      "filePath": ".local/scripts/bootstrap/ubuntu_functions",
+      "lineRange": [
+        422,
+        433
+      ],
+      "summary": "Applies high-DPI display scaling tweaks for Ubuntu on high-resolution screens.",
+      "tags": [
+        "ubuntu",
+        "high-dpi",
+        "display",
+        "scaling",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/mac_functions:brew_install",
+      "type": "function",
+      "name": "brew_install",
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "lineRange": [
+        10,
+        17
+      ],
+      "summary": "Bootstraps Homebrew on macOS if it is not already installed, the prerequisite for all subsequent brew-based installs.",
+      "tags": [
+        "macos",
+        "homebrew",
+        "bootstrap",
+        "install",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/mac_functions:mac_install",
+      "type": "function",
+      "name": "mac_install",
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "lineRange": [
+        18,
+        103
+      ],
+      "summary": "Installs the main macOS package set via Homebrew (CLI tools, fonts, casks and GUI applications) that forms the core of the macOS environment.",
+      "tags": [
+        "macos",
+        "homebrew",
+        "packages",
+        "core-install",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/mac_functions:ai_tools_install",
+      "type": "function",
+      "name": "ai_tools_install",
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "lineRange": [
+        104,
+        119
+      ],
+      "summary": "Installs AI/LLM CLI tooling and supporting packages on macOS during bootstrap.",
+      "tags": [
+        "macos",
+        "ai-tools",
+        "cli",
+        "install",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/mac_functions:optional",
+      "type": "function",
+      "name": "optional",
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "lineRange": [
+        120,
+        165
+      ],
+      "summary": "Collection of optional, manually-invoked macOS install snippets and extras not run during the default bootstrap.",
+      "tags": [
+        "macos",
+        "optional",
+        "extras",
+        "install",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/mac_functions:vim_install",
+      "type": "function",
+      "name": "vim_install",
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "lineRange": [
+        177,
+        190
+      ],
+      "summary": "Installs macvim/neovim and supporting tooling and bootstraps vim plugins on macOS.",
+      "tags": [
+        "macos",
+        "vim",
+        "neovim",
+        "editor",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/mac_functions:doom_emacs_install",
+      "type": "function",
+      "name": "doom_emacs_install",
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "lineRange": [
+        191,
+        236
+      ],
+      "summary": "Installs Emacs and bootstraps the Doom Emacs configuration on macOS.",
+      "tags": [
+        "macos",
+        "emacs",
+        "doom-emacs",
+        "editor",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/mac_functions:app_store_install",
+      "type": "function",
+      "name": "app_store_install",
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "lineRange": [
+        237,
+        249
+      ],
+      "summary": "Installs Mac App Store applications via the mas CLI during macOS bootstrap.",
+      "tags": [
+        "macos",
+        "app-store",
+        "mas",
+        "install",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/mac_functions:write_defaults",
+      "type": "function",
+      "name": "write_defaults",
+      "filePath": ".local/scripts/bootstrap/mac_functions",
+      "lineRange": [
+        254,
+        356
+      ],
+      "summary": "Extensive `defaults write` configurator that tunes macOS system and application preferences (Dock, Finder, keyboard, trackpad and more) to the user's opinionated settings.",
+      "tags": [
+        "macos",
+        "defaults",
+        "system-preferences",
+        "configuration",
+        "shell"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_arch_functions:base_uninstall",
+      "type": "function",
+      "name": "base_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_arch_functions",
+      "lineRange": [
+        11,
+        47
+      ],
+      "summary": "Removes the core base package set (cmake, bat, fzf, kitty, vim and similar) installed by the Arch/Manjaro base_install.",
+      "tags": [
+        "uninstall",
+        "arch",
+        "base-packages",
+        "pacman",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_arch_functions:arch_uninstall",
+      "type": "function",
+      "name": "arch_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_arch_functions",
+      "lineRange": [
+        48,
+        70
+      ],
+      "summary": "Removes Arch-specific drivers and services (NVIDIA, CUPS, Bluetooth) installed during bootstrap.",
+      "tags": [
+        "uninstall",
+        "arch",
+        "drivers",
+        "services",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_arch_functions:i3_uninstall",
+      "type": "function",
+      "name": "i3_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_arch_functions",
+      "lineRange": [
+        71,
+        83
+      ],
+      "summary": "Removes the i3 window-manager stack (i3-gaps, i3blocks, rofi and related packages).",
+      "tags": [
+        "uninstall",
+        "arch",
+        "i3",
+        "window-manager",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_arch_functions:xmonad_uninstall",
+      "type": "function",
+      "name": "xmonad_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_arch_functions",
+      "lineRange": [
+        84,
+        94
+      ],
+      "summary": "Removes the xmonad window manager and companion tools (xmobar, trayer, dmenu).",
+      "tags": [
+        "uninstall",
+        "arch",
+        "xmonad",
+        "window-manager",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_arch_functions:vim_uninstall",
+      "type": "function",
+      "name": "vim_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_arch_functions",
+      "lineRange": [
+        95,
+        107
+      ],
+      "summary": "Removes Vim/Neovim extras (ctags, formatters and related tooling) installed during Arch/Manjaro bootstrap.",
+      "tags": [
+        "uninstall",
+        "arch",
+        "vim",
+        "editor",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_arch_functions:emacs_uninstall",
+      "type": "function",
+      "name": "emacs_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_arch_functions",
+      "lineRange": [
+        137,
+        151
+      ],
+      "summary": "Removes Emacs and the Doom Emacs configuration installed during Arch/Manjaro bootstrap.",
+      "tags": [
+        "uninstall",
+        "arch",
+        "emacs",
+        "doom-emacs",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_mac_functions:cli_uninstall",
+      "type": "function",
+      "name": "cli_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_mac_functions",
+      "lineRange": [
+        8,
+        24
+      ],
+      "summary": "Removes the macOS CLI tools installed via Homebrew (bat, fzf, ripgrep, stow and similar).",
+      "tags": [
+        "uninstall",
+        "macos",
+        "cli",
+        "homebrew",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_mac_functions:fonts_uninstall",
+      "type": "function",
+      "name": "fonts_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_mac_functions",
+      "lineRange": [
+        25,
+        42
+      ],
+      "summary": "Removes the Nerd Fonts (Fira Code, Iosevka, Meslo and others) installed via Homebrew on macOS.",
+      "tags": [
+        "uninstall",
+        "macos",
+        "fonts",
+        "homebrew",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_mac_functions:gui_apps_uninstall",
+      "type": "function",
+      "name": "gui_apps_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_mac_functions",
+      "lineRange": [
+        43,
+        60
+      ],
+      "summary": "Removes the GUI applications (Chrome, Spotify, VS Code and similar) installed as Homebrew casks on macOS.",
+      "tags": [
+        "uninstall",
+        "macos",
+        "gui-apps",
+        "homebrew",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_mac_functions:vim_uninstall",
+      "type": "function",
+      "name": "vim_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_mac_functions",
+      "lineRange": [
+        61,
+        74
+      ],
+      "summary": "Removes macvim/neovim and associated plugins installed during macOS bootstrap.",
+      "tags": [
+        "uninstall",
+        "macos",
+        "vim",
+        "editor",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_manjaro_functions",
+      "type": "file",
+      "name": "uninstall_manjaro_functions",
+      "filePath": ".local/scripts/bootstrap/uninstall_manjaro_functions",
+      "summary": "Manjaro uninstall helper functions that remove Manjaro-specific snaps/pacman packages and shared Arch+Manjaro packages (printer drivers, samba group, git credential helper).",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "manjaro",
+        "pacman",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_tui",
+      "type": "file",
+      "name": "uninstall_tui",
+      "filePath": ".local/scripts/bootstrap/uninstall_tui",
+      "summary": "Reusable TUI checklist helper sourced by the per-OS uninstall entrypoints; renders a whiptail/dialog/plain-text checkbox list and invokes each selected component as a bash function after confirmation.",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "tui",
+        "whiptail",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_ubuntu",
+      "type": "file",
+      "name": "uninstall_ubuntu",
+      "filePath": ".local/scripts/bootstrap/uninstall_ubuntu",
+      "summary": "Ubuntu uninstall entrypoint that sources base_functions, the TUI helper, and the Ubuntu uninstall functions, then presents a checklist of removable components (base packages, GUI apps, snaps, Emacs, Vim, Homebrew, cleanup).",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "ubuntu",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "type": "file",
+      "name": "uninstall_ubuntu_functions",
+      "filePath": ".local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "summary": "Ubuntu uninstall function library defining per-component removers (base packages, GUI apps, Chrome, snaps, Emacs, Vim/Neovim, Homebrew) plus an apt autoremove cleanup.",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "ubuntu",
+        "apt",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_work",
+      "type": "file",
+      "name": "uninstall_work",
+      "filePath": ".local/scripts/bootstrap/uninstall_work",
+      "summary": "Work machine (ROG Strix/Ubuntu+NVIDIA) uninstall entrypoint that sources base_functions, the TUI helper, and the work uninstall functions, then offers a checklist to remove NVIDIA, dev tools, Node, Python, Docker, and GUI apps.",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "work",
+        "entrypoint",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/uninstall_work_functions",
+      "type": "file",
+      "name": "uninstall_work_functions",
+      "filePath": ".local/scripts/bootstrap/uninstall_work_functions",
+      "summary": "Work machine uninstall function library that reverses the work bootstrap: removes NVIDIA tools, dev tools, Node, Python/pipx, Docker CE, and GUI apps including repo keys and snaps.",
+      "tags": [
+        "bootstrap",
+        "uninstall",
+        "work",
+        "apt",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/work",
+      "type": "file",
+      "name": "work",
+      "filePath": ".local/scripts/bootstrap/work",
+      "summary": "Work machine bootstrap entrypoint (Asus ROG Strix / Ubuntu + NVIDIA) that sources base_functions and work_functions, then runs the full install sequence: shutdown fix, NVIDIA, dev tools, Node, Python, Docker, gcloud, and GUI apps.",
+      "tags": [
+        "bootstrap",
+        "install",
+        "work",
+        "ubuntu",
+        "entrypoint"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/bootstrap/work_functions",
+      "type": "file",
+      "name": "work_functions",
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "summary": "Large work-machine bootstrap function library installing NVIDIA drivers, core dev tools, Node.js, Python, Docker CE, Google Cloud SDK, and a wide range of GUI/AI applications with parallel downloads and high-DPI tweaks.",
+      "tags": [
+        "bootstrap",
+        "install",
+        "work",
+        "apt",
+        "gui-apps"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:.local/scripts/cinnamon_path/cinnamon_dump_config",
+      "type": "file",
+      "name": "cinnamon_dump_config",
+      "filePath": ".local/scripts/cinnamon_path/cinnamon_dump_config",
+      "summary": "Cinnamon config dumper that snapshots /org/cinnamon, /org/nemo, /org/gtk, and /org/gnome dconf trees into light or dark profile files, selected via -l/-d getopts flags.",
+      "tags": [
+        "cinnamon",
+        "dconf",
+        "theme",
+        "dump",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/cinnamon_path/cinnamon_load_config",
+      "type": "file",
+      "name": "cinnamon_load_config",
+      "filePath": ".local/scripts/cinnamon_path/cinnamon_load_config",
+      "summary": "Cinnamon config loader that restores saved light or dark dconf profiles into /org/cinnamon, /org/nemo, /org/gtk, and /org/gnome, selected via -l/-d getopts flags.",
+      "tags": [
+        "cinnamon",
+        "dconf",
+        "theme",
+        "load",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/cinnamon_path/dark-theme",
+      "type": "file",
+      "name": "dark-theme",
+      "filePath": ".local/scripts/cinnamon_path/dark-theme",
+      "summary": "Applies the Cinnamon dark theme by dconf-loading the saved dark profiles, switching Papirus folder colors, and setting the base16 onedark terminal scheme.",
+      "tags": [
+        "cinnamon",
+        "theme",
+        "dark",
+        "dconf",
+        "base16"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/cinnamon_path/light-theme",
+      "type": "file",
+      "name": "light-theme",
+      "filePath": ".local/scripts/cinnamon_path/light-theme",
+      "summary": "Applies the Cinnamon light theme by dconf-loading the saved light profiles, switching Papirus folder colors, and setting a base16 light terminal scheme.",
+      "tags": [
+        "cinnamon",
+        "theme",
+        "light",
+        "dconf",
+        "base16"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/gnome_path/gnome_dump_config",
+      "type": "file",
+      "name": "gnome_dump_config",
+      "filePath": ".local/scripts/gnome_path/gnome_dump_config",
+      "summary": "One-line GNOME config dumper that exports the entire dconf database to ~/.config/dconf-settings.ini.",
+      "tags": [
+        "gnome",
+        "dconf",
+        "dump",
+        "config",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/gnome_path/gnome_load_config",
+      "type": "file",
+      "name": "gnome_load_config",
+      "filePath": ".local/scripts/gnome_path/gnome_load_config",
+      "summary": "One-line GNOME config loader that imports the entire dconf database from ~/.config/dconf-settings.ini.",
+      "tags": [
+        "gnome",
+        "dconf",
+        "load",
+        "config",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/claude-cost-stats.py",
+      "type": "file",
+      "name": "claude-cost-stats.py",
+      "filePath": ".local/scripts/claude-cost-stats.py",
+      "summary": "CLI tool that scans Claude Code/agent JSONL transcripts, computes token usage and per-model/per-group cost using a built-in rates table, and prints a humanized cost summary with optional --since filtering and JSON output.",
+      "tags": [
+        "python",
+        "cli",
+        "cost-analysis",
+        "claude",
+        "reporting"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:.local/scripts/discord_fix.py",
+      "type": "file",
+      "name": "discord_fix.py",
+      "filePath": ".local/scripts/discord_fix.py",
+      "summary": "Tiny script that edits ~/.config/discord/settings.json to set SKIP_HOST_UPDATE=true, preventing Discord's broken self-updater from running.",
+      "tags": [
+        "python",
+        "discord",
+        "fix",
+        "json",
+        "config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/desklets",
+      "type": "file",
+      "name": "desklets",
+      "filePath": ".local/scripts/desklets",
+      "summary": "Interactive installer that optionally downloads Cinnamon calendar and diskspace desklets in parallel and extracts them via a built-in multi-format ex() helper.",
+      "tags": [
+        "cinnamon",
+        "desklets",
+        "installer",
+        "download",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/hooks/pre-commit",
+      "type": "file",
+      "name": "pre-commit",
+      "filePath": ".local/scripts/hooks/pre-commit",
+      "summary": "Git pre-commit hook that mirrors CI locally on staged files: shellcheck on staged shell scripts, hardcoded-user-path scanning, and markdownlint on staged markdown, sourcing shared helpers from lint_helpers.sh.",
+      "tags": [
+        "git-hook",
+        "pre-commit",
+        "lint",
+        "shellcheck",
+        "ci"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/obsidian-reinstall-plugins",
+      "type": "file",
+      "name": "obsidian-reinstall-plugins",
+      "filePath": ".local/scripts/obsidian-reinstall-plugins",
+      "summary": "Thin wrapper that locates the canonical obsidian-reinstall-plugins script inside the obsidian_vault repo and re-execs it, printing clone instructions if the vault is missing.",
+      "tags": [
+        "obsidian",
+        "wrapper",
+        "plugins",
+        "shim",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/spot",
+      "type": "file",
+      "name": "spot",
+      "filePath": ".local/scripts/spot",
+      "summary": "Status-bar helper that prints the currently playing Spotify artist and song via playerctl when Spotify is running.",
+      "tags": [
+        "spotify",
+        "playerctl",
+        "statusbar",
+        "now-playing",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/spoti",
+      "type": "file",
+      "name": "spoti",
+      "filePath": ".local/scripts/spoti",
+      "summary": "Status-bar helper that resolves the Spotify window title via wmctrl/pgrep to display the current track, used where playerctl is unavailable.",
+      "tags": [
+        "spotify",
+        "wmctrl",
+        "statusbar",
+        "now-playing",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:.local/scripts/stow-backup-conflicts",
+      "type": "file",
+      "name": "stow-backup-conflicts",
+      "filePath": ".local/scripts/stow-backup-conflicts",
+      "summary": "Runs a GNU Stow dry-run, parses conflicting non-symlink targets, and moves each into a timestamped ~/.dotfiles-backup directory so stow can proceed cleanly.",
+      "tags": [
+        "stow",
+        "backup",
+        "conflicts",
+        "dotfiles",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/stow-uninstall",
+      "type": "file",
+      "name": "stow-uninstall",
+      "filePath": ".local/scripts/stow-uninstall",
+      "summary": "Removes all stow symlinks and restores original files: detects unstow conflicts, moves them aside, runs stow -D, puts overwritten user data back, restores remaining backed-up files, and cleans up the backup directory.",
+      "tags": [
+        "stow",
+        "uninstall",
+        "restore",
+        "dotfiles",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/toggle_theme",
+      "type": "file",
+      "name": "toggle_theme",
+      "filePath": ".local/scripts/toggle_theme",
+      "summary": "Self-contained light/dark theme switcher that updates GTK 2/3 theme and icon settings, Vim colorscheme, termite colors, and wallpaper based on a single light|dark argument.",
+      "tags": [
+        "theme",
+        "gtk",
+        "vim",
+        "wallpaper",
+        "shell"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:.local/scripts/volume-change-output",
+      "type": "file",
+      "name": "volume-change-output",
+      "filePath": ".local/scripts/volume-change-output",
+      "summary": "Helper that auto-detects the ALSA/PulseAudio mixer and simple control name (defaulting to the pulse device) for use in volume-control keybindings.",
+      "tags": [
+        "audio",
+        "alsa",
+        "pulseaudio",
+        "amixer",
+        "shell"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/work_functions:nvidia_install",
+      "type": "function",
+      "name": "nvidia_install",
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "lineRange": [
+        19,
+        34
+      ],
+      "summary": "Installs ubuntu-drivers-common and NVIDIA drivers (via ubuntu-drivers install when no driver is loaded) plus nvidia-settings and nvidia-prime for Optimus GPU switching.",
+      "tags": [
+        "nvidia",
+        "drivers",
+        "install",
+        "ubuntu",
+        "gpu"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/work_functions:dev_tools_install",
+      "type": "function",
+      "name": "dev_tools_install",
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "lineRange": [
+        39,
+        96
+      ],
+      "summary": "Installs a broad set of core dev tools and modern CLI utilities (build-essential, git, zsh, neovim, bat, eza, fzf, ripgrep, etc.) and configures the git credential helper.",
+      "tags": [
+        "dev-tools",
+        "cli",
+        "install",
+        "apt",
+        "git"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/work_functions:node_install",
+      "type": "function",
+      "name": "node_install",
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "lineRange": [
+        99,
+        120
+      ],
+      "summary": "Installs Node.js 22 LTS via the NodeSource setup script and adds global npm packages (cline, markdownlint-cli2, GitHub Copilot CLI) if missing.",
+      "tags": [
+        "nodejs",
+        "npm",
+        "install",
+        "nodesource",
+        "lts"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/work_functions:python_install",
+      "type": "function",
+      "name": "python_install",
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "lineRange": [
+        123,
+        143
+      ],
+      "summary": "Installs Python 3 with pip, venv, and pipx, ensures the pipx path, and installs the vim-vint linter used for the vimrc.",
+      "tags": [
+        "python",
+        "pip",
+        "pipx",
+        "install",
+        "vint"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/work_functions:docker_install",
+      "type": "function",
+      "name": "docker_install",
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "lineRange": [
+        145,
+        189
+      ],
+      "summary": "Installs Docker CE from the official apt repo (GPG key, sources list, buildx/compose plugins) and adds the current user to the docker group for rootless usage.",
+      "tags": [
+        "docker",
+        "install",
+        "apt-repo",
+        "containers",
+        "gpg"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/work_functions:gcloud_install",
+      "type": "function",
+      "name": "gcloud_install",
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "lineRange": [
+        191,
+        212
+      ],
+      "summary": "Downloads and installs the Google Cloud CLI tarball into the home directory and runs its quiet installer when gcloud is not already present.",
+      "tags": [
+        "gcloud",
+        "google-cloud",
+        "install",
+        "cli",
+        "tarball"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/work_functions:gui_apps_install",
+      "type": "function",
+      "name": "gui_apps_install",
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "lineRange": [
+        214,
+        447
+      ],
+      "summary": "Phased GUI/AI app installer that downloads .deb/.AppImage/.run files in parallel then installs Chrome, Warp, LM Studio, Cursor, GPT4All, VS Code, Obsidian, Antigravity, Ollama, Zed, Claude Code, and assorted snaps.",
+      "tags": [
+        "gui-apps",
+        "install",
+        "parallel-download",
+        "ai-tools",
+        "snap"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/work_functions:high_dpi_screen",
+      "type": "function",
+      "name": "high_dpi_screen",
+      "filePath": ".local/scripts/bootstrap/work_functions",
+      "lineRange": [
+        450,
+        460
+      ],
+      "summary": "Applies GNOME high-DPI tweaks by increasing text-scaling-factor, cursor size, and desktop icon size instead of using full or fractional scaling.",
+      "tags": [
+        "high-dpi",
+        "gnome",
+        "gsettings",
+        "scaling",
+        "display"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_work_functions:dev_tools_uninstall",
+      "type": "function",
+      "name": "dev_tools_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_work_functions",
+      "lineRange": [
+        27,
+        37
+      ],
+      "summary": "Removes the core dev tools and CLI utilities installed by the work bootstrap and unsets the global git credential helper.",
+      "tags": [
+        "uninstall",
+        "dev-tools",
+        "apt-remove",
+        "work",
+        "git"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_work_functions:node_uninstall",
+      "type": "function",
+      "name": "node_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_work_functions",
+      "lineRange": [
+        40,
+        50
+      ],
+      "summary": "Uninstalls global npm packages and the nodejs package, then removes the NodeSource apt repo and key.",
+      "tags": [
+        "uninstall",
+        "nodejs",
+        "npm",
+        "nodesource",
+        "work"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_work_functions:python_uninstall",
+      "type": "function",
+      "name": "python_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_work_functions",
+      "lineRange": [
+        53,
+        66
+      ],
+      "summary": "Removes Python 3, pip, venv, and pipx, uninstalls vim-vint, and clears all pipx-installed packages.",
+      "tags": [
+        "uninstall",
+        "python",
+        "pipx",
+        "pip",
+        "work"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_work_functions:docker_uninstall",
+      "type": "function",
+      "name": "docker_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_work_functions",
+      "lineRange": [
+        69,
+        82
+      ],
+      "summary": "Removes Docker CE and its plugins, deletes the Docker apt repo and GPG key, and removes the user from the docker group.",
+      "tags": [
+        "uninstall",
+        "docker",
+        "apt-remove",
+        "work",
+        "containers"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_work_functions:gui_apps_uninstall",
+      "type": "function",
+      "name": "gui_apps_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_work_functions",
+      "lineRange": [
+        84,
+        114
+      ],
+      "summary": "Removes the work GUI apps installed via apt and snap (Chrome, VS Code, Antigravity, Warp, Obsidian, Spotify, etc.), deletes their repos/keys and the Cursor AppImage, then runs apt autoremove.",
+      "tags": [
+        "uninstall",
+        "gui-apps",
+        "snap",
+        "apt-remove",
+        "work"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:base_uninstall",
+      "type": "function",
+      "name": "base_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "lineRange": [
+        11,
+        20
+      ],
+      "summary": "Removes the Ubuntu base package set (build tools, git, gh, zsh, neovim, tmux, ranger, etc.) and unsets the global git credential helper.",
+      "tags": [
+        "uninstall",
+        "ubuntu",
+        "base-packages",
+        "apt-remove",
+        "git"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:ubuntu_gui_uninstall",
+      "type": "function",
+      "name": "ubuntu_gui_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "lineRange": [
+        26,
+        37
+      ],
+      "summary": "Removes Ubuntu GUI packages (lxappearance, audacity, calibre, KVM/libvirt, gparted, VLC, etc.) and removes RStudio via dpkg.",
+      "tags": [
+        "uninstall",
+        "ubuntu",
+        "gui",
+        "apt-remove",
+        "rstudio"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:snaps_uninstall",
+      "type": "function",
+      "name": "snaps_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "lineRange": [
+        49,
+        64
+      ],
+      "summary": "Removes the snap packages installed by the Ubuntu bootstrap (VS Code, Discord, IntelliJ, PyCharm, Skype, Slack, Spotify, Sublime, Walc).",
+      "tags": [
+        "uninstall",
+        "ubuntu",
+        "snap",
+        "ides",
+        "apps"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:emacs_uninstall",
+      "type": "function",
+      "name": "emacs_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "lineRange": [
+        67,
+        77
+      ],
+      "summary": "Removes Emacs and its build deps and deletes Doom/Chemacs config directories under the home folder.",
+      "tags": [
+        "uninstall",
+        "ubuntu",
+        "emacs",
+        "doom-emacs",
+        "apt-remove"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:brew_uninstall",
+      "type": "function",
+      "name": "brew_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "lineRange": [
+        91,
+        101
+      ],
+      "summary": "Uninstalls Homebrew via the official uninstall script when the brew command is present, otherwise skips.",
+      "tags": [
+        "uninstall",
+        "homebrew",
+        "ubuntu",
+        "shell",
+        "script"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_manjaro_functions:manjaro_uninstall",
+      "type": "function",
+      "name": "manjaro_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_manjaro_functions",
+      "lineRange": [
+        11,
+        23
+      ],
+      "summary": "Removes Manjaro-specific snaps (IntelliJ, PyCharm, Spotify, Sublime, WhatsApp, Zotero) and pacman packages cinnamon-screensaver and manjaro-pipewire.",
+      "tags": [
+        "uninstall",
+        "manjaro",
+        "snap",
+        "pacman",
+        "packages"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/bootstrap/uninstall_manjaro_functions:arch_and_manjaro_uninstall",
+      "type": "function",
+      "name": "arch_and_manjaro_uninstall",
+      "filePath": ".local/scripts/bootstrap/uninstall_manjaro_functions",
+      "lineRange": [
+        28,
+        36
+      ],
+      "summary": "Removes packages shared by Arch and Manjaro (hplip and the Epson inkjet AUR driver), removes the user from the sambashare group, and unsets the git credential helper.",
+      "tags": [
+        "uninstall",
+        "arch",
+        "manjaro",
+        "printer",
+        "samba"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/claude-cost-stats.py:parse_since",
+      "type": "function",
+      "name": "parse_since",
+      "filePath": ".local/scripts/claude-cost-stats.py",
+      "lineRange": [
+        79,
+        97
+      ],
+      "summary": "Parses a --since specification into a timezone-aware cutoff datetime, supporting relative durations (e.g. 7d, 24h) and absolute ISO dates, exiting on invalid input.",
+      "tags": [
+        "python",
+        "datetime",
+        "parsing",
+        "cli-arg",
+        "filter"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/claude-cost-stats.py:cost_for",
+      "type": "function",
+      "name": "cost_for",
+      "filePath": ".local/scripts/claude-cost-stats.py",
+      "lineRange": [
+        110,
+        131
+      ],
+      "summary": "Computes the USD cost of a single usage record by applying per-token input/output and cache read/write rates from the given rates table.",
+      "tags": [
+        "python",
+        "cost",
+        "tokens",
+        "pricing",
+        "calculation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:.local/scripts/claude-cost-stats.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": ".local/scripts/claude-cost-stats.py",
+      "lineRange": [
+        141,
+        288
+      ],
+      "summary": "Entrypoint that parses CLI args, walks transcript JSONL events filtering by --since, aggregates tokens and cost by model and group, and prints a humanized summary or JSON report.",
+      "tags": [
+        "python",
+        "cli",
+        "aggregation",
+        "report",
+        "entrypoint"
+      ],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "pipeline:.github/workflows/lint.yml",
+      "target": "file:.local/scripts/lint.sh",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:.github/workflows/lint.yml",
+      "target": "pipeline:Makefile",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:.github/pull_request_template.md",
+      "target": "document:AGENTS.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:.local/scripts/lint_helpers.sh",
+      "target": "function:.local/scripts/lint_helpers.sh:lint_get_scripts",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/pipewire.sh",
+      "target": "function:.local/scripts/pipewire.sh:set_default_playback_device_next",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/pipewire.sh",
+      "target": "function:.local/scripts/pipewire.sh:print_block",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/ycm.sh",
+      "target": "function:.local/scripts/ycm.sh:ubuntu_based_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/ycm.sh",
+      "target": "function:.local/scripts/ycm.sh:ycm_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/lint.sh",
+      "target": "file:.local/scripts/lint_helpers.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/stow-backup-conflicts",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/stow-uninstall",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/lint.sh",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/doctor.sh",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/hooks/pre-commit",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/arch",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/manjaro",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/ubuntu",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/ubuntu_windows",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/mac",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/work",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/uninstall_arch",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/uninstall_manjaro",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/uninstall_ubuntu",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/uninstall_mac",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "pipeline:Makefile",
+      "target": "file:.local/scripts/bootstrap/uninstall_work",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:README.md",
+      "target": "pipeline:Makefile",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:.local/scripts/bootstrap/arch",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:.local/scripts/bootstrap/manjaro",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:.local/scripts/bootstrap/ubuntu",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:.local/scripts/bootstrap/mac",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:.local/scripts/bootstrap/work",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:.local/scripts/toggle_theme",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "pipeline:Makefile",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:.local/scripts/stow-backup-conflicts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:.local/scripts/bootstrap/arch",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:.local/scripts/bootstrap/manjaro",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:.local/scripts/bootstrap/ubuntu",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:.local/scripts/bootstrap/mac",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:.local/scripts/bootstrap/work",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:SECURITY.md",
+      "target": "document:README.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:.local/scripts/bin/clone-all",
+      "target": "function:.local/scripts/bin/clone-all:process_repo",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bin/git-ahead",
+      "target": "function:.local/scripts/bin/git-ahead:scan_repo",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bin/git-clean-branches",
+      "target": "function:.local/scripts/bin/git-clean-branches:scan_repo",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bin/git-recurse",
+      "target": "function:.local/scripts/bin/git-recurse:git_recursive",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/base_functions",
+      "target": "function:.local/scripts/bootstrap/base_functions:install_preparation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/base_functions",
+      "target": "function:.local/scripts/bootstrap/base_functions:nvidia_display_config",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/base_functions",
+      "target": "function:.local/scripts/bootstrap/base_functions:apply_skip_worktree",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:base_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:git_repos",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:arch_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:arch_and_manjaro",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:manjaro_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:yay_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:vim_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:i3_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:xmonad_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:cinnamon_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:emacs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:ai_tools_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch_functions",
+      "target": "function:.local/scripts/bootstrap/arch_functions:optional",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:base_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:ubuntu_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:chrome_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:emacs_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:i3_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:snaps_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:ai_tools_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:vim_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:clone_repos",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/ubuntu_functions:high_dpi_screen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac_functions",
+      "target": "function:.local/scripts/bootstrap/mac_functions:brew_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac_functions",
+      "target": "function:.local/scripts/bootstrap/mac_functions:mac_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac_functions",
+      "target": "function:.local/scripts/bootstrap/mac_functions:ai_tools_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac_functions",
+      "target": "function:.local/scripts/bootstrap/mac_functions:optional",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac_functions",
+      "target": "function:.local/scripts/bootstrap/mac_functions:vim_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac_functions",
+      "target": "function:.local/scripts/bootstrap/mac_functions:doom_emacs_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac_functions",
+      "target": "function:.local/scripts/bootstrap/mac_functions:app_store_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac_functions",
+      "target": "function:.local/scripts/bootstrap/mac_functions:write_defaults",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_arch_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_arch_functions:base_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_arch_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_arch_functions:arch_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_arch_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_arch_functions:i3_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_arch_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_arch_functions:xmonad_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_arch_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_arch_functions:vim_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_arch_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_arch_functions:emacs_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_mac_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_mac_functions:cli_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_mac_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_mac_functions:fonts_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_mac_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_mac_functions:gui_apps_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_mac_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_mac_functions:vim_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/arch",
+      "target": "file:.local/scripts/bootstrap/arch_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/manjaro",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/manjaro",
+      "target": "file:.local/scripts/bootstrap/arch_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu",
+      "target": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_windows",
+      "target": "file:.local/scripts/bootstrap/ubuntu_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/ubuntu_windows",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/mac",
+      "target": "file:.local/scripts/bootstrap/mac_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_arch",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_arch",
+      "target": "file:.local/scripts/bootstrap/uninstall_tui",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_arch",
+      "target": "file:.local/scripts/bootstrap/uninstall_arch_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_mac",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_mac",
+      "target": "file:.local/scripts/bootstrap/uninstall_tui",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_mac",
+      "target": "file:.local/scripts/bootstrap/uninstall_mac_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_manjaro",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_manjaro",
+      "target": "file:.local/scripts/bootstrap/uninstall_tui",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_manjaro",
+      "target": "file:.local/scripts/bootstrap/uninstall_arch_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_manjaro",
+      "target": "file:.local/scripts/bootstrap/uninstall_manjaro_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bin/changeVolume",
+      "target": "file:.local/scripts/bin/changeBrightness",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work_functions",
+      "target": "function:.local/scripts/bootstrap/work_functions:nvidia_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work_functions",
+      "target": "function:.local/scripts/bootstrap/work_functions:dev_tools_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work_functions",
+      "target": "function:.local/scripts/bootstrap/work_functions:node_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work_functions",
+      "target": "function:.local/scripts/bootstrap/work_functions:python_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work_functions",
+      "target": "function:.local/scripts/bootstrap/work_functions:docker_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work_functions",
+      "target": "function:.local/scripts/bootstrap/work_functions:gcloud_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work_functions",
+      "target": "function:.local/scripts/bootstrap/work_functions:gui_apps_install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work_functions",
+      "target": "function:.local/scripts/bootstrap/work_functions:high_dpi_screen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_work_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_work_functions:dev_tools_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_work_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_work_functions:node_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_work_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_work_functions:python_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_work_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_work_functions:docker_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_work_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_work_functions:gui_apps_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:base_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:ubuntu_gui_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:snaps_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:emacs_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_ubuntu_functions:brew_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_manjaro_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_manjaro_functions:manjaro_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_manjaro_functions",
+      "target": "function:.local/scripts/bootstrap/uninstall_manjaro_functions:arch_and_manjaro_uninstall",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/claude-cost-stats.py",
+      "target": "function:.local/scripts/claude-cost-stats.py:parse_since",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/claude-cost-stats.py",
+      "target": "function:.local/scripts/claude-cost-stats.py:cost_for",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/claude-cost-stats.py",
+      "target": "function:.local/scripts/claude-cost-stats.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work",
+      "target": "file:.local/scripts/bootstrap/work_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/work_functions",
+      "target": "file:.local/scripts/permanent_shutdown_fix.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_ubuntu",
+      "target": "file:.local/scripts/bootstrap/uninstall_ubuntu_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_ubuntu",
+      "target": "file:.local/scripts/bootstrap/uninstall_tui",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_ubuntu",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_work",
+      "target": "file:.local/scripts/bootstrap/uninstall_work_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_work",
+      "target": "file:.local/scripts/bootstrap/uninstall_tui",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/bootstrap/uninstall_work",
+      "target": "file:.local/scripts/bootstrap/base_functions",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/hooks/pre-commit",
+      "target": "file:.local/scripts/lint_helpers.sh",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:.local/scripts/cinnamon_path/cinnamon_dump_config",
+      "target": "file:.local/scripts/cinnamon_path/cinnamon_load_config",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:.local/scripts/gnome_path/gnome_dump_config",
+      "target": "file:.local/scripts/gnome_path/gnome_load_config",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:.local/scripts/spot",
+      "target": "file:.local/scripts/spoti",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:.local/scripts/stow-backup-conflicts",
+      "target": "file:.local/scripts/stow-uninstall",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:.local/scripts/cinnamon_path/dark-theme",
+      "target": "file:.local/scripts/cinnamon_path/light-theme",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:os-provisioning",
+      "name": "OS Provisioning",
+      "description": "Per-OS bootstrap install scripts and their function libraries that set up a fresh machine (Arch, Manjaro, Ubuntu, macOS, work). Entry points source a shared base plus an OS-specific function file.",
+      "nodeIds": [
+        "file:.local/scripts/bootstrap/arch",
+        "file:.local/scripts/bootstrap/arch_functions",
+        "file:.local/scripts/bootstrap/base_functions",
+        "file:.local/scripts/bootstrap/mac",
+        "file:.local/scripts/bootstrap/mac_functions",
+        "file:.local/scripts/bootstrap/manjaro",
+        "file:.local/scripts/bootstrap/ubuntu",
+        "file:.local/scripts/bootstrap/ubuntu_functions",
+        "file:.local/scripts/bootstrap/ubuntu_windows",
+        "file:.local/scripts/bootstrap/work",
+        "file:.local/scripts/bootstrap/work_functions"
+      ]
+    },
+    {
+      "id": "layer:system-teardown",
+      "name": "System Teardown",
+      "description": "Uninstall counterparts to the provisioning layer, including an interactive TUI checklist, that remove packages and revert machine setup per OS.",
+      "nodeIds": [
+        "file:.local/scripts/bootstrap/uninstall_arch",
+        "file:.local/scripts/bootstrap/uninstall_arch_functions",
+        "file:.local/scripts/bootstrap/uninstall_mac",
+        "file:.local/scripts/bootstrap/uninstall_mac_functions",
+        "file:.local/scripts/bootstrap/uninstall_manjaro",
+        "file:.local/scripts/bootstrap/uninstall_manjaro_functions",
+        "file:.local/scripts/bootstrap/uninstall_tui",
+        "file:.local/scripts/bootstrap/uninstall_ubuntu",
+        "file:.local/scripts/bootstrap/uninstall_ubuntu_functions",
+        "file:.local/scripts/bootstrap/uninstall_work",
+        "file:.local/scripts/bootstrap/uninstall_work_functions"
+      ]
+    },
+    {
+      "id": "layer:stow-lifecycle",
+      "name": "Stow & Repo Lifecycle",
+      "description": "GNU Make + GNU Stow lifecycle: the Makefile orchestrates symlink install/uninstall/restow, conflict backup, and the git pre-commit hook.",
+      "nodeIds": [
+        "pipeline:Makefile",
+        "file:.local/scripts/stow-backup-conflicts",
+        "file:.local/scripts/stow-uninstall",
+        "file:.local/scripts/hooks/pre-commit"
+      ]
+    },
+    {
+      "id": "layer:developer-utilities",
+      "name": "Developer Utilities",
+      "description": "Command-line helpers for git workflows, repo cloning, shell prompt, system info, and Claude usage cost reporting.",
+      "nodeIds": [
+        "file:.local/scripts/bin/clone-all",
+        "file:.local/scripts/bin/git-ahead",
+        "file:.local/scripts/bin/git-clean-branches",
+        "file:.local/scripts/bin/git-recurse",
+        "file:.local/scripts/bin/yolo",
+        "file:.local/scripts/bin/program",
+        "file:.local/scripts/bin/prompt",
+        "file:.local/scripts/bin/pfetch",
+        "file:.local/scripts/claude-cost-stats.py"
+      ]
+    },
+    {
+      "id": "layer:desktop-theming",
+      "name": "Desktop & Theming",
+      "description": "Cinnamon/GNOME config dump-and-restore, light/dark theme switching, applets and desklets installers, and audio/brightness/Spotify controls for the desktop environment.",
+      "nodeIds": [
+        "file:.local/scripts/cinnamon_path/cinnamon_dump_config",
+        "file:.local/scripts/cinnamon_path/cinnamon_load_config",
+        "file:.local/scripts/cinnamon_path/dark-theme",
+        "file:.local/scripts/cinnamon_path/light-theme",
+        "file:.local/scripts/gnome_path/gnome_dump_config",
+        "file:.local/scripts/gnome_path/gnome_load_config",
+        "file:.local/scripts/toggle_theme",
+        "file:.local/scripts/applets",
+        "file:.local/scripts/desklets",
+        "file:.local/scripts/spot",
+        "file:.local/scripts/spoti",
+        "file:.local/scripts/pipewire.sh",
+        "file:.local/scripts/volume-change-output",
+        "file:.local/scripts/bin/changeBrightness",
+        "file:.local/scripts/bin/changeVolume"
+      ]
+    },
+    {
+      "id": "layer:maintenance-fixes",
+      "name": "Maintenance & Fixes",
+      "description": "Quality and repair scripts: repo doctor, shellcheck lint runner and helpers, plus targeted one-off fixes (shutdown, Discord, YouCompleteMe, Obsidian plugins).",
+      "nodeIds": [
+        "file:.local/scripts/doctor.sh",
+        "file:.local/scripts/lint.sh",
+        "file:.local/scripts/lint_helpers.sh",
+        "file:.local/scripts/permanent_shutdown_fix.sh",
+        "file:.local/scripts/ycm.sh",
+        "file:.local/scripts/discord_fix.py",
+        "file:.local/scripts/obsidian-reinstall-plugins"
+      ]
+    },
+    {
+      "id": "layer:ci-github",
+      "name": "CI & GitHub Automation",
+      "description": "GitHub Actions workflows (lint, markdown, secret scanning, workspace parity, skills update, vim/xmonad checks) plus Dependabot, funding, and the pull-request template.",
+      "nodeIds": [
+        "pipeline:.github/workflows/check-workspace-parity.yml",
+        "pipeline:.github/workflows/lint.yml",
+        "pipeline:.github/workflows/markdown.yml",
+        "pipeline:.github/workflows/secrets.yml",
+        "pipeline:.github/workflows/skills-update.yml",
+        "pipeline:.github/workflows/vim.yml",
+        "pipeline:.github/workflows/xmonad.yml",
+        "config:.github/dependabot.yml",
+        "config:.github/FUNDING.yml",
+        "document:.github/pull_request_template.md"
+      ]
+    },
+    {
+      "id": "layer:documentation",
+      "name": "Documentation",
+      "description": "Top-level project documentation: README setup guide, AGENTS contributor/agent conventions, and the security policy.",
+      "nodeIds": [
+        "document:README.md",
+        "document:AGENTS.md",
+        "document:SECURITY.md"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "Project Overview",
+      "description": "Start here. The README explains that this repo is a GNU Stow-managed set of Linux/macOS dotfiles; AGENTS.md captures the conventions and architecture that agents and contributors must follow.",
+      "nodeIds": [
+        "document:README.md",
+        "document:AGENTS.md"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "The Stow Lifecycle",
+      "description": "The Makefile is the single entry point for everyday operations: it symlinks configs into $HOME via Stow, backs up conflicts first, and exposes install/uninstall/restow targets.",
+      "nodeIds": [
+        "pipeline:Makefile",
+        "file:.local/scripts/stow-backup-conflicts",
+        "file:.local/scripts/stow-uninstall"
+      ]
+    },
+    {
+      "order": 3,
+      "title": "OS Provisioning Entry Points",
+      "description": "Each supported OS has a bootstrap entry script. They source a shared base library plus an OS-specific function file, then run the install pipeline for that platform.",
+      "nodeIds": [
+        "file:.local/scripts/bootstrap/arch",
+        "file:.local/scripts/bootstrap/ubuntu",
+        "file:.local/scripts/bootstrap/mac",
+        "file:.local/scripts/bootstrap/manjaro",
+        "file:.local/scripts/bootstrap/work"
+      ]
+    },
+    {
+      "order": 4,
+      "title": "Shared & Per-OS Function Libraries",
+      "description": "The real provisioning logic lives in function libraries: base_functions is shared by every OS, while arch/ubuntu/mac/work_functions add platform-specific package installs and setup steps.",
+      "nodeIds": [
+        "file:.local/scripts/bootstrap/base_functions",
+        "file:.local/scripts/bootstrap/arch_functions",
+        "file:.local/scripts/bootstrap/ubuntu_functions",
+        "file:.local/scripts/bootstrap/mac_functions",
+        "file:.local/scripts/bootstrap/work_functions"
+      ]
+    },
+    {
+      "order": 5,
+      "title": "Tearing It Down",
+      "description": "Teardown mirrors provisioning. An interactive TUI checklist drives the per-OS uninstall entry points, which source matching uninstall function libraries to remove what was installed.",
+      "nodeIds": [
+        "file:.local/scripts/bootstrap/uninstall_tui",
+        "file:.local/scripts/bootstrap/uninstall_arch",
+        "file:.local/scripts/bootstrap/uninstall_ubuntu",
+        "file:.local/scripts/bootstrap/uninstall_arch_functions"
+      ]
+    },
+    {
+      "order": 6,
+      "title": "Developer Utilities",
+      "description": "Day-to-day command-line helpers: bulk-clone repos, recurse git commands across many checkouts, prune merged branches, and report Claude token usage costs.",
+      "nodeIds": [
+        "file:.local/scripts/bin/clone-all",
+        "file:.local/scripts/bin/git-recurse",
+        "file:.local/scripts/bin/git-clean-branches",
+        "file:.local/scripts/claude-cost-stats.py"
+      ]
+    },
+    {
+      "order": 7,
+      "title": "Desktop & Theming",
+      "description": "Desktop environment management: dump and restore Cinnamon configuration, and switch the whole system between light and dark themes via a single toggle.",
+      "nodeIds": [
+        "file:.local/scripts/toggle_theme",
+        "file:.local/scripts/cinnamon_path/dark-theme",
+        "file:.local/scripts/cinnamon_path/light-theme",
+        "file:.local/scripts/cinnamon_path/cinnamon_dump_config",
+        "file:.local/scripts/cinnamon_path/cinnamon_load_config"
+      ]
+    },
+    {
+      "order": 8,
+      "title": "Quality Gates",
+      "description": "Before code lands, the git pre-commit hook runs the lint suite (shellcheck via lint.sh + helpers) and the doctor health check verifies the environment.",
+      "nodeIds": [
+        "file:.local/scripts/hooks/pre-commit",
+        "file:.local/scripts/lint.sh",
+        "file:.local/scripts/lint_helpers.sh",
+        "file:.local/scripts/doctor.sh"
+      ]
+    },
+    {
+      "order": 9,
+      "title": "Continuous Integration",
+      "description": "GitHub Actions enforce the same checks remotely: linting, markdown rules, secret scanning, and workspace parity between the dotfiles and the cuberhaus workspace.",
+      "nodeIds": [
+        "pipeline:.github/workflows/lint.yml",
+        "pipeline:.github/workflows/markdown.yml",
+        "pipeline:.github/workflows/secrets.yml",
+        "pipeline:.github/workflows/check-workspace-parity.yml"
+      ]
+    },
+    {
+      "order": 10,
+      "title": "Contributing & Security",
+      "description": "Finish with the contribution surface: the pull-request template, dependency automation via Dependabot, and the security policy.",
+      "nodeIds": [
+        "document:.github/pull_request_template.md",
+        "config:.github/dependabot.yml",
+        "document:SECURITY.md"
+      ]
+    }
+  ]
+}
