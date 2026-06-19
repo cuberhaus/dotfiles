@@ -1,0 +1,19 @@
+# gitleaks allowlist — historical findings acknowledged after review.
+# Format: <commit>:<file>:<rule-id>:<line>  (gitleaks fingerprints)
+# These are all in old history (2021-2022); the live working tree no longer
+# tracks the sensitive files (hosts.json is gitignored, .gitconfig untracked).
+# Rotate any still-valid credentials at the source — an allowlist only silences
+# the scanner, it does not invalidate a leaked secret.
+
+# GitHub Copilot OAuth token committed in 2022 (file now gitignored & untracked).
+# A 2022 Copilot token is expired and GitHub secret-scanning auto-revokes these.
+2ff7c39cc5ba5831bb71425764dd8810d9352a46:.config/github-copilot/hosts.json:github-app-token:1
+
+# False positive: GPG *signing key ID* (a public identifier, not a private key).
+dd44dcde9632869e6628199fb88243ee8e57ec93:.gitconfig:generic-api-key:4
+
+# FIB-UPC personal RSS feed access keys (university notice/calendar feeds), 2021.
+416df648636442f30efc9fceb2bf338f410b8896:.conky/conkyrss:generic-api-key:73
+66b7d6d14a8c9f2902dbfa99f121c86dbc04df2b:.conky/conkyrss:generic-api-key:72
+66b7d6d14a8c9f2902dbfa99f121c86dbc04df2b:.conky/conkyrss:generic-api-key:75
+82d77dbdeebfbde2be8ad957e68e2dc6a4f80fe9:.conky/conkyrss:generic-api-key:75

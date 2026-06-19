@@ -22,6 +22,7 @@
 !.shellcheckrc
 !.gitattributes
 !.gitignore
+!.gitleaksignore
 !.gitmodules
 !.stow-local-ignore
 !Makefile
