@@ -19,6 +19,7 @@
 !.screenrc
 !.editorconfig
 !.markdownlint.json
+!commitlint.config.json
 !.shellcheckrc
 !.gitattributes
 !.gitignore
