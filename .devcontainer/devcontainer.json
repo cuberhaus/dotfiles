@@ -1,0 +1,18 @@
+{
+  "//": "cuberhaus reproducible dev environment (base: shell/config/docs repos). Managed source: cuberhaus-workspace/assets/devcontainers/base. Applied per repo by scripts/apply-devcontainers.ps1.",
+  "name": "cuberhaus base",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "remoteUser": "vscode",
+  "postCreateCommand": "bash -lc 'if [ -f skills-lock.json ]; then make skills-restore || true; fi'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "editorconfig.editorconfig"
+      ]
+    }
+  }
+}
