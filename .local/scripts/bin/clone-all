@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# Clone all repos in an org, or fast-forward update the ones already present.
+# Clone all repos for a GitHub owner, or fast-forward update the ones already present.
 # One concise status line per repo; error output is indented underneath.
+#
+# Owner defaults to the currently authenticated gh account (the "selected user").
+# Override with an argument or the CLONE_ALL_OWNER env var.
+#
+# Usage: clone-all [owner]
 
-orgname=cuberhaus
 # Cloning/pulling is network + disk bound, not CPU bound, so parallelism
 # well above core count is fine. Default: detected cores (min 4, cap 32).
 # Override with CLONE_ALL_JOBS=N.
@@ -21,6 +25,16 @@ max_jobs=${CLONE_ALL_JOBS:-$(detect_jobs)}
 if ! command -v gh &>/dev/null; then
     echo "error: gh (GitHub CLI) is not installed" >&2
     exit 1
+fi
+
+# Owner to clone: explicit arg > CLONE_ALL_OWNER env > the active gh account.
+orgname="${1:-${CLONE_ALL_OWNER:-}}"
+if [ -z "$orgname" ]; then
+    orgname=$(gh api user --jq '.login' 2>/dev/null)
+    if [ -z "$orgname" ]; then
+        echo "error: could not determine the active gh user (run 'gh auth login' or pass an owner)" >&2
+        exit 1
+    fi
 fi
 
 if [ -t 1 ]; then
