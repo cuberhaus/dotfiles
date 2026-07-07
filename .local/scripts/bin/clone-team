@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# clone-team: clone every repository a GitHub team you belong to can access.
+#
+# Usage:
+#   clone-team                       # pick a team interactively, clone into .
+#   clone-team org/team-slug         # clone that team's repos into .
+#   clone-team org/team-slug ~/src   # clone into ~/src
+#
+# Mirrors the PowerShell Clone-GitHubTeamRepos (WinDotfiles my_git.psm1).
+# Repos already present in the destination are skipped. Requires the GitHub
+# CLI (gh) authenticated with the read:org scope.
+
+set -uo pipefail
+
+if ! command -v gh >/dev/null 2>&1; then
+    echo "error: gh (GitHub CLI) is not installed. See https://cli.github.com/" >&2
+    exit 1
+fi
+
+team=""
+dest="."
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h|--help)
+            sed -n '2,12p' "$0" | sed 's/^# \?//'
+            exit 0
+            ;;
+        -*)
+            echo "Unknown option: $1" >&2
+            exit 2
+            ;;
+        *)
+            if [ -z "$team" ]; then team="$1"; else dest="$1"; fi
+            shift
+            ;;
+    esac
+done
+
+if [ -t 1 ]; then
+    green=$'\033[32m'; yellow=$'\033[33m'; red=$'\033[31m'; cyan=$'\033[36m'; reset=$'\033[0m'
+else
+    green=''; yellow=''; red=''; cyan=''; reset=''
+fi
+
+org=""
+slug=""
+if [ -n "$team" ]; then
+    if [[ "$team" != */* || "$team" == */*/* ]]; then
+        echo "${red}error:${reset} team must be in 'org/team-slug' form, e.g. myorg/backend." >&2
+        exit 1
+    fi
+    org="${team%%/*}"
+    slug="${team#*/}"
+else
+    echo "${cyan}Fetching your GitHub teams...${reset}"
+    mapfile -t teams < <(gh api --paginate /user/teams \
+        --jq '.[] | "\(.organization.login)/\(.slug)"' 2>/dev/null)
+    if [ "${#teams[@]}" -eq 0 ]; then
+        echo "${yellow}You are not a member of any GitHub teams (or gh is not authed with read:org).${reset}" >&2
+        exit 0
+    fi
+    echo
+    for i in "${!teams[@]}"; do
+        printf '  [%d] %s\n' "$((i + 1))" "${teams[$i]}"
+    done
+    echo
+    read -rp "Select a team by number (or 'q' to quit): " choice
+    case "$choice" in
+        q|Q|"") exit 0 ;;
+        *[!0-9]*)
+            echo "${red}error:${reset} invalid selection." >&2
+            exit 1
+            ;;
+    esac
+    idx=$((choice - 1))
+    if [ "$idx" -lt 0 ] || [ "$idx" -ge "${#teams[@]}" ]; then
+        echo "${red}error:${reset} invalid selection." >&2
+        exit 1
+    fi
+    org="${teams[$idx]%%/*}"
+    slug="${teams[$idx]#*/}"
+fi
+
+echo "${cyan}Fetching repositories for $org/$slug...${reset}"
+mapfile -t repos < <(gh api --paginate "/orgs/$org/teams/$slug/repos" \
+    --jq '.[].full_name' 2>/dev/null)
+if [ "${#repos[@]}" -eq 0 ]; then
+    echo "${yellow}No repositories found for $org/$slug (or you lack access).${reset}" >&2
+    exit 0
+fi
+
+mkdir -p "$dest" || { echo "${red}error:${reset} could not create $dest" >&2; exit 1; }
+target=$(cd "$dest" && pwd) || exit 1
+
+echo "${cyan}Cloning ${#repos[@]} repo(s) into $target${reset}"
+cd "$target" || exit 1
+for full in "${repos[@]}"; do
+    name="${full##*/}"
+    if [ -e "$name" ]; then
+        printf '  %sskip%s   %s (already exists)\n' "$yellow" "$reset" "$full"
+        continue
+    fi
+    printf '  %sclone%s  %s\n' "$green" "$reset" "$full"
+    gh repo clone "$full"
+done
