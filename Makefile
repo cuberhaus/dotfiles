@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run update-repos audit-policies bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run sync-drive sync-drive-dry-run update-repos audit-policies bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -117,6 +117,12 @@ sync-workspace: ## Copy cuberhaus-workspace/ sources into $$HOME/cuberhaus (work
 
 sync-workspace-dry-run: ## Show what sync-workspace would change without writing
 	bash ../cuberhaus-workspace/sync.sh -n
+
+sync-drive: ## Copy cuberhaus-workspace/drive-triage/.github/ into the Google Drive PARA root (set DRIVE_ROOT to your mount)
+	bash ../cuberhaus-workspace/drive-triage/sync.sh
+
+sync-drive-dry-run: ## Show what sync-drive would change without writing
+	bash ../cuberhaus-workspace/drive-triage/sync.sh -n
 
 update-repos: ## Refresh repos.json in $$HOME/cuberhaus (GitHub API + local enrichment; needs gh auth + python3)
 	python3 ../cuberhaus-workspace/scripts/build-repos.py
