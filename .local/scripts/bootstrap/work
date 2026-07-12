@@ -7,6 +7,8 @@ set -euo pipefail
 scripts="$HOME/.local/scripts"
 source "$scripts/bootstrap/base_functions"
 source "$scripts/bootstrap/work_functions"
+parse_bootstrap_args "$@"
+configure_dual_boot_utc_rtc
 
 ### INSTALLATION
 info "Updating system..."

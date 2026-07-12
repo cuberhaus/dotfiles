@@ -4,8 +4,9 @@
 STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
+BOOTSTRAP_ARGS ?=
 
-.PHONY: help install uninstall restow dry-run lint check fix doctor hooks install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run sync-drive sync-drive-dry-run update-repos audit-policies bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help install uninstall restow dry-run lint check fix doctor hooks install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run sync-drive sync-drive-dry-run update-repos audit-policies dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -157,18 +158,21 @@ antigen-update: ## Fetch the latest antigen.zsh from GitHub
 # `sync-workspace` so the cuberhaus-workspace/ sources land in ~/cuberhaus
 # without a separate manual step. Setup remains one command per OS.
 
+dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
+	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'
+
 bootstrap-arch: ## Run Arch bootstrap (chains sync-workspace)
-	bash .local/scripts/bootstrap/arch
+	bash .local/scripts/bootstrap/arch $(BOOTSTRAP_ARGS)
 	@$(MAKE) --no-print-directory sync-workspace
 	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-manjaro: ## Run Manjaro bootstrap (chains sync-workspace)
-	bash .local/scripts/bootstrap/manjaro
+	bash .local/scripts/bootstrap/manjaro $(BOOTSTRAP_ARGS)
 	@$(MAKE) --no-print-directory sync-workspace
 	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-ubuntu: ## Run Ubuntu bootstrap (chains sync-workspace)
-	bash .local/scripts/bootstrap/ubuntu
+	bash .local/scripts/bootstrap/ubuntu $(BOOTSTRAP_ARGS)
 	@$(MAKE) --no-print-directory sync-workspace
 	@$(MAKE) --no-print-directory install-automations
 
@@ -183,7 +187,7 @@ bootstrap-mac: ## Run macOS bootstrap (chains sync-workspace)
 	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA, chains sync-workspace)
-	bash .local/scripts/bootstrap/work
+	bash .local/scripts/bootstrap/work $(BOOTSTRAP_ARGS)
 	@$(MAKE) --no-print-directory sync-workspace
 	@$(MAKE) --no-print-directory install-automations
 

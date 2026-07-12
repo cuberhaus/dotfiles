@@ -6,6 +6,8 @@ set -euo pipefail
 scripts="$HOME/.local/scripts"
 source "$scripts/bootstrap/base_functions"
 source "$scripts/bootstrap/ubuntu_functions"
+parse_bootstrap_args "$@"
+configure_dual_boot_utc_rtc
 
 ### FIRST RUN
 read -rp "Is this a first-time install? (y/n): " FirstRun

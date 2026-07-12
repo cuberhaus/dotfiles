@@ -126,6 +126,35 @@ make bootstrap-mac       # macOS
 make bootstrap-work      # Work machine (Ubuntu + NVIDIA, minimal)
 ```
 
+### Dual-boot hardware clock
+
+For a machine that boots both Windows and physical Linux, opt in to a UTC
+hardware clock during bootstrap:
+
+```bash
+make bootstrap-ubuntu BOOTSTRAP_ARGS=--dual-boot-utc
+# Also supported: bootstrap-arch, bootstrap-manjaro, and bootstrap-work
+```
+
+For an existing physical Linux installation, run:
+
+```bash
+make dual-boot-utc
+```
+
+The helper rejects WSL and non-systemd systems. It enables network time, waits
+for `NTPSynchronized=yes`, then runs `timedatectl set-local-rtc 0` and verifies
+`LocalRTC=no`. It refuses to change the RTC if synchronization cannot be
+established. Configure Windows with WinDotfiles' `-DualBootUtcRtc` option as
+well; changing only one operating system leaves the original disagreement in
+place.
+
+Verify with `timedatectl`: it should report `System clock synchronized: yes`,
+`NTP service: active`, and `RTC in local TZ: no`. Do not use
+`timedatectl set-local-rtc 1` as a permanent workaround because local RTC is
+fragile across DST and timezone changes. The option is intentionally not
+forwarded to the WSL or macOS bootstrap targets.
+
 Each bootstrap entrypoint follows the same pattern:
 
 1. Sources `base_functions` (shared logging helpers and `$DOTFILES` auto-detection).
