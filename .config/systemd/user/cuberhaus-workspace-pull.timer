@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Cuberhaus workspace fast-forward pull
+
+[Timer]
+OnCalendar=*-*-* 11:00:00
+Persistent=true
+AccuracySec=1m
+Unit=cuberhaus-workspace-pull.service
+
+[Install]
+WantedBy=timers.target

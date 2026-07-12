@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "$(uname -s)" != "Linux" ]]; then
+    printf 'System package maintenance is supported on Linux only.\n' >&2
+    exit 1
+fi
+if [[ ${EUID} -ne 0 ]]; then
+    printf 'System package maintenance must run as root.\n' >&2
+    exit 1
+fi
+
+lock_dir="/run/lock/cuberhaus-system-maintenance.lock"
+if ! mkdir "$lock_dir" 2>/dev/null; then
+    printf 'Another system package maintenance process is running.\n'
+    exit 0
+fi
+trap 'rmdir "$lock_dir"' EXIT
+
+printf '[%s] Starting system package maintenance.\n' "$(date --iso-8601=seconds)"
+
+if command -v apt-get >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get full-upgrade -y
+elif command -v pacman >/dev/null 2>&1; then
+    pacman -Syu --noconfirm
+else
+    printf 'No supported system package manager found (apt-get or pacman).\n' >&2
+    exit 1
+fi
+
+printf '[%s] System package maintenance completed. A reboot was not requested.\n' "$(date --iso-8601=seconds)"

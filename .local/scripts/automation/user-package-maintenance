@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:/home/linuxbrew/.linuxbrew/bin:$HOME/.linuxbrew/bin:$PATH"
+
+minimum_age_seconds=0
+if [[ ${1:-} == "--if-due-seconds" ]]; then
+    minimum_age_seconds="${2:?missing seconds for --if-due-seconds}"
+fi
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus-automations"
+state_file="$state_dir/user-package-maintenance.last-success"
+mkdir -p "$state_dir"
+
+if [[ -f "$state_file" && $minimum_age_seconds -gt 0 ]]; then
+    last_success=$(<"$state_file")
+    now=$(date +%s)
+    if [[ $last_success =~ ^[0-9]+$ ]] && ((now - last_success < minimum_age_seconds)); then
+        printf 'User package maintenance completed recently. Skipping.\n'
+        exit 0
+    fi
+fi
+
+lock_dir="${TMPDIR:-/tmp}/cuberhaus-user-package-maintenance.lock"
+if ! mkdir "$lock_dir" 2>/dev/null; then
+    printf 'Another user package maintenance process is running.\n'
+    exit 0
+fi
+trap 'rmdir "$lock_dir"' EXIT
+
+ran_manager=false
+printf '[%s] Starting user package maintenance.\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')"
+
+if command -v brew >/dev/null 2>&1; then
+    brew update
+    brew upgrade
+    ran_manager=true
+fi
+
+if [[ "$(uname -s)" == "Linux" ]] && command -v yay >/dev/null 2>&1; then
+    yay -Sua --noconfirm --needed
+    ran_manager=true
+fi
+
+if [[ $ran_manager == false ]]; then
+    printf 'No supported user package manager found (Homebrew or yay). Nothing to do.\n'
+fi
+
+date +%s > "$state_file"
+printf '[%s] User package maintenance completed. A reboot was not requested.\n' "$(date '+%Y-%m-%dT%H:%M:%S%z')"

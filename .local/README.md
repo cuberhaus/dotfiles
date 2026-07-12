@@ -34,6 +34,11 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── ubuntu_functions   # Ubuntu package lists & installers
 │   │   ├── mac_functions      # macOS (Homebrew) package lists & installers
 │   │   └── xterm-256color-italic.terminfo
+│   ├── automation/             # Scheduled package updates and workspace pulls
+│   │   ├── install             # Installs systemd timers or launchd agents
+│   │   ├── system-maintenance  # Root apt/pacman upgrades (Linux)
+│   │   ├── user-package-maintenance # Homebrew/yay upgrades
+│   │   └── workspace-pull      # Safe recursive pull of ~/cuberhaus
 │   │
 │   ├── cinnamon_path/          # Scripts added to $PATH on Cinnamon DE
 │   │   ├── cinnamon_load_config
@@ -70,6 +75,10 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
   `$PATH` based on the `$DESKTOP_SESSION` environment variable (see `.zshenv`).
 - **`bootstrap/`** scripts are run via `make bootstrap-<os>` (see the root
   Makefile) and are **not** on `$PATH`.
+- **`automation/`** contains shared jobs invoked by `systemd` on Linux and
+  `launchd` on macOS. `make install-automations` installs or refreshes their
+  native scheduler definitions; `make uninstall-automations-dry-run` previews
+  removal and `make uninstall-automations` disables/removes them.
 
 ## Bootstrap flow
 
@@ -81,5 +90,7 @@ Each bootstrap entrypoint (e.g. `bootstrap/arch`) follows this pattern:
 4. Run system update.
 5. Call installer functions in dependency order.
 6. Switch default shell to zsh.
+7. Install package-maintenance and workspace-pull schedules through the root
+  Makefile target.
 
 See the root [README](../README.md) for quick-start instructions.

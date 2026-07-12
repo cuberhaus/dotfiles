@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+dotfiles_root=$(cd "$script_dir/../../.." && pwd)
+platform=$(uname -s)
+
+for required_script in system-maintenance user-package-maintenance workspace-pull; do
+    if [[ ! -r "$script_dir/$required_script" ]]; then
+        printf 'Required automation script is missing or unreadable: %s\n' "$script_dir/$required_script" >&2
+        exit 1
+    fi
+done
+
+install_linux() {
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+        printf 'WSL detected: Windows Task Scheduler owns these automations; skipping.\n'
+        return
+    fi
+    if ! command -v systemctl >/dev/null 2>&1; then
+        printf 'systemd is unavailable; automation installation was skipped.\n' >&2
+        return 1
+    fi
+
+    for deployed_file in \
+        "$HOME/.local/scripts/automation/user-package-maintenance" \
+        "$HOME/.local/scripts/automation/workspace-pull" \
+        "$HOME/.config/systemd/user/cuberhaus-user-package-maintenance.service" \
+        "$HOME/.config/systemd/user/cuberhaus-user-package-maintenance.timer" \
+        "$HOME/.config/systemd/user/cuberhaus-workspace-pull.service" \
+        "$HOME/.config/systemd/user/cuberhaus-workspace-pull.timer"; do
+        if [[ ! -r "$deployed_file" ]]; then
+            printf 'Required Stow deployment is missing: %s\nRun make restow first.\n' "$deployed_file" >&2
+            exit 1
+        fi
+    done
+
+    systemctl --user daemon-reload
+    systemctl --user enable --now \
+        cuberhaus-user-package-maintenance.timer \
+        cuberhaus-workspace-pull.timer
+
+    sudo install -d -m 0755 /usr/local/libexec
+    sudo install -m 0755 "$script_dir/system-maintenance" /usr/local/libexec/cuberhaus-system-maintenance
+    sudo install -m 0644 \
+        "$dotfiles_root/.local/share/cuberhaus-automations/systemd/cuberhaus-system-maintenance.service" \
+        "$dotfiles_root/.local/share/cuberhaus-automations/systemd/cuberhaus-system-maintenance.timer" \
+        /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now cuberhaus-system-maintenance.timer
+}
+
+install_macos() {
+    local source_dir target_dir log_dir state_dir uid now
+    source_dir="$dotfiles_root/.local/share/cuberhaus-automations/launchd"
+    target_dir="$HOME/Library/LaunchAgents"
+    log_dir="$HOME/Library/Logs/Cuberhaus"
+    state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus-automations"
+    uid=$(id -u)
+    now=$(date +%s)
+
+    for deployed_script in \
+        "$HOME/.local/scripts/automation/user-package-maintenance" \
+        "$HOME/.local/scripts/automation/workspace-pull"; do
+        if [[ ! -r "$deployed_script" ]]; then
+            printf 'Required Stow deployment is missing: %s\nRun make restow first.\n' "$deployed_script" >&2
+            exit 1
+        fi
+    done
+
+    mkdir -p "$target_dir" "$log_dir" "$state_dir"
+    [[ -f "$state_dir/user-package-maintenance.last-success" ]] || printf '%s\n' "$now" > "$state_dir/user-package-maintenance.last-success"
+    [[ -f "$state_dir/workspace-pull.last-success" ]] || printf '%s\n' "$now" > "$state_dir/workspace-pull.last-success"
+    for source in "$source_dir"/*.plist; do
+        target="$target_dir/$(basename "$source")"
+        cp "$source" "$target"
+        plutil -lint "$target" >/dev/null
+        launchctl bootout "gui/$uid" "$target" 2>/dev/null || true
+        launchctl bootstrap "gui/$uid" "$target"
+    done
+}
+
+case "$platform" in
+    Linux) install_linux ;;
+    Darwin) install_macos ;;
+    *)
+        printf 'Unsupported platform: %s\n' "$platform" >&2
+        exit 1
+        ;;
+esac
+
+printf 'Cuberhaus package maintenance and workspace pull automations are installed.\n'

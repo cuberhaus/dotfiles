@@ -154,6 +154,8 @@
 !.config/dconf/**
 
 # Utilities
+!.config/systemd/
+!.config/systemd/**
 !.config/ranger/
 !.config/ranger/**
 !.config/tmux/
@@ -220,6 +222,8 @@
 
 !.local/share/
 .local/share/*
+!.local/share/cuberhaus-automations/
+!.local/share/cuberhaus-automations/**
 !.local/share/fonts/
 !.local/share/fonts/**
 .local/share/fonts/**/.uuid

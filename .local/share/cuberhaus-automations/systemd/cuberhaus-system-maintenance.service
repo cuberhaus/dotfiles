@@ -1,0 +1,11 @@
+[Unit]
+Description=Cuberhaus system package maintenance
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/cuberhaus-system-maintenance
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=4h

@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+dry_run=false
+if [[ ${1:-} == "--dry-run" ]]; then
+    dry_run=true
+elif (($# > 0)); then
+    printf 'Usage: %s [--dry-run]\n' "$0" >&2
+    exit 2
+fi
+
+show() {
+    printf '[dry-run]'
+    printf ' %q' "$@"
+    printf '\n'
+}
+
+uninstall_linux() {
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+        printf 'WSL detected: no Unix automation schedules were installed.\n'
+        return
+    fi
+    if ! command -v systemctl >/dev/null 2>&1; then
+        printf 'systemd is unavailable; nothing to disable.\n'
+        return
+    fi
+
+    if [[ $dry_run == true ]]; then
+        show systemctl --user disable --now cuberhaus-user-package-maintenance.timer cuberhaus-workspace-pull.timer
+        show sudo systemctl disable --now cuberhaus-system-maintenance.timer
+        show sudo rm -f /etc/systemd/system/cuberhaus-system-maintenance.service /etc/systemd/system/cuberhaus-system-maintenance.timer /usr/local/libexec/cuberhaus-system-maintenance
+        return
+    fi
+
+    systemctl --user disable --now \
+        cuberhaus-user-package-maintenance.timer \
+        cuberhaus-workspace-pull.timer 2>/dev/null || true
+    sudo systemctl disable --now cuberhaus-system-maintenance.timer 2>/dev/null || true
+    sudo rm -f \
+        /etc/systemd/system/cuberhaus-system-maintenance.service \
+        /etc/systemd/system/cuberhaus-system-maintenance.timer \
+        /usr/local/libexec/cuberhaus-system-maintenance
+    systemctl --user daemon-reload
+    sudo systemctl daemon-reload
+}
+
+uninstall_macos() {
+    local target_dir uid
+    target_dir="$HOME/Library/LaunchAgents"
+    uid=$(id -u)
+
+    for label in com.cuberhaus.user-package-maintenance com.cuberhaus.workspace-pull; do
+        target="$target_dir/$label.plist"
+        if [[ $dry_run == true ]]; then
+            show launchctl bootout "gui/$uid/$label"
+            show rm -f "$target"
+            continue
+        fi
+        launchctl bootout "gui/$uid/$label" 2>/dev/null || true
+        rm -f "$target"
+    done
+}
+
+case "$(uname -s)" in
+    Linux) uninstall_linux ;;
+    Darwin) uninstall_macos ;;
+    *)
+        printf 'Unsupported platform: %s\n' "$(uname -s)" >&2
+        exit 1
+        ;;
+esac
+
+printf 'Cuberhaus automation schedules are disabled and removed. Logs and state were preserved.\n'

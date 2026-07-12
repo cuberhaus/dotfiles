@@ -134,6 +134,60 @@ Each bootstrap entrypoint follows the same pattern:
 4. Runs a system update.
 5. Calls installer functions in dependency order (base packages, WM-specific, optional apps).
 6. Switches the default shell to zsh.
+7. Installs the native maintenance schedules shown below.
+
+The bootstrap installs these automations without requiring a separate command:
+
+| Automation | Linux | macOS |
+| --- | --- | --- |
+| System packages | Sunday 10:00 via system `systemd` (`apt-get` or `pacman`) | Managed by macOS Software Update |
+| User packages | Sunday 10:30 via user `systemd` (Homebrew and/or `yay`) | Sunday 10:30 via `launchd` (Homebrew) |
+| `~/cuberhaus` pull | Daily 11:00 via user `systemd` | Daily 11:00 via `launchd` |
+
+The workspace pull matches the shell helper's depth-3 discovery but uses
+`git pull --ff-only --no-edit` with credential prompts disabled. Repositories
+without upstreams are skipped; diverged or unauthenticated repositories are
+left unchanged and reported. None of the maintenance jobs requests a reboot.
+
+On Linux, `Persistent=true` runs a missed timer when the machine becomes
+available. On macOS, the agents run at login as well as on schedule, with state
+guards preventing duplicate work: 20 hours for workspace pulls and seven days
+for user package updates. WSL deliberately installs no duplicate timers because
+Windows Task Scheduler owns the same automations.
+
+For an existing checkout, restow the new files and install the schedules:
+
+```bash
+make restow
+make install-automations
+```
+
+Preview or remove scheduler registrations without deleting logs or state:
+
+```bash
+make uninstall-automations-dry-run
+make uninstall-automations
+```
+
+`make uninstall` removes scheduler registrations before unstowing the files, so
+no active job is left pointing at a removed script.
+
+Inspect the schedules and logs:
+
+```bash
+# Linux
+systemctl list-timers 'cuberhaus-*'
+systemctl --user list-timers 'cuberhaus-*'
+journalctl -u cuberhaus-system-maintenance.service
+journalctl --user -u cuberhaus-user-package-maintenance.service
+journalctl --user -u cuberhaus-workspace-pull.service
+
+# macOS
+launchctl print "gui/$UID/com.cuberhaus.user-package-maintenance"
+launchctl print "gui/$UID/com.cuberhaus.workspace-pull"
+tail -f "$HOME/Library/Logs/Cuberhaus/user-package-maintenance.log"
+tail -f "$HOME/Library/Logs/Cuberhaus/workspace-pull.log"
+```
 
 See [`.local/README.md`](.local/README.md) for a detailed breakdown of the
 scripts directory.

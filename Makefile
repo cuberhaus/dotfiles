@@ -5,7 +5,7 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 
-.PHONY: help install uninstall restow dry-run lint check fix doctor hooks update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run sync-drive sync-drive-dry-run update-repos audit-policies bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help install uninstall restow dry-run lint check fix doctor hooks install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run sync-drive sync-drive-dry-run update-repos audit-policies bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -26,7 +26,7 @@ install: ## Symlink dotfiles into $HOME via stow (backs up conflicts first)
 	@bash .local/scripts/stow-backup-conflicts
 	$(STOW) -v -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
 
-uninstall: ## Remove symlinks from $HOME and restore backed-up files
+uninstall: uninstall-automations ## Disable automations, remove symlinks, and restore backed-up files
 	@bash .local/scripts/stow-uninstall
 
 restow: ## Re-stow (uninstall then install — cleans stale links)
@@ -81,6 +81,15 @@ hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
 	cp .local/scripts/hooks/pre-commit .git/hooks/pre-commit
 	chmod +x .git/hooks/pre-commit
 	@echo "Pre-commit hook installed."
+
+install-automations: ## Install native package-maintenance and workspace-pull schedules
+	bash .local/scripts/automation/install
+
+uninstall-automations: ## Disable and remove native automation schedules
+	bash .local/scripts/automation/uninstall
+
+uninstall-automations-dry-run: ## Preview removal of native automation schedules
+	bash .local/scripts/automation/uninstall --dry-run
 
 # Files that are intentionally tracked (for the settings we care about) but
 # change constantly at runtime — apps rewrite them on every launch.
@@ -151,26 +160,32 @@ antigen-update: ## Fetch the latest antigen.zsh from GitHub
 bootstrap-arch: ## Run Arch bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/arch
 	@$(MAKE) --no-print-directory sync-workspace
+	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-manjaro: ## Run Manjaro bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/manjaro
 	@$(MAKE) --no-print-directory sync-workspace
+	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-ubuntu: ## Run Ubuntu bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/ubuntu
 	@$(MAKE) --no-print-directory sync-workspace
+	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-ubuntu-windows: ## Run Ubuntu-on-WSL bootstrap (no GUI apps, chains sync-workspace)
 	bash .local/scripts/bootstrap/ubuntu_windows
 	@$(MAKE) --no-print-directory sync-workspace
+	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-mac: ## Run macOS bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/mac
 	@$(MAKE) --no-print-directory sync-workspace
+	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA, chains sync-workspace)
 	bash .local/scripts/bootstrap/work
 	@$(MAKE) --no-print-directory sync-workspace
+	@$(MAKE) --no-print-directory install-automations
 
 ##@ Uninstall (OS-specific)
 

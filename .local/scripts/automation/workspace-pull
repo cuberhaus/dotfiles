@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="${HOME}/cuberhaus"
+depth=3
+minimum_age_seconds=0
+
+while (($# > 0)); do
+    case "$1" in
+        --root)
+            root="${2:?missing path for --root}"
+            shift 2
+            ;;
+        --depth)
+            depth="${2:?missing value for --depth}"
+            shift 2
+            ;;
+        --if-due-seconds)
+            minimum_age_seconds="${2:?missing seconds for --if-due-seconds}"
+            shift 2
+            ;;
+        *)
+            printf 'Unknown argument: %s\n' "$1" >&2
+            exit 2
+            ;;
+    esac
+done
+
+if [[ ! -d "$root" ]]; then
+    printf 'Workspace directory does not exist: %s\n' "$root" >&2
+    exit 1
+fi
+if ! command -v git >/dev/null 2>&1; then
+    printf 'Git is not available on PATH.\n' >&2
+    exit 1
+fi
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus-automations"
+state_file="$state_dir/workspace-pull.last-success"
+mkdir -p "$state_dir"
+
+if [[ -f "$state_file" && $minimum_age_seconds -gt 0 ]]; then
+    last_success=$(<"$state_file")
+    now=$(date +%s)
+    if [[ $last_success =~ ^[0-9]+$ ]] && ((now - last_success < minimum_age_seconds)); then
+        printf 'Workspace pull completed recently. Skipping.\n'
+        exit 0
+    fi
+fi
+
+lock_dir="${TMPDIR:-/tmp}/cuberhaus-workspace-pull.lock"
+if ! mkdir "$lock_dir" 2>/dev/null; then
+    printf 'Another workspace pull is running. Skipping.\n'
+    exit 0
+fi
+trap 'rmdir "$lock_dir"' EXIT
+
+export GIT_TERMINAL_PROMPT=0
+failures=0
+repositories=0
+
+while IFS= read -r -d '' git_dir; do
+    repository=${git_dir%/.git}
+    repositories=$((repositories + 1))
+
+    if ! upstream=$(git -C "$repository" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null); then
+        printf '[SKIP] %s (no upstream)\n' "$repository"
+        continue
+    fi
+
+    printf '[PULL] %s (%s)\n' "$repository" "$upstream"
+    if ! git -C "$repository" -c credential.interactive=never pull --ff-only --no-edit; then
+        printf '[FAIL] %s\n' "$repository" >&2
+        failures=$((failures + 1))
+    fi
+done < <(find "$root" -maxdepth "$depth" -type d -name .git -print0 2>/dev/null)
+
+printf 'Workspace pull checked %d repositories with %d failure(s).\n' "$repositories" "$failures"
+if ((failures > 0)); then
+    exit 1
+fi
+
+date +%s > "$state_file"

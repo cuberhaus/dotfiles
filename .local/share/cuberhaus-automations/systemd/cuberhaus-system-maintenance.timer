@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly Cuberhaus system package maintenance
+
+[Timer]
+OnCalendar=Sun *-*-* 10:00:00
+Persistent=true
+AccuracySec=1m
+Unit=cuberhaus-system-maintenance.service
+
+[Install]
+WantedBy=timers.target
