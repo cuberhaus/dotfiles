@@ -6,7 +6,7 @@ STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 BOOTSTRAP_ARGS ?=
 
-.PHONY: help install uninstall restow dry-run lint check fix doctor hooks install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run sync-drive sync-drive-dry-run update-repos audit-policies dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help install uninstall restow dry-run lint check fix doctor hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run sync-drive sync-drive-dry-run update-repos audit-policies dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -62,6 +62,9 @@ check: lint ## Run all linters (shellcheck + markdownlint + vint). Fails if any 
 	fi
 	@echo ""
 	@echo "==> All checks complete."
+
+test-shutdown-fix: ## Test the permanent shutdown-fix kernelstub path
+	bash .local/scripts/test_permanent_shutdown_fix.sh
 
 fix: ## Auto-fix markdown issues (markdownlint --fix)
 	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \

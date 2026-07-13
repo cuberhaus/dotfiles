@@ -54,6 +54,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   └── pre-commit         # Runs shellcheck on staged shell scripts
 │   │
 │   ├── lint.sh                 # Lint all tracked shell scripts with shellcheck
+│   ├── permanent_shutdown_fix.sh # Applies shutdown kernel parameters via kernelstub or GRUB
 │   ├── toggle_theme            # Switch between light/dark themes
 │   └── ...                     # Other utility scripts
 │
@@ -94,3 +95,16 @@ Each bootstrap entrypoint (e.g. `bootstrap/arch`) follows this pattern:
   Makefile target.
 
 See the root [README](../README.md) for quick-start instructions.
+
+## Shutdown fix
+
+Run `.local/scripts/permanent_shutdown_fix.sh` on a Linux machine that needs
+the configured ACPI, PCIe, and NVIDIA kernel parameters. It detects Pop!_OS's
+`kernelstub`/systemd-boot setup and uses `kernelstub`; on GRUB installations it
+updates `/etc/default/grub` and runs `update-grub`. The script removes `quiet`
+and `splash` when present so shutdown messages remain visible, then requires a
+reboot.
+
+Use `SHUTDOWN_FIX_BOOTLOADER=kernelstub` or `SHUTDOWN_FIX_BOOTLOADER=grub` to
+select a supported bootloader explicitly. Run the hermetic regression test
+with `bash .local/scripts/test_permanent_shutdown_fix.sh`.
