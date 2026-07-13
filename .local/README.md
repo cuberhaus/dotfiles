@@ -98,7 +98,7 @@ See the root [README](../README.md) for quick-start instructions.
 
 ## Shutdown fix
 
-Run `.local/scripts/permanent_shutdown_fix.sh` on a Linux machine that needs
+Run `sudo .local/scripts/permanent_shutdown_fix.sh` on a Linux machine that needs
 the configured ACPI, PCIe, and NVIDIA kernel parameters. It detects Pop!_OS's
 `kernelstub`/systemd-boot setup and uses `kernelstub`; on GRUB installations it
 updates `/etc/default/grub` and runs `update-grub`. The script removes `quiet`

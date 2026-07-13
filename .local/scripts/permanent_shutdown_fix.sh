@@ -17,6 +17,14 @@ print_parameters() {
     printf '%s\n' "${EXPECTED_PARAMETERS[*]}"
 }
 
+require_root() {
+    if [[ "$(id -u)" -ne 0 ]]; then
+        echo "This script must be run as root." >&2
+        echo "Re-run it with: sudo $0" >&2
+        exit 1
+    fi
+}
+
 apply_kernelstub_fix() {
     local parameter
     local current_options
@@ -28,7 +36,7 @@ apply_kernelstub_fix() {
             *" $parameter "*) echo "Kernel parameter already present: $parameter" ;;
             *)
                 echo "Adding kernel parameter: $parameter"
-                sudo kernelstub -a "$parameter"
+                kernelstub -a "$parameter"
                 ;;
         esac
     done
@@ -38,7 +46,7 @@ apply_kernelstub_fix() {
         case " $current_options " in
             *" $parameter "*)
                 echo "Removing kernel parameter: $parameter"
-                sudo kernelstub -d "$parameter"
+                kernelstub -d "$parameter"
                 ;;
         esac
     done
@@ -57,14 +65,14 @@ apply_grub_fix() {
     fi
 
     echo "Backing up $GRUB_DEFAULT_FILE to ${GRUB_DEFAULT_FILE}.bak..."
-    sudo cp --backup=numbered "$GRUB_DEFAULT_FILE" "${GRUB_DEFAULT_FILE}.bak"
+    cp --backup=numbered "$GRUB_DEFAULT_FILE" "${GRUB_DEFAULT_FILE}.bak"
     echo "Configuring GRUB parameters..."
     echo "Setting GRUB_CMDLINE_LINUX_DEFAULT to '$expected'"
-    sudo sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=\"$expected\"/" "$GRUB_DEFAULT_FILE"
+    sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=\"$expected\"/" "$GRUB_DEFAULT_FILE"
     echo "Verification - Current GRUB line:"
     grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_DEFAULT_FILE"
     echo "Running update-grub to apply changes..."
-    sudo update-grub
+    update-grub
 }
 
 detect_bootloader() {
@@ -92,6 +100,7 @@ detect_bootloader() {
 
 main() {
     local bootloader
+    require_root
     bootloader="$(detect_bootloader)"
 
     echo "Starting shutdown fix application using $bootloader..."
