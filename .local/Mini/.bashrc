@@ -312,8 +312,7 @@ gclean() {
 
             # Check commits ahead of default
             local ahead
-            ahead=$(git -C "$dir" rev-list --count "$default_branch..$branch" 2>/dev/null)
-            if [ $? -ne 0 ]; then
+            if ! ahead=$(git -C "$dir" rev-list --count "$default_branch..$branch" 2>/dev/null); then
                 ahead=$(git -C "$dir" rev-list --count "origin/$default_branch..$branch" 2>/dev/null)
             fi
 

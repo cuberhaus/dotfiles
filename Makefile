@@ -5,8 +5,9 @@ STOW      := stow
 STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 BOOTSTRAP_ARGS ?=
+PROFILE ?= auto
 
-.PHONY: help install uninstall restow dry-run lint check fix doctor hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run sync-drive sync-drive-dry-run update-repos audit-policies dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help install uninstall restow dry-run lint test check fix doctor audit-installation hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run sync-drive sync-drive-dry-run update-repos audit-policies dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -41,7 +42,10 @@ dry-run: ## Simulate stow and report conflicts (no changes made)
 lint: ## Run shellcheck on all shell scripts
 	bash .local/scripts/lint.sh
 
-check: lint ## Run all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.
+test: ## Run deterministic unit tests
+	python3 tests/test_installation_audit.py
+
+check: lint test ## Run tests and all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.
 	@echo ""
 	@echo "==> Running markdownlint..."
 	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
@@ -78,6 +82,9 @@ fix: ## Auto-fix markdown issues (markdownlint --fix)
 
 doctor: ## Report missing lint tools and broken symlinks in $$HOME
 	@bash .local/scripts/doctor.sh
+
+audit-installation: ## Report drift between this repo and the installed machine (PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work)
+	python3 .local/scripts/audit_installation.py --profile "$(PROFILE)"
 
 ##@ Setup
 

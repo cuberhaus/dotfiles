@@ -55,6 +55,8 @@
 !.tomighty/**
 !cuberhaus-workspace/
 !cuberhaus-workspace/**
+!tests/
+!tests/**
 
 # =============================================================================
 # .cache/ — only emacs bookmarks

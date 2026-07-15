@@ -15,7 +15,8 @@ Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS — shell, edi
 
 - `make install` / `make uninstall` / `make restow` — stow lifecycle (install backs up conflicts first via `.local/scripts/stow-backup-conflicts`).
 - `make dry-run` — simulate stow, report conflicts, no changes.
-- `make lint` (shellcheck) and `make check` (shellcheck + markdownlint + vint).
+- `make lint` (shellcheck), `make test` (unit tests), and `make check` (tests + shellcheck + markdownlint + vint).
+- `make audit-installation` — read-only comparison of the checkout, Stow-managed files, active bootstrap package declarations, and native automations. Set `PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work` to override auto-detection.
 - `make bootstrap-{arch,manjaro,ubuntu,mac,work}` — full OS provisioning; **read the script first**, it installs hundreds of packages.
 - `make skip-worktree` — run once after cloning to silence volatile files.
 

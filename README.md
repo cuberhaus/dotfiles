@@ -83,12 +83,22 @@ make install           # Symlink dotfiles into $HOME
 make uninstall         # Remove symlinks from $HOME
 make restow            # Re-stow (cleans stale links)
 make lint              # Run shellcheck on all scripts
-make check             # Run all linters (shellcheck + markdownlint + vint)
+make test              # Run deterministic unit tests
+make check             # Run tests and all linters (shellcheck + markdownlint + vint)
+make audit-installation # Report installation drift without changing the machine
 make submodules        # Init and update submodules
 make update            # Pull latest for every submodule
 make skip-worktree     # Ignore runtime changes to volatile config files (run once after cloning)
 make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac, work)
 ```
+
+Run `make audit-installation` regularly on each Unix machine to compare the
+current checkout, Stow-managed configs and aliases, packages declared by the
+active bootstrap profile, and native automations. The target changes nothing
+and exits `1` when it finds actionable drift. It auto-detects the profile; use
+`make audit-installation PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work`
+to override detection. Package expectations are parsed only from functions the
+selected bootstrap actually calls, so commented optional bundles are excluded.
 
 ### Volatile config files
 

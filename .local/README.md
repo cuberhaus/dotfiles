@@ -35,6 +35,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── mac_functions      # macOS (Homebrew) package lists & installers
 │   │   └── xterm-256color-italic.terminfo
 │   ├── automation/             # Scheduled package updates and workspace pulls
+│   ├── audit_installation.py   # Read-only installation alignment report
 │   │   ├── install             # Installs systemd timers or launchd agents
 │   │   ├── system-maintenance  # Root apt/pacman upgrades (Linux)
 │   │   ├── user-package-maintenance # Homebrew/yay upgrades
@@ -80,6 +81,9 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
   `launchd` on macOS. `make install-automations` installs or refreshes their
   native scheduler definitions; `make uninstall-automations-dry-run` previews
   removal and `make uninstall-automations` disables/removes them.
+- **`audit_installation.py`** statically reads the selected bootstrap instead
+  of sourcing it, then reports checkout, Stow, package, and scheduler drift via
+  `make audit-installation`. Set `PROFILE=<name>` to override auto-detection.
 
 ## Bootstrap flow
 

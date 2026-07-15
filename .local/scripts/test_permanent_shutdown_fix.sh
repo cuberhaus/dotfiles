@@ -2,7 +2,8 @@
 # Hermetic regression test for the Pop!_OS/kernelstub shutdown-fix path.
 set -euo pipefail
 
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
 readonly SCRIPT="$SCRIPT_DIR/permanent_shutdown_fix.sh"
 test_dir="$(mktemp -d)"
 trap 'rm -rf "$test_dir"' EXIT

@@ -104,8 +104,7 @@ scan_repo() {
 
         # Check commits ahead of default
         local ahead
-        ahead=$(git -C "$repo" rev-list --count "$default..$branch" 2>/dev/null)
-        if [ $? -ne 0 ]; then
+        if ! ahead=$(git -C "$repo" rev-list --count "$default..$branch" 2>/dev/null); then
             ahead=$(git -C "$repo" rev-list --count "origin/$default..$branch" 2>/dev/null)
         fi
 
