@@ -86,6 +86,7 @@ make lint              # Run shellcheck on all scripts
 make test              # Run deterministic unit tests
 make check             # Run tests and all linters (shellcheck + markdownlint + vint)
 make audit-installation # Report installation drift without changing the machine
+make workspace         # Sync workspace, refresh repos.json, audit policies
 make submodules        # Init and update submodules
 make update            # Pull latest for every submodule
 make skip-worktree     # Ignore runtime changes to volatile config files (run once after cloning)

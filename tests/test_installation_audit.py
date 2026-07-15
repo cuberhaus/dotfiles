@@ -22,6 +22,21 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertIn("audit-installation:", makefile)
         self.assertIn("audit_installation.py", makefile)
 
+    def test_make_exposes_one_ordered_workspace_target(self):
+        makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+        self.assertIn("workspace:", makefile)
+        for old_target in (
+            "sync-workspace:",
+            "sync-workspace-dry-run:",
+            "update-repos:",
+            "audit-policies:",
+        ):
+            self.assertNotIn(old_target, makefile)
+
+        workspace = makefile.split("workspace:", 1)[1].split("\n\n", 1)[0]
+        self.assertLess(workspace.index("sync.sh"), workspace.index("build-repos.py"))
+        self.assertLess(workspace.index("build-repos.py"), workspace.index("audit-policies.py"))
+
     def test_profiles_derive_packages_from_active_bootstrap_functions(self):
         audit = load_audit_module()
 

@@ -7,7 +7,7 @@ TARGET    := $(HOME)
 BOOTSTRAP_ARGS ?=
 PROFILE ?= auto
 
-.PHONY: help install uninstall restow dry-run lint test check fix doctor audit-installation hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree sync-workspace sync-workspace-dry-run update-repos audit-policies dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help install uninstall restow dry-run lint test check fix doctor audit-installation hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree workspace dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -132,16 +132,9 @@ skills-restore: ## Download/restore pinned skills from skills-lock.json
 
 ##@ Workspace integration (cuberhaus multi-root)
 
-sync-workspace: ## Copy cuberhaus-workspace/ sources into $$HOME/cuberhaus (workspace root)
+workspace: ## Sync workspace files, refresh repos.json, then audit workspace policies
 	bash ../cuberhaus-workspace/sync.sh
-
-sync-workspace-dry-run: ## Show what sync-workspace would change without writing
-	bash ../cuberhaus-workspace/sync.sh -n
-
-update-repos: ## Refresh repos.json in $$HOME/cuberhaus (GitHub API + local enrichment; needs gh auth + python3)
 	python3 ../cuberhaus-workspace/scripts/build-repos.py
-
-audit-policies: ## Audit cuberhaus repo settings + files against cuberhaus-workspace/policies.json (read-only, exits 1 on drift)
 	python3 ../cuberhaus-workspace/scripts/audit-policies.py
 
 ##@ Submodules
@@ -158,8 +151,8 @@ antigen-update: ## Fetch the latest antigen.zsh from GitHub
 	@echo "antigen.zsh updated. Restart your shell to pick up changes."
 
 ##@ Bootstrap (OS-specific)
-# Each bootstrap target runs the OS-specific bash script, then chains
-# `sync-workspace` so the cuberhaus-workspace/ sources land in ~/cuberhaus
+# Each bootstrap target runs the OS-specific bash script, then deploys
+# cuberhaus-workspace/ sources into ~/cuberhaus without API/policy maintenance
 # without a separate manual step. Setup remains one command per OS.
 
 dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
@@ -167,32 +160,32 @@ dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware cl
 
 bootstrap-arch: ## Run Arch bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/arch $(BOOTSTRAP_ARGS)
-	@$(MAKE) --no-print-directory sync-workspace
+	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-manjaro: ## Run Manjaro bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/manjaro $(BOOTSTRAP_ARGS)
-	@$(MAKE) --no-print-directory sync-workspace
+	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-ubuntu: ## Run Ubuntu bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/ubuntu $(BOOTSTRAP_ARGS)
-	@$(MAKE) --no-print-directory sync-workspace
+	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-ubuntu-windows: ## Run Ubuntu-on-WSL bootstrap (no GUI apps, chains sync-workspace)
 	bash .local/scripts/bootstrap/ubuntu_windows
-	@$(MAKE) --no-print-directory sync-workspace
+	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-mac: ## Run macOS bootstrap (chains sync-workspace)
 	bash .local/scripts/bootstrap/mac
-	@$(MAKE) --no-print-directory sync-workspace
+	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
 bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA, chains sync-workspace)
 	bash .local/scripts/bootstrap/work $(BOOTSTRAP_ARGS)
-	@$(MAKE) --no-print-directory sync-workspace
+	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
 ##@ Uninstall (OS-specific)
