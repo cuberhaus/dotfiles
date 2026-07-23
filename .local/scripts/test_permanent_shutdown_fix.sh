@@ -27,7 +27,7 @@ fi
 EOF
 chmod +x "$test_dir/bin/id" "$test_dir/bin/kernelstub"
 
-PATH="$test_dir/bin:$PATH" SHUTDOWN_FIX_BOOTLOADER=kernelstub "$SCRIPT" >"$test_dir/output"
+PATH="$test_dir/bin:$PATH" SHUTDOWN_FIX_BOOTLOADER=kernelstub bash "$SCRIPT" >"$test_dir/output"
 
 for parameter in nvidia-drm.modeset=1 acpi=force pcie_port_pm=off acpi_osi=Linux; do
     grep -qx -- "-a $parameter" "$test_dir/kernelstub.log"
@@ -36,11 +36,18 @@ grep -qx -- '-d quiet' "$test_dir/kernelstub.log"
 grep -qx -- '-d splash' "$test_dir/kernelstub.log"
 grep -q 'Fix applied successfully.' "$test_dir/output"
 
-if PATH="$test_dir/bin:$PATH" SHUTDOWN_FIX_TEST_UID=1000 SHUTDOWN_FIX_BOOTLOADER=kernelstub "$SCRIPT" >"$test_dir/non_root_output" 2>"$test_dir/non_root_error"; then
+if PATH="$test_dir/bin:$PATH" SHUTDOWN_FIX_TEST_UID=1000 SHUTDOWN_FIX_BOOTLOADER=kernelstub bash "$SCRIPT" >"$test_dir/non_root_output" 2>"$test_dir/non_root_error"; then
     echo "Expected non-root execution to fail." >&2
     exit 1
 fi
 grep -q 'This script must be run as root.' "$test_dir/non_root_error"
 grep -q "Re-run it with: sudo $SCRIPT" "$test_dir/non_root_error"
+
+source "$SCRIPT_DIR/bootstrap/work_functions"
+sudo() {
+    printf '%s\n' "$*" >"$test_dir/sudo.log"
+}
+HOME="$test_dir/home" shutdown_fix
+grep -qx "bash $test_dir/home/.local/scripts/permanent_shutdown_fix.sh" "$test_dir/sudo.log"
 
 echo "permanent_shutdown_fix kernelstub test passed."

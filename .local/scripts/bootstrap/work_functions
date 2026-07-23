@@ -9,7 +9,7 @@ apt="sudo apt-get install -y"
 ###############################################################
 
 shutdown_fix() {
-    bash "$HOME/.local/scripts/permanent_shutdown_fix.sh"
+    sudo bash "$HOME/.local/scripts/permanent_shutdown_fix.sh"
 }
 
 ###############################################################
