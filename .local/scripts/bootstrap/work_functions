@@ -132,7 +132,7 @@ python_install() {
     pipx ensurepath || true
 
     # Linter for vimrc
-    command -v vint &>/dev/null || pip install --user vim-vint || python3 -m pip install --user vim-vint
+    command -v vint &>/dev/null || pipx install vim-vint
 
     # Add pip/pipx packages below as needed:
     # pipx install <package>
