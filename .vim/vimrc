@@ -7,12 +7,13 @@ set foldmethod=marker
 
 if has('unix') || has('macunix')
     " Clean-up
-    set undodir=$XDG_DATA_HOME/vim/undo
-    set directory=$XDG_DATA_HOME/vim/swap
-    set backupdir=$XDG_DATA_HOME/vim/backup
-    set viewdir=$XDG_DATA_HOME/vim/view
+    let s:data_home = empty($XDG_DATA_HOME) ? expand('~/.local/share') : $XDG_DATA_HOME
+    let &undodir = s:data_home . '/vim/undo'
+    let &directory = s:data_home . '/vim/swap'
+    let &backupdir = s:data_home . '/vim/backup'
+    let &viewdir = s:data_home . '/vim/view'
     if has('nvim')
-        set viminfo+='1000,n$XDG_DATA_HOME/vim/viminfo
+        let &viminfo .= ",'1000,n" . s:data_home . '/vim/viminfo'
     endif
     if !has('nvim')
         set nocompatible
