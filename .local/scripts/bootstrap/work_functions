@@ -9,7 +9,7 @@ apt="sudo apt-get install -y"
 ###############################################################
 
 shutdown_fix() {
-    bash "$HOME/.local/scripts/permanent_shutdown_fix.sh"
+    sudo bash "$HOME/.local/scripts/permanent_shutdown_fix.sh"
 }
 
 ###############################################################
@@ -132,7 +132,7 @@ python_install() {
     pipx ensurepath || true
 
     # Linter for vimrc
-    command -v vint &>/dev/null || pip install --user vim-vint || python3 -m pip install --user vim-vint
+    command -v vint &>/dev/null || pipx install vim-vint
 
     # Add pip/pipx packages below as needed:
     # pipx install <package>
@@ -308,14 +308,14 @@ gui_apps_install() {
 
     if [ -f "$cursor_deb" ]; then
         info "Installing Cursor..."
-        sudo apt-get install -y "$cursor_deb"
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$cursor_deb"
         rm -f "$cursor_deb"
     fi
 
     if [ -f "$gpt4all_run" ] && ! command -v gpt4all &>/dev/null && [ ! -d "$HOME/gpt4all" ] && [ ! -d /opt/gpt4all ]; then
         info "Installing GPT4All..."
         chmod +x "$gpt4all_run"
-        "$gpt4all_run" --install "$HOME/gpt4all" --accept-licenses --default-answer --auto
+        "$gpt4all_run" --root "$HOME/gpt4all" --accept-licenses --default-answer --confirm-command install
         rm -f "$gpt4all_run"
         cat > "$HOME/.local/share/applications/gpt4all.desktop" <<EOF
 [Desktop Entry]

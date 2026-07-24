@@ -7,7 +7,7 @@ TARGET    := $(HOME)
 BOOTSTRAP_ARGS ?=
 PROFILE ?= auto
 
-.PHONY: help install uninstall restow dry-run lint test check fix doctor audit-installation hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree workspace dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run lint test check fix doctor audit-installation hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree workspace dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -24,17 +24,26 @@ help: ## Show this help
 
 ##@ Stow
 
-install: ## Symlink dotfiles into $HOME via stow (backs up conflicts first)
+check-stow:
+	@if ! command -v "$(STOW)" >/dev/null 2>&1; then \
+		echo "GNU Stow is required. Install it, then rerun your make command:"; \
+		echo "  Ubuntu/Debian: sudo apt install stow"; \
+		echo "  Arch/Manjaro:  sudo pacman -S stow"; \
+		echo "  macOS:         brew install stow"; \
+		exit 127; \
+	fi
+
+install: check-stow ## Symlink dotfiles into $HOME via stow (backs up conflicts first)
 	@bash .local/scripts/stow-backup-conflicts
 	$(STOW) -v -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
 
-uninstall: uninstall-automations ## Disable automations, remove symlinks, and restore backed-up files
+uninstall: check-stow uninstall-automations ## Disable automations, remove symlinks, and restore backed-up files
 	@bash .local/scripts/stow-uninstall
 
-restow: ## Re-stow (uninstall then install — cleans stale links)
+restow: check-stow ## Re-stow (uninstall then install — cleans stale links)
 	$(STOW) -v -R -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
 
-dry-run: ## Simulate stow and report conflicts (no changes made)
+dry-run: check-stow ## Simulate stow and report conflicts (no changes made)
 	$(STOW) -v -n -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR)) 2>&1
 
 ##@ Quality

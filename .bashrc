@@ -64,6 +64,10 @@ shopt -s globstar
 # => Aliases and functions
 ###############################################################
 
+if [ -r "$HOME/.config/distro" ]; then
+    source "$HOME/.config/distro"
+fi
+
 _zshdir="$HOME/.config/zsh"
 if [ -f "$_zshdir/aliases" ]; then
     source "$_zshdir/aliases"

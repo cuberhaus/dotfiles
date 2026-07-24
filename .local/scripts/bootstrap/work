@@ -24,6 +24,10 @@ shutdown_fix
 nvidia_install
 nvidia_display_config
 dev_tools_install
+if [ "$(basename "$SHELL")" != "zsh" ]; then
+    chsh -s "$(command -v zsh)"
+fi
+
 node_install
 python_install
 docker_install
@@ -36,10 +40,6 @@ if [[ "$current_scale" != "1.3" ]]; then
     if [[ "$hidpi" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         high_dpi_screen
     fi
-fi
-
-if [ "$(basename "$SHELL")" != "zsh" ]; then
-    chsh -s "$(which zsh)"
 fi
 
 apply_skip_worktree

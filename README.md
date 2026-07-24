@@ -64,13 +64,13 @@ cd ~
 mkdir -p dotfiles
 git clone --recurse-submodules https://github.com/cuberhaus/dotfiles dotfiles/dotfiles
 cd dotfiles/dotfiles
+sudo apt install stow # Pop!_OS, Ubuntu, and Debian
 make install
 ```
 
-> If you don't have `stow` installed, grab it first:
+> On other operating systems, install `stow` before running `make install`:
 >
 > - **Arch/Manjaro:** `sudo pacman -S stow`
-> - **Ubuntu/Debian:** `sudo apt install stow`
 > - **macOS:** `brew install stow`
 
 ## Usage
