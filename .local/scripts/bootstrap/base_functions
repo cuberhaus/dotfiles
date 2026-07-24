@@ -10,11 +10,23 @@ error() { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; }
 
 parse_bootstrap_args() {
     DUAL_BOOT_UTC=false
+    UNATTENDED=false
+    FIRST_RUN_CHOICE=""
+    HIGH_DPI_CHOICE=""
 
     while (( $# > 0 )); do
         case "$1" in
             --dual-boot-utc)
                 DUAL_BOOT_UTC=true
+                ;;
+            --unattended)
+                UNATTENDED=true
+                ;;
+            --first-run=yes|--first-run=no)
+                FIRST_RUN_CHOICE="${1#*=}"
+                ;;
+            --high-dpi=yes|--high-dpi=no)
+                HIGH_DPI_CHOICE="${1#*=}"
                 ;;
             *)
                 error "Unknown bootstrap option: $1"
@@ -24,7 +36,47 @@ parse_bootstrap_args() {
         shift
     done
 
-    export DUAL_BOOT_UTC
+    export DUAL_BOOT_UTC UNATTENDED FIRST_RUN_CHOICE HIGH_DPI_CHOICE
+}
+
+resolve_first_run_choice() {
+    case "${FIRST_RUN_CHOICE:-}" in
+        yes) FirstRun=y ;;
+        no) FirstRun=n ;;
+        "")
+            if [ "${UNATTENDED:-false}" = true ]; then
+                FirstRun=n
+            else
+                read -rp "Is this a first-time install? (y/n): " FirstRun
+            fi
+            ;;
+        *)
+            error "Invalid first-run choice: $FIRST_RUN_CHOICE"
+            return 2
+            ;;
+    esac
+    export FirstRun
+}
+
+resolve_high_dpi_choice() {
+    case "${HIGH_DPI_CHOICE:-}" in
+        yes) HIGH_DPI=true ;;
+        no) HIGH_DPI=false ;;
+        "")
+            if [ "${UNATTENDED:-false}" = true ]; then
+                HIGH_DPI=false
+            else
+                local answer
+                read -r -p "Do you have a high DPI screen? [y/N] " answer
+                [[ "$answer" =~ ^([yY][eE][sS]|[yY])$ ]] && HIGH_DPI=true || HIGH_DPI=false
+            fi
+            ;;
+        *)
+            error "Invalid high-DPI choice: $HIGH_DPI_CHOICE"
+            return 2
+            ;;
+    esac
+    export HIGH_DPI
 }
 
 is_wsl() {

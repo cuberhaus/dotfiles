@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+action="${1:-status}"
+lines="${2:-100}"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus-automations"
+
+format_epoch() {
+    local epoch="$1"
+    if date -d "@$epoch" '+%Y-%m-%d %H:%M:%S %z' >/dev/null 2>&1; then
+        date -d "@$epoch" '+%Y-%m-%d %H:%M:%S %z'
+    else
+        date -r "$epoch" '+%Y-%m-%d %H:%M:%S %z'
+    fi
+}
+
+digest() {
+    local name state_file value
+    for name in user-package-maintenance workspace-pull; do
+        state_file="$state_dir/$name.last-success"
+        if [[ -r "$state_file" ]]; then
+            value="$(<"$state_file")"
+            if [[ "$value" =~ ^[0-9]+$ ]]; then
+                printf '%-26s %s\n' "$name" "$(format_epoch "$value")"
+            else
+                printf '%-26s invalid state: %s\n' "$name" "$value"
+            fi
+        else
+            printf '%-26s never recorded\n' "$name"
+        fi
+    done
+}
+
+linux_status() {
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+        printf 'WSL detected: Windows Task Scheduler owns maintenance schedules.\n'
+        return
+    fi
+    systemctl list-timers --all 'cuberhaus-*'
+    systemctl --user list-timers --all 'cuberhaus-*'
+}
+
+linux_logs() {
+    journalctl -n "$lines" --no-pager -u cuberhaus-system-maintenance.service
+    journalctl --user -n "$lines" --no-pager -u cuberhaus-user-package-maintenance.service -u cuberhaus-workspace-pull.service
+}
+
+macos_status() {
+    local label
+    for label in com.cuberhaus.user-package-maintenance com.cuberhaus.workspace-pull; do
+        launchctl print "gui/$(id -u)/$label" || true
+    done
+}
+
+macos_logs() {
+    local log_dir="$HOME/Library/Logs/Cuberhaus"
+    tail -n "$lines" "$log_dir/user-package-maintenance.log" "$log_dir/workspace-pull.log"
+}
+
+case "$action" in
+    digest)
+        digest
+        ;;
+    status)
+        case "$(uname -s)" in
+            Linux) linux_status ;;
+            Darwin) macos_status ;;
+            *) printf 'Unsupported platform.\n' >&2; exit 1 ;;
+        esac
+        printf '\nLast successful runs\n'
+        digest
+        ;;
+    logs)
+        [[ "$lines" =~ ^[1-9][0-9]*$ ]] || { printf 'LINES must be a positive integer.\n' >&2; exit 2; }
+        case "$(uname -s)" in
+            Linux) linux_logs ;;
+            Darwin) macos_logs ;;
+            *) printf 'Unsupported platform.\n' >&2; exit 1 ;;
+        esac
+        ;;
+    *)
+        printf 'Usage: %s status|logs [lines]|digest\n' "$0" >&2
+        exit 2
+        ;;
+esac

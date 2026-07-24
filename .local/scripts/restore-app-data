@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+app="${1:-}"
+apply=false
+if [[ ${2:-} == "--apply" ]]; then
+    apply=true
+elif (($# > 1)); then
+    printf 'Usage: %s thunderbird|calibre|anki [--apply]\n' "$0" >&2
+    exit 2
+fi
+
+case "$app" in
+    thunderbird)
+        command_name=thunderbird
+        process_pattern='[/ ]thunderbird([ .]|$)'
+        remote='drive:Thunderbird'
+        destination="$HOME/.thunderbird"
+        mac_app='/Applications/Thunderbird.app'
+        ;;
+    calibre)
+        command_name=calibre
+        process_pattern='[/ ](calibre|ebook-viewer)([ .]|$)'
+        remote='drive:Calibre/Calibre Library'
+        destination="$HOME/Calibre Library"
+        mac_app='/Applications/calibre.app'
+        ;;
+    anki)
+        command_name=anki
+        process_pattern='[/ ]([Aa]nki)([ .]|$)'
+        remote='drive:Anki'
+        if [[ "$(uname -s)" == Darwin ]]; then
+            destination="$HOME/Library/Application Support/Anki2"
+        else
+            destination="${XDG_DATA_HOME:-$HOME/.local/share}/Anki2"
+        fi
+        mac_app='/Applications/Anki.app'
+        ;;
+    *)
+        printf 'Usage: %s thunderbird|calibre|anki [--apply]\n' "$0" >&2
+        exit 2
+        ;;
+esac
+
+command -v rclone >/dev/null 2>&1 || {
+    printf 'rclone is required before restoring %s.\n' "$app" >&2
+    exit 127
+}
+if ! rclone listremotes | grep -Fxq 'drive:'; then
+    printf 'The rclone remote drive: is not configured. Run `rclone config` first.\n' >&2
+    exit 1
+fi
+if ! command -v "$command_name" >/dev/null 2>&1 && [[ ! -d "$mac_app" ]]; then
+    printf '%s is not installed; refusing to restore its data.\n' "$app" >&2
+    exit 1
+fi
+if command -v pgrep >/dev/null 2>&1 && pgrep -f "$process_pattern" >/dev/null 2>&1; then
+    printf '%s is running. Close it before restoring data.\n' "$app" >&2
+    exit 1
+fi
+if ! rclone lsf "$remote" --max-depth 1 >/dev/null; then
+    printf 'Remote data is unavailable: %s\n' "$remote" >&2
+    exit 1
+fi
+
+mkdir -p "$destination"
+if [[ "$apply" == true ]]; then
+    printf 'Restoring %s from %s to %s\n' "$app" "$remote" "$destination"
+    rclone copy "$remote" "$destination" --progress
+else
+    printf 'Previewing %s restore. Re-run with APPLY=1 to copy files.\n' "$app"
+    rclone copy "$remote" "$destination" --dry-run --progress
+fi

@@ -6,6 +6,8 @@ set -euo pipefail
 scripts="$HOME/.local/scripts"
 source "$scripts/bootstrap/base_functions"
 source "$scripts/bootstrap/mac_functions"
+parse_bootstrap_args "$@"
+configure_dual_boot_utc_rtc
 
 ### INSTALLATION
 install_preparation

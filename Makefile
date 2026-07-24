@@ -6,8 +6,13 @@ STOW_DIR  := $(shell pwd)
 TARGET    := $(HOME)
 BOOTSTRAP_ARGS ?=
 PROFILE ?= auto
+FIRST_RUN ?= no
+HIGH_DPI ?= no
+REPAIR ?=
+RESTORE_APPS ?=
+RESTORE_APPLY ?= 0
 
-.PHONY: help check-stow install uninstall restow dry-run lint test check fix doctor audit-installation hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run update submodules antigen-update skip-worktree workspace dual-boot-utc bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -46,6 +51,15 @@ restow: check-stow ## Re-stow (uninstall then install — cleans stale links)
 dry-run: check-stow ## Simulate stow and report conflicts (no changes made)
 	$(STOW) -v -n -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR)) 2>&1
 
+config-status: check-stow ## Show Stow deployment drift and source checkout changes
+	python3 .local/scripts/config_lifecycle.py status
+
+config-diff: ## Diff tracked managed files against their current $$HOME targets
+	python3 .local/scripts/config_lifecycle.py diff
+
+config-import: check-stow ## Preview home-to-repo import; pass APPLY=1 to adopt changes
+	python3 .local/scripts/config_lifecycle.py import $(if $(filter 1,$(APPLY)),--apply,)
+
 ##@ Quality
 
 lint: ## Run shellcheck on all shell scripts
@@ -55,6 +69,9 @@ test: ## Run deterministic unit tests
 	python3 tests/test_installation_audit.py
 
 check: lint test ## Run tests and all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.
+	@echo ""
+	@echo "==> Running Gitleaks..."
+	bash .local/scripts/gitleaks.sh
 	@echo ""
 	@echo "==> Running markdownlint..."
 	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
@@ -89,11 +106,14 @@ fix: ## Auto-fix markdown issues (markdownlint --fix)
 		exit 1; \
 	fi
 
-doctor: ## Report missing lint tools and broken symlinks in $$HOME
-	@bash .local/scripts/doctor.sh
+doctor: ## Check tools, symlinks, configuration, packages, environment, and automations
+	@bash .local/scripts/doctor.sh "$(PROFILE)"
 
 audit-installation: ## Report drift between this repo and the installed machine (PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work)
 	python3 .local/scripts/audit_installation.py --profile "$(PROFILE)"
+
+repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard; PROFILE=auto|...)
+	bash .local/scripts/repair-installation "$(REPAIR)" "$(PROFILE)"
 
 ##@ Setup
 
@@ -110,6 +130,21 @@ uninstall-automations: ## Disable and remove native automation schedules
 
 uninstall-automations-dry-run: ## Preview removal of native automation schedules
 	bash .local/scripts/automation/uninstall --dry-run
+
+maintenance-status: ## Show native maintenance schedule status
+	bash .local/scripts/automation/observe status
+
+maintenance-logs: ## Show recent maintenance logs (LINES=100)
+	bash .local/scripts/automation/observe logs "$(or $(LINES),100)"
+
+maintenance-digest: ## Summarize last successful maintenance runs
+	bash .local/scripts/automation/observe digest
+
+restore-app: ## Preview app-data restore (APP=thunderbird|calibre|anki; APPLY=1 to copy)
+	bash .local/scripts/restore-app-data "$(APP)" $(if $(filter 1,$(APPLY)),--apply,)
+
+restore-apps: ## Restore selected apps after setup (RESTORE_APPS="..."; RESTORE_APPLY=1 to copy)
+	@if [ -z "$(strip $(RESTORE_APPS))" ]; then echo "No app data requested; set RESTORE_APPS to thunderbird, calibre, and/or anki."; else for app in $(RESTORE_APPS); do bash .local/scripts/restore-app-data "$$app" $(if $(filter 1,$(RESTORE_APPLY)),--apply,); done; fi
 
 # Files that are intentionally tracked (for the settings we care about) but
 # change constantly at runtime — apps rewrite them on every launch.
@@ -167,35 +202,45 @@ antigen-update: ## Fetch the latest antigen.zsh from GitHub
 dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
 	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'
 
+bootstrap-unattended: ## Provision without prompts (PROFILE required; FIRST_RUN=no, HIGH_DPI=no)
+	@case "$(PROFILE)" in arch|manjaro|ubuntu|ubuntu-windows|mac|work) ;; *) echo "PROFILE must be arch, manjaro, ubuntu, ubuntu-windows, mac, or work" >&2; exit 2 ;; esac
+	@$(MAKE) --no-print-directory bootstrap-$(PROFILE) BOOTSTRAP_ARGS="--unattended --first-run=$(FIRST_RUN) --high-dpi=$(HIGH_DPI)"
+
 bootstrap-arch: ## Run Arch bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/arch $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
+	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-manjaro: ## Run Manjaro bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/manjaro $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
+	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-ubuntu: ## Run Ubuntu bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/ubuntu $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
+	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-ubuntu-windows: ## Run Ubuntu-on-WSL bootstrap (no GUI apps, then deploy workspace files)
-	bash .local/scripts/bootstrap/ubuntu_windows
+	bash .local/scripts/bootstrap/ubuntu_windows $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
+	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-mac: ## Run macOS bootstrap (then deploy workspace files)
-	bash .local/scripts/bootstrap/mac
+	bash .local/scripts/bootstrap/mac $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
+	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA, then deploy workspace files)
 	bash .local/scripts/bootstrap/work $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
+	@$(MAKE) --no-print-directory restore-apps
 
 ##@ Uninstall (OS-specific)
 

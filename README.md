@@ -84,8 +84,13 @@ make uninstall         # Remove symlinks from $HOME
 make restow            # Re-stow (cleans stale links)
 make lint              # Run shellcheck on all scripts
 make test              # Run deterministic unit tests
-make check             # Run tests and all linters (shellcheck + markdownlint + vint)
+make check             # Run tests, Gitleaks, and all linters
 make audit-installation # Report installation drift without changing the machine
+make doctor            # Check tools, links, config, environment, packages, and schedules
+make config-status     # Show Stow deployment and source-checkout drift
+make config-diff       # Compare tracked configs with existing home targets
+make config-import     # Preview reverse import; add APPLY=1 to adopt
+make maintenance-digest # Show last successful scheduled maintenance runs
 make workspace         # Sync workspace, refresh repos.json, audit policies
 make submodules        # Init and update submodules
 make update            # Pull latest for every submodule
@@ -100,6 +105,12 @@ and exits `1` when it finds actionable drift. It auto-detects the profile; use
 `make audit-installation PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work`
 to override detection. Package expectations are parsed only from functions the
 selected bootstrap actually calls, so commented optional bundles are excluded.
+
+Configuration import is preview-first. `make config-import` shows the Stow
+`--adopt` operations; `make config-import APPLY=1` performs them and then shows
+the changed source files. Review `git diff` before committing. Use
+`make config-status` for deployment drift and `make config-diff` for content
+differences between tracked files and existing `$HOME` targets.
 
 ### Volatile config files
 
@@ -136,6 +147,22 @@ make bootstrap-ubuntu    # Ubuntu
 make bootstrap-mac       # macOS
 make bootstrap-work      # Work machine (Ubuntu + NVIDIA, minimal)
 ```
+
+For deterministic provisioning, use `make bootstrap-unattended PROFILE=<os>`.
+Set `FIRST_RUN=yes` only when one-time hardware setup is intended, and
+`HIGH_DPI=yes` when the work profile should change display scaling. The
+defaults are `no`, so unattended setup never opts into either action.
+
+App-data restores are guarded and preview-first:
+
+```bash
+make restore-app APP=thunderbird             # rclone dry run
+make restore-app APP=thunderbird APPLY=1     # perform restore
+make bootstrap-ubuntu RESTORE_APPS="thunderbird calibre anki" RESTORE_APPLY=1
+```
+
+The restore verifies that `rclone` and its `drive:` remote work, the target app
+is installed and closed, and the remote directory exists before copying.
 
 ### Dual-boot hardware clock
 
@@ -228,6 +255,9 @@ launchctl print "gui/$UID/com.cuberhaus.workspace-pull"
 tail -f "$HOME/Library/Logs/Cuberhaus/user-package-maintenance.log"
 tail -f "$HOME/Library/Logs/Cuberhaus/workspace-pull.log"
 ```
+
+The portable wrappers are `make maintenance-status`,
+`make maintenance-logs LINES=100`, and `make maintenance-digest`.
 
 See [`.local/README.md`](.local/README.md) for a detailed breakdown of the
 scripts directory.

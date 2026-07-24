@@ -6,6 +6,7 @@ import unittest
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
 AUDIT_PATH = REPO_ROOT / ".local" / "scripts" / "audit_installation.py"
+CONFIG_LIFECYCLE_PATH = REPO_ROOT / ".local" / "scripts" / "config_lifecycle.py"
 
 
 def load_audit_module():
@@ -16,7 +17,115 @@ def load_audit_module():
     return module
 
 
+def load_config_lifecycle_module():
+    spec = importlib.util.spec_from_file_location("config_lifecycle", CONFIG_LIFECYCLE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 class InstallationAuditContractTests(unittest.TestCase):
+    def test_config_lifecycle_diffs_only_managed_existing_targets(self):
+        lifecycle = load_config_lifecycle_module()
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as root:
+            root_path = pathlib.Path(root)
+            repo = root_path / "repo"
+            home = root_path / "home"
+            repo.mkdir()
+            home.mkdir()
+            (repo / ".stow-local-ignore").write_text("^/README.*\n", encoding="utf-8")
+            (repo / ".zshenv").write_text("repo\n", encoding="utf-8")
+            (home / ".zshenv").write_text("home\n", encoding="utf-8")
+            (repo / "README.md").write_text("repo docs\n", encoding="utf-8")
+            (home / "README.md").write_text("home docs\n", encoding="utf-8")
+
+            differences = lifecycle.managed_differences(
+                repo, home, [pathlib.Path(".zshenv"), pathlib.Path("README.md")]
+            )
+
+        self.assertEqual(len(differences), 1)
+        self.assertIn("home/.zshenv", differences[0])
+
+    def test_make_exposes_config_and_maintenance_observability(self):
+        makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+        for target in (
+            "config-status:",
+            "config-diff:",
+            "config-import:",
+            "maintenance-status:",
+            "maintenance-logs:",
+            "maintenance-digest:",
+        ):
+            self.assertIn(target, makefile)
+        self.assertIn("gitleaks.sh", makefile)
+
+    def test_deep_audit_covers_environment_git_shell_editors_and_fonts(self):
+        audit = load_audit_module()
+        expected_paths = audit.expected_shell_paths(pathlib.Path("/home/example"))
+
+        self.assertEqual(
+            expected_paths,
+            (
+                pathlib.Path("/home/example/.local/bin"),
+                pathlib.Path("/home/example/.local/scripts/bin"),
+            ),
+        )
+        source = AUDIT_PATH.read_text(encoding="utf-8")
+        for function in (
+            "audit_shell_configuration",
+            "audit_environment",
+            "audit_git_configuration",
+            "audit_editors_and_fonts",
+        ):
+            self.assertIn(f"{function}(", source)
+
+        makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+        self.assertIn('doctor.sh "$(PROFILE)"', makefile)
+
+    def test_guarded_app_restore_is_preview_first_and_bootstrap_integrated(self):
+        makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+        restore = (REPO_ROOT / ".local" / "scripts" / "restore-app-data").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("restore-app:", makefile)
+        self.assertIn("restore-apps:", makefile)
+        self.assertEqual(makefile.count("restore-apps\n"), 6)
+        for app in ("thunderbird", "calibre", "anki"):
+            self.assertIn(f"{app})", restore)
+        for guard in ("rclone listremotes", "command -v pgrep", "rclone lsf", "--dry-run"):
+            self.assertIn(guard, restore)
+
+    def test_make_exposes_allowlisted_repair_target(self):
+        makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+        repair = (REPO_ROOT / ".local" / "scripts" / "repair-installation").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("repair:", makefile)
+        self.assertIn('repair-installation "$(REPAIR)" "$(PROFILE)"', makefile)
+        for step in ("config", "aliases", "environment", "vim", "automations", "keyboard"):
+            self.assertIn(step, repair)
+
+    def test_unattended_bootstrap_choices_are_deterministic(self):
+        source = (
+            REPO_ROOT / ".local" / "scripts" / "bootstrap" / "base_functions"
+        ).read_text(encoding="utf-8")
+
+        for option in ("--unattended)", "--first-run=yes|--first-run=no)", "--high-dpi=yes|--high-dpi=no)"):
+            self.assertIn(option, source)
+        self.assertIn("FirstRun=n", source)
+        self.assertIn("HIGH_DPI=false", source)
+
+    def test_every_bootstrap_entrypoint_parses_shared_arguments(self):
+        bootstrap_dir = REPO_ROOT / ".local" / "scripts" / "bootstrap"
+        for name in ("arch", "manjaro", "ubuntu", "ubuntu_windows", "mac", "work"):
+            source = (bootstrap_dir / name).read_text(encoding="utf-8")
+            self.assertIn('parse_bootstrap_args "$@"', source, name)
+
     def test_make_exposes_read_only_audit_target(self):
         makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
         self.assertIn("audit-installation:", makefile)

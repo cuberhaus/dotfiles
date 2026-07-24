@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+step="${1:-}"
+profile="${2:-auto}"
+
+usage() {
+    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work]\n' >&2
+}
+
+detect_profile() {
+    if [[ "$OSTYPE" == darwin* ]]; then
+        printf 'mac\n'
+        return
+    fi
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+        printf 'ubuntu-windows\n'
+        return
+    fi
+    if [[ -r "$HOME/.config/distro" ]]; then
+        local detected
+        detected="$(sed -n 's/^export DISTRO=//p; s/^DISTRO=//p' "$HOME/.config/distro" | head -n 1)"
+        case "$detected" in
+            arch|manjaro|ubuntu|work)
+                printf '%s\n' "$detected"
+                return
+                ;;
+        esac
+    fi
+    if [[ -r /etc/os-release ]]; then
+        local detected
+        detected="$(. /etc/os-release; printf '%s' "${ID:-}")"
+        case "$detected" in
+            arch|manjaro|ubuntu)
+                printf '%s\n' "$detected"
+                return
+                ;;
+        esac
+    fi
+    printf 'Unable to detect a supported profile; pass PROFILE explicitly.\n' >&2
+    return 2
+}
+
+restow_config() {
+    command -v stow >/dev/null 2>&1 || {
+        printf 'GNU Stow is required for the %s repair.\n' "$step" >&2
+        return 127
+    }
+    bash "$repo_root/.local/scripts/stow-backup-conflicts"
+    stow -v -R -t "$HOME" -d "$(dirname "$repo_root")" "$(basename "$repo_root")"
+}
+
+repair_vim() {
+    [[ "$profile" == auto ]] && profile="$(detect_profile)"
+    local functions_file
+    case "$profile" in
+        arch|manjaro) functions_file=arch_functions ;;
+        ubuntu|ubuntu-windows) functions_file=ubuntu_functions ;;
+        mac) functions_file=mac_functions ;;
+        work) functions_file=work_functions ;;
+        *) printf 'Unsupported profile: %s\n' "$profile" >&2; return 2 ;;
+    esac
+
+    # shellcheck source=/dev/null
+    source "$repo_root/.local/scripts/bootstrap/base_functions"
+    # shellcheck source=/dev/null
+    source "$repo_root/.local/scripts/bootstrap/$functions_file"
+    if ! declare -F vim_install >/dev/null; then
+        printf 'The %s profile does not define vim_install().\n' "$profile" >&2
+        return 2
+    fi
+    vim_install
+}
+
+case "$step" in
+    config|aliases|environment)
+        restow_config
+        ;;
+    vim)
+        repair_vim
+        ;;
+    automations)
+        bash "$repo_root/.local/scripts/automation/install"
+        ;;
+    keyboard)
+        restow_config
+        if command -v xmodmap >/dev/null 2>&1 && [[ -n "${DISPLAY:-}" && -f "$HOME/.Xmodmap" ]]; then
+            xmodmap "$HOME/.Xmodmap"
+        else
+            printf 'Keyboard files deployed; no active X11 session found, so xmodmap was not run.\n'
+        fi
+        ;;
+    *)
+        usage
+        exit 2
+        ;;
+esac

@@ -3,6 +3,7 @@
 #  - shellcheck on staged shell scripts
 #  - hardcoded /home/<user>/ or /Users/<user>/ paths in any staged file
 #  - markdownlint on staged markdown files
+#  - Gitleaks on the staged snapshot
 # Install with: make hooks
 
 set -euo pipefail
@@ -78,8 +79,14 @@ if [ ${#md_staged[@]} -gt 0 ]; then
     # If neither tool is installed, just skip — CI will catch it.
 fi
 
+# ── secrets ──────────────────────────────────────────────────
+if ! bash "$REPO_ROOT/.local/scripts/gitleaks.sh" --staged; then
+    echo "Gitleaks failed."
+    fail=1
+fi
+
 if [ "$fail" -ne 0 ]; then
     echo ""
-    echo "Pre-commit checks failed. Fix the issues or commit with --no-verify to skip."
+    echo "Pre-commit checks failed. Fix the issues before committing."
     exit 1
 fi

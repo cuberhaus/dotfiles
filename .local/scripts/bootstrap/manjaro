@@ -12,8 +12,7 @@ parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
 
 ### FIRST RUN
-read -rp "Is this a first-time install? (y/n): " FirstRun
-export FirstRun
+resolve_first_run_choice
 
 ### INSTALLATION
 info "Updating system..."

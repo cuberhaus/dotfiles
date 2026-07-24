@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import os
 import pathlib
 import re
 import shlex
@@ -301,6 +302,112 @@ def audit_stow(repo_root: pathlib.Path, reporter: Reporter) -> None:
         reporter.result("OK", "All Stow-managed files match the repository.")
 
 
+def expected_shell_paths(home: pathlib.Path) -> tuple[pathlib.Path, ...]:
+    return (home / ".local" / "bin", home / ".local" / "scripts" / "bin")
+
+
+def audit_environment(repo_root: pathlib.Path, reporter: Reporter) -> None:
+    print("\nShell environment and PATH")
+    home = pathlib.Path.home()
+    path_entries = {pathlib.Path(entry).expanduser() for entry in os.environ.get("PATH", "").split(os.pathsep) if entry}
+    for expected in expected_shell_paths(home):
+        if not expected.is_dir():
+            reporter.result("MISSING", f"Expected user executable directory: {expected}", "make restow")
+        elif expected not in path_entries:
+            reporter.result("DRIFT", f"PATH does not include {expected}.", "Start a new login shell or source ~/.zshenv")
+        else:
+            reporter.result("OK", f"PATH includes {expected}.")
+
+    dotfiles = os.environ.get("DOTFILES")
+    if dotfiles and pathlib.Path(dotfiles).expanduser().resolve() == repo_root.resolve():
+        reporter.result("OK", "DOTFILES resolves to this checkout.")
+    elif dotfiles:
+        reporter.result("DRIFT", f"DOTFILES points to {dotfiles}, not this checkout.", "Start a new login shell after make restow")
+    else:
+        reporter.result("WARN", "DOTFILES is not set in this process; login-shell initialization could not be verified.")
+
+    for variable in ("EDITOR", "VISUAL"):
+        value = os.environ.get(variable)
+        if not value:
+            reporter.result("WARN", f"{variable} is not set in this process.")
+        elif shutil.which(shlex.split(value)[0]):
+            reporter.result("OK", f"{variable} resolves to {value}.")
+        else:
+            reporter.result("MISSING", f"{variable} points to unavailable command: {value}", "Run the matching bootstrap target")
+
+
+def same_file_content(first: pathlib.Path, second: pathlib.Path) -> bool:
+    try:
+        return first.read_bytes() == second.read_bytes()
+    except OSError:
+        return False
+
+
+def audit_shell_configuration(repo_root: pathlib.Path, reporter: Reporter) -> None:
+    print("\nAliases and shell functions")
+    home = pathlib.Path.home()
+    relative_paths = (
+        pathlib.Path(".config/zsh/aliases"),
+        pathlib.Path(".config/zsh/functions"),
+        pathlib.Path(".zshenv"),
+    )
+    for relative_path in relative_paths:
+        source = repo_root / relative_path
+        target = home / relative_path
+        if target.exists() and same_file_content(source, target):
+            reporter.result("OK", f"{relative_path} is deployed from this checkout.")
+        else:
+            reporter.result("MISSING", f"Managed shell file is missing or differs: ~/{relative_path}", "make restow")
+
+
+def global_git_value(key: str) -> str:
+    result = run(["git", "config", "--global", "--get", key])
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def audit_git_configuration(reporter: Reporter) -> None:
+    print("\nGlobal Git configuration")
+    expected = {
+        "user.name": "cuberhaus",
+        "user.email": "polcg10@gmail.com",
+        "credential.helper": "store",
+    }
+    for key, expected_value in expected.items():
+        actual = global_git_value(key)
+        if actual == expected_value:
+            reporter.result("OK", f"git {key} is {expected_value}.")
+        elif actual:
+            reporter.result("DRIFT", f"git {key} is {actual!r}; expected {expected_value!r}.", f"git config --global {key} {shlex.quote(expected_value)}")
+        else:
+            reporter.result("MISSING", f"git {key} is not configured.", f"git config --global {key} {shlex.quote(expected_value)}")
+
+
+def font_families() -> str:
+    if shutil.which("fc-list"):
+        return run(["fc-list", ":", "family"]).stdout
+    if sys.platform == "darwin":
+        font_dirs = (pathlib.Path.home() / "Library" / "Fonts", pathlib.Path("/Library/Fonts"))
+        return "\n".join(path.name for directory in font_dirs if directory.is_dir() for path in directory.iterdir())
+    return ""
+
+
+def audit_editors_and_fonts(profile: str, reporter: Reporter) -> None:
+    print("\nEditors and terminal fonts")
+    expected_editor = "nvim" if profile == "mac" else "vim"
+    if shutil.which(expected_editor):
+        reporter.result("OK", f"Expected editor is available: {expected_editor}.")
+    else:
+        reporter.result("MISSING", f"Expected editor is unavailable: {expected_editor}.", "Run the matching bootstrap target")
+
+    families = font_families()
+    if re.search(r"Nerd Font|Powerline|Meslo", families, re.IGNORECASE):
+        reporter.result("OK", "A Nerd Font or Powerline-compatible terminal font is installed.")
+    elif families:
+        reporter.result("MISSING", "No Nerd Font or Powerline-compatible font was found.", "Run the matching bootstrap target")
+    else:
+        reporter.result("WARN", "Installed terminal fonts could not be enumerated.")
+
+
 def installed_package_names(manager: str) -> set[str]:
     if manager in {"pacman", "yay"}:
         result = run(["pacman", "-Qq"])
@@ -405,6 +512,10 @@ def main() -> int:
     print("Read-only: no files, packages, services, or timers will be changed.")
     audit_git(repo_root, reporter)
     audit_stow(repo_root, reporter)
+    audit_shell_configuration(repo_root, reporter)
+    audit_environment(repo_root, reporter)
+    audit_git_configuration(reporter)
+    audit_editors_and_fonts(profile, reporter)
     audit_packages(packages, reporter)
     audit_automations(profile, reporter)
     print()

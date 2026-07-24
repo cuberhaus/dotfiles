@@ -36,8 +36,8 @@ gui_apps_install
 
 current_scale=$(gsettings get org.gnome.desktop.interface text-scaling-factor 2>/dev/null || echo "1.0")
 if [[ "$current_scale" != "1.3" ]]; then
-    read -r -p "Do you have a high DPI screen? [y/N] " hidpi
-    if [[ "$hidpi" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    resolve_high_dpi_choice
+    if [[ "$HIGH_DPI" == true ]]; then
         high_dpi_screen
     fi
 fi
