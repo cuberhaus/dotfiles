@@ -158,32 +158,32 @@ antigen-update: ## Fetch the latest antigen.zsh from GitHub
 dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
 	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'
 
-bootstrap-arch: ## Run Arch bootstrap (chains sync-workspace)
+bootstrap-arch: ## Run Arch bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/arch $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
-bootstrap-manjaro: ## Run Manjaro bootstrap (chains sync-workspace)
+bootstrap-manjaro: ## Run Manjaro bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/manjaro $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
-bootstrap-ubuntu: ## Run Ubuntu bootstrap (chains sync-workspace)
+bootstrap-ubuntu: ## Run Ubuntu bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/ubuntu $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
-bootstrap-ubuntu-windows: ## Run Ubuntu-on-WSL bootstrap (no GUI apps, chains sync-workspace)
+bootstrap-ubuntu-windows: ## Run Ubuntu-on-WSL bootstrap (no GUI apps, then deploy workspace files)
 	bash .local/scripts/bootstrap/ubuntu_windows
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
-bootstrap-mac: ## Run macOS bootstrap (chains sync-workspace)
+bootstrap-mac: ## Run macOS bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/mac
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
 
-bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA, chains sync-workspace)
+bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA, then deploy workspace files)
 	bash .local/scripts/bootstrap/work $(BOOTSTRAP_ARGS)
 	@bash ../cuberhaus-workspace/sync.sh
 	@$(MAKE) --no-print-directory install-automations
