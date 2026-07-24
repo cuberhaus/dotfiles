@@ -47,7 +47,7 @@ command -v rclone >/dev/null 2>&1 || {
     exit 127
 }
 if ! rclone listremotes | grep -Fxq 'drive:'; then
-    printf 'The rclone remote drive: is not configured. Run `rclone config` first.\n' >&2
+    printf 'The rclone remote drive: is not configured. Run rclone config first.\n' >&2
     exit 1
 fi
 if ! command -v "$command_name" >/dev/null 2>&1 && [[ ! -d "$mac_app" ]]; then

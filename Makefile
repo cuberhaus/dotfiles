@@ -2,8 +2,14 @@
 # Usage: make <target>
 
 STOW      := stow
-STOW_DIR  := $(shell pwd)
+STOW_DIR  := $(CURDIR)
 TARGET    := $(HOME)
+ifeq ($(OS),Windows_NT)
+PYTHON ?= python
+GITLEAKS ?= $(LOCALAPPDATA)/Microsoft/WinGet/Links/gitleaks.exe
+else
+PYTHON ?= python3
+endif
 BOOTSTRAP_ARGS ?=
 PROFILE ?= auto
 FIRST_RUN ?= no
@@ -52,13 +58,13 @@ dry-run: check-stow ## Simulate stow and report conflicts (no changes made)
 	$(STOW) -v -n -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR)) 2>&1
 
 config-status: check-stow ## Show Stow deployment drift and source checkout changes
-	python3 .local/scripts/config_lifecycle.py status
+	$(PYTHON) .local/scripts/config_lifecycle.py status
 
 config-diff: ## Diff tracked managed files against their current $$HOME targets
-	python3 .local/scripts/config_lifecycle.py diff
+	$(PYTHON) .local/scripts/config_lifecycle.py diff
 
 config-import: check-stow ## Preview home-to-repo import; pass APPLY=1 to adopt changes
-	python3 .local/scripts/config_lifecycle.py import $(if $(filter 1,$(APPLY)),--apply,)
+	$(PYTHON) .local/scripts/config_lifecycle.py import $(if $(filter 1,$(APPLY)),--apply,)
 
 ##@ Quality
 
@@ -66,30 +72,17 @@ lint: ## Run shellcheck on all shell scripts
 	bash .local/scripts/lint.sh
 
 test: ## Run deterministic unit tests
-	python3 tests/test_installation_audit.py
+	$(PYTHON) tests/test_installation_audit.py
 
 check: lint test ## Run tests and all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.
 	@echo ""
 	@echo "==> Running Gitleaks..."
+ifeq ($(OS),Windows_NT)
+	@"$(GITLEAKS)" git --redact --no-banner
+else
 	bash .local/scripts/gitleaks.sh
-	@echo ""
-	@echo "==> Running markdownlint..."
-	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
-		markdownlint-cli2 README.md .local/README.md .local/xdg/wallpapers/README.md; \
-	elif command -v markdownlint >/dev/null 2>&1; then \
-		markdownlint README.md .local/README.md .local/xdg/wallpapers/README.md; \
-	else \
-		echo "  markdownlint not found (npm install -g markdownlint-cli2 or run 'make doctor')"; \
-		exit 1; \
-	fi
-	@echo ""
-	@echo "==> Running vint (vimrc)..."
-	@if command -v vint >/dev/null 2>&1; then \
-		vint --style-problem .vim/vimrc || true; \
-	else \
-		echo "  vint not found (pip install vim-vint or run 'make doctor')"; \
-		exit 1; \
-	fi
+endif
+	bash .local/scripts/check-formatting.sh
 	@echo ""
 	@echo "==> All checks complete."
 
@@ -97,20 +90,13 @@ test-shutdown-fix: ## Test the permanent shutdown-fix kernelstub path
 	bash .local/scripts/test_permanent_shutdown_fix.sh
 
 fix: ## Auto-fix markdown issues (markdownlint --fix)
-	@if command -v markdownlint-cli2 >/dev/null 2>&1; then \
-		markdownlint-cli2 --fix README.md .local/README.md .local/xdg/wallpapers/README.md; \
-	elif command -v markdownlint >/dev/null 2>&1; then \
-		markdownlint --fix README.md .local/README.md .local/xdg/wallpapers/README.md; \
-	else \
-		echo "markdownlint not found (npm install -g markdownlint-cli2)"; \
-		exit 1; \
-	fi
+	bash .local/scripts/check-formatting.sh --fix
 
 doctor: ## Check tools, symlinks, configuration, packages, environment, and automations
 	@bash .local/scripts/doctor.sh "$(PROFILE)"
 
 audit-installation: ## Report drift between this repo and the installed machine (PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work)
-	python3 .local/scripts/audit_installation.py --profile "$(PROFILE)"
+	$(PYTHON) .local/scripts/audit_installation.py --profile "$(PROFILE)"
 
 repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard; PROFILE=auto|...)
 	bash .local/scripts/repair-installation "$(REPAIR)" "$(PROFILE)"
@@ -178,8 +164,8 @@ skills-restore: ## Download/restore pinned skills from skills-lock.json
 
 workspace: ## Sync workspace files, refresh repos.json, then audit workspace policies
 	bash ../cuberhaus-workspace/sync.sh
-	python3 ../cuberhaus-workspace/scripts/build-repos.py
-	python3 ../cuberhaus-workspace/scripts/audit-policies.py
+	$(PYTHON) ../cuberhaus-workspace/scripts/build-repos.py
+	$(PYTHON) ../cuberhaus-workspace/scripts/audit-policies.py
 
 ##@ Submodules
 

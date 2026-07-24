@@ -266,6 +266,10 @@
 # Build artifacts inside tracked dirs
 # =============================================================================
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Xmonad
 .xmonad/xmonad-x86_64-linux
 .xmonad/xmonad.errors
