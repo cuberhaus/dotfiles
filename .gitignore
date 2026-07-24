@@ -365,23 +365,10 @@
 .config/distro
 
 # =============================================================================
-# Knowledge-graph tooling — keep reusable artifacts so re-runs are fast.
+# Understand Anything — keep reusable artifacts so re-runs are fast.
 # The whitelist `*` above already ignores everything; un-ignore only what
-# speeds up the next graphify / understand run, leaving all scratch ignored.
+# speeds up the next run, leaving all scratch ignored.
 # =============================================================================
-
-# graphify: keep graph + manifest + labels + the semantic cache
-!graphify-out/
-graphify-out/*
-!graphify-out/graph.json
-!graphify-out/graph.html
-!graphify-out/GRAPH_REPORT.md
-!graphify-out/manifest.json
-!graphify-out/.graphify_labels.json
-!graphify-out/cache/
-graphify-out/cache/*
-!graphify-out/cache/semantic/
-!graphify-out/cache/semantic/**
 
 # understand-anything: keep knowledge-graph / meta / fingerprints / config +
 # scan-result.json (lets the next run skip Phase 1 SCAN)
