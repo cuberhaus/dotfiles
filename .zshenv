@@ -16,6 +16,15 @@ export XDG_CACHE_HOME="$HOME/.cache"
 # => Path
 ###############################################################
 
+case ":${PATH:-}:" in
+    *:/usr/bin:*) ;;
+    *) PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${PATH:-}" ;;
+esac
+if [ -d "$HOME/google-cloud-sdk/bin" ]; then
+    PATH="$HOME/google-cloud-sdk/bin:$PATH"
+fi
+export PATH
+
 if [ -d "$HOME/.local/bin" ] ; then
     PATH="$HOME/.local/bin:$PATH"
 fi
