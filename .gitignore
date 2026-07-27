@@ -52,6 +52,8 @@
 !.doom.d/**
 !.xmonad/
 !.xmonad/**
+!docs/
+!docs/**
 !.cinnamon/
 !.cinnamon/**
 !.conky/
