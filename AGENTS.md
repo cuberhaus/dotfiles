@@ -24,9 +24,25 @@ Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS — shell, edi
 
 - **POSIX-compliant bash** by default; explicitly note when a feature requires Zsh.
 - Use robust patterns: `find … -print0 | xargs -0`, `while IFS= read -r -d ''`, prefer `awk`/`sed`/`grep`/`find` over ad-hoc parsing.
-- New aliases/functions in `.config/zsh/aliases` and `.config/zsh/functions` must not shadow standard Unix commands.
+- New aliases/functions in `.config/zsh/aliases` and `.config/zsh/functions` must not shadow standard Unix commands unless they intentionally add defaults to that same command.
 - User-facing output uses ANSI colors: success `\033[32m`, warning `\033[33m`, info `\033[34m`, always reset with `\033[0m`.
 - Parallelize repo/file iteration with `xargs -P`, backgrounded `&` jobs + `wait`, especially for multi-repo helpers like `add_pat`.
+
+### Shell command catalog
+
+- The interactive `commands` function in `.config/zsh/functions` discovers entries dynamically; do not maintain a second hardcoded catalog.
+- Put aliases and small shell wrappers in `.config/zsh/aliases`, reusable functions in `.config/zsh/functions`, and standalone executables in `.local/scripts/bin`.
+- An alias whose expansion starts with its own name (for example, `alias grep='grep -i --color=auto'`) is shown under **Command defaults** with only the added arguments. Renamed commands and composed workflows are shown under **Aliases and workflows**.
+- Add a concise behavioral description immediately above every function using a `##` documentation comment. The catalog parses this comment and supports `name()`, `name ()`, and `function name()` declarations:
+
+  ```bash
+  ## Show status for Git repositories recursively.
+  status() { git-recurse "$@" git status; }
+  ```
+
+- Start each executable in `.local/scripts/bin` with a one-line `# Description: ...` comment after the shebang; the catalog uses it as the managed-command description.
+- Keep descriptions imperative, behavior-focused, and short enough to scan. Do not describe only the implementation location or repeat the command name.
+- Validate catalog changes with `shellcheck .config/zsh/aliases .config/zsh/functions`, then source both files and run `commands` under Bash and Zsh.
 
 ## Agent skills
 
