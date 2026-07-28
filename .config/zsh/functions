@@ -85,10 +85,10 @@ commands() {
     for alias_group in aliases defaults; do
         if [ "$alias_group" = aliases ]; then
             printf '\033[34mAliases and workflows\033[0m\n'
-            printf '  %-24s %s\n' 'NAME' 'EXPANDS TO'
+            printf '\033[1;36m  %-24s %s\033[0m\n' 'NAME' 'EXPANDS TO'
         else
             printf '\n\033[34mCommand defaults\033[0m\n'
-            printf '  %-24s %s\n' 'COMMAND' 'ADDS'
+            printf '\033[1;36m  %-24s %s\033[0m\n' 'COMMAND' 'ADDS'
         fi
 
         if [ -f "$aliases_file" ]; then
@@ -172,7 +172,7 @@ commands() {
     done
 
     printf '\n\033[34mFunctions\033[0m\n'
-    printf '  %-24s %s\n' 'NAME' 'DESCRIPTION'
+    printf '\033[1;36m  %-24s %s\033[0m\n' 'NAME' 'DESCRIPTION'
     for source_file in "$aliases_file" "$functions_file"; do
         [ -f "$source_file" ] || continue
         while IFS=$'\t' read -r command_name description; do
@@ -210,7 +210,7 @@ commands() {
     done
 
     printf '\n\033[34mManaged commands\033[0m\n'
-    printf '  %-24s %s\n' 'NAME' 'DESCRIPTION'
+    printf '\033[1;36m  %-24s %s\033[0m\n' 'NAME' 'DESCRIPTION'
     if [ -d "$command_dir" ]; then
         while IFS= read -r source_file; do
             description=$(awk -v command_name="${source_file##*/}" '
