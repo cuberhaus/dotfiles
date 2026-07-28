@@ -21,6 +21,7 @@ detect_jobs() {
     echo "$n"
 }
 max_jobs=${CLONE_ALL_JOBS:-$(detect_jobs)}
+clone_retries=${CLONE_ALL_RETRIES:-3}
 
 if ! command -v gh &>/dev/null; then
     echo "error: gh (GitHub CLI) is not installed" >&2
@@ -51,7 +52,7 @@ fi
 process_repo() {
     local nameWithOwner="$1"
     local dir="$nameWithOwner"
-    local output status label
+    local attempt output status label
 
     if [ -d "$dir/.git" ]; then
         if output=$(git -C "$dir" pull --ff-only --quiet --jobs=4 2>&1); then
@@ -70,12 +71,23 @@ process_repo() {
         output=""
         status=0
     else
-        if output=$(gh repo clone "$nameWithOwner" "$dir" -- --quiet 2>&1); then
+        attempt=1
+        status=1
+        while [ "$attempt" -le "$clone_retries" ]; do
+            if output=$(gh repo clone "$nameWithOwner" "$dir" -- --quiet 2>&1); then
+                status=0
+                break
+            fi
+            if [ "$attempt" -lt "$clone_retries" ]; then
+                printf 'retrying clone (%s/%s) %s\n' "$attempt" "$clone_retries" "$nameWithOwner" >&2
+            fi
+            attempt=$((attempt + 1))
+        done
+
+        if [ "$status" -eq 0 ]; then
             label="${C_BLUE}cloned${C_RESET}"
-            status=0
         else
             label="${C_RED}clone failed${C_RESET}"
-            status=1
         fi
     fi
 
@@ -86,7 +98,7 @@ process_repo() {
     return $status
 }
 export -f process_repo
-export C_RESET C_GREEN C_BLUE C_YELLOW C_RED C_DIM
+export C_RESET C_GREEN C_BLUE C_YELLOW C_RED C_DIM clone_retries
 
 gh repo list "$orgname" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' \
     | xargs -P "$max_jobs" -I {} bash -c 'process_repo "$@"' _ {}

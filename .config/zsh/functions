@@ -67,6 +67,99 @@ function mkd() {
 	mkdir -p "$@" && cd "$_" || exit;
 }
 
+# List aliases, functions, and executable commands defined by dotfiles.
+commands() {
+    local aliases_file="${ZDOTDIR:-$HOME/.config/zsh}/aliases"
+    local functions_file="${ZDOTDIR:-$HOME/.config/zsh}/functions"
+    local command_dir="$HOME/.local/scripts/bin"
+    local command_name definition description source_file
+    local columns="${COLUMNS:-100}"
+    local inline_width detail_width
+
+    case "$columns" in
+        ''|*[!0-9]*) columns=100 ;;
+    esac
+    [ "$columns" -lt 40 ] && columns=40
+    inline_width=$((columns - 29))
+    detail_width=$((columns - 6))
+
+    printf '\033[34mAliases\033[0m\n'
+    printf '  %-24s %s\n' 'NAME' 'EXPANDS TO'
+    if [ -f "$aliases_file" ]; then
+        while IFS= read -r command_name; do
+            definition=$(alias "$command_name" 2>/dev/null) || continue
+            definition=$(printf '%s' "${definition#*=}" \
+                | tr '\r\n\t' '   ' \
+                | sed -e "s/^\\$'//" -e "s/^'//" -e "s/'$//" \
+                    -e 's/\\n/ /g' -e 's/[[:space:]][[:space:]]*/ /g')
+            if [ "${#definition}" -le "$inline_width" ]; then
+                printf '  %-24s %s\n' "$command_name" "$definition"
+            else
+                if [ "${#definition}" -gt "$detail_width" ]; then
+                    definition="${definition:0:$((detail_width - 3))}..."
+                fi
+                printf '  %s\n      %s\n' "$command_name" "$definition"
+            fi
+        done < <(
+            awk '
+                {
+                    line = $0
+                    sub(/^[[:space:]]*/, "", line)
+                    if (line ~ /^alias[[:space:]]+/) {
+                        sub(/^alias[[:space:]]+/, "", line)
+                    } else if (line ~ /&&[[:space:]]*alias[[:space:]]+/) {
+                        sub(/^.*&&[[:space:]]*alias[[:space:]]+/, "", line)
+                    } else {
+                        next
+                    }
+                    sub(/=.*/, "", line)
+                    print line
+                }
+            ' "$aliases_file" | LC_ALL=C sort -u
+        )
+    fi
+
+    printf '\n\033[34mFunctions\033[0m\n'
+    printf '  %-24s %s\n' 'NAME' 'DESCRIPTION'
+    for source_file in "$aliases_file" "$functions_file"; do
+        [ -f "$source_file" ] || continue
+        while IFS= read -r command_name; do
+            typeset -f "$command_name" >/dev/null 2>&1 || continue
+            printf '  %-24s Shell function from %s\n' \
+                "$command_name" "${source_file#"$HOME/"}"
+        done < <(
+            sed -nE 's/^[[:space:]]*(function[[:space:]]+)?([^[:space:]()]+)[[:space:]]*\(\)[[:space:]]*\{.*/\2/p' \
+                "$source_file" | LC_ALL=C sort -u
+        )
+    done
+
+    printf '\n\033[34mManaged commands\033[0m\n'
+    printf '  %-24s %s\n' 'NAME' 'DESCRIPTION'
+    if [ -d "$command_dir" ]; then
+        while IFS= read -r source_file; do
+            description=$(awk -v command_name="${source_file##*/}" '
+                NR == 1 && /^#!/ { next }
+                /^[[:space:]]*#/ {
+                    sub(/^[[:space:]]*#[[:space:]]*/, "")
+                    if (/^Description:[[:space:]]*/) {
+                        sub(/^Description:[[:space:]]*/, "")
+                        description = $0
+                    } else if (!description && length && $0 != command_name &&
+                               $0 !~ /^(Author|Date|Script inspired by|https?:|shellcheck|=+)/) {
+                        description = $0
+                    }
+                    next
+                }
+                /^[[:space:]]*$/ { next }
+                { if (description) print description; found = 1; exit }
+                END { if (!found && description) print description }
+            ' "$source_file")
+            [ -n "$description" ] || description='Executable managed by dotfiles'
+            printf '  %-24s %s\n' "${source_file##*/}" "$description"
+        done < <(find "$command_dir" -maxdepth 1 -type f -perm -u+x -print | LC_ALL=C sort)
+    fi
+}
+
 # Recursively add a GitHub PAT token to all repositories
 function add_pat() {
     local pat="$1"
