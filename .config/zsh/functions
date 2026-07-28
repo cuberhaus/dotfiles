@@ -72,7 +72,8 @@ commands() {
     local aliases_file="${ZDOTDIR:-$HOME/.config/zsh}/aliases"
     local functions_file="${ZDOTDIR:-$HOME/.config/zsh}/functions"
     local command_dir="$HOME/.local/scripts/bin"
-    local command_name definition description source_file
+    local alias_group command_name definition description first_word source_file
+    local was_multiline
     local columns="${COLUMNS:-100}"
     local inline_width detail_width
 
@@ -83,41 +84,69 @@ commands() {
     inline_width=$((columns - 29))
     detail_width=$((columns - 6))
 
-    printf '\033[34mAliases\033[0m\n'
-    printf '  %-24s %s\n' 'NAME' 'EXPANDS TO'
-    if [ -f "$aliases_file" ]; then
-        while IFS= read -r command_name; do
-            definition=$(alias "$command_name" 2>/dev/null) || continue
-            definition=$(printf '%s' "${definition#*=}" \
-                | tr '\r\n\t' '   ' \
-                | sed -e "s/^\\$'//" -e "s/^'//" -e "s/'$//" \
-                    -e 's/\\n/ /g' -e 's/[[:space:]][[:space:]]*/ /g')
-            if [ "${#definition}" -le "$inline_width" ]; then
-                printf '  %-24s %s\n' "$command_name" "$definition"
-            else
-                if [ "${#definition}" -gt "$detail_width" ]; then
-                    definition="${definition:0:$((detail_width - 3))}..."
+    for alias_group in aliases defaults; do
+        if [ "$alias_group" = aliases ]; then
+            printf '\033[34mAliases and workflows\033[0m\n'
+            printf '  %-24s %s\n' 'NAME' 'EXPANDS TO'
+        else
+            printf '\n\033[34mCommand defaults\033[0m\n'
+            printf '  %-24s %s\n' 'COMMAND' 'ADDS'
+        fi
+
+        if [ -f "$aliases_file" ]; then
+            while IFS= read -r command_name; do
+                definition=$(alias "$command_name" 2>/dev/null) || continue
+                definition=${definition#*=}
+                case "$definition" in
+                    \$\'*) was_multiline=true ;;
+                    *) was_multiline=false ;;
+                esac
+                definition=$(printf '%s' "$definition" \
+                    | tr '\r\n\t' '   ' \
+                    | sed -e "s/^\\$'//" -e "s/^'//" -e "s/'$//" \
+                        -e 's/[[:space:]][[:space:]]*/ /g')
+                if [ "$was_multiline" = true ]; then
+                    definition=$(printf '%s' "$definition" \
+                        | sed -e 's/\\n/ /g' -e "s/\\\\'/'/g" \
+                            -e 's/[[:space:]][[:space:]]*/ /g')
                 fi
-                printf '  %s\n      %s\n' "$command_name" "$definition"
-            fi
-        done < <(
-            awk '
-                {
-                    line = $0
-                    sub(/^[[:space:]]*/, "", line)
-                    if (line ~ /^alias[[:space:]]+/) {
-                        sub(/^alias[[:space:]]+/, "", line)
-                    } else if (line ~ /&&[[:space:]]*alias[[:space:]]+/) {
-                        sub(/^.*&&[[:space:]]*alias[[:space:]]+/, "", line)
-                    } else {
-                        next
+                first_word=${definition%%[[:space:]]*}
+
+                if [ "$alias_group" = defaults ]; then
+                    [ "$first_word" = "$command_name" ] || continue
+                    definition=${definition#"$command_name"}
+                    definition=${definition# }
+                else
+                    [ "$first_word" = "$command_name" ] && continue
+                fi
+
+                if [ "${#definition}" -le "$inline_width" ]; then
+                    printf '  %-24s %s\n' "$command_name" "$definition"
+                else
+                    if [ "${#definition}" -gt "$detail_width" ]; then
+                        definition="${definition:0:$((detail_width - 3))}..."
+                    fi
+                    printf '  %s\n      %s\n' "$command_name" "$definition"
+                fi
+            done < <(
+                awk '
+                    {
+                        line = $0
+                        sub(/^[[:space:]]*/, "", line)
+                        if (line ~ /^alias[[:space:]]+/) {
+                            sub(/^alias[[:space:]]+/, "", line)
+                        } else if (line ~ /&&[[:space:]]*alias[[:space:]]+/) {
+                            sub(/^.*&&[[:space:]]*alias[[:space:]]+/, "", line)
+                        } else {
+                            next
+                        }
+                        sub(/=.*/, "", line)
+                        print line
                     }
-                    sub(/=.*/, "", line)
-                    print line
-                }
-            ' "$aliases_file" | LC_ALL=C sort -u
-        )
-    fi
+                ' "$aliases_file" | LC_ALL=C sort -u
+            )
+        fi
+    done
 
     printf '\n\033[34mFunctions\033[0m\n'
     printf '  %-24s %s\n' 'NAME' 'DESCRIPTION'

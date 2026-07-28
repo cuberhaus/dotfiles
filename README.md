@@ -25,22 +25,27 @@ Opinionated defaults. This repo is not meant to be used by everyone, just a pers
 
 ## How it works
 
-### Why `dotfiles/dotfiles`?
+### Why `cuberhaus/dotfiles`?
 
-You might wonder why the repository isn't just cloned directly into `~/dotfiles`. The nested `~/dotfiles/dotfiles` structure is required by how **[GNU Stow](https://www.gnu.org/software/stow/)** manages packages. Stow expects a "stow directory" (the parent, `~/dotfiles`) containing one or more "packages" (the child, `dotfiles`, which is this repo).
+The canonical checkout is `~/cuberhaus/dotfiles`. The `~/cuberhaus` directory
+collects this repository alongside the other Cuberhaus repositories, while
+`dotfiles` remains a GNU Stow package.
 
-By cloning into `~/dotfiles/dotfiles`, stow correctly treats the inner `dotfiles` folder as the package name, allowing it to safely symlink the contents (like `.config/`, `.vim/`) directly into your `$HOME` directory without confusing the repository root with the target deployment.
+[GNU Stow](https://www.gnu.org/software/stow/) treats the parent directory as
+the "stow directory" and this repository as the package. The Makefile passes
+`$HOME` as the deployment target, so sibling repositories under `~/cuberhaus`
+are unaffected.
 
 So, the structure looks like this:
 
 ```
- ~/dotfiles/
+ ~/cuberhaus/
  └── dotfiles/   (this repo)
      ├── .config/       ──┐
      ├── .local/         │  GNU Stow symlinks
      ├── .vim/           ├──────────────────►  $HOME/
-     ├── .xmonad/        │                     ├── .config/ → ~/dotfiles/dotfiles/.config/
-     ├── .zshenv        ──┘                    ├── .local/  → ~/dotfiles/dotfiles/.local/
+    ├── .xmonad/        │                     ├── .config/ → ~/cuberhaus/dotfiles/.config/
+    ├── .zshenv        ──┘                    ├── .local/  → ~/cuberhaus/dotfiles/.local/
      ├── Makefile  (make targets)              └── ...
      └── .local/scripts/
          └── bootstrap/  (OS-specific setup)
@@ -61,9 +66,9 @@ Clone the repo with its submodules and use [GNU Stow](https://www.gnu.org/softwa
 
 ```bash
 cd ~
-mkdir -p dotfiles
-git clone --recurse-submodules https://github.com/cuberhaus/dotfiles dotfiles/dotfiles
-cd dotfiles/dotfiles
+mkdir -p cuberhaus
+git clone --recurse-submodules https://github.com/cuberhaus/dotfiles cuberhaus/dotfiles
+cd cuberhaus/dotfiles
 sudo apt install stow # Pop!_OS, Ubuntu, and Debian
 make install
 ```

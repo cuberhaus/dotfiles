@@ -15,15 +15,15 @@
 (setq org-dir-string "/org")
 (setq org-dir (concat docs-dir org-dir-string))
 (cond ((eq system-type 'windows-nt)
-       (setq unix-dotfiles-dir (concat home-dir "/repos/dotfiles"))
+  (setq unix-dotfiles-dir (concat home-dir "/cuberhaus/dotfiles"))
        (setq windows-dotfiles-dir (concat home-dir "/.local/share/chezmoi/home/"))
        )
       ((eq system-type 'darwin)
-       (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
+       (setq unix-dotfiles-dir (concat home-dir "/cuberhaus/dotfiles"))
        (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles/home"))
        )
       ((eq system-type 'gnu/linux)
-       (setq unix-dotfiles-dir (concat home-dir "/dotfiles/dotfiles"))
+       (setq unix-dotfiles-dir (concat home-dir "/cuberhaus/dotfiles"))
        (setq windows-dotfiles-dir (concat home-dir "/repos/WinDotfiles/home"))
       )
       )
@@ -51,7 +51,7 @@
 (setq source-file  (concat unix-dotfiles-dir "/.config/emacs.org"))
 (setq target2-file (concat windows-dotfiles-dir "/dot_config/my_emacs/init.el"))
 (setq target1-file (concat unix-dotfiles-dir "/.config/my_emacs/init.el"))
-(setq emacs-babel-config-file (concat unix-dotfiles-dir "/.config" "/emacs.org")) ;; this has to be with /dotfiles/dotfiles
+(setq emacs-babel-config-file (concat unix-dotfiles-dir "/.config" "/emacs.org"))
 (setq custom-file (concat config-dir "/my_emacs/custom.el"))
 
 

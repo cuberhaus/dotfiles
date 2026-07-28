@@ -4,8 +4,8 @@ Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS — shell, edi
 
 ## Architecture
 
-- Repo lives at `~/dotfiles/dotfiles/` (nested so stow treats the inner dir as the package). Stow symlinks `.config/`, `.local/`, `.vim/`, `.xmonad/`, `.zshenv`, etc. into `$HOME`.
-- `$DOTFILES` (exported by `.zshenv`) resolves the symlink back to the repo root — scripts and configs should reference paths via `$DOTFILES`, not hardcoded `~/dotfiles/dotfiles`.
+- Repo lives at `~/cuberhaus/dotfiles/`; `~/cuberhaus` is the stow directory and `dotfiles` is the package. Stow symlinks `.config/`, `.local/`, `.vim/`, `.xmonad/`, `.zshenv`, etc. into `$HOME`.
+- `$DOTFILES` (exported by `.zshenv`) resolves the symlink back to the repo root — scripts and configs should reference paths via `$DOTFILES`, not a hardcoded checkout path.
 - OS-specific setup is segregated under `.local/scripts/bootstrap/` (one entrypoint per OS, plus shared `base_functions` and per-OS `*_functions` files).
 - Volatile, app-rewritten files (Warp prefs, LibreOffice settings) are tracked but masked with `git update-index --skip-worktree`.
 
