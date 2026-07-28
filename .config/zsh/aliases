@@ -15,18 +15,6 @@
 # Use mimeopen to set default apps
 ###############################################################
 
-alias bsc='eval "$(ssh-agent -s)"; ssh-add ~/.ssh/bsc'
-
-# grun $fileName $name of grammar root -gui
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.10.1-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
-    alias grun='java -Xmx500M -cp "/usr/local/lib/antlr-4.10.1-complete.jar:$CLASSPATH" org.antlr.v4.gui.TestRig'
-fi
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    alias antlr4='java -Xmx500M -cp "$HOME/.local/bin/antlr-4.10.1-complete.jar:$CLASSPATH" org.antlr.v4.Tool'
-    alias grun='java -Xmx500M -cp "$HOME/.local/bin/antlr-4.10.1-complete.jar:$CLASSPATH" org.antlr.v4.gui.TestRig'
-fi
-
 scripts=$HOME/.local/scripts
 
 # Alias to get context, since we do not want it cluttering our prompt all of the time, we want to  focus on what is important.

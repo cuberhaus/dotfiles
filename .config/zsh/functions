@@ -231,7 +231,39 @@ commands() {
                 END { if (!found && description) print description }
             ' "$source_file")
             [ -n "$description" ] || description='Executable managed by dotfiles'
-            printf '  %-24s %s\n' "${source_file##*/}" "$description"
+            if [ "${#description}" -gt "$detail_width" ]; then
+                description="${description:0:$((detail_width - 3))}..."
+            fi
+            first_line=true
+            while IFS= read -r wrapped_line; do
+                if [ "$first_line" = true ]; then
+                    printf '  %-24s %s\n' "${source_file##*/}" "$wrapped_line"
+                    first_line=false
+                else
+                    printf '  %-24s %s\n' '' "$wrapped_line"
+                fi
+            done < <(
+                printf '%s\n' "$description" | awk -v width="$inline_width" '
+                    {
+                        current_line = ""
+                        for (word_index = 1; word_index <= NF; word_index++) {
+                            word = $word_index
+                            if (length(word) > width) {
+                                word = substr(word, 1, width - 3) "..."
+                            }
+                            if (!length(current_line)) {
+                                current_line = word
+                            } else if (length(current_line) + length(word) + 1 <= width) {
+                                current_line = current_line " " word
+                            } else {
+                                print current_line
+                                current_line = word
+                            }
+                        }
+                        print current_line
+                    }
+                '
+            )
         done < <(find "$command_dir" -maxdepth 1 -type f -perm -u+x -print | LC_ALL=C sort)
     fi
 }
