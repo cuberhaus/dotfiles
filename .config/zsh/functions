@@ -1,7 +1,6 @@
 #! /bin/bash
 
-# # ex = EXtractor for all kinds of archives
-# # usage: ex <file>
+## Extract an archive based on its file extension.
 ex ()
 {
     if [ -f "$1" ] ; then
@@ -38,8 +37,7 @@ if [ ! "$(uname -s)" = 'Darwin' ]; then
 	fi
 fi
 
-# `o` with no arguments opens the current directory, otherwise opens the given
-# location
+## Open a path, or the current directory when omitted.
 function o() {
 	if [ $# -eq 0 ]; then
 		open . </dev/null &>/dev/null &
@@ -62,18 +60,18 @@ function o() {
 # 	fi;
 # }
 
-# Create a new directory and enter it
+## Create a directory and enter it.
 function mkd() {
 	mkdir -p "$@" && cd "$_" || exit;
 }
 
-# List aliases, functions, and executable commands defined by dotfiles.
+## List dotfiles aliases, functions, and managed commands.
 commands() {
     local aliases_file="${ZDOTDIR:-$HOME/.config/zsh}/aliases"
     local functions_file="${ZDOTDIR:-$HOME/.config/zsh}/functions"
     local command_dir="$HOME/.local/scripts/bin"
     local alias_group command_name definition description first_word source_file
-    local was_multiline
+    local first_line was_multiline wrapped_line
     local columns="${COLUMNS:-100}"
     local inline_width detail_width
 
@@ -82,7 +80,7 @@ commands() {
     esac
     [ "$columns" -lt 40 ] && columns=40
     inline_width=$((columns - 29))
-    detail_width=$((columns - 6))
+    detail_width=$((inline_width * 2))
 
     for alias_group in aliases defaults; do
         if [ "$alias_group" = aliases ]; then
@@ -120,14 +118,39 @@ commands() {
                     [ "$first_word" = "$command_name" ] && continue
                 fi
 
-                if [ "${#definition}" -le "$inline_width" ]; then
-                    printf '  %-24s %s\n' "$command_name" "$definition"
-                else
-                    if [ "${#definition}" -gt "$detail_width" ]; then
-                        definition="${definition:0:$((detail_width - 3))}..."
-                    fi
-                    printf '  %s\n      %s\n' "$command_name" "$definition"
+                if [ "${#definition}" -gt "$detail_width" ]; then
+                    definition="${definition:0:$((detail_width - 3))}..."
                 fi
+                first_line=true
+                while IFS= read -r wrapped_line; do
+                    if [ "$first_line" = true ]; then
+                        printf '  %-24s %s\n' "$command_name" "$wrapped_line"
+                        first_line=false
+                    else
+                        printf '  %-24s %s\n' '' "$wrapped_line"
+                    fi
+                done < <(
+                    printf '%s\n' "$definition" | awk -v width="$inline_width" '
+                        {
+                            current_line = ""
+                            for (word_index = 1; word_index <= NF; word_index++) {
+                                word = $word_index
+                                if (length(word) > width) {
+                                    word = substr(word, 1, width - 3) "..."
+                                }
+                                if (!length(current_line)) {
+                                    current_line = word
+                                } else if (length(current_line) + length(word) + 1 <= width) {
+                                    current_line = current_line " " word
+                                } else {
+                                    print current_line
+                                    current_line = word
+                                }
+                            }
+                            print current_line
+                        }
+                    '
+                )
             done < <(
                 awk '
                     {
@@ -152,13 +175,37 @@ commands() {
     printf '  %-24s %s\n' 'NAME' 'DESCRIPTION'
     for source_file in "$aliases_file" "$functions_file"; do
         [ -f "$source_file" ] || continue
-        while IFS= read -r command_name; do
+        while IFS=$'\t' read -r command_name description; do
             typeset -f "$command_name" >/dev/null 2>&1 || continue
-            printf '  %-24s Shell function from %s\n' \
-                "$command_name" "${source_file#"$HOME/"}"
+            [ -n "$description" ] || description='No description provided.'
+            first_line=true
+            while IFS= read -r wrapped_line; do
+                if [ "$first_line" = true ]; then
+                    printf '  %-24s %s\n' "$command_name" "$wrapped_line"
+                    first_line=false
+                else
+                    printf '  %-24s %s\n' '' "$wrapped_line"
+                fi
+            done < <(printf '%s\n' "$description" | fold -s -w "$inline_width")
         done < <(
-            sed -nE 's/^[[:space:]]*(function[[:space:]]+)?([^[:space:]()]+)[[:space:]]*\(\)[[:space:]]*\{.*/\2/p' \
-                "$source_file" | LC_ALL=C sort -u
+            awk '
+                /^[[:space:]]*##[[:space:]]+/ {
+                    description = $0
+                    sub(/^[[:space:]]*##[[:space:]]+/, "", description)
+                    next
+                }
+                /^[[:space:]]*(function[[:space:]]+)?[^#[:space:]()=]+[[:space:]]*\(\)/ {
+                    function_name = $0
+                    sub(/^[[:space:]]*/, "", function_name)
+                    sub(/^function[[:space:]]+/, "", function_name)
+                    sub(/[[:space:]]*\(\).*/, "", function_name)
+                    print function_name "\t" description
+                    description = ""
+                    next
+                }
+                /^[[:space:]]*#/ { next }
+                /[^[:space:]]/ { description = "" }
+            ' "$source_file" | LC_ALL=C sort -u
         )
     done
 
@@ -189,7 +236,7 @@ commands() {
     fi
 }
 
-# Recursively add a GitHub PAT token to all repositories
+## Apply a GitHub PAT to HTTPS remotes recursively.
 function add_pat() {
     local pat="$1"
     if [ -z "$pat" ]; then

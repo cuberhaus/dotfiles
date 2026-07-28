@@ -127,14 +127,17 @@ alias gsu="git submodule update --recursive --remote"
 alias gr="git-recurse"
 alias gah="git-ahead"
 alias gclean="git-clean-branches"
+## Show Claude usage and cost statistics.
 ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
 #yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
 yolo='git add -A; git commit -m "This is a placeholder"; git push'
 # shellcheck disable=SC2139
 alias yolo="$yolo"
 
+## Pull changes in Git repositories recursively.
 pull() { git-recurse "$@" git pull; }
 alias add-pat="add_pat"
+## Show status for Git repositories recursively.
 status() { git-recurse "$@" git status; }
 
 if command -v eza &> /dev/null
@@ -261,11 +264,14 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     fi
 
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
+        ## Install Arch packages non-interactively with pacman.
         pac() { sudo pacman -S --noconfirm --needed "$@"; }
+        ## Install AUR packages non-interactively with yay.
         yay() { command yay -S --noconfirm --needed "$@"; }
     fi
 
     if [[ "$DISTRO" == "ubuntu"* ]]; then
+        ## Install Debian packages non-interactively with apt-get.
         apt() { sudo apt-get -y install "$@"; }
     fi
 fi
