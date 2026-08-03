@@ -16,10 +16,10 @@ sudo apt-get update; sudo apt-get full-upgrade  # Update
 install_preparation
 echo "#! /bin/sh
 export DISTRO=ubuntu_windows" > "$HOME/.config/distro"
-brew_install
 
 ### ONLY CHANGE FROM HERE ON
 base_install
+sops_install
 vim_install
 windows_install
 

@@ -22,8 +22,8 @@ echo "#! /bin/sh
 export DISTRO=ubuntu" > "$HOME/.config/distro"
 
 ### ONLY CHANGE FROM HERE ON
-brew_install
 base_install
+sops_install
 
 #albert_install
 #bloat_install

@@ -64,6 +64,7 @@ base_install () {
         noto-fonts
 
         # CLI tools
+        age                     # Encryption backend for SOPS
         bat                     # Cat on steroids
         eza                     # ls on steroids (exa replacement)
         fzf                     # Fuzzy finder
@@ -72,6 +73,7 @@ base_install () {
         ranger                  # Ranger
         rclone                  # Rsync to remote
         reflector               # Update Arch mirrors
+        sops                    # Encrypt tracked secrets
         stow                    # Deploy dotfiles
         the_silver_searcher     # Better grep
         tmux                    # Terminal multiplexer

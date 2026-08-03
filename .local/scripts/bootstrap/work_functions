@@ -41,6 +41,7 @@ dev_tools_install() {
 
     local packages=(
         # Essentials
+        age                     # Encryption backend for SOPS
         build-essential
         cmake
         curl

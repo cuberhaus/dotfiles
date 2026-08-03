@@ -153,14 +153,34 @@ class InstallationAuditContractTests(unittest.TestCase):
         mac = audit.expected_packages(REPO_ROOT, "mac")
         work = audit.expected_packages(REPO_ROOT, "work")
 
+        self.assertIn(audit.Package("apt", "age"), ubuntu)
         self.assertIn(audit.Package("apt", "stow"), ubuntu)
         self.assertIn(audit.Package("snap", "code"), ubuntu)
         self.assertIn(audit.Package("apt", "antigravity"), ubuntu)
         self.assertNotIn(audit.Package("snap", "android-studio"), ubuntu)
+        self.assertIn(audit.Package("brew", "age"), mac)
+        self.assertIn(audit.Package("brew", "sops"), mac)
         self.assertIn(audit.Package("brew", "stow"), mac)
         self.assertIn(audit.Package("brew", "google-chrome"), mac)
         self.assertIn(audit.Package("brew-cask", "obsidian"), mac)
+        self.assertIn(audit.Package("apt", "age"), work)
         self.assertIn(audit.Package("apt", "docker-ce"), work)
+
+    def test_ubuntu_based_profiles_install_verified_sops_binary(self):
+        base_functions = (
+            REPO_ROOT / ".local" / "scripts" / "bootstrap" / "base_functions"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("sops_install()", base_functions)
+        self.assertIn("sops-v${version}.checksums.txt", base_functions)
+        self.assertIn("sha256sum -c", base_functions)
+        for bootstrap_name in ("ubuntu", "ubuntu_windows", "work"):
+            bootstrap = (
+                REPO_ROOT / ".local" / "scripts" / "bootstrap" / bootstrap_name
+            ).read_text(encoding="utf-8")
+            self.assertRegex(bootstrap, r"(?m)^sops_install$")
+            if bootstrap_name != "work":
+                self.assertNotRegex(bootstrap, r"(?m)^brew_install$")
 
     def test_arch_and_manjaro_profiles_remain_distinct(self):
         audit = load_audit_module()
@@ -168,6 +188,8 @@ class InstallationAuditContractTests(unittest.TestCase):
         arch = audit.expected_packages(REPO_ROOT, "arch")
         manjaro = audit.expected_packages(REPO_ROOT, "manjaro")
 
+        self.assertIn(audit.Package("pacman", "age"), arch)
+        self.assertIn(audit.Package("pacman", "sops"), arch)
         self.assertIn(audit.Package("pacman", "stow"), arch)
         self.assertIn(audit.Package("yay", "warp-terminal-bin"), arch)
         self.assertNotIn(audit.Package("snap", "whatsie"), arch)

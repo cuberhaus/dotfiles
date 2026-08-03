@@ -24,6 +24,7 @@ shutdown_fix
 nvidia_install
 nvidia_display_config
 dev_tools_install
+sops_install
 if [ "$(basename "$SHELL")" != "zsh" ]; then
     chsh -s "$(command -v zsh)"
 fi

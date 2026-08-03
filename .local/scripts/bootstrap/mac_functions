@@ -24,6 +24,7 @@ mac_install () {
     ### CLI tools
     local cli_tools=(
         ack
+        age                     # Encryption backend for SOPS
         astyle
         bat                     # Cat on steroids
         bison
@@ -47,6 +48,7 @@ mac_install () {
         rclone                  # Push/pull from cloud storage
         ripgrep
         smimesign               # Git with gpg
+        sops                    # Encrypt tracked secrets
         sox
         stow                    # Stow dotfiles
         swig

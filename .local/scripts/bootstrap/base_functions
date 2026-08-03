@@ -168,6 +168,43 @@ install_preparation() {
     sudo mkdir -p /var/lib/samba/usershares
 }
 
+sops_install() {
+    if command -v sops &>/dev/null; then
+        info "SOPS already installed ($(sops --version | head -n 1)), skipping."
+        return
+    fi
+
+    local version="${SOPS_VERSION:-3.13.2}"
+    local architecture
+    case "$(uname -m)" in
+        x86_64) architecture="amd64" ;;
+        aarch64|arm64) architecture="arm64" ;;
+        *)
+            error "SOPS does not provide a configured binary for $(uname -m)."
+            return 1
+            ;;
+    esac
+
+    local asset="sops-v${version}.linux.${architecture}"
+    local release_url="https://github.com/getsops/sops/releases/download/v${version}"
+
+    info "Installing SOPS ${version}..."
+    (
+        set -e
+        local temp_dir
+        temp_dir="$(mktemp -d)"
+        trap 'rm -rf "$temp_dir"' EXIT
+
+        curl -fsSL "${release_url}/${asset}" -o "${temp_dir}/${asset}"
+        curl -fsSL "${release_url}/sops-v${version}.checksums.txt" -o "${temp_dir}/checksums.txt"
+        awk -v asset="$asset" '$2 == asset { print; found = 1 } END { exit !found }' \
+            "${temp_dir}/checksums.txt" > "${temp_dir}/${asset}.sha256"
+        (cd "$temp_dir" && sha256sum -c "${asset}.sha256")
+        sudo install -m 0755 "${temp_dir}/${asset}" /usr/local/bin/sops
+    )
+    info "SOPS installed successfully."
+}
+
 ###############################################################
 # => Volatile file handling
 ###############################################################

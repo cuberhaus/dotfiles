@@ -7,6 +7,7 @@ scripts="$HOME/.local/scripts"
 
 base_install () {
     local packages=(
+        age                     # Encryption backend for SOPS
         autoconf
         automake
         bat                     # Better cat
