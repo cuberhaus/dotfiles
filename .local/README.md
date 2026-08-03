@@ -6,7 +6,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 
 ## Directory layout
 
-```
+```text
 .local/
 ├── etc/                        # Miscellaneous config snippets
 │   ├── launch.json             # VSCode-style debug launch config
@@ -19,6 +19,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── changeVolume       # Volume control with notification
 │   │   ├── clone-all          # Clone all repos from a GitHub user
 │   │   ├── git-recurse        # Run git commands across multiple repos
+│   │   ├── vault-secret       # Access SOPS-encrypted vault credentials
 │   │   ├── pfetch             # Minimal system info display
 │   │   ├── program            # Launch-or-focus helper for scratchpads
 │   │   ├── prompt             # Custom prompt helper
@@ -73,6 +74,10 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 
 - **`bin/`** is added to `$PATH` by `.zshenv` so its contents are available
   as commands in any shell.
+- **`vault-secret`** opens a dynamic credential selector for the Obsidian
+  vault's SOPS store. Use `vault-secret list`, `vault-secret <entry>`, or
+  `vault-secret edit` for direct operations; set `VAULT_ROOT` when the vault is
+  outside its standard checkout locations.
 - **`cinnamon_path/`** and **`gnome_path/`** are conditionally added to
   `$PATH` based on the `$DESKTOP_SESSION` environment variable (see `.zshenv`).
 - **`bootstrap/`** scripts are run via `make bootstrap-<os>` (see the root
