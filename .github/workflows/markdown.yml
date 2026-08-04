@@ -23,7 +23,7 @@ jobs:
           submodules: false
 
       - name: Lint own Markdown files
-        uses: DavidAnson/markdownlint-cli2-action@v23
+        uses: DavidAnson/markdownlint-cli2-action@v24
         with:
           globs: |
             README.md
