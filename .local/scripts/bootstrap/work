@@ -4,15 +4,19 @@
 set -euo pipefail
 
 ### VARIABLES
-scripts="$HOME/.local/scripts"
-source "$scripts/bootstrap/base_functions"
-source "$scripts/bootstrap/work_functions"
+bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
+export DOTFILES_ROOT
+source "$bootstrap_dir/base_functions"
+source "$bootstrap_dir/work_functions"
 parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
 
 ### INSTALLATION
 info "Updating system..."
 sudo apt-get update && sudo apt-get full-upgrade -y
+
+bootstrap_stow_checkout work
 
 install_preparation
 

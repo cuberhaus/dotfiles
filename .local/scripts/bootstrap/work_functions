@@ -9,7 +9,7 @@ apt="sudo apt-get install -y"
 ###############################################################
 
 shutdown_fix() {
-    sudo bash "$HOME/.local/scripts/permanent_shutdown_fix.sh"
+    sudo bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/permanent_shutdown_fix.sh"
 }
 
 ###############################################################
