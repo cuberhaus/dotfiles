@@ -2,7 +2,7 @@
 # Author: https://github.com/cuberhaus
 flags="-y"
 apt="sudo apt-get $flags install"
-ycm="$HOME/.local/scripts/ycm.sh" # make sure it's there
+ycm="${DOTFILES_ROOT:-$HOME}/.local/scripts/ycm.sh" # make sure it's there
 scripts="$HOME/.local/scripts"
 
 base_install () {

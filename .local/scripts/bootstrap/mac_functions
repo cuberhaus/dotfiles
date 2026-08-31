@@ -183,7 +183,7 @@ vim_install () {
     cd "$HOME" || exit
     vim +PlugInstall +qall
     # Vim YouCompleteMe plugin install
-    bash "$HOME/.local/scripts/ycm.sh"
+    bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/ycm.sh"
     sudo npm install -g neovim
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim

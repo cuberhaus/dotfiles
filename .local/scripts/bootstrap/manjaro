@@ -5,9 +5,11 @@ set -euo pipefail
 ### WARNING: If this script is to be changed, beware of the order of execution of every command
 
 ### VARIABLES
-scripts="$HOME/.local/scripts"
-source "$scripts/bootstrap/base_functions"
-source "$scripts/bootstrap/arch_functions"
+bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
+export DOTFILES_ROOT
+source "$bootstrap_dir/base_functions"
+source "$bootstrap_dir/arch_functions"
 parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
 
@@ -17,6 +19,8 @@ resolve_first_run_choice
 ### INSTALLATION
 info "Updating system..."
 sudo pacman -Syu
+
+bootstrap_stow_checkout manjaro
 
 install_preparation
 

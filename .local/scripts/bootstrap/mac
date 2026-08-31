@@ -3,16 +3,19 @@
 set -euo pipefail
 
 ### VARIABLES
-scripts="$HOME/.local/scripts"
-source "$scripts/bootstrap/base_functions"
-source "$scripts/bootstrap/mac_functions"
+bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
+export DOTFILES_ROOT
+source "$bootstrap_dir/base_functions"
+source "$bootstrap_dir/mac_functions"
 parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
 
 ### INSTALLATION
+brew_install
+bootstrap_stow_checkout mac
 install_preparation
 #app_store_install
-brew_install
 mac_install
 ai_tools_install
 vim_install

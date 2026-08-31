@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # stow-backup-conflicts — detect stow conflicts and back them up
 #
-# Usage: stow-backup-conflicts [backup-dir]
+# Usage: stow-backup-conflicts [--dry-run] [backup-dir]
 #
 # Runs a stow dry-run, parses conflicts, and moves each conflicting file
 # into a timestamped backup folder.  Exits 0 if there were no conflicts
@@ -25,6 +25,13 @@ TARGET="${HOME}"
 
 BACKUP_ROOT="${1:-$HOME/.dotfiles-backup}"
 BACKUP_DIR="$BACKUP_ROOT/$(date '+%Y-%m-%d_%H%M%S')"
+DRY_RUN=false
+
+if [ "${1:-}" = "--dry-run" ]; then
+    DRY_RUN=true
+    BACKUP_ROOT="${2:-$HOME/.dotfiles-backup}"
+    BACKUP_DIR="$BACKUP_ROOT/$(date '+%Y-%m-%d_%H%M%S')"
+fi
 
 # ---------------------------------------------------------------------------
 # Detect conflicts via stow dry-run
@@ -47,8 +54,12 @@ if (( ${#conflicts[@]} == 0 )); then
     exit 0
 fi
 
-info "Found ${#conflicts[@]} conflict(s). Backing up to $BACKUP_DIR"
-mkdir -p "$BACKUP_DIR"
+if [ "$DRY_RUN" = true ]; then
+    info "Found ${#conflicts[@]} conflict(s). Would back up to $BACKUP_DIR"
+else
+    info "Found ${#conflicts[@]} conflict(s). Backing up to $BACKUP_DIR"
+    mkdir -p "$BACKUP_DIR"
+fi
 
 for rel in "${conflicts[@]}"; do
     src="$TARGET/$rel"
@@ -59,8 +70,17 @@ for rel in "${conflicts[@]}"; do
         continue
     fi
 
+    if [ "$DRY_RUN" = true ]; then
+        info "  Would move $src to $dest"
+        continue
+    fi
+
     mkdir -p "$(dirname "$dest")"
     mv -v "$src" "$dest"
 done
 
-ok "All conflicts backed up to $BACKUP_DIR"
+if [ "$DRY_RUN" = true ]; then
+    ok "No files were moved."
+else
+    ok "All conflicts backed up to $BACKUP_DIR"
+fi

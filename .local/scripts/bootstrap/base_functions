@@ -11,6 +11,7 @@ error() { printf '\033[1;31m[ERROR]\033[0m %s\n' "$*" >&2; }
 parse_bootstrap_args() {
     DUAL_BOOT_UTC=false
     UNATTENDED=false
+    SKIP_STOW=false
     FIRST_RUN_CHOICE=""
     HIGH_DPI_CHOICE=""
 
@@ -21,6 +22,9 @@ parse_bootstrap_args() {
                 ;;
             --unattended)
                 UNATTENDED=true
+                ;;
+            --no-stow)
+                SKIP_STOW=true
                 ;;
             --first-run=yes|--first-run=no)
                 FIRST_RUN_CHOICE="${1#*=}"
@@ -36,7 +40,113 @@ parse_bootstrap_args() {
         shift
     done
 
-    export DUAL_BOOT_UTC UNATTENDED FIRST_RUN_CHOICE HIGH_DPI_CHOICE
+    export DUAL_BOOT_UTC UNATTENDED SKIP_STOW FIRST_RUN_CHOICE HIGH_DPI_CHOICE
+}
+
+## Return the dotfiles checkout root used by this bootstrap invocation.
+bootstrap_repository_root() {
+    if [ -n "${DOTFILES_ROOT:-}" ] && [ -d "$DOTFILES_ROOT" ]; then
+        printf '%s\n' "$DOTFILES_ROOT"
+        return 0
+    fi
+
+    cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd
+}
+
+## Report whether this bootstrap invocation can obtain a confirmation response.
+bootstrap_stdin_is_interactive() {
+    [ -t 0 ] && [ -t 1 ]
+}
+
+## Ask whether to apply the displayed Stow and conflict-backup plan.
+bootstrap_confirm_stow() {
+    local answer
+    read -r -p "Apply the displayed Stow plan? [y/N] " answer
+    [[ "$answer" =~ ^([yY][eE][sS]|[yY])$ ]]
+}
+
+## Return whether GNU Stow is available on the current PATH.
+bootstrap_stow_is_available() {
+    command -v stow >/dev/null 2>&1
+}
+
+## Install GNU Stow through the package manager for the selected profile.
+bootstrap_install_stow() {
+    local profile="$1"
+
+    info "GNU Stow is required to link this checkout; installing it for $profile..."
+    case "$profile" in
+        ubuntu|ubuntu-windows|work)
+            sudo apt-get install -y stow
+            ;;
+        arch|manjaro)
+            sudo pacman -S --noconfirm --needed stow
+            ;;
+        mac)
+            if ! command -v brew >/dev/null 2>&1; then
+                if declare -F brew_install >/dev/null 2>&1; then
+                    brew_install
+                else
+                    error "Homebrew is required to install GNU Stow on macOS."
+                    return 1
+                fi
+            fi
+            brew install stow
+            ;;
+        *)
+            error "No GNU Stow installer is configured for bootstrap profile: $profile"
+            return 2
+            ;;
+    esac
+
+    if ! bootstrap_stow_is_available; then
+        error "GNU Stow installation did not make the stow command available."
+        return 1
+    fi
+}
+
+## Preview and, with confirmation, link the current checkout through GNU Stow.
+bootstrap_stow_checkout() {
+    local profile="$1"
+    local dotfiles_root parent_dir package_name preview
+
+    if [ "${SKIP_STOW:-false}" = true ]; then
+        info "Skipping Stow linking (--no-stow); continuing from the checkout paths."
+        return 0
+    fi
+
+    if [ "${UNATTENDED:-false}" = true ] || ! bootstrap_stdin_is_interactive; then
+        warn "Stow linking was not applied because confirmation is unavailable. Continuing from checkout paths; rerun interactively or pass --no-stow."
+        return 0
+    fi
+
+    if ! bootstrap_stow_is_available; then
+        bootstrap_install_stow "$profile"
+    fi
+
+    dotfiles_root="$(bootstrap_repository_root)"
+    parent_dir="$(dirname "$dotfiles_root")"
+    package_name="$(basename "$dotfiles_root")"
+    preview="$(stow -v -n -t "$HOME" -d "$parent_dir" "$package_name" 2>&1 || true)"
+
+    info "Stow dry run for $dotfiles_root:"
+    if [ -n "$preview" ]; then
+        printf '%s\n' "$preview"
+    else
+        info "No Stow changes are needed."
+        return 0
+    fi
+
+    info "Conflict backup plan:"
+    bash "$dotfiles_root/.local/scripts/stow-backup-conflicts" --dry-run
+
+    if ! bootstrap_confirm_stow; then
+        info "Stow linking declined; continuing from checkout paths."
+        return 0
+    fi
+
+    bash "$dotfiles_root/.local/scripts/stow-backup-conflicts"
+    stow -v -t "$HOME" -d "$parent_dir" "$package_name"
 }
 
 resolve_first_run_choice() {
@@ -148,6 +258,7 @@ configure_dual_boot_utc_rtc() {
 install_preparation() {
     info "Preparing environment..."
 
+    mkdir -p "$HOME/.vim"
     echo "colorscheme onedark
     set background=dark" > "$HOME/.vim/theme"
 

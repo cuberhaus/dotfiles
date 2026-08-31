@@ -60,6 +60,14 @@ The `$DOTFILES` variable (exported by `.zshenv`) points to the repo root,
 auto-detected by resolving the `.zshenv` symlink. Scripts and configs that
 need to reference the repo should use `$DOTFILES`.
 
+Bootstrap profiles also start directly from their running checkout. Before
+linking any files, they install GNU Stow through the selected platform when
+needed, show the Stow dry run and any conflict-backup plan, and ask for an
+explicit confirmation. Declining continues provisioning through checkout paths
+without linking files. Pass `BOOTSTRAP_ARGS="--no-stow"` to opt out explicitly;
+an unattended or noninteractive bootstrap also leaves Stow unchanged rather
+than assuming consent.
+
 ## Installation
 
 Clone the repo with its submodules and use [GNU Stow](https://www.gnu.org/software/stow/) to symlink everything into `$HOME`:
@@ -208,6 +216,14 @@ Each bootstrap entrypoint follows the same pattern:
 6. Switches the default shell to zsh.
 7. Installs the native maintenance schedules shown below.
 
+### Doom Emacs Org visual-line movement
+
+After changing [.doom.d/config.el](.doom.d/config.el), run `doom sync`, then
+restart Doom Emacs (or evaluate the changed form). In an Org buffer with a
+soft-wrapped paragraph, `g j` and `g k` in Evil normal state move by displayed
+screen lines; a count such as `3 g j` moves three displayed lines. Confirm that
+the same keys retain their ordinary Evil behavior in a non-Org buffer.
+
 The bootstrap installs these automations without requiring a separate command:
 
 | Automation | Linux | macOS |
@@ -281,10 +297,10 @@ scripts directory.
 
 ## Supported OS
 
-- ![Arch\_icon][arch_icon] Arch
-- ![Manjaro\_icon][manjaro_icon] Manjaro
-- ![Ubuntu\_icon][ubuntu_icon] Ubuntu
-- ![MacOS\_icon][macos_icon] macOS
+- <img src=".github/assets/os-icons/arch.png" width="24" height="24" alt="Arch"> Arch
+- <img src=".github/assets/os-icons/manjaro.png" width="24" height="24" alt="Manjaro"> Manjaro
+- <img src=".github/assets/os-icons/ubuntu.png" width="24" height="24" alt="Ubuntu"> Ubuntu
+- <img src=".github/assets/os-icons/macos.png" width="24" height="24" alt="macOS"> macOS
 
 ## Window Managers
 
@@ -295,11 +311,5 @@ scripts directory.
 
 ## WIP
 
-- ![Gentoo\_icon][gentoo_icon] Gentoo
+- <img src=".github/assets/os-icons/gentoo.png" width="24" height="24" alt="Gentoo"> Gentoo
 - Openbox
-
-[manjaro_icon]: https://i.imgur.com/rfuvfYo.png
-[arch_icon]: https://upload.wikimedia.org/wikipedia/commons/a/a5/Archlinux-icon-crystal-64.svg
-[ubuntu_icon]: https://i.imgur.com/EX9n2Ib.png?1
-[macos_icon]: https://i.imgur.com/olG7ewE.png?1
-[gentoo_icon]: https://i.imgur.com/cKReKS2.png

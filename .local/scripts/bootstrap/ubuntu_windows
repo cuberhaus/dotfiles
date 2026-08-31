@@ -1,18 +1,19 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
 
-### First deploy dotfiles with stow, then execute scripts
-
 ### VARIABLES
-scripts="$HOME/.local/scripts"
+bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
+export DOTFILES_ROOT
 # Include functions
-source "$scripts/bootstrap/ubuntu_functions"
-source "$scripts/bootstrap/base_functions"
+source "$bootstrap_dir/ubuntu_functions"
+source "$bootstrap_dir/base_functions"
 parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
 
 ### INSTALLATION
 sudo apt-get update; sudo apt-get full-upgrade  # Update
+bootstrap_stow_checkout ubuntu-windows
 install_preparation
 echo "#! /bin/sh
 export DISTRO=ubuntu_windows" > "$HOME/.config/distro"
