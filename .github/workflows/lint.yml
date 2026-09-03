@@ -2,15 +2,49 @@ name: Lint
 
 on:
   push:
-    branches: [master]
+    branches: [main]
+    paths-ignore:
+      - README.md
+      - .local/README.md
+      - .local/xdg/wallpapers/README.md
   pull_request:
-    branches: [master]
+    branches: [main]
+    paths-ignore:
+      - README.md
+      - .local/README.md
+      - .local/xdg/wallpapers/README.md
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  python-tests:
+    name: Python unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          submodules: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Run installation audit tests
+        run: python tests/test_installation_audit.py
+
+  shell-tests:
+    name: Shell unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          submodules: false
+
+      - name: Run bootstrap Stow tests
+        run: bash tests/test_bootstrap_stow.sh
+
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-latest
