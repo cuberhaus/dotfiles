@@ -178,7 +178,7 @@ class InstallationAuditContractTests(unittest.TestCase):
             bootstrap = (
                 REPO_ROOT / ".local" / "scripts" / "bootstrap" / bootstrap_name
             ).read_text(encoding="utf-8")
-            self.assertRegex(bootstrap, r"(?m)^sops_install$")
+            self.assertRegex(bootstrap, r"(?m)^\s*sops_install$")
             if bootstrap_name != "work":
                 self.assertNotRegex(bootstrap, r"(?m)^brew_install$")
 

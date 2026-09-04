@@ -158,13 +158,16 @@ make bootstrap-arch      # Arch
 make bootstrap-manjaro   # Manjaro
 make bootstrap-ubuntu    # Ubuntu
 make bootstrap-mac       # macOS
-make bootstrap-work      # Work machine (Ubuntu + NVIDIA, minimal)
+make bootstrap-work      # Work machine (Ubuntu + NVIDIA workstation)
 ```
 
 For deterministic provisioning, use `make bootstrap-unattended PROFILE=<os>`.
 Set `FIRST_RUN=yes` only when one-time hardware setup is intended, and
 `HIGH_DPI=yes` when the work profile should change display scaling. The
 defaults are `no`, so unattended setup never opts into either action.
+Before an unattended work bootstrap, run `sudo -v` in the same terminal. The
+work entrypoint verifies cached credentials and keeps its direct `sudo` calls
+noninteractive instead of waiting for a password prompt.
 
 App-data restores are guarded and preview-first:
 

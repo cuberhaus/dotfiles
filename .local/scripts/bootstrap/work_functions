@@ -2,7 +2,7 @@
 # Work machine bootstrap functions (Asus ROG Strix / Ubuntu + NVIDIA)
 # Author: https://github.com/cuberhaus
 
-apt="sudo apt-get install -y"
+apt="sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y"
 
 ###############################################################
 # => ROG Strix shutdown fix (GRUB power-management params)
@@ -88,9 +88,6 @@ dev_tools_install() {
         neofetch                # Terminal system info summary
     )
     $apt "${packages[@]}"
-
-    # Git config
-    git config --global credential.helper store
 }
 
 ###############################################################
@@ -211,6 +208,17 @@ gcloud_install() {
 # => GUI applications
 ###############################################################
 
+cursor_is_installed() {
+    local app_image="$HOME/Applications/cursor.AppImage"
+    local app_image_size=0
+
+    command -v cursor &>/dev/null && return 0
+    if [ -f "$app_image" ]; then
+        app_image_size=$(stat -c%s "$app_image" 2>/dev/null || printf '0\n')
+    fi
+    [ "$app_image_size" -ge 1048576 ]
+}
+
 gui_apps_install() {
     info "Installing GUI applications..."
 
@@ -254,7 +262,7 @@ gui_apps_install() {
     fi
 
     # Cursor (AI IDE — .deb)
-    if ! command -v cursor &>/dev/null; then
+    if ! cursor_is_installed; then
         info "Downloading Cursor..."
         wget -qO "$cursor_deb" "https://api2.cursor.sh/updates/download/golden/linux-x64-deb/cursor/stable" &
         pids+=($!); names+=("Cursor")
@@ -357,7 +365,7 @@ EOF
     fi
 
     # Cursor (AI IDE — AppImage)
-    if [ ! -f "$HOME/Applications/cursor.AppImage" ] || [ "$(stat -c%s "$HOME/Applications/cursor.AppImage")" -lt 1048576 ]; then
+    if ! cursor_is_installed; then
         info "Installing Cursor..."
         $apt libfuse2
         mkdir -p "$HOME/Applications"

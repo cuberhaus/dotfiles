@@ -93,7 +93,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 
 ## Bootstrap flow
 
-Each bootstrap entrypoint (e.g. `bootstrap/arch`) follows this pattern:
+Most bootstrap entrypoints follow this pattern:
 
 1. Source `base_functions` (logging, `$DOTFILES` auto-detection, common prep).
 2. Source the OS-specific `*_functions` file (package lists, installers).
@@ -106,7 +106,10 @@ Each bootstrap entrypoint (e.g. `bootstrap/arch`) follows this pattern:
 
 The work bootstrap mirrors all terminal output to a persistent per-run log at
 `${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus/bootstrap/work-<UTC timestamp>-<PID>.log`.
-The log path is printed when the bootstrap starts.
+The log path is printed when the bootstrap starts. Its source-safe `work_main`
+entrypoint is exercised with destructive stages replaced by test doubles in
+`tests/test_bootstrap_work.sh`. For unattended runs, authorize `sudo` first
+with `sudo -v`; the entrypoint then uses noninteractive sudo and apt behavior.
 
 See the root [README](../README.md) for quick-start instructions.
 

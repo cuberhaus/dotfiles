@@ -8,45 +8,86 @@ bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
 export DOTFILES_ROOT
 source "$bootstrap_dir/base_functions"
-bootstrap_enable_logging work
 source "$bootstrap_dir/work_functions"
-parse_bootstrap_args "$@"
-configure_dual_boot_utc_rtc
 
-### INSTALLATION
-info "Updating system..."
-sudo apt-get update && sudo apt-get full-upgrade -y
+work_prepare_environment() {
+    [ "${UNATTENDED:-false}" = true ] || return 0
 
-bootstrap_stow_checkout work
-
-install_preparation
-
-echo "#! /bin/sh
-export DISTRO=ubuntu" > "$HOME/.config/distro"
-
-
-shutdown_fix
-nvidia_install
-nvidia_display_config
-dev_tools_install
-sops_install
-if [ "$(basename "$SHELL")" != "zsh" ]; then
-    chsh -s "$(command -v zsh)"
-fi
-
-node_install
-python_install
-docker_install
-gcloud_install
-gui_apps_install
-
-current_scale=$(gsettings get org.gnome.desktop.interface text-scaling-factor 2>/dev/null || echo "1.0")
-if [[ "$current_scale" != "1.3" ]]; then
-    resolve_high_dpi_choice
-    if [[ "$HIGH_DPI" == true ]]; then
-        high_dpi_screen
+    export DEBIAN_FRONTEND=noninteractive
+    if ! command sudo -n true; then
+        error "Unattended mode requires cached sudo credentials. Run 'sudo -v' in this terminal, then retry."
+        return 1
     fi
-fi
 
-apply_skip_worktree
-info "Bootstrap complete! Reboot to load NVIDIA drivers."
+    sudo() {
+        command sudo -n "$@"
+    }
+}
+
+work_update_system() {
+    info "Updating system..."
+    sudo env DEBIAN_FRONTEND=noninteractive apt-get update
+    sudo env DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
+}
+
+work_configure_default_shell() {
+    local zsh_path
+
+    [ "$(basename "${SHELL:-}")" = zsh ] && return 0
+    if ! zsh_path=$(command -v zsh); then
+        error "Cannot set the default shell because zsh is not available."
+        return 1
+    fi
+
+    if [ "${UNATTENDED:-false}" = true ]; then
+        sudo chsh -s "$zsh_path" "$USER"
+    else
+        chsh -s "$zsh_path"
+    fi
+}
+
+work_main() {
+    bootstrap_enable_logging work
+    parse_bootstrap_args "$@"
+    work_prepare_environment
+    configure_dual_boot_utc_rtc
+
+    ### INSTALLATION
+    work_update_system
+
+    bootstrap_stow_checkout work
+
+    install_preparation
+
+    mkdir -p "$XDG_CONFIG_HOME"
+    printf '%s\n' '#! /bin/sh' 'export DISTRO=ubuntu' > "$XDG_CONFIG_HOME/distro"
+
+    shutdown_fix
+    nvidia_install
+    nvidia_display_config
+    dev_tools_install
+    sops_install
+    work_configure_default_shell
+
+    node_install
+    python_install
+    docker_install
+    gcloud_install
+    gui_apps_install
+
+    local current_scale
+    current_scale=$(gsettings get org.gnome.desktop.interface text-scaling-factor 2>/dev/null || echo "1.0")
+    if [[ "$current_scale" != "1.3" ]]; then
+        resolve_high_dpi_choice
+        if [[ "$HIGH_DPI" == true ]]; then
+            high_dpi_screen
+        fi
+    fi
+
+    apply_skip_worktree
+    info "Bootstrap complete! Reboot to load NVIDIA drivers."
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    work_main "$@"
+fi

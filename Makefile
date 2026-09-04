@@ -74,6 +74,7 @@ lint: ## Run shellcheck on all shell scripts
 test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_installation_audit.py
 	bash tests/test_bootstrap_stow.sh
+	bash tests/test_bootstrap_work.sh
 	bash tests/test_shell_path.sh
 
 check: lint test ## Run tests and all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.

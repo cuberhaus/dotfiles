@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORK_BOOTSTRAP="$REPO_ROOT/.local/scripts/bootstrap/work"
+WORK_FUNCTIONS="$REPO_ROOT/.local/scripts/bootstrap/work_functions"
+CASE_DIR="$(mktemp -d)"
+EVENT_LOG="$CASE_DIR/events.log"
+RM_COMMAND="$(command -v rm)"
+trap '"$RM_COMMAND" -rf "$CASE_DIR"' EXIT
+
+fail() {
+    printf 'FAIL: %s\n' "$*" >&2
+    exit 1
+}
+
+grep -Fq "if [[ \"\${BASH_SOURCE[0]}\" == \"\$0\" ]]; then" "$WORK_BOOTSTRAP" ||
+    fail 'work bootstrap must be sourceable without provisioning the machine'
+
+export HOME="$CASE_DIR/home"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_STATE_HOME="$HOME/.local/state"
+export SHELL=/bin/zsh
+mkdir -p "$XDG_CONFIG_HOME"
+: > "$EVENT_LOG"
+
+source "$WORK_BOOTSTRAP"
+
+test_unattended_environment_is_noninteractive() {
+    local original_path="$PATH"
+    local fake_bin="$CASE_DIR/fake-bin"
+    local sudo_log="$CASE_DIR/sudo.log"
+    local error_log="$CASE_DIR/sudo-error.log"
+    mkdir -p "$fake_bin"
+    cat > "$fake_bin/sudo" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$FAKE_SUDO_LOG"
+[ "${FAKE_SUDO_FAIL:-false}" != true ]
+EOF
+    printf '#!/usr/bin/env bash\n' > "$fake_bin/zsh"
+    chmod +x "$fake_bin/sudo" "$fake_bin/zsh"
+
+    export PATH="$fake_bin:$PATH"
+    export FAKE_SUDO_LOG="$sudo_log"
+    UNATTENDED=true
+    unset DEBIAN_FRONTEND
+
+    work_prepare_environment || fail 'cached sudo credentials should allow unattended mode'
+    [ "$DEBIAN_FRONTEND" = noninteractive ] ||
+        fail 'unattended mode must export DEBIAN_FRONTEND=noninteractive'
+    sudo apt-get update
+    $apt example-package
+    grep -Fxq -- '-n true' "$sudo_log" || fail 'unattended mode did not preflight sudo -n'
+    grep -Fxq -- '-n apt-get update' "$sudo_log" ||
+        fail 'unattended mode did not keep subsequent sudo calls noninteractive'
+    grep -Fxq -- '-n env DEBIAN_FRONTEND=noninteractive apt-get install -y example-package' "$sudo_log" ||
+        fail 'apt installs did not preserve noninteractive Debian behavior through sudo'
+
+    local SHELL=/bin/bash
+    local USER=bootstrap-user
+    work_configure_default_shell
+    grep -Fxq -- "-n chsh -s $fake_bin/zsh bootstrap-user" "$sudo_log" ||
+        fail 'unattended shell change did not use noninteractive sudo'
+
+    unset -f sudo
+    export FAKE_SUDO_FAIL=true
+    if work_prepare_environment 2> "$error_log"; then
+        fail 'unattended mode accepted unavailable sudo credentials'
+    fi
+    grep -Fq 'sudo -v' "$error_log" ||
+        fail 'unattended sudo failure did not explain how to authorize it'
+
+    unset FAKE_SUDO_FAIL FAKE_SUDO_LOG DEBIAN_FRONTEND
+    export PATH="$original_path"
+}
+
+test_unattended_environment_is_noninteractive
+
+test_dev_tools_preserve_git_credentials() {
+    local apt=true
+    local git_log="$CASE_DIR/git.log"
+    git() { printf '%s\n' "$*" >> "$git_log"; }
+
+    dev_tools_install
+    [ ! -s "$git_log" ] || fail 'dev tools must not configure plaintext Git credential storage'
+    unset -f git
+}
+
+test_cursor_install_detection() {
+    local original_path="$PATH"
+    local fake_bin="$CASE_DIR/cursor-bin"
+    local cursor_app="$HOME/Applications/cursor.AppImage"
+    local chmod_command rm_command stat_command truncate_command
+    chmod_command="$(command -v chmod)"
+    rm_command="$(command -v rm)"
+    stat_command="$(command -v stat)"
+    truncate_command="$(command -v truncate)"
+    mkdir -p "$fake_bin" "$HOME/Applications"
+    ln -s "$stat_command" "$fake_bin/stat"
+    export PATH="$fake_bin"
+
+    : > "$cursor_app"
+    if cursor_is_installed; then
+        fail 'a partial Cursor AppImage must not count as installed'
+    fi
+
+    "$truncate_command" -s 1048576 "$cursor_app"
+    cursor_is_installed || fail 'a complete Cursor AppImage was not detected'
+
+    "$rm_command" -f "$cursor_app"
+    printf '#!/usr/bin/env bash\n' > "$fake_bin/cursor"
+    "$chmod_command" +x "$fake_bin/cursor"
+    cursor_is_installed || fail 'the installed Cursor command was not detected'
+
+    export PATH="$original_path"
+    [ "$(grep -c 'cursor_is_installed' "$WORK_FUNCTIONS")" -ge 3 ] ||
+        fail 'both Cursor installer branches must use the shared installed check'
+}
+
+test_dev_tools_preserve_git_credentials
+test_cursor_install_detection
+
+record() {
+    printf '%s\n' "$1" >> "$EVENT_LOG"
+}
+
+bootstrap_enable_logging() { record 'logging'; }
+work_prepare_environment() { record 'prepare-environment'; }
+configure_dual_boot_utc_rtc() { record 'dual-boot'; }
+work_update_system() { record 'system-update'; }
+bootstrap_stow_checkout() { record "stow:$1:$SKIP_STOW"; }
+install_preparation() { record 'preparation'; }
+shutdown_fix() { record 'shutdown-fix'; }
+nvidia_install() { record 'nvidia-install'; }
+nvidia_display_config() { record 'nvidia-display'; }
+dev_tools_install() { record 'dev-tools'; }
+sops_install() { record 'sops'; }
+work_configure_default_shell() { record 'default-shell'; }
+node_install() { record 'node'; }
+python_install() { record 'python'; }
+docker_install() { record 'docker'; }
+gcloud_install() { record 'gcloud'; }
+gui_apps_install() { record 'gui-apps'; }
+resolve_high_dpi_choice() {
+    record "high-dpi-choice:$HIGH_DPI_CHOICE"
+    HIGH_DPI=false
+}
+high_dpi_screen() { record 'high-dpi-apply'; }
+apply_skip_worktree() { record 'skip-worktree'; }
+gsettings() { printf '1.0\n'; }
+info() { :; }
+
+work_main --unattended --no-stow --first-run=no --high-dpi=no </dev/null
+
+[ "$UNATTENDED" = true ] || fail '--unattended was not parsed'
+[ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
+[ "$FIRST_RUN_CHOICE" = no ] || fail '--first-run was not parsed'
+[ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
+
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\nshutdown-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\ndocker\ngcloud\ngui-apps\nhigh-dpi-choice:no\nskip-worktree'
+actual_events="$(cat "$EVENT_LOG")"
+[ "$actual_events" = "$expected_events" ] ||
+    fail "unexpected work bootstrap stages:\n$actual_events"
+
+grep -Fqx 'export DISTRO=ubuntu' "$XDG_CONFIG_HOME/distro" ||
+    fail 'work bootstrap did not write the Ubuntu distro marker'
+
+printf 'Work bootstrap orchestration tests passed.\n'

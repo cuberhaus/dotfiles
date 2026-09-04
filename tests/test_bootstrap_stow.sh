@@ -62,18 +62,23 @@ run_stow_preflight() {
 
 test_bootstrap_logging_mirrors_output() {
     setup_case
+    local terminal_output="$CASE_DIR/terminal.log"
     (
         export XDG_STATE_HOME="$CASE_DIR/state"
         source "$BASE_FUNCTIONS"
         bootstrap_enable_logging work
-        printf 'bootstrap logging test\n'
+        printf 'bootstrap logging stdout\n'
+        printf 'bootstrap logging stderr\n' >&2
         exec 1>&- 2>&-
         wait "$BOOTSTRAP_LOG_TEE_PID"
-    )
+    ) > "$terminal_output" 2>&1
     local log_file
     log_file="$(find "$CASE_DIR/state/cuberhaus/bootstrap" -type f -name 'work-*.log' -print -quit)"
     [ -n "$log_file" ] || fail 'Expected the work bootstrap to create a log file'
-    assert_file_contains "$log_file" 'bootstrap logging test'
+    assert_file_contains "$terminal_output" 'bootstrap logging stdout'
+    assert_file_contains "$terminal_output" 'bootstrap logging stderr'
+    assert_file_contains "$log_file" 'bootstrap logging stdout'
+    assert_file_contains "$log_file" 'bootstrap logging stderr'
     teardown_case
 }
 
