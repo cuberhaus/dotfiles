@@ -2,7 +2,7 @@
 # Shared patterns for shell script linting (used by lint.sh and pre-commit).
 # Single source of truth — edit here, both tools pick it up.
 
-# Glob patterns passed to `git ls-files` to find shell scripts
+# Glob patterns passed to `git ls-files` to find tracked and untracked shell scripts
 LINT_PATTERNS=(
     '*.sh'
     '.zshenv'
@@ -39,13 +39,14 @@ LINT_EXCLUDES=(
     '\.terminfo$'
 )
 
-# Print all tracked shell scripts that should be linted (one per line).
+# Print all nonignored shell scripts that should be linted (one per line).
 lint_get_scripts() {
     local grep_args=()
     for pattern in "${LINT_EXCLUDES[@]}"; do
         grep_args+=(-e "$pattern")
     done
-    git ls-files -- "${LINT_PATTERNS[@]}" | grep -v "${grep_args[@]}"
+    git ls-files --cached --others --exclude-standard -- "${LINT_PATTERNS[@]}" |
+        grep -v "${grep_args[@]}"
 }
 
 # Pathspecs for files allowed to contain `/home/<user>/` or `/Users/<user>/`.

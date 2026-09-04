@@ -78,12 +78,22 @@ test_unattended_environment_is_noninteractive
 
 test_dev_tools_preserve_git_credentials() {
     local apt=true
+    local fake_bin="$CASE_DIR/git-bin"
     local git_log="$CASE_DIR/git.log"
-    git() { printf '%s\n' "$*" >> "$git_log"; }
+    local original_path="$PATH"
+    mkdir -p "$fake_bin"
+    cat > "$fake_bin/git" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$FAKE_GIT_LOG"
+EOF
+    chmod +x "$fake_bin/git"
+    export FAKE_GIT_LOG="$git_log"
+    export PATH="$fake_bin:$PATH"
 
     dev_tools_install
+    export PATH="$original_path"
+    unset FAKE_GIT_LOG
     [ ! -s "$git_log" ] || fail 'dev tools must not configure plaintext Git credential storage'
-    unset -f git
 }
 
 test_cursor_install_detection() {
@@ -117,8 +127,46 @@ test_cursor_install_detection() {
         fail 'both Cursor installer branches must use the shared installed check'
 }
 
+test_workspace_is_cloned_before_sync() {
+    local fake_bin="$CASE_DIR/workspace-bin"
+    local gh_log="$CASE_DIR/gh.log"
+    local sync_log="$CASE_DIR/workspace-sync.log"
+    local workspace_dir="$CASE_DIR/cuberhaus-workspace"
+    local make_command
+    make_command="$(command -v make)"
+    mkdir -p "$fake_bin"
+    cat > "$fake_bin/gh" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$FAKE_GH_LOG"
+mkdir -p "$4/.git"
+cat > "$4/sync.sh" <<'SYNC_SCRIPT'
+#!/usr/bin/env bash
+printf 'sync\n' >> "$FAKE_WORKSPACE_SYNC_LOG"
+SYNC_SCRIPT
+chmod +x "$4/sync.sh"
+EOF
+    chmod +x "$fake_bin/gh"
+
+    export FAKE_GH_LOG="$gh_log"
+    export FAKE_WORKSPACE_SYNC_LOG="$sync_log"
+    PATH="$fake_bin:$PATH" "$make_command" --no-print-directory -C "$REPO_ROOT" \
+        bootstrap-workspace CUBERHAUS_WORKSPACE_DIR="$workspace_dir"
+    PATH="$fake_bin:$PATH" "$make_command" --no-print-directory -C "$REPO_ROOT" \
+        bootstrap-workspace CUBERHAUS_WORKSPACE_DIR="$workspace_dir"
+
+    [ "$(grep -c '^repo clone cuberhaus/cuberhaus-workspace ' "$gh_log")" -eq 1 ] ||
+        fail 'workspace repository must be cloned exactly once'
+    [ "$(grep -c '^sync$' "$sync_log")" -eq 2 ] ||
+        fail 'workspace repository must be synced on every invocation'
+    [ "$(grep -c 'bootstrap-workspace' "$REPO_ROOT/Makefile")" -ge 7 ] ||
+        fail 'all OS bootstrap targets must use the shared workspace prerequisite'
+
+    unset FAKE_GH_LOG FAKE_WORKSPACE_SYNC_LOG
+}
+
 test_dev_tools_preserve_git_credentials
 test_cursor_install_detection
+test_workspace_is_cloned_before_sync
 
 record() {
     printf '%s\n' "$1" >> "$EVENT_LOG"

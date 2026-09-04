@@ -17,8 +17,10 @@ HIGH_DPI ?= no
 REPAIR ?=
 RESTORE_APPS ?=
 RESTORE_APPLY ?= 0
+CUBERHAUS_WORKSPACE_DIR ?= ../cuberhaus-workspace
+CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -165,10 +167,24 @@ skills-restore: ## Download/restore pinned skills from skills-lock.json
 
 ##@ Workspace integration (cuberhaus multi-root)
 
-workspace: ## Sync workspace files, refresh repos.json, then audit workspace policies
-	bash ../cuberhaus-workspace/sync.sh
-	$(PYTHON) ../cuberhaus-workspace/scripts/build-repos.py
-	$(PYTHON) ../cuberhaus-workspace/scripts/audit-policies.py
+bootstrap-workspace: ## Clone the private workspace repository when needed, then sync it
+	@if [ ! -d "$(CUBERHAUS_WORKSPACE_DIR)/.git" ]; then \
+		if [ -e "$(CUBERHAUS_WORKSPACE_DIR)" ]; then \
+			echo "Workspace path exists but is not a Git checkout: $(CUBERHAUS_WORKSPACE_DIR)" >&2; \
+			exit 2; \
+		fi; \
+		if ! command -v gh >/dev/null 2>&1; then \
+			echo "GitHub CLI is required to clone $(CUBERHAUS_WORKSPACE_REPO)." >&2; \
+			exit 127; \
+		fi; \
+		echo "Cloning $(CUBERHAUS_WORKSPACE_REPO) into $(CUBERHAUS_WORKSPACE_DIR)..."; \
+		GH_PROMPT_DISABLED=1 gh repo clone "$(CUBERHAUS_WORKSPACE_REPO)" "$(CUBERHAUS_WORKSPACE_DIR)"; \
+	fi
+	@bash "$(CUBERHAUS_WORKSPACE_DIR)/sync.sh"
+
+workspace: bootstrap-workspace ## Sync workspace files, refresh repos.json, then audit workspace policies
+	$(PYTHON) "$(CUBERHAUS_WORKSPACE_DIR)/scripts/build-repos.py"
+	$(PYTHON) "$(CUBERHAUS_WORKSPACE_DIR)/scripts/audit-policies.py"
 
 ##@ Submodules
 
@@ -197,37 +213,37 @@ bootstrap-unattended: ## Provision without prompts (PROFILE required; FIRST_RUN=
 
 bootstrap-arch: ## Run Arch bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/arch $(BOOTSTRAP_ARGS)
-	@bash ../cuberhaus-workspace/sync.sh
+	@$(MAKE) --no-print-directory bootstrap-workspace
 	@$(MAKE) --no-print-directory install-automations
 	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-manjaro: ## Run Manjaro bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/manjaro $(BOOTSTRAP_ARGS)
-	@bash ../cuberhaus-workspace/sync.sh
+	@$(MAKE) --no-print-directory bootstrap-workspace
 	@$(MAKE) --no-print-directory install-automations
 	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-ubuntu: ## Run Ubuntu bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/ubuntu $(BOOTSTRAP_ARGS)
-	@bash ../cuberhaus-workspace/sync.sh
+	@$(MAKE) --no-print-directory bootstrap-workspace
 	@$(MAKE) --no-print-directory install-automations
 	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-ubuntu-windows: ## Run Ubuntu-on-WSL bootstrap (no GUI apps, then deploy workspace files)
 	bash .local/scripts/bootstrap/ubuntu_windows $(BOOTSTRAP_ARGS)
-	@bash ../cuberhaus-workspace/sync.sh
+	@$(MAKE) --no-print-directory bootstrap-workspace
 	@$(MAKE) --no-print-directory install-automations
 	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-mac: ## Run macOS bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/mac $(BOOTSTRAP_ARGS)
-	@bash ../cuberhaus-workspace/sync.sh
+	@$(MAKE) --no-print-directory bootstrap-workspace
 	@$(MAKE) --no-print-directory install-automations
 	@$(MAKE) --no-print-directory restore-apps
 
 bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA, then deploy workspace files)
 	bash .local/scripts/bootstrap/work $(BOOTSTRAP_ARGS)
-	@bash ../cuberhaus-workspace/sync.sh
+	@$(MAKE) --no-print-directory bootstrap-workspace
 	@$(MAKE) --no-print-directory install-automations
 	@$(MAKE) --no-print-directory restore-apps
 
