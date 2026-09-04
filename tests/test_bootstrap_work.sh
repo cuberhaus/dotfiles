@@ -130,6 +130,7 @@ test_cursor_install_detection() {
 test_workspace_is_cloned_before_sync() {
     local fake_bin="$CASE_DIR/workspace-bin"
     local gh_log="$CASE_DIR/gh.log"
+    local restore_log="$CASE_DIR/workspace-restore.log"
     local sync_log="$CASE_DIR/workspace-sync.log"
     local workspace_dir="$CASE_DIR/cuberhaus-workspace"
     local make_command
@@ -139,8 +140,16 @@ test_workspace_is_cloned_before_sync() {
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$FAKE_GH_LOG"
 mkdir -p "$4/.git"
+cat > "$4/Makefile" <<'WORKSPACE_MAKEFILE'
+skills-restore:
+	@printf 'restore\n' >> "$$FAKE_WORKSPACE_RESTORE_LOG"
+WORKSPACE_MAKEFILE
 cat > "$4/sync.sh" <<'SYNC_SCRIPT'
 #!/usr/bin/env bash
+[ -s "$FAKE_WORKSPACE_RESTORE_LOG" ] || {
+    printf 'skills must be restored before sync\n' >&2
+    exit 1
+}
 printf 'sync\n' >> "$FAKE_WORKSPACE_SYNC_LOG"
 SYNC_SCRIPT
 chmod +x "$4/sync.sh"
@@ -148,6 +157,7 @@ EOF
     chmod +x "$fake_bin/gh"
 
     export FAKE_GH_LOG="$gh_log"
+    export FAKE_WORKSPACE_RESTORE_LOG="$restore_log"
     export FAKE_WORKSPACE_SYNC_LOG="$sync_log"
     PATH="$fake_bin:$PATH" "$make_command" --no-print-directory -C "$REPO_ROOT" \
         bootstrap-workspace CUBERHAUS_WORKSPACE_DIR="$workspace_dir"
@@ -156,12 +166,14 @@ EOF
 
     [ "$(grep -c '^repo clone cuberhaus/cuberhaus-workspace ' "$gh_log")" -eq 1 ] ||
         fail 'workspace repository must be cloned exactly once'
+    [ "$(grep -c '^restore$' "$restore_log")" -eq 1 ] ||
+        fail 'workspace skills must be restored once before the first sync'
     [ "$(grep -c '^sync$' "$sync_log")" -eq 2 ] ||
         fail 'workspace repository must be synced on every invocation'
     [ "$(grep -c 'bootstrap-workspace' "$REPO_ROOT/Makefile")" -ge 7 ] ||
         fail 'all OS bootstrap targets must use the shared workspace prerequisite'
 
-    unset FAKE_GH_LOG FAKE_WORKSPACE_SYNC_LOG
+    unset FAKE_GH_LOG FAKE_WORKSPACE_RESTORE_LOG FAKE_WORKSPACE_SYNC_LOG
 }
 
 test_dev_tools_preserve_git_credentials

@@ -142,8 +142,10 @@ class InstallationAuditContractTests(unittest.TestCase):
         ):
             self.assertNotIn(old_target, makefile)
 
-        workspace = makefile.split("workspace:", 1)[1].split("\n\n", 1)[0]
-        self.assertLess(workspace.index("sync.sh"), workspace.index("build-repos.py"))
+        bootstrap_workspace = makefile.split("\nbootstrap-workspace:", 1)[1].split("\n\n", 1)[0]
+        workspace = makefile.split("\nworkspace:", 1)[1].split("\n\n", 1)[0]
+        self.assertIn("sync.sh", bootstrap_workspace)
+        self.assertIn("workspace: bootstrap-workspace", makefile)
         self.assertLess(workspace.index("build-repos.py"), workspace.index("audit-policies.py"))
 
     def test_profiles_derive_packages_from_active_bootstrap_functions(self):

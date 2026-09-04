@@ -169,6 +169,11 @@ Before an unattended work bootstrap, run `sudo -v` in the same terminal. The
 work entrypoint verifies cached credentials and keeps its direct `sudo` calls
 noninteractive instead of waiting for a password prompt.
 
+Each bootstrap target also ensures the private `cuberhaus/cuberhaus-workspace`
+sibling exists. Authenticate `gh` before a first run; the target clones the
+repository, restores its pinned skills without prompting, and then syncs the
+workspace files. Existing checkouts are reused.
+
 App-data restores are guarded and preview-first:
 
 ```bash

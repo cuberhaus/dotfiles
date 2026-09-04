@@ -110,6 +110,9 @@ The log path is printed when the bootstrap starts. Its source-safe `work_main`
 entrypoint is exercised with destructive stages replaced by test doubles in
 `tests/test_bootstrap_work.sh`. For unattended runs, authorize `sudo` first
 with `sudo -v`; the entrypoint then uses noninteractive sudo and apt behavior.
+After provisioning, the shared `bootstrap-workspace` Make target clones the
+authenticated private workspace repository when absent, restores its pinned
+skills on that first clone, and runs its Linux sync script.
 
 See the root [README](../README.md) for quick-start instructions.
 

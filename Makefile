@@ -178,7 +178,9 @@ bootstrap-workspace: ## Clone the private workspace repository when needed, then
 			exit 127; \
 		fi; \
 		echo "Cloning $(CUBERHAUS_WORKSPACE_REPO) into $(CUBERHAUS_WORKSPACE_DIR)..."; \
-		GH_PROMPT_DISABLED=1 gh repo clone "$(CUBERHAUS_WORKSPACE_REPO)" "$(CUBERHAUS_WORKSPACE_DIR)"; \
+		GH_PROMPT_DISABLED=1 gh repo clone "$(CUBERHAUS_WORKSPACE_REPO)" "$(CUBERHAUS_WORKSPACE_DIR)" || exit $$?; \
+		echo "Restoring pinned workspace skills..."; \
+		npm_config_yes=true $(MAKE) --no-print-directory -C "$(CUBERHAUS_WORKSPACE_DIR)" skills-restore || exit $$?; \
 	fi
 	@bash "$(CUBERHAUS_WORKSPACE_DIR)/sync.sh"
 
