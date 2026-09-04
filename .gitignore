@@ -28,6 +28,7 @@
 !.stow-local-ignore
 !Makefile
 !README.md
+!autoinstall.yaml
 !LICENSE
 !AGENTS.md
 !skills-lock.json

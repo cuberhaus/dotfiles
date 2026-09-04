@@ -1,0 +1,122 @@
+#cloud-config
+# Ubuntu Desktop autoinstall for the Cuberhaus workstation.
+#
+# This keeps network, disk, and account selection interactive because they are
+# machine-specific and security-sensitive. The remaining installation is
+# automatic. On the first GNOME login, a terminal opens and runs the dotfiles
+# bootstrap; Stow backs up conflicting home files before creating links.
+autoinstall:
+  version: 1
+
+  interactive-sections:
+    - network
+    - storage
+    - identity
+
+  locale: en_US.UTF-8
+  keyboard:
+    layout: es
+    variant: ""
+  timezone: Europe/Madrid
+
+  # This source ID requires an Ubuntu Desktop ISO.
+  source:
+    id: ubuntu-desktop
+    search_drivers: true
+
+  # The installer still shows the storage screen before applying this default.
+  storage:
+    layout:
+      name: lvm
+      sizing-policy: all
+
+  apt:
+    fallback: offline-install
+    geoip: true
+
+  codecs:
+    install: true
+  drivers:
+    install: true
+  oem:
+    install: auto
+
+  ssh:
+    install-server: false
+
+  packages:
+    - ca-certificates
+    - curl
+    - git
+    - make
+    - stow
+
+  updates: all
+
+  user-data:
+    write_files:
+      - path: /usr/local/bin/cuberhaus-first-login
+        owner: root:root
+        permissions: "0755"
+        content: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus"
+          marker="$state_dir/bootstrap-complete"
+          log_file="$state_dir/bootstrap.log"
+
+          [ ! -f "$marker" ] || exit 0
+
+          mkdir -p "$state_dir" "$HOME/cuberhaus"
+          exec > >(tee -a "$log_file") 2>&1
+
+          clone_or_update() {
+              local url="$1"
+              local destination="$2"
+
+              if [ -d "$destination/.git" ]; then
+                  git -C "$destination" pull --ff-only
+                  git -C "$destination" submodule update --init --recursive
+              elif [ -e "$destination" ]; then
+                  printf 'Cannot clone %s: %s already exists and is not a Git checkout.\n' \
+                      "$url" "$destination" >&2
+                  return 1
+              else
+                  git clone --recurse-submodules "$url" "$destination"
+              fi
+          }
+
+          printf 'Preparing the Cuberhaus Ubuntu workstation.\n'
+          printf 'Provisioning output is recorded in %s.\n' "$log_file"
+          sudo -v
+
+          clone_or_update \
+              https://github.com/cuberhaus/cuberhaus-workspace.git \
+              "$HOME/cuberhaus/cuberhaus-workspace"
+          clone_or_update \
+              https://github.com/cuberhaus/dotfiles.git \
+              "$HOME/cuberhaus/dotfiles"
+
+          cd "$HOME/cuberhaus/dotfiles"
+          make install
+          make bootstrap-unattended PROFILE=ubuntu FIRST_RUN=yes HIGH_DPI=no
+
+          touch "$marker"
+          printf '\nCuberhaus provisioning completed successfully.\n'
+          printf 'This terminal can now be closed.\n'
+
+      - path: /etc/xdg/autostart/cuberhaus-bootstrap.desktop
+        owner: root:root
+        permissions: "0644"
+        content: |
+          [Desktop Entry]
+          Type=Application
+          Name=Cuberhaus workstation bootstrap
+          Comment=Install and apply the Cuberhaus dotfiles
+          Exec=gnome-terminal --wait -- /usr/local/bin/cuberhaus-first-login
+          OnlyShowIn=GNOME;
+          X-GNOME-Autostart-enabled=true
+          X-GNOME-Autostart-Delay=10
+
+  shutdown: reboot
