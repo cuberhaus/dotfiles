@@ -72,10 +72,9 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 
 ## How scripts are loaded
 
-- **`bin/`** is added to `$PATH` by `.zshenv` for Zsh and `.bashrc` for Bash,
-  so its contents are available as commands in either shell. The same shell
-  configuration exposes pipx applications from `$HOME/.local/bin`; bootstrap
-  scripts do not let `pipx ensurepath` rewrite startup files.
+- **`bin/`** is added to `$PATH` by `.zshenv` for Zsh. pipx applications in
+  `$HOME/.local/bin` are exposed by `.zshenv` for Zsh and `.bashrc` for Bash;
+  bootstrap scripts do not let `pipx ensurepath` rewrite startup files.
 - **`vault-secret`** opens a dynamic credential selector for the Obsidian
   vault's SOPS store. Use `vault-secret list`, `vault-secret <entry>`, or
   `vault-secret edit` for direct operations; set `VAULT_ROOT` when the vault is

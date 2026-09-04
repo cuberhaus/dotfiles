@@ -11,20 +11,21 @@ fail() {
     exit 1
 }
 
-if grep -Fq 'Created by `pipx`' "$repo_root/.bashrc" "$repo_root/.bash_profile"; then
+if grep -Fq "Created by \`pipx\`" "$repo_root/.bashrc" "$repo_root/.bash_profile"; then
     fail 'shell startup files contain pipx-generated PATH entries'
 fi
 
 mkdir -p "$case_dir/home/.local/bin"
-path_result="$({
-    set +e
-    set +u
-    HOME="$case_dir/home"
-    PATH="/usr/bin:/bin"
-    source "$repo_root/.bashrc"
-    source "$repo_root/.bashrc"
-    printf '%s\n' "$PATH"
-} 2>/dev/null)"
+# Variables in the command string are expanded by the child Bash process.
+# shellcheck disable=SC2016
+path_result="$(
+    REPO_ROOT="$repo_root" env HOME="$case_dir/home" PATH="/usr/bin:/bin" \
+        bash --noprofile --norc -c '
+            source "$REPO_ROOT/.bashrc"
+            source "$REPO_ROOT/.bashrc"
+            printf "%s\n" "$PATH"
+        ' 2>/dev/null
+)"
 
 if [[ "$path_result" != "$case_dir/home/.local/bin:/usr/bin:/bin" ]]; then
     fail "expected one portable local-bin entry, got: $path_result"
@@ -49,7 +50,7 @@ chmod +x "$case_dir/bin/pipx"
 
 grep -Fxq 'install vim-vint' "$case_dir/pipx.log" ||
     fail 'python bootstrap did not install vim-vint through pipx'
-grep -Fxq 'inject vim-vint setuptools<81' "$case_dir/pipx.log" ||
+grep -Fxq 'inject --force vim-vint setuptools<81' "$case_dir/pipx.log" ||
     fail 'python bootstrap did not provide vim-vint with pkg_resources'
 if grep -Fq 'ensurepath' "$case_dir/pipx.log"; then
     fail 'python bootstrap invoked mutating pipx ensurepath'

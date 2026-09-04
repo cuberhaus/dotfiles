@@ -132,7 +132,7 @@ python_install() {
     # Linter for vimrc
     command -v vint &>/dev/null || pipx install vim-vint
     # vim-vint imports pkg_resources without declaring setuptools.
-    vint --version &>/dev/null || pipx inject vim-vint 'setuptools<81'
+    vint --version &>/dev/null || pipx inject --force vim-vint 'setuptools<81'
 
     # Add pip/pipx packages below as needed:
     # pipx install <package>
