@@ -97,19 +97,21 @@ Most bootstrap entrypoints follow this pattern:
 
 1. Source `base_functions` (logging, `$DOTFILES` auto-detection, common prep).
 2. Source the OS-specific `*_functions` file (package lists, installers).
-3. Ask if this is a first-time install.
-4. Run system update.
-5. Call installer functions in dependency order.
-6. Switch default shell to zsh.
-7. Install package-maintenance and workspace-pull schedules through the root
+3. Run system update.
+4. Call installer functions in dependency order, converging machine-specific
+  state from hardware, service, and group checks.
+5. Switch default shell to zsh.
+6. Install package-maintenance and workspace-pull schedules through the root
   Makefile target.
 
 The work bootstrap mirrors all terminal output to a persistent per-run log at
 `${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus/bootstrap/work-<UTC timestamp>-<PID>.log`.
 The log path is printed when the bootstrap starts. Its source-safe `work_main`
 entrypoint is exercised with destructive stages replaced by test doubles in
-`tests/test_bootstrap_work.sh`. For unattended runs, authorize `sudo` first
-with `sudo -v`; the entrypoint then uses noninteractive sudo and apt behavior.
+`tests/test_bootstrap_work.sh`. Bootstrap Make targets are unattended by
+default; authorize `sudo` first with `sudo -v`, and the entrypoint then uses
+noninteractive sudo and apt behavior. Pass `BOOTSTRAP_ARGS=` to a direct target
+to restore interactive prompts.
 After provisioning, the shared `bootstrap-workspace` Make target clones the
 authenticated private workspace repository when absent, restores its pinned
 skills by default, retries an incomplete initial restore, and runs its Linux

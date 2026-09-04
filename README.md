@@ -161,12 +161,14 @@ make bootstrap-mac       # macOS
 make bootstrap-work      # Work machine (Ubuntu + NVIDIA workstation)
 ```
 
-For deterministic provisioning, use `make bootstrap-unattended PROFILE=<os>`.
-Set `FIRST_RUN=yes` only when one-time hardware setup is intended, and
-`HIGH_DPI=yes` when the work profile should change display scaling. The
-defaults are `no`, so unattended setup never opts into either action.
-Before an unattended work bootstrap, run `sudo -v` in the same terminal. The
-work entrypoint verifies cached credentials and keeps its direct `sudo` calls
+Bootstrap targets are deterministic and noninteractive by default. They derive
+machine-specific setup from current state: systemd converges service state,
+missing group memberships are added, and laptop configuration runs only when
+`laptop-detect` identifies a laptop. High-DPI changes remain opt-in; use
+`make bootstrap-unattended PROFILE=<os> HIGH_DPI=yes` when intended. Pass
+`BOOTSTRAP_ARGS=` to restore interactive prompts for a direct `bootstrap-<os>`
+target. Before a work bootstrap, run `sudo -v` in the same terminal. The work
+entrypoint verifies cached credentials and keeps its direct `sudo` calls
 noninteractive instead of waiting for a password prompt.
 
 Each bootstrap target also ensures the private `cuberhaus/cuberhaus-workspace`
@@ -220,9 +222,9 @@ Each bootstrap entrypoint follows the same pattern:
 
 1. Sources `base_functions` (shared logging helpers and `$DOTFILES` auto-detection).
 2. Sources the OS-specific `*_functions` file (package lists and installer functions).
-3. Asks whether this is a first-time install (enables services, sets up hardware, etc.).
-4. Runs a system update.
-5. Calls installer functions in dependency order (base packages, WM-specific, optional apps).
+3. Runs a system update.
+4. Calls installer functions in dependency order (base packages, WM-specific, optional apps).
+5. Converges service, group, and hardware-specific state where applicable.
 6. Switches the default shell to zsh.
 7. Installs the native maintenance schedules shown below.
 

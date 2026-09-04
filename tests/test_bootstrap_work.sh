@@ -234,11 +234,10 @@ apply_skip_worktree() { record 'skip-worktree'; }
 gsettings() { printf '1.0\n'; }
 info() { :; }
 
-work_main --unattended --no-stow --first-run=no --high-dpi=no </dev/null
+work_main --unattended --no-stow --high-dpi=no </dev/null
 
 [ "$UNATTENDED" = true ] || fail '--unattended was not parsed'
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
-[ "$FIRST_RUN_CHOICE" = no ] || fail '--first-run was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
 expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\nshutdown-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\ndocker\ngcloud\ngui-apps\nhigh-dpi-choice:no\nskip-worktree'

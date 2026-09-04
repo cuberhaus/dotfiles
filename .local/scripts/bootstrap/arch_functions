@@ -216,6 +216,18 @@ git_repos() {
     fi
 }
 
+configure_arch_services() {
+    sudo systemctl enable --now org.cups.cupsd.service
+    sudo systemctl enable bluetooth.service
+    sudo systemctl enable lightdm.service
+    sudo systemctl enable systemd-timesyncd.service
+    sudo timedatectl set-ntp true
+    if systemctl list-unit-files ntpd.service --no-legend 2>/dev/null | grep -q '^ntpd\.service'; then
+        sudo systemctl disable --now ntpd.service
+    fi
+    sudo systemctl enable NetworkManager.service
+}
+
 arch_install() {
     local packages=(
         # Display
@@ -257,16 +269,7 @@ arch_install() {
 
     $yay pulseaudio-modules-bt  # High quality audio codecs
 
-    if [[ $FirstRun == y || $FirstRun == Y ]]; then
-        sudo systemctl enable org.cups.cupsd.service
-        sudo systemctl start org.cups.cupsd.service
-        systemctl enable bluetooth.service
-        systemctl enable lightdm.service
-        systemctl enable systemd-timesyncd.service
-        sudo timedatectl set-ntp true
-        systemctl disable ntpd.service
-        systemctl enable NetworkManager.service
-    fi
+    configure_arch_services
 
     sudo sed -i '/HandlePowerKey/s/.*/HandlePowerKey=ignore/' /etc/systemd/logind.conf
 }
@@ -511,7 +514,6 @@ games_install () {
     $pac "${packages[@]}"
 }
 
-### DO ONCE
 # This function enables NaturalScrolling for the touchpad
 trackpad_scrolling () {
     local conf="/etc/X11/xorg.conf.d/30-touchpad.conf"
@@ -539,8 +541,13 @@ activate_reisub () {
 }
 
 laptop_install() {
+    if ! command -v laptop-detect >/dev/null 2>&1 || ! laptop-detect; then
+        info "Laptop-specific configuration is not needed, skipping."
+        return
+    fi
+
     $pac tlp        # Manage resources to improve battery usage
-    sudo systemctl enable tlp.service
+    sudo systemctl enable --now tlp.service
     trackpad_scrolling
 }
 

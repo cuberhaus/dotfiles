@@ -111,14 +111,36 @@ class InstallationAuditContractTests(unittest.TestCase):
             self.assertIn(step, repair)
 
     def test_unattended_bootstrap_choices_are_deterministic(self):
+        makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
         source = (
             REPO_ROOT / ".local" / "scripts" / "bootstrap" / "base_functions"
         ).read_text(encoding="utf-8")
 
-        for option in ("--unattended)", "--first-run=yes|--first-run=no)", "--high-dpi=yes|--high-dpi=no)"):
+        self.assertIn("BOOTSTRAP_ARGS ?= --unattended", makefile.splitlines())
+        for option in ("--unattended)", "--high-dpi=yes|--high-dpi=no)"):
             self.assertIn(option, source)
-        self.assertIn("FirstRun=n", source)
         self.assertIn("HIGH_DPI=false", source)
+
+    def test_bootstrap_derives_one_time_setup_from_machine_state(self):
+        bootstrap_dir = REPO_ROOT / ".local" / "scripts" / "bootstrap"
+        makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+        sources = {
+            path.name: path.read_text(encoding="utf-8")
+            for path in bootstrap_dir.iterdir()
+            if path.is_file()
+        }
+
+        self.assertNotIn("FIRST_RUN", makefile)
+        for name, source in sources.items():
+            self.assertNotIn("FirstRun", source, name)
+            self.assertNotIn("FIRST_RUN", source, name)
+            self.assertNotIn("--first-run", source, name)
+
+        arch_functions = sources["arch_functions"]
+        ubuntu_functions = sources["ubuntu_functions"]
+        self.assertIn("laptop-detect", arch_functions)
+        self.assertIn("systemctl enable --now", arch_functions)
+        self.assertIn('id -nG "$user"', ubuntu_functions)
 
     def test_every_bootstrap_entrypoint_parses_shared_arguments(self):
         bootstrap_dir = REPO_ROOT / ".local" / "scripts" / "bootstrap"

@@ -39,7 +39,6 @@ parse_bootstrap_args() {
     DUAL_BOOT_UTC=false
     UNATTENDED=false
     SKIP_STOW=false
-    FIRST_RUN_CHOICE=""
     HIGH_DPI_CHOICE=""
 
     while (( $# > 0 )); do
@@ -53,9 +52,6 @@ parse_bootstrap_args() {
             --no-stow)
                 SKIP_STOW=true
                 ;;
-            --first-run=yes|--first-run=no)
-                FIRST_RUN_CHOICE="${1#*=}"
-                ;;
             --high-dpi=yes|--high-dpi=no)
                 HIGH_DPI_CHOICE="${1#*=}"
                 ;;
@@ -67,7 +63,7 @@ parse_bootstrap_args() {
         shift
     done
 
-    export DUAL_BOOT_UTC UNATTENDED SKIP_STOW FIRST_RUN_CHOICE HIGH_DPI_CHOICE
+    export DUAL_BOOT_UTC UNATTENDED SKIP_STOW HIGH_DPI_CHOICE
 }
 
 ## Return the dotfiles checkout root used by this bootstrap invocation.
@@ -174,25 +170,6 @@ bootstrap_stow_checkout() {
 
     bash "$dotfiles_root/.local/scripts/stow-backup-conflicts"
     stow -v -t "$HOME" -d "$parent_dir" "$package_name"
-}
-
-resolve_first_run_choice() {
-    case "${FIRST_RUN_CHOICE:-}" in
-        yes) FirstRun=y ;;
-        no) FirstRun=n ;;
-        "")
-            if [ "${UNATTENDED:-false}" = true ]; then
-                FirstRun=n
-            else
-                read -rp "Is this a first-time install? (y/n): " FirstRun
-            fi
-            ;;
-        *)
-            error "Invalid first-run choice: $FIRST_RUN_CHOICE"
-            return 2
-            ;;
-    esac
-    export FirstRun
 }
 
 resolve_high_dpi_choice() {

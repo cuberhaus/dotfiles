@@ -72,6 +72,16 @@ bloat_install () {
     $apt cmatrix cowsay fortune neofetch   # A cow, random quotes, system info
 }
 
+ensure_virtualization_groups() {
+    local user group
+    user="$(id -un)"
+    for group in libvirt kvm; do
+        if ! id -nG "$user" | tr ' ' '\n' | grep -Fxq "$group"; then
+            sudo usermod -aG "$group" "$user"
+        fi
+    done
+}
+
 ubuntu_install() {
     local packages=(
         LXAppearance            # Theme
@@ -126,10 +136,7 @@ ubuntu_install() {
         warn "Failed to download gnome-terminal theme"
     fi
 
-    if [[ $FirstRun == y ]]; then
-        sudo adduser "$(id -un)" libvirt
-        sudo adduser "$(id -un)" kvm
-    fi
+    ensure_virtualization_groups
 }
 
 albert_install () {

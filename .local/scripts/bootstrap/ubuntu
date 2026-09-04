@@ -11,9 +11,6 @@ source "$bootstrap_dir/ubuntu_functions"
 parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
 
-### FIRST RUN
-resolve_first_run_choice
-
 ### INSTALLATION
 info "Updating system..."
 sudo apt-get update && sudo apt-get full-upgrade -y

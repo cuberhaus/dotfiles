@@ -10,9 +10,8 @@ GITLEAKS ?= $(LOCALAPPDATA)/Microsoft/WinGet/Links/gitleaks.exe
 else
 PYTHON ?= python3
 endif
-BOOTSTRAP_ARGS ?=
+BOOTSTRAP_ARGS ?= --unattended
 PROFILE ?= auto
-FIRST_RUN ?= no
 HIGH_DPI ?= no
 REPAIR ?=
 RESTORE_APPS ?=
@@ -77,6 +76,7 @@ lint: ## Run shellcheck on all shell scripts
 test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_installation_audit.py
 	bash tests/test_bootstrap_stow.sh
+	bash tests/test_bootstrap_machine_state.sh
 	bash tests/test_bootstrap_work.sh
 	bash tests/test_shell_path.sh
 
@@ -215,9 +215,9 @@ antigen-update: ## Fetch the latest antigen.zsh from GitHub
 dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
 	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'
 
-bootstrap-unattended: ## Provision without prompts (PROFILE required; FIRST_RUN=no, HIGH_DPI=no)
+bootstrap-unattended: ## Provision without prompts (PROFILE required; HIGH_DPI=no)
 	@case "$(PROFILE)" in arch|manjaro|ubuntu|ubuntu-windows|mac|work) ;; *) echo "PROFILE must be arch, manjaro, ubuntu, ubuntu-windows, mac, or work" >&2; exit 2 ;; esac
-	@$(MAKE) --no-print-directory bootstrap-$(PROFILE) BOOTSTRAP_ARGS="--unattended --first-run=$(FIRST_RUN) --high-dpi=$(HIGH_DPI)"
+	@$(MAKE) --no-print-directory bootstrap-$(PROFILE) BOOTSTRAP_ARGS="--unattended --high-dpi=$(HIGH_DPI)"
 
 bootstrap-arch: ## Run Arch bootstrap (then deploy workspace files)
 	bash .local/scripts/bootstrap/arch $(BOOTSTRAP_ARGS)

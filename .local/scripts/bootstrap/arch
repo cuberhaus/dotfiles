@@ -11,9 +11,6 @@ source "$bootstrap_dir/arch_functions"
 parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
 
-### FIRST RUN
-resolve_first_run_choice
-
 ### INSTALLATION
 info "Updating system..."
 sudo pacman -Syu
@@ -44,10 +41,8 @@ xmonad_install
 apps_AUR_install
 cava_install
 dwall
-if [[ "${FirstRun}" == y || "${FirstRun}" == Y ]]; then
-    laptop_install # DO ONLY ONCE
-    activate_reisub # DO ONLY ONCE
-fi
+laptop_install
+activate_reisub
 ai_tools_install
 vim_install
 wget -qO- https://git.io/papirus-folders-install | sh # Install folder colors https://github.com/PapirusDevelopmentTeam/papirus-folders

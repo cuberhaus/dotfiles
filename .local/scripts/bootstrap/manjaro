@@ -13,9 +13,6 @@ source "$bootstrap_dir/arch_functions"
 parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
 
-### FIRST RUN
-resolve_first_run_choice
-
 ### INSTALLATION
 info "Updating system..."
 sudo pacman -Syu
