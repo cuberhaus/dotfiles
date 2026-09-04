@@ -19,6 +19,7 @@ RESTORE_APPS ?=
 RESTORE_APPLY ?= 0
 CUBERHAUS_WORKSPACE_DIR ?= ../cuberhaus-workspace
 CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
+RESTORE_WORKSPACE_SKILLS ?= 1
 
 .PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
@@ -179,8 +180,13 @@ bootstrap-workspace: ## Clone the private workspace repository when needed, then
 		fi; \
 		echo "Cloning $(CUBERHAUS_WORKSPACE_REPO) into $(CUBERHAUS_WORKSPACE_DIR)..."; \
 		GH_PROMPT_DISABLED=1 gh repo clone "$(CUBERHAUS_WORKSPACE_REPO)" "$(CUBERHAUS_WORKSPACE_DIR)" || exit $$?; \
-		echo "Restoring pinned workspace skills..."; \
+	fi; \
+	if [ "$(RESTORE_WORKSPACE_SKILLS)" = 1 ] && \
+		[ ! -e "$(CUBERHAUS_WORKSPACE_DIR)/.agents/skills/.restore-complete" ]; then \
+		echo "Restoring approved pinned workspace skills..."; \
 		npm_config_yes=true $(MAKE) --no-print-directory -C "$(CUBERHAUS_WORKSPACE_DIR)" skills-restore || exit $$?; \
+		mkdir -p "$(CUBERHAUS_WORKSPACE_DIR)/.agents/skills"; \
+		touch "$(CUBERHAUS_WORKSPACE_DIR)/.agents/skills/.restore-complete"; \
 	fi
 	@bash "$(CUBERHAUS_WORKSPACE_DIR)/sync.sh"
 

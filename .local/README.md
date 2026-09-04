@@ -112,7 +112,8 @@ entrypoint is exercised with destructive stages replaced by test doubles in
 with `sudo -v`; the entrypoint then uses noninteractive sudo and apt behavior.
 After provisioning, the shared `bootstrap-workspace` Make target clones the
 authenticated private workspace repository when absent, restores its pinned
-skills on that first clone, and runs its Linux sync script.
+skills by default, retries an incomplete initial restore, and runs its Linux
+sync script.
 
 See the root [README](../README.md) for quick-start instructions.
 

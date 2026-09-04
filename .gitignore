@@ -168,6 +168,7 @@
 # Utilities
 !.config/systemd/
 !.config/systemd/**
+.config/systemd/user/*.wants/
 !.config/ranger/
 !.config/ranger/**
 !.config/tmux/

@@ -172,7 +172,9 @@ noninteractive instead of waiting for a password prompt.
 Each bootstrap target also ensures the private `cuberhaus/cuberhaus-workspace`
 sibling exists. Authenticate `gh` before a first run; the target clones the
 repository, restores its pinned skills without prompting, and then syncs the
-workspace files. Existing checkouts are reused.
+workspace files. Existing checkouts are reused, and an interrupted initial
+skill restore is retried on the next run. Set `RESTORE_WORKSPACE_SKILLS=0` only
+when the generated skill payloads must be skipped.
 
 App-data restores are guarded and preview-first:
 

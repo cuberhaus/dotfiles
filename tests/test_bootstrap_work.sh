@@ -130,6 +130,8 @@ test_cursor_install_detection() {
 test_workspace_is_cloned_before_sync() {
     local fake_bin="$CASE_DIR/workspace-bin"
     local gh_log="$CASE_DIR/gh.log"
+    local restore_attempt_log="$CASE_DIR/workspace-restore-attempt.log"
+    local restore_failure_marker="$CASE_DIR/workspace-restore-failed"
     local restore_log="$CASE_DIR/workspace-restore.log"
     local sync_log="$CASE_DIR/workspace-sync.log"
     local workspace_dir="$CASE_DIR/cuberhaus-workspace"
@@ -141,8 +143,12 @@ test_workspace_is_cloned_before_sync() {
 printf '%s\n' "$*" >> "$FAKE_GH_LOG"
 mkdir -p "$4/.git"
 cat > "$4/Makefile" <<'WORKSPACE_MAKEFILE'
+.RECIPEPREFIX := >
 skills-restore:
-	@printf 'restore\n' >> "$$FAKE_WORKSPACE_RESTORE_LOG"
+>@printf 'attempt\n' >> "$$FAKE_WORKSPACE_RESTORE_ATTEMPT_LOG"
+>@test -e "$$FAKE_WORKSPACE_RESTORE_FAILURE_MARKER" || { touch "$$FAKE_WORKSPACE_RESTORE_FAILURE_MARKER"; exit 1; }
+>@mkdir -p .agents/skills
+>@printf 'restore\n' >> "$$FAKE_WORKSPACE_RESTORE_LOG"
 WORKSPACE_MAKEFILE
 cat > "$4/sync.sh" <<'SYNC_SCRIPT'
 #!/usr/bin/env bash
@@ -157,8 +163,16 @@ EOF
     chmod +x "$fake_bin/gh"
 
     export FAKE_GH_LOG="$gh_log"
+    export FAKE_WORKSPACE_RESTORE_ATTEMPT_LOG="$restore_attempt_log"
+    export FAKE_WORKSPACE_RESTORE_FAILURE_MARKER="$restore_failure_marker"
     export FAKE_WORKSPACE_RESTORE_LOG="$restore_log"
     export FAKE_WORKSPACE_SYNC_LOG="$sync_log"
+    if PATH="$fake_bin:$PATH" "$make_command" --no-print-directory -C "$REPO_ROOT" \
+        bootstrap-workspace CUBERHAUS_WORKSPACE_DIR="$workspace_dir"; then
+        fail 'bootstrap must fail when initial workspace skill restoration fails'
+    fi
+    [ ! -s "$sync_log" ] || fail 'workspace sync must not run after failed skill restoration'
+
     PATH="$fake_bin:$PATH" "$make_command" --no-print-directory -C "$REPO_ROOT" \
         bootstrap-workspace CUBERHAUS_WORKSPACE_DIR="$workspace_dir"
     PATH="$fake_bin:$PATH" "$make_command" --no-print-directory -C "$REPO_ROOT" \
@@ -166,19 +180,29 @@ EOF
 
     [ "$(grep -c '^repo clone cuberhaus/cuberhaus-workspace ' "$gh_log")" -eq 1 ] ||
         fail 'workspace repository must be cloned exactly once'
+    [ "$(grep -c '^attempt$' "$restore_attempt_log")" -eq 2 ] ||
+        fail 'workspace skill restoration must retry after an interrupted first attempt'
     [ "$(grep -c '^restore$' "$restore_log")" -eq 1 ] ||
-        fail 'workspace skills must be restored once before the first sync'
+        fail 'workspace skills must not be reinstalled after restoration succeeds'
     [ "$(grep -c '^sync$' "$sync_log")" -eq 2 ] ||
         fail 'workspace repository must be synced on every invocation'
     [ "$(grep -c 'bootstrap-workspace' "$REPO_ROOT/Makefile")" -ge 7 ] ||
         fail 'all OS bootstrap targets must use the shared workspace prerequisite'
+    grep -Fq 'RESTORE_WORKSPACE_SKILLS ?= 1' "$REPO_ROOT/Makefile" ||
+        fail 'workspace skill installation must be enabled by default'
 
-    unset FAKE_GH_LOG FAKE_WORKSPACE_RESTORE_LOG FAKE_WORKSPACE_SYNC_LOG
+    unset FAKE_GH_LOG FAKE_WORKSPACE_RESTORE_ATTEMPT_LOG
+    unset FAKE_WORKSPACE_RESTORE_FAILURE_MARKER FAKE_WORKSPACE_RESTORE_LOG
+    unset FAKE_WORKSPACE_SYNC_LOG
 }
 
 test_dev_tools_preserve_git_credentials
 test_cursor_install_detection
 test_workspace_is_cloned_before_sync
+
+git check-ignore -q \
+    .config/systemd/user/timers.target.wants/cuberhaus-workspace-pull.timer ||
+    fail 'runtime systemd timer links must be ignored'
 
 record() {
     printf '%s\n' "$1" >> "$EVENT_LOG"
