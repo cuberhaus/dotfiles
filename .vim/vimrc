@@ -16,7 +16,6 @@ if has('unix') || has('macunix')
         let &viminfo .= ",'1000,n" . s:data_home . '/vim/viminfo'
     endif
     if !has('nvim')
-        set nocompatible
         " if cannot open viminfo file for reading create a cache folder and viminfo
         set viminfo=%,<800,'10,/50,:100,h,f0,n~/.vim/cache/viminfo
 "                   | |    |   |   |    | |  + viminfo file path
@@ -35,7 +34,10 @@ if has('unix') || has('macunix')
   if empty(glob('~/.vim/autoload/plug.vim'))
       silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
                   \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-      autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+      augroup bootstrap_vim_plug
+          autocmd!
+          autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+      augroup END
   endif
 endif
 " Specify a directory for plugins
@@ -80,7 +82,10 @@ Plug 'ycm-core/YouCompleteMe'
 " Plug 'lifepillar/vim-solarized8'
 call plug#end()
 "Acaben els plugins
-autocmd! User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
+augroup register_which_key
+    autocmd!
+    autocmd User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
+augroup END
 let g:UltiSnipsExpandTrigger='<S-e>' " insert snippet !!
 let g:UltiSnipsJumpForwardTrigger='<c-b>'
 let g:UltiSnipsJumpBackwardTrigger='<c-z>'
@@ -114,7 +119,7 @@ if has('win32')
     set clipboard=unnamed
 endif
 
-if system('uname -s') == "Darwin\n"
+if system('uname -s') ==# "Darwin\n"
   set clipboard=unnamed "OSX
 else
   set clipboard=unnamedplus "Linux
@@ -134,7 +139,10 @@ set number
 set mouse=a
 
 " Disable auto comments
-autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+augroup disable_auto_comments
+    autocmd!
+    autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+augroup END
 
 " Set 4 lines to the cursor - when moving vertically using j/k
 set scrolloff=4 " margin
@@ -181,7 +189,7 @@ set showmatch
 set belloff=all
 
 " Change cursor to a vertical thin line while in insert mode and underscore while replacing
-if system('uname -s') == "Darwin\n"
+if system('uname -s') ==# "Darwin\n"
     "Mode Settings
     let &t_SI.="\e[5 q" "SI = INSERT mode
     let &t_SR.="\e[4 q" "SR = REPLACE mode
@@ -196,7 +204,10 @@ endif
 set autochdir
 
 " Return to last edit position when opening files (You want this!)
-au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+augroup restore_last_position
+    autocmd!
+    autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+augroup END
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 " Define prefix dictionary
@@ -299,7 +310,7 @@ nmap <leader>tt :TagbarToggle<CR>
 function! GotoJump()
   jumps
   let j = input('Please select your jump: ')
-  if j != ''
+    if j !=# ''
     let pattern = '\v\c^\+'
     if j =~ pattern
       let j = substitute(j, pattern, '', 'g')
@@ -333,7 +344,7 @@ nmap <leader>tm <Plug>MarkdownPreviewToggle
 "Autoformat
 noremap <F3> :Autoformat<CR>
 
-if system('uname -s') == "Darwin\n"
+if system('uname -s') ==# "Darwin\n"
     "Toggle nerd Tree ctrl-spacebar
     if has('gui_running')
         nmap <C-Space> :NERDTreeToggle <CR>

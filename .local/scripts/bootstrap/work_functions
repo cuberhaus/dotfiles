@@ -129,11 +129,10 @@ python_install() {
         python3-venv \
         pipx
 
-    # Ensure pipx path is available
-    pipx ensurepath || true
-
     # Linter for vimrc
     command -v vint &>/dev/null || pipx install vim-vint
+    # vim-vint imports pkg_resources without declaring setuptools.
+    vint --version &>/dev/null || pipx inject vim-vint 'setuptools<81'
 
     # Add pip/pipx packages below as needed:
     # pipx install <package>
@@ -415,7 +414,9 @@ EOF
     # Claude Code (Anthropic CLI)
     if ! command -v claude &>/dev/null; then
         info "Installing Claude Code..."
-        curl -fsSL https://claude.ai/install.sh | sh
+        local claude_installer
+        claude_installer=$(curl -fsSL https://claude.ai/install.sh)
+        CI=1 bash -c "$claude_installer" </dev/null
     else
         info "Claude Code already installed, skipping."
     fi

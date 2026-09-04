@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2317
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -57,6 +58,31 @@ run_stow_preflight() {
         bootstrap_confirm_stow() { [ "${TEST_CONFIRM:-yes}" = yes ]; }
         bootstrap_stow_checkout "$1"
     )
+}
+
+test_bootstrap_logging_mirrors_output() {
+    setup_case
+    (
+        export XDG_STATE_HOME="$CASE_DIR/state"
+        source "$BASE_FUNCTIONS"
+        bootstrap_enable_logging work
+        printf 'bootstrap logging test\n'
+        exec 1>&- 2>&-
+        wait "$BOOTSTRAP_LOG_TEE_PID"
+    )
+    local log_file
+    log_file="$(find "$CASE_DIR/state/cuberhaus/bootstrap" -type f -name 'work-*.log' -print -quit)"
+    [ -n "$log_file" ] || fail 'Expected the work bootstrap to create a log file'
+    assert_file_contains "$log_file" 'bootstrap logging test'
+    teardown_case
+}
+
+test_logged_output_retains_interactive_state() {
+    (
+        source "$BASE_FUNCTIONS"
+        BOOTSTRAP_STDOUT_WAS_TTY=true
+        bootstrap_stdout_is_interactive
+    ) || fail 'Logging must preserve the original interactive stdout state'
 }
 
 test_clean_install_applies_previewed_links() {
@@ -153,8 +179,11 @@ test_entrypoints_use_checkout_relative_paths() {
         assert_file_contains "$REPO_ROOT/.local/scripts/bootstrap/$entrypoint" 'DOTFILES_ROOT='
         assert_file_contains "$REPO_ROOT/.local/scripts/bootstrap/$entrypoint" 'bootstrap_stow_checkout'
     done
+    assert_file_contains "$REPO_ROOT/.local/scripts/bootstrap/work" 'bootstrap_enable_logging work'
 }
 
+test_bootstrap_logging_mirrors_output
+test_logged_output_retains_interactive_state
 test_clean_install_applies_previewed_links
 test_existing_links_are_idempotent
 test_conflicts_are_backed_up_after_confirmation

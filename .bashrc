@@ -8,14 +8,15 @@ BASE16_SHELL="$HOME/.config/base16-shell/"
     [ -s "$BASE16_SHELL/profile_helper.sh" ] && \
     eval "$("$BASE16_SHELL/profile_helper.sh")"
 
-### Prompt
-# For more info: https://github.com/magicmonty/bash-git-prompt
-GIT_PROMPT_ONLY_IN_REPO=0 # Set config variables first
-GIT_PROMPT_THEME_FILE=~/.config/.git-prompt-colors.sh
-GIT_PROMPT_THEME=Custom
-if [ -f ~/.config/bash-git-prompt/gitprompt.sh ]; then
-    source ~/.config/bash-git-prompt/gitprompt.sh
-fi
+###############################################################
+# => Path
+###############################################################
+
+case ":${PATH:-}:" in
+    *:"$HOME/.local/bin":*) ;;
+    *) PATH="$HOME/.local/bin${PATH:+:$PATH}" ;;
+esac
+export PATH
 
 ###############################################################
 # => Configuration

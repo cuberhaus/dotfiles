@@ -72,8 +72,10 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 
 ## How scripts are loaded
 
-- **`bin/`** is added to `$PATH` by `.zshenv` so its contents are available
-  as commands in any shell.
+- **`bin/`** is added to `$PATH` by `.zshenv` for Zsh and `.bashrc` for Bash,
+  so its contents are available as commands in either shell. The same shell
+  configuration exposes pipx applications from `$HOME/.local/bin`; bootstrap
+  scripts do not let `pipx ensurepath` rewrite startup files.
 - **`vault-secret`** opens a dynamic credential selector for the Obsidian
   vault's SOPS store. Use `vault-secret list`, `vault-secret <entry>`, or
   `vault-secret edit` for direct operations; set `VAULT_ROOT` when the vault is
@@ -102,6 +104,10 @@ Each bootstrap entrypoint (e.g. `bootstrap/arch`) follows this pattern:
 6. Switch default shell to zsh.
 7. Install package-maintenance and workspace-pull schedules through the root
   Makefile target.
+
+The work bootstrap mirrors all terminal output to a persistent per-run log at
+`${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus/bootstrap/work-<UTC timestamp>-<PID>.log`.
+The log path is printed when the bootstrap starts.
 
 See the root [README](../README.md) for quick-start instructions.
 

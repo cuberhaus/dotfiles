@@ -8,6 +8,7 @@ bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
 export DOTFILES_ROOT
 source "$bootstrap_dir/base_functions"
+bootstrap_enable_logging work
 source "$bootstrap_dir/work_functions"
 parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
