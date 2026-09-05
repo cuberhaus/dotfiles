@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+"""Send one email for each unseen item in the configured RSS feed."""
+
+import json
+import os
+import smtplib
+import ssl
+import sys
+import tempfile
+import urllib.request
+import xml.etree.ElementTree as ET
+from dataclasses import dataclass
+from email.message import EmailMessage
+from html.parser import HTMLParser
+from pathlib import Path
+
+
+DEFAULT_FEED_URL = "https://steamcommunity.com/groups/GrabFreeGames/rss/"
+
+
+@dataclass(frozen=True)
+class FeedItem:
+    guid: str
+    title: str
+    link: str
+    description: str
+    published: str
+
+
+class TextExtractor(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(data)
+
+    def handle_starttag(
+        self, tag: str, attributes: list[tuple[str, str | None]]
+    ) -> None:
+        del attributes
+        if tag in {"br", "div", "li", "p"}:
+            self.parts.append("\n")
+
+    def text(self) -> str:
+        lines = [" ".join(line.split()) for line in "".join(self.parts).splitlines()]
+        return "\n".join(line for line in lines if line)
+
+
+def load_credentials() -> dict[str, str]:
+    credentials_directory = Path(
+        os.environ.get("CREDENTIALS_DIRECTORY", "/etc/cuberhaus")
+    )
+    credential_path = credentials_directory / "rss-email.json"
+    with credential_path.open(encoding="utf-8") as credential_file:
+        credentials = json.load(credential_file)
+
+    for field in ("sender", "recipient", "app_password"):
+        if not isinstance(credentials.get(field), str) or not credentials[field]:
+            raise ValueError(f"RSS email credential field is missing: {field}")
+    return credentials
+
+
+def fetch_items(feed_url: str) -> list[FeedItem]:
+    request = urllib.request.Request(
+        feed_url,
+        headers={"User-Agent": "pol-server-rss-email/1.0"},
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
+        root = ET.fromstring(response.read())
+
+    items: list[FeedItem] = []
+    guids: set[str] = set()
+    for item in root.findall("./channel/item"):
+        guid = (item.findtext("guid") or "").strip()
+        if not guid:
+            raise ValueError("RSS item is missing a GUID")
+        if guid in guids:
+            continue
+        title = " ".join((item.findtext("title") or "Untitled feed item").split())
+        link = (item.findtext("link") or "").strip()
+        extractor = TextExtractor()
+        extractor.feed(item.findtext("description") or "")
+        items.append(
+            FeedItem(
+                guid=guid,
+                title=title,
+                link=link,
+                description=extractor.text(),
+                published=(item.findtext("pubDate") or "").strip(),
+            )
+        )
+        guids.add(guid)
+    if not items:
+        raise ValueError("RSS feed contains no items")
+    return items
+
+
+def write_seen_guids(state_path: Path, guids: list[str]) -> None:
+    state_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    file_descriptor, temporary_name = tempfile.mkstemp(
+        prefix=".seen-guids.", dir=state_path.parent
+    )
+    try:
+        with os.fdopen(file_descriptor, "w", encoding="utf-8") as state_file:
+            json.dump(guids, state_file)
+            state_file.write("\n")
+        os.replace(temporary_name, state_path)
+    except BaseException:
+        Path(temporary_name).unlink(missing_ok=True)
+        raise
+
+
+def read_seen_guids(state_path: Path) -> list[str]:
+    with state_path.open(encoding="utf-8") as state_file:
+        guids = json.load(state_file)
+    if not isinstance(guids, list) or not all(
+        isinstance(guid, str) and guid for guid in guids
+    ):
+        raise ValueError("RSS email state is invalid")
+    return guids
+
+
+def build_message(item: FeedItem, sender: str, recipient: str) -> EmailMessage:
+    message = EmailMessage()
+    message["Subject"] = item.title.replace("\r", " ").replace("\n", " ")
+    message["From"] = sender
+    message["To"] = recipient
+    sections = [item.title]
+    if item.published:
+        sections.append(f"Published: {item.published}")
+    if item.description:
+        sections.append(item.description)
+    if item.link:
+        sections.append(item.link)
+    message.set_content("\n\n".join(sections))
+    return message
+
+
+def send_new_items(
+    items: list[FeedItem], credentials: dict[str, str], state_path: Path
+) -> int:
+    seen_guids = read_seen_guids(state_path)
+    seen = set(seen_guids)
+    new_items = [item for item in reversed(items) if item.guid not in seen]
+    if not new_items:
+        print("No new feed items")
+        return 0
+
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
+        smtp.ehlo()
+        smtp.starttls(context=ssl.create_default_context())
+        smtp.ehlo()
+        smtp.login(credentials["sender"], credentials["app_password"])
+        for item in new_items:
+            smtp.send_message(
+                build_message(item, credentials["sender"], credentials["recipient"])
+            )
+            seen_guids.append(item.guid)
+            seen.add(item.guid)
+            write_seen_guids(state_path, seen_guids)
+
+    print(f"Sent feed items: {len(new_items)}")
+    return 0
+
+
+def run() -> int:
+    credentials = load_credentials()
+    feed_url = os.environ.get("RSS_EMAIL_FEED_URL", DEFAULT_FEED_URL)
+    state_directory = Path(
+        os.environ.get("STATE_DIRECTORY", "/var/lib/cuberhaus-rss-email")
+    )
+    state_path = state_directory / "seen-guids.json"
+    items = fetch_items(feed_url)
+
+    if not state_path.exists():
+        write_seen_guids(state_path, [item.guid for item in items])
+        print(f"Baseline recorded: {len(items)} feed items")
+        return 0
+
+    return send_new_items(items, credentials, state_path)
+
+
+def main(arguments: list[str] | None = None) -> int:
+    arguments = sys.argv[1:] if arguments is None else arguments
+    if arguments == ["--run"]:
+        try:
+            return run()
+        except (
+            OSError,
+            ValueError,
+            ET.ParseError,
+            json.JSONDecodeError,
+            smtplib.SMTPException,
+        ) as error:
+            print(f"RSS email failed: {error}", file=sys.stderr)
+            return 1
+    print("Usage: rss-email --run", file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
