@@ -94,11 +94,13 @@ It deliberately does not partition disks, enable UFW, configure Samba shares,
 install Docker, or deploy applications. Those capabilities enter the bootstrap
 only after their phase-specific gate and rollback have been reviewed.
 
-The selected future restic destination is an existing external backup disk that
-is currently attached to another PC. It must retain its current backups and the
-Immich copy intended for later import. When connected to `pol-server`, inspect it
-read-only before adding a dedicated `pol-server-restic` directory; do not format
-or repartition it.
+The selected future restic destination is a 1.5 TB WD Elements disk. Its
+read-only workstation inventory found a 1 TB exFAT volume with approximately
+712 GiB free, existing backups, and the Immich copy intended for later import.
+Its SMART media counters are clean, but the observed 54 C temperature and lack
+of a completed long self-test still block backup use. Preserve its contents and
+do not format or repartition it; see
+`reports/2026-09-05-external-backup-baseline.md`.
 
 ## Hardware qualification
 

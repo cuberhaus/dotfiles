@@ -225,6 +225,7 @@ sync_repositories() {
 check_mirrors() {
     local mirror_path
     local mirror_count=0
+    local healthy_count=0
     local active_count=0
     local failures=0
     local repository_name
@@ -253,16 +254,17 @@ check_mirrors() {
     mirrors=("$state_directory"/*.git)
     shopt -u nullglob
     for mirror_path in "${mirrors[@]}"; do
-        if [ "$(git -C "$mirror_path" rev-parse --is-bare-repository 2>/dev/null || true)" != true ] ||
-            ! git -C "$mirror_path" fsck --no-dangling >/dev/null 2>&1; then
+        mirror_count=$((mirror_count + 1))
+        if [ "$(git -c safe.directory="$mirror_path" -C "$mirror_path" rev-parse --is-bare-repository 2>/dev/null || true)" != true ] ||
+            ! git -c safe.directory="$mirror_path" -C "$mirror_path" fsck --no-dangling >/dev/null 2>&1; then
             error "Mirror integrity check failed: $mirror_path"
             failures=1
             continue
         fi
-        mirror_count=$((mirror_count + 1))
+        healthy_count=$((healthy_count + 1))
     done
 
-    info "Mirrors healthy: $mirror_count"
+    info "Mirrors healthy: $healthy_count"
     info "Active repositories mirrored: $active_count"
     info "Retained mirrors: $((mirror_count - active_count))"
     info "Last successful sync: $(< "$state_directory/last-success")"

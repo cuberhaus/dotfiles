@@ -75,7 +75,7 @@ Baseline recorded on 2026-09-05:
 | Kingston data disk | Blocked | User confirmed no data must survive; NTFS remains untouched pending full Phase 0 gate and explicit format approval |
 | Firewall | Pending | UFW is installed but intentionally not enabled or configured |
 | Samba | Pending | Package is installed; users, directories, shares, and restrictions are not configured |
-| Backup | Blocked | Existing external disk selected for `pol-server-restic`, but it is attached to another PC and must be inventoried before use |
+| Backup | Partial | WD Elements read-only inventory and SMART snapshot are recorded; elevated 54 C temperature and a missing long self-test block use |
 | Baseline bootstrap | Complete | Root-owned bundle enrolled; narrow apply/audit pass and temporary broad maintenance access is revoked |
 | Containers | Pending | Docker Engine and Compose plugin are not installed |
 | Immich | Pending | Must wait for storage, Samba isolation, backup, and monitoring |
@@ -132,10 +132,11 @@ User confirmations on 2026-09-05:
 - The tracked two-minute moderate CPU load completed with zero stressor failures
    and a 54 C maximum; post-load service and SMART audits passed.
 - No USB Ethernet adapter is available yet.
-- The existing external backup disk was selected as the restic destination. It
-   remains attached to another PC and contains backups plus an Immich copy that
-   must be preserved and later imported. When connected, inventory it read-only
-   before creating a dedicated `pol-server-restic` directory; do not reformat it.
+- The existing WD Elements backup disk was inventoried read-only on the Ubuntu
+   workstation. Its 1 TB exFAT volume contains backups plus an Immich copy that
+   must be preserved and later imported, with approximately 712 GiB free. SMART
+   reports clean media and interface counters, but its observed 54 C temperature
+   and missing long self-test block use. Do not reformat or repartition it.
 
 Tracked commands:
 
@@ -261,15 +262,18 @@ can create/read/rename/delete test files, and guest or unauthorized users fail.
 
 ## Phase 6: implement backup and prove restore
 
-Status: **blocked until the selected external disk is connected; required before
-applications**.
+Status: **in progress; required before applications**.
 
 The selected destination is an existing external backup disk. Preserve all
 current content, especially the Immich copy intended for later import. The plan
 is to add a dedicated `pol-server-restic` directory using free space, without
 repartitioning or reformatting. Before any write, record its model, capacity,
 filesystem, mount state, free space, SMART availability, and a top-level
-read-only inventory.
+read-only inventory. That inventory completed on the Ubuntu workstation on
+2026-09-05 and is recorded in
+`reports/2026-09-05-external-backup-baseline.md`. The disk remains blocked until
+it is cooled and passes a SMART long self-test; it is not yet attached to
+`pol-server` for unattended backups.
 
 1. Choose an independent backup destination with enough capacity for
    irreplaceable data and version history. A second internal SSD is not backup.

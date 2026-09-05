@@ -48,7 +48,7 @@ cat > "$API_PAGE_ONE" <<'JSON'
 ]
 JSON
 export API_PAGE_ONE
-export LFS_LOG REAL_GIT
+export LFS_LOG MIRROR_DIR REAL_GIT
 
 cat > "$FAKE_BIN/curl" <<'EOF'
 #!/usr/bin/env bash
@@ -62,6 +62,19 @@ EOF
 
 cat > "$FAKE_BIN/git" <<'EOF'
 #!/usr/bin/env bash
+if [ "${GIT_TEST_REQUIRE_SAFE_DIRECTORY:-}" = true ] &&
+    [[ "$*" == *'rev-parse --is-bare-repository'* || "$*" == *'fsck --no-dangling'* ]]; then
+    safe_directory=''
+    working_directory=''
+    arguments=("$@")
+    for ((index = 0; index < ${#arguments[@]}; index++)); do
+        case "${arguments[index]}" in
+            safe.directory=*) safe_directory="${arguments[index]#safe.directory=}" ;;
+            -C) working_directory="${arguments[index + 1]}" ;;
+        esac
+    done
+    [ "$safe_directory" = "$working_directory" ] || exit 128
+fi
 case "$*" in
     *'clone --mirror'*|*'remote update --prune'*|*'lfs fetch --all origin'*)
         [ "${GIT_CONFIG_COUNT:-}" = 1 ] || exit 97
@@ -104,6 +117,7 @@ check_output="$(
     PATH="$FAKE_BIN:$PATH" \
         CREDENTIALS_DIRECTORY="$CREDENTIALS_DIR" \
         GITHUB_MIRROR_STATE_DIRECTORY="$MIRROR_DIR" \
+    GIT_TEST_REQUIRE_SAFE_DIRECTORY=true \
         POL_SERVER_ALLOW_UNPRIVILEGED=true \
         "$MIRROR_COMMAND" --check
 )"
