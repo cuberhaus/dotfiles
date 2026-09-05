@@ -54,6 +54,8 @@ Usage: deploy [--host HOST] MODE
     --upgrade-immich               Back up, pull, and reconcile the pinned stack.
     --restore-immich               Validate and preview the fixed WD recovery set.
     --restore-immich-apply         Apply the fixed WD recovery set with rollback copies.
+    --install-monitoring           Install native LAN-only Netdata.
+    --check-monitoring             Audit Netdata configuration and reachability.
 EOF
 }
 
@@ -67,7 +69,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--check-backup|--prepare-backup|--generate-restic-password|--run-backup|--check-backup-repository|--restore-test-backup|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report|--install-immich|--check-immich|--configure-immich|--start-immich|--stop-immich|--backup-immich|--upgrade-immich|--restore-immich|--restore-immich-apply)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--check-backup|--prepare-backup|--generate-restic-password|--run-backup|--check-backup-repository|--restore-test-backup|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report|--install-immich|--check-immich|--configure-immich|--start-immich|--stop-immich|--backup-immich|--upgrade-immich|--restore-immich|--restore-immich-apply|--install-monitoring|--check-monitoring)
             mode="$1"
             ;;
         --help|-h)
@@ -96,6 +98,7 @@ case "$mode" in
         immich-setup \
         install-autonomy \
         maintenance-access \
+        monitoring-setup \
         samba-setup \
         pol-server-bootstrap \
         pol-server-hardware \
@@ -105,6 +108,7 @@ case "$mode" in
         pol-server-github-mirror \
         pol-server-rss-email \
         pol-server-immich \
+        pol-server-monitoring \
         rss-email \
         pol-server-maintenance \
         packages.txt \
@@ -337,6 +341,14 @@ case "$mode" in
 --restore-immich-apply)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-immich --restore-existing-apply RESTORE-WD-IMMICH'
+    ;;
+--install-monitoring)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-monitoring --install'
+    ;;
+--check-monitoring)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-monitoring --check'
     ;;
 --revoke-maintenance)
     ssh -o BatchMode=yes "$remote_host" \

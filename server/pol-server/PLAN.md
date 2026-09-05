@@ -81,6 +81,7 @@ Baseline recorded on 2026-09-05:
 | Containers | Complete | Official Docker Engine 29.8.0 and Compose 5.5.1 are installed; `pol` remains outside the Docker group |
 | Immich | Restore acceptance in progress | Tracked v3.1.0 stack is LAN-bound with media on Kingston and PostgreSQL on Micron; preserved WD recovery is being restored |
 | OpenClaw | Pending | Must wait for backup and Docker; use a cloud model initially |
+| Monitoring | Tracked implementation ready | Native LAN-only Netdata with 90-day/2 GiB bounded history; deployment and external Healthchecks.io email acceptance remain pending |
 | Remote access | Pending | WireGuard waits until LAN operation and recovery are proven |
 
 ## Phase 0: close hardware and data gates
@@ -353,7 +354,22 @@ copy remain separate follow-up gates.
 
 ## Phase 7: monitoring and maintenance
 
-Status: **pending**.
+Status: **implementation ready; deployment and external alerting pending**.
+
+The selected minimal local layer is native Netdata rather than a
+Prometheus/Grafana stack. Its tracked configuration binds only to loopback and
+`192.168.1.34`, keeps one high-resolution tier for at most 90 days and roughly
+2 GiB, disables anonymous telemetry, and exposes no Docker socket. The local
+dashboard is intentionally separate from the alert transport: Healthchecks.io
+will provide the off-box dead-man signal and email delivery after its account
+URLs are enrolled outside Git.
+
+Tracked commands:
+
+```bash
+make install-pol-server-monitoring
+make audit-pol-server-monitoring
+```
 
 1. Configure `smartd` and scheduled monthly short and quarterly long tests.
 2. Alert on backup failure, SMART failure, failed units, and 80% disk usage.

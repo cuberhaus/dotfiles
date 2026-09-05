@@ -16,6 +16,7 @@ maintenance_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-maintena
 github_mirror_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-github-mirror"
 rss_email_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-rss-email"
 immich_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-immich"
+monitoring_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-monitoring"
 sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-bootstrap"
 maintenance_sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-maintenance"
 staging_dir="${install_dir}.new.$$"
@@ -52,6 +53,7 @@ install -m 0755 \
     "$server_dir/github-mirror" \
     "$server_dir/hardware-qualification" \
     "$server_dir/immich-setup" \
+    "$server_dir/monitoring-setup" \
     "$server_dir/samba-setup" \
     "$server_dir/storage-setup" \
     "$server_dir/maintenance-access" \
@@ -78,6 +80,7 @@ install -m 0755 "$server_dir/pol-server-maintenance" "$maintenance_launcher_targ
 install -m 0755 "$server_dir/pol-server-github-mirror" "$github_mirror_launcher_target"
 install -m 0755 "$server_dir/pol-server-rss-email" "$rss_email_launcher_target"
 install -m 0755 "$server_dir/pol-server-immich" "$immich_launcher_target"
+install -m 0755 "$server_dir/pol-server-monitoring" "$monitoring_launcher_target"
 
 install -d -m 0755 "$(dirname "$sudoers_target")"
 printf '%s\n' \
@@ -118,6 +121,8 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --upgrade' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --restore-existing' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --restore-existing-apply RESTORE-WD-IMMICH' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-monitoring --install' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-monitoring --check' \
     > "$sudoers_staging"
 chmod 0440 "$sudoers_staging"
 visudo -cf "$sudoers_staging"

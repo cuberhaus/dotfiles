@@ -370,6 +370,39 @@ make test-pol-server-thermals
 It uses two workers at 60% load for two minutes and prints thermal telemetry
 every ten seconds. Its duration and load are fixed in the root-owned command.
 
+## Monitoring
+
+The selected local monitoring layer is the native Debian Netdata package. It
+runs directly under systemd so it can observe the host without a privileged
+container, Docker socket, or broad host mounts. Install and audit it through the
+tracked lifecycle:
+
+```bash
+make install-pol-server-monitoring
+make audit-pol-server-monitoring
+```
+
+The dashboard is available only from loopback and the trusted LAN at
+`http://192.168.1.34:19999`. The listener is pinned to those exact addresses;
+management, MCP, configuration, badge, and streaming endpoints remain
+loopback-only. Do not forward TCP 19999 through the router. WireGuard may carry
+LAN access later without changing the listener into a public service.
+
+Netdata stores one high-resolution database tier on the Micron system SSD. It
+removes data at 90 days or approximately 2 GiB, whichever limit is reached
+first. Metric history is disposable and excluded from Restic; the tracked
+configuration is the recovery source. Anonymous Netdata telemetry is disabled
+through its documented opt-out marker, and the node is not claimed to Netdata
+Cloud. The Debian package is intentionally not version-pinned so it follows the
+host's normal security updates; the audit prints the installed version and
+verifies the effective access and retention settings after an upgrade.
+
+This local agent cannot report a total power or network outage. Healthchecks.io
+dead-man monitoring and proactive email delivery remain a separate credentialed
+follow-up. Until that path is configured and deliberately failed end to end,
+the dashboard complements existing systemd and `smartd` state but does not
+satisfy the external-alert acceptance gate.
+
 ## Current inventory
 
 Initial device letters were recorded on 2026-09-05, but they changed across

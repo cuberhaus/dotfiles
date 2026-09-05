@@ -21,7 +21,7 @@ CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 RESTORE_WORKSPACE_SKILLS ?= 1
 POL_SERVER_HOST ?= home-nas
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended enroll-pol-server enroll-pol-server-maintenance revoke-pol-server-maintenance reboot-pol-server upgrade-pol-server bootstrap-pol-server audit-pol-server audit-pol-server-hardware audit-pol-server-storage prepare-pol-server-storage audit-pol-server-samba configure-pol-server-samba set-pol-server-samba-password generate-pol-server-samba-password test-pol-server-samba-access audit-pol-server-backup prepare-pol-server-backup generate-pol-server-restic-password run-pol-server-backup check-pol-server-backup test-pol-server-backup-restore install-pol-server-immich configure-pol-server-immich audit-pol-server-immich start-pol-server-immich stop-pol-server-immich backup-pol-server-immich upgrade-pol-server-immich restore-pol-server-immich restore-pol-server-immich-apply start-pol-server-smart-long-kingston start-pol-server-smart-long-micron test-pol-server-thermals configure-pol-server-github-mirrors sync-pol-server-github-mirrors audit-pol-server-github-mirrors bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended enroll-pol-server enroll-pol-server-maintenance revoke-pol-server-maintenance reboot-pol-server upgrade-pol-server bootstrap-pol-server audit-pol-server audit-pol-server-hardware audit-pol-server-storage prepare-pol-server-storage audit-pol-server-samba configure-pol-server-samba set-pol-server-samba-password generate-pol-server-samba-password test-pol-server-samba-access audit-pol-server-backup prepare-pol-server-backup generate-pol-server-restic-password run-pol-server-backup check-pol-server-backup test-pol-server-backup-restore install-pol-server-immich configure-pol-server-immich audit-pol-server-immich start-pol-server-immich stop-pol-server-immich backup-pol-server-immich upgrade-pol-server-immich restore-pol-server-immich restore-pol-server-immich-apply install-pol-server-monitoring audit-pol-server-monitoring start-pol-server-smart-long-kingston start-pol-server-smart-long-micron test-pol-server-thermals configure-pol-server-github-mirrors sync-pol-server-github-mirrors audit-pol-server-github-mirrors bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -84,6 +84,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_pol_server_samba.sh
 	bash tests/test_pol_server_backup.sh
 	bash tests/test_pol_server_immich.sh
+	bash tests/test_pol_server_monitoring.sh
 	bash tests/test_pol_server_github_mirror.sh
 	bash tests/test_pol_server_hardware.sh
 	bash tests/test_obsidian_bootstrap.sh
@@ -311,6 +312,12 @@ restore-pol-server-immich: ## Validate the preserved WD recovery set without cha
 
 restore-pol-server-immich-apply: ## Restore the validated WD recovery set and retain rollback copies
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --restore-immich-apply
+
+install-pol-server-monitoring: ## Install native LAN-only Netdata monitoring
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --install-monitoring
+
+audit-pol-server-monitoring: ## Audit Netdata configuration, service, API, and listeners
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --check-monitoring
 
 audit-pol-server-wd-backup: ## Print the external WD backup disk SMART report
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --audit-wd-backup
