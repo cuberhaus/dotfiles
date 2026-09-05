@@ -6,6 +6,8 @@ BOOTSTRAP="$REPO_ROOT/server/pol-server/bootstrap"
 DEPLOY="$REPO_ROOT/server/pol-server/deploy"
 INSTALLER="$REPO_ROOT/server/pol-server/install-autonomy"
 HARDWARE="$REPO_ROOT/server/pol-server/hardware-qualification"
+STORAGE="$REPO_ROOT/server/pol-server/storage-setup"
+SAMBA="$REPO_ROOT/server/pol-server/samba-setup"
 MAINTENANCE="$REPO_ROOT/server/pol-server/maintenance-access"
 GITHUB_MIRROR="$REPO_ROOT/server/pol-server/github-mirror"
 RSS_EMAIL="$REPO_ROOT/server/pol-server/rss-email"
@@ -17,6 +19,7 @@ PACKAGE_STATE="$CASE_DIR/packages"
 SYSTEMD_ENABLED="$CASE_DIR/systemd-enabled"
 SYSTEMD_ACTIVE="$CASE_DIR/systemd-active"
 SYSTEMD_MASKED="$CASE_DIR/systemd-masked"
+SAMBA_PASSWORD_STATE="$CASE_DIR/samba-password"
 ORIGINAL_PATH="$PATH"
 trap 'rm -rf "$CASE_DIR"' EXIT
 
@@ -33,6 +36,8 @@ assert_file_contains() {
 
 [ -x "$BOOTSTRAP" ] || fail 'pol-server bootstrap must exist and be executable'
 [ -x "$HARDWARE" ] || fail 'pol-server hardware qualification command must exist and be executable'
+[ -x "$STORAGE" ] || fail 'pol-server storage setup command must exist and be executable'
+[ -x "$SAMBA" ] || fail 'pol-server Samba setup command must exist and be executable'
 [ -x "$MAINTENANCE" ] || fail 'pol-server maintenance access command must exist and be executable'
 [ -x "$GITHUB_MIRROR" ] || fail 'pol-server GitHub mirror command must exist and be executable'
 [ -x "$RSS_EMAIL" ] || fail 'pol-server RSS email command must exist and be executable'
@@ -40,6 +45,14 @@ assert_file_contains() {
 [ -x "$INSTALLER" ] || fail 'pol-server autonomy installer must exist and be executable'
 grep -Eq '^[[:space:]]*rss-email[[:space:]]*\\$' "$DEPLOY" ||
     fail 'pol-server deploy must transfer the RSS email command'
+grep -Eq '^[[:space:]]*storage-setup[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the storage setup command'
+grep -Eq '^[[:space:]]*pol-server-storage[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the storage launcher'
+grep -Eq '^[[:space:]]*samba-setup[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the Samba setup command'
+grep -Eq '^[[:space:]]*pol-server-samba[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the Samba launcher'
 grep -Fq 'bootstrap-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose bootstrap-pol-server'
 grep -Fq 'audit-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose audit-pol-server'
 grep -Fq 'enroll-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose enroll-pol-server'
@@ -59,6 +72,11 @@ grep -Fq 'start-pol-server-smart-long-micron:' "$REPO_ROOT/Makefile" || fail 'Ma
 grep -Fq 'audit-pol-server-wd-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the WD backup disk audit'
 grep -Fq 'start-pol-server-smart-long-wd-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the WD backup disk SMART test'
 grep -Fq 'test-pol-server-thermals:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the bounded thermal test'
+grep -Fq 'audit-pol-server-storage:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the storage preflight'
+grep -Fq 'prepare-pol-server-storage:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the guarded storage migration'
+grep -Fq 'audit-pol-server-samba:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Samba audit'
+grep -Fq 'configure-pol-server-samba:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Samba staging'
+grep -Fq 'set-pol-server-samba-password:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose interactive Samba activation'
 grep -Fq 'configure-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror authentication'
 grep -Fq 'sync-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose manual GitHub mirror sync'
 grep -Fq 'audit-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror checks'
@@ -70,6 +88,16 @@ grep -Fq "'sudo -n /usr/local/sbin/pol-server-rss-email --test-email'" "$DEPLOY"
     fail 'remote RSS delivery test must use its narrow root command'
 grep -Fq "'sudo -n /usr/local/sbin/pol-server-rss-email --send-wd-report'" "$DEPLOY" ||
     fail 'remote WD report email must use its narrow root command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-storage --check'" "$DEPLOY" ||
+    fail 'remote storage preflight must use its narrow root command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-storage --apply ERASE-KINGSTON-SA400S37960G'" "$DEPLOY" ||
+    fail 'remote storage migration must use its exact destructive command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-samba --check'" "$DEPLOY" ||
+    fail 'remote Samba audit must use its narrow root command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-samba --apply'" "$DEPLOY" ||
+    fail 'remote Samba staging must use its exact root command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-samba --set-password'" "$DEPLOY" ||
+    fail 'remote Samba password setup must use its exact root command'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -203,14 +231,19 @@ cat > "$FAKE_BIN/visudo" <<'EOF'
 printf 'visudo:%s\n' "$*" >> "$EVENT_LOG"
 EOF
 
+cat > "$FAKE_BIN/pdbedit" <<'EOF'
+#!/usr/bin/env bash
+[ "$*" = '-L -u pol-files' ] && [ -f "$SAMBA_PASSWORD_STATE" ]
+EOF
+
 cat > "$FAKE_BIN/date" <<'EOF'
 #!/usr/bin/env bash
 printf '20260905210000Z\n'
 EOF
 
 chmod +x "$FAKE_BIN/dpkg-query" "$FAKE_BIN/apt-get" "$FAKE_BIN/systemctl" "$FAKE_BIN/hostname" \
-    "$FAKE_BIN/timedatectl" "$FAKE_BIN/localectl" "$FAKE_BIN/sshd" "$FAKE_BIN/visudo" "$FAKE_BIN/date"
-export EVENT_LOG PACKAGE_STATE SYSTEMD_ENABLED SYSTEMD_ACTIVE SYSTEMD_MASKED
+    "$FAKE_BIN/timedatectl" "$FAKE_BIN/localectl" "$FAKE_BIN/sshd" "$FAKE_BIN/visudo" "$FAKE_BIN/pdbedit" "$FAKE_BIN/date"
+export EVENT_LOG PACKAGE_STATE SYSTEMD_ENABLED SYSTEMD_ACTIVE SYSTEMD_MASKED SAMBA_PASSWORD_STATE
 export PATH="$FAKE_BIN:$ORIGINAL_PATH"
 export POL_SERVER_ROOT="$FAKE_ROOT"
 export POL_SERVER_ALLOW_UNPRIVILEGED=true
@@ -219,6 +252,8 @@ export POL_SERVER_ALLOW_UNPRIVILEGED=true
 
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-bootstrap" '/usr/local/lib/cuberhaus/pol-server/bootstrap'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-hardware" '/usr/local/lib/cuberhaus/pol-server/hardware-qualification'
+assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-storage" '/usr/local/lib/cuberhaus/pol-server/storage-setup'
+assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-samba" '/usr/local/lib/cuberhaus/pol-server/samba-setup'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-maintenance" '/usr/local/lib/cuberhaus/pol-server/maintenance-access'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-github-mirror" '/usr/local/lib/cuberhaus/pol-server/github-mirror'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-rss-email" '/usr/local/lib/cuberhaus/pol-server/rss-email'
@@ -230,6 +265,11 @@ assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: 
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long micron'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long wd-backup'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --thermal-load'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-storage --check'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-storage --apply ERASE-KINGSTON-SA400S37960G'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --check'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --apply'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --set-password'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync'
@@ -243,6 +283,10 @@ assert_file_contains "$EVENT_LOG" 'visudo:-cf'
     fail 'installer must deploy an executable root-owned bootstrap bundle'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/hardware-qualification" ] ||
     fail 'installer must deploy the executable hardware qualification command'
+[ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/storage-setup" ] ||
+    fail 'installer must deploy the executable storage setup command'
+[ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/samba-setup" ] ||
+    fail 'installer must deploy the executable Samba setup command'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/github-mirror" ] ||
     fail 'installer must deploy the executable GitHub mirror command'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/rss-email" ] ||
@@ -276,7 +320,7 @@ assert_file_contains "$FAKE_ROOT/etc/systemd/logind.conf.d/90-pol-server.conf" '
 assert_file_contains "$FAKE_ROOT/etc/apt/apt.conf.d/52pol-server-periodic" 'APT::Periodic::Unattended-Upgrade "1";'
 assert_file_contains "$FAKE_ROOT/etc/ssh/sshd_config.d/10-pol-server.conf" 'PasswordAuthentication no'
 assert_file_contains "$FAKE_ROOT/home/pol/.ssh/authorized_keys" 'dotfiles-client@pol-server'
-for package in ca-certificates curl git git-lfs jq openssh-server python3 restic samba smartmontools stress-ng ufw unattended-upgrades; do
+for package in ca-certificates curl git git-lfs jq openssh-server python3 restic samba smbclient smartmontools stress-ng ufw unattended-upgrades; do
     grep -Fxq -- "$package" "$PACKAGE_STATE" || fail "Expected package to be installed: $package"
 done
 
@@ -304,6 +348,21 @@ if "$BOOTSTRAP" --check >/dev/null 2>&1; then
     fail 'bootstrap check must report unsynchronized time'
 fi
 unset FAKE_NTP_SYNCHRONIZED
+
+install -D -m 0644 "$REPO_ROOT/server/pol-server/etc/samba/smb.conf" \
+    "$FAKE_ROOT/etc/samba/smb.conf"
+touch "$SAMBA_PASSWORD_STATE"
+: > "$EVENT_LOG"
+"$BOOTSTRAP" --apply
+assert_file_contains "$EVENT_LOG" 'systemctl:enable --now smbd.service'
+if grep -Fq 'systemctl:enable --now nmbd.service' "$EVENT_LOG"; then
+    fail 'configured baseline must not enable legacy NetBIOS discovery'
+fi
+configured_output="$($BOOTSTRAP --check)"
+grep -Fq 'Configured Samba service active and enabled: smbd.service' <<< "$configured_output" ||
+    fail 'baseline must accept active Samba after tracked configuration and password enrollment'
+grep -Fq 'Legacy NetBIOS service inactive and disabled: nmbd.service' <<< "$configured_output" ||
+    fail 'baseline must require nmbd to remain inactive after Samba configuration'
 
 rm "$FAKE_ROOT/etc/systemd/logind.conf.d/90-pol-server.conf"
 if "$BOOTSTRAP" --check >/dev/null 2>&1; then

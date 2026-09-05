@@ -206,6 +206,55 @@ capacities. The external WD path also requires SAT pass-through. These commands
 do not mount, format, repartition, or erase any disk; the start commands request
 only a drive-managed nondestructive SMART self-test.
 
+## Kingston storage setup
+
+Audit the destructive preconditions without changing the Kingston disk:
+
+```bash
+make audit-pol-server-storage
+```
+
+The root-owned command resolves the Kingston by exact model and capacity,
+rejects a mounted or root-containing target, and requires the expected legacy
+NTFS layout. After separately reviewing and approving the destructive change,
+run:
+
+```bash
+make prepare-pol-server-storage
+```
+
+That command erases the Kingston partition table, creates one GPT ext4
+filesystem labeled `nas-data`, records it in `/etc/fstab` by UUID, mounts it at
+`/srv/storage`, and creates the initial ownership boundaries. It cannot target
+the Micron system SSD or the external WD disk, and it refuses to run without
+the exact destructive confirmation token embedded in the reviewed deploy path.
+
+## Samba setup
+
+The initial Samba deployment uses the current Wi-Fi interface by explicit
+decision. Ethernet remains recommended for sustained transfer reliability, but
+is not a prerequisite. Service access is limited to `192.168.1.0/24`, TCP 445,
+and authenticated SMB2/SMB3 clients; guest access, SMB1, NetBIOS discovery, and
+router port forwarding remain disabled.
+
+Use the supervised maintenance workflow and keep configuration, password
+enrollment, and auditing separate:
+
+```bash
+make enroll-pol-server-maintenance
+make configure-pol-server-samba
+make set-pol-server-samba-password
+make audit-pol-server-samba
+make audit-pol-server
+make revoke-pol-server-maintenance
+```
+
+The password command creates the Samba credential interactively for the
+non-login `pol-files` identity. Enter that password only in the terminal. The
+tracked shares are authenticated read/write `shared` and `incoming`, plus
+`private`, which is restricted to `pol-files`. The storage root, `immich`,
+`appdata`, and the administrator's home are not shared.
+
 After physical inspection, run the fixed moderate CPU thermal check:
 
 ```bash
@@ -217,7 +266,8 @@ every ten seconds. Its duration and load are fixed in the root-owned command.
 
 ## Current inventory
 
-Recorded on 2026-09-05 from the active SSH session:
+Initial device letters were recorded on 2026-09-05, but they changed across
+reboots and are not identifiers:
 
 - Hostname: `pol-server`
 - Debian: 13 (trixie), kernel `6.12.107+deb13-amd64`
@@ -228,10 +278,10 @@ Recorded on 2026-09-05 from the active SSH session:
     - `/dev/sdb1`: EFI, approximately 976 MB
     - `/dev/sdb2`: ext4 root, approximately 225.2 GB
     - `/dev/sdb3`: swap, approximately 12.3 GB
-- Data candidate: `/dev/sda`, Kingston SA400S37960G, approximately 894.3 GB
-    - `/dev/sda1`: approximately 16 MB
-    - `/dev/sda2`: NTFS, approximately 894.2 GB
-- The Kingston disk has not been formatted or repartitioned.
+- Data disk: Kingston SA400S37960G, approximately 894.3 GB
+    - One ext4 filesystem labeled `nas-data`
+    - UUID `ba435bde-4f44-44f4-9f74-a6c55c59ab86`
+    - Mounted at `/srv/storage` through `/etc/fstab`
 
 The LAN address is currently DHCP-assigned. Reserve `192.168.1.34` for this
 laptop in the router before relying on it for SSH or WireGuard.
@@ -247,7 +297,8 @@ laptop in the router before relying on it for SSH or WireGuard.
     active.
 - The tracked no-sleep policy is installed and active. All four systemd sleep
     targets report `masked` and the effective `logind` actions report `ignore`.
-- No disk contents or partition tables have been changed.
+- The explicitly approved Kingston migration replaced its legacy NTFS layout
+    with one GPT ext4 filesystem labeled `nas-data`.
 - The baseline bundle was enrolled and its passwordless apply and audit paths
     passed on 2026-09-05.
 - Two unattended reboot cycles restored SSH and passed the full baseline audit;
@@ -257,6 +308,9 @@ laptop in the router before relying on it for SSH or WireGuard.
 - The Kingston SMART long test completed without error on 2026-09-05. Its old
     interface counters remained stable during the test at `524353` and `13`;
     future audits must compare against that baseline.
+- The `nas-data` UUID mount and its acceptance file survived two additional
+    reboots even though the Kingston device letter changed from `/dev/sdb` to
+    `/dev/sdc`.
 - The GitHub mirror completed its initial authenticated Git and LFS sync. All 54
     active repositories passed the post-sync integrity audit, and its persistent
     daily timer is enabled.
@@ -317,12 +371,13 @@ sudo systemctl restart systemd-logind
 
 ## Safety gates
 
-Before formatting `/dev/sda2` for `/srv/storage`:
+Before formatting the model-verified Kingston disk for `/srv/storage`:
 
 1. Complete and verify an independent backup of all required data.
 2. Record the complete SMART output for `/dev/sda` and `/dev/sdb` here.
 3. Confirm the Kingston model and device path again with `lsblk` immediately before partitioning.
-4. Use a separate, explicitly approved step for partitioning and formatting.
+4. Review `make audit-pol-server-storage`, then explicitly approve the separate
+    `make prepare-pol-server-storage` step for partitioning and formatting.
 5. Mount the resulting filesystem by UUID, not by `/dev/sda2`.
 
 ## Reproducibility log

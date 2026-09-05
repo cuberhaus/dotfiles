@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+# Description: Audit and configure authenticated Samba shares for pol-server.
+set -euo pipefail
+
+server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+root_prefix="${POL_SERVER_ROOT:-}"
+storage_root="${POL_SERVER_STORAGE_ROOT:-/srv/storage}"
+samba_user="${POL_SERVER_SAMBA_USER:-pol-files}"
+smb_conf="${POL_SERVER_SAMBA_CONF:-${root_prefix%/}/etc/samba/smb.conf}"
+tracked_smb_conf="$server_dir/etc/samba/smb.conf"
+
+error() { printf 'ERROR: %s\n' "$*" >&2; }
+
+usage() {
+    cat <<'EOF'
+Usage: samba-setup MODE
+
+    --check         Report storage, configuration, account, and service state.
+    --apply         Stage the tracked configuration and account with Samba disabled.
+    --set-password  Enroll the Samba password interactively and activate smbd.
+EOF
+}
+
+require_apply_privileges() {
+        if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
+                error 'Run --apply as root through the tracked maintenance workflow.'
+                return 1
+        fi
+}
+
+check_storage() {
+    local mount_info filesystem
+    mount_info="$(findmnt -n -o SOURCE,FSTYPE --target "$storage_root" 2>/dev/null || true)"
+    filesystem="${mount_info##* }"
+    if [ "$filesystem" != ext4 ]; then
+        error "Expected an ext4 filesystem mounted at $storage_root"
+        return 1
+    fi
+
+    local directory
+    for directory in shared incoming private immich appdata; do
+        if [ ! -d "$storage_root/$directory" ]; then
+            error "Missing storage directory: $storage_root/$directory"
+            return 1
+        fi
+    done
+
+    if ! getent group nasusers >/dev/null; then
+        error 'Required group is missing: nasusers'
+        return 1
+    fi
+
+    printf 'Storage state: ready (ext4)\n'
+}
+
+check_state() {
+    local account_present=false
+    local account_enrolled=false
+    local config_current=false
+    local service_ready=false
+    local netbios_disabled=false
+
+    check_storage
+
+    if cmp -s "$tracked_smb_conf" "$smb_conf" 2>/dev/null &&
+        testparm -s "$smb_conf" >/dev/null; then
+        config_current=true
+    fi
+
+    if getent passwd "$samba_user" >/dev/null; then
+        account_present=true
+        if pdbedit -L -u "$samba_user" >/dev/null 2>&1; then
+            account_enrolled=true
+        fi
+    fi
+
+    if [ "$(systemctl is-active smbd.service 2>/dev/null || true)" = active ] &&
+        [ "$(systemctl is-enabled smbd.service 2>/dev/null || true)" = enabled ]; then
+        service_ready=true
+    fi
+    if [ "$(systemctl is-active nmbd.service 2>/dev/null || true)" = inactive ] &&
+        [ "$(systemctl is-enabled nmbd.service 2>/dev/null || true)" = disabled ]; then
+        netbios_disabled=true
+    fi
+
+    if [ "$config_current" = true ] && [ "$account_enrolled" = true ] &&
+        [ "$service_ready" = true ] && [ "$netbios_disabled" = true ]; then
+        printf 'Samba state: configured\n'
+    elif [ "$config_current" = true ]; then
+        printf 'Samba state: staged\n'
+    elif [ -f "$smb_conf" ]; then
+        printf 'Samba state: configuration drift\n'
+    else
+        printf 'Samba state: unconfigured\n'
+    fi
+
+    if [ "$account_enrolled" = true ]; then
+        printf 'Account state: enrolled (%s)\n' "$samba_user"
+    elif [ "$account_present" = true ]; then
+        printf 'Account state: password pending (%s)\n' "$samba_user"
+    else
+        printf 'Account state: missing (%s)\n' "$samba_user"
+    fi
+
+    if [ "$service_ready" = true ]; then
+        printf 'Service state: active and enabled\n'
+    else
+        printf 'Service state: inactive and disabled\n'
+    fi
+
+    if [ "$netbios_disabled" = true ]; then
+        printf 'NetBIOS state: inactive and disabled\n'
+    else
+        printf 'NetBIOS state: unexpected\n'
+    fi
+}
+
+apply_configuration() {
+    local backup_path=
+
+    require_apply_privileges
+    check_storage
+
+    if ! getent passwd "$samba_user" >/dev/null; then
+        useradd --system --no-create-home --home-dir /nonexistent \
+            --shell /usr/sbin/nologin --gid nasusers "$samba_user"
+    fi
+
+    chown root:nasusers "$storage_root/shared" "$storage_root/incoming"
+    chmod 2770 "$storage_root/shared" "$storage_root/incoming"
+    chown "$samba_user:nasusers" "$storage_root/private"
+    chmod 0700 "$storage_root/private"
+
+    if [ -f "$smb_conf" ]; then
+        backup_path="${smb_conf}.pre-cuberhaus.$(date -u +%Y%m%d%H%M%SZ)"
+        cp -a "$smb_conf" "$backup_path"
+    fi
+
+    rollback_configuration() {
+        if [ -n "$backup_path" ]; then
+            cp -a "$backup_path" "$smb_conf"
+        else
+            rm -f "$smb_conf"
+        fi
+    }
+    trap rollback_configuration ERR
+
+    install -D -m 0644 "$tracked_smb_conf" "$smb_conf"
+    testparm -s "$smb_conf" >/dev/null
+    systemctl disable --now smbd.service
+    systemctl disable --now nmbd.service
+
+    trap - ERR
+    printf 'Samba configuration staged for %s; services remain disabled.\n' "$samba_user"
+    if [ -n "$backup_path" ]; then
+        printf 'Previous configuration saved at %s\n' "$backup_path"
+    fi
+}
+
+set_password_and_activate() {
+    require_apply_privileges
+    check_storage
+
+    if ! cmp -s "$tracked_smb_conf" "$smb_conf" 2>/dev/null; then
+        error 'Tracked Samba configuration is not staged; run --apply first.'
+        return 1
+    fi
+    if ! getent passwd "$samba_user" >/dev/null; then
+        error "Dedicated Samba account is missing: $samba_user"
+        return 1
+    fi
+
+    testparm -s "$smb_conf" >/dev/null
+    smbpasswd -a "$samba_user"
+    if ! pdbedit -L -u "$samba_user" >/dev/null 2>&1; then
+        error "Samba account enrollment failed: $samba_user"
+        return 1
+    fi
+
+    rollback_service() {
+        systemctl disable --now smbd.service || true
+    }
+    trap rollback_service ERR
+
+    systemctl disable --now nmbd.service
+    systemctl enable --now smbd.service
+    [ "$(systemctl is-active smbd.service)" = active ]
+    [ "$(systemctl is-enabled smbd.service)" = enabled ]
+
+    trap - ERR
+    printf 'Samba account enrolled and smbd activated for %s.\n' "$samba_user"
+}
+
+case "${1:-}" in
+    --check) check_state ;;
+    --apply) apply_configuration ;;
+    --set-password) set_password_and_activate ;;
+    --help|-h)
+        usage
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

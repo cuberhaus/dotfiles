@@ -5,6 +5,7 @@ set -euo pipefail
 server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 root_prefix="${POL_SERVER_ROOT:-}"
 admin_user="${POL_SERVER_ADMIN_USER:-pol}"
+samba_user="${POL_SERVER_SAMBA_USER:-pol-files}"
 mode=check
 
 info() { printf '\033[34m[INFO]\033[0m %s\n' "$*"; }
@@ -181,13 +182,31 @@ ensure_service() {
     fi
 }
 
-disable_unconfigured_samba() {
+disable_service() {
+    local unit="$1"
+    if [ "$(systemctl is-active "$unit" 2>/dev/null || true)" = active ] ||
+        [ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" = enabled ]; then
+        systemctl disable --now "$unit"
+    fi
+}
+
+samba_configured() {
+    cmp -s \
+        "$server_dir/etc/samba/smb.conf" \
+        "$(root_path /etc/samba/smb.conf)" 2>/dev/null &&
+        pdbedit -L -u "$samba_user" >/dev/null 2>&1
+}
+
+converge_samba_service() {
     local unit
+    if samba_configured; then
+        ensure_service smbd.service
+        disable_service nmbd.service
+        return
+    fi
+
     for unit in smbd.service nmbd.service; do
-        if [ "$(systemctl is-active "$unit" 2>/dev/null || true)" = active ] ||
-            [ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" = enabled ]; then
-            systemctl disable --now "$unit"
-        fi
+        disable_service "$unit"
     done
 }
 
@@ -196,7 +215,7 @@ apply_services() {
     for unit in ssh.service smartmontools.service fstrim.timer apt-daily-upgrade.timer unattended-upgrades.service; do
         ensure_service "$unit"
     done
-    disable_unconfigured_samba
+    converge_samba_service
     if [ -r "$(root_path /etc/cuberhaus/github-mirror-token)" ]; then
         ensure_service pol-server-github-mirror.timer
     fi
@@ -284,14 +303,31 @@ check_baseline() {
         info 'RSS email credential not configured; timer remains disabled'
     fi
 
-    for unit in smbd.service nmbd.service; do
-        if [ "$(systemctl is-active "$unit" 2>/dev/null || true)" = active ]; then
-            warn "Unconfigured Samba service is active: $unit"
-            failures=1
+    if samba_configured; then
+        if unit_enabled_and_active smbd.service; then
+            info 'Configured Samba service active and enabled: smbd.service'
         else
-            info "Unconfigured Samba service is inactive: $unit"
+            warn 'Configured Samba service drift: smbd.service'
+            failures=1
         fi
-    done
+        if [ "$(systemctl is-active nmbd.service 2>/dev/null || true)" = inactive ] &&
+            [ "$(systemctl is-enabled nmbd.service 2>/dev/null || true)" = disabled ]; then
+            info 'Legacy NetBIOS service inactive and disabled: nmbd.service'
+        else
+            warn 'Legacy NetBIOS service must remain inactive and disabled: nmbd.service'
+            failures=1
+        fi
+    else
+        for unit in smbd.service nmbd.service; do
+            if [ "$(systemctl is-active "$unit" 2>/dev/null || true)" = active ] ||
+                [ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" = enabled ]; then
+                warn "Unconfigured Samba service is active or enabled: $unit"
+                failures=1
+            else
+                info "Unconfigured Samba service is inactive and disabled: $unit"
+            fi
+        done
+    fi
 
     if ! check_host_facts; then
         failures=1

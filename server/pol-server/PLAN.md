@@ -70,12 +70,12 @@ Baseline recorded on 2026-09-05:
 | Cooling baseline | Complete | Fixed two-minute moderate load passed with a 54 C observed maximum and no service or SMART regressions |
 | Battery | Complete | User confirmed no swelling or abnormal heat; telemetry reports 68.4% retained capacity after 630 cycles |
 | Charger | Complete | User confirmed physical stability and kernel reports AC adapter online |
-| Network | Blocked | PCI inventory contains only Qualcomm Wi-Fi and no Ethernet controller; a Linux-compatible USB 3 gigabit adapter is required |
+| Network | Wi-Fi accepted temporarily | Samba may use trusted LAN `192.168.1.0/24` on `wlp2s0`; USB 3 gigabit Ethernet remains the recommended reliability upgrade |
 | SMART qualification | Complete | Both long tests passed; media-error counters are zero and Kingston CRC counters stayed stable |
-| Kingston data disk | Blocked | User confirmed no data must survive; NTFS remains untouched pending full Phase 0 gate and explicit format approval |
+| Kingston data disk | Complete | Approved model-pinned migration created ext4 `nas-data`; its UUID mount and acceptance file survived two reboots with changing device letters |
 | Firewall | Pending | UFW is installed but intentionally not enabled or configured |
-| Samba | Pending | Package is installed; users, directories, shares, and restrictions are not configured |
-| Backup | Partial | WD Elements inventory passed; its unmounted long SMART test is running on `pol-server` with a 52 C start reading |
+| Samba | Ready to deploy | Tracked LAN-only configuration uses dedicated `pol-files`; `shared` and `incoming` are group read/write and `private` is user-only |
+| Backup | Partial | WD Elements inventory and critical counters passed, but repeated long tests were interrupted; the user chose no further SMART retries, so unattended use is not yet accepted |
 | GitHub mirrors | Complete | All 54 active repositories passed Git integrity; LFS fetches completed and the persistent daily timer is enabled |
 | Baseline bootstrap | Complete | Root-owned bundle enrolled; narrow apply/audit pass and temporary broad maintenance access is revoked |
 | Containers | Pending | Docker Engine and Compose plugin are not installed |
@@ -132,13 +132,15 @@ User confirmations on 2026-09-05:
    abnormal heat, or instability.
 - The tracked two-minute moderate CPU load completed with zero stressor failures
    and a 54 C maximum; post-load service and SMART audits passed.
-- No USB Ethernet adapter is available yet.
+- No USB Ethernet adapter is available yet. The user explicitly accepted Wi-Fi
+   for the initial Samba rollout; Ethernet remains a later reliability upgrade.
 - The existing WD Elements backup disk was inventoried read-only on the Ubuntu
    workstation. Its 1 TB exFAT volume contains backups plus an Immich copy that
    must be preserved and later imported, with approximately 712 GiB free. SMART
    reports clean media and interface counters. It is now attached unmounted to
-   `pol-server`; a 232-minute long test started at 52 C and remains a backup gate.
-   Do not reformat or repartition it.
+   `pol-server`; repeated long tests were interrupted by host or bridge resets.
+   The user chose not to retry them. Do not reformat or repartition it, and do
+   not treat it as an accepted unattended backup destination yet.
 
 Tracked commands:
 
@@ -159,10 +161,11 @@ Acceptance gate:
 - Both SSDs complete fresh long tests without media or uncorrectable errors.
 - CRC/interface counters remain stable during testing.
 - Battery, charger, and cooling are physically safe.
-- A reliable wired-network path is available.
+- The active private network is explicitly accepted for the current service
+   rollout; wired networking remains the preferred final transport.
 
-All items except the wired-network path are complete. Phase 3 remains blocked
-until a compatible USB 3 gigabit Ethernet adapter is connected and proven.
+All hardware items needed for local storage preparation are complete. The
+initial Samba rollout may proceed over Wi-Fi within the trusted LAN.
 
 Stop here if any item fails. Do not repartition the Kingston SSD.
 
@@ -208,7 +211,7 @@ package upgrades are clean, time is synchronized, and no systemd units fail.
 
 ## Phase 3: qualify and prepare the Kingston SSD
 
-Status: **blocked by Phase 0 and explicit approval**.
+Status: **complete**.
 
 1. Recheck model, serial privately, capacity, filesystem, mount state, and SMART
    immediately before making changes.
@@ -221,8 +224,28 @@ Status: **blocked by Phase 0 and explicit approval**.
    share.
 6. Keep at least 10-15% free and set the operational warning threshold at 80%.
 
+Tracked commands:
+
+```bash
+make audit-pol-server-storage
+make prepare-pol-server-storage
+```
+
+The second command is intentionally separate from the baseline and contains the
+exact confirmation token accepted by the root-owned, model-pinned script.
+
 Acceptance gate: the filesystem mounts by UUID after two reboots, a disposable
 test file survives both reboots, ownership is correct, and SMART remains clean.
+
+Completed on 2026-09-05 after explicit approval. The Kingston was resolved by
+model and capacity, its legacy NTFS partition table was replaced with one ext4
+filesystem labeled `nas-data`, and UUID
+`ba435bde-4f44-44f4-9f74-a6c55c59ab86` was added to `/etc/fstab`. The hierarchy
+uses `nasusers` only for `shared`, `private`, and `incoming`; `immich` and
+`appdata` remain root-only. Acceptance file persistence and automatic mounting
+passed across boot IDs `76ff9747-041a-4a1b-945b-f928bd9928c2` and
+`bc736cea-2901-41c8-93a1-0d1c2315faa8`. The device letter changed across those
+boots, confirming that no persistent configuration depends on `/dev/sdX`.
 
 ## Phase 4: finish power, cooling, network, and firewall
 
@@ -247,7 +270,16 @@ private traffic, and no guest-network client can reach administration services.
 
 ## Phase 5: configure authenticated Samba shares
 
-Status: **pending**.
+Status: **ready to deploy over the accepted Wi-Fi LAN**.
+
+Confirmed initial access model:
+
+- Dedicated non-login identity: `pol-files`.
+- `shared` and `incoming`: authenticated read/write for `nasusers`.
+- `private`: authenticated read/write for `pol-files` only.
+- `immich`, `appdata`, `/srv/storage`, and administrator homes: not shared.
+- TCP 445 only on `lo` and `wlp2s0`; clients restricted to `192.168.1.0/24`.
+- Guest access, SMB1, NetBIOS discovery, and router port forwarding: disabled.
 
 1. Define the household users, private-directory ownership, and one `nasusers`
    group before writing configuration.
@@ -274,8 +306,10 @@ filesystem, mount state, free space, SMART availability, and a top-level
 read-only inventory. That inventory completed on the Ubuntu workstation on
 2026-09-05 and is recorded in
 `reports/2026-09-05-external-backup-baseline.md`. The disk is attached unmounted
-to `pol-server`, where its long SMART test is in progress. It remains blocked
-until that test completes without error and its critical counters stay clean.
+to `pol-server`. Repeated long tests were interrupted, while every observed
+critical counter remained clean. The user chose no further SMART retries; keep
+the disk unmodified until unattended-use risk is accepted separately or another
+backup destination is selected.
 
 1. Choose an independent backup destination with enough capacity for
    irreplaceable data and version history. A second internal SSD is not backup.

@@ -51,16 +51,14 @@ confirmed that neither partition was mounted, and reported `52 C`. The first
 server-side test was interrupted by a host or USB bridge reset with 80%
 remaining. No matching kernel USB disconnect, I/O error, or server reboot was
 recorded after the disk attached, and the critical SMART counters remained at
-zero. A third 232-minute extended test started successfully at 17:22 and is
-expected to finish at 21:14:56 CEST. An automatic report is scheduled for 21:16.
-The redacted report will be emailed through the configured Gmail transport at
-21:17. Keep the disk powered, connected, and ventilated until then.
+zero. A third extended test was also interrupted after reaching 60% remaining.
+Every observed critical media and interface counter remained at zero. The user
+chose not to run further extended tests; preserve the disk in its current layout
+and record this incomplete qualification rather than treating it as a pass.
 
 ## Result
 
 The read-only inventory gate passes and the snapshot contains no reported media
-or interface errors. The disk is not yet qualified for unattended backups: its
-latest observed temperature is `48 C` and the third server-side long test is
-still in progress. Verify a `Completed without error` result and unchanged
-critical counters before creating `pol-server-restic` or relying on the disk as
-a backup target.
+or interface errors. The disk is not qualified by a completed extended test and
+must not be reformatted or repartitioned. Its use as an unattended restic target
+requires a separate risk decision or replacement with a qualified destination.

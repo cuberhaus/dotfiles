@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+# Description: Prepare and verify the model-pinned pol-server data disk.
+set -euo pipefail
+
+kingston_model='KINGSTON SA400S37960G'
+minimum_bytes=900000000000
+maximum_bytes=1000000000000
+confirmation_token='ERASE-KINGSTON-SA400S37960G'
+fstab_path="${POL_SERVER_FSTAB:-/etc/fstab}"
+storage_root="${POL_SERVER_STORAGE_ROOT:-/srv/storage}"
+
+usage() {
+    cat <<'EOF'
+Usage: storage-setup --check
+       storage-setup --apply ERASE-KINGSTON-SA400S37960G
+
+    --check          Verify the Kingston data-disk identity and storage state.
+    --apply TOKEN    Erase the verified legacy Kingston layout and create /srv/storage.
+EOF
+}
+
+resolve_kingston() {
+    local path model candidate_size
+    local match=
+
+    while read -r path model; do
+        [ "$model" = "$kingston_model" ] || continue
+        candidate_size="$(blockdev --getsize64 "$path")"
+        if (( candidate_size < minimum_bytes || candidate_size > maximum_bytes )); then
+            printf 'Refusing Kingston candidate with unexpected capacity: %s bytes\n' "$candidate_size" >&2
+            exit 1
+        fi
+        if [ -n "$match" ]; then
+            printf 'Refusing ambiguous Kingston disk inventory.\n' >&2
+            exit 1
+        fi
+        match="$path"
+    done < <(lsblk -dn -o PATH,MODEL)
+
+    if [ -z "$match" ]; then
+        printf 'Expected Kingston data disk was not found.\n' >&2
+        exit 1
+    fi
+    printf '%s\n' "$match"
+}
+
+check_storage() {
+    local device root_source mounted filesystem partition label uuid mounted_source
+    local -a partitions
+
+    device="$(resolve_kingston)"
+    root_source="$(findmnt -n -o SOURCE /)"
+    if [[ "$root_source" == "$device" || "$root_source" == "$device"[0-9]* ]]; then
+        printf 'Refusing data-disk operation because %s contains the root filesystem.\n' "$device" >&2
+        exit 1
+    fi
+
+    mounted="$(lsblk -nr -o MOUNTPOINTS "$device" | sed '/^[[:space:]]*$/d')"
+    filesystem="$(lsblk -nrpo PATH,TYPE,FSTYPE,LABEL "$device" |
+        awk '$2 == "part" && $3 != "" { print $3 }' |
+        sort -u |
+        paste -sd, -)"
+    [ -n "$filesystem" ] || filesystem=none
+
+    printf 'Kingston target: %s (%s)\n' "$device" "$kingston_model"
+    if [ "$filesystem" = ntfs ]; then
+        if [ -n "$mounted" ]; then
+            printf 'Refusing mounted Kingston data disk: %s\n' "$mounted" >&2
+            exit 1
+        fi
+        printf 'Storage state: legacy\n'
+        printf 'Mount state: unmounted\n'
+        printf 'Legacy filesystem: ntfs\n'
+        return
+    fi
+
+    if [ "$filesystem" != ext4 ]; then
+        printf 'Refusing unexpected Kingston filesystem layout: %s\n' "$filesystem" >&2
+        exit 1
+    fi
+    mapfile -t partitions < <(lsblk -nrpo PATH,TYPE "$device" | awk '$2 == "part" { print $1 }')
+    if (( ${#partitions[@]} != 1 )); then
+        printf 'Expected one configured Kingston partition; found %s.\n' "${#partitions[@]}" >&2
+        exit 1
+    fi
+    partition="${partitions[0]}"
+    label="$(lsblk -dn -o LABEL "$partition" | xargs)"
+    if [ "$label" != nas-data ]; then
+        printf 'Refusing unexpected Kingston filesystem label: %s\n' "${label:-none}" >&2
+        exit 1
+    fi
+    uuid="$(blkid -s UUID -o value "$partition")"
+    if ! grep -Fqx "UUID=$uuid /srv/storage ext4 defaults,nosuid,nodev 0 2" "$fstab_path"; then
+        printf 'Configured Kingston UUID is missing from %s.\n' "$fstab_path" >&2
+        exit 1
+    fi
+    mounted_source="$(findmnt -n -o SOURCE,FSTYPE --target "$storage_root")"
+    if [ "$mounted_source" != "$partition ext4" ]; then
+        printf 'Unexpected mounted filesystem: %s\n' "$mounted_source" >&2
+        exit 1
+    fi
+    for directory in shared private incoming immich appdata; do
+        if [ ! -d "$storage_root/$directory" ]; then
+            printf 'Missing storage directory: %s/%s\n' "$storage_root" "$directory" >&2
+            exit 1
+        fi
+    done
+
+    printf 'Storage state: configured\n'
+    printf 'Mount state: %s\n' "$storage_root"
+    printf 'Filesystem: ext4 (nas-data)\n'
+    printf 'Filesystem UUID: %s\n' "$uuid"
+}
+
+apply_storage() {
+    local supplied_token="${1:-}"
+    local device root_source mounted legacy_filesystem partition uuid mounted_source
+    local fstab_backup mounted_here=false
+    local -a partitions
+
+    if [ "$supplied_token" != "$confirmation_token" ]; then
+        printf 'Refusing destructive storage setup without the exact confirmation token.\n' >&2
+        exit 2
+    fi
+    if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
+        printf 'Run storage-setup --apply as root.\n' >&2
+        exit 1
+    fi
+    for required_command in parted udevadm mkfs.ext4 blkid mount findmnt groupadd getent install; do
+        command -v "$required_command" >/dev/null || {
+            printf 'Required command not found: %s\n' "$required_command" >&2
+            exit 127
+        }
+    done
+
+    device="$(resolve_kingston)"
+    root_source="$(findmnt -n -o SOURCE /)"
+    if [[ "$root_source" == "$device" || "$root_source" == "$device"[0-9]* ]]; then
+        printf 'Refusing data-disk operation because %s contains the root filesystem.\n' "$device" >&2
+        exit 1
+    fi
+    mounted="$(lsblk -nr -o MOUNTPOINTS "$device" | sed '/^[[:space:]]*$/d')"
+    if [ -n "$mounted" ]; then
+        printf 'Refusing mounted Kingston data disk: %s\n' "$mounted" >&2
+        exit 1
+    fi
+    legacy_filesystem="$(lsblk -nrpo PATH,TYPE,FSTYPE,LABEL "$device" |
+        awk '$2 == "part" && $3 != "" { print $3 }' |
+        sort -u |
+        paste -sd, -)"
+    if [ "$legacy_filesystem" != ntfs ]; then
+        printf 'Refusing unexpected Kingston filesystem layout: %s\n' "${legacy_filesystem:-none}" >&2
+        exit 1
+    fi
+    if awk '$1 !~ /^#/ && $2 == "/srv/storage" { found=1 } END { exit !found }' "$fstab_path"; then
+        printf 'Refusing because /srv/storage already has an fstab entry.\n' >&2
+        exit 1
+    fi
+
+    printf 'Erasing legacy partitions on %s (%s).\n' "$device" "$kingston_model"
+    parted --script "$device" mklabel gpt mkpart primary ext4 1MiB 100%
+    udevadm settle
+    mapfile -t partitions < <(lsblk -nrpo PATH,TYPE "$device" | awk '$2 == "part" { print $1 }')
+    if (( ${#partitions[@]} != 1 )); then
+        printf 'Expected one Kingston partition after repartitioning; found %s.\n' "${#partitions[@]}" >&2
+        exit 1
+    fi
+    partition="${partitions[0]}"
+    mkfs.ext4 -F -L nas-data "$partition"
+    uuid="$(blkid -s UUID -o value "$partition")"
+    if [ -z "$uuid" ]; then
+        printf 'Unable to resolve the new nas-data filesystem UUID.\n' >&2
+        exit 1
+    fi
+
+    install -d -m 0755 "$storage_root"
+    fstab_backup="${fstab_path}.pre-nas-data.$(date -u +%Y%m%d%H%M%SZ)"
+    cp --archive "$fstab_path" "$fstab_backup"
+    rollback_after_format() {
+        local exit_code=$?
+        if [ "$mounted_here" = true ]; then
+            umount "$storage_root" || true
+        fi
+        cp --archive "$fstab_backup" "$fstab_path"
+        printf 'Storage setup failed after formatting; restored %s from %s.\n' "$fstab_path" "$fstab_backup" >&2
+        exit "$exit_code"
+    }
+    trap rollback_after_format ERR
+
+    printf 'UUID=%s /srv/storage ext4 defaults,nosuid,nodev 0 2\n' "$uuid" >> "$fstab_path"
+    mount "$storage_root"
+    mounted_here=true
+    mounted_source="$(findmnt -n -o SOURCE,FSTYPE --target "$storage_root")"
+    if [ "$mounted_source" != "$partition ext4" ]; then
+        printf 'Unexpected mounted filesystem: %s\n' "$mounted_source" >&2
+        false
+    fi
+
+    getent group nasusers >/dev/null || groupadd --system nasusers
+    install -d -o root -g nasusers -m 2770 \
+        "$storage_root/shared" \
+        "$storage_root/incoming"
+    install -d -o root -g nasusers -m 2710 "$storage_root/private"
+    install -d -o root -g root -m 0750 \
+        "$storage_root/immich" \
+        "$storage_root/appdata"
+
+    trap - ERR
+    printf 'Prepared %s as ext4 label nas-data at /srv/storage.\n' "$partition"
+    printf 'Previous fstab saved at %s.\n' "$fstab_backup"
+}
+
+case "${1:-}" in
+    --check) check_storage ;;
+    --apply) apply_storage "${2:-}" ;;
+    --help|-h) usage ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

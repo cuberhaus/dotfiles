@@ -9,6 +9,8 @@ maintenance_hours="${POL_SERVER_MAINTENANCE_HOURS:-8}"
 install_dir="${root_prefix%/}/usr/local/lib/cuberhaus/pol-server"
 launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-bootstrap"
 hardware_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-hardware"
+storage_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-storage"
+samba_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-samba"
 maintenance_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-maintenance"
 github_mirror_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-github-mirror"
 rss_email_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-rss-email"
@@ -46,6 +48,8 @@ install -m 0755 \
     "$server_dir/apply-power-policy" \
     "$server_dir/github-mirror" \
     "$server_dir/hardware-qualification" \
+    "$server_dir/samba-setup" \
+    "$server_dir/storage-setup" \
     "$server_dir/maintenance-access" \
     "$server_dir/rss-email" \
     "$staging_dir/"
@@ -63,6 +67,8 @@ rm -rf "$install_dir"
 mv "$staging_dir" "$install_dir"
 install -m 0755 "$server_dir/pol-server-bootstrap" "$launcher_target"
 install -m 0755 "$server_dir/pol-server-hardware" "$hardware_launcher_target"
+install -m 0755 "$server_dir/pol-server-storage" "$storage_launcher_target"
+install -m 0755 "$server_dir/pol-server-samba" "$samba_launcher_target"
 install -m 0755 "$server_dir/pol-server-maintenance" "$maintenance_launcher_target"
 install -m 0755 "$server_dir/pol-server-github-mirror" "$github_mirror_launcher_target"
 install -m 0755 "$server_dir/pol-server-rss-email" "$rss_email_launcher_target"
@@ -77,6 +83,11 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long micron' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long wd-backup' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --thermal-load' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-storage --check' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-storage --apply ERASE-KINGSTON-SA400S37960G' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --check' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --apply' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --set-password' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync' \
