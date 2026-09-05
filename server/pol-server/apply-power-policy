@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+source_file="$script_dir/etc/systemd/logind.conf.d/90-pol-server.conf"
+target_dir=/etc/systemd/logind.conf.d
+target_file="$target_dir/90-pol-server.conf"
+
+install -D -m 0644 "$source_file" "$target_file"
+
+for unit in sleep.target suspend.target hibernate.target hybrid-sleep.target; do
+    systemctl mask "$unit"
+done
+
+systemctl daemon-reload
+systemctl restart systemd-logind
+
+printf 'Applied no-sleep policy from %s\n' "$source_file"

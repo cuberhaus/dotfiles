@@ -55,6 +55,8 @@
 !.xmonad/**
 !docs/
 !docs/**
+!server/
+!server/**
 !.cinnamon/
 !.cinnamon/**
 !.conky/
