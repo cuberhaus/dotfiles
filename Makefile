@@ -242,11 +242,17 @@ bootstrap-pol-server: ## Converge the enrolled pol-server baseline without a pas
 audit-pol-server-hardware: ## Print a redacted hardware and SMART report from pol-server
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --hardware-report
 
+audit-pol-server-wd-backup: ## Print the external WD backup disk SMART report
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --audit-wd-backup
+
 start-pol-server-smart-long-kingston: ## Start the Kingston data SSD long SMART test
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --start-smart-long-kingston
 
 start-pol-server-smart-long-micron: ## Start the Micron system SSD long SMART test
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --start-smart-long-micron
+
+start-pol-server-smart-long-wd-backup: ## Start the external WD backup disk SMART long test
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --start-smart-long-wd-backup
 
 test-pol-server-thermals: ## Run a bounded two-minute CPU thermal test
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --thermal-load

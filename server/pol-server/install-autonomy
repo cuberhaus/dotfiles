@@ -68,8 +68,10 @@ install -d -m 0755 "$(dirname "$sudoers_target")"
 printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-bootstrap --apply' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --report' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --report-disk wd-backup' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long kingston' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long micron' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long wd-backup' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --thermal-load' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token' \

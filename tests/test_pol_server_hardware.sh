@@ -18,6 +18,8 @@ fail() {
 grep -Fq 'audit-pol-server-hardware:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the redacted hardware audit'
 grep -Fq 'start-pol-server-smart-long-kingston:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Kingston long test'
 grep -Fq 'start-pol-server-smart-long-micron:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Micron long test'
+grep -Fq 'audit-pol-server-wd-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the WD backup disk audit'
+grep -Fq 'start-pol-server-smart-long-wd-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the WD backup disk long test'
 grep -Fq 'test-pol-server-thermals:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the bounded thermal test'
 
 mkdir -p "$FAKE_BIN"
@@ -29,10 +31,12 @@ case "$*" in
     '-dn -o PATH,MODEL')
         printf '%s\n' \
             '/dev/sda KINGSTON SA400S37960G' \
-            '/dev/sdb Micron_1100_MTFDDAV256TBN'
+            '/dev/sdb Micron_1100_MTFDDAV256TBN' \
+            '/dev/sdc WDC WD15SMRW-11YNDS0'
         ;;
     '-nr -o MOUNTPOINTS /dev/sda') ;;
     '-nr -o MOUNTPOINTS /dev/sdb') printf '/\n/boot/efi\n[SWAP]\n' ;;
+    '-nr -o MOUNTPOINTS /dev/sdc') ;;
     *)
         printf 'Unexpected lsblk call: %s\n' "$*" >&2
         exit 2
@@ -45,6 +49,7 @@ cat > "$FAKE_BIN/blockdev" <<'EOF'
 case "${2:-}" in
     /dev/sda) printf '960197124096\n' ;;
     /dev/sdb) printf '256060514304\n' ;;
+    /dev/sdc) printf '1500267937792\n' ;;
     *) exit 2 ;;
 esac
 EOF
@@ -52,7 +57,7 @@ EOF
 cat > "$FAKE_BIN/smartctl" <<'EOF'
 #!/usr/bin/env bash
 printf 'smartctl:%s\n' "$*" >> "$EVENT_LOG"
-if [ "${1:-}" = -t ]; then
+if [[ "$*" == *'-t long'* ]]; then
     printf 'Please wait 120 minutes for test to complete.\n'
     exit 0
 fi
@@ -98,11 +103,26 @@ if grep -Fq 'SECRET-SERIAL-MUST-NOT-LEAK' <<< "$report"; then
 fi
 
 : > "$EVENT_LOG"
+external_report="$($HARDWARE --report-disk wd-backup)"
+grep -Fqx 'smartctl:-d sat -c -H -A -l selftest /dev/sdc' "$EVENT_LOG" ||
+    fail 'WD backup report must use SAT passthrough on the model-matched disk'
+grep -Fq 'WDC WD15SMRW-11YNDS0: /dev/sdc' <<< "$external_report" ||
+    fail 'WD backup report must identify the external disk by model'
+if grep -Fq 'SECRET-SERIAL-MUST-NOT-LEAK' <<< "$external_report"; then
+    fail 'WD backup report must redact disk serial numbers'
+fi
+
+: > "$EVENT_LOG"
 "$HARDWARE" --start-smart-long kingston >/dev/null
 grep -Fqx 'smartctl:-t long /dev/sda' "$EVENT_LOG" || fail 'Kingston test must target only the model-matched disk'
 if grep -Fq '/dev/sdb' "$EVENT_LOG"; then
     fail 'Kingston test must not target the Micron disk'
 fi
+
+: > "$EVENT_LOG"
+"$HARDWARE" --start-smart-long wd-backup >/dev/null
+grep -Fqx 'smartctl:-d sat -t long /dev/sdc' "$EVENT_LOG" ||
+    fail 'WD backup test must use SAT passthrough on the model-matched disk'
 
 "$HARDWARE" --thermal-load >/dev/null
 grep -Fqx 'stress-ng:--cpu 2 --cpu-load 60 --timeout 2m --metrics-brief --thermalstat 10' "$EVENT_LOG" ||

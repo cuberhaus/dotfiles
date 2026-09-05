@@ -20,8 +20,10 @@ Usage: deploy [--host HOST] MODE
     --reboot                       Reboot while temporary maintenance access is active.
     --upgrade                      Apply current Debian upgrades during maintenance.
     --hardware-report              Print the redacted hardware qualification report.
+    --audit-wd-backup              Print the WD backup disk SMART report.
     --start-smart-long-kingston    Start the Kingston SMART long test.
     --start-smart-long-micron      Start the Micron SMART long test.
+    --start-smart-long-wd-backup   Start the WD backup disk SMART long test.
     --thermal-load                 Run the fixed two-minute thermal load test.
     --configure-github-mirrors     Store a read-only GitHub token interactively.
     --sync-github-mirrors          Run the GitHub mirror service now.
@@ -39,7 +41,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--start-smart-long-kingston|--start-smart-long-micron|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors)
             mode="$1"
             ;;
         --help|-h)
@@ -92,6 +94,10 @@ case "$mode" in
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-hardware --report'
     ;;
+--audit-wd-backup)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-hardware --report-disk wd-backup'
+    ;;
 --start-smart-long-kingston)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-hardware --start-smart-long kingston'
@@ -99,6 +105,10 @@ case "$mode" in
 --start-smart-long-micron)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-hardware --start-smart-long micron'
+    ;;
+--start-smart-long-wd-backup)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-hardware --start-smart-long wd-backup'
     ;;
 --thermal-load)
     ssh -o BatchMode=yes "$remote_host" \
