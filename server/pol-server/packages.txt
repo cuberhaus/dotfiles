@@ -1,5 +1,6 @@
 ca-certificates
 curl
+exfatprogs
 git
 git-lfs
 jq

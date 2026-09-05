@@ -161,6 +161,10 @@ apply_configuration() {
         systemd_target="$(root_path "/etc/systemd/system/${systemd_source##*/}")"
         install_if_changed "$systemd_source" "$systemd_target" 0644 && systemd_changed=true
     done
+    for systemd_source in "$server_dir"/etc/systemd/system/pol-server-backup*; do
+        systemd_target="$(root_path "/etc/systemd/system/${systemd_source##*/}")"
+        install_if_changed "$systemd_source" "$systemd_target" 0644 && systemd_changed=true
+    done
 
     POL_SERVER_ROOT="$root_prefix" POL_SERVER_ALLOW_UNPRIVILEGED="${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" \
         "$server_dir/apply-power-policy"
@@ -222,6 +226,13 @@ apply_services() {
     if [ -r "$(root_path /etc/cuberhaus/rss-email.json)" ]; then
         ensure_service pol-server-rss-email.timer
     fi
+    if [ -r "$(root_path /etc/cuberhaus/restic-password)" ]; then
+        ensure_service pol-server-backup.timer
+        ensure_service pol-server-backup-check.timer
+    else
+        disable_service pol-server-backup.timer
+        disable_service pol-server-backup-check.timer
+    fi
 }
 
 check_baseline() {
@@ -245,7 +256,11 @@ check_baseline() {
         "$server_dir/etc/systemd/system/pol-server-github-mirror.service" \
         "$server_dir/etc/systemd/system/pol-server-github-mirror.timer" \
         "$server_dir/etc/systemd/system/pol-server-rss-email.service" \
-        "$server_dir/etc/systemd/system/pol-server-rss-email.timer"; do
+        "$server_dir/etc/systemd/system/pol-server-rss-email.timer" \
+        "$server_dir/etc/systemd/system/pol-server-backup.service" \
+        "$server_dir/etc/systemd/system/pol-server-backup.timer" \
+        "$server_dir/etc/systemd/system/pol-server-backup-check.service" \
+        "$server_dir/etc/systemd/system/pol-server-backup-check.timer"; do
         target_file="$(root_path "${source_file#"$server_dir"}")"
         if cmp -s "$source_file" "$target_file" 2>/dev/null; then
             info "Configuration current: ${target_file#"${root_prefix%/}"}"
@@ -301,6 +316,19 @@ check_baseline() {
         fi
     else
         info 'RSS email credential not configured; timer remains disabled'
+    fi
+
+    if [ -r "$(root_path /etc/cuberhaus/restic-password)" ]; then
+        for unit in pol-server-backup.timer pol-server-backup-check.timer; do
+            if unit_enabled_and_active "$unit"; then
+                info "Service active and enabled: $unit"
+            else
+                warn "Service drift: $unit"
+                failures=1
+            fi
+        done
+    else
+        info 'Restic credential not configured; backup timers remain disabled'
     fi
 
     if samba_configured; then

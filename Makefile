@@ -21,7 +21,7 @@ CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 RESTORE_WORKSPACE_SKILLS ?= 1
 POL_SERVER_HOST ?= home-nas
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended enroll-pol-server enroll-pol-server-maintenance revoke-pol-server-maintenance reboot-pol-server upgrade-pol-server bootstrap-pol-server audit-pol-server audit-pol-server-hardware audit-pol-server-storage prepare-pol-server-storage audit-pol-server-samba configure-pol-server-samba set-pol-server-samba-password generate-pol-server-samba-password test-pol-server-samba-access start-pol-server-smart-long-kingston start-pol-server-smart-long-micron test-pol-server-thermals configure-pol-server-github-mirrors sync-pol-server-github-mirrors audit-pol-server-github-mirrors bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended enroll-pol-server enroll-pol-server-maintenance revoke-pol-server-maintenance reboot-pol-server upgrade-pol-server bootstrap-pol-server audit-pol-server audit-pol-server-hardware audit-pol-server-storage prepare-pol-server-storage audit-pol-server-samba configure-pol-server-samba set-pol-server-samba-password generate-pol-server-samba-password test-pol-server-samba-access audit-pol-server-backup prepare-pol-server-backup generate-pol-server-restic-password run-pol-server-backup check-pol-server-backup test-pol-server-backup-restore start-pol-server-smart-long-kingston start-pol-server-smart-long-micron test-pol-server-thermals configure-pol-server-github-mirrors sync-pol-server-github-mirrors audit-pol-server-github-mirrors bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -82,6 +82,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_pol_server_bootstrap.sh
 	bash tests/test_pol_server_storage.sh
 	bash tests/test_pol_server_samba.sh
+	bash tests/test_pol_server_backup.sh
 	bash tests/test_pol_server_github_mirror.sh
 	bash tests/test_pol_server_hardware.sh
 	bash tests/test_obsidian_bootstrap.sh
@@ -264,6 +265,24 @@ generate-pol-server-samba-password: ## Generate a private local Samba password a
 
 test-pol-server-samba-access: ## Test authenticated SMB3 file operations and guest denial
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --test-samba-access
+
+audit-pol-server-backup: ## Audit the WD mount, Restic repository, and timers
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --check-backup
+
+prepare-pol-server-backup: ## Mount the accepted existing WD partition without formatting it
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --prepare-backup
+
+generate-pol-server-restic-password: ## Generate a private Restic password and initialize the repository
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --generate-restic-password
+
+run-pol-server-backup: ## Back up /srv/storage to the external WD now
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --run-backup
+
+check-pol-server-backup: ## Check Restic metadata and a rotating repository data subset
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --check-backup-repository
+
+test-pol-server-backup-restore: ## Restore and compare the stable backup acceptance probe
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --restore-test-backup
 
 audit-pol-server-wd-backup: ## Print the external WD backup disk SMART report
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --audit-wd-backup

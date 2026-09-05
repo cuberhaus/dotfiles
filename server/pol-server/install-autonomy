@@ -11,6 +11,7 @@ launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-bootstrap"
 hardware_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-hardware"
 storage_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-storage"
 samba_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-samba"
+backup_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-backup"
 maintenance_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-maintenance"
 github_mirror_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-github-mirror"
 rss_email_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-rss-email"
@@ -46,6 +47,7 @@ install -d -m 0755 "$staging_dir"
 install -m 0755 \
     "$server_dir/bootstrap" \
     "$server_dir/apply-power-policy" \
+    "$server_dir/backup-setup" \
     "$server_dir/github-mirror" \
     "$server_dir/hardware-qualification" \
     "$server_dir/samba-setup" \
@@ -69,6 +71,7 @@ install -m 0755 "$server_dir/pol-server-bootstrap" "$launcher_target"
 install -m 0755 "$server_dir/pol-server-hardware" "$hardware_launcher_target"
 install -m 0755 "$server_dir/pol-server-storage" "$storage_launcher_target"
 install -m 0755 "$server_dir/pol-server-samba" "$samba_launcher_target"
+install -m 0755 "$server_dir/pol-server-backup" "$backup_launcher_target"
 install -m 0755 "$server_dir/pol-server-maintenance" "$maintenance_launcher_target"
 install -m 0755 "$server_dir/pol-server-github-mirror" "$github_mirror_launcher_target"
 install -m 0755 "$server_dir/pol-server-rss-email" "$rss_email_launcher_target"
@@ -89,6 +92,12 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --apply' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --set-password' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --set-password-stdin' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-backup --check' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-backup --prepare' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-backup --configure-password-stdin' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-backup --backup' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-backup --check-repository' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-backup --restore-test' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync' \

@@ -8,6 +8,7 @@ INSTALLER="$REPO_ROOT/server/pol-server/install-autonomy"
 HARDWARE="$REPO_ROOT/server/pol-server/hardware-qualification"
 STORAGE="$REPO_ROOT/server/pol-server/storage-setup"
 SAMBA="$REPO_ROOT/server/pol-server/samba-setup"
+BACKUP="$REPO_ROOT/server/pol-server/backup-setup"
 MAINTENANCE="$REPO_ROOT/server/pol-server/maintenance-access"
 GITHUB_MIRROR="$REPO_ROOT/server/pol-server/github-mirror"
 RSS_EMAIL="$REPO_ROOT/server/pol-server/rss-email"
@@ -38,6 +39,7 @@ assert_file_contains() {
 [ -x "$HARDWARE" ] || fail 'pol-server hardware qualification command must exist and be executable'
 [ -x "$STORAGE" ] || fail 'pol-server storage setup command must exist and be executable'
 [ -x "$SAMBA" ] || fail 'pol-server Samba setup command must exist and be executable'
+[ -x "$BACKUP" ] || fail 'pol-server backup setup command must exist and be executable'
 [ -x "$MAINTENANCE" ] || fail 'pol-server maintenance access command must exist and be executable'
 [ -x "$GITHUB_MIRROR" ] || fail 'pol-server GitHub mirror command must exist and be executable'
 [ -x "$RSS_EMAIL" ] || fail 'pol-server RSS email command must exist and be executable'
@@ -53,6 +55,10 @@ grep -Eq '^[[:space:]]*samba-setup[[:space:]]*\\$' "$DEPLOY" ||
     fail 'pol-server deploy must transfer the Samba setup command'
 grep -Eq '^[[:space:]]*pol-server-samba[[:space:]]*\\$' "$DEPLOY" ||
     fail 'pol-server deploy must transfer the Samba launcher'
+grep -Eq '^[[:space:]]*backup-setup[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the backup setup command'
+grep -Eq '^[[:space:]]*pol-server-backup[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the backup launcher'
 grep -Fq 'bootstrap-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose bootstrap-pol-server'
 grep -Fq 'audit-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose audit-pol-server'
 grep -Fq 'enroll-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose enroll-pol-server'
@@ -79,6 +85,12 @@ grep -Fq 'configure-pol-server-samba:' "$REPO_ROOT/Makefile" || fail 'Makefile m
 grep -Fq 'set-pol-server-samba-password:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose interactive Samba activation'
 grep -Fq 'generate-pol-server-samba-password:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose generated Samba credentials'
 grep -Fq 'test-pol-server-samba-access:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Samba access acceptance'
+grep -Fq 'audit-pol-server-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the backup audit'
+grep -Fq 'prepare-pol-server-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose additive WD preparation'
+grep -Fq 'generate-pol-server-restic-password:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose generated restic credentials'
+grep -Fq 'run-pol-server-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose a manual backup run'
+grep -Fq 'check-pol-server-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose repository integrity checks'
+grep -Fq 'test-pol-server-backup-restore:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose restore acceptance'
 grep -Fq 'configure-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror authentication'
 grep -Fq 'sync-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose manual GitHub mirror sync'
 grep -Fq 'audit-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror checks'
@@ -112,6 +124,14 @@ grep -Fq 'SMB3 file lifecycle passed' "$DEPLOY" ||
     fail 'Samba acceptance must test the file lifecycle over SMB3'
 grep -Fq 'Guest access denied as expected' "$DEPLOY" ||
     fail 'Samba acceptance must verify that guest access fails'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-backup --check'" "$DEPLOY" ||
+    fail 'remote backup audit must use its narrow root command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-backup --prepare'" "$DEPLOY" ||
+    fail 'remote backup preparation must use its exact additive root command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-backup --configure-password-stdin'" "$DEPLOY" ||
+    fail 'generated restic password setup must use standard input'
+grep -Fq 'pol-server-restic-password' "$DEPLOY" ||
+    fail 'generated restic credentials must be stored outside the repository'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -268,6 +288,7 @@ assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-bootstrap" '/usr/loca
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-hardware" '/usr/local/lib/cuberhaus/pol-server/hardware-qualification'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-storage" '/usr/local/lib/cuberhaus/pol-server/storage-setup'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-samba" '/usr/local/lib/cuberhaus/pol-server/samba-setup'
+assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-backup" '/usr/local/lib/cuberhaus/pol-server/backup-setup'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-maintenance" '/usr/local/lib/cuberhaus/pol-server/maintenance-access'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-github-mirror" '/usr/local/lib/cuberhaus/pol-server/github-mirror'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-rss-email" '/usr/local/lib/cuberhaus/pol-server/rss-email'
@@ -285,6 +306,12 @@ assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: 
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --apply'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --set-password'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --set-password-stdin'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-backup --check'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-backup --prepare'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-backup --configure-password-stdin'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-backup --backup'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-backup --check-repository'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-backup --restore-test'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync'
@@ -302,6 +329,8 @@ assert_file_contains "$EVENT_LOG" 'visudo:-cf'
     fail 'installer must deploy the executable storage setup command'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/samba-setup" ] ||
     fail 'installer must deploy the executable Samba setup command'
+[ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/backup-setup" ] ||
+    fail 'installer must deploy the executable backup setup command'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/github-mirror" ] ||
     fail 'installer must deploy the executable GitHub mirror command'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/rss-email" ] ||
@@ -315,6 +344,11 @@ assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'OnCalendar=*-*-* 08:00:00'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'OnCalendar=*-*-* 20:00:00'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'Persistent=true'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup.service" 'LoadCredential=restic-password:/etc/cuberhaus/restic-password'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup.service" 'RequiresMountsFor=/mnt/pol-server-backup'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup.timer" 'OnCalendar=*-*-* 02:00:00'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup.timer" 'Persistent=true'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup-check.timer" 'OnCalendar=Sun *-*-* 04:30:00'
 
 "$INSTALLER" --temporary-full-access
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-maintenance" \
@@ -335,15 +369,18 @@ assert_file_contains "$FAKE_ROOT/etc/systemd/logind.conf.d/90-pol-server.conf" '
 assert_file_contains "$FAKE_ROOT/etc/apt/apt.conf.d/52pol-server-periodic" 'APT::Periodic::Unattended-Upgrade "1";'
 assert_file_contains "$FAKE_ROOT/etc/ssh/sshd_config.d/10-pol-server.conf" 'PasswordAuthentication no'
 assert_file_contains "$FAKE_ROOT/home/pol/.ssh/authorized_keys" 'dotfiles-client@pol-server'
-for package in ca-certificates curl git git-lfs jq openssh-server python3 restic samba smbclient smartmontools stress-ng ufw unattended-upgrades; do
+for package in ca-certificates curl exfatprogs git git-lfs jq openssh-server python3 restic samba smbclient smartmontools stress-ng ufw unattended-upgrades; do
     grep -Fxq -- "$package" "$PACKAGE_STATE" || fail "Expected package to be installed: $package"
 done
 
 install -D -m 0600 /dev/null "$FAKE_ROOT/etc/cuberhaus/github-mirror-token"
 install -D -m 0600 /dev/null "$FAKE_ROOT/etc/cuberhaus/rss-email.json"
+install -D -m 0600 /dev/null "$FAKE_ROOT/etc/cuberhaus/restic-password"
 "$BOOTSTRAP" --apply
 assert_file_contains "$EVENT_LOG" 'systemctl:enable --now pol-server-github-mirror.timer'
 assert_file_contains "$EVENT_LOG" 'systemctl:enable --now pol-server-rss-email.timer'
+assert_file_contains "$EVENT_LOG" 'systemctl:enable --now pol-server-backup.timer'
+assert_file_contains "$EVENT_LOG" 'systemctl:enable --now pol-server-backup-check.timer'
 
 : > "$EVENT_LOG"
 "$BOOTSTRAP" --apply

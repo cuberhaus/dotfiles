@@ -27,6 +27,12 @@ Usage: deploy [--host HOST] MODE
     --set-samba-password           Enroll the Samba password and activate smbd interactively.
     --generate-samba-password      Generate a private local password and activate smbd.
     --test-samba-access            Test SMB3 file operations and guest denial on every share.
+    --check-backup                 Audit the WD mount, Restic repository, and timers.
+    --prepare-backup               Mount the accepted WD partition without formatting it.
+    --generate-restic-password     Generate a private local password and initialize Restic.
+    --run-backup                   Back up /srv/storage now.
+    --check-backup-repository      Check Restic metadata and a rotating data subset.
+    --restore-test-backup          Restore and compare the backup acceptance probe.
     --audit-wd-backup              Print the WD backup disk SMART report.
     --start-smart-long-kingston    Start the Kingston SMART long test.
     --start-smart-long-micron      Start the Micron SMART long test.
@@ -52,7 +58,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--check-backup|--prepare-backup|--generate-restic-password|--run-backup|--check-backup-repository|--restore-test-backup|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report)
             mode="$1"
             ;;
         --help|-h)
@@ -74,6 +80,7 @@ case "$mode" in
     tar -C "$server_dir" -cf - \
         bootstrap \
         apply-power-policy \
+        backup-setup \
         hardware-qualification \
         storage-setup \
         github-mirror \
@@ -84,6 +91,7 @@ case "$mode" in
         pol-server-hardware \
         pol-server-storage \
         pol-server-samba \
+        pol-server-backup \
         pol-server-github-mirror \
         pol-server-rss-email \
         rss-email \
@@ -192,6 +200,48 @@ case "$mode" in
         fi
         printf "Guest access denied as expected.\n"
     '
+    ;;
+--check-backup)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-backup --check'
+    ;;
+--prepare-backup)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-backup --prepare'
+    ;;
+--generate-restic-password)
+    secret_dir="${XDG_CONFIG_HOME:-$HOME/.config}/cuberhaus/secrets"
+    secret_file="$secret_dir/pol-server-restic-password"
+    install -d -m 0700 "$secret_dir"
+    umask 077
+    temporary_secret="$(mktemp "$secret_dir/.pol-server-restic-password.XXXXXX")"
+    cleanup_secret() {
+        rm -f "$temporary_secret"
+    }
+    trap cleanup_secret EXIT
+    openssl rand -base64 32 | tr -d '\n' > "$temporary_secret"
+    printf '\n' >> "$temporary_secret"
+    {
+        cat "$temporary_secret"
+        cat "$temporary_secret"
+    } | ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-backup --configure-password-stdin'
+    mv "$temporary_secret" "$secret_file"
+    chmod 0600 "$secret_file"
+    trap - EXIT
+    printf 'Restic password stored locally at %s (mode 0600).\n' "$secret_file"
+    ;;
+--run-backup)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-backup --backup'
+    ;;
+--check-backup-repository)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-backup --check-repository'
+    ;;
+--restore-test-backup)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-backup --restore-test'
     ;;
 --audit-wd-backup)
     ssh -o BatchMode=yes "$remote_host" \
