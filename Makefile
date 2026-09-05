@@ -21,7 +21,7 @@ CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 RESTORE_WORKSPACE_SKILLS ?= 1
 POL_SERVER_HOST ?= home-nas
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended enroll-pol-server bootstrap-pol-server audit-pol-server bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended enroll-pol-server enroll-pol-server-maintenance revoke-pol-server-maintenance bootstrap-pol-server audit-pol-server audit-pol-server-hardware start-pol-server-smart-long-kingston start-pol-server-smart-long-micron bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -80,6 +80,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_bootstrap_stow.sh
 	bash tests/test_bootstrap_machine_state.sh
 	bash tests/test_pol_server_bootstrap.sh
+	bash tests/test_pol_server_hardware.sh
 	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh
 	bash tests/test_shell_path.sh
@@ -222,8 +223,23 @@ audit-pol-server: ## Report drift from the tracked pol-server baseline
 enroll-pol-server: ## Install/update pol-server's root-owned bootstrap (interactive sudo)
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --enroll
 
+enroll-pol-server-maintenance: ## Enroll pol-server with eight-hour full sudo access
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --enroll-maintenance
+
+revoke-pol-server-maintenance: ## Revoke temporary full sudo access immediately
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --revoke-maintenance
+
 bootstrap-pol-server: ## Converge the enrolled pol-server baseline without a password
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --apply
+
+audit-pol-server-hardware: ## Print a redacted hardware and SMART report from pol-server
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --hardware-report
+
+start-pol-server-smart-long-kingston: ## Start the Kingston data SSD long SMART test
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --start-smart-long-kingston
+
+start-pol-server-smart-long-micron: ## Start the Micron system SSD long SMART test
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --start-smart-long-micron
 
 dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
 	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'

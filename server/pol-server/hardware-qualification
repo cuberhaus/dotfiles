@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+# Description: Audit pol-server hardware and start model-pinned SMART long tests.
+set -euo pipefail
+
+mode=--report
+disk_alias=
+battery_root="${POL_SERVER_BATTERY_ROOT:-/sys/class/power_supply}"
+
+error() { printf '\033[31m[ERROR]\033[0m %s\n' "$*" >&2; }
+
+usage() {
+    cat <<'EOF'
+Usage: hardware-qualification [--report | --start-smart-long DISK]
+
+  --report                 Print a redacted hardware qualification report.
+  --start-smart-long DISK  Start a long test on kingston or micron.
+EOF
+}
+
+parse_args() {
+    case "${1:---report}" in
+        --report)
+            [ "$#" -eq 1 ] || return 2
+            mode=--report
+            ;;
+        --start-smart-long)
+            [ "$#" -eq 2 ] || return 2
+            mode=--start-smart-long
+            disk_alias="$2"
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *) return 2 ;;
+    esac
+}
+
+require_privileges() {
+    if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
+        error 'Run through the tracked root-owned launcher.'
+        return 1
+    fi
+}
+
+disk_spec() {
+    case "$1" in
+        kingston) printf '%s\t%s\t%s\n' 'KINGSTON SA400S37960G' 900000000000 1000000000000 ;;
+        micron) printf '%s\t%s\t%s\n' 'Micron_1100_MTFDDAV256TBN' 240000000000 270000000000 ;;
+        *)
+            error "Unknown disk alias: $1"
+            return 2
+            ;;
+    esac
+}
+
+resolve_disk() {
+    local alias="$1"
+    local expected_model minimum_size maximum_size path model size match=
+    IFS=$'\t' read -r expected_model minimum_size maximum_size < <(disk_spec "$alias")
+
+    while read -r path model; do
+        if [ "$model" = "$expected_model" ]; then
+            if [ -n "$match" ]; then
+                error "More than one disk matches model: $expected_model"
+                return 1
+            fi
+            match="$path"
+        fi
+    done < <(lsblk -dn -o PATH,MODEL)
+
+    if [ -z "$match" ]; then
+        error "Expected disk model not found: $expected_model"
+        return 1
+    fi
+
+    size="$(blockdev --getsize64 "$match")"
+    if (( size < minimum_size || size > maximum_size )); then
+        error "Unexpected capacity for $expected_model: $size bytes"
+        return 1
+    fi
+
+    printf '%s\n' "$match"
+}
+
+redact_smart_output() {
+    awk '{ normalized = tolower($0) } normalized !~ /serial number|wwn device|logical unit id/'
+}
+
+report_disk() {
+    local alias="$1"
+    local model device mounts
+    IFS=$'\t' read -r model _ < <(disk_spec "$alias")
+    device="$(resolve_disk "$alias")"
+    mounts="$(lsblk -nr -o MOUNTPOINTS "$device" | sed '/^[[:space:]]*$/d')"
+
+    printf '\n## %s: %s\n' "$model" "$device"
+    printf 'Capacity bytes: %s\n' "$(blockdev --getsize64 "$device")"
+    if [ -n "$mounts" ]; then
+        printf 'Mounts:\n%s\n' "$mounts"
+    else
+        printf 'Mounts: none\n'
+    fi
+    smartctl -c -H -A -l selftest "$device" | redact_smart_output
+}
+
+report_battery() {
+    local battery file value
+    shopt -s nullglob
+    for battery in "$battery_root"/BAT*; do
+        printf '\n## Battery: %s\n' "$(basename "$battery")"
+        for file in manufacturer model_name technology cycle_count energy_full_design energy_full charge_full_design charge_full capacity status; do
+            if [ -r "$battery/$file" ]; then
+                value="$(< "$battery/$file")"
+                printf '%s: %s\n' "$file" "$value"
+            fi
+        done
+    done
+}
+
+report_hardware() {
+    printf '# pol-server hardware qualification\n'
+    printf 'Root filesystem source: %s\n' "$(findmnt -n -o SOURCE /)"
+    report_disk kingston
+    report_disk micron
+    report_battery
+    printf '\n## Network addresses\n'
+    ip -brief address
+    printf '\n## Failed systemd units\n'
+    systemctl --failed --no-legend
+}
+
+start_smart_long() {
+    local device
+    device="$(resolve_disk "$1")"
+    printf 'Starting SMART long test for %s at %s\n' "$1" "$device"
+    smartctl -t long "$device"
+}
+
+main() {
+    if ! parse_args "$@"; then
+        usage >&2
+        exit 2
+    fi
+    require_privileges
+
+    case "$mode" in
+        --report) report_hardware ;;
+        --start-smart-long) start_smart_long "$disk_alias" ;;
+    esac
+}
+
+main "$@"

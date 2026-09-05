@@ -18,10 +18,33 @@ managed workstation:
 make enroll-pol-server
 ```
 
-Enrollment validates and installs a sudoers rule allowing exactly
-`/usr/local/sbin/pol-server-bootstrap --apply`. It requires the server user's
-sudo password in a visible terminal. It does not grant `NOPASSWD: ALL` and does
-not enable root SSH login.
+Enrollment validates and installs sudoers rules for a small set of exact,
+root-owned commands. It requires the server user's sudo password in a visible
+terminal. It does not grant `NOPASSWD: ALL`, accept arbitrary device paths, or
+enable root SSH login.
+
+For a supervised build session that needs to install new root-owned phases
+without repeated password prompts, enroll an eight-hour maintenance window:
+
+```bash
+make enroll-pol-server-maintenance
+```
+
+This opt-in mode is intentionally broader: until the UTC `NOTAFTER` timestamp,
+the `pol` account and any process running as that account can execute any command
+as root without a password. It still does not enable root SSH. The installer
+prints the expiry, validates both sudoers files with `visudo`, and preserves the
+narrow permanent rules that remain after expiry.
+
+Revoke the window as soon as the supervised work is done:
+
+```bash
+make revoke-pol-server-maintenance
+```
+
+The revoker itself is a permanent exact-command rule, so early rollback does not
+need a password. The expired file is inert, but the revoke target also removes
+it from `/etc/sudoers.d`.
 
 After enrollment, audit with:
 
@@ -51,6 +74,35 @@ It deliberately does not partition disks, enable UFW, configure Samba shares,
 install Docker, or deploy applications. Those capabilities enter the bootstrap
 only after their phase-specific gate and rollback have been reviewed.
 
+## Hardware qualification
+
+The same enrollment installs a separate root-owned hardware command. It locates
+the expected disks by exact model and capacity, so device-letter changes cannot
+redirect a test. Reports omit disk serial numbers and other unique identifiers.
+
+Print the current inventory, relevant SMART attributes, self-test history,
+battery values, network addresses, and failed units:
+
+```bash
+make audit-pol-server-hardware
+```
+
+Start one nondestructive SMART long test at a time:
+
+```bash
+make start-pol-server-smart-long-kingston
+# Wait for the reported completion time, then audit again.
+make audit-pol-server-hardware
+
+make start-pol-server-smart-long-micron
+# Wait for the reported completion time, then audit again.
+make audit-pol-server-hardware
+```
+
+These targets can only select `kingston` or `micron`; the root-owned command
+rejects unknown models, duplicate matches, and unexpected capacities. They do
+not mount, write, format, repartition, or erase either disk.
+
 ## Current inventory
 
 Recorded on 2026-09-05 from the active SSH session:
@@ -79,9 +131,16 @@ laptop in the router before relying on it for SSH or WireGuard.
     `SHA256:TmBy3/5PjJhHwNh+EDs96ZJvajK0Gj8xfqGrwBfE13Y`.
 - `smartmontools` is installed for disk inspection.
 - `ufw` is installed but has not been enabled or given firewall rules.
+- `unattended-upgrades` and the tracked daily APT policy are installed and
+    active.
 - The tracked no-sleep policy is installed and active. All four systemd sleep
     targets report `masked` and the effective `logind` actions report `ignore`.
 - No disk contents or partition tables have been changed.
+- The baseline bundle was enrolled and its passwordless apply and audit paths
+    passed on 2026-09-05.
+- The Kingston SMART long test completed without error on 2026-09-05. Its old
+    interface counters remained stable during the test at `524353` and `13`;
+    future audits must compare against that baseline.
 
 Connect from the managed workstation with:
 

@@ -87,7 +87,11 @@ test_dev_tools_preserve_git_credentials() {
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$FAKE_GIT_LOG"
 EOF
-    chmod +x "$fake_bin/git"
+    cat > "$fake_bin/sudo" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+    chmod +x "$fake_bin/git" "$fake_bin/sudo"
     export FAKE_GIT_LOG="$git_log"
     export PATH="$fake_bin:$PATH"
 

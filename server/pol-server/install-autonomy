@@ -4,17 +4,33 @@ set -euo pipefail
 
 server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 root_prefix="${POL_SERVER_ROOT:-}"
+temporary_full_access=false
+maintenance_hours="${POL_SERVER_MAINTENANCE_HOURS:-8}"
 install_dir="${root_prefix%/}/usr/local/lib/cuberhaus/pol-server"
 launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-bootstrap"
+hardware_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-hardware"
+maintenance_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-maintenance"
 sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-bootstrap"
+maintenance_sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-maintenance"
 staging_dir="${install_dir}.new.$$"
 sudoers_staging="${sudoers_target}.new.$$"
+maintenance_sudoers_staging="${maintenance_sudoers_target}.new.$$"
 
 cleanup() {
     rm -rf "$staging_dir"
     rm -f "$sudoers_staging"
+    rm -f "$maintenance_sudoers_staging"
 }
 trap cleanup EXIT
+
+case "${1:-}" in
+    '') ;;
+    --temporary-full-access) temporary_full_access=true ;;
+    *)
+        printf 'Usage: install-autonomy [--temporary-full-access]\n' >&2
+        exit 2
+        ;;
+esac
 
 if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
     printf 'Run install-autonomy as root.\n' >&2
@@ -26,6 +42,8 @@ install -d -m 0755 "$staging_dir"
 install -m 0755 \
     "$server_dir/bootstrap" \
     "$server_dir/apply-power-policy" \
+    "$server_dir/hardware-qualification" \
+    "$server_dir/maintenance-access" \
     "$staging_dir/"
 install -m 0644 "$server_dir/packages.txt" "$staging_dir/packages.txt"
 cp -R "$server_dir/etc" "$server_dir/keys" "$staging_dir/"
@@ -40,14 +58,35 @@ install -d -m 0755 "$(dirname "$install_dir")" "$(dirname "$launcher_target")"
 rm -rf "$install_dir"
 mv "$staging_dir" "$install_dir"
 install -m 0755 "$server_dir/pol-server-bootstrap" "$launcher_target"
+install -m 0755 "$server_dir/pol-server-hardware" "$hardware_launcher_target"
+install -m 0755 "$server_dir/pol-server-maintenance" "$maintenance_launcher_target"
 
 install -d -m 0755 "$(dirname "$sudoers_target")"
 printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-bootstrap --apply' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --report' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long kingston' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long micron' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke' \
     > "$sudoers_staging"
 chmod 0440 "$sudoers_staging"
 visudo -cf "$sudoers_staging"
 install -m 0440 "$sudoers_staging" "$sudoers_target"
+
+if [ "$temporary_full_access" = true ]; then
+    if ! [[ "$maintenance_hours" =~ ^[0-9]+$ ]] ||
+        (( maintenance_hours < 1 || maintenance_hours > 24 )); then
+        printf 'POL_SERVER_MAINTENANCE_HOURS must be an integer from 1 through 24.\n' >&2
+        exit 2
+    fi
+    expires_at="$(date -u -d "+$maintenance_hours hours" +%Y%m%d%H%M%SZ)"
+    printf 'pol ALL=(ALL:ALL) NOTAFTER=%s NOPASSWD: ALL\n' "$expires_at" \
+        > "$maintenance_sudoers_staging"
+    chmod 0440 "$maintenance_sudoers_staging"
+    visudo -cf "$maintenance_sudoers_staging"
+    install -m 0440 "$maintenance_sudoers_staging" "$maintenance_sudoers_target"
+    printf 'Temporary full maintenance access expires at %s.\n' "$expires_at"
+fi
 
 printf 'Installed root-owned bootstrap at %s\n' "$install_dir"
 printf 'Installed narrow sudo rule at %s\n' "$sudoers_target"

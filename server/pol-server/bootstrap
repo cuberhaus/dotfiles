@@ -252,6 +252,68 @@ check_baseline() {
         fi
     done
 
+    if ! check_host_facts; then
+        failures=1
+    fi
+
+    return "$failures"
+}
+
+check_host_facts() {
+    local failures=0
+    local expected_hostname="${POL_SERVER_EXPECTED_HOSTNAME:-pol-server}"
+    local expected_timezone="${POL_SERVER_EXPECTED_TIMEZONE:-Europe/Madrid}"
+    local expected_locale="${POL_SERVER_EXPECTED_LOCALE:-LANG=es_ES.UTF-8}"
+    local actual_hostname actual_timezone actual_locale synchronized failed_units last_trim
+
+    actual_hostname="$(hostname)"
+    if [ "$actual_hostname" = "$expected_hostname" ]; then
+        info "Hostname current: $actual_hostname"
+    else
+        warn "Hostname drift: expected $expected_hostname, found $actual_hostname"
+        failures=1
+    fi
+
+    actual_timezone="$(timedatectl show -p Timezone --value)"
+    if [ "$actual_timezone" = "$expected_timezone" ]; then
+        info "Timezone current: $actual_timezone"
+    else
+        warn "Timezone drift: expected $expected_timezone, found $actual_timezone"
+        failures=1
+    fi
+
+    actual_locale="$(localectl status | sed -n 's/^[[:space:]]*System Locale: //p')"
+    if [ "$actual_locale" = "$expected_locale" ]; then
+        info "System locale current: $actual_locale"
+    else
+        warn "System locale drift: expected $expected_locale, found ${actual_locale:-unset}"
+        failures=1
+    fi
+
+    synchronized="$(timedatectl show -p NTPSynchronized --value)"
+    if [ "$synchronized" = yes ]; then
+        info 'System clock synchronized'
+    else
+        warn 'System clock is not synchronized'
+        failures=1
+    fi
+
+    last_trim="$(systemctl show fstrim.timer -p LastTriggerUSec --value 2>/dev/null || true)"
+    if [ -n "$last_trim" ] && [ "$last_trim" != n/a ]; then
+        info "fstrim.timer last trigger: $last_trim"
+    else
+        warn 'fstrim.timer has no recorded trigger'
+        failures=1
+    fi
+
+    failed_units="$(systemctl --failed --no-legend 2>/dev/null || true)"
+    if [ -z "$failed_units" ]; then
+        info 'No failed systemd units'
+    else
+        warn "Failed systemd units:\n$failed_units"
+        failures=1
+    fi
+
     return "$failures"
 }
 

@@ -41,6 +41,14 @@ root-owned code and requires visible sudo approval; routine
 code with the exact `--apply` argument. Destructive storage operations and secret
 provisioning are never hidden inside the baseline target.
 
+During an explicitly supervised build session,
+`make enroll-pol-server-maintenance` may install a broad passwordless sudo rule
+with an eight-hour `NOTAFTER` timestamp. This is equivalent to temporary root
+access for every process running as `pol`, so use it only while actively
+configuring the host. Revoke it early with
+`make revoke-pol-server-maintenance`; after expiry or revocation, only the
+tracked exact-command rules remain. Root SSH stays disabled in all modes.
+
 Formatting `/dev/sda`, changing firewall policy, disabling SSH passwords, and
 configuring backup retention each require an explicit review immediately before
 application. Never infer a destructive device path from its current letter;
@@ -57,16 +65,16 @@ Baseline recorded on 2026-09-05:
 | Sleep prevention | Complete | Effective `logind` actions are `ignore`; four sleep targets are `masked` |
 | Service health | Complete | No failed systemd units at the baseline check |
 | SSD trimming | Complete | `fstrim.timer` is enabled and active |
-| Security updates | Partial | APT timers are active, but `unattended-upgrades` is not installed or configured |
+| Security updates | Complete | `unattended-upgrades`, APT periodic policy, and both upgrade services/timers are active |
 | Cooling baseline | Partial | Idle sensors report approximately 35-39 C; sustained-load behavior is unknown |
-| Battery | Partial | Reports 100% charge and 630 cycles; physical condition and retained capacity need checking |
+| Battery | Partial | Reports 630 cycles and 24.615 Wh full versus 36 Wh design (68.4%); physical condition still needs checking |
 | Network | Blocked | Only Wi-Fi `wlp2s0` is active; address `192.168.1.34` is DHCP-assigned |
-| SMART qualification | Blocked | Preliminary reports exist, but fresh long tests for both SSDs are not recorded |
+| SMART qualification | In progress | Kingston long test passed with stable CRC counters; Micron long test started and awaits final verification |
 | Kingston data disk | Blocked | Approximately 894.2 GB remains NTFS and must not be erased yet |
 | Firewall | Pending | UFW is installed but intentionally not enabled or configured |
 | Samba | Pending | Package is installed; users, directories, shares, and restrictions are not configured |
 | Backup | Pending | Restic and an independent destination are not configured; no restore has passed |
-| Baseline bootstrap | Ready locally | Enrollment installs a root-owned bundle and a narrow passwordless apply rule; it has not yet been enrolled on the host |
+| Baseline bootstrap | Complete | Root-owned bundle enrolled; passwordless apply and audit both passed on 2026-09-05 |
 | Containers | Pending | Docker Engine and Compose plugin are not installed |
 | Immich | Pending | Must wait for storage, Samba isolation, backup, and monitoring |
 | OpenClaw | Pending | Must wait for backup and Docker; use a cloud model initially |
@@ -74,7 +82,25 @@ Baseline recorded on 2026-09-05:
 
 ## Phase 0: close hardware and data gates
 
-Status: **next**.
+Status: **in progress**.
+
+Read-only inventory on 2026-09-05 confirmed that Debian root is on the Micron,
+the Kingston remains an unmounted 894.2 GB NTFS partition, no systemd units are
+failed, and Wi-Fi is still the only network interface. The battery reports
+24.615 Wh full-charge capacity versus 36 Wh design capacity (68.4%) after 630
+cycles. Serial numbers are intentionally omitted from tracked reports.
+
+The enrolled hardware command resolves disks by exact model and expected
+capacity rather than trusting `/dev/sdX`. Its report redacts unique disk
+identifiers. The only passwordless diagnostic mutations are fixed commands to
+start a SMART long test on the named Kingston or Micron model.
+
+The Kingston long test completed without error at 999 power-on hours. Health
+remained `PASSED`, reallocated and reported-uncorrectable counters remained zero,
+and the historical interface counters stayed unchanged during the test:
+`SATA_CRC_Error_Count=524353` and `CRC_Error_Count=13`. Treat those as a
+baseline, not as repaired history; any increase requires stopping and inspecting
+the internal connection. The Micron long test was started separately afterward.
 
 1. Confirm whether the Kingston NTFS volume contains anything that must survive.
 2. Copy all required data to an independent device or remote destination and
@@ -91,6 +117,19 @@ Status: **next**.
    Ethernet adapter. Test sustained transfer and link stability.
 7. Confirm charger stability, ventilation, and temperatures under a controlled
    CPU and disk load.
+
+Tracked commands:
+
+```bash
+make audit-pol-server-hardware
+make start-pol-server-smart-long-kingston
+make start-pol-server-smart-long-micron
+```
+
+Run the two long tests separately. Re-run the hardware audit after each test has
+finished and compare the Kingston CRC counter with the recorded starting value.
+The physical battery, charger, ventilation, old-data backup, and wired Ethernet
+checks still require human inspection or external equipment.
 
 Acceptance gate:
 
@@ -120,7 +159,10 @@ files stored only on `pol-server`.
 
 ## Phase 2: finish the Debian base
 
-Status: **partial**.
+Status: **in progress**.
+
+Package convergence, automatic upgrades, SSH, SMART monitoring, trimming, and
+the no-sleep policy are complete. Two unattended reboot checks remain.
 
 1. Apply current Debian security and point-release updates, then reboot and
    verify SSH key access.

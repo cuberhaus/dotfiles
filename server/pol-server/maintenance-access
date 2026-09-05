@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Description: Report or revoke temporary full maintenance access on pol-server.
+set -euo pipefail
+
+root_prefix="${POL_SERVER_ROOT:-}"
+sudoers_file="${root_prefix%/}/etc/sudoers.d/pol-server-maintenance"
+
+require_privileges() {
+    if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
+        printf 'Run through the tracked root-owned launcher.\n' >&2
+        return 1
+    fi
+}
+
+case "${1:---status}" in
+    --status)
+        if [ -r "$sudoers_file" ]; then
+            cat "$sudoers_file"
+        else
+            printf 'Temporary maintenance access is not installed.\n'
+        fi
+        ;;
+    --revoke)
+        require_privileges
+        rm -f "$sudoers_file"
+        printf 'Temporary maintenance access revoked.\n'
+        ;;
+    *)
+        printf 'Usage: maintenance-access [--status | --revoke]\n' >&2
+        exit 2
+        ;;
+esac
