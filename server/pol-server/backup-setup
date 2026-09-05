@@ -124,7 +124,13 @@ check_backup() {
             systemctl is-active pol-server-backup.timer >/dev/null 2>&1 &&
             systemctl is-enabled pol-server-backup-check.timer >/dev/null 2>&1 &&
             systemctl is-active pol-server-backup-check.timer >/dev/null 2>&1; then
+            if [ ! -s "$state_path/last-success" ] || [ ! -s "$state_path/last-check" ]; then
+                error 'Backup acceptance is incomplete: success or check marker is missing.'
+                return 1
+            fi
             printf 'Backup state: configured\n'
+            printf 'Last successful backup: %s\n' "$(cat "$state_path/last-success")"
+            printf 'Last repository check: %s\n' "$(cat "$state_path/last-check")"
         else
             printf 'Backup state: repository initialized, timer inactive\n'
         fi

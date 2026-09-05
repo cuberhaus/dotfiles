@@ -75,9 +75,9 @@ Baseline recorded on 2026-09-05:
 | Kingston data disk | Complete | Approved model-pinned migration created ext4 `nas-data`; its UUID mount and acceptance file survived two reboots with changing device letters |
 | Firewall | Pending | UFW is installed but intentionally not enabled or configured |
 | Samba | Complete for Wi-Fi rollout | Dedicated `pol-files` access passed SMB3 file lifecycle tests on all three shares; guest access failed and `nmbd` remains disabled |
-| Backup | Partial | WD Elements inventory and critical counters passed, but repeated long tests were interrupted; the user chose no further SMART retries, so unattended use is not yet accepted |
+| Backup | Operational; policy follow-up pending | User accepted the incomplete SMART-test risk; encrypted Restic backup, rotating integrity check, and restore test passed on the preserved WD exFAT volume |
 | GitHub mirrors | Complete | All 54 active repositories passed Git integrity; LFS fetches completed and the persistent daily timer is enabled |
-| Baseline bootstrap | Complete | Root-owned bundle enrolled; narrow apply/audit pass and temporary broad maintenance access is revoked |
+| Baseline bootstrap | Complete | Root-owned bundle enrolled; routine operations use exact narrow commands and supervised broad access remains bounded by `NOTAFTER` |
 | Containers | Pending | Docker Engine and Compose plugin are not installed |
 | Immich | Pending | Must wait for storage, Samba isolation, backup, and monitoring |
 | OpenClaw | Pending | Must wait for backup and Docker; use a cloud model initially |
@@ -85,7 +85,7 @@ Baseline recorded on 2026-09-05:
 
 ## Phase 0: close hardware and data gates
 
-Status: **in progress**.
+Status: **complete for the accepted Wi-Fi rollout**.
 
 Read-only inventory on 2026-09-05 confirmed that Debian root is on the Micron,
 the Kingston remains an unmounted 894.2 GB NTFS partition, no systemd units are
@@ -126,8 +126,8 @@ are all zero. The redacted details are saved in
 
 User confirmations on 2026-09-05:
 
-- No data on the Kingston needs to be preserved, so the old-data copy step is
-   not applicable. This is not yet authorization to format it.
+- No data on the Kingston needed preservation. Its separately approved,
+   model-pinned migration is complete and recorded in Phase 3.
 - Battery, charger, and ventilation passed physical inspection without swelling,
    abnormal heat, or instability.
 - The tracked two-minute moderate CPU load completed with zero stressor failures
@@ -139,8 +139,8 @@ User confirmations on 2026-09-05:
    must be preserved and later imported, with approximately 712 GiB free. SMART
    reports clean media and interface counters. It is now attached unmounted to
    `pol-server`; repeated long tests were interrupted by host or bridge resets.
-   The user chose not to retry them. Do not reformat or repartition it, and do
-   not treat it as an accepted unattended backup destination yet.
+   The user chose not to retry them and explicitly accepted that residual risk
+   for unattended Restic use. Do not reformat or repartition it.
 
 Tracked commands:
 
@@ -152,8 +152,9 @@ make start-pol-server-smart-long-micron
 
 Run the two long tests separately. Re-run the hardware audit after each test has
 finished and compare the Kingston CRC counter with the recorded starting value.
-The physical battery, charger, ventilation, old-data backup, and wired Ethernet
-checks still require human inspection or external equipment.
+The physical battery, charger, ventilation, and local-storage gates passed.
+Wired Ethernet remains an optional reliability upgrade requiring external
+equipment.
 
 Acceptance gate:
 
@@ -305,7 +306,7 @@ The tracked audit and `make test-pol-server-samba-access` now enforce this gate.
 
 ## Phase 6: implement backup and prove restore
 
-Status: **in progress; required before applications**.
+Status: **operational; retention and off-site policy remain pending**.
 
 The selected destination is an existing external backup disk. Preserve all
 current content, especially the Immich copy intended for later import. The plan
@@ -314,11 +315,18 @@ repartitioning or reformatting. Before any write, record its model, capacity,
 filesystem, mount state, free space, SMART availability, and a top-level
 read-only inventory. That inventory completed on the Ubuntu workstation on
 2026-09-05 and is recorded in
-`reports/2026-09-05-external-backup-baseline.md`. The disk is attached unmounted
-to `pol-server`. Repeated long tests were interrupted, while every observed
-critical counter remained clean. The user chose no further SMART retries; keep
-the disk unmodified until unattended-use risk is accepted separately or another
-backup destination is selected.
+`reports/2026-09-05-external-backup-baseline.md`. Repeated long tests were
+interrupted, while every observed critical counter remained clean. On
+2026-09-05 the user explicitly accepted that residual risk and selected the
+disk for unattended Restic use without formatting or repartitioning it.
+
+The existing exFAT partition is mounted by UUID `5EEB-7DF6` at
+`/mnt/pol-server-backup`; the encrypted repository is isolated under
+`pol-server-restic/`. The first backup processed 755 MiB into snapshot
+`1d2c4c00`. A restore to a separate temporary path matched the source probe,
+the repository metadata and rotating data-subset check reported no errors, and
+both hardened systemd services completed with status 0. Daily backup and weekly
+check timers are enabled. Approximately 711 GiB remained free after acceptance.
 
 1. Choose an independent backup destination with enough capacity for
    irreplaceable data and version history. A second internal SSD is not backup.
@@ -333,8 +341,11 @@ backup destination is selected.
    representative files.
 7. Add an off-site copy for irreplaceable documents and photos.
 
-Acceptance gate: unattended backup succeeds, failure is visible, `restic check`
-passes, and a real restore works without access to the original source.
+Acceptance gate: the production backup service succeeds, failure is visible in
+systemd, `restic check` passes, and a real restore works without access to the
+original source. Those functional checks pass; observe the first timer-triggered
+run before calling scheduling fully proven. Retention pruning and an off-site
+copy remain separate follow-up gates.
 
 ## Phase 7: monitoring and maintenance
 
@@ -410,16 +421,14 @@ during representative concurrent use.
 
 ## Immediate next batch
 
-Do not install more services yet. The next session should do only the following:
+Keep application deployment blocked until backup scheduling and monitoring are
+observed. The next session should:
 
-1. Confirm whether every required file on the Kingston NTFS volume is backed up
-   and whether that disk may eventually be erased.
-2. Confirm the independent backup destination and available capacity.
-3. Confirm the physical Ethernet option and obtain router access for a DHCP
-   reservation.
-4. Add and run a tracked, read-only qualification script for SMART long tests,
-   battery capacity, temperatures, network, and storage identity.
-5. Review the resulting report and decide whether Phase 0 passes.
-
-Only after those five items pass should the plan prepare a separately reviewed
-script for the destructive Kingston migration.
+1. Confirm the first timer-triggered backup and weekly check freshness.
+2. Review the proposed 7 daily, 5 weekly, 12 monthly, and 3 yearly retention
+   policy with a Restic dry run before authorizing any prune.
+3. Preserve the Restic password and recovery procedure outside the NAS, then
+   choose an off-site copy for irreplaceable data.
+4. Reserve the current address in the router and configure tested LAN-only UFW
+   rules for SSH and Samba; Ethernet remains an optional reliability upgrade.
+5. Add backup, SMART, failed-unit, temperature, and 80% storage alerts.

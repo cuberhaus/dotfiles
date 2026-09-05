@@ -94,15 +94,12 @@ It deliberately does not partition disks, enable UFW, configure Samba shares,
 install Docker, or deploy applications. Those capabilities enter the bootstrap
 only after their phase-specific gate and rollback have been reviewed.
 
-The selected future restic destination is a 1.5 TB WD Elements disk. Its
-read-only workstation inventory found a 1 TB exFAT volume with approximately
-712 GiB free, existing backups, and the Immich copy intended for later import.
-Its SMART media counters are clean, but the observed 54 C temperature and lack
-of a completed long self-test still block backup use. It is now attached
-unmounted to `pol-server`; a 232-minute test started at 52 C and is expected to
-finish at 20:12:46 CEST on 2026-09-05. Preserve its contents and do not format or
-repartition it; see
-`reports/2026-09-05-external-backup-baseline.md`.
+The selected Restic destination is the existing 1.5 TB WD Elements disk. Its
+1 TB exFAT partition remains intact with the pre-existing backups and Immich
+copy preserved. The user explicitly accepted unattended backup use despite the
+known incomplete extended SMART tests; critical media and interface counters
+remain zero. The implementation never formats or repartitions this disk. See
+`reports/2026-09-05-external-backup-baseline.md` for the recorded risk context.
 
 ## GitHub recovery mirror
 
@@ -270,6 +267,38 @@ The access test streams that credential through SSH without putting it in a
 command argument, exercises an SMB3 create/read/rename/delete lifecycle on all
 three shares, verifies guest denial, and removes its temporary files.
 
+## Restic backup
+
+The accepted WD exFAT partition is mounted by UUID `5EEB-7DF6` at
+`/mnt/pol-server-backup` with root-only, `nosuid`, `nodev`, and `noexec`
+permissions. Existing content remains untouched; the encrypted repository lives
+only in `pol-server-restic/`. An absent or incorrectly mounted disk makes every
+backup command fail rather than writing to the system SSD.
+
+The tracked workflow is:
+
+```bash
+make audit-pol-server-backup
+make prepare-pol-server-backup
+make generate-pol-server-restic-password
+make run-pol-server-backup
+make check-pol-server-backup
+make test-pol-server-backup-restore
+```
+
+The generated password is stored locally at
+`~/.config/cuberhaus/secrets/pol-server-restic-password` with mode `0600` and
+root-only on the server at `/etc/cuberhaus/restic-password`. Preserve the local
+copy in the recovery material; losing every copy makes the encrypted repository
+unrecoverable.
+
+The daily backup timer runs at 02:00 with up to 30 minutes of randomized delay.
+The weekly Sunday check runs at 04:30 and reads a rotating twelfth of repository
+data, covering all data groups over twelve weeks. The first 755 MiB snapshot,
+isolated restore comparison, repository metadata check, and production systemd
+service executions passed on 2026-09-05. Retention pruning is not configured;
+it requires a separate review before any snapshot deletion.
+
 After physical inspection, run the fixed moderate CPU thermal check:
 
 ```bash
@@ -331,6 +360,9 @@ laptop in the router before relying on it for SSH or WireGuard.
     daily timer is enabled.
 - PCI inventory exposes only the Qualcomm Wi-Fi controller, so wired service
     requires a Linux-compatible USB 3 gigabit Ethernet adapter.
+- The accepted existing WD partition is mounted by UUID at
+    `/mnt/pol-server-backup`; encrypted Restic backup and weekly check timers are
+    active, and the initial backup, integrity check, and restore test passed.
 
 Connect from the managed workstation with:
 

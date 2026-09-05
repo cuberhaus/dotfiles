@@ -60,5 +60,7 @@ and record this incomplete qualification rather than treating it as a pass.
 
 The read-only inventory gate passes and the snapshot contains no reported media
 or interface errors. The disk is not qualified by a completed extended test and
-must not be reformatted or repartitioned. Its use as an unattended restic target
-requires a separate risk decision or replacement with a qualified destination.
+must not be reformatted or repartitioned. On 2026-09-05 the user explicitly
+accepted that residual risk for unattended Restic use. The implementation
+preserves the existing exFAT partition and content, mounts it by UUID, and uses
+only a dedicated `pol-server-restic` directory.

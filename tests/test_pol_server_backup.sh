@@ -251,5 +251,9 @@ configured_output="$(
 )"
 grep -Fq 'Backup state: configured' <<< "$configured_output" ||
     fail 'check must recognize the initialized repository and active timer'
+grep -Fq 'Last successful backup:' <<< "$configured_output" ||
+    fail 'check must report the latest successful backup marker'
+grep -Fq 'Last repository check:' <<< "$configured_output" ||
+    fail 'check must report the latest successful integrity-check marker'
 
 printf 'pol-server backup setup tests passed.\n'
