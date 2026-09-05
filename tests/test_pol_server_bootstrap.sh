@@ -3,6 +3,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BOOTSTRAP="$REPO_ROOT/server/pol-server/bootstrap"
+DEPLOY="$REPO_ROOT/server/pol-server/deploy"
 INSTALLER="$REPO_ROOT/server/pol-server/install-autonomy"
 HARDWARE="$REPO_ROOT/server/pol-server/hardware-qualification"
 MAINTENANCE="$REPO_ROOT/server/pol-server/maintenance-access"
@@ -35,8 +36,10 @@ assert_file_contains() {
 [ -x "$MAINTENANCE" ] || fail 'pol-server maintenance access command must exist and be executable'
 [ -x "$GITHUB_MIRROR" ] || fail 'pol-server GitHub mirror command must exist and be executable'
 [ -x "$RSS_EMAIL" ] || fail 'pol-server RSS email command must exist and be executable'
-[ -x "$REPO_ROOT/server/pol-server/deploy" ] || fail 'pol-server deploy must exist and be executable'
+[ -x "$DEPLOY" ] || fail 'pol-server deploy must exist and be executable'
 [ -x "$INSTALLER" ] || fail 'pol-server autonomy installer must exist and be executable'
+grep -Eq '^[[:space:]]*rss-email[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the RSS email command'
 grep -Fq 'bootstrap-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose bootstrap-pol-server'
 grep -Fq 'audit-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose audit-pol-server'
 grep -Fq 'enroll-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose enroll-pol-server'
@@ -238,7 +241,7 @@ assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.timer" 'OnCalendar=*-*-* 03:30:00'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.timer" 'Persistent=true'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.service" 'DynamicUser=yes'
-assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.service" 'LoadCredential=rss-email:/etc/cuberhaus/rss-email.json'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.service" 'LoadCredential=rss-email.json:/etc/cuberhaus/rss-email.json'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'OnCalendar=*-*-* 08:00:00'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'OnCalendar=*-*-* 20:00:00'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'Persistent=true'

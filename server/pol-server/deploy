@@ -28,6 +28,8 @@ Usage: deploy [--host HOST] MODE
     --configure-github-mirrors     Store a read-only GitHub token interactively.
     --sync-github-mirrors          Run the GitHub mirror service now.
     --check-github-mirrors         Verify local mirror integrity and schedule state.
+    --configure-rss-email          Validate and store Gmail delivery settings.
+    --run-rss-email                Run the RSS email service immediately.
 EOF
 }
 
@@ -41,7 +43,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email)
             mode="$1"
             ;;
         --help|-h)
@@ -70,6 +72,8 @@ case "$mode" in
         pol-server-bootstrap \
         pol-server-hardware \
         pol-server-github-mirror \
+        pol-server-rss-email \
+        rss-email \
         pol-server-maintenance \
         packages.txt \
         etc \
@@ -125,6 +129,14 @@ case "$mode" in
 --check-github-mirrors)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-github-mirror --check'
+    ;;
+--configure-rss-email)
+    ssh -o BatchMode=yes -t "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-rss-email --configure'
+    ;;
+--run-rss-email)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/bin/systemctl start pol-server-rss-email.service'
     ;;
 --revoke-maintenance)
     ssh -o BatchMode=yes "$remote_host" \

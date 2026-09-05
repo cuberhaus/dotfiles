@@ -1,0 +1,32 @@
+[Unit]
+Description=Email new GrabFreeGames RSS items
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+DynamicUser=yes
+StateDirectory=cuberhaus-rss-email
+StateDirectoryMode=0700
+LoadCredential=rss-email.json:/etc/cuberhaus/rss-email.json
+ExecStart=/usr/local/lib/cuberhaus/pol-server/rss-email --run
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=2m
+UMask=0077
+NoNewPrivileges=yes
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+SystemCallArchitectures=native

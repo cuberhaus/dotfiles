@@ -266,6 +266,12 @@ sync-pol-server-github-mirrors: ## Mirror all cuberhaus GitHub repositories now
 audit-pol-server-github-mirrors: ## Verify pol-server's GitHub mirrors and schedule
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --check-github-mirrors
 
+configure-pol-server-rss-email: ## Store validated Gmail settings and enable RSS notifications
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --configure-rss-email
+
+run-pol-server-rss-email: ## Check the configured RSS feed for new items now
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --run-rss-email
+
 dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
 	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'
 

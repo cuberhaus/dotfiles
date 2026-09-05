@@ -40,9 +40,9 @@ class TextExtractor(HTMLParser):
         self.parts.append(data)
 
     def handle_starttag(
-        self, tag: str, attributes: list[tuple[str, str | None]]
+        self, tag: str, attrs: list[tuple[str, str | None]]
     ) -> None:
-        del attributes
+        del attrs
         if tag in {"br", "div", "li", "p"}:
             self.parts.append("\n")
 
@@ -104,7 +104,7 @@ def gmail_connection(sender: str, app_password: str):
 
 
 def configured_credential_path() -> Path:
-    root_prefix = os.environ.get("POL_SERVER_ROOT", "")
+    root_prefix = os.environ.get("POL_SERVER_ROOT") or "/"
     return Path(root_prefix) / "etc" / "cuberhaus" / "rss-email.json"
 
 
@@ -138,6 +138,9 @@ def configure() -> int:
         pass
     write_credentials(credentials)
     subprocess.run(["systemctl", "daemon-reload"], check=True)
+    subprocess.run(
+        ["systemctl", "start", "pol-server-rss-email.service"], check=True
+    )
     subprocess.run(
         ["systemctl", "enable", "--now", "pol-server-rss-email.timer"],
         check=True,
@@ -264,21 +267,22 @@ def run() -> int:
 
 def main(arguments: list[str] | None = None) -> int:
     arguments = sys.argv[1:] if arguments is None else arguments
-    if arguments in (["--run"], ["--configure"]):
-        try:
-            return run() if arguments == ["--run"] else configure()
-        except (
-            OSError,
-            ValueError,
-            ET.ParseError,
-            json.JSONDecodeError,
-            smtplib.SMTPException,
-                subprocess.CalledProcessError,
-        ) as error:
-            print(f"RSS email failed: {error}", file=sys.stderr)
-            return 1
-            print("Usage: rss-email [--configure | --run]", file=sys.stderr)
-    return 2
+    if arguments not in (["--run"], ["--configure"]):
+        print("Usage: rss-email [--configure | --run]", file=sys.stderr)
+        return 2
+
+    try:
+        return run() if arguments == ["--run"] else configure()
+    except (
+        OSError,
+        ValueError,
+        ET.ParseError,
+        json.JSONDecodeError,
+        smtplib.SMTPException,
+        subprocess.CalledProcessError,
+    ) as error:
+        print(f"RSS email failed: {error}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

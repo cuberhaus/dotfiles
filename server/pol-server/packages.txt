@@ -4,6 +4,7 @@ git
 git-lfs
 jq
 openssh-server
+python3
 restic
 samba
 smartmontools

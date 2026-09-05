@@ -11,6 +11,7 @@ launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-bootstrap"
 hardware_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-hardware"
 maintenance_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-maintenance"
 github_mirror_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-github-mirror"
+rss_email_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-rss-email"
 sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-bootstrap"
 maintenance_sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-maintenance"
 staging_dir="${install_dir}.new.$$"
@@ -46,6 +47,7 @@ install -m 0755 \
     "$server_dir/github-mirror" \
     "$server_dir/hardware-qualification" \
     "$server_dir/maintenance-access" \
+    "$server_dir/rss-email" \
     "$staging_dir/"
 install -m 0644 "$server_dir/packages.txt" "$staging_dir/packages.txt"
 cp -R "$server_dir/etc" "$server_dir/keys" "$staging_dir/"
@@ -63,6 +65,7 @@ install -m 0755 "$server_dir/pol-server-bootstrap" "$launcher_target"
 install -m 0755 "$server_dir/pol-server-hardware" "$hardware_launcher_target"
 install -m 0755 "$server_dir/pol-server-maintenance" "$maintenance_launcher_target"
 install -m 0755 "$server_dir/pol-server-github-mirror" "$github_mirror_launcher_target"
+install -m 0755 "$server_dir/pol-server-rss-email" "$rss_email_launcher_target"
 
 install -d -m 0755 "$(dirname "$sudoers_target")"
 printf '%s\n' \
@@ -77,6 +80,8 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --check' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-rss-email --configure' \
+    'pol ALL=(root) NOPASSWD: /usr/bin/systemctl start pol-server-rss-email.service' \
     > "$sudoers_staging"
 chmod 0440 "$sudoers_staging"
 visudo -cf "$sudoers_staging"

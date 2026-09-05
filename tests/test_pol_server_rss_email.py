@@ -22,6 +22,16 @@ def load_command():
 
 
 class RssEmailTests(unittest.TestCase):
+    def test_default_credential_path_is_absolute_system_path(self):
+        rss_email = load_command()
+
+        with mock.patch.dict(os.environ, {}, clear=True):
+            credential_path = rss_email.configured_credential_path()
+
+        self.assertEqual(
+            Path("/etc/cuberhaus/rss-email.json"), credential_path
+        )
+
     def test_first_run_records_baseline_without_sending_email(self):
         rss_email = load_command()
         feed = b"""<?xml version="1.0" encoding="UTF-8"?>
@@ -242,6 +252,10 @@ class RssEmailTests(unittest.TestCase):
             systemctl.assert_has_calls(
                 [
                     mock.call(["systemctl", "daemon-reload"], check=True),
+                    mock.call(
+                        ["systemctl", "start", "pol-server-rss-email.service"],
+                        check=True,
+                    ),
                     mock.call(
                         [
                             "systemctl",

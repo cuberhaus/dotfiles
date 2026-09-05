@@ -123,6 +123,40 @@ minutes of randomized delay. A failed repository or LFS fetch prevents the
 success marker from advancing while allowing the remaining repositories to be
 processed.
 
+## RSS email notifications
+
+The server can replace the GrabFreeGames IFTTT applet with a small Python
+command and a hardened systemd service. It checks the Steam Community RSS feed
+at 08:00 and 20:00, with up to 15 minutes of randomized delay. Each unseen RSS
+`guid` produces one plain-text email; the `guid` is recorded only after Gmail
+accepts that message, so failed deliveries remain pending for the next run.
+
+Configure it with a Gmail app password after enabling two-step verification:
+
+```bash
+make configure-pol-server-rss-email
+```
+
+Enter the Gmail sender, an optional recipient (blank means the same address),
+and the app password directly in the hidden server prompt. The command validates
+the SMTP login without sending an email, stores the settings root-only at
+`/etc/cuberhaus/rss-email.json`, runs the service once to record the current feed
+as a silent baseline, and then enables the persistent timer. The secret must
+never be added to Git or pasted into chat.
+
+Run an additional check manually and inspect its status with:
+
+```bash
+make run-pol-server-rss-email
+ssh home-nas 'systemctl status pol-server-rss-email.service --no-pager'
+ssh home-nas 'systemctl list-timers pol-server-rss-email.timer --no-pager'
+```
+
+The service uses a dynamic user, a private state directory, a read-only system,
+and a systemd credential copy. Its first run intentionally sends nothing; all
+items already present become the baseline. No container or n8n instance is
+required for this single low-frequency workflow.
+
 ## Hardware qualification
 
 The same enrollment installs a separate root-owned hardware command. It locates
