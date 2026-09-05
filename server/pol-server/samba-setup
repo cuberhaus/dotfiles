@@ -18,6 +18,8 @@ Usage: samba-setup MODE
     --check         Report storage, configuration, account, and service state.
     --apply         Stage the tracked configuration and account with Samba disabled.
     --set-password  Enroll the Samba password interactively and activate smbd.
+    --set-password-stdin
+                                    Read the password twice from standard input and activate smbd.
 EOF
 }
 
@@ -158,6 +160,8 @@ apply_configuration() {
 }
 
 set_password_and_activate() {
+    local password_input="${1:-interactive}"
+
     require_apply_privileges
     check_storage
 
@@ -171,7 +175,11 @@ set_password_and_activate() {
     fi
 
     testparm -s "$smb_conf" >/dev/null
-    smbpasswd -a "$samba_user"
+    if [ "$password_input" = stdin ]; then
+        smbpasswd -s -a "$samba_user"
+    else
+        smbpasswd -a "$samba_user"
+    fi
     if ! pdbedit -L -u "$samba_user" >/dev/null 2>&1; then
         error "Samba account enrollment failed: $samba_user"
         return 1
@@ -195,6 +203,7 @@ case "${1:-}" in
     --check) check_state ;;
     --apply) apply_configuration ;;
     --set-password) set_password_and_activate ;;
+    --set-password-stdin) set_password_and_activate stdin ;;
     --help|-h)
         usage
         ;;

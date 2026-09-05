@@ -74,7 +74,15 @@ EOF
 cat > "$FAKE_BIN/smbpasswd" <<'EOF'
 #!/usr/bin/env bash
 printf 'smbpasswd:%s\n' "$*" >> "$EVENT_LOG"
-[ "$*" = '-a pol-files' ] || exit 2
+case "$*" in
+    '-a pol-files') ;;
+    '-s -a pol-files')
+        IFS= read -r first_password
+        IFS= read -r second_password
+        [ -n "$first_password" ] && [ "$first_password" = "$second_password" ] || exit 2
+        ;;
+    *) exit 2 ;;
+esac
 touch "$PASSWORD_STATE"
 EOF
 
@@ -165,5 +173,14 @@ grep -Fq 'Account state: enrolled (pol-files)' <<< "$configured_report" ||
     fail 'check must verify the Samba password database entry'
 grep -Fq 'Service state: active and enabled' <<< "$configured_report" ||
     fail 'check must verify the active smbd service'
+
+rm -f "$PASSWORD_STATE" "$SERVICE_STATE"
+printf 'generated-test-secret\ngenerated-test-secret\n' |
+    "$SAMBA" --set-password-stdin >/dev/null
+grep -Fqx 'smbpasswd:-s -a pol-files' "$EVENT_LOG" ||
+    fail 'stdin enrollment must use smbpasswd silent mode without a password argument'
+stdin_report="$($SAMBA --check)"
+grep -Fq 'Samba state: configured' <<< "$stdin_report" ||
+    fail 'stdin password enrollment must activate the same configured state'
 
 printf 'pol-server Samba setup tests passed.\n'

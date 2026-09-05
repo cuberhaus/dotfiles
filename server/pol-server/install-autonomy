@@ -88,6 +88,7 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --check' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --apply' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --set-password' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-samba --set-password-stdin' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync' \

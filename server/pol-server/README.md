@@ -255,6 +255,17 @@ tracked shares are authenticated read/write `shared` and `incoming`, plus
 `private`, which is restricted to `pol-files`. The storage root, `immich`,
 `appdata`, and the administrator's home are not shared.
 
+If the interactive terminal is unavailable, use this alternative after the
+configuration step:
+
+```bash
+make generate-pol-server-samba-password
+```
+
+It generates a strong password without printing it, sends it twice over SSH to
+the silent `smbpasswd` input, and stores the only local copy at
+`~/.config/cuberhaus/secrets/pol-server-samba-password` with mode `0600`.
+
 After physical inspection, run the fixed moderate CPU thermal check:
 
 ```bash

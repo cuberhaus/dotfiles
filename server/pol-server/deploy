@@ -25,6 +25,7 @@ Usage: deploy [--host HOST] MODE
     --check-samba                  Audit Samba configuration, account, and service state.
     --configure-samba              Stage authenticated LAN-only Samba configuration.
     --set-samba-password           Enroll the Samba password and activate smbd interactively.
+    --generate-samba-password      Generate a private local password and activate smbd.
     --audit-wd-backup              Print the WD backup disk SMART report.
     --start-smart-long-kingston    Start the Kingston SMART long test.
     --start-smart-long-micron      Start the Micron SMART long test.
@@ -50,7 +51,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report)
             mode="$1"
             ;;
         --help|-h)
@@ -128,6 +129,28 @@ case "$mode" in
 --set-samba-password)
     ssh -o BatchMode=yes -t "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-samba --set-password'
+    ;;
+--generate-samba-password)
+    secret_dir="${XDG_CONFIG_HOME:-$HOME/.config}/cuberhaus/secrets"
+    secret_file="$secret_dir/pol-server-samba-password"
+    install -d -m 0700 "$secret_dir"
+    umask 077
+    temporary_secret="$(mktemp "$secret_dir/.pol-server-samba-password.XXXXXX")"
+    cleanup_secret() {
+        rm -f "$temporary_secret"
+    }
+    trap cleanup_secret EXIT
+    openssl rand -base64 24 | tr -d '\n' > "$temporary_secret"
+    printf '\n' >> "$temporary_secret"
+    {
+        cat "$temporary_secret"
+        cat "$temporary_secret"
+    } | ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-samba --set-password-stdin'
+    mv "$temporary_secret" "$secret_file"
+    chmod 0600 "$secret_file"
+    trap - EXIT
+    printf 'Samba password stored locally at %s (mode 0600).\n' "$secret_file"
     ;;
 --audit-wd-backup)
     ssh -o BatchMode=yes "$remote_host" \

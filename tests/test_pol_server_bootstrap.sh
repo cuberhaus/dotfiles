@@ -77,6 +77,7 @@ grep -Fq 'prepare-pol-server-storage:' "$REPO_ROOT/Makefile" || fail 'Makefile m
 grep -Fq 'audit-pol-server-samba:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Samba audit'
 grep -Fq 'configure-pol-server-samba:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Samba staging'
 grep -Fq 'set-pol-server-samba-password:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose interactive Samba activation'
+grep -Fq 'generate-pol-server-samba-password:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose generated Samba credentials'
 grep -Fq 'configure-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror authentication'
 grep -Fq 'sync-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose manual GitHub mirror sync'
 grep -Fq 'audit-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror checks'
@@ -98,6 +99,14 @@ grep -Fq "'sudo -n /usr/local/sbin/pol-server-samba --apply'" "$DEPLOY" ||
     fail 'remote Samba staging must use its exact root command'
 grep -Fq "'sudo -n /usr/local/sbin/pol-server-samba --set-password'" "$DEPLOY" ||
     fail 'remote Samba password setup must use its exact root command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-samba --set-password-stdin'" "$DEPLOY" ||
+    fail 'generated Samba password setup must use its exact root command'
+grep -Fq 'openssl rand -base64 24' "$DEPLOY" ||
+    fail 'generated Samba credentials must use a strong random source'
+grep -Fq 'umask 077' "$DEPLOY" ||
+    fail 'generated Samba credentials must be private by default'
+grep -Fq 'pol-server-samba-password' "$DEPLOY" ||
+    fail 'generated Samba credentials must be stored outside the repository'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -270,6 +279,7 @@ assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: 
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --check'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --apply'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --set-password'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-samba --set-password-stdin'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync'
