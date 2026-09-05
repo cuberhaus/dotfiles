@@ -2,14 +2,18 @@
 """Send one email for each unseen item in the configured RSS feed."""
 
 import json
+import getpass
 import os
 import smtplib
 import ssl
+import subprocess
 import sys
 import tempfile
 import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
+from contextlib import contextmanager
+from email.headerregistry import Address
 from email.message import EmailMessage
 from html.parser import HTMLParser
 from pathlib import Path
@@ -59,6 +63,87 @@ def load_credentials() -> dict[str, str]:
         if not isinstance(credentials.get(field), str) or not credentials[field]:
             raise ValueError(f"RSS email credential field is missing: {field}")
     return credentials
+
+
+def normalize_address(value: str) -> str:
+    value = value.strip()
+    if "\r" in value or "\n" in value:
+        raise ValueError("Email address contains a line break")
+    return str(Address(addr_spec=value))
+
+
+def read_configuration() -> dict[str, str]:
+    if sys.stdin.isatty():
+        sender = input("Gmail sender address: ")
+        recipient = input("Recipient address [same as sender]: ")
+        app_password = getpass.getpass("Gmail app password: ")
+    else:
+        sender = sys.stdin.readline()
+        recipient = sys.stdin.readline()
+        app_password = sys.stdin.readline()
+    sender = normalize_address(sender)
+    recipient = normalize_address(recipient) if recipient.strip() else sender
+    app_password = "".join(app_password.split())
+    if not app_password:
+        raise ValueError("Gmail app password cannot be empty")
+    return {
+        "sender": sender,
+        "recipient": recipient,
+        "app_password": app_password,
+    }
+
+
+@contextmanager
+def gmail_connection(sender: str, app_password: str):
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
+        smtp.ehlo()
+        smtp.starttls(context=ssl.create_default_context())
+        smtp.ehlo()
+        smtp.login(sender, app_password)
+        yield smtp
+
+
+def configured_credential_path() -> Path:
+    root_prefix = os.environ.get("POL_SERVER_ROOT", "")
+    return Path(root_prefix) / "etc" / "cuberhaus" / "rss-email.json"
+
+
+def write_credentials(credentials: dict[str, str]) -> None:
+    credential_path = configured_credential_path()
+    credential_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    file_descriptor, temporary_name = tempfile.mkstemp(
+        prefix=".rss-email.", dir=credential_path.parent
+    )
+    try:
+        with os.fdopen(file_descriptor, "w", encoding="utf-8") as credential_file:
+            json.dump(credentials, credential_file)
+            credential_file.write("\n")
+        os.chmod(temporary_name, 0o600)
+        os.replace(temporary_name, credential_path)
+    except BaseException:
+        Path(temporary_name).unlink(missing_ok=True)
+        raise
+
+
+def configure() -> int:
+    if (
+        os.environ.get("POL_SERVER_ALLOW_UNPRIVILEGED") != "true"
+        and os.geteuid() != 0
+    ):
+        raise PermissionError(
+            "Run --configure through the tracked root-owned deploy command"
+        )
+    credentials = read_configuration()
+    with gmail_connection(credentials["sender"], credentials["app_password"]):
+        pass
+    write_credentials(credentials)
+    subprocess.run(["systemctl", "daemon-reload"], check=True)
+    subprocess.run(
+        ["systemctl", "enable", "--now", "pol-server-rss-email.timer"],
+        check=True,
+    )
+    print("RSS email credential validated and timer enabled")
+    return 0
 
 
 def fetch_items(feed_url: str) -> list[FeedItem]:
@@ -147,11 +232,7 @@ def send_new_items(
         print("No new feed items")
         return 0
 
-    with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
-        smtp.ehlo()
-        smtp.starttls(context=ssl.create_default_context())
-        smtp.ehlo()
-        smtp.login(credentials["sender"], credentials["app_password"])
+    with gmail_connection(credentials["sender"], credentials["app_password"]) as smtp:
         for item in new_items:
             smtp.send_message(
                 build_message(item, credentials["sender"], credentials["recipient"])
@@ -183,19 +264,20 @@ def run() -> int:
 
 def main(arguments: list[str] | None = None) -> int:
     arguments = sys.argv[1:] if arguments is None else arguments
-    if arguments == ["--run"]:
+    if arguments in (["--run"], ["--configure"]):
         try:
-            return run()
+            return run() if arguments == ["--run"] else configure()
         except (
             OSError,
             ValueError,
             ET.ParseError,
             json.JSONDecodeError,
             smtplib.SMTPException,
+                subprocess.CalledProcessError,
         ) as error:
             print(f"RSS email failed: {error}", file=sys.stderr)
             return 1
-    print("Usage: rss-email --run", file=sys.stderr)
+            print("Usage: rss-email [--configure | --run]", file=sys.stderr)
     return 2
 
 

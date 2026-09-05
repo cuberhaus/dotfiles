@@ -7,6 +7,7 @@ INSTALLER="$REPO_ROOT/server/pol-server/install-autonomy"
 HARDWARE="$REPO_ROOT/server/pol-server/hardware-qualification"
 MAINTENANCE="$REPO_ROOT/server/pol-server/maintenance-access"
 GITHUB_MIRROR="$REPO_ROOT/server/pol-server/github-mirror"
+RSS_EMAIL="$REPO_ROOT/server/pol-server/rss-email"
 CASE_DIR="$(mktemp -d)"
 FAKE_ROOT="$CASE_DIR/root"
 FAKE_BIN="$CASE_DIR/bin"
@@ -33,6 +34,7 @@ assert_file_contains() {
 [ -x "$HARDWARE" ] || fail 'pol-server hardware qualification command must exist and be executable'
 [ -x "$MAINTENANCE" ] || fail 'pol-server maintenance access command must exist and be executable'
 [ -x "$GITHUB_MIRROR" ] || fail 'pol-server GitHub mirror command must exist and be executable'
+[ -x "$RSS_EMAIL" ] || fail 'pol-server RSS email command must exist and be executable'
 [ -x "$REPO_ROOT/server/pol-server/deploy" ] || fail 'pol-server deploy must exist and be executable'
 [ -x "$INSTALLER" ] || fail 'pol-server autonomy installer must exist and be executable'
 grep -Fq 'bootstrap-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose bootstrap-pol-server'
@@ -55,6 +57,8 @@ grep -Fq 'test-pol-server-thermals:' "$REPO_ROOT/Makefile" || fail 'Makefile mus
 grep -Fq 'configure-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror authentication'
 grep -Fq 'sync-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose manual GitHub mirror sync'
 grep -Fq 'audit-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror checks'
+grep -Fq 'configure-pol-server-rss-email:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose RSS email configuration'
+grep -Fq 'run-pol-server-rss-email:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose a manual RSS email run'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -206,6 +210,7 @@ assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-bootstrap" '/usr/loca
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-hardware" '/usr/local/lib/cuberhaus/pol-server/hardware-qualification'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-maintenance" '/usr/local/lib/cuberhaus/pol-server/maintenance-access'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-github-mirror" '/usr/local/lib/cuberhaus/pol-server/github-mirror'
+assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-rss-email" '/usr/local/lib/cuberhaus/pol-server/rss-email'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-bootstrap --apply'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --report'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --report-disk wd-backup'
@@ -217,6 +222,8 @@ assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: 
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --check'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-rss-email --configure'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/bin/systemctl start pol-server-rss-email.service'
 assert_file_contains "$EVENT_LOG" 'visudo:-cf'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/bootstrap" ] ||
     fail 'installer must deploy an executable root-owned bootstrap bundle'
@@ -224,10 +231,17 @@ assert_file_contains "$EVENT_LOG" 'visudo:-cf'
     fail 'installer must deploy the executable hardware qualification command'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/github-mirror" ] ||
     fail 'installer must deploy the executable GitHub mirror command'
+[ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/rss-email" ] ||
+    fail 'installer must deploy the executable RSS email command'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.service" 'DynamicUser=yes'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.service" 'LoadCredential=github-token:/etc/cuberhaus/github-mirror-token'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.timer" 'OnCalendar=*-*-* 03:30:00'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.timer" 'Persistent=true'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.service" 'DynamicUser=yes'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.service" 'LoadCredential=rss-email:/etc/cuberhaus/rss-email.json'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'OnCalendar=*-*-* 08:00:00'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'OnCalendar=*-*-* 20:00:00'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'Persistent=true'
 
 "$INSTALLER" --temporary-full-access
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-maintenance" \
@@ -248,13 +262,15 @@ assert_file_contains "$FAKE_ROOT/etc/systemd/logind.conf.d/90-pol-server.conf" '
 assert_file_contains "$FAKE_ROOT/etc/apt/apt.conf.d/52pol-server-periodic" 'APT::Periodic::Unattended-Upgrade "1";'
 assert_file_contains "$FAKE_ROOT/etc/ssh/sshd_config.d/10-pol-server.conf" 'PasswordAuthentication no'
 assert_file_contains "$FAKE_ROOT/home/pol/.ssh/authorized_keys" 'dotfiles-client@pol-server'
-for package in ca-certificates curl git git-lfs jq openssh-server restic samba smartmontools stress-ng ufw unattended-upgrades; do
+for package in ca-certificates curl git git-lfs jq openssh-server python3 restic samba smartmontools stress-ng ufw unattended-upgrades; do
     grep -Fxq -- "$package" "$PACKAGE_STATE" || fail "Expected package to be installed: $package"
 done
 
 install -D -m 0600 /dev/null "$FAKE_ROOT/etc/cuberhaus/github-mirror-token"
+install -D -m 0600 /dev/null "$FAKE_ROOT/etc/cuberhaus/rss-email.json"
 "$BOOTSTRAP" --apply
 assert_file_contains "$EVENT_LOG" 'systemctl:enable --now pol-server-github-mirror.timer'
+assert_file_contains "$EVENT_LOG" 'systemctl:enable --now pol-server-rss-email.timer'
 
 : > "$EVENT_LOG"
 "$BOOTSTRAP" --apply
