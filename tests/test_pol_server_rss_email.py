@@ -209,6 +209,115 @@ class RssEmailTests(unittest.TestCase):
             )
             self.assertIn("RSS email failed: temporary failure", stderr.getvalue())
 
+    def test_test_email_sends_without_changing_feed_state(self):
+        rss_email = load_command()
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            credentials = root / "credentials"
+            state = root / "state"
+            credentials.mkdir()
+            state.mkdir()
+            state_path = state / "seen-guids.json"
+            state_path.write_text(json.dumps(["baseline-guid"]), encoding="utf-8")
+            (credentials / "rss-email.json").write_text(
+                json.dumps(
+                    {
+                        "sender": "sender@example.test",
+                        "recipient": "recipient@example.test",
+                        "app_password": "test-secret",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            environment = {
+                "CREDENTIALS_DIRECTORY": str(credentials),
+                "STATE_DIRECTORY": str(state),
+            }
+            smtp = mock.MagicMock()
+            smtp_connection = smtp.return_value.__enter__.return_value
+
+            with mock.patch.dict(os.environ, environment, clear=False), mock.patch(
+                "smtplib.SMTP", smtp
+            ), mock.patch("sys.stdout", new_callable=io.StringIO) as stdout:
+                exit_code = rss_email.main(["--test-email"])
+
+            self.assertEqual(0, exit_code)
+            smtp_connection.send_message.assert_called_once()
+            message = smtp_connection.send_message.call_args.args[0]
+            self.assertEqual("[pol-server] RSS email delivery test", message["Subject"])
+            self.assertEqual("recipient@example.test", message["To"])
+            self.assertEqual(
+                ["baseline-guid"],
+                json.loads(state_path.read_text(encoding="utf-8")),
+            )
+            self.assertIn("Test email sent to recipient@example.test", stdout.getvalue())
+
+    def test_wd_report_email_contains_report_without_changing_feed_state(self):
+        rss_email = load_command()
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            credentials = root / "credentials"
+            state = root / "state"
+            credentials.mkdir()
+            state.mkdir()
+            state_path = state / "seen-guids.json"
+            state_path.write_text(json.dumps(["baseline-guid"]), encoding="utf-8")
+            (credentials / "rss-email.json").write_text(
+                json.dumps(
+                    {
+                        "sender": "sender@example.test",
+                        "recipient": "recipient@example.test",
+                        "app_password": "test-secret",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            environment = {
+                "CREDENTIALS_DIRECTORY": str(credentials),
+                "STATE_DIRECTORY": str(state),
+            }
+            report = "SMART overall-health self-assessment test result: PASSED\n# 1 Extended offline Completed without error\n"
+            report_command = mock.MagicMock(
+                returncode=0,
+                stdout=report,
+                stderr="",
+            )
+            smtp = mock.MagicMock()
+            smtp_connection = smtp.return_value.__enter__.return_value
+
+            with mock.patch.dict(os.environ, environment, clear=False), mock.patch(
+                "subprocess.run", return_value=report_command
+            ) as run_command, mock.patch("smtplib.SMTP", smtp), mock.patch(
+                "sys.stdout", new_callable=io.StringIO
+            ) as stdout:
+                exit_code = rss_email.main(["--send-wd-report"])
+
+            self.assertEqual(0, exit_code)
+            run_command.assert_called_once_with(
+                [
+                    "/usr/local/sbin/pol-server-hardware",
+                    "--report-disk",
+                    "wd-backup",
+                ],
+                capture_output=True,
+                check=False,
+                text=True,
+            )
+            smtp_connection.send_message.assert_called_once()
+            message = smtp_connection.send_message.call_args.args[0]
+            self.assertEqual("[pol-server] WD SMART post-test report", message["Subject"])
+            self.assertEqual("recipient@example.test", message["To"])
+            self.assertIn(report, message.get_content())
+            self.assertEqual(
+                ["baseline-guid"],
+                json.loads(state_path.read_text(encoding="utf-8")),
+            )
+            self.assertIn(
+                "WD SMART report sent to recipient@example.test", stdout.getvalue()
+            )
+
     def test_configure_validates_and_stores_root_only_gmail_credential(self):
         rss_email = load_command()
 

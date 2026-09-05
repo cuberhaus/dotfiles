@@ -47,15 +47,20 @@ partition for another filesystem.
 The first extended test was started on the workstation and deliberately aborted
 at 90% remaining before disconnecting the disk. After connection to
 `pol-server`, the model-and-capacity-pinned audit resolved it as `/dev/sdc`,
-confirmed that neither partition was mounted, and reported `52 C`. A new
-232-minute extended test started successfully and is expected to finish at
-2026-09-05 20:12:46 CEST. Keep the disk powered and connected until then.
+confirmed that neither partition was mounted, and reported `52 C`. The first
+server-side test was interrupted by a host or USB bridge reset with 80%
+remaining. No matching kernel USB disconnect, I/O error, or server reboot was
+recorded after the disk attached, and the critical SMART counters remained at
+zero. A third 232-minute extended test started successfully at 17:22 and is
+expected to finish at 21:14:56 CEST. An automatic report is scheduled for 21:16.
+The redacted report will be emailed through the configured Gmail transport at
+21:17. Keep the disk powered, connected, and ventilated until then.
 
 ## Result
 
 The read-only inventory gate passes and the snapshot contains no reported media
 or interface errors. The disk is not yet qualified for unattended backups: its
-temperature remains elevated and the server-side long test is still in
-progress. Verify a `Completed without error` result and unchanged critical
-counters before creating `pol-server-restic` or relying on the disk as a backup
-target.
+latest observed temperature is `48 C` and the third server-side long test is
+still in progress. Verify a `Completed without error` result and unchanged
+critical counters before creating `pol-server-restic` or relying on the disk as
+a backup target.

@@ -248,6 +248,59 @@ def send_new_items(
     return 0
 
 
+def send_test_email() -> int:
+    credentials = load_credentials()
+    item = FeedItem(
+        guid="delivery-test",
+        title="[pol-server] RSS email delivery test",
+        link=DEFAULT_FEED_URL,
+        description=(
+            "The pol-server RSS-to-Gmail automation can deliver messages "
+            "successfully."
+        ),
+        published="",
+    )
+    with gmail_connection(credentials["sender"], credentials["app_password"]) as smtp:
+        smtp.send_message(
+            build_message(item, credentials["sender"], credentials["recipient"])
+        )
+    print(f"Test email sent to {credentials['recipient']}")
+    return 0
+
+
+def send_wd_report() -> int:
+    report = subprocess.run(
+        [
+            "/usr/local/sbin/pol-server-hardware",
+            "--report-disk",
+            "wd-backup",
+        ],
+        capture_output=True,
+        check=False,
+        text=True,
+    )
+    report_sections = [f"Command exit code: {report.returncode}"]
+    if report.stdout.strip():
+        report_sections.append(report.stdout.strip())
+    if report.stderr.strip():
+        report_sections.append(report.stderr.strip())
+
+    credentials = load_credentials()
+    item = FeedItem(
+        guid="wd-smart-post-test-report",
+        title="[pol-server] WD SMART post-test report",
+        link="",
+        description="\n\n".join(report_sections),
+        published="",
+    )
+    with gmail_connection(credentials["sender"], credentials["app_password"]) as smtp:
+        smtp.send_message(
+            build_message(item, credentials["sender"], credentials["recipient"])
+        )
+    print(f"WD SMART report sent to {credentials['recipient']}")
+    return 0 if report.returncode == 0 else 1
+
+
 def run() -> int:
     credentials = load_credentials()
     feed_url = os.environ.get("RSS_EMAIL_FEED_URL", DEFAULT_FEED_URL)
@@ -267,12 +320,27 @@ def run() -> int:
 
 def main(arguments: list[str] | None = None) -> int:
     arguments = sys.argv[1:] if arguments is None else arguments
-    if arguments not in (["--run"], ["--configure"]):
-        print("Usage: rss-email [--configure | --run]", file=sys.stderr)
+    if arguments not in (
+        ["--run"],
+        ["--configure"],
+        ["--test-email"],
+        ["--send-wd-report"],
+    ):
+        print(
+            "Usage: rss-email "
+            "[--configure | --run | --test-email | --send-wd-report]",
+            file=sys.stderr,
+        )
         return 2
 
     try:
-        return run() if arguments == ["--run"] else configure()
+        if arguments == ["--run"]:
+            return run()
+        if arguments == ["--configure"]:
+            return configure()
+        if arguments == ["--test-email"]:
+            return send_test_email()
+        return send_wd_report()
     except (
         OSError,
         ValueError,

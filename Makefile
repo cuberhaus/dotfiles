@@ -272,6 +272,12 @@ configure-pol-server-rss-email: ## Store validated Gmail settings and enable RSS
 run-pol-server-rss-email: ## Check the configured RSS feed for new items now
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --run-rss-email
 
+test-pol-server-rss-email: ## Send one delivery test to the configured RSS recipient
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --test-rss-email
+
+email-pol-server-wd-report: ## Email the current redacted WD SMART report
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --email-wd-report
+
 dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
 	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'
 

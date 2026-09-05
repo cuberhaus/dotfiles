@@ -148,9 +148,22 @@ Run an additional check manually and inspect its status with:
 
 ```bash
 make run-pol-server-rss-email
+make test-pol-server-rss-email
 ssh home-nas 'systemctl status pol-server-rss-email.service --no-pager'
 ssh home-nas 'systemctl list-timers pol-server-rss-email.timer --no-pager'
 ```
+
+The test target sends one confirmation message to the configured recipient
+without fetching the feed or changing its recorded GUIDs.
+
+After a WD extended test finishes, email its current redacted SMART report with:
+
+```bash
+make email-pol-server-wd-report
+```
+
+The report command is model-pinned to `wd-backup`, includes command failures in
+the message, and does not read or change RSS feed state.
 
 The service uses a dynamic user, a private state directory, a read-only system,
 and a systemd credential copy. Its first run intentionally sends nothing; all

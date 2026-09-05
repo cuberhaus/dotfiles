@@ -64,6 +64,12 @@ grep -Fq 'sync-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefi
 grep -Fq 'audit-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror checks'
 grep -Fq 'configure-pol-server-rss-email:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose RSS email configuration'
 grep -Fq 'run-pol-server-rss-email:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose a manual RSS email run'
+grep -Fq 'test-pol-server-rss-email:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose an RSS delivery test'
+grep -Fq 'email-pol-server-wd-report:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the WD report email'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-rss-email --test-email'" "$DEPLOY" ||
+    fail 'remote RSS delivery test must use its narrow root command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-rss-email --send-wd-report'" "$DEPLOY" ||
+    fail 'remote WD report email must use its narrow root command'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -229,6 +235,8 @@ assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: 
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --check'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-rss-email --configure'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-rss-email --test-email'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-rss-email --send-wd-report'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/bin/systemctl start pol-server-rss-email.service'
 assert_file_contains "$EVENT_LOG" 'visudo:-cf'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/bootstrap" ] ||

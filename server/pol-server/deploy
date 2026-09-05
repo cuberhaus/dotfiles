@@ -30,6 +30,8 @@ Usage: deploy [--host HOST] MODE
     --check-github-mirrors         Verify local mirror integrity and schedule state.
     --configure-rss-email          Validate and store Gmail delivery settings.
     --run-rss-email                Run the RSS email service immediately.
+    --test-rss-email               Send one RSS delivery test email.
+    --email-wd-report              Email the current redacted WD SMART report.
 EOF
 }
 
@@ -43,7 +45,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report)
             mode="$1"
             ;;
         --help|-h)
@@ -137,6 +139,14 @@ case "$mode" in
 --run-rss-email)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/bin/systemctl start pol-server-rss-email.service'
+    ;;
+--test-rss-email)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-rss-email --test-email'
+    ;;
+--email-wd-report)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-rss-email --send-wd-report'
     ;;
 --revoke-maintenance)
     ssh -o BatchMode=yes "$remote_host" \
