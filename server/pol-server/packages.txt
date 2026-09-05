@@ -1,5 +1,8 @@
 ca-certificates
 curl
+git
+git-lfs
+jq
 openssh-server
 restic
 samba

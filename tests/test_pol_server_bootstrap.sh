@@ -6,6 +6,7 @@ BOOTSTRAP="$REPO_ROOT/server/pol-server/bootstrap"
 INSTALLER="$REPO_ROOT/server/pol-server/install-autonomy"
 HARDWARE="$REPO_ROOT/server/pol-server/hardware-qualification"
 MAINTENANCE="$REPO_ROOT/server/pol-server/maintenance-access"
+GITHUB_MIRROR="$REPO_ROOT/server/pol-server/github-mirror"
 CASE_DIR="$(mktemp -d)"
 FAKE_ROOT="$CASE_DIR/root"
 FAKE_BIN="$CASE_DIR/bin"
@@ -31,6 +32,7 @@ assert_file_contains() {
 [ -x "$BOOTSTRAP" ] || fail 'pol-server bootstrap must exist and be executable'
 [ -x "$HARDWARE" ] || fail 'pol-server hardware qualification command must exist and be executable'
 [ -x "$MAINTENANCE" ] || fail 'pol-server maintenance access command must exist and be executable'
+[ -x "$GITHUB_MIRROR" ] || fail 'pol-server GitHub mirror command must exist and be executable'
 [ -x "$REPO_ROOT/server/pol-server/deploy" ] || fail 'pol-server deploy must exist and be executable'
 [ -x "$INSTALLER" ] || fail 'pol-server autonomy installer must exist and be executable'
 grep -Fq 'bootstrap-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose bootstrap-pol-server'
@@ -48,6 +50,9 @@ grep -Fq 'audit-pol-server-hardware:' "$REPO_ROOT/Makefile" || fail 'Makefile mu
 grep -Fq 'start-pol-server-smart-long-kingston:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Kingston SMART test'
 grep -Fq 'start-pol-server-smart-long-micron:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Micron SMART test'
 grep -Fq 'test-pol-server-thermals:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the bounded thermal test'
+grep -Fq 'configure-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror authentication'
+grep -Fq 'sync-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose manual GitHub mirror sync'
+grep -Fq 'audit-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror checks'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -198,17 +203,27 @@ export POL_SERVER_ALLOW_UNPRIVILEGED=true
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-bootstrap" '/usr/local/lib/cuberhaus/pol-server/bootstrap'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-hardware" '/usr/local/lib/cuberhaus/pol-server/hardware-qualification'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-maintenance" '/usr/local/lib/cuberhaus/pol-server/maintenance-access'
+assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-github-mirror" '/usr/local/lib/cuberhaus/pol-server/github-mirror'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-bootstrap --apply'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --report'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long kingston'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long micron'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --thermal-load'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-github-mirror --check'
 assert_file_contains "$EVENT_LOG" 'visudo:-cf'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/bootstrap" ] ||
     fail 'installer must deploy an executable root-owned bootstrap bundle'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/hardware-qualification" ] ||
     fail 'installer must deploy the executable hardware qualification command'
+[ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/github-mirror" ] ||
+    fail 'installer must deploy the executable GitHub mirror command'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.service" 'DynamicUser=yes'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.service" 'LoadCredential=github-token:/etc/cuberhaus/github-mirror-token'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.timer" 'OnCalendar=*-*-* 03:30:00'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.timer" 'Persistent=true'
 
 "$INSTALLER" --temporary-full-access
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-maintenance" \
@@ -229,9 +244,13 @@ assert_file_contains "$FAKE_ROOT/etc/systemd/logind.conf.d/90-pol-server.conf" '
 assert_file_contains "$FAKE_ROOT/etc/apt/apt.conf.d/52pol-server-periodic" 'APT::Periodic::Unattended-Upgrade "1";'
 assert_file_contains "$FAKE_ROOT/etc/ssh/sshd_config.d/10-pol-server.conf" 'PasswordAuthentication no'
 assert_file_contains "$FAKE_ROOT/home/pol/.ssh/authorized_keys" 'dotfiles-client@pol-server'
-for package in ca-certificates curl openssh-server restic samba smartmontools stress-ng ufw unattended-upgrades; do
+for package in ca-certificates curl git git-lfs jq openssh-server restic samba smartmontools stress-ng ufw unattended-upgrades; do
     grep -Fxq -- "$package" "$PACKAGE_STATE" || fail "Expected package to be installed: $package"
 done
+
+install -D -m 0600 /dev/null "$FAKE_ROOT/etc/cuberhaus/github-mirror-token"
+"$BOOTSTRAP" --apply
+assert_file_contains "$EVENT_LOG" 'systemctl:enable --now pol-server-github-mirror.timer'
 
 : > "$EVENT_LOG"
 "$BOOTSTRAP" --apply

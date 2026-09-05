@@ -3,10 +3,13 @@
 set -euo pipefail
 
 api_url="${GITHUB_MIRROR_API_URL:-https://api.github.com/user/repos}"
+user_api_url="${GITHUB_MIRROR_USER_API_URL:-https://api.github.com/user}"
 git_base_url="${GITHUB_MIRROR_GIT_BASE_URL:-https://github.com/cuberhaus}"
 state_directory="${GITHUB_MIRROR_STATE_DIRECTORY:-${STATE_DIRECTORY:-/var/lib/cuberhaus-github-mirrors}}"
 credentials_directory="${CREDENTIALS_DIRECTORY:-/etc/cuberhaus}"
 token_file="$credentials_directory/github-token"
+root_prefix="${POL_SERVER_ROOT:-}"
+configured_token_file="${root_prefix%/}/etc/cuberhaus/github-mirror-token"
 owner=cuberhaus
 git_auth_url=https://github.com/
 
@@ -15,10 +18,11 @@ info() { printf '\033[34m[INFO]\033[0m %s\n' "$*"; }
 
 usage() {
     cat <<'EOF'
-Usage: github-mirror [--sync | --check]
+Usage: github-mirror [--configure-token | --sync | --check]
 
+    --configure-token  Validate and store a read-only GitHub token.
   --sync  Discover and mirror every repository owned by cuberhaus.
-    --check Verify the integrity of all local mirrors and the last successful sync.
+    --check  Verify the integrity of all local mirrors and the last successful sync.
 EOF
 }
 
@@ -49,30 +53,90 @@ validate_repository() {
 
 git_authenticated() {
     local token="$1"
+    local encoded_credentials
     shift
+    encoded_credentials="$(printf 'x-access-token:%s' "$token" | base64 -w0)"
     GIT_CONFIG_COUNT=1 \
         GIT_CONFIG_KEY_0="http.${git_auth_url}.extraHeader" \
-        GIT_CONFIG_VALUE_0="Authorization: Bearer $token" \
+        GIT_CONFIG_VALUE_0="Authorization: Basic $encoded_credentials" \
         git "$@"
+}
+
+fetch_authenticated_url() {
+    local url="$1"
+    local token="$2"
+    local curl_config response result
+
+    curl_config="$(mktemp)"
+    chmod 0600 "$curl_config"
+    printf 'header = "Authorization: Bearer %s"\n' "$token" > "$curl_config"
+    if response="$(curl --config "$curl_config" --fail --silent --show-error "$url")"; then
+        result=0
+    else
+        result=$?
+    fi
+    rm -f "$curl_config"
+    printf '%s\n' "$response"
+    return "$result"
 }
 
 fetch_page() {
     local page="$1"
     local token="$2"
-    local curl_config
 
-    curl_config="$(mktemp)"
-    chmod 0600 "$curl_config"
-    printf 'header = "Authorization: Bearer %s"\n' "$token" > "$curl_config"
-    curl --config "$curl_config" --fail --silent --show-error \
-        "$api_url?per_page=100&page=$page&affiliation=owner&sort=full_name"
-    rm -f "$curl_config"
+    fetch_authenticated_url \
+        "$api_url?per_page=100&page=$page&affiliation=owner&sort=full_name" \
+        "$token"
+}
+
+configure_token() {
+    local token response token_directory token_staging
+
+    if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
+        error 'Run --configure-token as root through the tracked deploy command.'
+        return 1
+    fi
+
+    if [ -t 0 ]; then
+        printf 'GitHub fine-grained read-only token: ' >&2
+        IFS= read -rs token
+        printf '\n' >&2
+    else
+        IFS= read -r token
+    fi
+    [ -n "$token" ] || {
+        error 'GitHub token cannot be empty.'
+        return 1
+    }
+
+    if ! response="$(fetch_authenticated_url "$user_api_url" "$token")" ||
+        ! jq -e --arg owner "$owner" '.login == $owner' >/dev/null <<< "$response"; then
+        error "The token is invalid or does not belong to $owner."
+        return 1
+    fi
+
+    token_directory="$(dirname "$configured_token_file")"
+    install -d -m 0700 "$token_directory"
+    token_staging="$(mktemp "$token_directory/.github-mirror-token.XXXXXX")"
+    printf '%s\n' "$token" > "$token_staging"
+    chmod 0600 "$token_staging"
+    if [ -z "$root_prefix" ]; then
+        chown root:root "$token_staging"
+    fi
+    mv "$token_staging" "$configured_token_file"
+    token=
+
+    systemctl daemon-reload
+    systemctl enable --now pol-server-github-mirror.timer
+    info "GitHub mirror credential installed at $configured_token_file"
 }
 
 sync_repositories() {
     local token page response repository repository_name mirror_path
     local failures=0
     local sync_succeeded
+    local discovered_count=0
+    local inventory_staging success_staging
 
     [ -r "$token_file" ] || {
         error "GitHub credential is unavailable: $token_file"
@@ -85,13 +149,19 @@ sync_repositories() {
     }
 
     install -d -m 0700 "$state_directory"
+    inventory_staging="$(mktemp "$state_directory/.active-repositories.XXXXXX")"
     page=1
     while :; do
-        response="$(fetch_page "$page" "$token")"
-        jq -e 'type == "array"' >/dev/null <<< "$response" || {
-            error "GitHub returned an invalid response for page $page."
+        if ! response="$(fetch_page "$page" "$token")"; then
+            error "Failed to query GitHub repository page $page."
+            rm -f "$inventory_staging"
             return 1
-        }
+        fi
+        if ! jq -e 'type == "array"' >/dev/null <<< "$response"; then
+            error "GitHub returned an invalid response for page $page."
+            rm -f "$inventory_staging"
+            return 1
+        fi
         [ "$(jq 'length' <<< "$response")" -gt 0 ] || break
 
         while IFS= read -r repository; do
@@ -99,6 +169,8 @@ sync_repositories() {
                 failures=1
                 continue
             fi
+            printf '%s\n' "$repository_name" >> "$inventory_staging"
+            discovered_count=$((discovered_count + 1))
             mirror_path="$state_directory/$repository_name.git"
             sync_succeeded=false
             if [ -e "$mirror_path" ]; then
@@ -134,11 +206,18 @@ sync_repositories() {
         page=$((page + 1))
     done
 
+    if (( discovered_count == 0 )); then
+        error 'GitHub returned no owned repositories; refusing to publish an empty inventory.'
+        failures=1
+    fi
     if (( failures == 0 )); then
-        local success_staging
+        sort -u -o "$inventory_staging" "$inventory_staging"
+        mv "$inventory_staging" "$state_directory/active-repositories"
         success_staging="$(mktemp "$state_directory/.last-success.XXXXXX")"
         date -u +%Y-%m-%dT%H:%M:%SZ > "$success_staging"
         mv "$success_staging" "$state_directory/last-success"
+    else
+        rm -f "$inventory_staging"
     fi
     return "$failures"
 }
@@ -146,13 +225,29 @@ sync_repositories() {
 check_mirrors() {
     local mirror_path
     local mirror_count=0
+    local active_count=0
     local failures=0
+    local repository_name
     local -a mirrors=()
 
     [ -r "$state_directory/last-success" ] || {
         error 'No fully successful mirror run has been recorded.'
         return 1
     }
+    [ -r "$state_directory/active-repositories" ] || {
+        error 'No complete active repository inventory has been recorded.'
+        return 1
+    }
+
+    while IFS= read -r repository_name; do
+        [ -n "$repository_name" ] || continue
+        active_count=$((active_count + 1))
+        if ! [[ "$repository_name" =~ ^[A-Za-z0-9._-]+$ ]] ||
+            [ ! -d "$state_directory/$repository_name.git" ]; then
+            error "Active mirror is missing or invalid: $repository_name"
+            failures=1
+        fi
+    done < "$state_directory/active-repositories"
 
     shopt -s nullglob
     mirrors=("$state_directory"/*.git)
@@ -168,6 +263,8 @@ check_mirrors() {
     done
 
     info "Mirrors healthy: $mirror_count"
+    info "Active repositories mirrored: $active_count"
+    info "Retained mirrors: $((mirror_count - active_count))"
     info "Last successful sync: $(< "$state_directory/last-success")"
     return "$failures"
 }
@@ -179,7 +276,14 @@ main() {
     }
     require_dependencies
     case "$1" in
-        --sync) sync_repositories ;;
+        --configure-token) configure_token ;;
+        --sync)
+            if (( EUID == 0 )) && [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ]; then
+                systemctl start --wait pol-server-github-mirror.service
+            else
+                sync_repositories
+            fi
+            ;;
         --check) check_mirrors ;;
         --help|-h) usage ;;
         *)

@@ -10,6 +10,7 @@ install_dir="${root_prefix%/}/usr/local/lib/cuberhaus/pol-server"
 launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-bootstrap"
 hardware_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-hardware"
 maintenance_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-maintenance"
+github_mirror_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-github-mirror"
 sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-bootstrap"
 maintenance_sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-maintenance"
 staging_dir="${install_dir}.new.$$"
@@ -42,6 +43,7 @@ install -d -m 0755 "$staging_dir"
 install -m 0755 \
     "$server_dir/bootstrap" \
     "$server_dir/apply-power-policy" \
+    "$server_dir/github-mirror" \
     "$server_dir/hardware-qualification" \
     "$server_dir/maintenance-access" \
     "$staging_dir/"
@@ -60,6 +62,7 @@ mv "$staging_dir" "$install_dir"
 install -m 0755 "$server_dir/pol-server-bootstrap" "$launcher_target"
 install -m 0755 "$server_dir/pol-server-hardware" "$hardware_launcher_target"
 install -m 0755 "$server_dir/pol-server-maintenance" "$maintenance_launcher_target"
+install -m 0755 "$server_dir/pol-server-github-mirror" "$github_mirror_launcher_target"
 
 install -d -m 0755 "$(dirname "$sudoers_target")"
 printf '%s\n' \
@@ -69,6 +72,9 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long micron' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --thermal-load' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --configure-token' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --check' \
     > "$sudoers_staging"
 chmod 0440 "$sudoers_staging"
 visudo -cf "$sudoers_staging"

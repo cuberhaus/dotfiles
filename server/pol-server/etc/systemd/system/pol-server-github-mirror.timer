@@ -1,0 +1,12 @@
+[Unit]
+Description=Daily cuberhaus GitHub repository mirror
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=30m
+AccuracySec=5m
+Unit=pol-server-github-mirror.service
+
+[Install]
+WantedBy=timers.target

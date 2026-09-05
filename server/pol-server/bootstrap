@@ -140,6 +140,7 @@ apply_packages() {
 apply_configuration() {
     local apt_changed=false
     local ssh_changed=false
+    local systemd_changed=false
     local apt_source="$server_dir/etc/apt/apt.conf.d/52pol-server-periodic"
     local apt_target
     local ssh_source="$server_dir/etc/ssh/sshd_config.d/10-pol-server.conf"
@@ -151,6 +152,10 @@ apply_configuration() {
     install_if_changed "$apt_source" "$apt_target" 0644 && apt_changed=true
     ensure_admin_key
     install_if_changed "$ssh_source" "$ssh_target" 0644 && ssh_changed=true
+    for systemd_source in "$server_dir"/etc/systemd/system/pol-server-github-mirror.*; do
+        systemd_target="$(root_path "/etc/systemd/system/${systemd_source##*/}")"
+        install_if_changed "$systemd_source" "$systemd_target" 0644 && systemd_changed=true
+    done
 
     POL_SERVER_ROOT="$root_prefix" POL_SERVER_ALLOW_UNPRIVILEGED="${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" \
         "$server_dir/apply-power-policy"
@@ -160,7 +165,7 @@ apply_configuration() {
         systemctl reload ssh.service
     fi
 
-    if [ "$apt_changed" = true ]; then
+    if [ "$apt_changed" = true ] || [ "$systemd_changed" = true ]; then
         systemctl daemon-reload
     fi
 }
@@ -188,6 +193,9 @@ apply_services() {
         ensure_service "$unit"
     done
     disable_unconfigured_samba
+    if [ -r "$(root_path /etc/cuberhaus/github-mirror-token)" ]; then
+        ensure_service pol-server-github-mirror.timer
+    fi
 }
 
 check_baseline() {
@@ -207,7 +215,9 @@ check_baseline() {
     for source_file in \
         "$server_dir/etc/apt/apt.conf.d/52pol-server-periodic" \
         "$server_dir/etc/ssh/sshd_config.d/10-pol-server.conf" \
-        "$server_dir/etc/systemd/logind.conf.d/90-pol-server.conf"; do
+        "$server_dir/etc/systemd/logind.conf.d/90-pol-server.conf" \
+        "$server_dir/etc/systemd/system/pol-server-github-mirror.service" \
+        "$server_dir/etc/systemd/system/pol-server-github-mirror.timer"; do
         target_file="$(root_path "${source_file#"$server_dir"}")"
         if cmp -s "$source_file" "$target_file" 2>/dev/null; then
             info "Configuration current: ${target_file#"${root_prefix%/}"}"
@@ -242,6 +252,17 @@ check_baseline() {
             failures=1
         fi
     done
+
+    if [ -r "$(root_path /etc/cuberhaus/github-mirror-token)" ]; then
+        if unit_enabled_and_active pol-server-github-mirror.timer; then
+            info 'Service active and enabled: pol-server-github-mirror.timer'
+        else
+            warn 'Service drift: pol-server-github-mirror.timer'
+            failures=1
+        fi
+    else
+        info 'GitHub mirror credential not configured; timer remains disabled'
+    fi
 
     for unit in smbd.service nmbd.service; do
         if [ "$(systemctl is-active "$unit" 2>/dev/null || true)" = active ]; then

@@ -10,6 +10,8 @@ FAKE_BIN="$CASE_DIR/bin"
 CREDENTIALS_DIR="$CASE_DIR/credentials"
 API_PAGE_ONE="$CASE_DIR/api-page-1.json"
 LFS_LOG="$CASE_DIR/lfs.log"
+SYSTEMCTL_LOG="$CASE_DIR/systemctl.log"
+FAKE_ROOT="$CASE_DIR/root"
 REAL_GIT="$(command -v git)"
 trap 'rm -rf "$CASE_DIR"' EXIT
 
@@ -21,6 +23,7 @@ fail() {
 mkdir -p "$REMOTE_DIR" "$MIRROR_DIR" "$FAKE_BIN" "$CREDENTIALS_DIR"
 printf 'test-token\n' > "$CREDENTIALS_DIR/github-token"
 : > "$LFS_LOG"
+: > "$SYSTEMCTL_LOG"
 
 git init --quiet --bare "$REMOTE_DIR/private-archive.git"
 git init --quiet --initial-branch=main "$CASE_DIR/source"
@@ -52,6 +55,7 @@ cat > "$FAKE_BIN/curl" <<'EOF'
 case "$*" in
         *'&page=1&'*) cat "$API_PAGE_ONE" ;;
     *'&page=2&'*) printf '[]\n' ;;
+    *'https://api.github.test/user'*) printf '{"login":"cuberhaus"}\n' ;;
     *) exit 22 ;;
 esac
 EOF
@@ -62,7 +66,8 @@ case "$*" in
     *'clone --mirror'*|*'remote update --prune'*|*'lfs fetch --all origin'*)
         [ "${GIT_CONFIG_COUNT:-}" = 1 ] || exit 97
         [ "${GIT_CONFIG_KEY_0:-}" = 'http.https://github.com/.extraHeader' ] || exit 97
-        [ "${GIT_CONFIG_VALUE_0:-}" = 'Authorization: Bearer test-token' ] || exit 97
+        expected_auth="Authorization: Basic $(printf 'x-access-token:test-token' | base64 -w0)"
+        [ "${GIT_CONFIG_VALUE_0:-}" = "$expected_auth" ] || exit 97
         [[ "$*" != *test-token* ]] || exit 97
         ;;
 esac
@@ -72,7 +77,13 @@ if [[ "$*" == *' lfs fetch --all origin' ]]; then
 fi
 exec "$REAL_GIT" "$@"
 EOF
-chmod +x "$FAKE_BIN/curl" "$FAKE_BIN/git"
+
+cat > "$FAKE_BIN/systemctl" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$SYSTEMCTL_LOG"
+EOF
+export SYSTEMCTL_LOG
+chmod +x "$FAKE_BIN/curl" "$FAKE_BIN/git" "$FAKE_BIN/systemctl"
 
 PATH="$FAKE_BIN:$PATH" \
     CREDENTIALS_DIRECTORY="$CREDENTIALS_DIR" \
@@ -153,5 +164,19 @@ if PATH="$FAKE_BIN:$PATH" \
 fi
 [ -d "$MIRROR_DIR/healthy.git" ] ||
         fail 'sync must continue after an individual repository fails'
+
+printf 'configured-token\n' |
+    PATH="$FAKE_BIN:$PATH" \
+        GITHUB_MIRROR_USER_API_URL='https://api.github.test/user' \
+        POL_SERVER_ALLOW_UNPRIVILEGED=true \
+        POL_SERVER_ROOT="$FAKE_ROOT" \
+        "$MIRROR_COMMAND" --configure-token
+token_file="$FAKE_ROOT/etc/cuberhaus/github-mirror-token"
+[ "$(cat "$token_file")" = 'configured-token' ] ||
+    fail 'configure-token must store the validated credential outside the repository'
+[ "$(stat -c %a "$token_file")" = 600 ] ||
+    fail 'the GitHub credential must be readable only by root'
+grep -Fq 'enable --now pol-server-github-mirror.timer' "$SYSTEMCTL_LOG" ||
+    fail 'configure-token must enable the mirror timer after validation'
 
 printf 'pol-server GitHub mirror tests passed.\n'

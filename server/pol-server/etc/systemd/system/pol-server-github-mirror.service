@@ -1,0 +1,34 @@
+[Unit]
+Description=Mirror every cuberhaus GitHub repository
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+DynamicUser=yes
+StateDirectory=cuberhaus-github-mirrors
+StateDirectoryMode=0700
+RuntimeDirectory=cuberhaus-github-mirror
+RuntimeDirectoryMode=0700
+LoadCredential=github-token:/etc/cuberhaus/github-mirror-token
+ExecStart=/usr/local/lib/cuberhaus/pol-server/github-mirror --sync
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=4h
+UMask=0077
+NoNewPrivileges=yes
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+SystemCallArchitectures=native

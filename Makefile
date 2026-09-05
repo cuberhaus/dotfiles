@@ -21,7 +21,7 @@ CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 RESTORE_WORKSPACE_SKILLS ?= 1
 POL_SERVER_HOST ?= home-nas
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended enroll-pol-server enroll-pol-server-maintenance revoke-pol-server-maintenance reboot-pol-server upgrade-pol-server bootstrap-pol-server audit-pol-server audit-pol-server-hardware start-pol-server-smart-long-kingston start-pol-server-smart-long-micron test-pol-server-thermals bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended enroll-pol-server enroll-pol-server-maintenance revoke-pol-server-maintenance reboot-pol-server upgrade-pol-server bootstrap-pol-server audit-pol-server audit-pol-server-hardware start-pol-server-smart-long-kingston start-pol-server-smart-long-micron test-pol-server-thermals configure-pol-server-github-mirrors sync-pol-server-github-mirrors audit-pol-server-github-mirrors bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -80,6 +80,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_bootstrap_stow.sh
 	bash tests/test_bootstrap_machine_state.sh
 	bash tests/test_pol_server_bootstrap.sh
+	bash tests/test_pol_server_github_mirror.sh
 	bash tests/test_pol_server_hardware.sh
 	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh
@@ -249,6 +250,15 @@ start-pol-server-smart-long-micron: ## Start the Micron system SSD long SMART te
 
 test-pol-server-thermals: ## Run a bounded two-minute CPU thermal test
 	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --thermal-load
+
+configure-pol-server-github-mirrors: ## Store a read-only GitHub token on pol-server
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --configure-github-mirrors
+
+sync-pol-server-github-mirrors: ## Mirror all cuberhaus GitHub repositories now
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --sync-github-mirrors
+
+audit-pol-server-github-mirrors: ## Verify pol-server's GitHub mirrors and schedule
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --check-github-mirrors
 
 dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
 	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'

@@ -23,6 +23,9 @@ Usage: deploy [--host HOST] MODE
     --start-smart-long-kingston    Start the Kingston SMART long test.
     --start-smart-long-micron      Start the Micron SMART long test.
     --thermal-load                 Run the fixed two-minute thermal load test.
+    --configure-github-mirrors     Store a read-only GitHub token interactively.
+    --sync-github-mirrors          Run the GitHub mirror service now.
+    --check-github-mirrors         Verify local mirror integrity and schedule state.
 EOF
 }
 
@@ -36,7 +39,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--start-smart-long-kingston|--start-smart-long-micron|--thermal-load)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--start-smart-long-kingston|--start-smart-long-micron|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors)
             mode="$1"
             ;;
         --help|-h)
@@ -59,10 +62,12 @@ case "$mode" in
         bootstrap \
         apply-power-policy \
         hardware-qualification \
+        github-mirror \
         install-autonomy \
         maintenance-access \
         pol-server-bootstrap \
         pol-server-hardware \
+        pol-server-github-mirror \
         pol-server-maintenance \
         packages.txt \
         etc \
@@ -98,6 +103,18 @@ case "$mode" in
 --thermal-load)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-hardware --thermal-load'
+    ;;
+--configure-github-mirrors)
+    ssh -o BatchMode=yes -t "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-github-mirror --configure-token'
+    ;;
+--sync-github-mirrors)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-github-mirror --sync'
+    ;;
+--check-github-mirrors)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-github-mirror --check'
     ;;
 --revoke-maintenance)
     ssh -o BatchMode=yes "$remote_host" \
