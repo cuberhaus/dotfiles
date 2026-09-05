@@ -181,6 +181,7 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertIn(audit.Package("apt", "stow"), ubuntu)
         self.assertIn(audit.Package("snap", "code"), ubuntu)
         self.assertIn(audit.Package("apt", "antigravity"), ubuntu)
+        self.assertIn(audit.Package("snap", "obsidian"), ubuntu)
         self.assertNotIn(audit.Package("snap", "android-studio"), ubuntu)
         self.assertIn(audit.Package("brew", "age"), mac)
         self.assertIn(audit.Package("brew", "sops"), mac)

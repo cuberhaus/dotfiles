@@ -68,6 +68,11 @@ without linking files. Pass `BOOTSTRAP_ARGS="--no-stow"` to opt out explicitly;
 an unattended or noninteractive bootstrap also leaves Stow unchanged rather
 than assuming consent.
 
+GUI-capable Unix bootstraps also clone the Obsidian vault to
+`~/cuberhaus/obsidian_vault` and run its `plugin-install` target after installing
+Obsidian. Set `OBSIDIAN_VAULT_ROOT` to use another checkout path. The WSL
+bootstrap skips this GUI-specific step.
+
 ## Installation
 
 Clone the repo with its submodules and use [GNU Stow](https://www.gnu.org/software/stow/) to symlink everything into `$HOME`:

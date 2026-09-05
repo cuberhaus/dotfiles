@@ -252,6 +252,7 @@ snaps_install() {
     snap list code &>/dev/null                    || sudo snap install code --classic
     snap list discord &>/dev/null                 || sudo snap install discord
     snap list intellij-idea-professional &>/dev/null || sudo snap install intellij-idea-professional --classic
+    snap list obsidian &>/dev/null                || sudo snap install obsidian --classic
     #snap list intellij-idea-community &>/dev/null || sudo snap install intellij-idea-community --classic
     # snap list pycharm-community &>/dev/null     || sudo snap install pycharm-community --classic # Does not accept jupyter notebook
     snap list pycharm-professional &>/dev/null    || sudo snap install pycharm-professional --classic

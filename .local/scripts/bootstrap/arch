@@ -25,6 +25,7 @@ sudo cp "${DOTFILES:-$HOME/cuberhaus/dotfiles}/.local/share/icons/Avatar.jpg" /u
 
 ### ONLY CHANGE FROM HERE ON
 base_install
+obsidian_vault_install
 arch_install
 nvidia_display_config
 i3_install

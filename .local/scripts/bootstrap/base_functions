@@ -172,6 +172,28 @@ bootstrap_stow_checkout() {
     stow -v -t "$HOME" -d "$parent_dir" "$package_name"
 }
 
+obsidian_vault_install() {
+    local vault_root="${OBSIDIAN_VAULT_ROOT:-$HOME/cuberhaus/obsidian_vault}"
+    local vault_parent
+
+    vault_parent="$(dirname "$vault_root")"
+    if [ -e "$vault_root" ] && [ ! -d "$vault_root/.git" ]; then
+        error "Obsidian vault path exists but is not a Git checkout: $vault_root"
+        return 1
+    fi
+
+    if [ ! -d "$vault_root/.git" ]; then
+        info "Cloning Obsidian vault into $vault_root..."
+        mkdir -p "$vault_parent"
+        git clone https://github.com/cuberhaus/obsidian_vault.git "$vault_root"
+    else
+        info "Obsidian vault already exists, skipping clone."
+    fi
+
+    info "Installing Obsidian community plugins..."
+    make -C "$vault_root" plugin-install
+}
+
 resolve_high_dpi_choice() {
     case "${HIGH_DPI_CHOICE:-}" in
         yes) HIGH_DPI=true ;;

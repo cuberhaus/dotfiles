@@ -28,6 +28,7 @@ sudo cp "${DOTFILES:-$HOME/cuberhaus/dotfiles}/.local/share/icons/Avatar.jpg" "$
 
 ### ONLY CHANGE FROM HERE ON
 base_install
+obsidian_vault_install
 arch_and_manjaro
 nvidia_display_config
 manjaro_install

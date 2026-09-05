@@ -225,6 +225,7 @@ python_install() { record 'python'; }
 docker_install() { record 'docker'; }
 gcloud_install() { record 'gcloud'; }
 gui_apps_install() { record 'gui-apps'; }
+obsidian_vault_install() { record 'obsidian-vault'; }
 resolve_high_dpi_choice() {
     record "high-dpi-choice:$HIGH_DPI_CHOICE"
     HIGH_DPI=false
@@ -240,7 +241,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\nshutdown-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\ndocker\ngcloud\ngui-apps\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\nshutdown-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"

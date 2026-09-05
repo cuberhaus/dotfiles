@@ -74,6 +74,7 @@ work_main() {
     docker_install
     gcloud_install
     gui_apps_install
+    obsidian_vault_install
 
     local current_scale
     current_scale=$(gsettings get org.gnome.desktop.interface text-scaling-factor 2>/dev/null || echo "1.0")

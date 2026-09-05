@@ -77,6 +77,7 @@ test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_installation_audit.py
 	bash tests/test_bootstrap_stow.sh
 	bash tests/test_bootstrap_machine_state.sh
+	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh
 	bash tests/test_shell_path.sh
 

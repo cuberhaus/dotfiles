@@ -17,6 +17,7 @@ bootstrap_stow_checkout mac
 install_preparation
 #app_store_install
 mac_install
+obsidian_vault_install
 ai_tools_install
 vim_install
 #bloat_install
