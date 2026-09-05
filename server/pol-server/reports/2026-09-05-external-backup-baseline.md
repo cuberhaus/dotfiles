@@ -6,6 +6,8 @@ Source commands:
 lsblk -b -o NAME,PATH,MODEL,SIZE,TYPE,FSTYPE,LABEL,UUID,FSAVAIL,FSUSE%,MOUNTPOINTS,TRAN /dev/sda
 df -hT /media/pol/Pol-HDD
 sudo smartctl -d sat -H -A -l selftest /dev/sda
+make audit-pol-server-wd-backup
+make start-pol-server-smart-long-wd-backup
 ```
 
 Serial numbers and other unique hardware identifiers are intentionally omitted.
@@ -40,12 +42,20 @@ partition for another filesystem.
 - UDMA CRC errors: `0`.
 - Spin retries: `0`.
 - Observed temperature: `54 C`.
-- Self-test history: no self-tests logged.
+- Initial self-test history: no self-tests logged.
+
+The first extended test was started on the workstation and deliberately aborted
+at 90% remaining before disconnecting the disk. After connection to
+`pol-server`, the model-and-capacity-pinned audit resolved it as `/dev/sdc`,
+confirmed that neither partition was mounted, and reported `52 C`. A new
+232-minute extended test started successfully and is expected to finish at
+2026-09-05 20:12:46 CEST. Keep the disk powered and connected until then.
 
 ## Result
 
 The read-only inventory gate passes and the snapshot contains no reported media
 or interface errors. The disk is not yet qualified for unattended backups: its
-observed temperature is elevated and it has no logged self-test. Improve its
-ventilation, allow it to cool, then run and verify one SMART long self-test
-before creating `pol-server-restic` or relying on the disk as a backup target.
+temperature remains elevated and the server-side long test is still in
+progress. Verify a `Completed without error` result and unchanged critical
+counters before creating `pol-server-restic` or relying on the disk as a backup
+target.

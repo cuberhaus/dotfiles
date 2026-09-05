@@ -98,9 +98,30 @@ The selected future restic destination is a 1.5 TB WD Elements disk. Its
 read-only workstation inventory found a 1 TB exFAT volume with approximately
 712 GiB free, existing backups, and the Immich copy intended for later import.
 Its SMART media counters are clean, but the observed 54 C temperature and lack
-of a completed long self-test still block backup use. Preserve its contents and
-do not format or repartition it; see
+of a completed long self-test still block backup use. It is now attached
+unmounted to `pol-server`; a 232-minute test started at 52 C and is expected to
+finish at 20:12:46 CEST on 2026-09-05. Preserve its contents and do not format or
+repartition it; see
 `reports/2026-09-05-external-backup-baseline.md`.
+
+## GitHub recovery mirror
+
+The server keeps bare Git mirrors and all referenced Git LFS objects for every
+repository owned by `cuberhaus`. The fine-grained read-only token is stored at
+`/etc/cuberhaus/github-mirror-token`, outside Git and readable only by root.
+
+```bash
+make configure-pol-server-github-mirrors
+make sync-pol-server-github-mirrors
+make audit-pol-server-github-mirrors
+```
+
+The initial 2026-09-05 sync and post-sync audit verified 54 healthy active
+repositories, zero retained mirrors, and a complete success marker. The
+persistent timer is enabled and schedules a daily run at 03:30 with up to 30
+minutes of randomized delay. A failed repository or LFS fetch prevents the
+success marker from advancing while allowing the remaining repositories to be
+processed.
 
 ## Hardware qualification
 
@@ -125,11 +146,18 @@ make audit-pol-server-hardware
 make start-pol-server-smart-long-micron
 # Wait for the reported completion time, then audit again.
 make audit-pol-server-hardware
+
+make audit-pol-server-wd-backup
+make start-pol-server-smart-long-wd-backup
+# Wait for the reported completion time, then audit the WD disk again.
+make audit-pol-server-wd-backup
 ```
 
-These targets can only select `kingston` or `micron`; the root-owned command
-rejects unknown models, duplicate matches, and unexpected capacities. They do
-not mount, write, format, repartition, or erase either disk.
+These targets can only select `kingston`, `micron`, or `wd-backup`; the
+root-owned command rejects unknown models, duplicate matches, and unexpected
+capacities. The external WD path also requires SAT pass-through. These commands
+do not mount, format, repartition, or erase any disk; the start commands request
+only a drive-managed nondestructive SMART self-test.
 
 After physical inspection, run the fixed moderate CPU thermal check:
 
@@ -182,6 +210,9 @@ laptop in the router before relying on it for SSH or WireGuard.
 - The Kingston SMART long test completed without error on 2026-09-05. Its old
     interface counters remained stable during the test at `524353` and `13`;
     future audits must compare against that baseline.
+- The GitHub mirror completed its initial authenticated Git and LFS sync. All 54
+    active repositories passed the post-sync integrity audit, and its persistent
+    daily timer is enabled.
 - PCI inventory exposes only the Qualcomm Wi-Fi controller, so wired service
     requires a Linux-compatible USB 3 gigabit Ethernet adapter.
 
