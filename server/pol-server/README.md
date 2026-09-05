@@ -245,6 +245,7 @@ make enroll-pol-server-maintenance
 make configure-pol-server-samba
 make set-pol-server-samba-password
 make audit-pol-server-samba
+make test-pol-server-samba-access
 make audit-pol-server
 make revoke-pol-server-maintenance
 ```
@@ -265,6 +266,9 @@ make generate-pol-server-samba-password
 It generates a strong password without printing it, sends it twice over SSH to
 the silent `smbpasswd` input, and stores the only local copy at
 `~/.config/cuberhaus/secrets/pol-server-samba-password` with mode `0600`.
+The access test streams that credential through SSH without putting it in a
+command argument, exercises an SMB3 create/read/rename/delete lifecycle on all
+three shares, verifies guest denial, and removes its temporary files.
 
 After physical inspection, run the fixed moderate CPU thermal check:
 

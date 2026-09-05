@@ -74,7 +74,7 @@ Baseline recorded on 2026-09-05:
 | SMART qualification | Complete | Both long tests passed; media-error counters are zero and Kingston CRC counters stayed stable |
 | Kingston data disk | Complete | Approved model-pinned migration created ext4 `nas-data`; its UUID mount and acceptance file survived two reboots with changing device letters |
 | Firewall | Pending | UFW is installed but intentionally not enabled or configured |
-| Samba | Ready to deploy | Tracked LAN-only configuration uses dedicated `pol-files`; `shared` and `incoming` are group read/write and `private` is user-only |
+| Samba | Complete for Wi-Fi rollout | Dedicated `pol-files` access passed SMB3 file lifecycle tests on all three shares; guest access failed and `nmbd` remains disabled |
 | Backup | Partial | WD Elements inventory and critical counters passed, but repeated long tests were interrupted; the user chose no further SMART retries, so unattended use is not yet accepted |
 | GitHub mirrors | Complete | All 54 active repositories passed Git integrity; LFS fetches completed and the persistent daily timer is enabled |
 | Baseline bootstrap | Complete | Root-owned bundle enrolled; narrow apply/audit pass and temporary broad maintenance access is revoked |
@@ -270,7 +270,15 @@ private traffic, and no guest-network client can reach administration services.
 
 ## Phase 5: configure authenticated Samba shares
 
-Status: **ready to deploy over the accepted Wi-Fi LAN**.
+Status: **complete for the accepted Wi-Fi LAN**.
+
+The tracked configuration is installed, `pol-files` is enrolled, `smbd` is
+enabled and active, and `nmbd` is disabled and inactive. A reusable loopback
+SMB3 acceptance test passed create/read/rename/delete on `shared`, `incoming`,
+and `private`, then confirmed that guest access is denied. TCP 445 listens on
+loopback and the current Wi-Fi addresses. UFW hardening and an additional test
+from a separate LAN client remain Phase 4 follow-up work rather than Samba
+configuration blockers.
 
 Confirmed initial access model:
 
@@ -293,6 +301,7 @@ Confirmed initial access model:
 
 Acceptance gate: `testparm -s` passes, SMB2/SMB3 is negotiated, approved users
 can create/read/rename/delete test files, and guest or unauthorized users fail.
+The tracked audit and `make test-pol-server-samba-access` now enforce this gate.
 
 ## Phase 6: implement backup and prove restore
 

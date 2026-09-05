@@ -12,6 +12,9 @@
 # False positive: GPG *signing key ID* (a public identifier, not a private key).
 dd44dcde9632869e6628199fb88243ee8e57ec93:.gitconfig:generic-api-key:4
 
+# False positive: explicit destructive-operation confirmation phrase, not a credential.
+b7c66c7e5575e91baddc4f2abed64e5f7e363731:server/pol-server/storage-setup:generic-api-key:8
+
 # FIB-UPC personal RSS feed access keys (university notice/calendar feeds), 2021.
 416df648636442f30efc9fceb2bf338f410b8896:.conky/conkyrss:generic-api-key:73
 66b7d6d14a8c9f2902dbfa99f121c86dbc04df2b:.conky/conkyrss:generic-api-key:72

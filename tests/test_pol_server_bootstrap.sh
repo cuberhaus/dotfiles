@@ -78,6 +78,7 @@ grep -Fq 'audit-pol-server-samba:' "$REPO_ROOT/Makefile" || fail 'Makefile must 
 grep -Fq 'configure-pol-server-samba:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Samba staging'
 grep -Fq 'set-pol-server-samba-password:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose interactive Samba activation'
 grep -Fq 'generate-pol-server-samba-password:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose generated Samba credentials'
+grep -Fq 'test-pol-server-samba-access:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Samba access acceptance'
 grep -Fq 'configure-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror authentication'
 grep -Fq 'sync-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose manual GitHub mirror sync'
 grep -Fq 'audit-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror checks'
@@ -107,6 +108,10 @@ grep -Fq 'umask 077' "$DEPLOY" ||
     fail 'generated Samba credentials must be private by default'
 grep -Fq 'pol-server-samba-password' "$DEPLOY" ||
     fail 'generated Samba credentials must be stored outside the repository'
+grep -Fq 'SMB3 file lifecycle passed' "$DEPLOY" ||
+    fail 'Samba acceptance must test the file lifecycle over SMB3'
+grep -Fq 'Guest access denied as expected' "$DEPLOY" ||
+    fail 'Samba acceptance must verify that guest access fails'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"

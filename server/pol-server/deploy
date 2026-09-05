@@ -26,6 +26,7 @@ Usage: deploy [--host HOST] MODE
     --configure-samba              Stage authenticated LAN-only Samba configuration.
     --set-samba-password           Enroll the Samba password and activate smbd interactively.
     --generate-samba-password      Generate a private local password and activate smbd.
+    --test-samba-access            Test SMB3 file operations and guest denial on every share.
     --audit-wd-backup              Print the WD backup disk SMART report.
     --start-smart-long-kingston    Start the Kingston SMART long test.
     --start-smart-long-micron      Start the Micron SMART long test.
@@ -51,7 +52,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report)
             mode="$1"
             ;;
         --help|-h)
@@ -151,6 +152,46 @@ case "$mode" in
     chmod 0600 "$secret_file"
     trap - EXIT
     printf 'Samba password stored locally at %s (mode 0600).\n' "$secret_file"
+    ;;
+--test-samba-access)
+    secret_file="${XDG_CONFIG_HOME:-$HOME/.config}/cuberhaus/secrets/pol-server-samba-password"
+    if [ ! -r "$secret_file" ] || [ "$(stat -c '%a' "$secret_file")" != 600 ]; then
+        printf 'Expected a readable mode-0600 Samba password at %s\n' "$secret_file" >&2
+        exit 1
+    fi
+    {
+        printf 'username = pol-files\npassword = '
+        cat "$secret_file"
+    } | ssh -o BatchMode=yes "$remote_host" '
+        set -eu
+        umask 077
+        auth="$(mktemp /tmp/cuberhaus-smb-auth.XXXXXX)"
+        payload="$(mktemp /tmp/cuberhaus-smb-payload.XXXXXX)"
+        download="$(mktemp /tmp/cuberhaus-smb-download.XXXXXX)"
+        remote_name=".cuberhaus-acceptance-$$"
+        cleanup() {
+            for share in shared incoming private; do
+                smbclient "//127.0.0.1/$share" -A "$auth" -m SMB3 \
+                    -c "del $remote_name; del ${remote_name}.renamed" >/dev/null 2>&1 || true
+            done
+            rm -f "$auth" "$payload" "$download"
+        }
+        trap cleanup EXIT HUP INT TERM
+        cat > "$auth"
+        printf "cuberhaus Samba acceptance\n" > "$payload"
+        for share in shared incoming private; do
+            smbclient "//127.0.0.1/$share" -A "$auth" -m SMB3 \
+                -c "put $payload $remote_name; rename $remote_name ${remote_name}.renamed; get ${remote_name}.renamed $download; del ${remote_name}.renamed" \
+                >/dev/null
+            cmp -s "$payload" "$download"
+            printf "SMB3 file lifecycle passed: %s\n" "$share"
+        done
+        if smbclient //127.0.0.1/shared -N -m SMB3 -c ls >/dev/null 2>&1; then
+            printf "ERROR: guest access unexpectedly succeeded\n" >&2
+            exit 1
+        fi
+        printf "Guest access denied as expected.\n"
+    '
     ;;
 --audit-wd-backup)
     ssh -o BatchMode=yes "$remote_host" \
