@@ -299,6 +299,68 @@ isolated restore comparison, repository metadata check, and production systemd
 service executions passed on 2026-09-05. Retention pruning is not configured;
 it requires a separate review before any snapshot deletion.
 
+When Immich is configured, every Restic run first stops `immich-server`, writes
+and gzip-tests an atomic PostgreSQL dump under
+`/srv/storage/immich/backups`, then restarts the server. A failed dump prevents
+the Restic snapshot, so media is never recorded without its paired database.
+
+## Immich
+
+Immich runs as a root-operated Docker Compose project pinned to `v3.1.0`.
+Media lives on Kingston ext4 at `/srv/storage/immich`; PostgreSQL lives on the
+Micron root filesystem at `/var/lib/immich/postgres`. The root-only environment
+is `/etc/cuberhaus/immich.env`. The `pol` account is deliberately not in the
+root-equivalent `docker` group.
+
+Install, configure, and audit the stack with:
+
+```bash
+make install-pol-server-immich
+make configure-pol-server-immich
+make audit-pol-server-immich
+```
+
+Immich is reachable only on the trusted LAN at
+`http://192.168.1.34:2283`. Compose publishes that exact address rather than a
+wildcard; Docker-published ports must not be treated as protected by UFW alone.
+The Immich media tree is excluded from Samba.
+
+Routine lifecycle commands are:
+
+```bash
+make start-pol-server-immich
+make stop-pol-server-immich
+make backup-pol-server-immich
+make upgrade-pol-server-immich
+```
+
+The upgrade target runs the complete Restic backup first and stops if that
+backup fails. The normal daily Restic timer invokes the same consistent Immich
+database-dump step before snapshotting `/srv/storage`.
+
+The preserved Windows recovery copy remains read-only at
+`/mnt/pol-server-backup/Immich`. Preview its fixed-source restore with:
+
+```bash
+make restore-pol-server-immich
+```
+
+The preview requires the six standard media directories and their `.immich`
+markers, validates the newest compressed database dump, verifies the exact WD
+backup mount, and refuses a live target containing user media. The separately
+named apply command is intentionally destructive to the fresh targets:
+
+```bash
+make restore-pol-server-immich-apply
+```
+
+Apply first renames both current SSD targets to timestamped `.pre-restore-*`
+directories, leaves the WD source unchanged, and restores those rollback trees
+automatically if copying, database import, or startup fails. Retain the rollback
+directories until login, library counts, representative assets, and a fresh
+paired Restic restore have all been verified. The WD partition table and its
+approximately 500 GB unallocated tail remain untouched.
+
 After physical inspection, run the fixed moderate CPU thermal check:
 
 ```bash

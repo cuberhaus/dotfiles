@@ -15,6 +15,7 @@ backup_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-backup"
 maintenance_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-maintenance"
 github_mirror_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-github-mirror"
 rss_email_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-rss-email"
+immich_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-immich"
 sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-bootstrap"
 maintenance_sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-maintenance"
 staging_dir="${install_dir}.new.$$"
@@ -50,6 +51,7 @@ install -m 0755 \
     "$server_dir/backup-setup" \
     "$server_dir/github-mirror" \
     "$server_dir/hardware-qualification" \
+    "$server_dir/immich-setup" \
     "$server_dir/samba-setup" \
     "$server_dir/storage-setup" \
     "$server_dir/maintenance-access" \
@@ -75,6 +77,7 @@ install -m 0755 "$server_dir/pol-server-backup" "$backup_launcher_target"
 install -m 0755 "$server_dir/pol-server-maintenance" "$maintenance_launcher_target"
 install -m 0755 "$server_dir/pol-server-github-mirror" "$github_mirror_launcher_target"
 install -m 0755 "$server_dir/pol-server-rss-email" "$rss_email_launcher_target"
+install -m 0755 "$server_dir/pol-server-immich" "$immich_launcher_target"
 
 install -d -m 0755 "$(dirname "$sudoers_target")"
 printf '%s\n' \
@@ -106,6 +109,15 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-rss-email --test-email' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-rss-email --send-wd-report' \
     'pol ALL=(root) NOPASSWD: /usr/bin/systemctl start pol-server-rss-email.service' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --install' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --check' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --configure' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --start' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --stop' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --backup' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --upgrade' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --restore-existing' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --restore-existing-apply RESTORE-WD-IMMICH' \
     > "$sudoers_staging"
 chmod 0440 "$sudoers_staging"
 visudo -cf "$sudoers_staging"

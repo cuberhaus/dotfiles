@@ -1,0 +1,579 @@
+#!/usr/bin/env bash
+# Description: Configure and operate the pinned pol-server Immich deployment.
+set -euo pipefail
+
+server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+root_prefix="${POL_SERVER_ROOT:-}"
+admin_user="${POL_SERVER_ADMIN_USER:-pol}"
+immich_version=v3.1.0
+bind_address=192.168.1.34
+upload_location=/srv/storage/immich
+database_location=/var/lib/immich/postgres
+database_name=immich
+database_user=postgres
+environment_path=/etc/cuberhaus/immich.env
+compose_path="$server_dir/etc/immich/compose.yaml"
+unit_name=pol-server-immich.service
+backup_command_path=/usr/local/lib/cuberhaus/pol-server/backup-setup
+recovery_root=/mnt/pol-server-backup/Immich
+docker_packages=(docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin)
+conflicting_docker_packages=(docker.io docker-compose docker-compose-v2 docker-doc podman-docker containerd runc)
+media_folders=(library upload profile backups thumbs encoded-video)
+
+error() { printf '\033[31m[ERROR]\033[0m %s\n' "$*" >&2; }
+
+usage() {
+    cat <<'EOF'
+Usage: immich-setup MODE
+
+    --install    Install Docker Engine from Docker's official Debian repository.
+    --check      Audit Docker, storage placement, LAN binding, and stack health.
+    --configure  Create root-only configuration and start the pinned stack.
+    --start      Reconcile and start the configured stack.
+    --stop       Stop the configured stack without deleting data.
+    --backup     Stop writes, create a verified PostgreSQL dump, and restart Immich.
+    --upgrade    Run the full Restic backup before pulling the pinned images.
+    --restore-existing
+                 Validate the preserved WD recovery set and print a dry-run plan.
+    --restore-existing-apply RESTORE-WD-IMMICH
+                 Restore the validated WD media and database with rollback copies.
+EOF
+}
+
+root_path() {
+    printf '%s%s\n' "${root_prefix%/}" "$1"
+}
+
+require_privileges() {
+    if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
+        error 'Run through the tracked root-owned Immich command.'
+        return 1
+    fi
+}
+
+require_supported_host() {
+    local os_release distro_id distro_version
+
+    os_release="$(root_path /etc/os-release)"
+    [ -r "$os_release" ] || {
+        error "Cannot read $os_release"
+        return 1
+    }
+    distro_id="$(. "$os_release"; printf '%s' "${ID:-}")"
+    distro_version="$(. "$os_release"; printf '%s' "${VERSION_ID:-}")"
+    if [ "$distro_id" != debian ] || [ "$distro_version" != 13 ]; then
+        error "Expected Debian 13, found ${distro_id:-unknown} ${distro_version:-unknown}"
+        return 1
+    fi
+}
+
+package_installed() {
+    [ "$(dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null || true)" = installed ]
+}
+
+require_docker() {
+    local package
+
+    for package in "${docker_packages[@]}"; do
+        package_installed "$package" || {
+            error "Docker package is not installed: $package"
+            return 1
+        }
+    done
+    docker compose version >/dev/null
+    docker info >/dev/null
+}
+
+install_docker() {
+    local package os_release suite architecture keyring_directory keyring_target
+    local source_directory source_target key_staging source_staging
+
+    require_privileges
+    require_supported_host
+    for package in "${conflicting_docker_packages[@]}"; do
+        if package_installed "$package"; then
+            error "Remove conflicting Docker package before installation: $package"
+            return 1
+        fi
+    done
+
+    os_release="$(root_path /etc/os-release)"
+    suite="$(. "$os_release"; printf '%s' "${VERSION_CODENAME:-}")"
+    architecture="$(dpkg --print-architecture)"
+    if [ -z "$suite" ] || [ -z "$architecture" ]; then
+        error 'Cannot determine the Docker repository suite or architecture.'
+        return 1
+    fi
+
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates curl
+    keyring_directory="$(root_path /etc/apt/keyrings)"
+    keyring_target="$keyring_directory/docker.asc"
+    source_directory="$(root_path /etc/apt/sources.list.d)"
+    source_target="$source_directory/docker.sources"
+    install -d -m 0755 "$keyring_directory" "$source_directory"
+
+    key_staging="$(mktemp "$keyring_directory/.docker.asc.XXXXXX")"
+    if ! curl -fsSL https://download.docker.com/linux/debian/gpg -o "$key_staging"; then
+        rm -f "$key_staging"
+        error 'Failed to download the official Docker signing key.'
+        return 1
+    fi
+    chmod 0644 "$key_staging"
+    mv "$key_staging" "$keyring_target"
+
+    source_staging="$(mktemp "$source_directory/.docker.sources.XXXXXX")"
+    cat > "$source_staging" <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: $suite
+Components: stable
+Architectures: $architecture
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+    chmod 0644 "$source_staging"
+    mv "$source_staging" "$source_target"
+
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y "${docker_packages[@]}"
+    systemctl enable --now docker.service
+    require_docker
+    if id -nG "$admin_user" | tr ' ' '\n' | grep -Fqx docker; then
+        error "$admin_user must not belong to the root-equivalent docker group."
+        return 1
+    fi
+    printf 'Docker Engine installed from the official Debian repository.\n'
+}
+
+compose() {
+    docker compose \
+        --project-directory "$(dirname "$compose_path")" \
+        --env-file "$(root_path "$environment_path")" \
+        -f "$compose_path" "$@"
+}
+
+configure_immich() {
+    local environment_target environment_directory database_target storage_target
+    local unit_source unit_target password staging
+
+    require_privileges
+    require_supported_host
+    require_docker
+
+    environment_target="$(root_path "$environment_path")"
+    environment_directory="$(dirname "$environment_target")"
+    storage_target="$(root_path "$upload_location")"
+    database_target="$(root_path "$database_location")"
+    unit_source="$server_dir/etc/systemd/system/$unit_name"
+    unit_target="$(root_path "/etc/systemd/system/$unit_name")"
+
+    install -d -m 0700 "$storage_target" "$database_target"
+    install -d -m 0700 "$environment_directory"
+    if [ ! -e "$environment_target" ]; then
+        password="$(openssl rand -hex 32)"
+        staging="$(mktemp "$environment_directory/.immich.env.XXXXXX")"
+        cat > "$staging" <<EOF
+UPLOAD_LOCATION=$upload_location
+DB_DATA_LOCATION=$database_location
+TZ=Europe/Madrid
+IMMICH_VERSION=$immich_version
+DB_PASSWORD=$password
+DB_USERNAME=$database_user
+DB_DATABASE_NAME=$database_name
+IMMICH_BIND_ADDRESS=$bind_address
+EOF
+        chmod 0600 "$staging"
+        mv "$staging" "$environment_target"
+        password=
+    fi
+    chmod 0600 "$environment_target"
+    if [ -z "$root_prefix" ]; then
+        chown root:root "$environment_target" "$storage_target" "$database_target"
+    fi
+
+    install -D -m 0644 "$unit_source" "$unit_target"
+    compose config --quiet
+    systemctl daemon-reload
+    systemctl enable --now "$unit_name"
+    printf 'Immich configured at http://%s:2283.\n' "$bind_address"
+}
+
+start_immich() {
+    require_privileges
+    require_supported_host
+    require_docker
+    [ -r "$(root_path "$environment_path")" ] || {
+        error 'Immich environment is not configured.'
+        return 1
+    }
+    compose config --quiet
+    compose up -d --wait --wait-timeout 300
+}
+
+stop_immich() {
+    require_privileges
+    [ -r "$(root_path "$environment_path")" ] || return 0
+    compose stop
+}
+
+backup_immich() {
+    local environment_target storage_target backup_directory running_services
+    local timestamp dump_target dump_staging restart_server=false result=0
+
+    require_privileges
+    require_supported_host
+    require_docker
+    environment_target="$(root_path "$environment_path")"
+    storage_target="$(root_path "$upload_location")"
+    [ -r "$environment_target" ] || {
+        error 'Immich environment is not configured.'
+        return 1
+    }
+    running_services="$(compose ps --status running --services)"
+    grep -Fqx database <<< "$running_services" || {
+        error 'The Immich PostgreSQL service must be running before backup.'
+        return 1
+    }
+    if grep -Fqx immich-server <<< "$running_services"; then
+        restart_server=true
+    fi
+
+    backup_directory="$storage_target/backups"
+    install -d -m 0700 "$backup_directory"
+    timestamp="$(date -u +%Y%m%dT%H%M%S%NZ)"
+    dump_target="$backup_directory/immich-db-backup-$timestamp.sql.gz"
+    [ ! -e "$dump_target" ] || {
+        error "Refusing to overwrite an existing database dump: $dump_target"
+        return 1
+    }
+    dump_staging="$(mktemp "$backup_directory/.immich-db-backup.XXXXXX.sql.gz")"
+
+    if [ "$restart_server" = true ]; then
+        compose stop immich-server
+    fi
+    if ! compose exec -T database pg_dump \
+        --clean --if-exists \
+        --dbname="$database_name" \
+        --username="$database_user" | gzip -c > "$dump_staging"; then
+        error 'Immich PostgreSQL dump failed.'
+        result=1
+    elif [ ! -s "$dump_staging" ] || ! gzip -t "$dump_staging"; then
+        error 'Immich PostgreSQL dump is empty or invalid.'
+        result=1
+    else
+        mv "$dump_staging" "$dump_target"
+        printf 'Immich database dump: %s\n' "$dump_target"
+    fi
+    rm -f "$dump_staging"
+
+    if [ "$restart_server" = true ] && ! compose start immich-server; then
+        error 'Immich server failed to restart after database backup.'
+        result=1
+    fi
+    return "$result"
+}
+
+upgrade_immich() {
+    local environment_target backup_command
+
+    require_privileges
+    require_supported_host
+    require_docker
+    environment_target="$(root_path "$environment_path")"
+    backup_command="$(root_path "$backup_command_path")"
+    [ -r "$environment_target" ] || {
+        error 'Immich environment is not configured.'
+        return 1
+    }
+    [ -x "$backup_command" ] || {
+        error "Required backup command is unavailable: $backup_command"
+        return 1
+    }
+
+    "$backup_command" --backup
+    compose pull
+    compose up -d --wait --wait-timeout 300
+    printf 'Immich backup and pinned-image upgrade completed.\n'
+}
+
+latest_recovery_dump() {
+    local backups_path="$1"
+    local candidate latest=
+
+    while IFS= read -r -d '' candidate; do
+        if [ -z "$latest" ] || [ "$candidate" -nt "$latest" ]; then
+            latest="$candidate"
+        fi
+    done < <(find "$backups_path" -type f -name '*.sql.gz' -print0)
+    printf '%s\n' "$latest"
+}
+
+validate_existing_recovery() {
+    local backup_command backup_status source_library upload_target database_target
+    local folder source_real target_real unexpected
+
+    backup_command="$(root_path "$backup_command_path")"
+    [ -x "$backup_command" ] || {
+        error "Required backup command is unavailable: $backup_command"
+        return 1
+    }
+    backup_status="$("$backup_command" --check)"
+    grep -Fqx 'Backup state: configured' <<< "$backup_status" || {
+        error 'The pinned WD backup destination is not fully configured.'
+        return 1
+    }
+
+    source_library="$(root_path "$recovery_root/library")"
+    upload_target="$(root_path "$upload_location")"
+    database_target="$(root_path "$database_location")"
+    [ -d "$source_library" ] || {
+        error "Immich recovery library was not found: $source_library"
+        return 1
+    }
+    for folder in "${media_folders[@]}"; do
+        if [ ! -d "$source_library/$folder" ] || [ ! -f "$source_library/$folder/.immich" ]; then
+            error "Required Immich recovery folder or marker is missing: $folder"
+            return 1
+        fi
+    done
+    validated_recovery_dump="$(latest_recovery_dump "$source_library/backups")"
+    if [ -z "$validated_recovery_dump" ] || [ ! -s "$validated_recovery_dump" ] ||
+        ! gzip -t "$validated_recovery_dump"; then
+        error 'No valid non-empty Immich database dump was found in the recovery set.'
+        return 1
+    fi
+    if [ ! -d "$upload_target" ] || [ ! -d "$database_target" ]; then
+        error 'Configure Immich before validating the existing recovery set.'
+        return 1
+    fi
+    source_real="$(readlink -f "$source_library")"
+    target_real="$(readlink -f "$upload_target")"
+    if [ "$source_real" = "$target_real" ] || [[ "$source_real" == "$target_real/"* ]]; then
+        error 'The WD recovery source must be separate from the live media target.'
+        return 1
+    fi
+    unexpected="$(
+        find "$upload_target" -type f ! -name .immich \
+            ! -path "$upload_target/backups/*.sql.gz" -print -quit
+    )"
+    if [ -n "$unexpected" ]; then
+        error "Refusing to replace a live media target containing user data: $unexpected"
+        return 1
+    fi
+
+    validated_recovery_library="$source_library"
+    validated_upload_target="$upload_target"
+    validated_database_target="$database_target"
+}
+
+rollback_existing_restore() {
+    local media_target="$1"
+    local database_target="$2"
+    local media_rollback="$3"
+    local database_rollback="$4"
+    local timestamp="$5"
+
+    compose down >/dev/null 2>&1 || true
+    if [ -e "$media_target" ]; then
+        mv "$media_target" "$media_target.failed-$timestamp" || true
+    fi
+    if [ -e "$database_target" ]; then
+        mv "$database_target" "$database_target.failed-$timestamp" || true
+    fi
+    mv "$media_rollback" "$media_target"
+    mv "$database_rollback" "$database_target"
+    if ! compose up -d --wait --wait-timeout 300; then
+        error 'Rollback data was restored, but the previous Immich stack did not restart.'
+        return 1
+    fi
+}
+
+restore_existing_immich() {
+    local apply="$1"
+    local token="${2:-}"
+    local timestamp media_rollback database_rollback folder health attempt
+    local database_healthy=false result=0
+
+    require_privileges
+    require_supported_host
+    validate_existing_recovery
+
+    printf 'Immich restore plan:\n'
+    printf '  Media source: %s\n' "$validated_recovery_library"
+    printf '  Database dump: %s\n' "$validated_recovery_dump"
+    printf '  Media target: %s\n' "$validated_upload_target"
+    printf '  Database target: %s\n' "$validated_database_target"
+    if [ "$apply" != true ]; then
+        printf 'Dry run only. Re-run with the explicit restore token to apply.\n'
+        return
+    fi
+    [ "$token" = RESTORE-WD-IMMICH ] || {
+        error 'Restore apply requires the exact token RESTORE-WD-IMMICH.'
+        return 2
+    }
+    require_docker
+
+    timestamp="$(date -u +%Y%m%dT%H%M%S%NZ)"
+    media_rollback="$validated_upload_target.pre-restore-$timestamp"
+    database_rollback="$validated_database_target.pre-restore-$timestamp"
+    compose down
+    mv "$validated_upload_target" "$media_rollback"
+    if ! mv "$validated_database_target" "$database_rollback"; then
+        mv "$media_rollback" "$validated_upload_target"
+        error 'Could not preserve the current database target; media rollback was restored.'
+        return 1
+    fi
+
+    if ! install -d -m 0700 "$validated_upload_target" "$validated_database_target"; then
+        result=1
+    fi
+    if (( result == 0 )); then
+        for folder in "${media_folders[@]}"; do
+            if ! install -d -m 0700 "$validated_upload_target/$folder" ||
+                ! cp -a --no-preserve=ownership \
+                    "$validated_recovery_library/$folder/." "$validated_upload_target/$folder/"; then
+                error "Failed to restore Immich media folder: $folder"
+                result=1
+                break
+            fi
+        done
+    fi
+    if (( result == 0 )) && ! compose up -d database; then
+        error 'Failed to start PostgreSQL for restore.'
+        result=1
+    fi
+    if (( result == 0 )); then
+        for (( attempt = 0; attempt < 60; attempt++ )); do
+            health="$(docker inspect --format '{{.State.Health.Status}}' immich_postgres 2>/dev/null || true)"
+            if [ "$health" = healthy ]; then
+                database_healthy=true
+                break
+            fi
+            sleep 2
+        done
+        if [ "$database_healthy" != true ]; then
+            error 'PostgreSQL did not become healthy within 120 seconds.'
+            result=1
+        fi
+    fi
+    if (( result == 0 )) &&
+        ! gzip -dc "$validated_recovery_dump" |
+            compose exec -T database psql \
+                --dbname="$database_name" --username="$database_user"; then
+        error 'Immich database restore failed.'
+        result=1
+    fi
+    if (( result == 0 )) && ! compose up -d --wait --wait-timeout 300; then
+        error 'Immich failed to start after restore.'
+        result=1
+    fi
+    if (( result != 0 )); then
+        rollback_existing_restore \
+            "$validated_upload_target" "$validated_database_target" \
+            "$media_rollback" "$database_rollback" "$timestamp" || true
+        return 1
+    fi
+
+    printf 'Immich restore completed. Rollback media: %s\n' "$media_rollback"
+    printf 'Immich restore completed. Rollback database: %s\n' "$database_rollback"
+}
+
+check_immich() {
+    local package environment_target storage_target database_target
+    local running_services listen_addresses
+    local -a expected_services=(database immich-machine-learning immich-server redis)
+
+    require_supported_host
+    for package in "${docker_packages[@]}"; do
+        package_installed "$package" || {
+            error "Docker package missing: $package"
+            return 1
+        }
+    done
+    environment_target="$(root_path "$environment_path")"
+    storage_target="$(root_path "$upload_location")"
+    database_target="$(root_path "$database_location")"
+    if [ ! -r "$environment_target" ] || [ "$(stat -c %a "$environment_target")" != 600 ]; then
+        error 'Immich environment is missing or not mode 0600.'
+        return 1
+    fi
+    grep -Fqx "UPLOAD_LOCATION=$upload_location" "$environment_target"
+    grep -Fqx "DB_DATA_LOCATION=$database_location" "$environment_target"
+    grep -Fqx "IMMICH_VERSION=$immich_version" "$environment_target"
+    grep -Fqx "IMMICH_BIND_ADDRESS=$bind_address" "$environment_target"
+    if [ ! -d "$storage_target" ] || [ ! -d "$database_target" ]; then
+        error 'Immich storage or database directory is missing.'
+        return 1
+    fi
+    if id -nG "$admin_user" | tr ' ' '\n' | grep -Fqx docker; then
+        error "$admin_user must not belong to the root-equivalent docker group."
+        return 1
+    fi
+
+    require_docker
+    compose config --quiet
+    if [ "$(systemctl is-enabled "$unit_name" 2>/dev/null || true)" != enabled ] ||
+        [ "$(systemctl is-active "$unit_name" 2>/dev/null || true)" != active ]; then
+        error 'Immich systemd service is not active and enabled.'
+        return 1
+    fi
+    running_services="$(compose ps --status running --services | sort)"
+    [ "$running_services" = "$(printf '%s\n' "${expected_services[@]}" | sort)" ] || {
+        error "Unexpected running Immich services: ${running_services:-none}"
+        return 1
+    }
+    listen_addresses="$(ss -H -ltn 'sport = :2283' | awk '{print $4}')"
+    [ "$listen_addresses" = "$bind_address:2283" ] || {
+        error "Immich must listen only on $bind_address:2283; found ${listen_addresses:-none}."
+        return 1
+    }
+    curl --fail --silent --show-error "http://$bind_address:2283/api/server/ping" >/dev/null
+
+    printf 'Immich version: %s\n' "$immich_version"
+    printf 'Immich state: configured and healthy\n'
+    printf 'Immich media: %s\n' "$upload_location"
+    printf 'Immich database: %s\n' "$database_location"
+    printf 'Immich URL: http://%s:2283\n' "$bind_address"
+}
+
+main() {
+    [ "$#" -ge 1 ] || {
+        usage >&2
+        return 2
+    }
+    local mode="$1"
+    shift
+    case "$mode" in
+        --restore-existing)
+            [ "$#" -eq 0 ] || return 2
+            restore_existing_immich false
+            ;;
+        --restore-existing-apply)
+            [ "$#" -eq 1 ] || return 2
+            restore_existing_immich true "$1"
+            ;;
+        *)
+            [ "$#" -eq 0 ] || {
+                usage >&2
+                return 2
+            }
+            case "$mode" in
+        --install) install_docker ;;
+        --check) check_immich ;;
+        --configure) configure_immich ;;
+        --start) start_immich ;;
+        --stop) stop_immich ;;
+        --backup) backup_immich ;;
+        --upgrade) upgrade_immich ;;
+        --help|-h) usage ;;
+        *)
+            error "Unknown mode: $mode"
+            usage >&2
+            return 2
+            ;;
+            esac
+            ;;
+    esac
+}
+
+main "$@"

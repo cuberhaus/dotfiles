@@ -14,6 +14,8 @@ root_prefix="${POL_SERVER_ROOT:-}"
 storage_path="${root_prefix%/}/srv/storage"
 credential_path="${root_prefix%/}/etc/cuberhaus/restic-password"
 state_path="${root_prefix%/}/var/lib/cuberhaus-backup"
+immich_environment="${root_prefix%/}/etc/cuberhaus/immich.env"
+immich_command="${root_prefix%/}/usr/local/lib/cuberhaus/pol-server/immich-setup"
 
 error() { printf '\033[31m[ERROR]\033[0m %s\n' "$*" >&2; }
 
@@ -294,6 +296,15 @@ record_success() {
     mv "$staging" "$state_path/$marker"
 }
 
+prepare_application_backups() {
+    [ -e "$immich_environment" ] || return 0
+    [ -x "$immich_command" ] || {
+        error "Configured Immich backup command is unavailable: $immich_command"
+        return 1
+    }
+    "$immich_command" --backup
+}
+
 configure_password() {
     local password confirmation credential_directory credential_staging repository
 
@@ -347,6 +358,7 @@ run_backup() {
 
     require_apply_privileges
     verify_repository
+    prepare_application_backups
     password_file="$(active_password_file)"
     restic_with_password "$password_file" \
         backup --one-file-system --exclude-caches "$storage_path"

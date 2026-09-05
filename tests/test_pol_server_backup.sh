@@ -243,12 +243,41 @@ if grep -Fq 'test-restic-password-1234567890' "$EVENT_LOG"; then
     fail 'the restic password must not appear in command logs'
 fi
 
+install -D -m 0600 /dev/null "$FAKE_ROOT/etc/cuberhaus/immich.env"
+immich_command="$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/immich-setup"
+install -d -m 0755 "$(dirname "$immich_command")"
+cat > "$immich_command" <<'EOF'
+#!/usr/bin/env bash
+printf 'immich:%s\n' "$*" >> "$EVENT_LOG"
+[ "${FAKE_IMMICH_BACKUP_FAIL:-false}" != true ]
+EOF
+chmod +x "$immich_command"
+
+: > "$EVENT_LOG"
+export FAKE_IMMICH_BACKUP_FAIL=true
+if PATH="$FAKE_BIN:$PATH" \
+    POL_SERVER_ALLOW_UNPRIVILEGED=true \
+    POL_SERVER_ROOT="$FAKE_ROOT" \
+    "$BACKUP" --backup >/dev/null 2>&1; then
+    fail 'restic backup must fail when the Immich database dump fails'
+fi
+unset FAKE_IMMICH_BACKUP_FAIL
+if grep -Fq 'command=backup ' "$EVENT_LOG"; then
+    fail 'restic must not snapshot media after a failed Immich database dump'
+fi
+
+: > "$EVENT_LOG"
 PATH="$FAKE_BIN:$PATH" \
     POL_SERVER_ALLOW_UNPRIVILEGED=true \
     POL_SERVER_ROOT="$FAKE_ROOT" \
     "$BACKUP" --backup >/dev/null
 grep -Fq "command=backup --one-file-system --exclude-caches $FAKE_ROOT/srv/storage" "$EVENT_LOG" ||
     fail 'backup must cover the complete storage tree without crossing filesystems'
+immich_line="$(grep -n -F 'immich:--backup' "$EVENT_LOG" | head -1 | cut -d: -f1)"
+restic_line="$(grep -n -F 'command=backup ' "$EVENT_LOG" | head -1 | cut -d: -f1)"
+if [ -z "$immich_line" ] || [ -z "$restic_line" ] || (( immich_line >= restic_line )); then
+    fail 'Immich database backup must complete before the Restic snapshot starts'
+fi
 [ -s "$FAKE_ROOT/var/lib/cuberhaus-backup/last-success" ] ||
     fail 'a successful backup must publish a freshness marker'
 

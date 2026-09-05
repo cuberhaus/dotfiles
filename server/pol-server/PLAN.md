@@ -78,8 +78,8 @@ Baseline recorded on 2026-09-05:
 | Backup | Operational; policy follow-up pending | User accepted the incomplete SMART-test risk; encrypted Restic backup, rotating integrity check, and restore test passed on the preserved WD exFAT volume |
 | GitHub mirrors | Complete | All 54 active repositories passed Git integrity; LFS fetches completed and the persistent daily timer is enabled |
 | Baseline bootstrap | Complete | Root-owned bundle enrolled; routine operations use exact narrow commands and supervised broad access remains bounded by `NOTAFTER` |
-| Containers | Pending | Docker Engine and Compose plugin are not installed |
-| Immich | Pending | Must wait for storage, Samba isolation, backup, and monitoring |
+| Containers | Complete | Official Docker Engine 29.8.0 and Compose 5.5.1 are installed; `pol` remains outside the Docker group |
+| Immich | Restore acceptance in progress | Tracked v3.1.0 stack is LAN-bound with media on Kingston and PostgreSQL on Micron; preserved WD recovery is being restored |
 | OpenClaw | Pending | Must wait for backup and Docker; use a cloud model initially |
 | Remote access | Pending | WireGuard waits until LAN operation and recovery are proven |
 
@@ -327,6 +327,10 @@ The existing exFAT partition is mounted by UUID `5EEB-7DF6` at
 the repository metadata and rotating data-subset check reported no errors, and
 both hardened systemd services completed with status 0. Daily backup and weekly
 check timers are enabled. Approximately 711 GiB remained free after acceptance.
+When Immich is configured, the production backup service first stops its server
+container, creates and verifies an atomic compressed PostgreSQL dump alongside
+the media on Kingston, and only then starts Restic. Dump failure blocks the
+snapshot, preserving the database/media consistency boundary.
 
 1. Choose an independent backup destination with enough capacity for
    irreplaceable data and version history. A second internal SSD is not backup.
@@ -381,16 +385,30 @@ revoked peer fails, and an external scan finds no application ports exposed.
 
 ## Phase 9: deploy Immich
 
-Status: **deferred until Phases 3, 6, and 7 pass**.
+Status: **deployed; preserved-library restore acceptance in progress**.
 
-1. Install Docker Engine and the Compose plugin from Docker's Debian repository.
-2. Keep the reviewed Compose project under a tracked server directory and keep
-   its real `.env` file on the server with restrictive permissions.
-3. Put Immich media under `/srv/storage/immich`; keep PostgreSQL on the Micron
-   system SSD under `/var/lib/immich/postgres`.
-4. Never expose the Immich-managed media tree through Samba.
-5. Import a small test set and prove upload, retrieval, mobile background sync,
-   paired media/database backup, and clean restore before the main library.
+Docker Engine and its Compose plugin are installed from Docker's official
+Debian repository. The tracked four-service project is pinned to Immich
+`v3.1.0`; its root-only environment is stored outside Git. Media is on Kingston
+at `/srv/storage/immich`, while PostgreSQL is on Micron at
+`/var/lib/immich/postgres`. Only `192.168.1.34:2283` is published, the media tree
+is excluded from Samba, and `pol` has no Docker-group access.
+
+The preserved WD copy is a fixed read-only recovery source, not primary
+storage. Its restore validates Immich markers and the newest database dump,
+requires a dry run and an exact apply token, renames both fresh SSD targets to
+timestamped rollback paths, and restores those paths on any failed copy, import,
+or startup. The WD partition and approximately 500 GB unallocated tail remain
+unchanged so backup and primary data stay in separate physical failure domains.
+
+Remaining acceptance steps are:
+
+1. Complete the active media copy and database import without interrupting it.
+2. Prove all four containers healthy and the exact LAN-only listener.
+3. Verify login, library counts, representative assets, and upload/retrieval.
+4. Create a fresh paired PostgreSQL/media Restic snapshot and pass repository
+   and isolated-restore checks.
+5. Reboot and prove service, storage, Samba, backup, and Immich convergence.
 6. Measure RAM, swap, temperature, free space, and responsiveness during initial
    indexing. Test Intel Quick Sync separately before enabling it broadly.
 
@@ -421,14 +439,15 @@ during representative concurrent use.
 
 ## Immediate next batch
 
-Keep application deployment blocked until backup scheduling and monitoring are
-observed. The next session should:
+Complete and prove the active Immich recovery before adding another application:
 
-1. Confirm the first timer-triggered backup and weekly check freshness.
-2. Review the proposed 7 daily, 5 weekly, 12 monthly, and 3 yearly retention
+1. Finish Immich application, paired-backup, restore, and reboot acceptance.
+2. Confirm the first timer-triggered backup and weekly check freshness.
+3. Review the proposed 7 daily, 5 weekly, 12 monthly, and 3 yearly retention
    policy with a Restic dry run before authorizing any prune.
-3. Preserve the Restic password and recovery procedure outside the NAS, then
+4. Preserve the Restic password and recovery procedure outside the NAS, then
    choose an off-site copy for irreplaceable data.
-4. Reserve the current address in the router and configure tested LAN-only UFW
-   rules for SSH and Samba; Ethernet remains an optional reliability upgrade.
-5. Add backup, SMART, failed-unit, temperature, and 80% storage alerts.
+5. Reserve the current address in the router and configure tested LAN-only UFW
+   rules for SSH, Samba, and Immich; Ethernet remains an optional reliability
+   upgrade.
+6. Add backup, SMART, failed-unit, temperature, and 80% storage alerts.

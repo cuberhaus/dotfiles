@@ -45,6 +45,15 @@ Usage: deploy [--host HOST] MODE
     --run-rss-email                Run the RSS email service immediately.
     --test-rss-email               Send one RSS delivery test email.
     --email-wd-report              Email the current redacted WD SMART report.
+    --install-immich               Install official Docker Engine packages.
+    --check-immich                 Audit Immich placement, binding, and health.
+    --configure-immich             Configure and start the pinned Immich stack.
+    --start-immich                 Reconcile and start Immich.
+    --stop-immich                  Stop Immich without deleting data.
+    --backup-immich                Create a consistent database dump for Restic.
+    --upgrade-immich               Back up, pull, and reconcile the pinned stack.
+    --restore-immich               Validate and preview the fixed WD recovery set.
+    --restore-immich-apply         Apply the fixed WD recovery set with rollback copies.
 EOF
 }
 
@@ -58,7 +67,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--check-backup|--prepare-backup|--generate-restic-password|--run-backup|--check-backup-repository|--restore-test-backup|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--check-backup|--prepare-backup|--generate-restic-password|--run-backup|--check-backup-repository|--restore-test-backup|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report|--install-immich|--check-immich|--configure-immich|--start-immich|--stop-immich|--backup-immich|--upgrade-immich|--restore-immich|--restore-immich-apply)
             mode="$1"
             ;;
         --help|-h)
@@ -84,6 +93,7 @@ case "$mode" in
         hardware-qualification \
         storage-setup \
         github-mirror \
+        immich-setup \
         install-autonomy \
         maintenance-access \
         samba-setup \
@@ -94,6 +104,7 @@ case "$mode" in
         pol-server-backup \
         pol-server-github-mirror \
         pol-server-rss-email \
+        pol-server-immich \
         rss-email \
         pol-server-maintenance \
         packages.txt \
@@ -290,6 +301,42 @@ case "$mode" in
 --email-wd-report)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-rss-email --send-wd-report'
+    ;;
+--install-immich)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-immich --install'
+    ;;
+--check-immich)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-immich --check'
+    ;;
+--configure-immich)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-immich --configure'
+    ;;
+--start-immich)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-immich --start'
+    ;;
+--stop-immich)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-immich --stop'
+    ;;
+--backup-immich)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-immich --backup'
+    ;;
+--upgrade-immich)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-immich --upgrade'
+    ;;
+--restore-immich)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-immich --restore-existing'
+    ;;
+--restore-immich-apply)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-immich --restore-existing-apply RESTORE-WD-IMMICH'
     ;;
 --revoke-maintenance)
     ssh -o BatchMode=yes "$remote_host" \

@@ -12,6 +12,7 @@ BACKUP="$REPO_ROOT/server/pol-server/backup-setup"
 MAINTENANCE="$REPO_ROOT/server/pol-server/maintenance-access"
 GITHUB_MIRROR="$REPO_ROOT/server/pol-server/github-mirror"
 RSS_EMAIL="$REPO_ROOT/server/pol-server/rss-email"
+IMMICH="$REPO_ROOT/server/pol-server/immich-setup"
 CASE_DIR="$(mktemp -d)"
 FAKE_ROOT="$CASE_DIR/root"
 FAKE_BIN="$CASE_DIR/bin"
@@ -43,6 +44,7 @@ assert_file_contains() {
 [ -x "$MAINTENANCE" ] || fail 'pol-server maintenance access command must exist and be executable'
 [ -x "$GITHUB_MIRROR" ] || fail 'pol-server GitHub mirror command must exist and be executable'
 [ -x "$RSS_EMAIL" ] || fail 'pol-server RSS email command must exist and be executable'
+[ -x "$IMMICH" ] || fail 'pol-server Immich command must exist and be executable'
 [ -x "$DEPLOY" ] || fail 'pol-server deploy must exist and be executable'
 [ -x "$INSTALLER" ] || fail 'pol-server autonomy installer must exist and be executable'
 grep -Eq '^[[:space:]]*rss-email[[:space:]]*\\$' "$DEPLOY" ||
@@ -59,6 +61,10 @@ grep -Eq '^[[:space:]]*backup-setup[[:space:]]*\\$' "$DEPLOY" ||
     fail 'pol-server deploy must transfer the backup setup command'
 grep -Eq '^[[:space:]]*pol-server-backup[[:space:]]*\\$' "$DEPLOY" ||
     fail 'pol-server deploy must transfer the backup launcher'
+grep -Eq '^[[:space:]]*immich-setup[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the Immich command'
+grep -Eq '^[[:space:]]*pol-server-immich[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the Immich launcher'
 grep -Fq 'bootstrap-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose bootstrap-pol-server'
 grep -Fq 'audit-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose audit-pol-server'
 grep -Fq 'enroll-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose enroll-pol-server'
@@ -91,6 +97,16 @@ grep -Fq 'generate-pol-server-restic-password:' "$REPO_ROOT/Makefile" || fail 'M
 grep -Fq 'run-pol-server-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose a manual backup run'
 grep -Fq 'check-pol-server-backup:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose repository integrity checks'
 grep -Fq 'test-pol-server-backup-restore:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose restore acceptance'
+grep -Fq 'install-pol-server-immich:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Docker installation'
+grep -Fq 'configure-pol-server-immich:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Immich configuration'
+grep -Fq 'audit-pol-server-immich:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Immich audit'
+grep -Fq 'start-pol-server-immich:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Immich startup'
+grep -Fq 'stop-pol-server-immich:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Immich shutdown'
+grep -Fq 'backup-pol-server-immich:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose a consistent Immich backup'
+grep -Fq 'upgrade-pol-server-immich:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose backup-first Immich upgrades'
+grep -Fq 'restore-pol-server-immich:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose an Immich restore preview'
+grep -Fq 'restore-pol-server-immich-apply:' "$REPO_ROOT/Makefile" || fail 'Makefile must separate destructive Immich restore apply'
+grep -Fq 'bash tests/test_pol_server_immich.sh' "$REPO_ROOT/Makefile" || fail 'make test must include the Immich contract'
 grep -Fq 'configure-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror authentication'
 grep -Fq 'sync-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose manual GitHub mirror sync'
 grep -Fq 'audit-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror checks'
@@ -132,6 +148,14 @@ grep -Fq "'sudo -n /usr/local/sbin/pol-server-backup --configure-password-stdin'
     fail 'generated restic password setup must use standard input'
 grep -Fq 'pol-server-restic-password' "$DEPLOY" ||
     fail 'generated restic credentials must be stored outside the repository'
+for mode in install check configure start stop backup upgrade; do
+    grep -Fq "'sudo -n /usr/local/sbin/pol-server-immich --$mode'" "$DEPLOY" ||
+        fail "remote Immich $mode must use its exact root command"
+done
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-immich --restore-existing'" "$DEPLOY" ||
+    fail 'remote Immich restore must default to its exact dry-run command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-immich --restore-existing-apply RESTORE-WD-IMMICH'" "$DEPLOY" ||
+    fail 'remote Immich restore apply must use its exact confirmation token'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -292,6 +316,7 @@ assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-backup" '/usr/local/l
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-maintenance" '/usr/local/lib/cuberhaus/pol-server/maintenance-access'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-github-mirror" '/usr/local/lib/cuberhaus/pol-server/github-mirror'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-rss-email" '/usr/local/lib/cuberhaus/pol-server/rss-email'
+assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-immich" '/usr/local/lib/cuberhaus/pol-server/immich-setup'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-bootstrap --apply'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-bootstrap --check'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --report'
@@ -320,6 +345,14 @@ assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: 
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-rss-email --test-email'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-rss-email --send-wd-report'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/bin/systemctl start pol-server-rss-email.service'
+for mode in install check configure start stop backup upgrade; do
+    assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" \
+        "NOPASSWD: /usr/local/sbin/pol-server-immich --$mode"
+done
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" \
+    'NOPASSWD: /usr/local/sbin/pol-server-immich --restore-existing'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" \
+    'NOPASSWD: /usr/local/sbin/pol-server-immich --restore-existing-apply RESTORE-WD-IMMICH'
 assert_file_contains "$EVENT_LOG" 'visudo:-cf'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/bootstrap" ] ||
     fail 'installer must deploy an executable root-owned bootstrap bundle'
@@ -335,6 +368,12 @@ assert_file_contains "$EVENT_LOG" 'visudo:-cf'
     fail 'installer must deploy the executable GitHub mirror command'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/rss-email" ] ||
     fail 'installer must deploy the executable RSS email command'
+[ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/immich-setup" ] ||
+    fail 'installer must deploy the executable Immich command'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/immich/compose.yaml" \
+    "- '\${IMMICH_BIND_ADDRESS}:2283:2283'"
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-immich.service" \
+    'RequiresMountsFor=/srv/storage'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.service" 'DynamicUser=yes'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.service" 'LoadCredential=github-token:/etc/cuberhaus/github-mirror-token'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-github-mirror.timer" 'OnCalendar=*-*-* 03:30:00'
@@ -346,6 +385,7 @@ assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-rss-email.timer" 'Persistent=true'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup.service" 'LoadCredential=restic-password:/etc/cuberhaus/restic-password'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup.service" 'RequiresMountsFor=/mnt/pol-server-backup'
+assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup.service" 'ReadWritePaths=/srv/storage/immich'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup.timer" 'OnCalendar=*-*-* 02:00:00'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup.timer" 'Persistent=true'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-backup-check.timer" 'OnCalendar=Sun *-*-* 04:30:00'
