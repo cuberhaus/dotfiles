@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Description: Enroll the root-owned pol-server bootstrap and narrow sudo rule.
+set -euo pipefail
+
+server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+root_prefix="${POL_SERVER_ROOT:-}"
+install_dir="${root_prefix%/}/usr/local/lib/cuberhaus/pol-server"
+launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-bootstrap"
+sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-bootstrap"
+staging_dir="${install_dir}.new.$$"
+sudoers_staging="${sudoers_target}.new.$$"
+
+cleanup() {
+    rm -rf "$staging_dir"
+    rm -f "$sudoers_staging"
+}
+trap cleanup EXIT
+
+if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
+    printf 'Run install-autonomy as root.\n' >&2
+    exit 1
+fi
+
+rm -rf "$staging_dir"
+install -d -m 0755 "$staging_dir"
+install -m 0755 \
+    "$server_dir/bootstrap" \
+    "$server_dir/apply-power-policy" \
+    "$staging_dir/"
+install -m 0644 "$server_dir/packages.txt" "$staging_dir/packages.txt"
+cp -R "$server_dir/etc" "$server_dir/keys" "$staging_dir/"
+find "$staging_dir/etc" "$staging_dir/keys" -type d -exec chmod 0755 {} +
+find "$staging_dir/etc" "$staging_dir/keys" -type f -exec chmod 0644 {} +
+
+if [ -z "$root_prefix" ]; then
+    chown -R root:root "$staging_dir"
+fi
+
+install -d -m 0755 "$(dirname "$install_dir")" "$(dirname "$launcher_target")"
+rm -rf "$install_dir"
+mv "$staging_dir" "$install_dir"
+install -m 0755 "$server_dir/pol-server-bootstrap" "$launcher_target"
+
+install -d -m 0755 "$(dirname "$sudoers_target")"
+printf '%s\n' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-bootstrap --apply' \
+    > "$sudoers_staging"
+chmod 0440 "$sudoers_staging"
+visudo -cf "$sudoers_staging"
+install -m 0440 "$sudoers_staging" "$sudoers_target"
+
+printf 'Installed root-owned bootstrap at %s\n' "$install_dir"
+printf 'Installed narrow sudo rule at %s\n' "$sudoers_target"
+if [ -n "$root_prefix" ]; then
+    "$install_dir/bootstrap" --apply
+else
+    "$launcher_target" --apply
+fi

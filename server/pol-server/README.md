@@ -5,6 +5,52 @@ contains configuration that is safe to track and scripts that apply privileged
 system configuration. It must not contain passwords, private keys, API tokens,
 or generated machine state.
 
+See [PLAN.md](PLAN.md) for the phased implementation roadmap, current gates,
+and acceptance criteria derived from the Obsidian Home NAS design note.
+
+## Bootstrap
+
+The tracked bootstrap is the only supported way to converge routine server
+configuration. Enroll or update its root-owned copy from this repository on the
+managed workstation:
+
+```bash
+make enroll-pol-server
+```
+
+Enrollment validates and installs a sudoers rule allowing exactly
+`/usr/local/sbin/pol-server-bootstrap --apply`. It requires the server user's
+sudo password in a visible terminal. It does not grant `NOPASSWD: ALL` and does
+not enable root SSH login.
+
+After enrollment, audit with:
+
+```bash
+make audit-pol-server
+```
+
+Apply the enrolled safe baseline without a password:
+
+```bash
+make bootstrap-pol-server
+```
+
+Normal apply mode invokes only the installed root-owned bootstrap. The deploy
+script transfers code only during enrollment and removes the temporary directory
+afterward. Re-run enrollment after changing bootstrap code or tracked server
+configuration. The bootstrap is idempotent and currently owns:
+
+- The packages declared in `packages.txt`.
+- The tracked administrative public key and SSH hardening configuration.
+- Automatic security-update scheduling.
+- Active SSH, SMART monitoring, SSD trimming, and APT upgrade timers/services.
+- The no-sleep policy and masked sleep targets.
+- Disabled Samba services until authenticated shares are tracked and approved.
+
+It deliberately does not partition disks, enable UFW, configure Samba shares,
+install Docker, or deploy applications. Those capabilities enter the bootstrap
+only after their phase-specific gate and rollback have been reviewed.
+
 ## Current inventory
 
 Recorded on 2026-09-05 from the active SSH session:
@@ -54,12 +100,15 @@ It prevents lid-close, idle, power-key, suspend-key, and hibernate-key actions
 from suspending the server. The application script also masks the four systemd
 sleep targets so an ordinary suspend or hibernate request cannot stop services.
 
-Apply it from the repository root on the server:
+Apply it from the tracked checkout on the managed workstation:
 
 ```bash
-sudo ./server/pol-server/apply-power-policy
+make bootstrap-pol-server
 ```
 
+Enrollment transfers and invokes the installer; paths under `/tmp` are staging
+details and are removed after each enrollment, so they must never be called
+manually.
 The script is idempotent. It installs the tracked drop-in, masks
 `sleep.target`, `suspend.target`, `hibernate.target`, and `hybrid-sleep.target`,
 reloads systemd, and restarts `systemd-logind` so the policy is active.

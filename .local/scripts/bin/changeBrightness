@@ -1,62 +1,54 @@
 #!/usr/bin/env bash
+# Description: Adjust the active backlight and optionally show a notification.
+set -euo pipefail
 
-# Script inspired by:
-# https://github.com/dastorm/volume-notification-dunst/blob/master/volume.sh
-# https://gist.github.com/sebastiencs/5d7227f388d93374cebdf72e783fbd6a
+usage() {
+    printf 'Usage: changeBrightness [INT]\n'
+    printf 'Example: changeBrightness -5\n'
+}
+
+get_brightness() {
+    if command -v brightnessctl >/dev/null 2>&1; then
+        brightnessctl -m | awk -F, 'NR == 1 { gsub(/%/, "", $5); print $5; exit }'
+    elif command -v light >/dev/null 2>&1; then
+        light -G
+    fi
+}
+
+if [ "$#" -ne 1 ] || [ "$1" = '-h' ]; then
+    usage
+    exit 2
+fi
 
 step="$1"
+if ! [[ "$step" =~ ^[+-]?[0-9]+$ ]]; then
+    printf 'error: step must be an integer\n' >&2
+    usage >&2
+    exit 2
+fi
 
-for cmd in light dunstify bc; do
-    if ! command -v "$cmd" &>/dev/null; then
-        echo "error: $cmd is not installed" >&2
-        exit 1
+amount="$((step < 0 ? -step : step))"
+if command -v brightnessctl >/dev/null 2>&1; then
+    if (( step >= 0 )); then
+        brightnessctl set "${amount}%+"
+    else
+        brightnessctl set "${amount}%-"
     fi
-done
-
-function get_brightness {
-    light -G
-}
-
-function send_notification {
-    # icon="preferences-system-brightness-lock"
-    brightness=$(get_brightness)
-    # Make the bar with the special character ─ (it's not dash -)
-    # https://en.wikipedia.org/wiki/Box-drawing_character
-    # bar=$(seq -s "─" 0 "$(echo "$brightness / 5" | bc -l)" | sed 's/[0-9]//g')
-    # Send the notification
-    # dunstify  -r 5555 -u low "      $bar"
-
-    dunstify -r 5555 -u low \
-    -h int:value:"$brightness" "Brightness: ${brightness}%"
-}
-
-function Usage()
-{
-    echo "Usage: changeBrightness [INT]"
-    echo "Example: changeBrightness -5"
-}
-
-if [[ "$#" -ne 1 || $1 == "-h" ]]; then
-    Usage
-    exit
-fi
-
-# https://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash
-# is the parameter an integer?
-re="^[+-]?[0-9]+([.][0-9]+)?$"
-# =~ is used when using a regexp expression
-if ! [[ $1 =~ $re ]] ; then
-    echo "error: Not a number" >&2
-    Usage
-    exit
-fi
-
-if [[ $1 -ge 0 ]]; then
-    # increase the backlight by 5%
-    light -A "$step"
-    send_notification
+elif command -v light >/dev/null 2>&1; then
+    if (( step >= 0 )); then
+        light -A "$amount"
+    else
+        light -U "$amount"
+    fi
 else
-    # decrease the backlight by 5%
-    light -U "$(echo "$step * -1" | bc -l)" # take absolute value of negative number
-    send_notification
+    printf 'error: brightnessctl is not installed\n' >&2
+    exit 1
+fi
+
+if command -v dunstify >/dev/null 2>&1; then
+    brightness="$(get_brightness)"
+    if [ -n "$brightness" ]; then
+        dunstify -r 5555 -u low \
+            -h "int:value:$brightness" "Brightness: ${brightness}%"
+    fi
 fi

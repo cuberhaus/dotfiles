@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Description: Run the installed root-owned pol-server bootstrap bundle.
+set -euo pipefail
+
+exec /usr/local/lib/cuberhaus/pol-server/bootstrap "$@"

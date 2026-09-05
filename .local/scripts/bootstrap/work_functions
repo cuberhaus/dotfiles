@@ -43,8 +43,10 @@ dev_tools_install() {
         # Essentials
         age                     # Encryption backend for SOPS
         build-essential
+        brightnessctl           # Laptop backlight control
         cmake
         curl
+        ddcutil                 # External monitor DDC brightness control
         git
         jq
         tree
@@ -88,6 +90,7 @@ dev_tools_install() {
         neofetch                # Terminal system info summary
     )
     $apt "${packages[@]}"
+    configure_brightness_access
 }
 
 ###############################################################

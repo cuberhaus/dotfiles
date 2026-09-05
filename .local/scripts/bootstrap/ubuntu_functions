@@ -12,8 +12,10 @@ base_install () {
         automake
         bat                     # Better cat
         build-essential
+        brightnessctl           # Laptop backlight control
         cmake                   # To install ycm
         curl
+        ddcutil                 # External monitor DDC brightness control
         eza                     # ls on steroids (exa replacement)
         ffmpeg
         file
@@ -53,6 +55,8 @@ base_install () {
         nmap                    # Network exploration and security auditing
     )
     $apt "${packages[@]}"
+
+    configure_brightness_access
 
     chsh -s "$(which zsh)"
     git config --global credential.helper store
@@ -211,7 +215,8 @@ i3_install () {
         python-dbus
         rofi
         udiskie
-        xbacklight
+        brightnessctl
+        ddcutil
         xdotool
         xfce4-clipman
         xss-lock
@@ -220,23 +225,7 @@ i3_install () {
     )
     $apt "${packages[@]}"
 
-    # Add current user to group video, type groups to see which groups you are in
-    sudo usermod -a -G video "$LOGNAME"
-    # Light setup | Enables brightness controls
-    if ! command -v light &>/dev/null; then
-        cd "$HOME" || exit
-        git clone https://github.com/haikarainen/light
-        cd "$HOME/light" || exit
-        ./autogen.sh
-        ./configure && make
-        sudo make install
-        ./configure --with-udev && make
-        sudo make install
-        cd "$HOME" || exit
-        rm -rf "$HOME/light"
-    else
-        info "light already installed, skipping."
-    fi
+    configure_brightness_access
 }
 
 snaps_install_optional() {

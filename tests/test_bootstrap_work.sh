@@ -32,16 +32,17 @@ test_unattended_environment_is_noninteractive() {
     local sudo_log="$CASE_DIR/sudo.log"
     local error_log="$CASE_DIR/sudo-error.log"
     mkdir -p "$fake_bin"
-    cat > "$fake_bin/sudo" <<'EOF'
+    cat > "$fake_bin/privilege-runner" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$FAKE_SUDO_LOG"
 [ "${FAKE_SUDO_FAIL:-false}" != true ]
 EOF
     printf '#!/usr/bin/env bash\n' > "$fake_bin/zsh"
-    chmod +x "$fake_bin/sudo" "$fake_bin/zsh"
+    chmod +x "$fake_bin/privilege-runner" "$fake_bin/zsh"
 
     export PATH="$fake_bin:$PATH"
     export FAKE_SUDO_LOG="$sudo_log"
+    export SUDO_COMMAND=privilege-runner
     UNATTENDED=true
     unset DEBIAN_FRONTEND
 
@@ -62,7 +63,6 @@ EOF
     grep -Fxq -- "-n chsh -s $fake_bin/zsh bootstrap-user" "$sudo_log" ||
         fail 'unattended shell change did not use noninteractive sudo'
 
-    unset -f sudo
     export FAKE_SUDO_FAIL=true
     if work_prepare_environment 2> "$error_log"; then
         fail 'unattended mode accepted unavailable sudo credentials'
@@ -70,7 +70,8 @@ EOF
     grep -Fq 'sudo -v' "$error_log" ||
         fail 'unattended sudo failure did not explain how to authorize it'
 
-    unset FAKE_SUDO_FAIL FAKE_SUDO_LOG DEBIAN_FRONTEND
+    unset -f sudo
+    unset FAKE_SUDO_FAIL FAKE_SUDO_LOG DEBIAN_FRONTEND SUDO_COMMAND
     export PATH="$original_path"
 }
 

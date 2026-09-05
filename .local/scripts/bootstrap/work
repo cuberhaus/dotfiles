@@ -14,13 +14,15 @@ work_prepare_environment() {
     [ "${UNATTENDED:-false}" = true ] || return 0
 
     export DEBIAN_FRONTEND=noninteractive
-    if ! command sudo -n true; then
+    SUDO_COMMAND="${SUDO_COMMAND:-sudo}"
+    export SUDO_COMMAND
+    if ! command "$SUDO_COMMAND" -n true; then
         error "Unattended mode requires cached sudo credentials. Run 'sudo -v' in this terminal, then retry."
         return 1
     fi
 
     sudo() {
-        command sudo -n "$@"
+        command "$SUDO_COMMAND" -n "$@"
     }
 }
 

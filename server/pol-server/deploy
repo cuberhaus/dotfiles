@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Description: Deploy and run the tracked pol-server bootstrap over SSH.
+set -euo pipefail
+
+server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+remote_host="${POL_SERVER_HOST:-home-nas}"
+mode=--check
+remote_dir=/tmp/cuberhaus-pol-server-bootstrap
+
+usage() {
+    cat <<'EOF'
+Usage: deploy [--host HOST] [--check | --apply | --enroll]
+
+  --host HOST  SSH host or alias (default: home-nas).
+    --check      Audit the installed root-owned baseline (default).
+    --apply      Converge the installed baseline through narrow passwordless sudo.
+    --enroll     Install or update the root-owned bundle; requires a sudo password.
+EOF
+}
+
+while (( $# > 0 )); do
+    case "$1" in
+        --host)
+            [ "$#" -ge 2 ] || {
+                printf 'Missing value for --host\n' >&2
+                exit 2
+            }
+            remote_host="$2"
+            shift
+            ;;
+        --check|--apply|--enroll) mode="$1" ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            printf 'Unknown option: %s\n' "$1" >&2
+            usage >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
+
+case "$mode" in
+--enroll)
+    ssh -o BatchMode=yes "$remote_host" "rm -rf '$remote_dir' && mkdir -p '$remote_dir'"
+    tar -C "$server_dir" -cf - \
+        bootstrap \
+        apply-power-policy \
+        install-autonomy \
+        pol-server-bootstrap \
+        packages.txt \
+        etc \
+        keys |
+        ssh -o BatchMode=yes "$remote_host" "tar -xf - -C '$remote_dir'"
+    ssh -o BatchMode=yes -t "$remote_host" \
+        "trap 'rm -rf \"$remote_dir\"' EXIT; sudo '$remote_dir/install-autonomy'"
+    ;;
+--apply)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-bootstrap --apply'
+    ;;
+--check)
+    ssh -o BatchMode=yes "$remote_host" \
+        '/usr/local/sbin/pol-server-bootstrap --check'
+    ;;
+esac

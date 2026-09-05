@@ -377,8 +377,6 @@ vim_install () {
 }
 
 i3_install () {
-    sudo usermod -a -G video "$USER"
-
     local yay_packages=(
         cava                    # https://github.com/karlstav/cava
         kbdd-git                # i3blocks keyboard layout
@@ -394,7 +392,8 @@ i3_install () {
         flameshot               # Screenshots
         i3-gaps                 # i3 with gaps
         i3blocks                # Bottom bar
-        light                   # Brightness
+        brightnessctl           # Laptop backlight control
+        ddcutil                 # External monitor DDC brightness control
         perl-anyevent-i3
         python-dbus
         picom                   # Compositor, for transparencies
@@ -404,6 +403,8 @@ i3_install () {
         zenity                  # Poweroff menu i3blocks
     )
     $pac "${packages[@]}"
+
+    configure_brightness_access
 }
 
 xmonad_install () {

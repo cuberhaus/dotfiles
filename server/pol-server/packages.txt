@@ -1,0 +1,8 @@
+ca-certificates
+curl
+openssh-server
+restic
+samba
+smartmontools
+ufw
+unattended-upgrades

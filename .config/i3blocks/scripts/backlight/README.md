@@ -1,6 +1,6 @@
 # backlight
 
-Show the screen brightness value given by `xbacklight`.
+Show and adjust the laptop backlight using `brightnessctl`.
 Clicking uses `xset` to turn off the backlight, scrolling increases or decreases
 the brightness.
 
@@ -16,7 +16,6 @@ command=$SCRIPT_DIR/backlight
 label=☀
 interval=20
 #STEP_SIZE=5
-#USE_SUDO=0
 ```
 
 - right click: turn off backlight
@@ -24,27 +23,10 @@ interval=20
 
 ## Dependencies
 
-These tools from the xorg-suite are needed:
+These tools are needed:
 
-- `xorg-xbacklight`
+- `brightnessctl`
 - `xorg-xset`
 
-You need to allow the user to change the brightness (only if you want to use scrolling).
-If you don't have the proper permissions, you will get an error like
-
-```bash session
-$ xbacklight -inc 5
-/usr/bin/xbacklight: [Errno 13] Permission denied: '/sys/class/backlight/intel_backlight/brightness'
-```
-
-One option is to create a [udev rule](https://wiki.archlinux.org/index.php/Backlight#Udev_rule).
-
-Another option is to allow the user to execute `xbacklight` without a password using the
-[sudoers file](https://wiki.archlinux.org/index.php/Sudo#Configuration).
-For the user `<user>` it would be something like
-
-```
-<user> ALL=(ALL) NOPASSWD: /usr/bin/xbacklight
-```
-
-Then use `USE_SUDO=1` in the configuration of this block.
+The Ubuntu and Arch bootstrap adds the user to the `video` group so
+`brightnessctl` can write the kernel backlight device after the next login.

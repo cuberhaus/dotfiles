@@ -19,8 +19,9 @@ RESTORE_APPLY ?= 0
 CUBERHAUS_WORKSPACE_DIR ?= ../cuberhaus-workspace
 CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 RESTORE_WORKSPACE_SKILLS ?= 1
+POL_SERVER_HOST ?= home-nas
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended enroll-pol-server bootstrap-pol-server audit-pol-server bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -75,8 +76,10 @@ lint: ## Run shellcheck on all shell scripts
 
 test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_installation_audit.py
+	bash tests/test_brightness.sh
 	bash tests/test_bootstrap_stow.sh
 	bash tests/test_bootstrap_machine_state.sh
+	bash tests/test_pol_server_bootstrap.sh
 	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh
 	bash tests/test_shell_path.sh
@@ -212,6 +215,15 @@ antigen-update: ## Fetch the latest antigen.zsh from GitHub
 # Each bootstrap target runs the OS-specific bash script, then deploys
 # cuberhaus-workspace/ sources into ~/cuberhaus without API/policy maintenance
 # without a separate manual step. Setup remains one command per OS.
+
+audit-pol-server: ## Report drift from the tracked pol-server baseline
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --check
+
+enroll-pol-server: ## Install/update pol-server's root-owned bootstrap (interactive sudo)
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --enroll
+
+bootstrap-pol-server: ## Converge the enrolled pol-server baseline without a password
+	bash server/pol-server/deploy --host "$(POL_SERVER_HOST)" --apply
 
 dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware clock
 	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'

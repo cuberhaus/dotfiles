@@ -1,0 +1,272 @@
+#!/usr/bin/env bash
+# Description: Converge the safe Debian baseline for pol-server.
+set -euo pipefail
+
+server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+root_prefix="${POL_SERVER_ROOT:-}"
+admin_user="${POL_SERVER_ADMIN_USER:-pol}"
+mode=check
+
+info() { printf '\033[34m[INFO]\033[0m %s\n' "$*"; }
+warn() { printf '\033[33m[WARN]\033[0m %s\n' "$*"; }
+error() { printf '\033[31m[ERROR]\033[0m %s\n' "$*" >&2; }
+
+usage() {
+    cat <<'EOF'
+Usage: bootstrap [--check | --apply]
+
+  --check  Report baseline drift without changing the server (default).
+  --apply  Install packages and converge tracked baseline configuration.
+EOF
+}
+
+root_path() {
+    printf '%s%s\n' "${root_prefix%/}" "$1"
+}
+
+parse_args() {
+    while (( $# > 0 )); do
+        case "$1" in
+            --check|--apply) mode="$1" ;;
+            --help|-h)
+                usage
+                exit 0
+                ;;
+            *)
+                error "Unknown option: $1"
+                usage >&2
+                exit 2
+                ;;
+        esac
+        shift
+    done
+}
+
+require_supported_host() {
+    local os_release distro_id distro_version
+    os_release="$(root_path /etc/os-release)"
+    [ -r "$os_release" ] || {
+        error "Cannot read $os_release"
+        return 1
+    }
+
+    distro_id="$(. "$os_release"; printf '%s' "${ID:-}")"
+    distro_version="$(. "$os_release"; printf '%s' "${VERSION_ID:-}")"
+    if [ "$distro_id" != debian ] || [ "$distro_version" != 13 ]; then
+        error "Expected Debian 13, found ${distro_id:-unknown} ${distro_version:-unknown}"
+        return 1
+    fi
+}
+
+require_apply_privileges() {
+    if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
+        error 'Run --apply as root, normally through the tracked deploy script.'
+        return 1
+    fi
+}
+
+package_installed() {
+    [ "$(dpkg-query -W -f='${db:Status-Status}' "$1" 2>/dev/null || true)" = installed ]
+}
+
+unit_enabled_and_active() {
+    [ "$(systemctl is-enabled "$1" 2>/dev/null || true)" = enabled ] &&
+        [ "$(systemctl is-active "$1" 2>/dev/null || true)" = active ]
+}
+
+install_if_changed() {
+    local source_file="$1"
+    local target_file="$2"
+    local mode_bits="$3"
+
+    if cmp -s "$source_file" "$target_file" 2>/dev/null; then
+        return 1
+    fi
+
+    install -D -m "$mode_bits" "$source_file" "$target_file"
+    return 0
+}
+
+ensure_admin_key() {
+    local source_key="$server_dir/keys/$admin_user.pub"
+    local admin_home="/home/$admin_user"
+    local ssh_dir authorized_keys
+
+    [ -r "$source_key" ] || {
+        error "Missing tracked public key: $source_key"
+        return 1
+    }
+
+    if [ -z "$root_prefix" ]; then
+        admin_home="$(getent passwd "$admin_user" | cut -d: -f6)"
+        [ -n "$admin_home" ] || {
+            error "Administrative user does not exist: $admin_user"
+            return 1
+        }
+    fi
+
+    ssh_dir="$(root_path "$admin_home/.ssh")"
+    authorized_keys="$ssh_dir/authorized_keys"
+    install -d -m 0700 "$ssh_dir"
+    touch "$authorized_keys"
+    chmod 0600 "$authorized_keys"
+    if ! grep -Fqx -- "$(cat "$source_key")" "$authorized_keys"; then
+        cat "$source_key" >> "$authorized_keys"
+    fi
+
+    if [ -z "$root_prefix" ]; then
+        chown -R "$admin_user:$admin_user" "$ssh_dir"
+    fi
+}
+
+apply_packages() {
+    local package
+    local -a missing_packages=()
+
+    while IFS= read -r package; do
+        [ -n "$package" ] || continue
+        package_installed "$package" || missing_packages+=("$package")
+    done < "$server_dir/packages.txt"
+
+    if (( ${#missing_packages[@]} == 0 )); then
+        return 0
+    fi
+
+    info "Installing missing packages: ${missing_packages[*]}"
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y "${missing_packages[@]}"
+}
+
+apply_configuration() {
+    local apt_changed=false
+    local ssh_changed=false
+    local apt_source="$server_dir/etc/apt/apt.conf.d/52pol-server-periodic"
+    local apt_target
+    local ssh_source="$server_dir/etc/ssh/sshd_config.d/10-pol-server.conf"
+    local ssh_target
+
+    apt_target="$(root_path /etc/apt/apt.conf.d/52pol-server-periodic)"
+    ssh_target="$(root_path /etc/ssh/sshd_config.d/10-pol-server.conf)"
+
+    install_if_changed "$apt_source" "$apt_target" 0644 && apt_changed=true
+    ensure_admin_key
+    install_if_changed "$ssh_source" "$ssh_target" 0644 && ssh_changed=true
+
+    POL_SERVER_ROOT="$root_prefix" POL_SERVER_ALLOW_UNPRIVILEGED="${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" \
+        "$server_dir/apply-power-policy"
+
+    if [ "$ssh_changed" = true ]; then
+        sshd -t
+        systemctl reload ssh.service
+    fi
+
+    if [ "$apt_changed" = true ]; then
+        systemctl daemon-reload
+    fi
+}
+
+ensure_service() {
+    local unit="$1"
+    if ! unit_enabled_and_active "$unit"; then
+        systemctl enable --now "$unit"
+    fi
+}
+
+disable_unconfigured_samba() {
+    local unit
+    for unit in smbd.service nmbd.service; do
+        if [ "$(systemctl is-active "$unit" 2>/dev/null || true)" = active ] ||
+            [ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" = enabled ]; then
+            systemctl disable --now "$unit"
+        fi
+    done
+}
+
+apply_services() {
+    local unit
+    for unit in ssh.service smartmontools.service fstrim.timer apt-daily-upgrade.timer unattended-upgrades.service; do
+        ensure_service "$unit"
+    done
+    disable_unconfigured_samba
+}
+
+check_baseline() {
+    local failures=0
+    local package unit target source_file target_file
+
+    while IFS= read -r package; do
+        [ -n "$package" ] || continue
+        if package_installed "$package"; then
+            info "Package installed: $package"
+        else
+            warn "Package missing: $package"
+            failures=1
+        fi
+    done < "$server_dir/packages.txt"
+
+    for source_file in \
+        "$server_dir/etc/apt/apt.conf.d/52pol-server-periodic" \
+        "$server_dir/etc/ssh/sshd_config.d/10-pol-server.conf" \
+        "$server_dir/etc/systemd/logind.conf.d/90-pol-server.conf"; do
+        target_file="$(root_path "${source_file#"$server_dir"}")"
+        if cmp -s "$source_file" "$target_file" 2>/dev/null; then
+            info "Configuration current: ${target_file#"${root_prefix%/}"}"
+        else
+            warn "Configuration drift: ${target_file#"${root_prefix%/}"}"
+            failures=1
+        fi
+    done
+
+    target="$(root_path "/home/$admin_user/.ssh/authorized_keys")"
+    if [ -r "$target" ] && grep -Fqx -- "$(cat "$server_dir/keys/$admin_user.pub")" "$target"; then
+        info "Administrative public key authorized: $admin_user"
+    else
+        warn "Administrative public key missing: $admin_user"
+        failures=1
+    fi
+
+    for unit in sleep.target suspend.target hibernate.target hybrid-sleep.target; do
+        if [ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" = masked ]; then
+            info "Sleep target masked: $unit"
+        else
+            warn "Sleep target is not masked: $unit"
+            failures=1
+        fi
+    done
+
+    for unit in ssh.service smartmontools.service fstrim.timer apt-daily-upgrade.timer unattended-upgrades.service; do
+        if unit_enabled_and_active "$unit"; then
+            info "Service active and enabled: $unit"
+        else
+            warn "Service drift: $unit"
+            failures=1
+        fi
+    done
+
+    for unit in smbd.service nmbd.service; do
+        if [ "$(systemctl is-active "$unit" 2>/dev/null || true)" = active ]; then
+            warn "Unconfigured Samba service is active: $unit"
+            failures=1
+        else
+            info "Unconfigured Samba service is inactive: $unit"
+        fi
+    done
+
+    return "$failures"
+}
+
+main() {
+    parse_args "$@"
+    require_supported_host
+
+    if [ "$mode" = --apply ]; then
+        require_apply_privileges
+        apply_packages
+        apply_configuration
+        apply_services
+    fi
+
+    check_baseline
+}
+
+main "$@"
