@@ -178,6 +178,7 @@ class InstallationAuditContractTests(unittest.TestCase):
         work = audit.expected_packages(REPO_ROOT, "work")
 
         self.assertIn(audit.Package("apt", "age"), ubuntu)
+        self.assertIn(audit.Package("apt", "smartmontools"), ubuntu)
         self.assertIn(audit.Package("apt", "stow"), ubuntu)
         self.assertIn(audit.Package("snap", "code"), ubuntu)
         self.assertIn(audit.Package("apt", "antigravity"), ubuntu)

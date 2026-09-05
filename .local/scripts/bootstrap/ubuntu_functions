@@ -43,6 +43,7 @@ base_install () {
         samba-common-bin
         sassc
         silversearcher-ag       # Better and faster ack (and grep)
+        smartmontools           # Disk SMART health and self-tests
         stow
         subversion              # To download repos
         tmux                    # Terminal multiplexer
