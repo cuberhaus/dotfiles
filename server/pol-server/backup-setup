@@ -38,6 +38,32 @@ repository_path() {
     printf '%s/pol-server-restic\n' "$(root_path "$mount_point")"
 }
 
+expected_fstab_entry() {
+    printf 'UUID=%s %s %s %s 0 0\n' \
+        "$backup_uuid" "$mount_point" "$backup_filesystem" "$fstab_options"
+}
+
+backup_mount_info() {
+    local partition="$1"
+    local mount_path="$2"
+    local fstab_path mount_info concrete_mounts
+
+    fstab_path="$(root_path /etc/fstab)"
+    mount_info="$(findmnt -n -o SOURCE,FSTYPE --mountpoint "$mount_path" 2>/dev/null || true)"
+    if [ "$mount_info" = 'systemd-1 autofs' ] &&
+        grep -Fqx "$(expected_fstab_entry)" "$fstab_path"; then
+        find "$mount_path" -mindepth 1 -maxdepth 1 -print -quit >/dev/null 2>&1 || true
+        mount_info="$(findmnt -n -o SOURCE,FSTYPE --mountpoint "$mount_path" 2>/dev/null || true)"
+    fi
+
+    concrete_mounts="$(awk '$2 != "autofs" { print }' <<< "$mount_info")"
+    if [ "$concrete_mounts" = "$partition $backup_filesystem" ]; then
+        printf '%s %s\n' "$partition" "$backup_filesystem"
+    else
+        printf '%s\n' "$mount_info"
+    fi
+}
+
 resolve_wd_backup() {
     local path model candidate_size
     local match=
@@ -102,7 +128,7 @@ check_backup() {
     printf 'Backup partition: %s (%s, UUID %s)\n' \
         "$partition" "$backup_filesystem" "$backup_uuid"
 
-    mount_info="$(findmnt -n -o SOURCE,FSTYPE --mountpoint "$mount_path" 2>/dev/null || true)"
+    mount_info="$(backup_mount_info "$partition" "$mount_path")"
     if [ -z "$mount_info" ]; then
         if [ -r "$fstab_path" ] && grep -Eq \
             "^UUID=${backup_uuid}[[:space:]]+${mount_point}[[:space:]]+${backup_filesystem}[[:space:]]" \
@@ -156,7 +182,7 @@ prepare_backup() {
     mount_path="$(root_path "$mount_point")"
     fstab_path="$(root_path /etc/fstab)"
     repository_path="$mount_path/pol-server-restic"
-    expected_fstab="UUID=$backup_uuid $mount_point $backup_filesystem $fstab_options 0 0"
+    expected_fstab="$(expected_fstab_entry)"
 
     install -d -m 0700 "$mount_path"
     source_mount="$(findmnt -n -o TARGET --source "$partition" 2>/dev/null || true)"
@@ -164,7 +190,7 @@ prepare_backup() {
         error "Refusing WD partition already mounted at $source_mount."
         return 1
     fi
-    mount_info="$(findmnt -n -o SOURCE,FSTYPE --mountpoint "$mount_path" 2>/dev/null || true)"
+    mount_info="$(backup_mount_info "$partition" "$mount_path")"
     if [ -n "$mount_info" ] && [ "$mount_info" != "$partition $backup_filesystem" ]; then
         error "Refusing unexpected filesystem at backup mountpoint: $mount_info"
         return 1
@@ -198,7 +224,7 @@ prepare_backup() {
         fi
     fi
 
-    mount_info="$(findmnt -n -o SOURCE,FSTYPE --mountpoint "$mount_path" 2>/dev/null || true)"
+    mount_info="$(backup_mount_info "$partition" "$mount_path")"
     if [ "$mount_info" != "$partition $backup_filesystem" ]; then
         error "Unexpected backup mount after preparation: ${mount_info:-unmounted}"
         return 1
@@ -219,7 +245,7 @@ verify_prepared_mount() {
     device="$(resolve_wd_backup)"
     partition="$(resolve_backup_partition "$device")"
     mount_path="$(root_path "$mount_point")"
-    mount_info="$(findmnt -n -o SOURCE,FSTYPE --mountpoint "$mount_path" 2>/dev/null || true)"
+    mount_info="$(backup_mount_info "$partition" "$mount_path")"
     if [ "$mount_info" != "$partition $backup_filesystem" ]; then
         error "Expected the WD exFAT partition at $mount_point; found ${mount_info:-unmounted}."
         return 1

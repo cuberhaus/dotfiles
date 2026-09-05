@@ -48,7 +48,12 @@ cat > "$FAKE_BIN/findmnt" <<'EOF'
 #!/usr/bin/env bash
 case "$*" in
     '-n -o SOURCE,FSTYPE --mountpoint '*)
-        if [ -f "$MOUNT_STATE" ]; then
+        if [ "${FAKE_AUTOFS_PENDING:-false}" = true ]; then
+            printf 'systemd-1 autofs\n'
+            if [ -f "$MOUNT_STATE" ]; then
+                printf '/dev/sdz2 exfat\n'
+            fi
+        elif [ -f "$MOUNT_STATE" ]; then
             printf '/dev/sdz2 exfat\n'
         else
             exit 1
@@ -60,6 +65,15 @@ case "$*" in
         ;;
     *) exit 2 ;;
 esac
+EOF
+
+cat > "$FAKE_BIN/find" <<'EOF'
+#!/usr/bin/env bash
+if [ "${FAKE_AUTOFS_PENDING:-false}" = true ] &&
+    [ "${1:-}" = "$FAKE_ROOT/mnt/pol-server-backup" ]; then
+    touch "$MOUNT_STATE"
+fi
+exec /usr/bin/find "$@"
 EOF
 
 cat > "$FAKE_BIN/mount" <<'EOF'
@@ -186,6 +200,18 @@ prepared_output="$(
 )"
 grep -Fq 'Backup state: prepared, repository not initialized' <<< "$prepared_output" ||
     fail 'check must recognize a mounted but uninitialized destination'
+
+rm "$MOUNT_STATE"
+export FAKE_AUTOFS_PENDING=true FAKE_ROOT
+automount_output="$(
+    PATH="$FAKE_BIN:$PATH" \
+        POL_SERVER_ALLOW_UNPRIVILEGED=true \
+        POL_SERVER_ROOT="$FAKE_ROOT" \
+        "$BACKUP" --check
+)"
+grep -Fq 'Backup state: prepared, repository not initialized' <<< "$automount_output" ||
+    fail 'check must activate and recognize the expected systemd automount'
+unset FAKE_AUTOFS_PENDING
 
 export FAKE_BACKUP_SOURCE="$FAKE_ROOT/srv/storage"
 printf 'existing unrelated content\n' > "$FAKE_ROOT/mnt/pol-server-backup/pol-server-restic/existing.txt"
