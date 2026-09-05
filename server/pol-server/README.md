@@ -94,6 +94,12 @@ It deliberately does not partition disks, enable UFW, configure Samba shares,
 install Docker, or deploy applications. Those capabilities enter the bootstrap
 only after their phase-specific gate and rollback have been reviewed.
 
+The selected future restic destination is an existing external backup disk that
+is currently attached to another PC. It must retain its current backups and the
+Immich copy intended for later import. When connected to `pol-server`, inspect it
+read-only before adding a dedicated `pol-server-restic` directory; do not format
+or repartition it.
+
 ## Hardware qualification
 
 The same enrollment installs a separate root-owned hardware command. It locates
@@ -169,6 +175,8 @@ laptop in the router before relying on it for SSH or WireGuard.
     passed on 2026-09-05.
 - Two unattended reboot cycles restored SSH and passed the full baseline audit;
     the subsequent Debian full upgrade reported no pending packages.
+- Temporary broad maintenance access was revoked after the supervised build;
+    arbitrary passwordless sudo is denied and the exact root-owned commands remain.
 - The Kingston SMART long test completed without error on 2026-09-05. Its old
     interface counters remained stable during the test at `524353` and `13`;
     future audits must compare against that baseline.

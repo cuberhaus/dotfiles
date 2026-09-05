@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+# Description: Maintain recoverable bare mirrors of cuberhaus GitHub repositories.
+set -euo pipefail
+
+api_url="${GITHUB_MIRROR_API_URL:-https://api.github.com/user/repos}"
+git_base_url="${GITHUB_MIRROR_GIT_BASE_URL:-https://github.com/cuberhaus}"
+state_directory="${GITHUB_MIRROR_STATE_DIRECTORY:-${STATE_DIRECTORY:-/var/lib/cuberhaus-github-mirrors}}"
+credentials_directory="${CREDENTIALS_DIRECTORY:-/etc/cuberhaus}"
+token_file="$credentials_directory/github-token"
+owner=cuberhaus
+git_auth_url=https://github.com/
+
+error() { printf '\033[31m[ERROR]\033[0m %s\n' "$*" >&2; }
+info() { printf '\033[34m[INFO]\033[0m %s\n' "$*"; }
+
+usage() {
+    cat <<'EOF'
+Usage: github-mirror [--sync | --check]
+
+  --sync  Discover and mirror every repository owned by cuberhaus.
+    --check Verify the integrity of all local mirrors and the last successful sync.
+EOF
+}
+
+require_dependencies() {
+    local command_name
+    for command_name in curl git jq; do
+        command -v "$command_name" >/dev/null 2>&1 || {
+            error "Required command is unavailable: $command_name"
+            return 1
+        }
+    done
+}
+
+validate_repository() {
+    local repository="$1"
+    local repository_owner repository_name
+
+    repository_owner="$(jq -r '.owner.login // empty' <<< "$repository")"
+    repository_name="$(jq -r '.name // empty' <<< "$repository")"
+    if [ "$repository_owner" != "$owner" ] ||
+        ! [[ "$repository_name" =~ ^[A-Za-z0-9._-]+$ ]]; then
+        error 'GitHub returned an invalid repository identity.'
+        return 1
+    fi
+
+    printf '%s\n' "$repository_name"
+}
+
+git_authenticated() {
+    local token="$1"
+    shift
+    GIT_CONFIG_COUNT=1 \
+        GIT_CONFIG_KEY_0="http.${git_auth_url}.extraHeader" \
+        GIT_CONFIG_VALUE_0="Authorization: Bearer $token" \
+        git "$@"
+}
+
+fetch_page() {
+    local page="$1"
+    local token="$2"
+    local curl_config
+
+    curl_config="$(mktemp)"
+    chmod 0600 "$curl_config"
+    printf 'header = "Authorization: Bearer %s"\n' "$token" > "$curl_config"
+    curl --config "$curl_config" --fail --silent --show-error \
+        "$api_url?per_page=100&page=$page&affiliation=owner&sort=full_name"
+    rm -f "$curl_config"
+}
+
+sync_repositories() {
+    local token page response repository repository_name mirror_path
+    local failures=0
+    local sync_succeeded
+
+    [ -r "$token_file" ] || {
+        error "GitHub credential is unavailable: $token_file"
+        return 1
+    }
+    token="$(< "$token_file")"
+    [ -n "$token" ] || {
+        error 'GitHub credential is empty.'
+        return 1
+    }
+
+    install -d -m 0700 "$state_directory"
+    page=1
+    while :; do
+        response="$(fetch_page "$page" "$token")"
+        jq -e 'type == "array"' >/dev/null <<< "$response" || {
+            error "GitHub returned an invalid response for page $page."
+            return 1
+        }
+        [ "$(jq 'length' <<< "$response")" -gt 0 ] || break
+
+        while IFS= read -r repository; do
+            if ! repository_name="$(validate_repository "$repository")"; then
+                failures=1
+                continue
+            fi
+            mirror_path="$state_directory/$repository_name.git"
+            sync_succeeded=false
+            if [ -e "$mirror_path" ]; then
+                if [ "$(git -C "$mirror_path" rev-parse --is-bare-repository 2>/dev/null || true)" != true ]; then
+                    error "Existing mirror path is not a bare repository: $mirror_path"
+                    failures=1
+                    continue
+                fi
+                info "Updating $owner/$repository_name"
+                if ! git_authenticated "$token" -C "$mirror_path" remote update --prune; then
+                    error "Failed to update $owner/$repository_name"
+                    failures=1
+                else
+                    sync_succeeded=true
+                fi
+            else
+                info "Cloning $owner/$repository_name"
+                if ! git_authenticated "$token" clone --mirror \
+                    "$git_base_url/$repository_name.git" "$mirror_path"; then
+                    error "Failed to clone $owner/$repository_name"
+                    rm -rf "$mirror_path"
+                    failures=1
+                else
+                    sync_succeeded=true
+                fi
+            fi
+            if [ "$sync_succeeded" = true ] &&
+                ! git_authenticated "$token" -C "$mirror_path" lfs fetch --all origin; then
+                error "Failed to fetch Git LFS objects for $owner/$repository_name"
+                failures=1
+            fi
+        done <<< "$(jq -c '.[]' <<< "$response")"
+        page=$((page + 1))
+    done
+
+    if (( failures == 0 )); then
+        local success_staging
+        success_staging="$(mktemp "$state_directory/.last-success.XXXXXX")"
+        date -u +%Y-%m-%dT%H:%M:%SZ > "$success_staging"
+        mv "$success_staging" "$state_directory/last-success"
+    fi
+    return "$failures"
+}
+
+check_mirrors() {
+    local mirror_path
+    local mirror_count=0
+    local failures=0
+    local -a mirrors=()
+
+    [ -r "$state_directory/last-success" ] || {
+        error 'No fully successful mirror run has been recorded.'
+        return 1
+    }
+
+    shopt -s nullglob
+    mirrors=("$state_directory"/*.git)
+    shopt -u nullglob
+    for mirror_path in "${mirrors[@]}"; do
+        if [ "$(git -C "$mirror_path" rev-parse --is-bare-repository 2>/dev/null || true)" != true ] ||
+            ! git -C "$mirror_path" fsck --no-dangling >/dev/null 2>&1; then
+            error "Mirror integrity check failed: $mirror_path"
+            failures=1
+            continue
+        fi
+        mirror_count=$((mirror_count + 1))
+    done
+
+    info "Mirrors healthy: $mirror_count"
+    info "Last successful sync: $(< "$state_directory/last-success")"
+    return "$failures"
+}
+
+main() {
+    [ "$#" -eq 1 ] || {
+        usage >&2
+        return 2
+    }
+    require_dependencies
+    case "$1" in
+        --sync) sync_repositories ;;
+        --check) check_mirrors ;;
+        --help|-h) usage ;;
+        *)
+            error "Unknown option: $1"
+            usage >&2
+            return 2
+            ;;
+    esac
+}
+
+main "$@"
