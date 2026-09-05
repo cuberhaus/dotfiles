@@ -67,6 +67,7 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --report' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long kingston' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long micron' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --thermal-load' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke' \
     > "$sudoers_staging"
 chmod 0440 "$sudoers_staging"

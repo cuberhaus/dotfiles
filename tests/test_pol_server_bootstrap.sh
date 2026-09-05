@@ -38,9 +38,16 @@ grep -Fq 'audit-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose
 grep -Fq 'enroll-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose enroll-pol-server'
 grep -Fq 'enroll-pol-server-maintenance:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose temporary maintenance enrollment'
 grep -Fq 'revoke-pol-server-maintenance:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose maintenance revocation'
+grep -Fq 'reboot-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose remote reboot verification'
+grep -Fq 'upgrade-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Debian upgrades'
+grep -Fq "'sudo -n systemctl reboot'" "$REPO_ROOT/server/pol-server/deploy" ||
+    fail 'remote reboot must be noninteractive and limited to the maintenance window'
+grep -Fq 'DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y' "$REPO_ROOT/server/pol-server/deploy" ||
+    fail 'remote upgrades must use noninteractive Debian package handling'
 grep -Fq 'audit-pol-server-hardware:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose audit-pol-server-hardware'
 grep -Fq 'start-pol-server-smart-long-kingston:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Kingston SMART test'
 grep -Fq 'start-pol-server-smart-long-micron:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Micron SMART test'
+grep -Fq 'test-pol-server-thermals:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the bounded thermal test'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -195,6 +202,7 @@ assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: 
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --report'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long kingston'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long micron'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --thermal-load'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-maintenance --revoke'
 assert_file_contains "$EVENT_LOG" 'visudo:-cf'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/bootstrap" ] ||
@@ -221,7 +229,7 @@ assert_file_contains "$FAKE_ROOT/etc/systemd/logind.conf.d/90-pol-server.conf" '
 assert_file_contains "$FAKE_ROOT/etc/apt/apt.conf.d/52pol-server-periodic" 'APT::Periodic::Unattended-Upgrade "1";'
 assert_file_contains "$FAKE_ROOT/etc/ssh/sshd_config.d/10-pol-server.conf" 'PasswordAuthentication no'
 assert_file_contains "$FAKE_ROOT/home/pol/.ssh/authorized_keys" 'dotfiles-client@pol-server'
-for package in ca-certificates curl openssh-server restic samba smartmontools ufw unattended-upgrades; do
+for package in ca-certificates curl openssh-server restic samba smartmontools stress-ng ufw unattended-upgrades; do
     grep -Fxq -- "$package" "$PACKAGE_STATE" || fail "Expected package to be installed: $package"
 done
 

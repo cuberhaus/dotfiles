@@ -18,6 +18,7 @@ fail() {
 grep -Fq 'audit-pol-server-hardware:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the redacted hardware audit'
 grep -Fq 'start-pol-server-smart-long-kingston:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Kingston long test'
 grep -Fq 'start-pol-server-smart-long-micron:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Micron long test'
+grep -Fq 'test-pol-server-thermals:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the bounded thermal test'
 
 mkdir -p "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -71,6 +72,11 @@ cat > "$FAKE_BIN/systemctl" <<'EOF'
 [ "$*" = '--failed --no-legend' ] || exit 2
 EOF
 
+cat > "$FAKE_BIN/stress-ng" <<'EOF'
+#!/usr/bin/env bash
+printf 'stress-ng:%s\n' "$*" >> "$EVENT_LOG"
+EOF
+
 cat > "$FAKE_BIN/findmnt" <<'EOF'
 #!/usr/bin/env bash
 printf '/dev/sdb2\n'
@@ -97,6 +103,10 @@ grep -Fqx 'smartctl:-t long /dev/sda' "$EVENT_LOG" || fail 'Kingston test must t
 if grep -Fq '/dev/sdb' "$EVENT_LOG"; then
     fail 'Kingston test must not target the Micron disk'
 fi
+
+"$HARDWARE" --thermal-load >/dev/null
+grep -Fqx 'stress-ng:--cpu 2 --cpu-load 60 --timeout 2m --metrics-brief --thermalstat 10' "$EVENT_LOG" ||
+    fail 'thermal test must retain its fixed worker, load, duration, and telemetry limits'
 
 if "$HARDWARE" --start-smart-long unknown >/dev/null 2>&1; then
     fail 'unknown disk aliases must be rejected'

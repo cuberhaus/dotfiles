@@ -65,12 +65,14 @@ Baseline recorded on 2026-09-05:
 | Sleep prevention | Complete | Effective `logind` actions are `ignore`; four sleep targets are `masked` |
 | Service health | Complete | No failed systemd units at the baseline check |
 | SSD trimming | Complete | `fstrim.timer` is enabled and active |
+| Host identity and time | Complete | Audit enforces `pol-server`, `Europe/Madrid`, `es_ES.UTF-8`, synchronized NTP, and no failed units |
 | Security updates | Complete | `unattended-upgrades`, APT periodic policy, and both upgrade services/timers are active |
-| Cooling baseline | Partial | Idle sensors report approximately 35-39 C; sustained-load behavior is unknown |
-| Battery | Partial | Reports 630 cycles and 24.615 Wh full versus 36 Wh design (68.4%); physical condition still needs checking |
-| Network | Blocked | Only Wi-Fi `wlp2s0` is active; address `192.168.1.34` is DHCP-assigned |
-| SMART qualification | In progress | Kingston long test passed with stable CRC counters; Micron long test started and awaits final verification |
-| Kingston data disk | Blocked | Approximately 894.2 GB remains NTFS and must not be erased yet |
+| Cooling baseline | Complete | Fixed two-minute moderate load passed with a 54 C observed maximum and no service or SMART regressions |
+| Battery | Complete | User confirmed no swelling or abnormal heat; telemetry reports 68.4% retained capacity after 630 cycles |
+| Charger | Complete | User confirmed physical stability and kernel reports AC adapter online |
+| Network | Blocked | PCI inventory contains only Qualcomm Wi-Fi and no Ethernet controller; a Linux-compatible USB 3 gigabit adapter is required |
+| SMART qualification | Complete | Both long tests passed; media-error counters are zero and Kingston CRC counters stayed stable |
+| Kingston data disk | Blocked | User confirmed no data must survive; NTFS remains untouched pending full Phase 0 gate and explicit format approval |
 | Firewall | Pending | UFW is installed but intentionally not enabled or configured |
 | Samba | Pending | Package is installed; users, directories, shares, and restrictions are not configured |
 | Backup | Pending | Restic and an independent destination are not configured; no restore has passed |
@@ -100,7 +102,10 @@ remained `PASSED`, reallocated and reported-uncorrectable counters remained zero
 and the historical interface counters stayed unchanged during the test:
 `SATA_CRC_Error_Count=524353` and `CRC_Error_Count=13`. Treat those as a
 baseline, not as repaired history; any increase requires stopping and inspecting
-the internal connection. The Micron long test was started separately afterward.
+the internal connection. The Micron long test completed without error at 2,707
+power-on hours. Its reallocated, pending, uncorrectable, and UDMA CRC counters
+are all zero. The redacted details are saved in
+`reports/2026-09-05-smart-baseline.md` outside the server.
 
 1. Confirm whether the Kingston NTFS volume contains anything that must survive.
 2. Copy all required data to an independent device or remote destination and
@@ -117,6 +122,17 @@ the internal connection. The Micron long test was started separately afterward.
    Ethernet adapter. Test sustained transfer and link stability.
 7. Confirm charger stability, ventilation, and temperatures under a controlled
    CPU and disk load.
+
+User confirmations on 2026-09-05:
+
+- No data on the Kingston needs to be preserved, so the old-data copy step is
+   not applicable. This is not yet authorization to format it.
+- Battery, charger, and ventilation passed physical inspection without swelling,
+   abnormal heat, or instability.
+- The tracked two-minute moderate CPU load completed with zero stressor failures
+   and a 54 C maximum; post-load service and SMART audits passed.
+- No USB Ethernet adapter is available yet.
+- An independent restic destination has not been selected.
 
 Tracked commands:
 
@@ -139,6 +155,9 @@ Acceptance gate:
 - Battery, charger, and cooling are physically safe.
 - A reliable wired-network path is available.
 
+All items except the wired-network path are complete. Phase 3 remains blocked
+until a compatible USB 3 gigabit Ethernet adapter is connected and proven.
+
 Stop here if any item fails. Do not repartition the Kingston SSD.
 
 ## Phase 1: preserve recovery material
@@ -159,10 +178,15 @@ files stored only on `pol-server`.
 
 ## Phase 2: finish the Debian base
 
-Status: **in progress**.
+Status: **complete**.
 
 Package convergence, automatic upgrades, SSH, SMART monitoring, trimming, and
-the no-sleep policy are complete. Two unattended reboot checks remain.
+the no-sleep policy are complete. The baseline auditor now enforces hostname,
+timezone, locale, synchronized time, a recorded `fstrim` trigger, and no failed
+systemd units. On 2026-09-05, two ordinary unattended reboots produced distinct
+boot IDs; SSH key access and the full baseline audit passed after each boot and
+time synchronization. A noninteractive APT refresh and full upgrade then
+reported zero packages upgraded, installed, removed, or held back.
 
 1. Apply current Debian security and point-release updates, then reboot and
    verify SSH key access.

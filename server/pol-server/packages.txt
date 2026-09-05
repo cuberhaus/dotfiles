@@ -4,5 +4,6 @@ openssh-server
 restic
 samba
 smartmontools
+stress-ng
 ufw
 unattended-upgrades

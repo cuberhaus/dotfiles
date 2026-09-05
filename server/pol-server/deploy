@@ -17,9 +17,12 @@ Usage: deploy [--host HOST] MODE
     --enroll                       Update the root-owned bundle; requires a sudo password.
     --enroll-maintenance           Enroll with eight-hour full maintenance access.
     --revoke-maintenance           Revoke temporary full maintenance access immediately.
+    --reboot                       Reboot while temporary maintenance access is active.
+    --upgrade                      Apply current Debian upgrades during maintenance.
     --hardware-report              Print the redacted hardware qualification report.
     --start-smart-long-kingston    Start the Kingston SMART long test.
     --start-smart-long-micron      Start the Micron SMART long test.
+    --thermal-load                 Run the fixed two-minute thermal load test.
 EOF
 }
 
@@ -33,7 +36,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--hardware-report|--start-smart-long-kingston|--start-smart-long-micron)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--start-smart-long-kingston|--start-smart-long-micron|--thermal-load)
             mode="$1"
             ;;
         --help|-h)
@@ -92,8 +95,19 @@ case "$mode" in
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-hardware --start-smart-long micron'
     ;;
+--thermal-load)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-hardware --thermal-load'
+    ;;
 --revoke-maintenance)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-maintenance --revoke'
+    ;;
+--reboot)
+    ssh -o BatchMode=yes "$remote_host" 'sudo -n systemctl reboot'
+    ;;
+--upgrade)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n apt-get update && sudo -n env DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y'
     ;;
 esac

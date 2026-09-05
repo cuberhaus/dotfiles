@@ -10,10 +10,11 @@ error() { printf '\033[31m[ERROR]\033[0m %s\n' "$*" >&2; }
 
 usage() {
     cat <<'EOF'
-Usage: hardware-qualification [--report | --start-smart-long DISK]
+Usage: hardware-qualification [--report | --start-smart-long DISK | --thermal-load]
 
   --report                 Print a redacted hardware qualification report.
   --start-smart-long DISK  Start a long test on kingston or micron.
+    --thermal-load           Run the fixed two-minute moderate CPU load test.
 EOF
 }
 
@@ -27,6 +28,10 @@ parse_args() {
             [ "$#" -eq 2 ] || return 2
             mode=--start-smart-long
             disk_alias="$2"
+            ;;
+        --thermal-load)
+            [ "$#" -eq 1 ] || return 2
+            mode=--thermal-load
             ;;
         --help|-h)
             usage
@@ -137,6 +142,10 @@ start_smart_long() {
     smartctl -t long "$device"
 }
 
+run_thermal_load() {
+    stress-ng --cpu 2 --cpu-load 60 --timeout 2m --metrics-brief --thermalstat 10
+}
+
 main() {
     if ! parse_args "$@"; then
         usage >&2
@@ -147,6 +156,7 @@ main() {
     case "$mode" in
         --report) report_hardware ;;
         --start-smart-long) start_smart_long "$disk_alias" ;;
+        --thermal-load) run_thermal_load ;;
     esac
 }
 

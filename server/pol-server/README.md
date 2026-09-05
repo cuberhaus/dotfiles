@@ -46,6 +46,24 @@ The revoker itself is a permanent exact-command rule, so early rollback does not
 need a password. The expired file is inert, but the revoke target also removes
 it from `/etc/sudoers.d`.
 
+During the active window, reboot through the tracked noninteractive target:
+
+```bash
+make reboot-pol-server
+```
+
+This target deliberately stops working after maintenance access expires or is
+revoked; reboot is not part of the permanent passwordless sudo policy.
+
+Apply current Debian updates noninteractively during the same window:
+
+```bash
+make upgrade-pol-server
+```
+
+Review `/var/run/reboot-required` afterward and use the tracked reboot target if
+needed. Package upgrades are not part of routine baseline convergence.
+
 After enrollment, audit with:
 
 ```bash
@@ -67,6 +85,8 @@ configuration. The bootstrap is idempotent and currently owns:
 - The tracked administrative public key and SSH hardening configuration.
 - Automatic security-update scheduling.
 - Active SSH, SMART monitoring, SSD trimming, and APT upgrade timers/services.
+- Hostname, timezone, locale, time synchronization, latest trim trigger, and
+    failed-unit checks.
 - The no-sleep policy and masked sleep targets.
 - Disabled Samba services until authenticated shares are tracked and approved.
 
@@ -103,6 +123,15 @@ These targets can only select `kingston` or `micron`; the root-owned command
 rejects unknown models, duplicate matches, and unexpected capacities. They do
 not mount, write, format, repartition, or erase either disk.
 
+After physical inspection, run the fixed moderate CPU thermal check:
+
+```bash
+make test-pol-server-thermals
+```
+
+It uses two workers at 60% load for two minutes and prints thermal telemetry
+every ten seconds. Its duration and load are fixed in the root-owned command.
+
 ## Current inventory
 
 Recorded on 2026-09-05 from the active SSH session:
@@ -138,9 +167,13 @@ laptop in the router before relying on it for SSH or WireGuard.
 - No disk contents or partition tables have been changed.
 - The baseline bundle was enrolled and its passwordless apply and audit paths
     passed on 2026-09-05.
+- Two unattended reboot cycles restored SSH and passed the full baseline audit;
+    the subsequent Debian full upgrade reported no pending packages.
 - The Kingston SMART long test completed without error on 2026-09-05. Its old
     interface counters remained stable during the test at `524353` and `13`;
     future audits must compare against that baseline.
+- PCI inventory exposes only the Qualcomm Wi-Fi controller, so wired service
+    requires a Linux-compatible USB 3 gigabit Ethernet adapter.
 
 Connect from the managed workstation with:
 
