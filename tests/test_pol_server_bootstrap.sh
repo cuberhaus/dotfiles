@@ -49,6 +49,8 @@ grep -Fq 'reboot-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expos
 grep -Fq 'upgrade-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Debian upgrades'
 grep -Fq "'sudo -n systemctl reboot'" "$REPO_ROOT/server/pol-server/deploy" ||
     fail 'remote reboot must be noninteractive and limited to the maintenance window'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-bootstrap --check'" "$DEPLOY" ||
+    fail 'remote baseline audit must inspect root-only credential state'
 grep -Fq 'DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y' "$REPO_ROOT/server/pol-server/deploy" ||
     fail 'remote upgrades must use noninteractive Debian package handling'
 grep -Fq 'audit-pol-server-hardware:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose audit-pol-server-hardware'
@@ -215,6 +217,7 @@ assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-maintenance" '/usr/lo
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-github-mirror" '/usr/local/lib/cuberhaus/pol-server/github-mirror'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-rss-email" '/usr/local/lib/cuberhaus/pol-server/rss-email'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-bootstrap --apply'
+assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-bootstrap --check'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --report'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --report-disk wd-backup'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long kingston'

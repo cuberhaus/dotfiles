@@ -92,7 +92,7 @@ case "$mode" in
     ;;
 --check)
     ssh -o BatchMode=yes "$remote_host" \
-        '/usr/local/sbin/pol-server-bootstrap --check'
+        'sudo -n /usr/local/sbin/pol-server-bootstrap --check'
     ;;
 --hardware-report)
     ssh -o BatchMode=yes "$remote_host" \

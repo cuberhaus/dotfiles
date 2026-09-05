@@ -70,6 +70,7 @@ install -m 0755 "$server_dir/pol-server-rss-email" "$rss_email_launcher_target"
 install -d -m 0755 "$(dirname "$sudoers_target")"
 printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-bootstrap --apply' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-bootstrap --check' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --report' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --report-disk wd-backup' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-hardware --start-smart-long kingston' \
