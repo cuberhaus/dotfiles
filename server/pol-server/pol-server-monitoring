@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-# Description: Run the installed root-owned pol-server monitoring command.
-set -euo pipefail
-
-exec /usr/local/lib/cuberhaus/pol-server/monitoring-setup "$@"
