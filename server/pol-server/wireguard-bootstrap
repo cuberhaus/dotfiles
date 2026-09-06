@@ -1,0 +1,238 @@
+#!/usr/bin/env bash
+# Description: Run the complete interactive pol-server WireGuard rollout and acceptance.
+set -euo pipefail
+
+server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+deploy="${POL_SERVER_DEPLOY:-$server_dir/deploy}"
+remote_host="${POL_SERVER_HOST:-home-nas}"
+maintenance_open=false
+
+info() { printf '\033[34m[INFO]\033[0m %s\n' "$*"; }
+warn() { printf '\033[33m[WARN]\033[0m %s\n' "$*"; }
+error() { printf '\033[31m[ERROR]\033[0m %s\n' "$*" >&2; }
+
+usage() {
+    cat <<'EOF'
+Usage: wireguard-bootstrap [--host HOST]
+
+Interactively installs local enrollment tools, audits the NAS, deploys its
+tracked WireGuard bundle, guides DuckDNS/router/iOS setup, proves revocation,
+re-enrolls the phone, reruns all audits, and closes bounded maintenance access.
+EOF
+}
+
+while (( $# > 0 )); do
+    case "$1" in
+        --host)
+            [ "$#" -ge 2 ] || {
+                error 'Missing value for --host.'
+                exit 2
+            }
+            remote_host="$2"
+            shift
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            error "Unknown option: $1"
+            usage >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
+
+if [ "${POL_SERVER_ALLOW_NONINTERACTIVE:-false}" != true ] &&
+    { [ ! -t 0 ] || [ ! -t 1 ]; }; then
+    error 'Run this bootstrap in an interactive terminal.'
+    exit 1
+fi
+
+run_deploy() {
+    "$deploy" --host "$remote_host" "$@"
+}
+
+close_maintenance() {
+    if [ "$maintenance_open" = true ]; then
+        warn 'Closing temporary NAS maintenance access.'
+        if run_deploy --revoke-maintenance; then
+            maintenance_open=false
+        else
+            error 'Automatic maintenance revocation failed. Run make revoke-pol-server-maintenance immediately.'
+            return 1
+        fi
+    fi
+}
+
+cleanup() {
+    local exit_code=$?
+    trap - EXIT HUP INT TERM
+    if ! close_maintenance; then
+        exit 1
+    fi
+    exit "$exit_code"
+}
+trap cleanup EXIT HUP INT TERM
+
+confirm() {
+    local prompt="$1" answer
+    printf '%s [y/N] ' "$prompt" >&2
+    IFS= read -r answer || return 1
+    case "$answer" in
+        y|Y|yes|YES|Yes) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+require_confirmation() {
+    local prompt="$1" guidance="$2"
+    if ! confirm "$prompt"; then
+        error "$guidance"
+        return 1
+    fi
+}
+
+ensure_local_tools() {
+    local missing=()
+    command -v wg >/dev/null 2>&1 || missing+=(wireguard-tools)
+    command -v qrencode >/dev/null 2>&1 || missing+=(qrencode)
+    (( ${#missing[@]} > 0 )) || {
+        info 'Local WireGuard and QR enrollment tools are available.'
+        return
+    }
+
+    command -v apt-get >/dev/null 2>&1 || {
+        error "Install these local packages, then rerun: ${missing[*]}"
+        return 1
+    }
+    printf 'The workstation needs these enrollment packages: %s\n' "${missing[*]}"
+    require_confirmation \
+        'Install them now with local sudo?' \
+        'Local enrollment tools were not installed; no NAS change was made.'
+    sudo apt-get update
+    sudo apt-get install -y "${missing[@]}"
+    if ! command -v wg >/dev/null 2>&1 || ! command -v qrencode >/dev/null 2>&1; then
+        error 'Local enrollment tool installation did not complete.'
+        return 1
+    fi
+}
+
+audit_existing_services() {
+    info 'Auditing the NAS baseline, Immich, and Netdata.'
+    run_deploy --check
+    run_deploy --check-immich
+    run_deploy --check-monitoring
+}
+
+configure_endpoint() {
+    cat <<'EOF'
+
+DuckDNS endpoint
+  1. Sign in to https://www.duckdns.org/ on your own browser.
+  2. Reserve pol-home-nas so pol-home-nas.duckdns.org belongs to you.
+  3. Keep the DuckDNS token out of chat and shell command arguments.
+EOF
+    require_confirmation \
+        'Is pol-home-nas reserved in your DuckDNS account?' \
+        'Reserve the DuckDNS name, then rerun this bootstrap.'
+
+    if confirm 'Does the Askey router explicitly offer DuckDNS as a DDNS provider?'; then
+        require_confirmation \
+            'Did you configure pol-home-nas.duckdns.org in the router and confirm it updates?' \
+            'Complete and verify router-managed DuckDNS, then rerun this bootstrap.'
+    else
+        info 'Using the approved root-only NAS DuckDNS fallback.'
+        run_deploy --configure-duckdns
+    fi
+}
+
+configure_router() {
+    cat <<'EOF'
+
+Router changes at https://192.168.1.1/
+  - Reserve dc:f5:05:65:af:e1 as 192.168.1.34.
+  - Forward external UDP 51820 to 192.168.1.34 UDP 51820.
+  - Do not forward TCP 2283, 19999, 22, or 445.
+EOF
+    require_confirmation \
+        'Is the MAC reservation active and does the NAS still have 192.168.1.34?' \
+        'Complete the fixed DHCP reservation, then rerun this bootstrap.'
+    require_confirmation \
+        'Is UDP 51820 the only new router port forward?' \
+        'Correct the router forwarding policy, then rerun this bootstrap.'
+}
+
+enroll_phone() {
+    run_deploy --generate-wireguard-client
+    info 'Displaying the private profile only in this terminal.'
+    run_deploy --show-wireguard-qr
+    require_confirmation \
+        'Did the iPhone WireGuard app import the pol-iphone profile?' \
+        'Import the displayed profile, then rerun this bootstrap.'
+    cat <<'EOF'
+
+In the iPhone WireGuard app, configure on-demand activation for:
+  - cellular: enabled
+  - Wi-Fi: enabled except MOVISTAR_PLUS_9460
+EOF
+    require_confirmation \
+        'Are those iOS on-demand rules saved?' \
+        'Save the iOS on-demand rules, then rerun this bootstrap.'
+}
+
+accept_mobile_access() {
+    cat <<'EOF'
+
+Turn off iPhone Wi-Fi so this test uses cellular data, then activate WireGuard.
+Use http://192.168.1.34:2283 for Immich and
+http://192.168.1.34:19999 for Netdata.
+EOF
+    require_confirmation \
+        'Does Immich work over cellular WireGuard?' \
+        'Immich mobile acceptance did not pass.'
+    require_confirmation \
+        'Does Netdata work over cellular WireGuard?' \
+        'Netdata mobile acceptance did not pass.'
+    require_confirmation \
+        'Did connection attempts to NAS SSH (22) and SMB (445) both fail?' \
+        'The least-privilege peer boundary has not been accepted.'
+
+    info 'Revoking pol-iphone for the required negative test.'
+    run_deploy --revoke-wireguard-client
+    require_confirmation \
+        'After reconnecting the tunnel, are both Immich and Netdata unreachable?' \
+        'Peer revocation has not been proven.'
+
+    info 'Re-enrolling the same locally held phone key after the revocation proof.'
+    run_deploy --generate-wireguard-client
+    require_confirmation \
+        'Are Immich and Netdata reachable again over cellular?' \
+        'Post-revocation re-enrollment has not been accepted.'
+}
+
+info 'Closing any stale temporary NAS maintenance grant from an interrupted run.'
+run_deploy --revoke-maintenance
+
+ensure_local_tools
+audit_existing_services
+
+info 'Enrolling the tracked root bundle with an eight-hour NOTAFTER maintenance grant.'
+run_deploy --enroll-maintenance
+maintenance_open=true
+
+info 'Installing the NAS WireGuard service and pre-NAT nftables restriction.'
+run_deploy --install-wireguard
+configure_endpoint
+configure_router
+enroll_phone
+run_deploy --check-wireguard
+accept_mobile_access
+
+info 'Running final WireGuard and existing-service audits.'
+run_deploy --check-wireguard
+audit_existing_services
+close_maintenance
+
+info 'WireGuard rollout and mobile acceptance completed; temporary maintenance access is closed.'

@@ -382,8 +382,20 @@ case "$mode" in
         rm -f -- "$private_key" "$public_key" "$temporary_config"
     }
     trap cleanup_wireguard_client EXIT
-    wg genkey > "$private_key"
-    wg pubkey < "$private_key" > "$public_key"
+    if [ -e "$client_config" ]; then
+        if [ ! -r "$client_config" ] || [ "$(stat -c '%a' "$client_config")" != 600 ]; then
+            printf 'Existing WireGuard profile must be readable and mode 0600: %s\n' "$client_config" >&2
+            exit 1
+        fi
+        awk -F ' = ' '$1 == "PrivateKey" { print $2 }' "$client_config" > "$private_key"
+        if [ "$(wc -l < "$private_key")" != 1 ] || ! wg pubkey < "$private_key" > "$public_key"; then
+            printf 'Existing WireGuard profile has an invalid private key: %s\n' "$client_config" >&2
+            exit 1
+        fi
+    else
+        wg genkey > "$private_key"
+        wg pubkey < "$private_key" > "$public_key"
+    fi
     server_public_key="$(
         ssh -o BatchMode=yes "$remote_host" \
             'sudo -n /usr/local/sbin/pol-server-wireguard --server-public-key'
@@ -407,7 +419,7 @@ case "$mode" in
     install -m 0600 "$temporary_config" "$client_config"
     cleanup_wireguard_client
     trap - EXIT
-    printf 'WireGuard client configuration stored locally at %s (mode 0600).\n' "$client_config"
+    printf 'WireGuard client configuration enrolled from %s (mode 0600).\n' "$client_config"
     printf 'Run make show-pol-server-wireguard-qr in your own terminal to scan it.\n'
     ;;
 --show-wireguard-qr)

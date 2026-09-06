@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WIREGUARD="$REPO_ROOT/server/pol-server/wireguard-setup"
 DEPLOY="$REPO_ROOT/server/pol-server/deploy"
+BOOTSTRAP="$REPO_ROOT/server/pol-server/wireguard-bootstrap"
 FIREWALL="$REPO_ROOT/server/pol-server/etc/nftables.d/pol-server-wireguard.nft"
 DDNS_SERVICE="$REPO_ROOT/server/pol-server/etc/systemd/system/pol-server-duckdns.service"
 DDNS_TIMER="$REPO_ROOT/server/pol-server/etc/systemd/system/pol-server-duckdns.timer"
@@ -23,7 +24,7 @@ SERVER_PUBLIC_KEY="$(printf '%*s' 32 '' | tr ' ' b | base64 -w0)"
 PEER_PUBLIC_KEY="$(printf '%*s' 32 '' | tr ' ' c | base64 -w0)"
 SECOND_PEER_PUBLIC_KEY="$(printf '%*s' 32 '' | tr ' ' d | base64 -w0)"
 CLIENT_PRIVATE_KEY="$(printf '%*s' 32 '' | tr ' ' e | base64 -w0)"
-DUCKDNS_TOKEN=0123456789abcdef0123456789abcdef
+DUCKDNS_TEST_VALUE=duckdns-test-value
 trap 'rm -rf "$CASE_DIR"' EXIT
 
 fail() {
@@ -38,6 +39,7 @@ assert_file_contains() {
 }
 
 [ -x "$WIREGUARD" ] || fail 'pol-server WireGuard setup must exist and be executable'
+[ -x "$BOOTSTRAP" ] || fail 'interactive WireGuard bootstrap must exist and be executable'
 [ -r "$FIREWALL" ] || fail 'tracked WireGuard peer firewall must exist'
 [ -r "$DDNS_SERVICE" ] || fail 'tracked DuckDNS service must exist'
 [ -r "$DDNS_TIMER" ] || fail 'tracked DuckDNS timer must exist'
@@ -49,6 +51,13 @@ assert_file_contains "$FIREWALL" 'tcp dport { 2283, 19999 } accept'
 assert_file_contains "$FIREWALL" 'iifname "wg0" drop'
 assert_file_contains "$DDNS_SERVICE" 'LoadCredential=duckdns-token:/etc/cuberhaus/duckdns-token'
 assert_file_contains "$DDNS_TIMER" 'OnUnitActiveSec=5min'
+assert_file_contains "$BOOTSTRAP" '--enroll-maintenance'
+assert_file_contains "$BOOTSTRAP" '--revoke-maintenance'
+assert_file_contains "$BOOTSTRAP" '--install-wireguard'
+assert_file_contains "$BOOTSTRAP" '--generate-wireguard-client'
+assert_file_contains "$BOOTSTRAP" '--check-wireguard'
+assert_file_contains "$BOOTSTRAP" '--revoke-wireguard-client'
+assert_file_contains "$BOOTSTRAP" 'sudo apt-get install -y'
 if grep -Eq 'tcp dport (22|445)' "$FIREWALL"; then
     fail 'tracked WireGuard policy must not allow SSH or SMB'
 fi
@@ -324,14 +333,14 @@ fi
 printf '%s\n' "$PEER_PUBLIC_KEY" | "$WIREGUARD" --enroll-pol-iphone-stdin >/dev/null
 
 : > "$EVENT_LOG"
-printf '%s\n' "$DUCKDNS_TOKEN" | "$WIREGUARD" --configure-duckdns-token
+printf '%s\n' "$DUCKDNS_TEST_VALUE" | "$WIREGUARD" --configure-duckdns-token
 [ "$(stat -c '%a' "$FAKE_ROOT/etc/cuberhaus/duckdns-token")" = 600 ] ||
     fail 'DuckDNS token must use mode 0600'
 assert_file_contains "$EVENT_LOG" 'systemctl:start pol-server-duckdns.service'
 assert_file_contains "$EVENT_LOG" 'systemctl:enable --now pol-server-duckdns.timer'
 assert_file_contains "$CURL_CONFIG" 'domains=pol-home-nas'
-assert_file_contains "$CURL_CONFIG" "token=$DUCKDNS_TOKEN"
-if grep -Fq "$DUCKDNS_TOKEN" "$EVENT_LOG"; then
+assert_file_contains "$CURL_CONFIG" "token=$DUCKDNS_TEST_VALUE"
+if grep -Fq "$DUCKDNS_TEST_VALUE" "$EVENT_LOG"; then
     fail 'DuckDNS token must not appear in command arguments or logs'
 fi
 
@@ -341,7 +350,7 @@ if printf '%s\n' abcdefabcdefabcdefabcdefabcdefab |
     fail 'failed DuckDNS validation must fail credential enrollment'
 fi
 unset FAKE_DUCKDNS_FAILURE
-[ "$(cat "$FAKE_ROOT/etc/cuberhaus/duckdns-token")" = "$DUCKDNS_TOKEN" ] ||
+[ "$(cat "$FAKE_ROOT/etc/cuberhaus/duckdns-token")" = "$DUCKDNS_TEST_VALUE" ] ||
     fail 'failed DuckDNS validation must restore the previous credential'
 
 check_output="$("$WIREGUARD" --check)"
@@ -375,5 +384,47 @@ unset FAKE_SSH_ENROLL_FAILURE
 if "$DEPLOY" --host fake-nas --show-wireguard-qr >/dev/null 2>&1; then
     fail 'QR display must refuse noninteractive output'
 fi
+[ "$(wc -l < "$WG_GENKEY_STATE")" = 2 ] ||
+    fail 'rerunning client enrollment must reuse rather than rotate the existing private key'
+
+ORCHESTRATOR_LOG="$CASE_DIR/orchestrator.log"
+cat > "$FAKE_BIN/fake-deploy" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$ORCHESTRATOR_LOG"
+mode="${*: -1}"
+[ "${FAKE_DEPLOY_FAILURE:-}" != "$mode" ]
+EOF
+chmod +x "$FAKE_BIN/fake-deploy"
+export ORCHESTRATOR_LOG
+export POL_SERVER_DEPLOY="$FAKE_BIN/fake-deploy"
+export POL_SERVER_ALLOW_NONINTERACTIVE=true
+
+printf 'y\nn\ny\ny\ny\ny\ny\ny\ny\ny\ny\n' | "$BOOTSTRAP" --host fake-nas >/dev/null
+for mode in \
+    --check \
+    --check-immich \
+    --check-monitoring \
+    --enroll-maintenance \
+    --install-wireguard \
+    --configure-duckdns \
+    --generate-wireguard-client \
+    --show-wireguard-qr \
+    --check-wireguard \
+    --revoke-wireguard-client \
+    --revoke-maintenance; do
+    grep -Fq -- "--host fake-nas $mode" "$ORCHESTRATOR_LOG" ||
+        fail "interactive bootstrap must run tracked mode: $mode"
+done
+[ "$(tail -n 1 "$ORCHESTRATOR_LOG")" = '--host fake-nas --revoke-maintenance' ] ||
+    fail 'successful bootstrap must finish by revoking temporary maintenance'
+
+: > "$ORCHESTRATOR_LOG"
+export FAKE_DEPLOY_FAILURE=--install-wireguard
+if "$BOOTSTRAP" --host fake-nas </dev/null >/dev/null 2>&1; then
+    fail 'interactive bootstrap must fail when WireGuard deployment fails'
+fi
+unset FAKE_DEPLOY_FAILURE
+[ "$(tail -n 1 "$ORCHESTRATOR_LOG")" = '--host fake-nas --revoke-maintenance' ] ||
+    fail 'failed bootstrap must revoke temporary maintenance through its exit trap'
 
 printf 'pol-server WireGuard contract passed.\n'

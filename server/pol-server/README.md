@@ -418,18 +418,23 @@ restriction before Docker destination NAT keeps the Immich path inside the same
 policy boundary. SSH, SMB, other NAS ports, and full-tunnel Internet access are
 not allowed for this peer.
 
-Enroll the current root-owned bundle during bounded maintenance, then install
-and audit the server:
+Run the complete workflow through its tracked interactive bootstrap:
 
 ```bash
-make enroll-pol-server-maintenance
-make install-pol-server-wireguard
-make revoke-pol-server-maintenance
+make bootstrap-pol-server-wireguard
 ```
 
-The server private key is generated on the NAS and stored root-only. Install
-`wireguard-tools` and `qrencode` on the managed workstation, then generate the
-iPhone private key and profile locally:
+The bootstrap installs missing workstation enrollment tools with visible local
+sudo approval, audits the existing NAS services, replaces the root-owned bundle,
+opens bounded maintenance, deploys WireGuard, guides DuckDNS and router changes,
+enrolls the phone, performs mobile allow/deny and revocation acceptance, reruns
+all audits, and closes maintenance. Its exit trap also attempts revocation after
+an interruption or failed step. Rerunning it reuses the existing local phone key
+instead of silently rotating it.
+
+The server private key is generated on the NAS and stored root-only. The iPhone
+private key and profile are generated locally. The individual targets remain
+available for recovery and focused diagnosis:
 
 ```bash
 make generate-pol-server-wireguard-client
@@ -456,11 +461,13 @@ the credential-backed NAS fallback:
 make configure-pol-server-duckdns
 ```
 
-The token is read without echo, stored root-only, loaded as a systemd
+The interactive bootstrap invokes this fallback when selected. The token is
+read without echo, stored root-only, loaded as a systemd
 credential, and used by a five-minute timer without appearing in command-line
 arguments. Revoke the phone independently with
-`make revoke-pol-server-wireguard-client`; generate a new profile to enroll a
-replacement key.
+`make revoke-pol-server-wireguard-client`; rerun the bootstrap to re-enroll the
+locally held key, or remove the local profile first when intentional key
+rotation is required.
 
 ## Current inventory
 

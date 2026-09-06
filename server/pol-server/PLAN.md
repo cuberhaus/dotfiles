@@ -405,6 +405,10 @@ confirmed server and first-peer contract is:
 - Client private key and profile generated only on the managed workstation,
   stored mode `0600`, shown as a QR only in an interactive local terminal, and
   backed up to the password manager.
+- One redoable `make bootstrap-pol-server-wireguard` entrypoint owns local tool
+   installation, baseline audits, bounded maintenance, deployment, external
+   setup prompts, mobile acceptance, revocation proof, final audits, and cleanup.
+   Its exit trap revokes maintenance, and reruns reuse the existing phone key.
 
 Remaining live steps are:
 
