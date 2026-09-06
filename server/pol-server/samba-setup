@@ -61,8 +61,15 @@ check_state() {
     local config_current=false
     local service_ready=false
     local netbios_disabled=false
+    local storage_root_mode
+    local storage_root_ready=false
 
     check_storage
+
+    storage_root_mode="$(stat -c '%a' "$storage_root")"
+    if [ "$storage_root_mode" = 755 ]; then
+        storage_root_ready=true
+    fi
 
     if cmp -s "$tracked_smb_conf" "$smb_conf" 2>/dev/null &&
         testparm -s "$smb_conf" >/dev/null; then
@@ -85,9 +92,13 @@ check_state() {
         netbios_disabled=true
     fi
 
-    if [ "$config_current" = true ] && [ "$account_enrolled" = true ] &&
+    if [ "$storage_root_ready" = true ] && [ "$config_current" = true ] &&
+        [ "$account_enrolled" = true ] &&
         [ "$service_ready" = true ] && [ "$netbios_disabled" = true ]; then
         printf 'Samba state: configured\n'
+    elif [ "$config_current" = true ] && [ "$account_enrolled" = true ] &&
+        [ "$service_ready" = true ]; then
+        printf 'Samba state: configuration drift\n'
     elif [ "$config_current" = true ]; then
         printf 'Samba state: staged\n'
     elif [ -f "$smb_conf" ]; then
@@ -115,6 +126,12 @@ check_state() {
     else
         printf 'NetBIOS state: unexpected\n'
     fi
+
+    if [ "$storage_root_ready" = true ]; then
+        printf 'Storage root state: traversable (0755)\n'
+    else
+        printf 'Storage root state: blocked (0%s)\n' "$storage_root_mode"
+    fi
 }
 
 apply_configuration() {
@@ -128,6 +145,7 @@ apply_configuration() {
             --shell /usr/sbin/nologin --gid nasusers "$samba_user"
     fi
 
+    chmod 0755 "$storage_root"
     chown root:nasusers "$storage_root/shared" "$storage_root/incoming"
     chmod 2770 "$storage_root/shared" "$storage_root/incoming"
     chown "$samba_user:nasusers" "$storage_root/private"

@@ -34,6 +34,13 @@ Every implementation batch follows the same sequence:
    `make bootstrap-pol-server` or a separately reviewed phase command.
 5. Run the documented acceptance check and update this plan with the result.
 
+For a complete build, recovery, or change spanning multiple phases, use
+`make bootstrap-pol-server-full`. It is the resumable top-level lifecycle from
+the first SSH-reachable Debian host onward and owns local validation, bounded
+maintenance, all tracked phase commands, interactive acceptance, and cleanup.
+Use `make status-pol-server-full` for its read-only aggregate audit. The phase
+targets remain available for focused diagnosis and repair.
+
 The baseline bootstrap must remain idempotent: a second apply on converged state
 must make no changes. `make enroll-pol-server` is the only path that updates its
 root-owned code and requires visible sudo approval; routine
@@ -79,10 +86,11 @@ Baseline recorded on 2026-09-05:
 | GitHub mirrors | Complete | All 54 active repositories passed Git integrity; LFS fetches completed and the persistent daily timer is enabled |
 | Baseline bootstrap | Complete | Root-owned bundle enrolled; routine operations use exact narrow commands and supervised broad access remains bounded by `NOTAFTER` |
 | Containers | Complete | Official Docker Engine 29.8.0 and Compose 5.5.1 are installed; `pol` remains outside the Docker group |
-| Immich | Restore acceptance in progress | Tracked v3.1.0 stack is LAN-bound with media on Kingston and PostgreSQL on Micron; preserved WD recovery is being restored |
+| Immich | Complete | Tracked v3.1.0 stack is LAN-bound with media on Kingston and PostgreSQL on Micron; preserved WD recovery and application acceptance passed |
 | OpenClaw | Pending | Must wait for backup and Docker; use a cloud model initially |
 | Monitoring | Local monitoring complete | Native LAN-only Netdata 2.11.0 with three-month/2 GiB bounded history; external Healthchecks.io email acceptance remains pending |
 | Remote access | Tracked implementation complete; deployment pending | NAS-hosted `wg0`, fixed iPhone peer, pre-NAT nftables restriction, local key generation, revocation, and optional DuckDNS timer have hermetic tests; router and mobile acceptance remain |
+| Complete lifecycle | Implemented; live acceptance pending | One resumable interactive entrypoint composes every tracked phase; full local validation and router/iPhone acceptance remain |
 
 ## Phase 0: close hardware and data gates
 

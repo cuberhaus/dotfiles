@@ -8,6 +8,40 @@ or generated machine state.
 See [PLAN.md](PLAN.md) for the phased implementation roadmap, current gates,
 and acceptance criteria derived from the Obsidian Home NAS design note.
 
+## Complete lifecycle
+
+Use the tracked interactive orchestrator for a new build, complete recovery, or
+any session spanning multiple server areas:
+
+```bash
+make bootstrap-pol-server-full
+```
+
+Debian installation on the Micron SSD and initial passwordless SSH-key
+enrollment are the only manual prerequisites. From the first reachable
+`home-nas` onward, the orchestrator validates this repository, closes stale
+maintenance access, opens a bounded maintenance window, and composes the
+tracked baseline, hardware, storage, Samba, Restic, GitHub mirror, RSS email,
+Immich, Netdata, and WireGuard lifecycles. Its exit trap revokes broad
+maintenance access after success, failure, or interruption.
+
+The workflow is safe to resume. Live audits decide whether configured services
+need work; human acceptance decisions are recorded outside Git at
+`${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus/pol-server-bootstrap.state`.
+One-shot storage migration and Immich recovery still require the exact typed
+tokens `ERASE-KINGSTON-SA400S37960G` and `RESTORE-WD-IMMICH`. Secrets and
+passwords are entered only into terminal prompts.
+
+Run the complete read-only audit at any time:
+
+```bash
+make status-pol-server-full
+```
+
+The narrower targets below remain supported for focused diagnosis, repair, and
+recovery. They are implementation primitives of the complete workflow, not a
+manual checklist for rebuilding the server.
+
 ## Bootstrap
 
 The tracked bootstrap is the only supported way to converge routine server

@@ -20,6 +20,7 @@ fail() {
 }
 
 mkdir -p "$FAKE_BIN" "$STORAGE_ROOT"/{shared,incoming,private,immich,appdata}
+chmod 0755 "$STORAGE_ROOT"
 : > "$EVENT_LOG"
 
 cat > "$FAKE_BIN/findmnt" <<'EOF'
@@ -136,6 +137,8 @@ grep -Fq 'Service state: inactive and disabled' <<< "$report" ||
 "$SAMBA" --apply >/dev/null
 grep -Fqx 'useradd:--system --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin --gid nasusers pol-files' "$EVENT_LOG" ||
     fail 'apply must create a dedicated non-login Samba identity'
+grep -Fqx "chmod:0755 $STORAGE_ROOT" "$EVENT_LOG" ||
+    fail 'apply must make the mounted storage root traversable to share users'
 grep -Fqx "chown:root:nasusers $STORAGE_ROOT/shared $STORAGE_ROOT/incoming" "$EVENT_LOG" ||
     fail 'apply must assign shared directories to the NAS group'
 grep -Fqx "chmod:2770 $STORAGE_ROOT/shared $STORAGE_ROOT/incoming" "$EVENT_LOG" ||
@@ -173,6 +176,14 @@ grep -Fq 'Account state: enrolled (pol-files)' <<< "$configured_report" ||
     fail 'check must verify the Samba password database entry'
 grep -Fq 'Service state: active and enabled' <<< "$configured_report" ||
     fail 'check must verify the active smbd service'
+
+/usr/bin/chmod 0700 "$STORAGE_ROOT"
+blocked_report="$("$SAMBA" --check)"
+grep -Fq 'Samba state: configuration drift' <<< "$blocked_report" ||
+    fail 'check must reject configured Samba when the storage root blocks traversal'
+grep -Fq 'Storage root state: blocked (0700)' <<< "$blocked_report" ||
+    fail 'check must report the mounted storage root mode'
+/usr/bin/chmod 0755 "$STORAGE_ROOT"
 
 rm -f "$PASSWORD_STATE" "$SERVICE_STATE"
 printf 'generated-test-secret\ngenerated-test-secret\n' |

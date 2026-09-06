@@ -1,0 +1,390 @@
+#!/usr/bin/env bash
+# Description: Run the complete tracked pol-server build, recovery, and acceptance workflow.
+set -euo pipefail
+
+server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd -- "$server_dir/../.." && pwd)"
+deploy="${POL_SERVER_DEPLOY:-$server_dir/deploy}"
+wireguard_bootstrap="${POL_SERVER_WIREGUARD_BOOTSTRAP:-$server_dir/wireguard-bootstrap}"
+remote_host="${POL_SERVER_HOST:-home-nas}"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus"
+state_file="${POL_SERVER_BOOTSTRAP_STATE:-$state_dir/pol-server-bootstrap.state}"
+state_parent="$(dirname -- "$state_file")"
+maintenance_open=false
+mode=--run
+
+info() { printf '\033[34m[INFO]\033[0m %s\n' "$*"; }
+warn() { printf '\033[33m[WARN]\033[0m %s\n' "$*"; }
+error() { printf '\033[31m[ERROR]\033[0m %s\n' "$*" >&2; }
+
+usage() {
+    cat <<'EOF'
+Usage: full-bootstrap [--host HOST] [--run | --status]
+
+  --run     Validate and resume the complete interactive NAS lifecycle.
+  --status  Run every available read-only audit without changing state.
+
+Debian installation on the Micron SSD and initial SSH-key enrollment are manual
+prerequisites. From the first reachable home-nas onward, this command owns the
+tracked baseline, storage, Samba, backup, GitHub mirrors, RSS email, Immich
+recovery, Netdata, WireGuard, acceptance checks, and maintenance cleanup.
+EOF
+}
+
+while (( $# > 0 )); do
+    case "$1" in
+        --host)
+            [ "$#" -ge 2 ] || {
+                error 'Missing value for --host.'
+                exit 2
+            }
+            remote_host="$2"
+            shift
+            ;;
+        --run|--status) mode="$1" ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            error "Unknown option: $1"
+            usage >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
+
+if [ "$mode" = --run ] && [ "${POL_SERVER_ALLOW_NONINTERACTIVE:-false}" != true ] &&
+    { [ ! -t 0 ] || [ ! -t 1 ]; }; then
+    error 'Run the full bootstrap in an interactive terminal.'
+    exit 1
+fi
+
+run_deploy() {
+    "$deploy" --host "$remote_host" "$@"
+}
+
+state_has() {
+    [ -r "$state_file" ] && grep -Fqx -- "$1" "$state_file"
+}
+
+state_mark() {
+    local state="$1"
+    state_has "$state" && return
+    install -d -m 0700 "$state_parent"
+    touch "$state_file"
+    chmod 0600 "$state_file"
+    printf '%s\n' "$state" >> "$state_file"
+}
+
+confirm() {
+    local prompt="$1" answer
+    printf '%s [y/N] ' "$prompt" >&2
+    IFS= read -r answer || return 1
+    case "$answer" in
+        y|Y|yes|YES|Yes) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+require_confirmation() {
+    local prompt="$1" guidance="$2"
+    if ! confirm "$prompt"; then
+        error "$guidance"
+        return 1
+    fi
+}
+
+close_maintenance() {
+    if [ "$maintenance_open" = true ]; then
+        warn 'Closing temporary NAS maintenance access.'
+        if run_deploy --revoke-maintenance; then
+            maintenance_open=false
+        else
+            error 'Automatic revocation failed. Run make revoke-pol-server-maintenance immediately.'
+            return 1
+        fi
+    fi
+}
+
+cleanup() {
+    local exit_code=$?
+    trap - EXIT HUP INT TERM
+    if ! close_maintenance; then
+        exit 1
+    fi
+    exit "$exit_code"
+}
+trap cleanup EXIT HUP INT TERM
+
+close_stale_maintenance() {
+    info 'Closing any stale temporary maintenance grant from an interrupted run.'
+    if ! run_deploy --revoke-maintenance; then
+        warn 'No enrolled maintenance command was available; initial enrollment will establish it.'
+    fi
+}
+
+open_maintenance() {
+    [ "$maintenance_open" = false ] || return
+    info 'Enrolling the current root-owned bundle with bounded maintenance access.'
+    run_deploy --enroll-maintenance
+    maintenance_open=true
+}
+
+validate_local_source() {
+    if [ "${POL_SERVER_SKIP_LOCAL_CHECK:-false}" = true ]; then
+        info 'Skipping local validation only because POL_SERVER_SKIP_LOCAL_CHECK=true.'
+        return
+    fi
+    info 'Validating the complete tracked source before deployment.'
+    make -C "$repo_root" check
+}
+
+require_reachable_host() {
+    ssh -o BatchMode=yes "$remote_host" 'test "$(hostname)" = pol-server' || {
+        error 'Expected passwordless SSH to a host named pol-server.'
+        return 1
+    }
+    info 'Debian installation and SSH bootstrap prerequisites are reachable.'
+}
+
+audit_foundation() {
+    run_deploy --check
+    run_deploy --hardware-report
+}
+
+accept_hardware_qualification() {
+    state_has hardware-qualified && return
+    cat <<'EOF'
+
+The tracked SMART and thermal reports record completed qualification of the
+Kingston, Micron, battery, charger, and fixed two-minute thermal load. Rerunning
+long SMART tests is intentionally not part of every bootstrap replay.
+EOF
+    require_confirmation \
+        'Have you reviewed and accepted the tracked hardware qualification reports?' \
+        'Review server/pol-server/reports before resuming.'
+    if confirm 'Start new Kingston and Micron SMART long tests now?'; then
+        run_deploy --start-smart-long-kingston
+        run_deploy --start-smart-long-micron
+        warn 'SMART long tests were started. Let them finish, inspect the hardware report, then rerun.'
+        return 1
+    fi
+    if confirm 'Run the bounded two-minute thermal load again now?'; then
+        run_deploy --thermal-load
+    fi
+    state_mark hardware-qualified
+}
+
+ensure_storage() {
+    local erase_token
+    if run_deploy --check-storage; then
+        return
+    fi
+    cat <<'EOF'
+
+Storage preparation is one-shot and destructive. It accepts only the exact
+Kingston SA400S37960G capacity/model, erases its legacy layout, and creates the
+tracked ext4 filesystem at /srv/storage. Never use this for an already migrated
+disk or the external WD backup disk.
+EOF
+    printf 'Type ERASE-KINGSTON-SA400S37960G to approve this exact disk migration: ' >&2
+    IFS= read -r erase_token
+    [ "$erase_token" = ERASE-KINGSTON-SA400S37960G ] || {
+        error 'Storage migration was not approved.'
+        return 1
+    }
+    run_deploy --prepare-storage
+    run_deploy --check-storage
+}
+
+offer_system_maintenance() {
+    if confirm 'Apply current Debian package upgrades now?'; then
+        run_deploy --upgrade
+        state_mark debian-upgrade-accepted
+    fi
+}
+
+ensure_samba() {
+    local check_output
+    check_output="$(run_deploy --check-samba)"
+    printf '%s\n' "$check_output"
+    if ! grep -Fqx 'Samba state: configured' <<< "$check_output"; then
+        info 'Converging authenticated LAN-only Samba.'
+        run_deploy --configure-samba
+        run_deploy --generate-samba-password
+        run_deploy --check-samba
+    fi
+    run_deploy --test-samba-access
+}
+
+ensure_backup() {
+    local check_output
+    check_output="$(run_deploy --check-backup)"
+    printf '%s\n' "$check_output"
+    if ! grep -Fqx 'Backup state: configured' <<< "$check_output"; then
+        cat <<'EOF'
+
+Backup preparation is additive: it accepts only the model-pinned WD disk and
+existing exFAT UUID 5EEB-7DF6. It does not format, repartition, or use the
+unallocated tail.
+EOF
+        require_confirmation \
+            'Is the preserved WD backup disk connected and may the tracked mount/repository be prepared?' \
+            'Connect and verify the preserved WD disk, then rerun.'
+        run_deploy --prepare-backup
+        run_deploy --generate-restic-password
+        run_deploy --check-backup
+    fi
+    info 'Running the encrypted backup, integrity, and isolated restore acceptance.'
+    run_deploy --run-backup
+    run_deploy --check-backup-repository
+    run_deploy --restore-test-backup
+}
+
+ensure_github_mirrors() {
+    if run_deploy --check-github-mirrors; then
+        return
+    fi
+    cat <<'EOF'
+
+GitHub mirror enrollment needs a fine-grained read-only token for cuberhaus.
+Enter it only into the upcoming terminal prompt; never put it in chat.
+EOF
+    run_deploy --configure-github-mirrors
+    run_deploy --sync-github-mirrors
+    run_deploy --check-github-mirrors
+}
+
+offer_rss_acceptance() {
+    if state_has rss-email-accepted; then
+        return
+    fi
+    if confirm 'Configure or refresh RSS email and send its acceptance messages now?'; then
+        run_deploy --configure-rss-email
+        run_deploy --test-rss-email
+        run_deploy --email-wd-report
+        state_mark rss-email-accepted
+    else
+        warn 'RSS email acceptance remains pending and will be offered on the next run.'
+    fi
+}
+
+ensure_immich() {
+    local restore_token
+    if ! run_deploy --check-immich; then
+        info 'Installing and configuring the pinned Immich stack.'
+        run_deploy --install-immich
+        run_deploy --configure-immich
+        if run_deploy --restore-immich; then
+            cat <<'EOF'
+
+The preserved WD recovery preview passed. Applying it replaces the fresh media
+and PostgreSQL targets after renaming both to timestamped rollback paths. The WD
+source remains unchanged.
+EOF
+            printf 'Type RESTORE-WD-IMMICH to apply the validated recovery, or anything else to stop: ' >&2
+            IFS= read -r restore_token
+            [ "$restore_token" = RESTORE-WD-IMMICH ] || {
+                error 'Immich recovery was not approved; stopping before destructive apply.'
+                return 1
+            }
+            run_deploy --restore-immich-apply
+        else
+            error 'Immich is unhealthy and the preserved recovery preview did not pass.'
+            return 1
+        fi
+        run_deploy --check-immich
+    fi
+
+    if ! state_has immich-library-accepted; then
+        cat <<'EOF'
+
+Open http://192.168.1.34:2283 and verify the restored account, library counts,
+representative photos/videos, thumbnails, and one upload/retrieval round trip.
+EOF
+        require_confirmation \
+            'Does the restored Immich library pass that application acceptance?' \
+            'Immich application acceptance remains pending.'
+        state_mark immich-library-accepted
+    fi
+
+    run_deploy --backup-immich
+    run_deploy --run-backup
+    run_deploy --check-backup-repository
+    run_deploy --restore-test-backup
+}
+
+ensure_monitoring() {
+    if ! run_deploy --check-monitoring; then
+        run_deploy --install-monitoring
+    fi
+    run_deploy --check-monitoring
+}
+
+run_wireguard_acceptance() {
+    if state_has wireguard-mobile-accepted && run_deploy --check-wireguard; then
+        info 'WireGuard mobile acceptance is recorded and the live audit passes.'
+        return
+    fi
+    close_maintenance
+    POL_SERVER_HOST="$remote_host" "$wireguard_bootstrap" --host "$remote_host"
+    state_mark wireguard-mobile-accepted
+}
+
+verify_maintenance_closed() {
+    if ssh -o BatchMode=yes "$remote_host" 'sudo -n true' >/dev/null 2>&1; then
+        error 'Broad passwordless sudo remains active after lifecycle completion.'
+        return 1
+    fi
+    info 'Broad passwordless sudo is closed.'
+}
+
+status() {
+    local failed=false
+    require_reachable_host
+    for audit_mode in \
+        --check \
+        --hardware-report \
+        --check-storage \
+        --check-samba \
+        --check-backup \
+        --check-github-mirrors \
+        --check-immich \
+        --check-monitoring \
+        --check-wireguard; do
+        if ! run_deploy "$audit_mode"; then
+            failed=true
+        fi
+    done
+    verify_maintenance_closed || failed=true
+    [ "$failed" = false ]
+}
+
+run() {
+    close_stale_maintenance
+    validate_local_source
+    require_reachable_host
+    open_maintenance
+    run_deploy --apply
+    audit_foundation
+    accept_hardware_qualification
+    ensure_storage
+    offer_system_maintenance
+    ensure_samba
+    ensure_backup
+    ensure_github_mirrors
+    offer_rss_acceptance
+    ensure_immich
+    ensure_monitoring
+    run_wireguard_acceptance
+    close_maintenance
+    status
+    info 'Complete pol-server build, recovery, and acceptance workflow passed.'
+}
+
+case "$mode" in
+    --run) run ;;
+    --status) status ;;
+esac

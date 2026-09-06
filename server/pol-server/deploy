@@ -211,10 +211,15 @@ case "$mode" in
         cat > "$auth"
         printf "cuberhaus Samba acceptance\n" > "$payload"
         for share in shared incoming private; do
-            smbclient "//127.0.0.1/$share" -A "$auth" -m SMB3 \
-                -c "put $payload $remote_name; rename $remote_name ${remote_name}.renamed; get ${remote_name}.renamed $download; del ${remote_name}.renamed" \
-                >/dev/null
-            cmp -s "$payload" "$download"
+            if ! smbclient "//127.0.0.1/$share" -A "$auth" -m SMB3 \
+                -c "put $payload $remote_name; rename $remote_name ${remote_name}.renamed; get ${remote_name}.renamed $download; del ${remote_name}.renamed"; then
+                printf "ERROR: SMB3 file lifecycle failed: %s\n" "$share" >&2
+                exit 1
+            fi
+            if ! cmp -s "$payload" "$download"; then
+                printf "ERROR: SMB3 downloaded content differed: %s\n" "$share" >&2
+                exit 1
+            fi
             printf "SMB3 file lifecycle passed: %s\n" "$share"
         done
         if smbclient //127.0.0.1/shared -N -m SMB3 -c ls >/dev/null 2>&1; then
