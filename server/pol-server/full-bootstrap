@@ -258,19 +258,23 @@ EOF
 }
 
 ensure_rss_acceptance() {
-    if state_has rss-email-accepted; then
-        info 'RSS email acceptance is recorded; revalidating delivery.'
-        run_deploy --test-rss-email
-        return
-    fi
-    cat <<'EOF'
+    local configured_now=false
+    if ! run_deploy --check-rss-email; then
+        cat <<'EOF'
 
 RSS email is part of the complete server lifecycle. Enter the Gmail sender,
 optional recipient, and Gmail app password only into the upcoming terminal
 prompts. The credential remains root-only on the NAS and outside Git.
 EOF
-    run_deploy --configure-rss-email
+        run_deploy --configure-rss-email
+        run_deploy --check-rss-email
+        configured_now=true
+    fi
     run_deploy --test-rss-email
+    if state_has rss-email-accepted && [ "$configured_now" = false ]; then
+        info 'RSS email configuration and delivery remain healthy.'
+        return
+    fi
     run_deploy --email-wd-report
     require_confirmation \
         'Did the RSS delivery test and WD SMART report arrive?' \
@@ -358,11 +362,6 @@ status() {
         printf '%s\n' "$baseline_output"
         failed=true
     fi
-    if ! grep -Fq 'Service active and enabled: pol-server-rss-email.timer' \
-        <<< "$baseline_output"; then
-        error 'RSS email timer is not configured, active, and enabled.'
-        failed=true
-    fi
     if ! state_has rss-email-accepted; then
         error 'RSS email delivery acceptance is not recorded.'
         failed=true
@@ -373,6 +372,7 @@ status() {
         --check-samba \
         --check-backup \
         --check-github-mirrors \
+        --check-rss-email \
         --check-immich \
         --check-monitoring \
         --check-wireguard; do

@@ -112,6 +112,7 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --sync' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-github-mirror --check' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-rss-email --configure' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-rss-email --check' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-rss-email --test-email' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-rss-email --send-wd-report' \
     'pol ALL=(root) NOPASSWD: /usr/bin/systemctl start pol-server-rss-email.service' \

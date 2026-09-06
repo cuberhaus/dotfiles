@@ -28,9 +28,11 @@ maintenance access after success, failure, or interruption.
 The workflow is safe to resume. Live audits decide whether configured services
 need work; human acceptance decisions are recorded outside Git at
 `${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus/pol-server-bootstrap.state`.
-RSS setup is required: the workflow validates the Gmail app credential, sends
-the delivery test and WD SMART report, and stops until their receipt is
-confirmed. The credential is entered only in the server terminal prompt.
+RSS setup is required: the workflow audits and reuses a healthy existing Gmail
+credential and timer, prompting for a credential only when configuration is
+missing or unhealthy. It sends a delivery test on every run; until receipt is
+accepted, it also sends the WD SMART report and stops for confirmation. The
+credential is entered only in the server terminal prompt.
 One-shot storage migration and Immich recovery still require the exact typed
 tokens `ERASE-KINGSTON-SA400S37960G` and `RESTORE-WD-IMMICH`. Secrets and
 passwords are entered only into terminal prompts.
@@ -181,11 +183,15 @@ never be added to Git or pasted into chat.
 Run an additional check manually and inspect its status with:
 
 ```bash
+make audit-pol-server-rss-email
 make run-pol-server-rss-email
 make test-pol-server-rss-email
 ssh home-nas 'systemctl status pol-server-rss-email.service --no-pager'
 ssh home-nas 'systemctl list-timers pol-server-rss-email.timer --no-pager'
 ```
+
+The audit validates the root-only credential, timer state, and Gmail login
+without replacing the credential or sending a message.
 
 The test target sends one confirmation message to the configured recipient
 without fetching the feed or changing its recorded GUIDs.

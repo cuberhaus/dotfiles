@@ -41,6 +41,7 @@ Usage: deploy [--host HOST] MODE
     --configure-github-mirrors     Store a read-only GitHub token interactively.
     --sync-github-mirrors          Run the GitHub mirror service now.
     --check-github-mirrors         Verify local mirror integrity and schedule state.
+    --check-rss-email              Validate existing Gmail settings and timer health.
     --configure-rss-email          Validate and store Gmail delivery settings.
     --run-rss-email                Run the RSS email service immediately.
     --test-rss-email               Send one RSS delivery test email.
@@ -75,7 +76,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--check-backup|--prepare-backup|--generate-restic-password|--run-backup|--check-backup-repository|--restore-test-backup|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report|--install-immich|--check-immich|--configure-immich|--start-immich|--stop-immich|--backup-immich|--upgrade-immich|--restore-immich|--restore-immich-apply|--install-monitoring|--check-monitoring|--install-wireguard|--check-wireguard|--generate-wireguard-client|--show-wireguard-qr|--revoke-wireguard-client|--configure-duckdns)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--check-backup|--prepare-backup|--generate-restic-password|--run-backup|--check-backup-repository|--restore-test-backup|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--check-rss-email|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report|--install-immich|--check-immich|--configure-immich|--start-immich|--stop-immich|--backup-immich|--upgrade-immich|--restore-immich|--restore-immich-apply|--install-monitoring|--check-monitoring|--install-wireguard|--check-wireguard|--generate-wireguard-client|--show-wireguard-qr|--revoke-wireguard-client|--configure-duckdns)
             mode="$1"
             ;;
         --help|-h)
@@ -302,6 +303,10 @@ case "$mode" in
 --check-github-mirrors)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-github-mirror --check'
+    ;;
+--check-rss-email)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-rss-email --check'
     ;;
 --configure-rss-email)
     ssh -o BatchMode=yes -t "$remote_host" \

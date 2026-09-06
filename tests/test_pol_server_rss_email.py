@@ -3,6 +3,7 @@ from importlib.machinery import SourceFileLoader
 import io
 import json
 import os
+import stat
 import tempfile
 import unittest
 from pathlib import Path
@@ -376,6 +377,71 @@ class RssEmailTests(unittest.TestCase):
                     ),
                 ]
             )
+
+    def test_check_reuses_valid_credential_and_verifies_timer_and_smtp(self):
+        rss_email = load_command()
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            credential_path = root / "etc" / "cuberhaus" / "rss-email.json"
+            credential_path.parent.mkdir(parents=True)
+            credential_path.write_text(
+                json.dumps(
+                    {
+                        "sender": "sender@example.test",
+                        "recipient": "recipient@example.test",
+                        "app_password": "test-secret",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            credential_path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+            environment = {
+                "POL_SERVER_ALLOW_UNPRIVILEGED": "true",
+                "POL_SERVER_ROOT": str(root),
+            }
+            smtp = mock.MagicMock()
+
+            with mock.patch.dict(os.environ, environment, clear=False), mock.patch(
+                "smtplib.SMTP", smtp
+            ), mock.patch("subprocess.run") as systemctl, mock.patch(
+                "sys.stdout", new_callable=io.StringIO
+            ) as stdout:
+                exit_code = rss_email.main(["--check"])
+
+            self.assertEqual(0, exit_code)
+            smtp.return_value.__enter__.return_value.login.assert_called_once_with(
+                "sender@example.test", "test-secret"
+            )
+            systemctl.assert_has_calls(
+                [
+                    mock.call(
+                        ["systemctl", "is-active", "--quiet", "pol-server-rss-email.timer"],
+                        check=True,
+                    ),
+                    mock.call(
+                        ["systemctl", "is-enabled", "--quiet", "pol-server-rss-email.timer"],
+                        check=True,
+                    ),
+                ]
+            )
+            self.assertIn("RSS email configuration healthy", stdout.getvalue())
+
+    def test_check_rejects_missing_credential_without_prompting(self):
+        rss_email = load_command()
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            environment = {
+                "POL_SERVER_ALLOW_UNPRIVILEGED": "true",
+                "POL_SERVER_ROOT": temporary_directory,
+            }
+            with mock.patch.dict(os.environ, environment, clear=False), mock.patch(
+                "sys.stderr", new_callable=io.StringIO
+            ) as stderr:
+                exit_code = rss_email.main(["--check"])
+
+            self.assertEqual(1, exit_code)
+            self.assertIn("RSS email failed", stderr.getvalue())
 
 
 if __name__ == "__main__":

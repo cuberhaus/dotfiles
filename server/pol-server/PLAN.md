@@ -84,7 +84,7 @@ Baseline recorded on 2026-09-05:
 | Samba | Complete for Wi-Fi rollout | Dedicated `pol-files` access passed SMB3 file lifecycle tests on all three shares; guest access failed and `nmbd` remains disabled |
 | Backup | Operational; policy follow-up pending | User accepted the incomplete SMART-test risk; encrypted Restic backup, rotating integrity check, and restore test passed on the preserved WD exFAT volume |
 | GitHub mirrors | Complete | All 54 active repositories passed Git integrity; LFS fetches completed and the persistent daily timer is enabled |
-| RSS email | Pending lifecycle acceptance | The full bootstrap requires Gmail credential validation plus receipt of its delivery test and WD SMART report before completion |
+| RSS email | Pending lifecycle acceptance | The full bootstrap audits and reuses healthy Gmail settings, configures only when needed, and requires receipt of its delivery test and WD SMART report before completion |
 | Baseline bootstrap | Complete | Root-owned bundle enrolled; routine operations use exact narrow commands and supervised broad access remains bounded by `NOTAFTER` |
 | Containers | Complete | Official Docker Engine 29.8.0 and Compose 5.5.1 are installed; `pol` remains outside the Docker group |
 | Immich | Complete | Tracked v3.1.0 stack is LAN-bound with media on Kingston and PostgreSQL on Micron; preserved WD recovery and application acceptance passed |

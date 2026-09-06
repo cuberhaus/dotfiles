@@ -39,6 +39,7 @@ for mode in \
     --check-backup-repository \
     --restore-test-backup \
     --check-github-mirrors \
+    --check-rss-email \
     --configure-rss-email \
     --test-rss-email \
     --email-wd-report \
@@ -53,13 +54,13 @@ assert_file_contains "$BOOTSTRAP" 'RESTORE-WD-IMMICH'
 assert_file_contains "$BOOTSTRAP" 'sudo -n true'
 assert_file_excludes "$BOOTSTRAP" "if confirm 'Configure or refresh RSS email"
 assert_file_contains "$BOOTSTRAP" 'Did the RSS delivery test and WD SMART report arrive?'
-assert_file_contains "$BOOTSTRAP" 'Service active and enabled: pol-server-rss-email.timer'
 
 CASE_DIR="$(mktemp -d)"
 FAKE_BIN="$CASE_DIR/bin"
 DEPLOY_LOG="$CASE_DIR/deploy.log"
 WIREGUARD_LOG="$CASE_DIR/wireguard.log"
 STATE_FILE="$CASE_DIR/state/pol-server.state"
+RSS_STATE="$CASE_DIR/rss-configured"
 trap 'rm -rf "$CASE_DIR"' EXIT
 mkdir -p "$FAKE_BIN"
 : > "$DEPLOY_LOG"
@@ -81,6 +82,12 @@ case "$mode" in
     --check-backup)
         printf '%s\n' 'Backup state: configured'
         ;;
+    --check-rss-email)
+        [ -f "$RSS_STATE" ]
+        ;;
+    --configure-rss-email)
+        : > "$RSS_STATE"
+        ;;
 esac
 EOF
 
@@ -101,7 +108,7 @@ esac
 EOF
 
 chmod +x "$FAKE_BIN/fake-deploy" "$FAKE_BIN/fake-wireguard-bootstrap" "$FAKE_BIN/ssh"
-export DEPLOY_LOG WIREGUARD_LOG
+export DEPLOY_LOG WIREGUARD_LOG RSS_STATE
 export POL_SERVER_DEPLOY="$FAKE_BIN/fake-deploy"
 export POL_SERVER_WIREGUARD_BOOTSTRAP="$FAKE_BIN/fake-wireguard-bootstrap"
 export POL_SERVER_BOOTSTRAP_STATE="$STATE_FILE"
@@ -124,6 +131,7 @@ for mode in \
     --check-backup-repository \
     --restore-test-backup \
     --check-github-mirrors \
+    --check-rss-email \
     --configure-rss-email \
     --test-rss-email \
     --email-wd-report \
@@ -148,6 +156,19 @@ printf 'n\n' | "$BOOTSTRAP" --host fake-nas --run >/dev/null
     fail 'a resumed full bootstrap must not replace an accepted RSS credential'
 [ "$(grep -Fc -- '--host fake-nas --test-rss-email' "$DEPLOY_LOG")" -eq 2 ] ||
     fail 'a resumed full bootstrap must revalidate RSS delivery'
+
+: > "$DEPLOY_LOG"
+EXISTING_STATE_FILE="$CASE_DIR/state/existing-rss.state"
+printf '%s\n' hardware-qualified immich-library-accepted wireguard-mobile-accepted > \
+    "$EXISTING_STATE_FILE"
+export POL_SERVER_BOOTSTRAP_STATE="$EXISTING_STATE_FILE"
+printf 'n\ny\n' | "$BOOTSTRAP" --host fake-nas --run >/dev/null
+! grep -Fq -- '--host fake-nas --configure-rss-email' "$DEPLOY_LOG" ||
+    fail 'an existing healthy RSS credential must be reused without prompting'
+grep -Fq -- '--host fake-nas --test-rss-email' "$DEPLOY_LOG" ||
+    fail 'an unaccepted existing RSS configuration must send its delivery test'
+grep -Fxq rss-email-accepted "$EXISTING_STATE_FILE" ||
+    fail 'existing RSS configuration acceptance must be recorded'
 
 : > "$DEPLOY_LOG"
 export FAKE_DEPLOY_FAILURE=--run-backup
