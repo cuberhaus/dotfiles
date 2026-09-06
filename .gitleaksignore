@@ -1,8 +1,6 @@
 # gitleaks allowlist — historical findings acknowledged after review.
 # Format: <commit>:<file>:<rule-id>:<line>  (gitleaks fingerprints)
-# These are all in old history (2021-2022); the live working tree no longer
-# tracks the sensitive files (hosts.json is gitignored, .gitconfig untracked).
-# Rotate any still-valid credentials at the source — an allowlist only silences
+# Rotate any still-valid credentials at the source; an allowlist only silences
 # the scanner, it does not invalidate a leaked secret.
 
 # GitHub Copilot OAuth token committed in 2022 (file now gitignored & untracked).
@@ -14,6 +12,7 @@ dd44dcde9632869e6628199fb88243ee8e57ec93:.gitconfig:generic-api-key:4
 
 # False positive: explicit destructive-operation confirmation phrase, not a credential.
 b7c66c7e5575e91baddc4f2abed64e5f7e363731:server/pol-server/storage-setup:generic-api-key:8
+b508b0aea154025aed3e389e092756b35a7688b5:server/pol-server/full-bootstrap:generic-api-key:194
 
 # False positive: deterministic DuckDNS token fixture used only by the hermetic test.
 530e2426ebe08168b103fdcc24cb38f9d61f6df0:tests/test_pol_server_wireguard.sh:generic-api-key:26

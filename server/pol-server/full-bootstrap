@@ -257,18 +257,25 @@ EOF
     run_deploy --check-github-mirrors
 }
 
-offer_rss_acceptance() {
+ensure_rss_acceptance() {
     if state_has rss-email-accepted; then
+        info 'RSS email acceptance is recorded; revalidating delivery.'
+        run_deploy --test-rss-email
         return
     fi
-    if confirm 'Configure or refresh RSS email and send its acceptance messages now?'; then
-        run_deploy --configure-rss-email
-        run_deploy --test-rss-email
-        run_deploy --email-wd-report
-        state_mark rss-email-accepted
-    else
-        warn 'RSS email acceptance remains pending and will be offered on the next run.'
-    fi
+    cat <<'EOF'
+
+RSS email is part of the complete server lifecycle. Enter the Gmail sender,
+optional recipient, and Gmail app password only into the upcoming terminal
+prompts. The credential remains root-only on the NAS and outside Git.
+EOF
+    run_deploy --configure-rss-email
+    run_deploy --test-rss-email
+    run_deploy --email-wd-report
+    require_confirmation \
+        'Did the RSS delivery test and WD SMART report arrive?' \
+        'RSS email delivery acceptance remains incomplete.'
+    state_mark rss-email-accepted
 }
 
 ensure_immich() {
@@ -342,10 +349,25 @@ verify_maintenance_closed() {
 }
 
 status() {
+    local baseline_output
     local failed=false
     require_reachable_host
+    if baseline_output="$(run_deploy --check)"; then
+        printf '%s\n' "$baseline_output"
+    else
+        printf '%s\n' "$baseline_output"
+        failed=true
+    fi
+    if ! grep -Fq 'Service active and enabled: pol-server-rss-email.timer' \
+        <<< "$baseline_output"; then
+        error 'RSS email timer is not configured, active, and enabled.'
+        failed=true
+    fi
+    if ! state_has rss-email-accepted; then
+        error 'RSS email delivery acceptance is not recorded.'
+        failed=true
+    fi
     for audit_mode in \
-        --check \
         --hardware-report \
         --check-storage \
         --check-samba \
@@ -375,7 +397,7 @@ run() {
     ensure_samba
     ensure_backup
     ensure_github_mirrors
-    offer_rss_acceptance
+    ensure_rss_acceptance
     ensure_immich
     ensure_monitoring
     run_wireguard_acceptance

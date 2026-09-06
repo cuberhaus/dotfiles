@@ -16,6 +16,12 @@ assert_file_contains() {
     grep -Fq -- "$expected" "$file" || fail "Expected $file to contain: $expected"
 }
 
+assert_file_excludes() {
+    local file="$1"
+    local unexpected="$2"
+    ! grep -Fq -- "$unexpected" "$file" || fail "Expected $file to exclude: $unexpected"
+}
+
 [ -x "$BOOTSTRAP" ] || fail 'full pol-server bootstrap must exist and be executable'
 assert_file_contains "$MAKEFILE" 'bootstrap-pol-server-full:'
 assert_file_contains "$MAKEFILE" 'bash tests/test_pol_server_full_bootstrap.sh'
@@ -45,6 +51,9 @@ assert_file_contains "$BOOTSTRAP" 'wireguard-bootstrap'
 assert_file_contains "$BOOTSTRAP" 'make -C'
 assert_file_contains "$BOOTSTRAP" 'RESTORE-WD-IMMICH'
 assert_file_contains "$BOOTSTRAP" 'sudo -n true'
+assert_file_excludes "$BOOTSTRAP" "if confirm 'Configure or refresh RSS email"
+assert_file_contains "$BOOTSTRAP" 'Did the RSS delivery test and WD SMART report arrive?'
+assert_file_contains "$BOOTSTRAP" 'Service active and enabled: pol-server-rss-email.timer'
 
 CASE_DIR="$(mktemp -d)"
 FAKE_BIN="$CASE_DIR/bin"
@@ -62,6 +71,9 @@ printf '%s\n' "$*" >> "$DEPLOY_LOG"
 mode="${*: -1}"
 [ "${FAKE_DEPLOY_FAILURE:-}" != "$mode" ] || exit 1
 case "$mode" in
+    --check)
+        printf '%s\n' '[INFO] Service active and enabled: pol-server-rss-email.timer'
+        ;;
     --check-samba)
         printf '%s\n' 'Samba state: configured' 'Account state: enrolled (pol-files)' \
             'Service state: active and enabled' 'NetBIOS state: inactive and disabled'
@@ -97,7 +109,7 @@ export POL_SERVER_ALLOW_NONINTERACTIVE=true
 export POL_SERVER_SKIP_LOCAL_CHECK=true
 export PATH="$FAKE_BIN:$PATH"
 
-printf 'y\nn\nn\nn\nn\ny\n' | "$BOOTSTRAP" --host fake-nas --run >/dev/null
+printf 'y\nn\nn\nn\ny\ny\n' | "$BOOTSTRAP" --host fake-nas --run >/dev/null
 for mode in \
     --revoke-maintenance \
     --enroll-maintenance \
@@ -112,6 +124,9 @@ for mode in \
     --check-backup-repository \
     --restore-test-backup \
     --check-github-mirrors \
+    --configure-rss-email \
+    --test-rss-email \
+    --email-wd-report \
     --check-immich \
     --backup-immich \
     --check-monitoring \
@@ -122,10 +137,17 @@ done
 grep -Fq -- '--host fake-nas' "$WIREGUARD_LOG" ||
     fail 'full bootstrap must compose the tracked WireGuard bootstrap'
 grep -Fxq hardware-qualified "$STATE_FILE" || fail 'hardware acceptance must be resumable'
+grep -Fxq rss-email-accepted "$STATE_FILE" || fail 'RSS email acceptance must be resumable'
 grep -Fxq immich-library-accepted "$STATE_FILE" || fail 'Immich acceptance must be resumable'
 grep -Fxq wireguard-mobile-accepted "$STATE_FILE" || fail 'WireGuard acceptance must be resumable'
 [ "$(tail -n 1 "$DEPLOY_LOG")" = 'ssh:sudo -n true' ] ||
     fail 'full bootstrap must finish by proving broad maintenance is closed'
+
+printf 'n\n' | "$BOOTSTRAP" --host fake-nas --run >/dev/null
+[ "$(grep -Fc -- '--host fake-nas --configure-rss-email' "$DEPLOY_LOG")" -eq 1 ] ||
+    fail 'a resumed full bootstrap must not replace an accepted RSS credential'
+[ "$(grep -Fc -- '--host fake-nas --test-rss-email' "$DEPLOY_LOG")" -eq 2 ] ||
+    fail 'a resumed full bootstrap must revalidate RSS delivery'
 
 : > "$DEPLOY_LOG"
 export FAKE_DEPLOY_FAILURE=--run-backup

@@ -28,6 +28,9 @@ maintenance access after success, failure, or interruption.
 The workflow is safe to resume. Live audits decide whether configured services
 need work; human acceptance decisions are recorded outside Git at
 `${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus/pol-server-bootstrap.state`.
+RSS setup is required: the workflow validates the Gmail app credential, sends
+the delivery test and WD SMART report, and stops until their receipt is
+confirmed. The credential is entered only in the server terminal prompt.
 One-shot storage migration and Immich recovery still require the exact typed
 tokens `ERASE-KINGSTON-SA400S37960G` and `RESTORE-WD-IMMICH`. Secrets and
 passwords are entered only into terminal prompts.
