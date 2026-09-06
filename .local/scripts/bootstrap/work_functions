@@ -112,6 +112,7 @@ node_install() {
     command -v cline &>/dev/null || sudo npm install -g cline
     command -v markdownlint-cli2 &>/dev/null || sudo npm install -g markdownlint-cli2
     command -v copilot &>/dev/null || sudo npm install -g @github/copilot
+    command -v codex &>/dev/null || sudo npm install -g @openai/codex
 
     # Add more global npm packages below as needed:
     # sudo npm install -g <package>

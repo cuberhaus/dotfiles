@@ -39,7 +39,7 @@ dev_tools_uninstall() {
 ###############################################################
 node_uninstall() {
     info "Uninstalling Node.js and global packages..."
-    sudo npm uninstall -g cline markdownlint-cli2 || true
+    sudo npm uninstall -g cline markdownlint-cli2 @openai/codex || true
     $apt_remove nodejs || true
     
     # Remove NodeSource repo

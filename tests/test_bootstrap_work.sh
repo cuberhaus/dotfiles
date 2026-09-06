@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK_BOOTSTRAP="$REPO_ROOT/.local/scripts/bootstrap/work"
 WORK_FUNCTIONS="$REPO_ROOT/.local/scripts/bootstrap/work_functions"
+WORK_UNINSTALL_FUNCTIONS="$REPO_ROOT/.local/scripts/bootstrap/uninstall_work_functions"
 CASE_DIR="$(mktemp -d)"
 EVENT_LOG="$CASE_DIR/events.log"
 RM_COMMAND="$(command -v rm)"
@@ -16,6 +17,10 @@ fail() {
 
 grep -Fq "if [[ \"\${BASH_SOURCE[0]}\" == \"\$0\" ]]; then" "$WORK_BOOTSTRAP" ||
     fail 'work bootstrap must be sourceable without provisioning the machine'
+grep -Fq 'command -v codex &>/dev/null || sudo npm install -g @openai/codex' "$WORK_FUNCTIONS" ||
+    fail 'work bootstrap must install the OpenAI Codex CLI'
+grep -Fq 'sudo npm uninstall -g cline markdownlint-cli2 @openai/codex' "$WORK_UNINSTALL_FUNCTIONS" ||
+    fail 'work bootstrap uninstall must remove the OpenAI Codex CLI'
 
 export HOME="$CASE_DIR/home"
 export XDG_CONFIG_HOME="$HOME/.config"
