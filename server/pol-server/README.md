@@ -406,6 +406,62 @@ follow-up. Until that path is configured and deliberately failed end to end,
 the dashboard complements existing systemd and `smartd` state but does not
 satisfy the external-alert acceptance gate.
 
+## Private remote access
+
+The tracked remote-access design runs plain WireGuard on Debian as `wg0`; it
+does not depend on Tailscale or expose an application directly. The server uses
+`10.77.0.1/24` and UDP `51820`. Its fixed first peer, `pol-iphone`, uses
+`10.77.0.2/32` and receives only the route `192.168.1.34/32`. A pre-NAT
+nftables hook accepts that peer only for Immich TCP `2283` and Netdata TCP
+`19999`, then drops every other packet entering through `wg0`. Applying the
+restriction before Docker destination NAT keeps the Immich path inside the same
+policy boundary. SSH, SMB, other NAS ports, and full-tunnel Internet access are
+not allowed for this peer.
+
+Enroll the current root-owned bundle during bounded maintenance, then install
+and audit the server:
+
+```bash
+make enroll-pol-server-maintenance
+make install-pol-server-wireguard
+make revoke-pol-server-maintenance
+```
+
+The server private key is generated on the NAS and stored root-only. Install
+`wireguard-tools` and `qrencode` on the managed workstation, then generate the
+iPhone private key and profile locally:
+
+```bash
+make generate-pol-server-wireguard-client
+make show-pol-server-wireguard-qr
+make audit-pol-server-wireguard
+```
+
+The profile remains outside Git at
+`~/.config/cuberhaus/secrets/pol-server-wireguard-pol-iphone.conf` with mode
+`0600`. The QR command refuses non-interactive output so the private profile is
+not emitted to redirected logs. After import, attach the profile to the
+password manager and configure WireGuard on demand in the iOS app for cellular
+and away Wi-Fi, excluding `MOVISTAR_PLUS_9460`; iOS on-demand rules are not part
+of the portable WireGuard configuration format.
+
+Reserve MAC `dc:f5:05:65:af:e1` as `192.168.1.34` in the router and forward only
+external UDP `51820` to `192.168.1.34:51820`. Never forward TCP `2283`, `19999`,
+`22`, or `445`. The profile endpoint is
+`pol-home-nas.duckdns.org:51820`. Prefer the router's DDNS client only if it
+explicitly supports DuckDNS. Otherwise, after reserving that DuckDNS name, use
+the credential-backed NAS fallback:
+
+```bash
+make configure-pol-server-duckdns
+```
+
+The token is read without echo, stored root-only, loaded as a systemd
+credential, and used by a five-minute timer without appearing in command-line
+arguments. Revoke the phone independently with
+`make revoke-pol-server-wireguard-client`; generate a new profile to enroll a
+replacement key.
+
 ## Current inventory
 
 Initial device letters were recorded on 2026-09-05, but they changed across

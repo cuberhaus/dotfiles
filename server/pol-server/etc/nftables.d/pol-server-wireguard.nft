@@ -1,0 +1,8 @@
+table inet pol_server_wireguard {
+    chain peer_ingress {
+        type filter hook prerouting priority raw; policy accept;
+
+        iifname "wg0" ip saddr 10.77.0.2 ip daddr 192.168.1.34 tcp dport { 2283, 19999 } accept
+        iifname "wg0" drop
+    }
+}

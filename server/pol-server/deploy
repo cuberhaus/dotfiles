@@ -56,6 +56,12 @@ Usage: deploy [--host HOST] MODE
     --restore-immich-apply         Apply the fixed WD recovery set with rollback copies.
     --install-monitoring           Install native LAN-only Netdata.
     --check-monitoring             Audit Netdata configuration and reachability.
+    --install-wireguard            Install the restricted WireGuard server.
+    --check-wireguard              Audit WireGuard, peer, and firewall state.
+    --generate-wireguard-client    Generate and enroll pol-iphone locally.
+    --show-wireguard-qr            Show pol-iphone's QR in an interactive terminal.
+    --revoke-wireguard-client      Revoke pol-iphone from the server.
+    --configure-duckdns            Store the DuckDNS token interactively.
 EOF
 }
 
@@ -69,7 +75,7 @@ while (( $# > 0 )); do
             remote_host="$2"
             shift
             ;;
-        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--check-backup|--prepare-backup|--generate-restic-password|--run-backup|--check-backup-repository|--restore-test-backup|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report|--install-immich|--check-immich|--configure-immich|--start-immich|--stop-immich|--backup-immich|--upgrade-immich|--restore-immich|--restore-immich-apply|--install-monitoring|--check-monitoring)
+        --check|--apply|--enroll|--enroll-maintenance|--revoke-maintenance|--reboot|--upgrade|--hardware-report|--check-storage|--prepare-storage|--check-samba|--configure-samba|--set-samba-password|--generate-samba-password|--test-samba-access|--check-backup|--prepare-backup|--generate-restic-password|--run-backup|--check-backup-repository|--restore-test-backup|--audit-wd-backup|--start-smart-long-kingston|--start-smart-long-micron|--start-smart-long-wd-backup|--thermal-load|--configure-github-mirrors|--sync-github-mirrors|--check-github-mirrors|--configure-rss-email|--run-rss-email|--test-rss-email|--email-wd-report|--install-immich|--check-immich|--configure-immich|--start-immich|--stop-immich|--backup-immich|--upgrade-immich|--restore-immich|--restore-immich-apply|--install-monitoring|--check-monitoring|--install-wireguard|--check-wireguard|--generate-wireguard-client|--show-wireguard-qr|--revoke-wireguard-client|--configure-duckdns)
             mode="$1"
             ;;
         --help|-h)
@@ -99,6 +105,7 @@ case "$mode" in
         install-autonomy \
         maintenance-access \
         monitoring-setup \
+        wireguard-setup \
         samba-setup \
         pol-server-bootstrap \
         pol-server-hardware \
@@ -109,6 +116,7 @@ case "$mode" in
         pol-server-rss-email \
         pol-server-immich \
         pol-server-monitoring \
+        pol-server-wireguard \
         rss-email \
         pol-server-maintenance \
         packages.txt \
@@ -349,6 +357,82 @@ case "$mode" in
 --check-monitoring)
     ssh -o BatchMode=yes "$remote_host" \
         'sudo -n /usr/local/sbin/pol-server-monitoring --check'
+    ;;
+--install-wireguard)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-wireguard --install'
+    ;;
+--check-wireguard)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-wireguard --check'
+    ;;
+--generate-wireguard-client)
+    if ! command -v wg >/dev/null 2>&1; then
+        printf 'Local wireguard-tools is required to generate the iPhone key.\n' >&2
+        exit 127
+    fi
+    secret_dir="${XDG_CONFIG_HOME:-$HOME/.config}/cuberhaus/secrets"
+    client_config="$secret_dir/pol-server-wireguard-pol-iphone.conf"
+    install -d -m 0700 "$secret_dir"
+    umask 077
+    private_key="$(mktemp "$secret_dir/.pol-iphone-private.XXXXXX")"
+    public_key="$(mktemp "$secret_dir/.pol-iphone-public.XXXXXX")"
+    temporary_config="$(mktemp "$secret_dir/.pol-iphone-config.XXXXXX")"
+    cleanup_wireguard_client() {
+        rm -f -- "$private_key" "$public_key" "$temporary_config"
+    }
+    trap cleanup_wireguard_client EXIT
+    wg genkey > "$private_key"
+    wg pubkey < "$private_key" > "$public_key"
+    server_public_key="$(
+        ssh -o BatchMode=yes "$remote_host" \
+            'sudo -n /usr/local/sbin/pol-server-wireguard --server-public-key'
+    )"
+    {
+        printf '%s\n' '[Interface]'
+        printf 'PrivateKey = %s\n' "$(cat "$private_key")"
+        printf '%s\n' 'Address = 10.77.0.2/32'
+        printf '\n%s\n' '[Peer]'
+        printf 'PublicKey = %s\n' "$server_public_key"
+        printf '%s\n' 'Endpoint = pol-home-nas.duckdns.org:51820'
+        printf '%s\n' 'AllowedIPs = 192.168.1.34/32'
+        printf '%s\n' 'PersistentKeepalive = 25'
+    } > "$temporary_config"
+    if ! ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-wireguard --enroll-pol-iphone-stdin' \
+        < "$public_key"; then
+        printf 'Peer enrollment failed; the local client configuration was not replaced.\n' >&2
+        exit 1
+    fi
+    install -m 0600 "$temporary_config" "$client_config"
+    cleanup_wireguard_client
+    trap - EXIT
+    printf 'WireGuard client configuration stored locally at %s (mode 0600).\n' "$client_config"
+    printf 'Run make show-pol-server-wireguard-qr in your own terminal to scan it.\n'
+    ;;
+--show-wireguard-qr)
+    client_config="${XDG_CONFIG_HOME:-$HOME/.config}/cuberhaus/secrets/pol-server-wireguard-pol-iphone.conf"
+    if [ ! -r "$client_config" ] || [ "$(stat -c '%a' "$client_config")" != 600 ]; then
+        printf 'Expected a readable mode-0600 client configuration at %s\n' "$client_config" >&2
+        exit 1
+    fi
+    if ! command -v qrencode >/dev/null 2>&1; then
+        printf 'Local qrencode is required to display the enrollment QR.\n' >&2
+        exit 127
+    fi
+    if [ ! -t 1 ]; then
+        printf 'Refusing to emit the private enrollment QR outside an interactive terminal.\n' >&2
+        exit 1
+    fi
+    qrencode -t ANSIUTF8 < "$client_config"
+    ;;
+--revoke-wireguard-client)
+    ssh -o BatchMode=yes "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-wireguard --revoke-pol-iphone'
+    ;;
+--configure-duckdns)
+    ssh -o BatchMode=yes -t "$remote_host" \
+        'sudo -n /usr/local/sbin/pol-server-wireguard --configure-duckdns-token'
     ;;
 --revoke-maintenance)
     ssh -o BatchMode=yes "$remote_host" \

@@ -82,7 +82,7 @@ Baseline recorded on 2026-09-05:
 | Immich | Restore acceptance in progress | Tracked v3.1.0 stack is LAN-bound with media on Kingston and PostgreSQL on Micron; preserved WD recovery is being restored |
 | OpenClaw | Pending | Must wait for backup and Docker; use a cloud model initially |
 | Monitoring | Local monitoring complete | Native LAN-only Netdata 2.11.0 with three-month/2 GiB bounded history; external Healthchecks.io email acceptance remains pending |
-| Remote access | Pending | WireGuard waits until LAN operation and recovery are proven |
+| Remote access | Tracked implementation complete; deployment pending | NAS-hosted `wg0`, fixed iPhone peer, pre-NAT nftables restriction, local key generation, revocation, and optional DuckDNS timer have hermetic tests; router and mobile acceptance remain |
 
 ## Phase 0: close hardware and data gates
 
@@ -387,18 +387,38 @@ channel and the maintenance checklist can be executed from the tracked runbook.
 
 ## Phase 8: add private remote access
 
-Status: **deferred until LAN and restore acceptance pass**.
+Status: **tracked implementation complete; live deployment and acceptance in
+progress**.
 
-1. Determine public IPv4, usable inbound IPv6, or CGNAT from the router and a
-   mobile-network test.
-2. Prefer plain WireGuard on the router when its implementation is maintained
-   and exportable; otherwise run it on Debian.
-3. Under CGNAT, request a public address before paying for a small external
-   WireGuard hub.
-4. Assign one key and least-privilege route set per client. Store private keys
-   in the password manager or encrypted backup, not in this repository.
-5. Expose only the WireGuard UDP listener. Keep SSH, SMB, Immich, OpenClaw, and
-   administration panels private.
+Read-only inventory found a dynamic Telefonica public IPv4 address, no usable
+public IPv6, and no strong CGNAT evidence. The Movistar Askey router does not
+provide the selected VPN implementation, so Debian owns plain WireGuard. The
+confirmed server and first-peer contract is:
+
+- `wg0` at `10.77.0.1/24`, listening on UDP `51820`.
+- Fixed peer `pol-iphone` at `10.77.0.2/32`.
+- Split route `192.168.1.34/32`; no default route through the NAS.
+- Pre-NAT nftables access only to Immich TCP `2283` and Netdata TCP `19999`.
+- SSH, SMB, every other NAS port, and forwarded Internet traffic denied.
+- Endpoint `pol-home-nas.duckdns.org:51820`; router-managed DuckDNS when
+  explicitly supported, otherwise the approved root-only five-minute timer.
+- Client private key and profile generated only on the managed workstation,
+  stored mode `0600`, shown as a QR only in an interactive local terminal, and
+  backed up to the password manager.
+
+Remaining live steps are:
+
+1. Reserve NAS MAC `dc:f5:05:65:af:e1` as `192.168.1.34` in the router.
+2. Reserve `pol-home-nas` in DuckDNS and choose router DDNS or the NAS fallback.
+3. Deploy the root-owned bundle, install WireGuard, and enroll `pol-iphone`.
+4. Forward only UDP `51820` to `192.168.1.34`; do not forward application or
+   administration ports.
+5. Configure iOS on demand for cellular and away Wi-Fi while excluding
+   `MOVISTAR_PLUS_9460`.
+6. From mobile data, prove Immich and Netdata work while SSH and SMB fail.
+7. Revoke the peer and prove access stops, then generate a replacement profile.
+8. Confirm an external scan exposes no application ports and close temporary
+   maintenance access.
 
 Acceptance gate: an approved mobile peer reaches only allowed services, a
 revoked peer fails, and an external scan finds no application ports exposed.

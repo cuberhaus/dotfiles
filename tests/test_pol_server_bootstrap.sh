@@ -14,6 +14,7 @@ GITHUB_MIRROR="$REPO_ROOT/server/pol-server/github-mirror"
 RSS_EMAIL="$REPO_ROOT/server/pol-server/rss-email"
 IMMICH="$REPO_ROOT/server/pol-server/immich-setup"
 MONITORING="$REPO_ROOT/server/pol-server/monitoring-setup"
+WIREGUARD="$REPO_ROOT/server/pol-server/wireguard-setup"
 CASE_DIR="$(mktemp -d)"
 FAKE_ROOT="$CASE_DIR/root"
 FAKE_BIN="$CASE_DIR/bin"
@@ -47,6 +48,7 @@ assert_file_contains() {
 [ -x "$RSS_EMAIL" ] || fail 'pol-server RSS email command must exist and be executable'
 [ -x "$IMMICH" ] || fail 'pol-server Immich command must exist and be executable'
 [ -x "$MONITORING" ] || fail 'pol-server monitoring command must exist and be executable'
+[ -x "$WIREGUARD" ] || fail 'pol-server WireGuard command must exist and be executable'
 [ -x "$DEPLOY" ] || fail 'pol-server deploy must exist and be executable'
 [ -x "$INSTALLER" ] || fail 'pol-server autonomy installer must exist and be executable'
 grep -Eq '^[[:space:]]*rss-email[[:space:]]*\\$' "$DEPLOY" ||
@@ -71,6 +73,10 @@ grep -Eq '^[[:space:]]*monitoring-setup[[:space:]]*\\$' "$DEPLOY" ||
     fail 'pol-server deploy must transfer the monitoring setup command'
 grep -Eq '^[[:space:]]*pol-server-monitoring[[:space:]]*\\$' "$DEPLOY" ||
     fail 'pol-server deploy must transfer the monitoring launcher'
+grep -Eq '^[[:space:]]*wireguard-setup[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the WireGuard setup command'
+grep -Eq '^[[:space:]]*pol-server-wireguard[[:space:]]*\\$' "$DEPLOY" ||
+    fail 'pol-server deploy must transfer the WireGuard launcher'
 grep -Fq 'bootstrap-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose bootstrap-pol-server'
 grep -Fq 'audit-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose audit-pol-server'
 grep -Fq 'enroll-pol-server:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose enroll-pol-server'
@@ -116,6 +122,13 @@ grep -Fq 'bash tests/test_pol_server_immich.sh' "$REPO_ROOT/Makefile" || fail 'm
 grep -Fq 'install-pol-server-monitoring:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose Netdata installation'
 grep -Fq 'audit-pol-server-monitoring:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the Netdata audit'
 grep -Fq 'bash tests/test_pol_server_monitoring.sh' "$REPO_ROOT/Makefile" || fail 'make test must include the Netdata contract'
+grep -Fq 'install-pol-server-wireguard:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose WireGuard installation'
+grep -Fq 'audit-pol-server-wireguard:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose the WireGuard audit'
+grep -Fq 'generate-pol-server-wireguard-client:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose local WireGuard client generation'
+grep -Fq 'show-pol-server-wireguard-qr:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose local WireGuard QR display'
+grep -Fq 'revoke-pol-server-wireguard-client:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose WireGuard peer revocation'
+grep -Fq 'configure-pol-server-duckdns:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose DuckDNS configuration'
+grep -Fq 'bash tests/test_pol_server_wireguard.sh' "$REPO_ROOT/Makefile" || fail 'make test must include the WireGuard contract'
 grep -Fq 'configure-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror authentication'
 grep -Fq 'sync-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose manual GitHub mirror sync'
 grep -Fq 'audit-pol-server-github-mirrors:' "$REPO_ROOT/Makefile" || fail 'Makefile must expose GitHub mirror checks'
@@ -169,6 +182,14 @@ grep -Fq "'sudo -n /usr/local/sbin/pol-server-monitoring --install'" "$DEPLOY" |
     fail 'remote Netdata installation must use its exact root command'
 grep -Fq "'sudo -n /usr/local/sbin/pol-server-monitoring --check'" "$DEPLOY" ||
     fail 'remote Netdata audit must use its exact root command'
+for mode in install check; do
+    grep -Fq "'sudo -n /usr/local/sbin/pol-server-wireguard --$mode'" "$DEPLOY" ||
+        fail "remote WireGuard $mode must use its exact root command"
+done
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-wireguard --enroll-pol-iphone-stdin'" "$DEPLOY" ||
+    fail 'remote WireGuard enrollment must use its exact root command'
+grep -Fq "'sudo -n /usr/local/sbin/pol-server-wireguard --revoke-pol-iphone'" "$DEPLOY" ||
+    fail 'remote WireGuard revocation must use its exact root command'
 
 mkdir -p "$FAKE_ROOT/etc" "$FAKE_BIN"
 : > "$EVENT_LOG"
@@ -331,6 +352,7 @@ assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-github-mirror" '/usr/
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-rss-email" '/usr/local/lib/cuberhaus/pol-server/rss-email'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-immich" '/usr/local/lib/cuberhaus/pol-server/immich-setup'
 assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-monitoring" '/usr/local/lib/cuberhaus/pol-server/monitoring-setup'
+assert_file_contains "$FAKE_ROOT/usr/local/sbin/pol-server-wireguard" '/usr/local/lib/cuberhaus/pol-server/wireguard-setup'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-bootstrap --apply'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-bootstrap --check'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" 'NOPASSWD: /usr/local/sbin/pol-server-hardware --report'
@@ -371,6 +393,10 @@ assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" \
     'NOPASSWD: /usr/local/sbin/pol-server-monitoring --install'
 assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" \
     'NOPASSWD: /usr/local/sbin/pol-server-monitoring --check'
+for mode in install check enroll-pol-iphone-stdin revoke-pol-iphone server-public-key configure-duckdns-token; do
+    assert_file_contains "$FAKE_ROOT/etc/sudoers.d/pol-server-bootstrap" \
+        "NOPASSWD: /usr/local/sbin/pol-server-wireguard --$mode"
+done
 assert_file_contains "$EVENT_LOG" 'visudo:-cf'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/bootstrap" ] ||
     fail 'installer must deploy an executable root-owned bootstrap bundle'
@@ -390,6 +416,8 @@ assert_file_contains "$EVENT_LOG" 'visudo:-cf'
     fail 'installer must deploy the executable Immich command'
 [ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/monitoring-setup" ] ||
     fail 'installer must deploy the executable monitoring command'
+[ -x "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/wireguard-setup" ] ||
+    fail 'installer must deploy the executable WireGuard command'
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/immich/compose.yaml" \
     "- '\${IMMICH_BIND_ADDRESS}:2283:2283'"
 assert_file_contains "$FAKE_ROOT/usr/local/lib/cuberhaus/pol-server/etc/systemd/system/pol-server-immich.service" \

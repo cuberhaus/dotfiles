@@ -1,0 +1,565 @@
+#!/usr/bin/env bash
+# Description: Install and audit restricted WireGuard access to pol-server.
+set -euo pipefail
+
+server_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+root_prefix="${POL_SERVER_ROOT:-}"
+mode=--check
+state_dir="${root_prefix%/}/etc/cuberhaus"
+wireguard_dir="${root_prefix%/}/etc/wireguard"
+private_key_file="$state_dir/wireguard-server-private-key"
+public_key_file="$state_dir/wireguard-server-public-key"
+peer_key_file="$state_dir/wireguard-pol-iphone-public-key"
+config_file="$wireguard_dir/wg0.conf"
+firewall_source="$server_dir/etc/nftables.d/pol-server-wireguard.nft"
+firewall_file="${root_prefix%/}/etc/nftables.d/pol-server-wireguard.nft"
+firewall_unit=pol-server-wireguard-firewall.service
+wireguard_unit=wg-quick@wg0.service
+duckdns_unit=pol-server-duckdns.service
+duckdns_timer=pol-server-duckdns.timer
+duckdns_token_file="$state_dir/duckdns-token"
+configuration_changed=false
+firewall_changed=false
+units_changed=false
+sysctl_changed=false
+config_backup=
+config_was_created=false
+
+info() { printf '\033[34m[INFO]\033[0m %s\n' "$*"; }
+warn() { printf '\033[33m[WARN]\033[0m %s\n' "$*"; }
+error() { printf '\033[31m[ERROR]\033[0m %s\n' "$*" >&2; }
+
+usage() {
+    cat <<'EOF'
+Usage: wireguard-setup MODE
+
+  --install                     Install and configure the restricted wg0 server.
+  --check                       Audit package, keys, policy, service, and peer state.
+  --enroll-pol-iphone-stdin     Read and enroll the fixed peer public key from stdin.
+  --revoke-pol-iphone           Remove the fixed peer from wg0.
+  --server-public-key           Print only the server public key.
+  --configure-duckdns-token     Read and store the DuckDNS token without echoing it.
+  --apply-firewall              Apply the tracked nftables table (systemd use).
+  --update-duckdns              Update the fixed DuckDNS hostname (systemd use).
+EOF
+}
+
+root_path() {
+    printf '%s%s\n' "${root_prefix%/}" "$1"
+}
+
+require_supported_host() {
+    local os_release distro_id distro_version
+    os_release="$(root_path /etc/os-release)"
+    [ -r "$os_release" ] || {
+        error "Cannot read $os_release"
+        return 1
+    }
+    distro_id="$(. "$os_release"; printf '%s' "${ID:-}")"
+    distro_version="$(. "$os_release"; printf '%s' "${VERSION_ID:-}")"
+    if [ "$distro_id" != debian ] || [ "$distro_version" != 13 ]; then
+        error "Expected Debian 13, found ${distro_id:-unknown} ${distro_version:-unknown}"
+        return 1
+    fi
+}
+
+require_root() {
+    if [ "${POL_SERVER_ALLOW_UNPRIVILEGED:-false}" != true ] && (( EUID != 0 )); then
+        error 'Run this mode as root through the tracked deploy script.'
+        return 1
+    fi
+}
+
+package_installed() {
+    dpkg-query -W -f='${db:Status-Status}' wireguard-tools >/dev/null 2>&1
+}
+
+valid_wireguard_key() {
+    local key="$1" decoded_size
+    [[ "$key" =~ ^[A-Za-z0-9+/]{43}=$ ]] || return 1
+    decoded_size="$(printf '%s' "$key" | base64 -d 2>/dev/null | wc -c)"
+    [ "$decoded_size" = 32 ]
+}
+
+install_if_changed() {
+    local source="$1" target="$2" mode_bits="$3" expected_mode
+    expected_mode="${mode_bits#0}"
+    if cmp -s "$source" "$target" 2>/dev/null &&
+        [ "$(stat -c '%a' "$target" 2>/dev/null || true)" = "$expected_mode" ]; then
+        return 1
+    fi
+    install -D -m "$mode_bits" "$source" "$target"
+    return 0
+}
+
+ensure_server_keys() {
+    local private_key derived_public temporary_private temporary_public
+    install -d -m 0700 "$state_dir"
+    if [ -e "$public_key_file" ] && [ ! -e "$private_key_file" ]; then
+        error 'Server public key exists without its private key; refusing key rotation.'
+        return 1
+    fi
+
+    if [ ! -e "$private_key_file" ]; then
+        temporary_private="$(mktemp "$state_dir/.wireguard-private.XXXXXX")"
+        temporary_public="$(mktemp "$state_dir/.wireguard-public.XXXXXX")"
+        chmod 0600 "$temporary_private" "$temporary_public"
+        if ! wg genkey > "$temporary_private" ||
+            ! wg pubkey < "$temporary_private" > "$temporary_public"; then
+            rm -f -- "$temporary_private" "$temporary_public"
+            error 'Failed to generate the WireGuard server key pair.'
+            return 1
+        fi
+        install -m 0600 "$temporary_private" "$private_key_file"
+        install -m 0644 "$temporary_public" "$public_key_file"
+        rm -f -- "$temporary_private" "$temporary_public"
+        info 'Generated a new root-only WireGuard server key.'
+        return
+    fi
+
+    private_key="$(cat "$private_key_file")"
+    if ! valid_wireguard_key "$private_key" ||
+        ! derived_public="$(printf '%s' "$private_key" | wg pubkey)" ||
+        ! valid_wireguard_key "$derived_public"; then
+        error 'Existing WireGuard server private key is invalid; refusing key rotation.'
+        return 1
+    fi
+    if [ ! -e "$public_key_file" ] || [ "$(cat "$public_key_file")" != "$derived_public" ]; then
+        printf '%s\n' "$derived_public" | install -m 0644 /dev/stdin "$public_key_file"
+    fi
+    chmod 0600 "$private_key_file"
+    chmod 0644 "$public_key_file"
+}
+
+render_configuration() {
+    local target="$1" private_key peer_key=
+    private_key="$(cat "$private_key_file")"
+    if [ -r "$peer_key_file" ]; then
+        peer_key="$(cat "$peer_key_file")"
+    fi
+    {
+        printf '%s\n' '[Interface]'
+        printf '%s\n' 'Address = 10.77.0.1/24'
+        printf '%s\n' 'ListenPort = 51820'
+        printf 'PrivateKey = %s\n' "$private_key"
+        if [ -n "$peer_key" ]; then
+            printf '\n%s\n' '[Peer]'
+            printf '%s\n' '# pol-iphone'
+            printf 'PublicKey = %s\n' "$peer_key"
+            printf '%s\n' 'AllowedIPs = 10.77.0.2/32'
+        fi
+    } > "$target"
+    chmod 0600 "$target"
+}
+
+stage_configuration() {
+    local temporary_config
+    install -d -m 0700 "$wireguard_dir"
+    temporary_config="$(mktemp "$wireguard_dir/.wg0.conf.XXXXXX")"
+    render_configuration "$temporary_config"
+    if cmp -s "$temporary_config" "$config_file" 2>/dev/null &&
+        [ "$(stat -c '%a' "$config_file" 2>/dev/null || true)" = 600 ]; then
+        rm -f -- "$temporary_config"
+        return
+    fi
+    config_backup="${config_file}.rollback.$$"
+    if [ -e "$config_file" ]; then
+        cp -a -- "$config_file" "$config_backup"
+    else
+        config_was_created=true
+    fi
+    install -m 0600 "$temporary_config" "$config_file"
+    rm -f -- "$temporary_config"
+    configuration_changed=true
+}
+
+rollback_configuration() {
+    if [ -n "$config_backup" ] && [ -e "$config_backup" ]; then
+        install -m 0600 "$config_backup" "$config_file"
+    elif [ "$config_was_created" = true ]; then
+        rm -f -- "$config_file"
+    fi
+    rm -f -- "$config_backup"
+}
+
+finish_configuration() {
+    rm -f -- "$config_backup"
+}
+
+install_tracked_files() {
+    local systemd_dir sysctl_source sysctl_target
+    systemd_dir="${root_prefix%/}/etc/systemd/system"
+    sysctl_source="$server_dir/etc/sysctl.d/90-pol-server-wireguard.conf"
+    sysctl_target="${root_prefix%/}/etc/sysctl.d/90-pol-server-wireguard.conf"
+
+    if install_if_changed "$firewall_source" "$firewall_file" 0644; then
+        firewall_changed=true
+    fi
+    if install_if_changed "$sysctl_source" "$sysctl_target" 0644; then
+        sysctl_changed=true
+    fi
+    for unit_path in \
+        pol-server-wireguard-firewall.service \
+        pol-server-duckdns.service \
+        pol-server-duckdns.timer; do
+        if install_if_changed \
+            "$server_dir/etc/systemd/system/$unit_path" \
+            "$systemd_dir/$unit_path" 0644; then
+            units_changed=true
+        fi
+    done
+    if install_if_changed \
+        "$server_dir/etc/systemd/system/wg-quick@wg0.service.d/pol-server.conf" \
+        "$systemd_dir/wg-quick@wg0.service.d/pol-server.conf" 0644; then
+        units_changed=true
+    fi
+}
+
+unit_ready() {
+    systemctl is-enabled "$1" >/dev/null 2>&1 &&
+        systemctl is-active "$1" >/dev/null 2>&1
+}
+
+apply_firewall() {
+    local transaction
+    [ -r "$firewall_file" ] || {
+        error "Missing tracked firewall policy at $firewall_file"
+        return 1
+    }
+    transaction="$(mktemp)"
+    if nft list table inet pol_server_wireguard >/dev/null 2>&1; then
+        printf '%s\n' 'delete table inet pol_server_wireguard' > "$transaction"
+    fi
+    cat "$firewall_file" >> "$transaction"
+    if ! nft --check --file "$transaction" || ! nft --file "$transaction"; then
+        rm -f -- "$transaction"
+        error 'Failed to apply the WireGuard nftables policy.'
+        return 1
+    fi
+    rm -f -- "$transaction"
+}
+
+apply_install() {
+    local was_installed=false
+    package_installed && was_installed=true
+    if [ "$was_installed" = false ]; then
+        info 'Installing WireGuard tools'
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get install -y wireguard-tools nftables
+    fi
+    ensure_server_keys
+    install_tracked_files
+    stage_configuration
+
+    if [ "$sysctl_changed" = true ]; then
+        sysctl --system >/dev/null
+    fi
+    if [ "$units_changed" = true ]; then
+        systemctl daemon-reload
+    fi
+    if ! unit_ready "$firewall_unit"; then
+        if ! systemctl enable --now "$firewall_unit"; then
+            rollback_configuration
+            error 'WireGuard firewall service failed to start; restored the prior server configuration.'
+            return 1
+        fi
+    elif [ "$firewall_changed" = true ]; then
+        if ! systemctl reload "$firewall_unit"; then
+            rollback_configuration
+            error 'WireGuard firewall rejected the tracked policy; restored the prior server configuration.'
+            return 1
+        fi
+    fi
+    if ! unit_ready "$wireguard_unit"; then
+        if ! systemctl enable --now "$wireguard_unit"; then
+            rollback_configuration
+            error 'WireGuard failed to start; restored the prior server configuration.'
+            return 1
+        fi
+    elif [ "$configuration_changed" = true ]; then
+        if ! systemctl restart "$wireguard_unit"; then
+            rollback_configuration
+            systemctl restart "$wireguard_unit" >/dev/null 2>&1 || true
+            error 'WireGuard rejected the new configuration; restored the prior configuration.'
+            return 1
+        fi
+    fi
+    if [ -r "$duckdns_token_file" ] && ! unit_ready "$duckdns_timer"; then
+        systemctl enable --now "$duckdns_timer"
+    fi
+    finish_configuration
+    info 'WireGuard server installed with LAN-service-only peer policy.'
+}
+
+read_peer_key() {
+    local key extra
+    IFS= read -r key || true
+    if IFS= read -r extra; then
+        error 'Expected exactly one WireGuard public-key line.'
+        return 1
+    fi
+    valid_wireguard_key "$key" || {
+        error 'Invalid WireGuard public key.'
+        return 1
+    }
+    printf '%s' "$key"
+}
+
+replace_peer_key() {
+    local new_key="$1" peer_backup="${peer_key_file}.rollback.$$" peer_existed=false
+    if [ ! -r "$private_key_file" ] || [ ! -r "$config_file" ]; then
+        error 'Install the WireGuard server before changing its peer.'
+        return 1
+    fi
+    if [ -e "$peer_key_file" ]; then
+        cp -a -- "$peer_key_file" "$peer_backup"
+        peer_existed=true
+    fi
+    if [ -n "$new_key" ]; then
+        printf '%s\n' "$new_key" | install -m 0600 /dev/stdin "$peer_key_file"
+    else
+        rm -f -- "$peer_key_file"
+    fi
+    stage_configuration
+    if ! systemctl restart "$wireguard_unit"; then
+        if [ "$peer_existed" = true ]; then
+            install -m 0600 "$peer_backup" "$peer_key_file"
+        else
+            rm -f -- "$peer_key_file"
+        fi
+        rollback_configuration
+        systemctl restart "$wireguard_unit" >/dev/null 2>&1 || true
+        rm -f -- "$peer_backup"
+        error 'WireGuard rejected the peer change; restored the previous peer state.'
+        return 1
+    fi
+    finish_configuration
+    rm -f -- "$peer_backup"
+}
+
+enroll_peer() {
+    local peer_key
+    peer_key="$(read_peer_key)" || return 1
+    replace_peer_key "$peer_key"
+    info 'Enrolled fixed peer pol-iphone at 10.77.0.2/32.'
+}
+
+revoke_peer() {
+    if [ ! -e "$peer_key_file" ]; then
+        info 'Peer pol-iphone is already revoked.'
+        return
+    fi
+    replace_peer_key ''
+    info 'Revoked peer pol-iphone.'
+}
+
+server_public_key() {
+    [ -r "$public_key_file" ] || {
+        error 'WireGuard server public key is unavailable; run --install first.'
+        return 1
+    }
+    cat "$public_key_file"
+}
+
+update_duckdns() {
+    local credential_file token response
+    credential_file="${CREDENTIALS_DIRECTORY:-}/duckdns-token"
+    [ -r "$credential_file" ] || {
+        error 'DuckDNS systemd credential is unavailable.'
+        return 1
+    }
+    token="$(cat "$credential_file")"
+    [[ "$token" =~ ^[A-Za-z0-9-]{16,128}$ ]] || {
+        error 'DuckDNS credential format is invalid.'
+        return 1
+    }
+    response="$({
+        printf '%s\n' 'url = "https://www.duckdns.org/update"'
+        printf '%s\n' 'get'
+        printf '%s\n' 'data-urlencode = "domains=pol-home-nas"'
+        printf 'data-urlencode = "token=%s"\n' "$token"
+        printf '%s\n' 'data-urlencode = "ip="'
+    } | curl --config - --fail --silent --show-error)"
+    [ "$response" = OK ] || {
+        error 'DuckDNS update did not return OK.'
+        return 1
+    }
+    info 'DuckDNS address updated.'
+}
+
+configure_duckdns() {
+    local token temporary_token backup_token="${duckdns_token_file}.rollback.$$" token_existed=false
+    if [ -t 0 ]; then
+        read -r -s -p 'DuckDNS token: ' token
+        printf '\n'
+    else
+        IFS= read -r token
+    fi
+    [[ "$token" =~ ^[A-Za-z0-9-]{16,128}$ ]] || {
+        error 'DuckDNS token must be 16-128 letters, digits, or hyphens.'
+        return 1
+    }
+    install -d -m 0700 "$state_dir"
+    if [ -e "$duckdns_token_file" ]; then
+        cp -a -- "$duckdns_token_file" "$backup_token"
+        token_existed=true
+    fi
+    temporary_token="$(mktemp "$state_dir/.duckdns-token.XXXXXX")"
+    printf '%s\n' "$token" > "$temporary_token"
+    chmod 0600 "$temporary_token"
+    install -m 0600 "$temporary_token" "$duckdns_token_file"
+    rm -f -- "$temporary_token"
+    if ! systemctl start "$duckdns_unit" || ! systemctl enable --now "$duckdns_timer"; then
+        if [ "$token_existed" = true ]; then
+            install -m 0600 "$backup_token" "$duckdns_token_file"
+        else
+            rm -f -- "$duckdns_token_file"
+        fi
+        rm -f -- "$backup_token"
+        error 'DuckDNS validation failed; restored the previous credential.'
+        return 1
+    fi
+    rm -f -- "$backup_token"
+    info 'Stored the DuckDNS credential and enabled its five-minute timer.'
+}
+
+check_wireguard() {
+    local expected_config actual_public actual_peer rules failed=false
+    if package_installed; then
+        info 'WireGuard tools installed.'
+    else
+        error 'WireGuard tools are not installed.'
+        failed=true
+    fi
+    for key_file in "$private_key_file" "$peer_key_file"; do
+        if [ -r "$key_file" ] && [ "$(stat -c '%a' "$key_file")" = 600 ]; then
+            :
+        else
+            error "Missing or non-private WireGuard state: $key_file"
+            failed=true
+        fi
+    done
+    if [ -r "$private_key_file" ] && [ -r "$public_key_file" ]; then
+        actual_public="$(wg pubkey < "$private_key_file" 2>/dev/null || true)"
+        if [ -z "$actual_public" ] || [ "$actual_public" != "$(cat "$public_key_file")" ]; then
+            error 'WireGuard server key pair is inconsistent.'
+            failed=true
+        else
+            info 'WireGuard server key pair present (private key redacted).'
+        fi
+    else
+        error 'WireGuard server key pair is incomplete.'
+        failed=true
+    fi
+    if [ -r "$private_key_file" ]; then
+        expected_config="$(mktemp)"
+        render_configuration "$expected_config"
+        if cmp -s "$expected_config" "$config_file" 2>/dev/null &&
+            [ "$(stat -c '%a' "$config_file" 2>/dev/null || true)" = 600 ]; then
+            info 'WireGuard wg0 configuration current.'
+        else
+            error 'WireGuard wg0 configuration is missing or drifted.'
+            failed=true
+        fi
+        rm -f -- "$expected_config"
+    fi
+    if unit_ready "$firewall_unit" && unit_ready "$wireguard_unit"; then
+        info 'WireGuard and its firewall are active and enabled.'
+    else
+        error 'WireGuard or its firewall is not active and enabled.'
+        failed=true
+    fi
+    rules="$(nft list table inet pol_server_wireguard 2>/dev/null || true)"
+    if grep -Fq 'wg0' <<< "$rules" && grep -Fq '10.77.0.2' <<< "$rules" &&
+        grep -Fq '192.168.1.34' <<< "$rules" && grep -Fq '2283' <<< "$rules" &&
+        grep -Fq '19999' <<< "$rules" && grep -Fq 'drop' <<< "$rules"; then
+        info 'WireGuard peer firewall allows only Immich and Netdata on this NAS.'
+    else
+        error 'WireGuard peer firewall is missing or incomplete.'
+        failed=true
+    fi
+    if [ "$(wg show wg0 listen-port 2>/dev/null || true)" = 51820 ]; then
+        info 'WireGuard is listening on UDP 51820.'
+    else
+        error 'WireGuard is not listening on UDP 51820.'
+        failed=true
+    fi
+    if [ -r "$peer_key_file" ]; then
+        actual_peer="$(wg show wg0 peers 2>/dev/null || true)"
+        if [ "$actual_peer" = "$(cat "$peer_key_file")" ]; then
+            info 'Peer pol-iphone enrolled at 10.77.0.2/32.'
+        else
+            error 'Peer pol-iphone is not the only active WireGuard peer.'
+            failed=true
+        fi
+    fi
+    if [ -r "$duckdns_token_file" ]; then
+        if [ "$(stat -c '%a' "$duckdns_token_file")" = 600 ] && unit_ready "$duckdns_timer"; then
+            info 'DuckDNS fallback timer active; credential redacted.'
+        else
+            error 'DuckDNS credential or timer state is invalid.'
+            failed=true
+        fi
+    else
+        warn 'DuckDNS NAS fallback is not configured; router-managed DuckDNS is required.'
+    fi
+    [ "$failed" = false ]
+}
+
+while (( $# > 0 )); do
+    case "$1" in
+        --install|--check|--enroll-pol-iphone-stdin|--revoke-pol-iphone|--server-public-key|--configure-duckdns-token|--apply-firewall|--update-duckdns)
+            mode="$1"
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            error "Unknown option: $1"
+            usage >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
+
+case "$mode" in
+    --install)
+        require_root
+        require_supported_host
+        apply_install
+        ;;
+    --check)
+        require_root
+        require_supported_host
+        check_wireguard
+        ;;
+    --enroll-pol-iphone-stdin)
+        require_root
+        require_supported_host
+        enroll_peer
+        ;;
+    --revoke-pol-iphone)
+        require_root
+        require_supported_host
+        revoke_peer
+        ;;
+    --server-public-key)
+        require_root
+        server_public_key
+        ;;
+    --configure-duckdns-token)
+        require_root
+        require_supported_host
+        configure_duckdns
+        ;;
+    --apply-firewall)
+        require_root
+        apply_firewall
+        ;;
+    --update-duckdns)
+        require_root
+        update_duckdns
+        ;;
+esac

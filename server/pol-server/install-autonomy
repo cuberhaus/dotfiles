@@ -17,6 +17,7 @@ github_mirror_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-github
 rss_email_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-rss-email"
 immich_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-immich"
 monitoring_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-monitoring"
+wireguard_launcher_target="${root_prefix%/}/usr/local/sbin/pol-server-wireguard"
 sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-bootstrap"
 maintenance_sudoers_target="${root_prefix%/}/etc/sudoers.d/pol-server-maintenance"
 staging_dir="${install_dir}.new.$$"
@@ -54,6 +55,7 @@ install -m 0755 \
     "$server_dir/hardware-qualification" \
     "$server_dir/immich-setup" \
     "$server_dir/monitoring-setup" \
+    "$server_dir/wireguard-setup" \
     "$server_dir/samba-setup" \
     "$server_dir/storage-setup" \
     "$server_dir/maintenance-access" \
@@ -81,6 +83,7 @@ install -m 0755 "$server_dir/pol-server-github-mirror" "$github_mirror_launcher_
 install -m 0755 "$server_dir/pol-server-rss-email" "$rss_email_launcher_target"
 install -m 0755 "$server_dir/pol-server-immich" "$immich_launcher_target"
 install -m 0755 "$server_dir/pol-server-monitoring" "$monitoring_launcher_target"
+install -m 0755 "$server_dir/pol-server-wireguard" "$wireguard_launcher_target"
 
 install -d -m 0755 "$(dirname "$sudoers_target")"
 printf '%s\n' \
@@ -123,6 +126,12 @@ printf '%s\n' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-immich --restore-existing-apply RESTORE-WD-IMMICH' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-monitoring --install' \
     'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-monitoring --check' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-wireguard --install' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-wireguard --check' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-wireguard --enroll-pol-iphone-stdin' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-wireguard --revoke-pol-iphone' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-wireguard --server-public-key' \
+    'pol ALL=(root) NOPASSWD: /usr/local/sbin/pol-server-wireguard --configure-duckdns-token' \
     > "$sudoers_staging"
 chmod 0440 "$sudoers_staging"
 visudo -cf "$sudoers_staging"
