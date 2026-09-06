@@ -28,8 +28,9 @@ assert_file_contains() {
 [ -r "$CONFIG" ] || fail 'tracked Netdata configuration must exist'
 assert_file_contains "$CONFIG" 'bind to = 127.0.0.1 192.168.1.34'
 assert_file_contains "$CONFIG" 'default port = 19999'
-assert_file_contains "$CONFIG" 'dbengine tier 0 disk space MB = 2048'
-assert_file_contains "$CONFIG" 'dbengine tier 0 retention days = 90'
+assert_file_contains "$CONFIG" 'db = dbengine'
+assert_file_contains "$CONFIG" 'dbengine tier 0 retention size = 2GiB'
+assert_file_contains "$CONFIG" 'dbengine tier 0 retention time = 3mo'
 if grep -Eq 'bind to[[:space:]]*=[[:space:]]*(\*|0\.0\.0\.0|::)' "$CONFIG"; then
     fail 'Netdata must not bind to a wildcard address'
 fi
@@ -66,6 +67,9 @@ if [ "${1:-}" = install ]; then
     for argument in "$@"; do
         case "$argument" in
             -*) ;;
+            */netdata-repo_5-5+debian13_all.deb)
+                grep -Fxq netdata-repo "$PACKAGE_STATE" || printf '%s\n' netdata-repo >> "$PACKAGE_STATE"
+                ;;
             *) grep -Fxq -- "$argument" "$PACKAGE_STATE" || printf '%s\n' "$argument" >> "$PACKAGE_STATE" ;;
         esac
     done
@@ -117,15 +121,45 @@ EOF
 cat > "$FAKE_BIN/curl" <<'EOF'
 #!/usr/bin/env bash
 [ "${FAKE_API_FAILURE:-false}" = false ] || exit 22
+printf 'curl:%s\n' "$*" >> "$EVENT_LOG"
 case "$*" in
-    */api/v1/info) printf '{"hostname":"pol-server","version":"1.47.5"}\n' ;;
+    *netdata-repo_5-5+debian13_all.deb*)
+        while [ "$#" -gt 0 ]; do
+            if [ "$1" = -o ]; then
+                printf 'pinned Netdata repository package\n' > "$2"
+                exit
+            fi
+            shift
+        done
+        exit 2
+        ;;
+    */api/v1/info)
+        printf '{"version":"v2.11.0","mirrored_hosts_status":[{"hostname":"pol-server","reachable":true}]}\n'
+        ;;
     */netdata.conf) cat "$FAKE_ROOT/etc/netdata/netdata.conf" ;;
     *) exit 22 ;;
 esac
 EOF
 
+cat > "$FAKE_BIN/sha256sum" <<'EOF'
+#!/usr/bin/env bash
+printf 'sha256sum:%s\n' "$*" >> "$EVENT_LOG"
+cat >/dev/null
+EOF
+
+cat > "$FAKE_BIN/dpkg-deb" <<'EOF'
+#!/usr/bin/env bash
+printf 'dpkg-deb:%s\n' "$*" >> "$EVENT_LOG"
+case "${3:-}" in
+    Package) printf 'netdata-repo\n' ;;
+    Version) printf '5-5\n' ;;
+    Architecture) printf 'all\n' ;;
+    *) exit 2 ;;
+esac
+EOF
+
 chmod +x "$FAKE_BIN/dpkg-query" "$FAKE_BIN/apt-get" "$FAKE_BIN/systemctl" \
-    "$FAKE_BIN/ss" "$FAKE_BIN/curl"
+    "$FAKE_BIN/ss" "$FAKE_BIN/curl" "$FAKE_BIN/sha256sum" "$FAKE_BIN/dpkg-deb"
 export EVENT_LOG PACKAGE_STATE SERVICE_STATE FAKE_ROOT
 export PATH="$FAKE_BIN:$ORIGINAL_PATH"
 export POL_SERVER_ROOT="$FAKE_ROOT"
@@ -134,11 +168,16 @@ export POL_SERVER_ALLOW_UNPRIVILEGED=true
 "$MONITORING" --install
 
 grep -Fxq netdata "$PACKAGE_STATE" || fail 'Netdata package must be installed'
+grep -Fxq netdata-repo "$PACKAGE_STATE" || fail 'official Netdata repository package must be installed'
+assert_file_contains "$EVENT_LOG" 'curl:-fsSL -o '
+assert_file_contains "$EVENT_LOG" 'netdata-repo_5-5+debian13_all.deb'
+assert_file_contains "$EVENT_LOG" 'sha256sum:-c -'
+assert_file_contains "$EVENT_LOG" 'dpkg-deb:-f '
 assert_file_contains "$EVENT_LOG" 'apt-get:install -y -o Dpkg::Options::=--force-confold netdata'
 assert_file_contains "$EVENT_LOG" 'systemctl:enable --now netdata.service'
 assert_file_contains "$FAKE_ROOT/etc/netdata/netdata.conf" 'bind to = 127.0.0.1 192.168.1.34'
-assert_file_contains "$FAKE_ROOT/etc/netdata/netdata.conf" 'dbengine tier 0 disk space MB = 2048'
-assert_file_contains "$FAKE_ROOT/etc/netdata/netdata.conf" 'dbengine tier 0 retention days = 90'
+assert_file_contains "$FAKE_ROOT/etc/netdata/netdata.conf" 'dbengine tier 0 retention size = 2GiB'
+assert_file_contains "$FAKE_ROOT/etc/netdata/netdata.conf" 'dbengine tier 0 retention time = 3mo'
 [ "$(stat -c '%a' "$FAKE_ROOT/etc/netdata/netdata.conf")" = 644 ] ||
     fail 'Netdata configuration must use mode 0644'
 [ -e "$FAKE_ROOT/etc/netdata/.opt-out-from-anonymous-statistics" ] ||
@@ -152,6 +191,8 @@ assert_file_contains "$FAKE_ROOT/etc/netdata/netdata.conf" 'dbengine tier 0 rete
 
 check_output="$("$MONITORING" --check)"
 grep -Fq 'Netdata package installed' <<< "$check_output" || fail 'check must report package state'
+grep -Fq 'Netdata repository package installed' <<< "$check_output" ||
+    fail 'check must report repository package state'
 grep -Fq '1.47.5-2' <<< "$check_output" || fail 'check must report the package version'
 grep -Fq 'Netdata configuration current' <<< "$check_output" || fail 'check must report configuration state'
 grep -Fq 'Netdata service active and enabled' <<< "$check_output" || fail 'check must report service state'

@@ -372,10 +372,10 @@ every ten seconds. Its duration and load are fixed in the root-owned command.
 
 ## Monitoring
 
-The selected local monitoring layer is the native Debian Netdata package. It
-runs directly under systemd so it can observe the host without a privileged
-container, Docker socket, or broad host mounts. Install and audit it through the
-tracked lifecycle:
+The selected local monitoring layer is Netdata's native Debian package from its
+stable Trixie repository. It runs directly under systemd so it can observe the
+host without a privileged container, Docker socket, or broad host mounts.
+Install and audit it through the tracked lifecycle:
 
 ```bash
 make install-pol-server-monitoring
@@ -388,14 +388,17 @@ management, MCP, configuration, badge, and streaming endpoints remain
 loopback-only. Do not forward TCP 19999 through the router. WireGuard may carry
 LAN access later without changing the listener into a public service.
 
-Netdata stores one high-resolution database tier on the Micron system SSD. It
-removes data at 90 days or approximately 2 GiB, whichever limit is reached
-first. Metric history is disposable and excluded from Restic; the tracked
+Netdata stores one high-resolution database tier on the Micron system SSD. Its
+canonical configuration removes data at three months or approximately 2 GiB,
+whichever limit is reached first. Metric history is disposable and excluded from Restic; the tracked
 configuration is the recovery source. Anonymous Netdata telemetry is disabled
 through its documented opt-out marker, and the node is not claimed to Netdata
-Cloud. The Debian package is intentionally not version-pinned so it follows the
-host's normal security updates; the audit prints the installed version and
-verifies the effective access and retention settings after an upgrade.
+Cloud. The repository bootstrap is downloaded over HTTPS, pinned by SHA-256,
+and checked for the expected package metadata before installation. The Netdata
+agent is intentionally not version-pinned so it follows the stable repository's
+updates; the audit prints both installed package versions and verifies the
+effective access and retention settings after an upgrade. Netdata `2.11.0` and
+repository package `5-5` passed live acceptance on 2026-09-06.
 
 This local agent cannot report a total power or network outage. Healthchecks.io
 dead-man monitoring and proactive email delivery remain a separate credentialed
