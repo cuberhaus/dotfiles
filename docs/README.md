@@ -6,3 +6,4 @@ Current notes:
 
 - [SSH/IAP/OS Login diagnosis](SSH-IAP-OS-LOGIN-DIAGNOSIS.md)
 - [Remote home access](REMOTE-HOME-ACCESS.md)
+- [VS Code terminal renderer crash diagnosis](VSCODE-TERMINAL-CRASH-DIAGNOSIS.md)
