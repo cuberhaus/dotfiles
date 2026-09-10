@@ -51,6 +51,18 @@ Installable skills live under `.agents/skills/` (gitignored; restore with `make 
 - **bash-defensive-patterns** — consult when writing or refactoring bash scripts under `.local/scripts/` (bootstrap, helpers, hooks).
 - **shellcheck-configuration** — consult when configuring `.shellcheckrc` or addressing findings from `make lint` / `make check`.
 
+### Issue tracker
+
+GitHub Issues for `cuberhaus/dotfiles`; use the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the canonical labels `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repository. Read the root `CONTEXT.md` when present and relevant ADRs under `docs/adr/`. See `docs/agents/domain.md`.
+
 ## Pitfalls
 
 - **Never overwrite `$HOME` files blindly** — symlink via stow or back up first; `make install` already handles conflict backups.
