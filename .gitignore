@@ -121,7 +121,10 @@
 !.config/Cursor/
 !.config/Cursor/**
 !.config/Antigravity/
-!.config/Antigravity/**
+.config/Antigravity/*
+!.config/Antigravity/User/
+.config/Antigravity/User/*
+!.config/Antigravity/User/settings.json
 !.config/warp-terminal/
 !.config/warp-terminal/**
 
@@ -238,6 +241,11 @@
 !.local/share/
 .local/share/*
 !.local/share/cuberhaus-automations/
+
+# Generated Python files
+__pycache__/
+*.py[cod]
+.pytest_cache/
 !.local/share/cuberhaus-automations/**
 !.local/share/fonts/
 !.local/share/fonts/**
