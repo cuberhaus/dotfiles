@@ -1,0 +1,373 @@
+{
+  "editor.cursorBlinking": "smooth",
+  "keyboard.dispatch": "keyCode",
+  "editor.multiCursorModifier": "ctrlCmd",
+  "editor.formatOnPaste": true,
+  "terminal.integrated.fontFamily": "monospace",
+  "terminal.integrated.shellIntegration.enabled": true,
+  "terminal.integrated.enablePersistentSessions": false,
+  "terminal.integrated.persistentSessionReviveProcess": "never",
+  "terminal.integrated.gpuAcceleration": "off",
+  "terminal.integrated.profiles.linux": {
+    "zsh": {
+      "path": "/usr/bin/zsh"
+    }
+  },
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "chat.tools.terminal.terminalProfile.linux": {
+    "path": "/bin/bash",
+    "args": ["--noprofile", "--norc"],
+    "env": {
+      "BASH_ENV": null,
+      "ENV": null,
+      "GH_PAGER": "cat",
+      "GIT_PAGER": "cat",
+      "PAGER": "cat"
+    }
+  },
+  "vim.incsearch": true,
+  "vim.useSystemClipboard": true,
+  "vim.useCtrlKeys": true,
+  "vim.hlsearch": true,
+  "vim.leader": "<space>",
+  "vim.surround": true,
+  "code-runner.executorMap": {
+    "cpp": "cd $dir && g++ -g -std=c++11 $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+    "python": "$pythonPath -u $fullFileName"
+  },
+  "vim.normalModeKeyBindings": [
+    {
+      "before": [
+        "leader",
+        "CR"
+      ],
+      "commands": [
+        ":nohl"
+      ]
+    },
+    {
+      "before": [
+        "leader",
+        "f",
+        "s"
+      ],
+      "commands": [
+        "workbench.action.files.save"
+      ]
+    }
+  ],
+  "workbench.colorCustomizations": {},
+  "gitlens.blame.highlight.enabled": false,
+  "git.autofetch": true,
+  "debug.onTaskErrors": "showErrors",
+  "code-runner.runInTerminal": true,
+  "terminal.external.linuxExec": "kitty",
+  "terminal.external.osxExec": "iTerm.app",
+  "[markdown]": {
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+  },
+  "settingsSync.ignoredExtensions": [
+    "ms-vscode.cpptools-extension-pack"
+  ],
+  "terminal.explorerKind": "external",
+  "editor.minimap.enabled": false,
+  "font-switcher.enableLivePreview": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "[cpp]": {
+    "editor.wordBasedSuggestions": "off",
+    "editor.suggest.insertMode": "replace",
+    "editor.semanticHighlighting.enabled": true
+  },
+  "python.languageServer": "Pylance",
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "settingsSync.ignoredSettings": [
+    "git.enabled",
+    "-python.defaultInterpreterPath"
+  ],
+  "gitlens.hovers.currentLine.over": "line",
+  "gitlens.hovers.enabled": false,
+  "workbench.editorAssociations": {
+    "*.ipynb": "jupyter-notebook",
+    "git-rebase-todo": "gitlens.rebase"
+  },
+  "editor.fontFamily": "Source Code Pro, 'monospace', 'Droid Sans Mono', monospace, 'Droid Sans Fallback'",
+  "files.exclude": {
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true
+  },
+  "editor.cursorStyle": "line",
+  "editor.insertSpaces": false,
+  "editor.lineNumbers": "on",
+  "editor.wordSeparators": "/\\()\"':,.;<>~!@#$%^&*|+=[]{}`?-",
+  "editor.wordWrap": "wordWrapColumn",
+  "workbench.colorTheme": "One Dark Pro",
+  "python.pythonPath": "/usr/local/opt/python@3.9/bin/python3.9",
+  "notebook.cellToolbarLocation": {
+    "default": "right",
+    "jupyter-notebook": "left"
+  },
+  "security.workspace.trust.untrustedFiles": "open",
+  "latex-workshop.view.pdf.viewer": "tab",
+  "extensions.ignoreRecommendations": true,
+  "C_Cpp.errorSquiggles": "Enabled",
+  "python.linting.pylintEnabled": true,
+  "git.confirmSync": false,
+  "haskell.manageHLS": "GHCup",
+  "files.autoSave": "afterDelay",
+  "editor.formatOnType": true,
+  "editor.inlineSuggest.enabled": true,
+  "python.defaultInterpreterPath": "c:\\Python314\\python.exe",
+  "notebook.lineNumbers": "on",
+  "editor.accessibilitySupport": "off",
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": true,
+    "markdown": true,
+    "scminput": false,
+    "yaml": false
+  },
+  "gitlens.codeLens.enabled": false,
+  "git.openRepositoryInParentFolders": "always",
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "git.enableSmartCommit": true,
+  "workbench.sideBar.location": "right",
+  "security.workspace.trust.enabled": false,
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.rulers": [
+      80
+    ],
+    "editor.selectionHighlight": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  },
+  "latex-utilities.message.update.show": false,
+  "workbench.secondarySideBar.defaultVisibility": "visible",
+  "terminal.integrated.allowedLinkSchemes": [
+    "file",
+    "http",
+    "https",
+    "mailto",
+    "vscode",
+    "vscode-insiders",
+    "ms-settings"
+  ],
+  "chat.agent.maxRequests": 4000,
+  "explorer.confirmDragAndDrop": false,
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+  "files.eol": "\n",
+  "remote.autoForwardPortsSource": "hybrid",
+  "claudeCode.preferredLocation": "panel",
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "chat.tools.urls.autoApprove": {
+    "https://code.visualstudio.com": true,
+    "https://github.com/microsoft/vscode/wiki/*": true,
+    "https://inlang.com/m/r7kp499g/app-inlang-finkLocalizationEditor": true,
+    "https://inlang.com/m/r7kp499g": true,
+    "https://inlang.com/m": true,
+    "https://inlang.com": true,
+    "https://inlang.com/documentation/concept/project": true,
+    "https://inlang.com/documentation/concept": true,
+    "https://inlang.com/documentation": true,
+    "https://*.firefly-iii.org": {
+      "approveRequest": true,
+      "approveResponse": false
+    },
+    "https://docs.firefly-iii.org": true,
+    "https://api-docs.firefly-iii.org": {
+      "approveRequest": false,
+      "approveResponse": true
+    },
+    "https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference": {
+      "approveRequest": false,
+      "approveResponse": true
+    },
+    "https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/configuring-multi-ecosystem-updates": {
+      "approveRequest": false,
+      "approveResponse": true
+    },
+    "https://www.credly.com/badges/cd5fe259-304f-42b6-9bd2-9c95657386df/public_url": true,
+    "https://www.credly.com/badges/cd5fe259-304f-42b6-9bd2-9c95657386df": true,
+    "https://www.credly.com/badges": true,
+    "https://www.credly.com": true,
+    "https://*.credly.com": true,
+    "https://simpleicons.org/icons/googlecloud.svg": true,
+    "https://simpleicons.org/icons": true,
+    "https://simpleicons.org": true,
+    "https://catalog-education.oracle.com/ords/certview/sharebadge": true,
+    "https://catalog-education.oracle.com/ords/certview": true,
+    "https://catalog-education.oracle.com/ords": true,
+    "https://catalog-education.oracle.com": true,
+    "https://*.oracle.com": true,
+    "https://certificate.stratio.com/user/certificate/3aa56e2ee5536c425ceca705be635041": true,
+    "https://certificate.stratio.com/user/certificate": true,
+    "https://certificate.stratio.com/user": true,
+    "https://certificate.stratio.com": true,
+    "https://*.stratio.com": true,
+    "https://certificate.stratio.com/user/certificate/f0ea41ec4fbdfa7518290851a10382fe": true,
+    "https://certificate.stratio.com/user/certificate/a4f162421762d5cd35d9f4e66552e4ad": true,
+    "https://academy.universal-robots.com": true,
+    "https://*.universal-robots.com": true,
+    "https://polcasacubertagil.com": true,
+    "https://www.virtualbadge.io/certificate-validator": true,
+    "https://www.virtualbadge.io": true,
+    "https://*.virtualbadge.io": true,
+    "https://learn.nvidia.com/certificates": true,
+    "https://learn.nvidia.com": true,
+    "https://*.nvidia.com": true,
+    "https://skills.sh/search": true,
+    "https://skills.sh": true,
+    "https://api.github.com/repos/Pseudonium/Obsidian_to_Anki/releases/tags/3.6.0": true,
+    "https://api.github.com/repos/Pseudonium/Obsidian_to_Anki/releases/tags": true,
+    "https://api.github.com/repos/Pseudonium/Obsidian_to_Anki/releases": true,
+    "https://api.github.com/repos/Pseudonium/Obsidian_to_Anki": true,
+    "https://api.github.com/repos/Pseudonium": true,
+    "https://api.github.com/repos": true,
+    "https://api.github.com": true,
+    "https://*.github.com": true,
+    "https://skillcertpro.com/product/nvidia-certified-associate-generative-ai-multimodal-nca-genm-exam-questions": {
+      "approveRequest": true,
+      "approveResponse": false
+    },
+    "https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main/install.ps1": true,
+    "https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main": true,
+    "https://raw.githubusercontent.com/Egonex-AI/Understand-Anything": true,
+    "https://raw.githubusercontent.com/Egonex-AI": true,
+    "https://raw.githubusercontent.com": true,
+    "https://*.githubusercontent.com": true
+  },
+  "sherlock.userId": "38b7fe67-8127-4482-a179-ff59aceeeec1",
+  "chat.viewSessions.orientation": "stacked",
+  "github.copilot.advanced.debug.useNodeFetcher": true,
+  "github.copilot.advanced": {
+    "debug": {
+      "useNodeFetcher": true
+    }
+  },
+  "chat.instructionsFilesLocations": {
+    ".github/instructions": true,
+    ".claude/rules": true,
+    "~/.copilot/instructions": true,
+    "~/.claude/rules": true,
+    "C:\\Users\\lara\\AppData\\Local\\Temp\\postman-collections-post-response.instructions.md": true,
+    "C:\\Users\\lara\\AppData\\Local\\Temp\\postman-collections-pre-request.instructions.md": true,
+    "C:\\Users\\lara\\AppData\\Local\\Temp\\postman-folder-post-response.instructions.md": true,
+    "C:\\Users\\lara\\AppData\\Local\\Temp\\postman-folder-pre-request.instructions.md": true,
+    "C:\\Users\\lara\\AppData\\Local\\Temp\\postman-http-request-post-response.instructions.md": true,
+    "C:\\Users\\lara\\AppData\\Local\\Temp\\postman-http-request-pre-request.instructions.md": true,
+    "C:\\Users\\polcg\\AppData\\Local\\Temp\\postman-collections-post-response.instructions.md": true,
+    "C:\\Users\\polcg\\AppData\\Local\\Temp\\postman-collections-pre-request.instructions.md": true,
+    "C:\\Users\\polcg\\AppData\\Local\\Temp\\postman-folder-post-response.instructions.md": true,
+    "C:\\Users\\polcg\\AppData\\Local\\Temp\\postman-folder-pre-request.instructions.md": true,
+    "C:\\Users\\polcg\\AppData\\Local\\Temp\\postman-http-request-post-response.instructions.md": true,
+    "C:\\Users\\polcg\\AppData\\Local\\Temp\\postman-http-request-pre-request.instructions.md": true
+  },
+  "workbench.startupEditor": "none",
+  "window.restoreWindows": "folders",
+  "remote.SSH.remotePlatform": {
+    "100.104.13.18": "linux"
+  },
+  "aiEngineeringFluency.toolFamilies": [
+    {
+      "id": "code-intelligence",
+      "name": "Code Intelligence",
+      "builtIn": [
+        "get_errors",
+        "hover",
+        "get_references",
+        "get_definition"
+      ],
+      "alternatives": [
+        "lsp",
+        "diagnostics",
+        "symbol_lookup"
+      ],
+      "description": "Tools that query language-server or IDE intelligence."
+    },
+    {
+      "id": "reading",
+      "name": "File Reading",
+      "builtIn": [
+        "read",
+        "view",
+        "cat"
+      ],
+      "alternatives": [
+        "lean-ctx",
+        "read_file",
+        "copilot_readFile"
+      ],
+      "description": "Tools that read file contents into context."
+    },
+    {
+      "id": "writing",
+      "name": "File Writing",
+      "builtIn": [
+        "edit",
+        "create",
+        "write"
+      ],
+      "alternatives": [
+        "write_file",
+        "copilot_createFile",
+        "copilot_editFile"
+      ],
+      "description": "Tools that create or modify files."
+    },
+    {
+      "id": "search",
+      "name": "Search & Discovery",
+      "builtIn": [
+        "search",
+        "grep",
+        "rg",
+        "glob",
+        "find"
+      ],
+      "alternatives": [
+        "symdex",
+        "search_files",
+        "copilot_searchFiles"
+      ],
+      "description": "Tools that search the codebase for files or text patterns."
+    },
+    {
+      "id": "shell",
+      "name": "Shell / Terminal",
+      "builtIn": [
+        "run_in_terminal",
+        "bash",
+        "shell"
+      ],
+      "alternatives": [
+        "run_command",
+        "execute_command"
+      ],
+      "description": "Tools that execute shell commands."
+    }
+  ],
+  "chat.permissions.default": "autoApprove",
+  "git.replaceTagsWhenPull": true,
+"dictation.model": "mai",
+"chat.tools.terminal.autoApprove": {
+	"/^git -C \"C:\\\\Users\\\\polcg\\\\cuberhaus\\\\cuberhaus-workspace\" status --short; gh auth status$/": {
+		"approve": true,
+		"matchCommandLine": true
+	}
+}
+}

@@ -120,6 +120,11 @@
 !.config/sublime-text-3/**
 !.config/Cursor/
 !.config/Cursor/**
+!.config/Code/
+.config/Code/*
+!.config/Code/User/
+.config/Code/User/*
+!.config/Code/User/settings.json
 !.config/Antigravity/
 .config/Antigravity/*
 !.config/Antigravity/User/

@@ -56,6 +56,18 @@ into this repo so that every config file stays version-controlled in one place.
 The `Makefile` wraps stow and exposes common tasks. Bootstrap scripts install
 packages and perform one-time setup for each supported OS.
 
+VS Code user settings live in `.config/Code/User/settings.json`. Chat-tool
+terminals use `/bin/bash --noprofile --norc` with `BASH_ENV` and `ENV` removed,
+so they do not source personal shell startup files. Normal terminals still use
+zsh. Agent terminals retain VS Code's inherited environment, including `PATH`;
+this is not an empty-environment sandbox. `GH_PAGER`, `GIT_PAGER`, and `PAGER`
+are set to `cat` to avoid pager-driven alternate-screen transitions implicated
+in the VS Code 1.137 chat-terminal marker hang. Other full-screen programs can
+still trigger that path. These Bash arguments prevent automatic shell-integration
+injection in that build, so agent command detection may be less precise.
+Create a new agent terminal after changing the profile. Remove
+`chat.tools.terminal.terminalProfile.linux` to return to the default profile.
+
 The `$DOTFILES` variable (exported by `.zshenv`) points to the repo root,
 auto-detected by resolving the `.zshenv` symlink. Scripts and configs that
 need to reference the repo should use `$DOTFILES`.
