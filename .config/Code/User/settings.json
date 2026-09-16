@@ -22,7 +22,8 @@
       "ENV": null,
       "GH_PAGER": "cat",
       "GIT_PAGER": "cat",
-      "PAGER": "cat"
+      "PAGER": "cat",
+      "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
     }
   },
   "vim.incsearch": true,
@@ -109,7 +110,6 @@
   "editor.wordSeparators": "/\\()\"':,.;<>~!@#$%^&*|+=[]{}`?-",
   "editor.wordWrap": "wordWrapColumn",
   "workbench.colorTheme": "One Dark Pro",
-  "python.pythonPath": "/usr/local/opt/python@3.9/bin/python3.9",
   "notebook.cellToolbarLocation": {
     "default": "right",
     "jupyter-notebook": "left"
@@ -124,7 +124,7 @@
   "files.autoSave": "afterDelay",
   "editor.formatOnType": true,
   "editor.inlineSuggest.enabled": true,
-  "python.defaultInterpreterPath": "c:\\Python314\\python.exe",
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
   "notebook.lineNumbers": "on",
   "editor.accessibilitySupport": "off",
   "github.copilot.enable": {
