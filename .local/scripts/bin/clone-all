@@ -6,6 +6,9 @@
 # Override with an argument or the CLONE_ALL_OWNER env var.
 #
 # Usage: clone-all [owner]
+#
+# Run from the directory that should contain checkouts (e.g. ~/cuberhaus).
+# Repos may live flat (./cv) or nested (./cuberhaus/cv); existing .git wins.
 
 # Cloning/pulling is network + disk bound, not CPU bound, so parallelism
 # well above core count is fine. Default: detected cores (min 4, cap 32).
@@ -49,9 +52,27 @@ else
     C_RESET=''; C_GREEN=''; C_BLUE=''; C_YELLOW=''; C_RED=''; C_DIM=''
 fi
 
+resolve_repo_dir() {
+    local nameWithOwner="$1"
+    local repoName="${nameWithOwner##*/}"
+
+    if [ -d "$nameWithOwner/.git" ]; then
+        printf '%s\n' "$nameWithOwner"
+    elif [ -d "$repoName/.git" ]; then
+        printf '%s\n' "$repoName"
+    elif [ -e "$nameWithOwner" ]; then
+        printf '%s\n' "$nameWithOwner"
+    elif [ -e "$repoName" ]; then
+        printf '%s\n' "$repoName"
+    else
+        printf '%s\n' "$repoName"
+    fi
+}
+
 process_repo() {
     local nameWithOwner="$1"
-    local dir="$nameWithOwner"
+    local dir
+    dir="$(resolve_repo_dir "$nameWithOwner")"
     local attempt output status label
 
     if [ -d "$dir/.git" ]; then
@@ -107,7 +128,7 @@ process_repo() {
     fi
     return $status
 }
-export -f process_repo
+export -f resolve_repo_dir process_repo
 export C_RESET C_GREEN C_BLUE C_YELLOW C_RED C_DIM clone_retries
 
 gh repo list "$orgname" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' \
