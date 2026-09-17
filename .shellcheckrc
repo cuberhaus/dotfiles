@@ -12,4 +12,5 @@ shell=bash
 # SC2034 — "variable appears unused" — many variables are used by sourced scripts
 # SC2154 — "variable is referenced but not assigned" — same reason (cross-file vars)
 # SC1090 — "Can't follow non-constant source" — dynamic source paths are common in dotfiles
-disable=SC1091,SC2034,SC2154,SC1090
+# SC2329 — "function never invoked" — test overrides and mocks are invoked indirectly
+disable=SC1091,SC2034,SC2154,SC1090,SC2329

@@ -700,6 +700,14 @@ EOF
     else
         info "Ollama already installed, skipping."
     fi
+
+    # OpenCode (AI coding agent)
+    if ! command -v opencode &>/dev/null; then
+        info "Installing OpenCode..."
+        $pac opencode
+    else
+        info "OpenCode already installed, skipping."
+    fi
 }
 
 ### All packages in here should be handpicked

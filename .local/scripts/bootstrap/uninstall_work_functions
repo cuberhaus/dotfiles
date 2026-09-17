@@ -107,6 +107,10 @@ gui_apps_uninstall() {
     # Cursor AppImage removal
     rm -f "$HOME/Applications/cursor.AppImage"
     rm -f "$HOME/.local/share/applications/cursor.desktop"
+
+    # OpenCode removal
+    rm -rf "$HOME/.opencode" 2>/dev/null || true
+    rm -f "$HOME/.local/bin/opencode" 2>/dev/null || true
     
     # Clean up apt caches
     sudo apt-get update

@@ -347,6 +347,27 @@ EOF
     else
         info "Ollama already installed, skipping."
     fi
+
+    # OpenCode (AI coding agent)
+    if ! command -v opencode &>/dev/null; then
+        if [ -x "$HOME/.opencode/bin/opencode" ]; then
+            mkdir -p "$HOME/.local/bin"
+            ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
+        fi
+    fi
+    if ! command -v opencode &>/dev/null; then
+        info "Installing OpenCode..."
+        if curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path; then
+            mkdir -p "$HOME/.local/bin"
+            if [ -f "$HOME/.opencode/bin/opencode" ]; then
+                ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
+            fi
+        else
+            warn "Failed to install OpenCode"
+        fi
+    else
+        info "OpenCode already installed, skipping."
+    fi
 }
 
 vim_install () {

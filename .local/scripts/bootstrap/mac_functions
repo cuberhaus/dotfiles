@@ -108,6 +108,7 @@ ai_tools_install() {
     brew install --cask cursor               # AI IDE
     brew install --cask warp                 # AI terminal
     brew install --cask lm-studio            # Local LLM runner
+    brew install opencode                    # AI coding agent
     # Antigravity: install manually from https://antigravity.dev if needed
 
     # Ollama (local LLM serving)

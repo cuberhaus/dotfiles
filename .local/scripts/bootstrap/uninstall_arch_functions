@@ -22,7 +22,7 @@ base_uninstall() {
         libreoffice-still libreoffice-still-ca lxappearance ncdu \
         nemo nemo-fileroller nemo-preview nemo-seahorse nemo-share \
         net-tools nilfs-utils nomacs noto-fonts-emoji npm ntfs-3g \
-        okular papirus-icon-theme partitionmanager perl-file-mimeinfo \
+        okular opencode papirus-icon-theme partitionmanager perl-file-mimeinfo \
         playerctl polkit polkit-gnome python python-pipenv python3 \
         qt5ct ranger rclone reflector remmina freerdp libvncserver \
         ruby seahorse speedcrunch stow svn the_silver_searcher \

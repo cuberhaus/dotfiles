@@ -185,6 +185,7 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertIn(audit.Package("snap", "obsidian"), ubuntu)
         self.assertNotIn(audit.Package("snap", "android-studio"), ubuntu)
         self.assertIn(audit.Package("brew", "age"), mac)
+        self.assertIn(audit.Package("brew", "opencode"), mac)
         self.assertIn(audit.Package("brew", "sops"), mac)
         self.assertIn(audit.Package("brew", "stow"), mac)
         self.assertIn(audit.Package("brew", "google-chrome"), mac)
@@ -215,9 +216,11 @@ class InstallationAuditContractTests(unittest.TestCase):
         manjaro = audit.expected_packages(REPO_ROOT, "manjaro")
 
         self.assertIn(audit.Package("pacman", "age"), arch)
+        self.assertIn(audit.Package("pacman", "opencode"), arch)
         self.assertIn(audit.Package("pacman", "sops"), arch)
         self.assertIn(audit.Package("pacman", "stow"), arch)
         self.assertIn(audit.Package("yay", "warp-terminal-bin"), arch)
+        self.assertNotIn(audit.Package("pacman", "opencode"), manjaro)
         self.assertNotIn(audit.Package("snap", "whatsie"), arch)
         self.assertIn(audit.Package("snap", "whatsie"), manjaro)
 

@@ -119,17 +119,23 @@
 !.config/sublime-text-3/
 !.config/sublime-text-3/**
 !.config/Cursor/
-!.config/Cursor/**
+.config/Cursor/*
+!.config/Cursor/User/
+.config/Cursor/User/*
+!.config/Cursor/User/settings.json
+!.config/Cursor/User/keybindings.json
 !.config/Code/
 .config/Code/*
 !.config/Code/User/
 .config/Code/User/*
 !.config/Code/User/settings.json
+!.config/Code/User/keybindings.json
 !.config/Antigravity/
 .config/Antigravity/*
 !.config/Antigravity/User/
 .config/Antigravity/User/*
 !.config/Antigravity/User/settings.json
+!.config/Antigravity/User/keybindings.json
 !.config/warp-terminal/
 !.config/warp-terminal/**
 
