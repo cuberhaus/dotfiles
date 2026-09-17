@@ -133,6 +133,7 @@
 !.config/Code/User/settings.json
 !.config/Code/User/keybindings.json
 !.config/opencode/
+!.config/opencode/opencode.jsonc
 !.config/opencode/tui.json
 !.config/Antigravity/
 .config/Antigravity/*
