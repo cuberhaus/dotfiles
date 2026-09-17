@@ -15,6 +15,10 @@ if grep -Fq "Created by \`pipx\`" "$repo_root/.bashrc" "$repo_root/.bash_profile
     fail 'shell startup files contain pipx-generated PATH entries'
 fi
 
+if grep -Fq "bin/env" "$repo_root/.bashrc" "$repo_root/.bash_profile" "$repo_root/.config/zsh/.zshrc"; then
+    fail 'shell startup files contain external installer env-loader entries'
+fi
+
 mkdir -p "$case_dir/home/.local/bin"
 # Variables in the command string are expanded by the child Bash process.
 # shellcheck disable=SC2016

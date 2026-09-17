@@ -210,6 +210,10 @@ export ADB_VENDOR_KEY="$XDG_CONFIG_HOME"/android
 export GTK_RC_FILES="$XDG_CONFIG_HOME"/gtk-1.0/gtkrc
 export GTK2_RC_FILES="$XDG_CONFIG_HOME"/gtk-2.0/gtkrc
 
+# Prevent standalone installers (uv, cargo-dist, etc.) from modifying shell startup files
+export UV_NO_MODIFY_PATH=1
+export INSTALLER_NO_MODIFY_PATH=1
+
 ###############################################################
 # => Cargo (sourced before local overrides so they can adjust it)
 ###############################################################

@@ -18,6 +18,10 @@ case ":${PATH:-}:" in
 esac
 export PATH
 
+# Prevent standalone installers (uv, cargo-dist, etc.) from modifying shell startup files
+export UV_NO_MODIFY_PATH=1
+export INSTALLER_NO_MODIFY_PATH=1
+
 ###############################################################
 # => Configuration
 ###############################################################
