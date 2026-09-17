@@ -1,3 +1,4 @@
 {
-  "app.model.cycleForward": "alt+m"
+  "app.model.cycleForward": "alt+m",
+  "app.thinking.cycle": "alt+v"
 }

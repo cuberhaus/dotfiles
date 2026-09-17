@@ -3,6 +3,7 @@
   "keybinds": {
     "leader": "ctrl+space",
     "model_cycle_favorite": "alt+m",
-    "model_cycle_favorite_reverse": "alt+shift+m"
+    "model_cycle_favorite_reverse": "alt+shift+m",
+    "variant_cycle": "alt+v"
   }
 }
