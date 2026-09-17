@@ -32,6 +32,18 @@ configure_tracked_repo_git() {
 
     if [ -d "$dir/.githooks" ]; then
         git -C "$dir" config core.hooksPath .githooks
+    elif [ "$(git -C "$dir" config --get core.hooksPath 2>/dev/null)" = ".githooks" ]; then
+        git -C "$dir" config --unset core.hooksPath 2>/dev/null || true
+    fi
+
+    if [ -f "$dir/lefthook.yml" ] || [ -f "$dir/.lefthook.yml" ]; then
+        if [ -x "$dir/node_modules/.bin/lefthook" ]; then
+            (cd "$dir" && "$dir/node_modules/.bin/lefthook" install 2>/dev/null) || true
+        elif command -v lefthook >/dev/null 2>&1; then
+            (cd "$dir" && lefthook install 2>/dev/null) || true
+        elif command -v npx >/dev/null 2>&1; then
+            (cd "$dir" && npx --yes lefthook install 2>/dev/null) || true
+        fi
     fi
 
     if [ -x "$dir/.local/scripts/apply-skip-worktree" ]; then

@@ -51,4 +51,24 @@ if [ ! -f "$tmpdir/work/skip-worktree-executed" ]; then
     exit 1
 fi
 
+# stale core.hooksPath unsetting when .githooks is deleted
+rm -rf "$tmpdir/work/.githooks"
+configure_tracked_repo_git "ExampleOrg/work" "$tmpdir/work" team
+assert_eq "$(git -C "$tmpdir/work" config --get core.hooksPath || echo "unset")" "unset"
+
+# lefthook installation when lefthook.yml is present
+git init -q "$tmpdir/lefthook-repo"
+touch "$tmpdir/lefthook-repo/lefthook.yml"
+mkdir -p "$tmpdir/lefthook-repo/node_modules/.bin"
+cat <<'EOF' > "$tmpdir/lefthook-repo/node_modules/.bin/lefthook"
+#!/usr/bin/env bash
+touch "$PWD/lefthook-installed"
+EOF
+chmod +x "$tmpdir/lefthook-repo/node_modules/.bin/lefthook"
+configure_tracked_repo_git "cuberhaus/lefthook-repo" "$tmpdir/lefthook-repo" personal
+if [ ! -f "$tmpdir/lefthook-repo/lefthook-installed" ]; then
+    printf 'FAIL: lefthook was not installed by configure_tracked_repo_git\n' >&2
+    exit 1
+fi
+
 printf 'OK: git-repo-defaults\n'
