@@ -113,6 +113,7 @@ node_install() {
     command -v markdownlint-cli2 &>/dev/null || sudo npm install -g markdownlint-cli2
     command -v copilot &>/dev/null || sudo npm install -g @github/copilot
     command -v codex &>/dev/null || sudo npm install -g @openai/codex
+    command -v pi &>/dev/null || sudo npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
     # Add more global npm packages below as needed:
     # sudo npm install -g <package>
@@ -452,6 +453,19 @@ EOF
         fi
     else
         info "OpenCode already installed, skipping."
+    fi
+
+    # Pi (AI coding agent)
+    if ! command -v pi &>/dev/null; then
+        info "Installing Pi..."
+        if command -v npm &>/dev/null; then
+            npm install -g --ignore-scripts @earendil-works/pi-coding-agent 2>/dev/null ||
+                sudo npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+        else
+            curl -fsSL https://pi.dev/install.sh | bash
+        fi
+    else
+        info "Pi already installed, skipping."
     fi
 
     # LibreOffice (full office suite)

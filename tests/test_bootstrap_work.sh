@@ -21,10 +21,14 @@ grep -Fq 'command -v codex &>/dev/null || sudo npm install -g @openai/codex' "$W
     fail 'work bootstrap must install the OpenAI Codex CLI'
 grep -Fq 'https://opencode.ai/install' "$WORK_FUNCTIONS" ||
     fail 'work bootstrap must install OpenCode'
+grep -Fq '@earendil-works/pi-coding-agent' "$WORK_FUNCTIONS" ||
+    fail 'work bootstrap must install Pi'
 grep -Fq 'sudo npm uninstall -g cline markdownlint-cli2 @openai/codex' "$WORK_UNINSTALL_FUNCTIONS" ||
     fail 'work bootstrap uninstall must remove the OpenAI Codex CLI'
 grep -Fq '.opencode' "$WORK_UNINSTALL_FUNCTIONS" ||
     fail 'work bootstrap uninstall must clean up OpenCode'
+grep -Fq '@earendil-works/pi-coding-agent' "$WORK_UNINSTALL_FUNCTIONS" ||
+    fail 'work bootstrap uninstall must clean up Pi'
 
 export HOME="$CASE_DIR/home"
 export XDG_CONFIG_HOME="$HOME/.config"

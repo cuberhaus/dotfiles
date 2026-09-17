@@ -37,7 +37,8 @@ base_uninstall() {
     # AUR packages
     $yay_remove caffeine-ng florence downgrade balena-etcher-appimage \
         woeusb-ng betterlockscreen google-chrome microsoft-edge-stable-bin \
-        libreoffice-extension-languagetool timeshift tomighty ttf-ms-fonts || true
+        libreoffice-extension-languagetool timeshift tomighty ttf-ms-fonts \
+        pi-coding-agent-bin || true
 
     git config --global --unset credential.helper || true
 }

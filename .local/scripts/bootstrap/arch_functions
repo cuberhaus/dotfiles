@@ -708,6 +708,14 @@ EOF
     else
         info "OpenCode already installed, skipping."
     fi
+
+    # Pi (AI coding agent)
+    if ! command -v pi &>/dev/null; then
+        info "Installing Pi..."
+        $yay pi-coding-agent-bin
+    else
+        info "Pi already installed, skipping."
+    fi
 }
 
 ### All packages in here should be handpicked

@@ -368,6 +368,19 @@ EOF
     else
         info "OpenCode already installed, skipping."
     fi
+
+    # Pi (AI coding agent)
+    if ! command -v pi &>/dev/null; then
+        info "Installing Pi..."
+        if command -v npm &>/dev/null; then
+            npm install -g --ignore-scripts @earendil-works/pi-coding-agent 2>/dev/null ||
+                sudo npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+        else
+            curl -fsSL https://pi.dev/install.sh | bash
+        fi
+    else
+        info "Pi already installed, skipping."
+    fi
 }
 
 vim_install () {
