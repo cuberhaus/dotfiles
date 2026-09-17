@@ -46,6 +46,8 @@
 # =============================================================================
 # Top-level directories (fully tracked)
 # =============================================================================
+!.pi/
+!.pi/**
 !.vim/
 !.vim/**
 .vim/.netrwhist
@@ -130,6 +132,8 @@
 .config/Code/User/*
 !.config/Code/User/settings.json
 !.config/Code/User/keybindings.json
+!.config/opencode/
+!.config/opencode/tui.json
 !.config/Antigravity/
 .config/Antigravity/*
 !.config/Antigravity/User/
