@@ -392,6 +392,22 @@ EOF
     else
         info "GitHub Copilot CLI already installed, skipping."
     fi
+
+    # Aider (AI pair programming)
+    if ! command -v aider &>/dev/null; then
+        info "Installing Aider..."
+        if command -v pipx &>/dev/null; then
+            if command -v python3.12 &>/dev/null; then
+                pipx install --python python3.12 aider-chat 2>/dev/null || pipx install aider-chat
+            else
+                pipx install aider-chat
+            fi
+        else
+            curl -LsSf https://aider.chat/install.sh | sh
+        fi
+    else
+        info "Aider already installed, skipping."
+    fi
 }
 
 vim_install () {

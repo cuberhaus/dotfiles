@@ -38,7 +38,7 @@ base_uninstall() {
     $yay_remove caffeine-ng florence downgrade balena-etcher-appimage \
         woeusb-ng betterlockscreen google-chrome microsoft-edge-stable-bin \
         libreoffice-extension-languagetool timeshift tomighty ttf-ms-fonts \
-        pi-coding-agent-bin github-copilot-cli || true
+        pi-coding-agent-bin github-copilot-cli aider-chat || true
 
     git config --global --unset credential.helper || true
 }

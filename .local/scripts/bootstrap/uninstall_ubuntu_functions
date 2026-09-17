@@ -46,6 +46,12 @@ ubuntu_gui_uninstall() {
     # GitHub Copilot CLI
     npm uninstall -g @github/copilot 2>/dev/null || true
     sudo npm uninstall -g @github/copilot 2>/dev/null || true
+
+    # Aider
+    if command -v pipx &>/dev/null; then
+        pipx uninstall aider-chat 2>/dev/null || true
+    fi
+    rm -f "$HOME/.local/bin/aider" 2>/dev/null || true
 }
 
 ###############################################################

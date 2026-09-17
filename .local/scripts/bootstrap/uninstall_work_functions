@@ -120,6 +120,12 @@ gui_apps_uninstall() {
     # GitHub Copilot CLI removal
     npm uninstall -g @github/copilot 2>/dev/null || true
     sudo npm uninstall -g @github/copilot 2>/dev/null || true
+
+    # Aider removal
+    if command -v pipx &>/dev/null; then
+        pipx uninstall aider-chat 2>/dev/null || true
+    fi
+    rm -f "$HOME/.local/bin/aider" 2>/dev/null || true
     
     # Clean up apt caches
     sudo apt-get update

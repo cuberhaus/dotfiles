@@ -111,6 +111,7 @@ ai_tools_install() {
     brew install opencode                    # AI coding agent
     brew install pi-coding-agent             # AI coding agent
     brew install --cask copilot-cli          # AI coding agent
+    brew install aider                       # AI pair programming
     # Antigravity: install manually from https://antigravity.dev if needed
 
     # Ollama (local LLM serving)

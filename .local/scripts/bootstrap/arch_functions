@@ -724,6 +724,14 @@ EOF
     else
         info "GitHub Copilot CLI already installed, skipping."
     fi
+
+    # Aider (AI pair programming)
+    if ! command -v aider &>/dev/null; then
+        info "Installing Aider..."
+        $yay aider-chat
+    else
+        info "Aider already installed, skipping."
+    fi
 }
 
 ### All packages in here should be handpicked
