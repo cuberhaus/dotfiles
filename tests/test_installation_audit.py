@@ -187,6 +187,7 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertIn(audit.Package("brew", "age"), mac)
         self.assertIn(audit.Package("brew", "opencode"), mac)
         self.assertIn(audit.Package("brew", "pi-coding-agent"), mac)
+        self.assertIn(audit.Package("brew-cask", "copilot-cli"), mac)
         self.assertIn(audit.Package("brew", "sops"), mac)
         self.assertIn(audit.Package("brew", "stow"), mac)
         self.assertIn(audit.Package("brew", "google-chrome"), mac)
@@ -222,8 +223,10 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertIn(audit.Package("pacman", "stow"), arch)
         self.assertIn(audit.Package("yay", "warp-terminal-bin"), arch)
         self.assertIn(audit.Package("yay", "pi-coding-agent-bin"), arch)
+        self.assertIn(audit.Package("yay", "github-copilot-cli"), arch)
         self.assertNotIn(audit.Package("pacman", "opencode"), manjaro)
         self.assertNotIn(audit.Package("yay", "pi-coding-agent-bin"), manjaro)
+        self.assertNotIn(audit.Package("yay", "github-copilot-cli"), manjaro)
         self.assertNotIn(audit.Package("snap", "whatsie"), arch)
         self.assertIn(audit.Package("snap", "whatsie"), manjaro)
 

@@ -48,6 +48,7 @@ gui_apps_uninstall() {
         karabiner-elements kitty mos rectangle spotify sublime-text
         texstudio the-unarchiver tomighty transmission visual-studio-code
         vlc whatsapp anki notion notion-calendar obsidian todoist
+        copilot-cli
     )
 
     for cask in "${casks[@]}"; do

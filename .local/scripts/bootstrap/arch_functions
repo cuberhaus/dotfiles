@@ -716,6 +716,14 @@ EOF
     else
         info "Pi already installed, skipping."
     fi
+
+    # GitHub Copilot CLI (AI coding assistant)
+    if ! command -v copilot &>/dev/null; then
+        info "Installing GitHub Copilot CLI..."
+        $yay github-copilot-cli
+    else
+        info "GitHub Copilot CLI already installed, skipping."
+    fi
 }
 
 ### All packages in here should be handpicked

@@ -42,6 +42,10 @@ ubuntu_gui_uninstall() {
     npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true
     sudo npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true
     rm -f "$HOME/.local/bin/pi" 2>/dev/null || true
+
+    # GitHub Copilot CLI
+    npm uninstall -g @github/copilot 2>/dev/null || true
+    sudo npm uninstall -g @github/copilot 2>/dev/null || true
 }
 
 ###############################################################

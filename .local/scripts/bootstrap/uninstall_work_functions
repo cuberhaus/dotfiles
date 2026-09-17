@@ -39,7 +39,7 @@ dev_tools_uninstall() {
 ###############################################################
 node_uninstall() {
     info "Uninstalling Node.js and global packages..."
-    sudo npm uninstall -g cline markdownlint-cli2 @openai/codex @earendil-works/pi-coding-agent || true
+    sudo npm uninstall -g cline markdownlint-cli2 @openai/codex @earendil-works/pi-coding-agent @github/copilot || true
     $apt_remove nodejs || true
     
     # Remove NodeSource repo
@@ -116,6 +116,10 @@ gui_apps_uninstall() {
     npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true
     sudo npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true
     rm -f "$HOME/.local/bin/pi" 2>/dev/null || true
+
+    # GitHub Copilot CLI removal
+    npm uninstall -g @github/copilot 2>/dev/null || true
+    sudo npm uninstall -g @github/copilot 2>/dev/null || true
     
     # Clean up apt caches
     sudo apt-get update

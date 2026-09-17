@@ -468,6 +468,17 @@ EOF
         info "Pi already installed, skipping."
     fi
 
+    # GitHub Copilot CLI (AI coding assistant)
+    if ! command -v copilot &>/dev/null; then
+        info "Installing GitHub Copilot CLI..."
+        if command -v npm &>/dev/null; then
+            npm install -g @github/copilot 2>/dev/null ||
+                sudo npm install -g @github/copilot
+        fi
+    else
+        info "GitHub Copilot CLI already installed, skipping."
+    fi
+
     # LibreOffice (full office suite)
     $apt libreoffice
 
