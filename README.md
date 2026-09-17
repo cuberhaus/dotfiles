@@ -126,7 +126,6 @@ make maintenance-digest # Show last successful scheduled maintenance runs
 make workspace         # Sync workspace, refresh repos.json, audit policies
 make submodules        # Init and update submodules
 make update            # Pull latest for every submodule
-make skip-worktree     # Ignore runtime changes to volatile config files (run once after cloning)
 make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac, work)
 ```
 
@@ -146,15 +145,9 @@ differences between tracked files and existing `$HOME` targets.
 
 ### Volatile config files
 
-Some tracked files (e.g. `user_preferences.json` for Warp, `javasettings_Linux_X86_64.xml` for LibreOffice) are **rewritten by their apps on every launch**. They are kept in the repo so the settings you care about are versioned, but the constant runtime changes make `git status` noisy and block `git pull`.
+Some tracked files (e.g. `user_preferences.json` for Warp, `vlc-qt-interface.conf` for VLC) are **rewritten by their apps on every launch**. They are kept in the repo so default settings are versioned, but the constant runtime changes make `git status` noisy and block `git pull`.
 
-After cloning, run once:
-
-```bash
-make skip-worktree
-```
-
-This applies `git update-index --skip-worktree` to those files — git keeps the committed version but stops noticing local changes.
+These files are automatically masked with `git update-index --skip-worktree` when cloning via `clone-all` or when running `make install` / `make restow` / OS bootstrap. No manual setup step is required.
 
 When you **intentionally** want to update one of them in the repo:
 
@@ -163,7 +156,7 @@ git update-index --no-skip-worktree .config/warp-terminal/user_preferences.json
 # edit / copy the new settings you want to keep
 git add .config/warp-terminal/user_preferences.json
 git commit -m "update warp settings"
-git update-index --skip-worktree .config/warp-terminal/user_preferences.json  # re-apply
+.local/scripts/apply-skip-worktree  # re-apply
 ```
 
 ## Bootstrap

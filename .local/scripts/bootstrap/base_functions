@@ -424,22 +424,9 @@ apply_skip_worktree() {
     local dotfiles_root
     dotfiles_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
-    local files=(
-        .config/warp-terminal/user_preferences.json
-        .config/libreoffice/4/user/config/javasettings_Linux_X86_64.xml
-    )
-
     info "Applying skip-worktree to volatile config files..."
-    for f in "${files[@]}"; do
-        if [ -f "$dotfiles_root/$f" ]; then
-            if git -C "$dotfiles_root" update-index --skip-worktree "$f"; then
-                info "  skip-worktree: $f"
-            else
-                warn "  Could not apply skip-worktree to $f"
-            fi
-        else
-            info "  Skipping (not yet present): $f"
-        fi
-    done
+    if [ -x "$dotfiles_root/.local/scripts/apply-skip-worktree" ]; then
+        "$dotfiles_root/.local/scripts/apply-skip-worktree" --verbose "$dotfiles_root"
+    fi
 }
 

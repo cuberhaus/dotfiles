@@ -34,6 +34,10 @@ configure_tracked_repo_git() {
         git -C "$dir" config core.hooksPath .githooks
     fi
 
+    if [ -x "$dir/.local/scripts/apply-skip-worktree" ]; then
+        "$dir/.local/scripts/apply-skip-worktree" "$dir"
+    fi
+
     local org="${nameWithOwner%%/*}"
     local git_name="" git_email=""
 

@@ -38,4 +38,17 @@ CLONE_TEAM_WORK_GIT_NAME='Custom Name' CLONE_TEAM_WORK_GIT_EMAIL='custom@example
 assert_eq "$(git -C "$tmpdir/work" config user.name)" "Custom Name"
 assert_eq "$(git -C "$tmpdir/work" config user.email)" "custom@example.com"
 
+# apply-skip-worktree auto-invocation
+mkdir -p "$tmpdir/work/.local/scripts"
+cat <<'EOF' > "$tmpdir/work/.local/scripts/apply-skip-worktree"
+#!/usr/bin/env bash
+touch "$1/skip-worktree-executed"
+EOF
+chmod +x "$tmpdir/work/.local/scripts/apply-skip-worktree"
+configure_tracked_repo_git "ExampleOrg/work" "$tmpdir/work" team
+if [ ! -f "$tmpdir/work/skip-worktree-executed" ]; then
+    printf 'FAIL: apply-skip-worktree was not executed by configure_tracked_repo_git\n' >&2
+    exit 1
+fi
+
 printf 'OK: git-repo-defaults\n'

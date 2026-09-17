@@ -7,7 +7,7 @@ Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS — shell, edi
 - Repo lives at `~/cuberhaus/dotfiles/`; `~/cuberhaus` is the stow directory and `dotfiles` is the package. Stow symlinks `.config/`, `.local/`, `.vim/`, `.xmonad/`, `.zshenv`, etc. into `$HOME`.
 - `$DOTFILES` (exported by `.zshenv`) resolves the symlink back to the repo root — scripts and configs should reference paths via `$DOTFILES`, not a hardcoded checkout path.
 - OS-specific setup is segregated under `.local/scripts/bootstrap/` (one entrypoint per OS, plus shared `base_functions` and per-OS `*_functions` files).
-- Volatile, app-rewritten files (Warp prefs, LibreOffice settings) are tracked but masked with `git update-index --skip-worktree`.
+- Volatile, app-rewritten files (Warp prefs, LibreOffice settings, VLC interface config) are tracked but automatically masked with `git update-index --skip-worktree` via `clone-all`, `make install`, and bootstrap.
 
 ## Build and Test
 
@@ -18,7 +18,6 @@ Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS — shell, edi
 - `make lint` (shellcheck), `make test` (unit tests), and `make check` (tests + shellcheck + markdownlint + vint).
 - `make audit-installation` — read-only comparison of the checkout, Stow-managed files, active bootstrap package declarations, and native automations. Set `PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work` to override auto-detection.
 - `make bootstrap-{arch,manjaro,ubuntu,mac,work}` — full OS provisioning; **read the script first**, it installs hundreds of packages.
-- `make skip-worktree` — run once after cloning to silence volatile files.
 
 ## Conventions
 

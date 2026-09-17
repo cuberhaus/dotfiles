@@ -20,7 +20,7 @@ CUBERHAUS_WORKSPACE_DIR ?= ../cuberhaus-workspace
 CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 RESTORE_WORKSPACE_SKILLS ?= 1
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update skip-worktree workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -49,12 +49,14 @@ check-stow:
 install: check-stow ## Symlink dotfiles into $HOME via stow (backs up conflicts first)
 	@bash .local/scripts/stow-backup-conflicts
 	$(STOW) -v -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
+	@bash .local/scripts/apply-skip-worktree
 
 uninstall: check-stow uninstall-automations ## Disable automations, remove symlinks, and restore backed-up files
 	@bash .local/scripts/stow-uninstall
 
 restow: check-stow ## Re-stow (uninstall then install — cleans stale links)
 	$(STOW) -v -R -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
+	@bash .local/scripts/apply-skip-worktree
 
 dry-run: check-stow ## Simulate stow and report conflicts (no changes made)
 	$(STOW) -v -n -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR)) 2>&1
@@ -140,20 +142,6 @@ restore-app: ## Preview app-data restore (APP=thunderbird|calibre|anki; APPLY=1 
 
 restore-apps: ## Restore selected apps after setup (RESTORE_APPS="..."; RESTORE_APPLY=1 to copy)
 	@if [ -z "$(strip $(RESTORE_APPS))" ]; then echo "No app data requested; set RESTORE_APPS to thunderbird, calibre, and/or anki."; else for app in $(RESTORE_APPS); do bash .local/scripts/restore-app-data "$$app" $(if $(filter 1,$(RESTORE_APPLY)),--apply,); done; fi
-
-# Files that are intentionally tracked (for the settings we care about) but
-# change constantly at runtime — apps rewrite them on every launch.
-# skip-worktree tells git to stop noticing local changes while keeping the
-# committed version in the repo.  Run this once after cloning.
-SKIP_WORKTREE_FILES := \
-	.config/warp-terminal/user_preferences.json \
-	.config/libreoffice/4/user/config/javasettings_Linux_X86_64.xml
-
-skip-worktree: ## Ignore runtime changes to volatile config files (run once after cloning)
-	git update-index --skip-worktree $(SKIP_WORKTREE_FILES)
-	@echo "skip-worktree applied to:"
-	@for f in $(SKIP_WORKTREE_FILES); do echo "  $$f"; done
-	@echo "To commit a real settings change: git update-index --no-skip-worktree <file>"
 
 ##@ Skills
 

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# apply-skip-worktree — apply skip-worktree to volatile config files
+#
+# Automatically called by clone-all (via git-repo-defaults), make install,
+# make restow, and bootstrap scripts so volatile runtime configs are never
+# tracked as uncommitted changes.
+set -euo pipefail
+
+verbose=false
+target_dir=""
+
+for arg in "$@"; do
+    case "$arg" in
+        -v|--verbose) verbose=true ;;
+        *) target_dir="$arg" ;;
+    esac
+done
+
+dotfiles_root="${target_dir:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+
+files=(
+    .config/warp-terminal/user_preferences.json
+    .config/libreoffice/4/user/config/javasettings_Linux_X86_64.xml
+    .config/vlc/vlc-qt-interface.conf
+)
+
+for f in "${files[@]}"; do
+    if [ -f "$dotfiles_root/$f" ] && git -C "$dotfiles_root" ls-files --error-unmatch "$f" &>/dev/null; then
+        if git -C "$dotfiles_root" update-index --skip-worktree "$f" 2>/dev/null; then
+            if [ "$verbose" = true ]; then
+                printf '  skip-worktree: %s\n' "$f"
+            fi
+        fi
+    fi
+done
