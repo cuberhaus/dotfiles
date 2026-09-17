@@ -7,8 +7,15 @@
 #   clone-team org/team-slug ~/src   # clone into ~/src
 #
 # Mirrors the PowerShell Clone-GitHubTeamRepos (WinDotfiles my_git.psm1).
-# Repos already present in the destination are skipped. Requires the GitHub
-# CLI (gh) authenticated with the read:org scope.
+# Existing git checkouts are fast-forward updated; others are cloned. Requires
+# the GitHub CLI (gh) authenticated with the read:org scope.
+#
+# After each successful clone or pull, configures core.hooksPath when .githooks/
+# exists and sets repo-local commit identity:
+#   cuberhaus/*  -> cuberhaus / polcg10@gmail.com
+#   other orgs   -> CLONE_TEAM_WORK_GIT_NAME / CLONE_TEAM_WORK_GIT_EMAIL
+#                 (defaults: Pol Casacuberta Gil / pcasacubertagil@deloitte.es)
+# Per-org overrides: CLONE_GIT_IDENTITY_<ORG>_NAME and _EMAIL (ORG uppercased).
 
 set -uo pipefail
 
@@ -17,12 +24,16 @@ if ! command -v gh >/dev/null 2>&1; then
     exit 1
 fi
 
+_clone_script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=../lib/git-repo-defaults.sh
+. "$_clone_script_dir/../lib/git-repo-defaults.sh"
+
 team=""
 dest="."
 while [ $# -gt 0 ]; do
     case "$1" in
         -h|--help)
-            sed -n '2,12p' "$0" | sed 's/^# \?//'
+            sed -n '2,20p' "$0" | sed 's/^# \?//'
             exit 0
             ;;
         -*)
@@ -37,9 +48,9 @@ while [ $# -gt 0 ]; do
 done
 
 if [ -t 1 ]; then
-    green=$'\033[32m'; yellow=$'\033[33m'; red=$'\033[31m'; cyan=$'\033[36m'; reset=$'\033[0m'
+    green=$'\033[32m'; yellow=$'\033[33m'; red=$'\033[31m'; cyan=$'\033[36m'; dim=$'\033[2m'; reset=$'\033[0m'
 else
-    green=''; yellow=''; red=''; cyan=''; reset=''
+    green=''; yellow=''; red=''; cyan=''; dim=''; reset=''
 fi
 
 org=""
@@ -92,14 +103,39 @@ fi
 mkdir -p "$dest" || { echo "${red}error:${reset} could not create $dest" >&2; exit 1; }
 target=$(cd "$dest" && pwd) || exit 1
 
-echo "${cyan}Cloning ${#repos[@]} repo(s) into $target${reset}"
+echo "${cyan}Syncing ${#repos[@]} repo(s) into $target${reset}"
 cd "$target" || exit 1
 for full in "${repos[@]}"; do
     name="${full##*/}"
-    if [ -e "$name" ]; then
-        printf '  %sskip%s   %s (already exists)\n' "$yellow" "$reset" "$full"
+    dir="$(resolve_repo_dir "$full")"
+
+    if [ -d "$dir/.git" ]; then
+        output=""
+        if output=$(git -C "$dir" pull --ff-only --quiet 2>&1); then
+            if [ -z "$output" ]; then
+                printf '  %s%s%s   %s\n' "$dim" "up-to-date" "$reset" "$full"
+            else
+                printf '  %s%s%s   %s\n' "$green" "updated" "$reset" "$full"
+            fi
+        else
+            printf '  %s%s%s   %s\n' "$red" "pull failed" "$reset" "$full"
+            if [ -n "$output" ]; then
+                printf '%s\n' "$output" | sed 's/^/    /'
+            fi
+        fi
+        configure_tracked_repo_git "$full" "$dir" team
         continue
     fi
-    printf '  %sclone%s  %s\n' "$green" "$reset" "$full"
-    gh repo clone "$full"
+
+    if [ -e "$dir" ]; then
+        printf '  %s%s%s   %s (exists, not a git repo)\n' "$yellow" "skip" "$reset" "$full"
+        continue
+    fi
+
+    printf '  %s%s%s  %s\n' "$green" "clone" "$reset" "$full"
+    if gh repo clone "$full" "$dir" -- --quiet; then
+        configure_tracked_repo_git "$full" "$dir" team
+    else
+        printf '  %s%s%s   %s\n' "$red" "clone failed" "$reset" "$full" >&2
+    fi
 done
