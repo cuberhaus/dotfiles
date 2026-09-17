@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Description: Report repositories with failing commit status checks on their default branch.
+#
+# Usage:
+#   git-ci-status [options]
+#   gci [options]
+#
+# Options:
+#   -a, --all      Show status for all repositories (failing, passing, pending, no checks)
+#   -r, --repo     Filter by repository name (substring or comma-separated list)
+#   --passing      Show only passing repositories
+#   --pending      Show only repositories with in-progress checks
+#   -j, --json     Output structured JSON
+#   -v, --verbose  Show detailed check listings
+#   --strict       Exit with status 1 if any repository is failing
+#   -h, --help     Show this help message
+
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ -f "$script_dir/git-ci-status.py" ]]; then
+    target="$script_dir/git-ci-status.py"
+elif [[ -n "${DOTFILES:-}" && -f "$DOTFILES/.local/scripts/git-ci-status.py" ]]; then
+    target="$DOTFILES/.local/scripts/git-ci-status.py"
+else
+    target="$HOME/.local/scripts/git-ci-status.py"
+fi
+
+exec python3 "$target" "$@"

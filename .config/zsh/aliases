@@ -115,6 +115,7 @@ alias gsu="git submodule update --recursive --remote"
 alias gr="git-recurse"
 alias gah="git-ahead"
 alias gclean="git-clean-branches"
+alias gci="git-ci-status"
 ## Show Claude usage and cost statistics.
 ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
 #yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
