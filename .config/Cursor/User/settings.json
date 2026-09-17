@@ -9,5 +9,6 @@
     "explorer.confirmPasteNative": false,
     "window.zoomLevel": 1,
     "cursor.composer.shouldChimeAfterChatFinishes": true,
-    "explorer.confirmDragAndDrop": false
+    "explorer.confirmDragAndDrop": false,
+    "window.autoDetectColorScheme": true
 }
