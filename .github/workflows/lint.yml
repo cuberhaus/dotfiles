@@ -75,7 +75,8 @@ jobs:
           #  - documentation (*.md, SECURITY.md, .gitignore) where examples are fine
           #  - configs that are intentionally per-user runtime state and would
           #    otherwise need to be re-removed from git on every machine
-          if git grep -InE '(/home/[a-z][a-z0-9_-]*/|/Users/[a-z][a-z0-9_-]*/)' \
+          #  - /home/linuxbrew/ which is standard Homebrew on Linux
+          matches=$(git grep -InE '(/home/[a-z][a-z0-9_-]*/|/Users/[a-z][a-z0-9_-]*/)' \
               -- ':!*.md' \
                  ':!.gitignore' \
                  ':!SECURITY.md' \
@@ -91,7 +92,9 @@ jobs:
                  ':!.config/zsh/.p10k.zsh' \
                  ':!.config/vlc/vlc-qt-interface.conf' \
                  ':!.vim/.netrwhist' \
-                 ':!.local/scripts/bootstrap/arch_functions'; then
+                 ':!.local/scripts/bootstrap/arch_functions' | grep -v '/home/linuxbrew/' || true)
+          if [ -n "$matches" ]; then
+            echo "$matches"
             echo ""
             echo "ERROR: hardcoded user paths found in tracked files (see above)."
             echo "Use \$HOME, ~/, or XDG variables instead."

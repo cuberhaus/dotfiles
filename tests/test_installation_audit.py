@@ -64,13 +64,13 @@ class InstallationAuditContractTests(unittest.TestCase):
 
     def test_deep_audit_covers_environment_git_shell_editors_and_fonts(self):
         audit = load_audit_module()
-        expected_paths = audit.expected_shell_paths(pathlib.Path("/home/example"))
+        expected_paths = audit.expected_shell_paths(pathlib.Path("/mock/user"))
 
         self.assertEqual(
             expected_paths,
             (
-                pathlib.Path("/home/example/.local/bin"),
-                pathlib.Path("/home/example/.local/scripts/bin"),
+                pathlib.Path("/mock/user/.local/bin"),
+                pathlib.Path("/mock/user/.local/scripts/bin"),
             ),
         )
         source = AUDIT_PATH.read_text(encoding="utf-8")
