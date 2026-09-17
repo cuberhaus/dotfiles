@@ -31,6 +31,10 @@ if ! command -v gh &>/dev/null; then
     exit 1
 fi
 
+_clone_script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=../lib/git-repo-defaults.sh
+. "$_clone_script_dir/../lib/git-repo-defaults.sh"
+
 # Owner to clone: explicit arg > CLONE_ALL_OWNER env > the active gh account.
 orgname="${1:-${CLONE_ALL_OWNER:-}}"
 if [ -z "$orgname" ]; then
@@ -51,23 +55,6 @@ if [ -t 1 ]; then
 else
     C_RESET=''; C_GREEN=''; C_BLUE=''; C_YELLOW=''; C_RED=''; C_DIM=''
 fi
-
-resolve_repo_dir() {
-    local nameWithOwner="$1"
-    local repoName="${nameWithOwner##*/}"
-
-    if [ -d "$nameWithOwner/.git" ]; then
-        printf '%s\n' "$nameWithOwner"
-    elif [ -d "$repoName/.git" ]; then
-        printf '%s\n' "$repoName"
-    elif [ -e "$nameWithOwner" ]; then
-        printf '%s\n' "$nameWithOwner"
-    elif [ -e "$repoName" ]; then
-        printf '%s\n' "$repoName"
-    else
-        printf '%s\n' "$repoName"
-    fi
-}
 
 process_repo() {
     local nameWithOwner="$1"
@@ -112,14 +99,8 @@ process_repo() {
         fi
     fi
 
-    if [ "$status" -eq 0 ] && [ -d "$dir/.git" ]; then
-        if [ -d "$dir/.githooks" ]; then
-            git -C "$dir" config core.hooksPath .githooks
-        fi
-        if [[ "$nameWithOwner" == cuberhaus/* ]]; then
-            git -C "$dir" config user.name "cuberhaus"
-            git -C "$dir" config user.email "polcg10@gmail.com"
-        fi
+    if [ "$status" -eq 0 ]; then
+        configure_tracked_repo_git "$nameWithOwner" "$dir" personal
     fi
 
     printf '%-22b %s\n' "$label" "$nameWithOwner"
