@@ -91,6 +91,16 @@ process_repo() {
         fi
     fi
 
+    if [ "$status" -eq 0 ] && [ -d "$dir/.git" ]; then
+        if [ -d "$dir/.githooks" ]; then
+            git -C "$dir" config core.hooksPath .githooks
+        fi
+        if [[ "$nameWithOwner" == cuberhaus/* ]]; then
+            git -C "$dir" config user.name "cuberhaus"
+            git -C "$dir" config user.email "polcg10@gmail.com"
+        fi
+    fi
+
     printf '%-22b %s\n' "$label" "$nameWithOwner"
     if [ -n "$output" ] && [ "$status" -ne 0 ]; then
         printf '%s\n' "$output" | sed 's/^/    /'
