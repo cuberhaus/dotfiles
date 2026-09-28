@@ -1,18 +1,72 @@
 #!/bin/bash
+# Description: Run a git command in all repositories under the current directory.
 # Author: Pol Casacuberta
 # Date: 19/3/2023
 
 DEFAULT_DEPTH=3
+DEFAULT_JOBS=4
+DEFAULT_RETRIES=1
 
 function mac_key() {
     eval "$(ssh-agent -s)"
     ssh-add -K ~/.ssh/imac
 }
 
+function is_transient_error() {
+    local file="$1"
+    grep -qiE "gnutls|handshake failed|connection.*terminated|connection.*reset|connection.*refused|could not resolve|timed out|operation timed out|unable to access|index\.lock|\.lock|the remote end hung up unexpectedly|rpc failed|502 bad gateway|503 service|504 gateway|429 too many" "$file" 2>/dev/null
+}
+
+function run_repo_with_retry() {
+    local dir="$1"
+    local outfile="$2"
+    local cmd="$3"
+    local max_retries="$4"
+    local attempt=0
+    local status=0
+
+    while true; do
+        ((attempt++))
+        local temp_attempt="${outfile}.attempt"
+        (
+            cd "$dir" 2>/dev/null || exit 1
+            eval "$cmd"
+        ) > "$temp_attempt" 2>&1
+        status=$?
+
+        if [[ $status -eq 0 ]]; then
+            if (( attempt > 1 )); then
+                printf "[retry %d/%d succeeded]\n" "$((attempt - 1))" "$max_retries" > "$outfile"
+                cat "$temp_attempt" >> "$outfile"
+            else
+                mv "$temp_attempt" "$outfile"
+            fi
+            rm -f "$temp_attempt"
+            return 0
+        fi
+
+        if (( attempt > max_retries )) || ! is_transient_error "$temp_attempt"; then
+            if (( attempt > 1 )); then
+                printf "[failed after %d retries]\n" "$((attempt - 1))" > "$outfile"
+                cat "$temp_attempt" >> "$outfile"
+            else
+                mv "$temp_attempt" "$outfile"
+            fi
+            rm -f "$temp_attempt"
+            return "$status"
+        fi
+
+        sleep "$attempt"
+        rm -f "$temp_attempt"
+    done
+}
+
 function git_recursive() {
     local cmd="$1"
-    local depth="${2:-2}"
-    local parallel="${3:-false}"
+    local depth="${2:-$DEFAULT_DEPTH}"
+    local parallel="${3:-true}"
+    local max_jobs="${4:-$DEFAULT_JOBS}"
+    local max_retries="${5:-$DEFAULT_RETRIES}"
 
     local blue green red normal
     blue=$(tput setaf 4)
@@ -40,29 +94,64 @@ function git_recursive() {
     if [[ "$parallel" == true ]]; then
         local tmpdir
         tmpdir=$(mktemp -d)
-        local pids=()
+        trap 'rm -rf "$tmpdir" 2>/dev/null' EXIT INT TERM
+
         local dim reset
         dim=$(tput dim 2>/dev/null || true)
         reset=$(tput sgr0)
 
-        printf "${blue}Launching \"%s\" in %d repo(s) in parallel...${normal}\n" "$cmd" "${#dirs[@]}"
+        local jobs=$max_jobs
+        if (( jobs > ${#dirs[@]} )); then
+            jobs=${#dirs[@]}
+        fi
 
-        for dir in "${dirs[@]}"; do
+        printf "${blue}Launching \"%s\" in %d repo(s) in parallel (concurrency: %d)...${normal}\n" "$cmd" "${#dirs[@]}" "$jobs"
+
+        local has_wait_n=true
+        if ( wait -n ) 2>&1 | grep -q "invalid option"; then
+            has_wait_n=false
+        fi
+
+        local running=0
+        local active_pids=()
+
+        for i in "${!dirs[@]}"; do
+            local dir="${dirs[$i]}"
+            local outfile="$tmpdir/$i.out"
+            local statusfile="$tmpdir/$i.status"
+
             (
-                cd "$dir" 2>/dev/null || exit 1
-                eval "$cmd"
-            ) > "$tmpdir/$(echo "$dir" | tr '/' '_').out" 2>&1 &
-            pids+=($!)
+                run_repo_with_retry "$dir" "$outfile" "$cmd" "$max_retries"
+                echo $? > "$statusfile"
+            ) &
+
+            if [[ "$has_wait_n" == true ]]; then
+                ((running++))
+                if (( running >= jobs )); then
+                    wait -n 2>/dev/null || true
+                    ((running--))
+                fi
+            else
+                active_pids+=($!)
+                if (( ${#active_pids[@]} >= jobs )); then
+                    wait "${active_pids[0]}" 2>/dev/null || true
+                    active_pids=("${active_pids[@]:1}")
+                fi
+            fi
         done
 
+        wait
+
         local failures=0
-        for i in "${!pids[@]}"; do
-            local pid=${pids[$i]}
-            local dir=${dirs[$i]}
-            local outfile
-            outfile="$tmpdir/$(echo "$dir" | tr '/' '_').out"
-            local status=0
-            wait "$pid" || status=$?
+        for i in "${!dirs[@]}"; do
+            local dir="${dirs[$i]}"
+            local outfile="$tmpdir/$i.out"
+            local statusfile="$tmpdir/$i.status"
+            local status=1
+
+            if [[ -f "$statusfile" ]]; then
+                status=$(cat "$statusfile")
+            fi
 
             if [[ $status -eq 0 ]]; then
                 printf "${green}✓ %s${normal}\n" "$dir"
@@ -81,6 +170,7 @@ function git_recursive() {
         done
 
         rm -rf "$tmpdir"
+        trap - EXIT INT TERM
         printf "\n${blue}Done: %d ok, %d failed (of %d)${normal}\n" \
             "$(( ${#dirs[@]} - failures ))" "$failures" "${#dirs[@]}"
         if ((failures > 0)); then
@@ -104,12 +194,16 @@ usage() {
     echo "The command and its args are passed as positional arguments. Examples:"
     echo "  $0 git status"
     echo "  $0 git pull"
-    echo "  $0 -p git fetch"
+    echo "  $0 -j 6 git fetch"
+    echo "  $0 -s git status"
     echo ""
     echo "Options:"
     echo "  -h              Show this help"
     echo "  -k              Add ssh key (macOS)"
-    echo "  -p              Run in parallel (all repos at once)"
+    echo "  -p              Run in parallel (default)"
+    echo "  -s              Run sequentially"
+    echo "  -j <jobs>       Max concurrent jobs in parallel mode (default: $DEFAULT_JOBS, env: GIT_RECURSE_JOBS)"
+    echo "  -r <retries>    Max retries on transient network/TLS failures (default: $DEFAULT_RETRIES, env: GIT_RECURSE_RETRIES)"
     echo "  -d <depth>      Max depth to search for .git dirs (default: $DEFAULT_DEPTH)"
 }
 
@@ -121,8 +215,10 @@ function exit_abnormal() {
 flag_key=false
 flag_parallel=true
 depth=$DEFAULT_DEPTH
+max_jobs="${GIT_RECURSE_JOBS:-$DEFAULT_JOBS}"
+max_retries="${GIT_RECURSE_RETRIES:-$DEFAULT_RETRIES}"
 
-while getopts "hpkd:" options; do
+while getopts "hpksj:r:d:" options; do
     case "${options}" in
     h)
         usage
@@ -133,6 +229,15 @@ while getopts "hpkd:" options; do
         ;;
     p)
         flag_parallel=true
+        ;;
+    s)
+        flag_parallel=false
+        ;;
+    j)
+        max_jobs="${OPTARG}"
+        ;;
+    r)
+        max_retries="${OPTARG}"
         ;;
     d)
         depth="${OPTARG}"
@@ -161,4 +266,19 @@ if [[ -z "${cmd// }" ]]; then
     exit 1
 fi
 
-git_recursive "$cmd" "${depth}" "$flag_parallel"
+if ! [[ "$max_jobs" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Error: -j requires a positive integer."
+    exit 1
+fi
+
+if ! [[ "$max_retries" =~ ^[0-9]+$ ]]; then
+    echo "Error: -r requires a non-negative integer."
+    exit 1
+fi
+
+if ! [[ "$depth" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Error: -d requires a positive integer."
+    exit 1
+fi
+
+git_recursive "$cmd" "${depth}" "$flag_parallel" "${max_jobs}" "${max_retries}"
