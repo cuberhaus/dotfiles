@@ -5,7 +5,15 @@
 
 DEFAULT_DEPTH=3
 DEFAULT_JOBS=0
-DEFAULT_RETRIES=0
+DEFAULT_RETRIES=2
+DEFAULT_TIMEOUT=12
+
+TIMEOUT_BIN=""
+if command -v timeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="gtimeout"
+fi
 
 function mac_key() {
     eval "$(ssh-agent -s)"
@@ -14,6 +22,12 @@ function mac_key() {
 
 function is_transient_error() {
     local file="$1"
+    local status="${2:-0}"
+
+    if [[ "$status" -eq 124 || "$status" -eq 137 ]]; then
+        return 0
+    fi
+
     grep -qiE "gnutls|handshake failed|connection.*terminated|connection.*reset|connection.*refused|could not resolve|timed out|operation timed out|unable to access|index\.lock|\.lock|the remote end hung up unexpectedly|rpc failed|502 bad gateway|503 service|504 gateway|429 too many" "$file" 2>/dev/null
 }
 
@@ -22,17 +36,27 @@ function run_repo_with_retry() {
     local outfile="$2"
     local cmd="$3"
     local max_retries="$4"
+    local timeout_sec="$5"
     local attempt=0
     local status=0
 
     while true; do
         ((attempt++))
         local temp_attempt="${outfile}.attempt"
-        (
-            cd "$dir" 2>/dev/null || exit 1
-            eval "$cmd"
-        ) > "$temp_attempt" 2>&1
-        status=$?
+
+        if [[ -n "$TIMEOUT_BIN" && "$timeout_sec" -gt 0 ]]; then
+            (
+                cd "$dir" 2>/dev/null || exit 1
+                "$TIMEOUT_BIN" -k 3s "${timeout_sec}s" bash -c "$cmd"
+            ) > "$temp_attempt" 2>&1
+            status=$?
+        else
+            (
+                cd "$dir" 2>/dev/null || exit 1
+                eval "$cmd"
+            ) > "$temp_attempt" 2>&1
+            status=$?
+        fi
 
         if [[ $status -eq 0 ]]; then
             if (( attempt > 1 )); then
@@ -45,7 +69,11 @@ function run_repo_with_retry() {
             return 0
         fi
 
-        if (( attempt > max_retries )) || ! is_transient_error "$temp_attempt"; then
+        if [[ $status -eq 124 || $status -eq 137 ]]; then
+            printf "Operation timed out after %ds (stalled connection killed)\n" "$timeout_sec" >> "$temp_attempt"
+        fi
+
+        if (( attempt > max_retries )) || ! is_transient_error "$temp_attempt" "$status"; then
             if (( attempt > 1 )); then
                 printf "[failed after %d retries]\n" "$((attempt - 1))" > "$outfile"
                 cat "$temp_attempt" >> "$outfile"
@@ -67,6 +95,7 @@ function git_recursive() {
     local parallel="${3:-true}"
     local max_jobs="${4:-$DEFAULT_JOBS}"
     local max_retries="${5:-$DEFAULT_RETRIES}"
+    local timeout_sec="${6:-$DEFAULT_TIMEOUT}"
 
     local blue green red normal
     blue=$(tput setaf 4)
@@ -135,7 +164,7 @@ function git_recursive() {
 
             (
                 trap 'echo "$i" >&3 2>/dev/null' EXIT
-                run_repo_with_retry "$dir" "$outfile" "$cmd" "$max_retries"
+                run_repo_with_retry "$dir" "$outfile" "$cmd" "$max_retries" "$timeout_sec"
                 echo $? > "$statusfile"
             ) &
         }
@@ -203,10 +232,18 @@ function git_recursive() {
         fi
     else
         for dir in "${dirs[@]}"; do
-            pushd "$dir" > /dev/null || continue
             printf "${blue}Executing \"%s\" in %s ${normal}\n" "$cmd" "$dir"
-            eval "$cmd"
-            popd > /dev/null || continue
+            local tmp_out
+            tmp_out=$(mktemp)
+            run_repo_with_retry "$dir" "$tmp_out" "$cmd" "$max_retries" "$timeout_sec"
+            local seq_status=$?
+            if [[ -s "$tmp_out" ]]; then
+                cat "$tmp_out"
+            fi
+            rm -f "$tmp_out"
+            if (( seq_status != 0 )); then
+                echo "${red}Command failed with exit code $seq_status${normal}"
+            fi
         done
     fi
 }
@@ -229,6 +266,7 @@ usage() {
     echo "  -s              Run sequentially"
     echo "  -j <jobs>       Max concurrent jobs in parallel mode (0 = all at once, default: $DEFAULT_JOBS, env: GIT_RECURSE_JOBS)"
     echo "  -r <retries>    Max retries on transient network/TLS failures (default: $DEFAULT_RETRIES, env: GIT_RECURSE_RETRIES)"
+    echo "  -t <seconds>    Timeout per repository in seconds (0 = disabled, default: $DEFAULT_TIMEOUT, env: GIT_RECURSE_TIMEOUT)"
     echo "  -d <depth>      Max depth to search for .git dirs (default: $DEFAULT_DEPTH)"
 }
 
@@ -242,8 +280,9 @@ flag_parallel=true
 depth=$DEFAULT_DEPTH
 max_jobs="${GIT_RECURSE_JOBS:-$DEFAULT_JOBS}"
 max_retries="${GIT_RECURSE_RETRIES:-$DEFAULT_RETRIES}"
+timeout_sec="${GIT_RECURSE_TIMEOUT:-$DEFAULT_TIMEOUT}"
 
-while getopts "hpksj:r:d:" options; do
+while getopts "hpksj:r:d:t:" options; do
     case "${options}" in
     h)
         usage
@@ -266,6 +305,9 @@ while getopts "hpksj:r:d:" options; do
         ;;
     d)
         depth="${OPTARG}"
+        ;;
+    t)
+        timeout_sec="${OPTARG}"
         ;;
     :)
         echo "Error: -${OPTARG} requires an argument."
@@ -301,9 +343,14 @@ if ! [[ "$max_retries" =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
+if ! [[ "$timeout_sec" =~ ^[0-9]+$ ]]; then
+    echo "Error: -t requires a non-negative integer (0 for disabled)."
+    exit 1
+fi
+
 if ! [[ "$depth" =~ ^[1-9][0-9]*$ ]]; then
     echo "Error: -d requires a positive integer."
     exit 1
 fi
 
-git_recursive "$cmd" "${depth}" "$flag_parallel" "${max_jobs}" "${max_retries}"
+git_recursive "$cmd" "${depth}" "$flag_parallel" "${max_jobs}" "${max_retries}" "${timeout_sec}"
