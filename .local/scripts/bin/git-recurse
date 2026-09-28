@@ -4,8 +4,8 @@
 # Date: 19/3/2023
 
 DEFAULT_DEPTH=3
-DEFAULT_JOBS=4
-DEFAULT_RETRIES=1
+DEFAULT_JOBS=0
+DEFAULT_RETRIES=0
 
 function mac_key() {
     eval "$(ssh-agent -s)"
@@ -94,59 +94,74 @@ function git_recursive() {
     if [[ "$parallel" == true ]]; then
         local tmpdir
         tmpdir=$(mktemp -d)
-        trap 'rm -rf "$tmpdir" 2>/dev/null' EXIT INT TERM
+        local pipe="$tmpdir/completion.fifo"
+        mkfifo "$pipe"
+        exec 3<>"$pipe"
+        rm -f "$pipe"
+
+        cleanup() {
+            exec 3>&- 2>/dev/null
+            exec 3<&- 2>/dev/null
+            rm -rf "$tmpdir" 2>/dev/null
+            local pids
+            pids=$(jobs -p 2>/dev/null)
+            if [[ -n "$pids" ]]; then
+                local pid_list=()
+                read -r -a pid_list <<< "$pids"
+                kill "${pid_list[@]}" 2>/dev/null
+            fi
+        }
+        trap cleanup EXIT INT TERM
 
         local dim reset
         dim=$(tput dim 2>/dev/null || true)
         reset=$(tput sgr0)
 
+        local total=${#dirs[@]}
+        local width=${#total}
         local jobs=$max_jobs
-        if (( jobs > ${#dirs[@]} )); then
-            jobs=${#dirs[@]}
+        if (( jobs <= 0 || jobs > total )); then
+            jobs=$total
+            printf "${blue}Launching \"%s\" in %d repo(s) in parallel...${normal}\n" "$cmd" "$total"
+        else
+            printf "${blue}Launching \"%s\" in %d repo(s) in parallel (concurrency: %d)...${normal}\n" "$cmd" "$total" "$jobs"
         fi
 
-        printf "${blue}Launching \"%s\" in %d repo(s) in parallel (concurrency: %d)...${normal}\n" "$cmd" "${#dirs[@]}" "$jobs"
-
-        local has_wait_n=true
-        if ( wait -n ) 2>&1 | grep -q "invalid option"; then
-            has_wait_n=false
-        fi
-
-        local running=0
-        local active_pids=()
-
-        for i in "${!dirs[@]}"; do
+        launch_job() {
+            local i="$1"
             local dir="${dirs[$i]}"
             local outfile="$tmpdir/$i.out"
             local statusfile="$tmpdir/$i.status"
 
             (
+                trap 'echo "$i" >&3 2>/dev/null' EXIT
                 run_repo_with_retry "$dir" "$outfile" "$cmd" "$max_retries"
                 echo $? > "$statusfile"
             ) &
+        }
 
-            if [[ "$has_wait_n" == true ]]; then
-                ((running++))
-                if (( running >= jobs )); then
-                    wait -n 2>/dev/null || true
-                    ((running--))
-                fi
-            else
-                active_pids+=($!)
-                if (( ${#active_pids[@]} >= jobs )); then
-                    wait "${active_pids[0]}" 2>/dev/null || true
-                    active_pids=("${active_pids[@]:1}")
-                fi
-            fi
+        local next_to_launch=0
+        local running=0
+        local completed=0
+        local failures=0
+
+        while (( next_to_launch < total && running < jobs )); do
+            launch_job "$next_to_launch"
+            ((next_to_launch++))
+            ((running++))
         done
 
-        wait
+        while (( completed < total )); do
+            local idx
+            if ! read -r idx <&3; then
+                break
+            fi
+            ((completed++))
+            ((running--))
 
-        local failures=0
-        for i in "${!dirs[@]}"; do
-            local dir="${dirs[$i]}"
-            local outfile="$tmpdir/$i.out"
-            local statusfile="$tmpdir/$i.status"
+            local dir="${dirs[$idx]}"
+            local outfile="$tmpdir/$idx.out"
+            local statusfile="$tmpdir/$idx.status"
             local status=1
 
             if [[ -f "$statusfile" ]]; then
@@ -154,9 +169,9 @@ function git_recursive() {
             fi
 
             if [[ $status -eq 0 ]]; then
-                printf "${green}✓ %s${normal}\n" "$dir"
+                printf "[%*d/%d] ${green}✓ %s${normal}\n" "$width" "$completed" "$total" "$dir"
             else
-                printf "${red}✗ %s (exit %d)${normal}\n" "$dir" "$status"
+                printf "[%*d/%d] ${red}✗ %s (exit %d)${normal}\n" "$width" "$completed" "$total" "$dir" "$status"
                 ((failures++)) || true
             fi
 
@@ -167,12 +182,22 @@ function git_recursive() {
             else
                 printf "    %s(no output)%s\n" "$dim" "$reset"
             fi
+
+            if (( next_to_launch < total )); then
+                launch_job "$next_to_launch"
+                ((next_to_launch++))
+                ((running++))
+            fi
         done
 
+        wait
+        exec 3>&- 2>/dev/null
+        exec 3<&- 2>/dev/null
         rm -rf "$tmpdir"
         trap - EXIT INT TERM
+
         printf "\n${blue}Done: %d ok, %d failed (of %d)${normal}\n" \
-            "$(( ${#dirs[@]} - failures ))" "$failures" "${#dirs[@]}"
+            "$(( total - failures ))" "$failures" "$total"
         if ((failures > 0)); then
             return 1
         fi
@@ -202,7 +227,7 @@ usage() {
     echo "  -k              Add ssh key (macOS)"
     echo "  -p              Run in parallel (default)"
     echo "  -s              Run sequentially"
-    echo "  -j <jobs>       Max concurrent jobs in parallel mode (default: $DEFAULT_JOBS, env: GIT_RECURSE_JOBS)"
+    echo "  -j <jobs>       Max concurrent jobs in parallel mode (0 = all at once, default: $DEFAULT_JOBS, env: GIT_RECURSE_JOBS)"
     echo "  -r <retries>    Max retries on transient network/TLS failures (default: $DEFAULT_RETRIES, env: GIT_RECURSE_RETRIES)"
     echo "  -d <depth>      Max depth to search for .git dirs (default: $DEFAULT_DEPTH)"
 }
@@ -266,8 +291,8 @@ if [[ -z "${cmd// }" ]]; then
     exit 1
 fi
 
-if ! [[ "$max_jobs" =~ ^[1-9][0-9]*$ ]]; then
-    echo "Error: -j requires a positive integer."
+if ! [[ "$max_jobs" =~ ^[0-9]+$ ]]; then
+    echo "Error: -j requires a non-negative integer (0 for unlimited)."
     exit 1
 fi
 
