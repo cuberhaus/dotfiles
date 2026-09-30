@@ -84,6 +84,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_bootstrap_work.sh
 	bash tests/test_shell_path.sh
 	bash tests/test_git_repo_defaults.sh
+	bash tests/test_git_recurse.sh
 
 check: lint test ## Run tests and all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.
 	@echo ""

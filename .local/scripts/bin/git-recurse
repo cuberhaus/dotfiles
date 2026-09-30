@@ -37,8 +37,15 @@ function run_repo_with_retry() {
     local cmd="$3"
     local max_retries="$4"
     local timeout_sec="$5"
+    local track_head="${6:-false}"
     local attempt=0
     local status=0
+    local head_before=""
+    local head_after=""
+
+    if [[ "$track_head" == true ]]; then
+        head_before=$(git -C "$dir" rev-parse HEAD 2>/dev/null || true)
+    fi
 
     while true; do
         ((attempt++))
@@ -59,6 +66,12 @@ function run_repo_with_retry() {
         fi
 
         if [[ $status -eq 0 ]]; then
+            if [[ "$track_head" == true && -n "$head_before" ]]; then
+                head_after=$(git -C "$dir" rev-parse HEAD 2>/dev/null || true)
+                if [[ -n "$head_after" && "$head_before" != "$head_after" ]]; then
+                    printf "%s\n%s\n" "$head_before" "$head_after" > "${outfile}.head"
+                fi
+            fi
             if (( attempt > 1 )); then
                 printf "[retry %d/%d succeeded]\n" "$((attempt - 1))" "$max_retries" > "$outfile"
                 cat "$temp_attempt" >> "$outfile"
@@ -89,6 +102,47 @@ function run_repo_with_retry() {
     done
 }
 
+function extract_pull_summary() {
+    local dir="$1"
+    local outfile="$2"
+    local head_file="${outfile}.head"
+    local summary=""
+
+    summary=$(grep -E '^[[:space:]]*[0-9]+ files? changed' "$outfile" 2>/dev/null | tail -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    if [[ -n "$summary" ]]; then
+        printf "%s\n" "$summary"
+        return 0
+    fi
+
+    if [[ -f "$head_file" ]]; then
+        local hb ha shortstat
+        hb=$(sed -n '1p' "$head_file")
+        ha=$(sed -n '2p' "$head_file")
+        if [[ -n "$hb" && -n "$ha" && "$hb" != "$ha" ]]; then
+            shortstat=$(git -C "$dir" diff --shortstat "$hb" "$ha" 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+            if [[ -n "$shortstat" ]]; then
+                printf "%s\n" "$shortstat"
+            else
+                printf "updated (%s..%s)\n" "${hb:0:7}" "${ha:0:7}"
+            fi
+            return 0
+        fi
+    fi
+
+    if grep -qiE 'already up[- ]to[- ]date|current branch .* is up to date' "$outfile" 2>/dev/null; then
+        return 1
+    fi
+
+    local update_line
+    update_line=$(grep -E 'Updating [0-9a-f]+\.\.[0-9a-f]+|Fast-forward|Successfully rebased and updated|Merge made by' "$outfile" 2>/dev/null | head -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    if [[ -n "$update_line" ]]; then
+        printf "%s\n" "$update_line"
+        return 0
+    fi
+
+    return 1
+}
+
 function git_recursive() {
     local cmd="$1"
     local depth="${2:-$DEFAULT_DEPTH}"
@@ -96,12 +150,14 @@ function git_recursive() {
     local max_jobs="${4:-$DEFAULT_JOBS}"
     local max_retries="${5:-$DEFAULT_RETRIES}"
     local timeout_sec="${6:-$DEFAULT_TIMEOUT}"
+    local show_summary="${7:-false}"
 
-    local blue green red normal
+    local blue green red normal dim
     blue=$(tput setaf 4)
     green=$(tput setaf 2)
     red=$(tput setaf 1)
     normal=$(tput sgr0)
+    dim=$(tput dim 2>/dev/null || true)
 
     echo "${blue}depth: $depth ${normal}"
     if [[ $depth -eq 1 ]]; then
@@ -119,6 +175,14 @@ function git_recursive() {
         echo "${red}No git repositories found${normal}"
         return
     fi
+
+    local total=${#dirs[@]}
+    local width=${#total}
+    local failures=0
+    local updated_repos=()
+    local updated_summaries=()
+    local failed_repos=()
+    local failed_statuses=()
 
     if [[ "$parallel" == true ]]; then
         local tmpdir
@@ -142,12 +206,6 @@ function git_recursive() {
         }
         trap cleanup EXIT INT TERM
 
-        local dim reset
-        dim=$(tput dim 2>/dev/null || true)
-        reset=$(tput sgr0)
-
-        local total=${#dirs[@]}
-        local width=${#total}
         local jobs=$max_jobs
         if (( jobs <= 0 || jobs > total )); then
             jobs=$total
@@ -164,7 +222,7 @@ function git_recursive() {
 
             (
                 trap 'echo "$i" >&3 2>/dev/null' EXIT
-                run_repo_with_retry "$dir" "$outfile" "$cmd" "$max_retries" "$timeout_sec"
+                run_repo_with_retry "$dir" "$outfile" "$cmd" "$max_retries" "$timeout_sec" "$show_summary"
                 echo $? > "$statusfile"
             ) &
         }
@@ -172,7 +230,6 @@ function git_recursive() {
         local next_to_launch=0
         local running=0
         local completed=0
-        local failures=0
 
         while (( next_to_launch < total && running < jobs )); do
             launch_job "$next_to_launch"
@@ -199,6 +256,12 @@ function git_recursive() {
 
             if [[ $status -eq 0 ]]; then
                 printf "[%*d/%d] ${green}✓ %s${normal}\n" "$width" "$completed" "$total" "$dir"
+                if [[ "$show_summary" == true ]]; then
+                    local summary
+                    if summary=$(extract_pull_summary "$dir" "$outfile"); then
+                        printf "%s\n" "$summary" > "$tmpdir/$idx.updated"
+                    fi
+                fi
             else
                 printf "[%*d/%d] ${red}✗ %s (exit %d)${normal}\n" "$width" "$completed" "$total" "$dir" "$status"
                 ((failures++)) || true
@@ -209,7 +272,7 @@ function git_recursive() {
             if [[ -s "$outfile" ]]; then
                 sed 's/^/    /' "$outfile"
             else
-                printf "    %s(no output)%s\n" "$dim" "$reset"
+                printf "    %s(no output)%s\n" "$dim" "$normal"
             fi
 
             if (( next_to_launch < total )); then
@@ -222,29 +285,85 @@ function git_recursive() {
         wait
         exec 3>&- 2>/dev/null
         exec 3<&- 2>/dev/null
-        rm -rf "$tmpdir"
-        trap - EXIT INT TERM
 
-        printf "\n${blue}Done: %d ok, %d failed (of %d)${normal}\n" \
-            "$(( total - failures ))" "$failures" "$total"
-        if ((failures > 0)); then
-            return 1
-        fi
-    else
-        for dir in "${dirs[@]}"; do
-            printf "${blue}Executing \"%s\" in %s ${normal}\n" "$cmd" "$dir"
-            local tmp_out
-            tmp_out=$(mktemp)
-            run_repo_with_retry "$dir" "$tmp_out" "$cmd" "$max_retries" "$timeout_sec"
-            local seq_status=$?
-            if [[ -s "$tmp_out" ]]; then
-                cat "$tmp_out"
+        local i
+        for (( i=0; i < total; i++ )); do
+            local r_dir="${dirs[$i]}"
+            local r_statusfile="$tmpdir/$i.status"
+            local r_updatedfile="$tmpdir/$i.updated"
+            local r_status=0
+            [[ -f "$r_statusfile" ]] && r_status=$(cat "$r_statusfile")
+
+            if [[ -f "$r_updatedfile" ]]; then
+                updated_repos+=("$r_dir")
+                updated_summaries+=("$(cat "$r_updatedfile")")
             fi
-            rm -f "$tmp_out"
-            if (( seq_status != 0 )); then
-                echo "${red}Command failed with exit code $seq_status${normal}"
+            if [[ "$r_status" -ne 0 ]]; then
+                failed_repos+=("$r_dir")
+                failed_statuses+=("$r_status")
             fi
         done
+
+        rm -rf "$tmpdir"
+        trap - EXIT INT TERM
+    else
+        local completed=0
+        for dir in "${dirs[@]}"; do
+            ((completed++))
+            local tmp_out
+            tmp_out=$(mktemp)
+            run_repo_with_retry "$dir" "$tmp_out" "$cmd" "$max_retries" "$timeout_sec" "$show_summary"
+            local seq_status=$?
+
+            if [[ $seq_status -eq 0 ]]; then
+                printf "[%*d/%d] ${green}✓ %s${normal}\n" "$width" "$completed" "$total" "$dir"
+                if [[ "$show_summary" == true ]]; then
+                    local summary
+                    if summary=$(extract_pull_summary "$dir" "$tmp_out"); then
+                        updated_repos+=("$dir")
+                        updated_summaries+=("$summary")
+                    fi
+                fi
+            else
+                printf "[%*d/%d] ${red}✗ %s (exit %d)${normal}\n" "$width" "$completed" "$total" "$dir" "$seq_status"
+                ((failures++)) || true
+                failed_repos+=("$dir")
+                failed_statuses+=("$seq_status")
+            fi
+
+            if [[ -s "$tmp_out" ]]; then
+                sed 's/^/    /' "$tmp_out"
+            else
+                printf "    %s(no output)%s\n" "$dim" "$normal"
+            fi
+            rm -f "$tmp_out" "${tmp_out}.head"
+        done
+    fi
+
+    printf "\n${blue}Done: %d ok, %d failed (of %d)${normal}\n" \
+        "$(( total - failures ))" "$failures" "$total"
+
+    if [[ "$show_summary" == true ]]; then
+        if (( ${#updated_repos[@]} > 0 )); then
+            printf "\n${green}Updated repositories (%d):${normal}\n" "${#updated_repos[@]}"
+            local j
+            for (( j=0; j < ${#updated_repos[@]}; j++ )); do
+                printf "  ${green}%s${normal}: %s\n" "${updated_repos[j]}" "${updated_summaries[j]}"
+            done
+        elif (( failures == 0 )); then
+            printf '\n%sAll repositories up to date.%s\n' "$dim" "$normal"
+        else
+            printf '\n%sNo repositories updated.%s\n' "$dim" "$normal"
+        fi
+    fi
+
+    if (( failures > 0 )); then
+        printf "\n${red}Failed repositories (%d):${normal}\n" "$failures"
+        local k
+        for (( k=0; k < ${#failed_repos[@]}; k++ )); do
+            printf "  ${red}%s${normal} (exit %d)\n" "${failed_repos[k]}" "${failed_statuses[k]}"
+        done
+        return 1
     fi
 }
 
@@ -268,6 +387,7 @@ usage() {
     echo "  -r <retries>    Max retries on transient network/TLS failures (default: $DEFAULT_RETRIES, env: GIT_RECURSE_RETRIES)"
     echo "  -t <seconds>    Timeout per repository in seconds (0 = disabled, default: $DEFAULT_TIMEOUT, env: GIT_RECURSE_TIMEOUT)"
     echo "  -d <depth>      Max depth to search for .git dirs (default: $DEFAULT_DEPTH)"
+    echo "  -S              Show summary of updated repositories (automatic for pull commands)"
 }
 
 function exit_abnormal() {
@@ -277,12 +397,13 @@ function exit_abnormal() {
 
 flag_key=false
 flag_parallel=true
+flag_summary=""
 depth=$DEFAULT_DEPTH
 max_jobs="${GIT_RECURSE_JOBS:-$DEFAULT_JOBS}"
 max_retries="${GIT_RECURSE_RETRIES:-$DEFAULT_RETRIES}"
 timeout_sec="${GIT_RECURSE_TIMEOUT:-$DEFAULT_TIMEOUT}"
 
-while getopts "hpksj:r:d:t:" options; do
+while getopts "hpksj:r:d:t:S" options; do
     case "${options}" in
     h)
         usage
@@ -296,6 +417,9 @@ while getopts "hpksj:r:d:t:" options; do
         ;;
     s)
         flag_parallel=false
+        ;;
+    S)
+        flag_summary=true
         ;;
     j)
         max_jobs="${OPTARG}"
@@ -353,4 +477,13 @@ if ! [[ "$depth" =~ ^[1-9][0-9]*$ ]]; then
     exit 1
 fi
 
-git_recursive "$cmd" "${depth}" "$flag_parallel" "${max_jobs}" "${max_retries}" "${timeout_sec}"
+show_summary=false
+if [[ "$flag_summary" == true ]]; then
+    show_summary=true
+elif [[ "$flag_summary" != false && "${GIT_RECURSE_SUMMARY:-auto}" != "0" ]]; then
+    if [[ "$cmd" =~ (^|[[:space:]])pull([[:space:]]|$) || "${GIT_RECURSE_SUMMARY:-auto}" == "1" ]]; then
+        show_summary=true
+    fi
+fi
+
+git_recursive "$cmd" "${depth}" "$flag_parallel" "${max_jobs}" "${max_retries}" "${timeout_sec}" "$show_summary"

@@ -26,6 +26,8 @@ export DISTRO=manjaro" > "$HOME/.config/distro"   # Distro variable
 sudo cp "${DOTFILES:-$HOME/cuberhaus/dotfiles}/.local/share/icons/Avatar.jpg" /usr/share/icons/Avatar.jpg # Move avatar picture so that LightDM can find it
 sudo cp "${DOTFILES:-$HOME/cuberhaus/dotfiles}/.local/share/icons/Avatar.jpg" "$HOME/.face" # Move avatar picture so mugshot can find it
 
+configure_inotify_watches
+
 ### ONLY CHANGE FROM HERE ON
 base_install
 obsidian_vault_install

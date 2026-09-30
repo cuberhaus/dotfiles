@@ -278,6 +278,60 @@ configure_dual_boot_utc_rtc() {
     info "Hardware clock now uses UTC (LocalRTC=no)."
 }
 
+## Print the running kernel's per-user inotify watch limit.
+running_inotify_watch_limit() {
+    cat /proc/sys/fs/inotify/max_user_watches
+}
+
+## Raise the per-user inotify watch limit so editors, Obsidian, and file syncers
+## can watch large workspaces at the same time.
+##
+## Every program shares one pool of watches per user. Some distributions cap it
+## low (Ubuntu's localsearch ships 65536), and a full pool makes Obsidian fail
+## with "ENOSPC: System limit for number of file watchers reached". The limit is
+## persisted in a drop-in whose 99- prefix sorts after those distro defaults,
+## then applied to the running kernel. Existing higher limits are never lowered.
+## Override the value with INOTIFY_MAX_USER_WATCHES (the drop-in path with
+## INOTIFY_SYSCTL_CONF, which exists so tests can avoid touching /etc).
+configure_inotify_watches() {
+    [ "$(uname -s)" = Linux ] || return 0
+
+    local limit="${INOTIFY_MAX_USER_WATCHES:-524288}"
+    local conf="${INOTIFY_SYSCTL_CONF:-/etc/sysctl.d/99-inotify.conf}"
+    local persisted running
+
+    if [[ ! "$limit" =~ ^[1-9][0-9]*$ ]]; then
+        error "INOTIFY_MAX_USER_WATCHES must be a positive integer, got: $limit"
+        return 2
+    fi
+
+    # sysctl applies the last assignment in a file, so the last one is the
+    # effective value; both "key=value" and "key = value" are valid syntax.
+    persisted="$(awk -F= '
+        /^[[:space:]]*fs\.inotify\.max_user_watches[[:space:]]*=/ {
+            gsub(/[[:space:]]/, "", $2)
+            value = $2
+        }
+        END { print value }' "$conf" 2>/dev/null || true)"
+
+    if [[ "$persisted" =~ ^[0-9]+$ ]] && (( persisted >= limit )); then
+        info "inotify watch limit is already persisted at $persisted, skipping."
+    else
+        info "Persisting fs.inotify.max_user_watches=$limit in $conf..."
+        printf '%s\n' \
+            '# Managed by dotfiles bootstrap.' \
+            '# Editors, Obsidian, and file syncers share one per-user inotify watch pool.' \
+            "fs.inotify.max_user_watches=$limit" | sudo tee -a "$conf" > /dev/null
+    fi
+
+    running="$(running_inotify_watch_limit 2>/dev/null || echo 0)"
+    if ! [[ "$running" =~ ^[0-9]+$ ]] || (( running < limit )); then
+        info "Raising the running inotify watch limit to $limit..."
+        sudo sysctl -w "fs.inotify.max_user_watches=$limit" > /dev/null ||
+            warn "Could not raise the running inotify watch limit; the persisted value applies after the next reboot."
+    fi
+}
+
 ###############################################################
 # => XDG defaults (in case .zshenv hasn't been sourced)
 ###############################################################

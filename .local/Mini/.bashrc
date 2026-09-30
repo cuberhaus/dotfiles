@@ -146,12 +146,20 @@ pull() {
             pids+=($!)
         done < <(find . -maxdepth 2 -type d -name .git -print0 2>/dev/null)
         
+        local updated_repos=()
+        local updated_summaries=()
         for i in "${!pids[@]}"; do
             local pid="${pids[$i]}" repo="${repos[$i]}"
             local outfile
             outfile="$tmpdir/$(echo "$repo" | tr '/' '_').out"
             if wait "$pid"; then
                 printf "\033[32m✓ %s\033[0m\n" "$repo"
+                local summary
+                summary=$(grep -E '^[[:space:]]*[0-9]+ files? changed' "$outfile" 2>/dev/null | tail -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+                if [ -n "$summary" ]; then
+                    updated_repos+=("$repo")
+                    updated_summaries+=("$summary")
+                fi
             else
                 printf "\033[31m✗ %s\033[0m\n" "$repo"
                 ((failures++)) || true
@@ -160,8 +168,15 @@ pull() {
         done
         set -m  # re-enable job control
         rm -rf "$tmpdir"
+        if [ "${#updated_repos[@]}" -gt 0 ]; then
+            printf "\n\033[32mUpdated repositories (%d):\033[0m\n" "${#updated_repos[@]}"
+            for (( j=0; j < ${#updated_repos[@]}; j++ )); do
+                printf "  \033[32m%s\033[0m: %s\n" "${updated_repos[j]}" "${updated_summaries[j]}"
+            done
+        fi
         if ((failures > 0)); then
             printf "\n\033[31m%d repo(s) failed\033[0m\n" "$failures"
+            return 1
         fi
     fi
 }

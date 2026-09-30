@@ -240,6 +240,7 @@ configure_dual_boot_utc_rtc() { record 'dual-boot'; }
 work_update_system() { record 'system-update'; }
 bootstrap_stow_checkout() { record "stow:$1:$SKIP_STOW"; }
 install_preparation() { record 'preparation'; }
+configure_inotify_watches() { record 'inotify'; }
 shutdown_fix() { record 'shutdown-fix'; }
 nvidia_install() { record 'nvidia-install'; }
 nvidia_display_config() { record 'nvidia-display'; }
@@ -267,7 +268,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\nshutdown-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"

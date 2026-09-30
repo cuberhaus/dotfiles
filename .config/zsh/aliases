@@ -278,3 +278,14 @@ alias update="$update"
 
 alias Xres='xrdb -load $HOME/.config/X11/xresources'
 alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
+
+###############################################################
+# => Enterprise RAG test environment
+###############################################################
+
+# Local k3s (Traefik) intercepts port 443 via iptables, so the tunnel uses 8443
+# and Chrome maps erag.com hostnames to it. Host details live in ~/.ssh/config.
+# 1) Start the tunnel (prompts for the jump host passphrase and sdp password).
+alias erag-tunnel='ssh -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 8443:localhost:443 erag-test'
+# 2) Open a throwaway Chrome profile that resolves erag.com to the tunnel.
+alias erag-chrome='google-chrome --user-data-dir=/tmp/chrome-erag --host-resolver-rules="MAP erag.com 127.0.0.1:8443, MAP *.erag.com 127.0.0.1:8443" --ignore-certificate-errors https://erag.com/'

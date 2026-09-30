@@ -240,6 +240,29 @@ Each bootstrap entrypoint follows the same pattern:
 6. Switches the default shell to zsh.
 7. Installs the native maintenance schedules shown below.
 
+### inotify watch limit
+
+The physical Linux bootstraps (`ubuntu`, `arch`, `manjaro`, and `work`) raise
+`fs.inotify.max_user_watches` to 524288. Editors, Obsidian, and file syncers
+share one per-user pool of file watches, and some distributions cap it low:
+Ubuntu's `localsearch` package ships 65536. When the pool is exhausted Obsidian
+fails to open with `ENOSPC: System limit for number of file watchers reached`.
+
+The step persists the value in `/etc/sysctl.d/99-inotify.conf`, whose `99-`
+prefix sorts after the distro defaults, and applies it to the running kernel. It
+is idempotent, never lowers a limit that is already higher, and only warns if the
+live write fails. Set `INOTIFY_MAX_USER_WATCHES=<n>` to choose another value.
+The WSL and macOS bootstraps skip it.
+
+To apply it to an existing machine without re-running the bootstrap:
+
+```bash
+bash -c 'source .local/scripts/bootstrap/base_functions; configure_inotify_watches'
+```
+
+Verify with `cat /proc/sys/fs/inotify/max_user_watches`. To undo it, remove
+`/etc/sysctl.d/99-inotify.conf` and run `sudo sysctl --system`.
+
 ### Doom Emacs Org visual-line movement
 
 After changing [.doom.d/config.el](.doom.d/config.el), run `doom sync`, then

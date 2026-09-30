@@ -64,6 +64,7 @@ work_main() {
     mkdir -p "$XDG_CONFIG_HOME"
     printf '%s\n' '#! /bin/sh' 'export DISTRO=ubuntu' > "$XDG_CONFIG_HOME/distro"
 
+    configure_inotify_watches
     shutdown_fix
     nvidia_install
     nvidia_display_config

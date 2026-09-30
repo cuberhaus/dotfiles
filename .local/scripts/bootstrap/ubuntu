@@ -22,6 +22,8 @@ install_preparation
 echo "#! /bin/sh
 export DISTRO=ubuntu" > "$HOME/.config/distro"
 
+configure_inotify_watches
+
 ### ONLY CHANGE FROM HERE ON
 base_install
 sops_install
