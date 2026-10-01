@@ -62,6 +62,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   ├── lint.sh                 # Lint all tracked shell scripts with shellcheck
 │   ├── permanent_shutdown_fix.sh # Applies shutdown kernel parameters via kernelstub or GRUB
 │   ├── toggle_theme            # Switch between light/dark themes
+│   ├── ycm.sh                  # Builds or verifies YouCompleteMe's compiled core and bundled clangd
 │   └── ...                     # Other utility scripts
 │
 ├── share/                      # XDG data files
@@ -165,3 +166,32 @@ failure only warns.
 Run the hermetic test with `bash tests/test_brightness_fix.sh`. The evidence,
 verification steps, and fallbacks are in
 [docs/ROG-BRIGHTNESS-DIAGNOSIS.md](../docs/ROG-BRIGHTNESS-DIAGNOSIS.md).
+
+## YouCompleteMe build
+
+YouCompleteMe's server (ycmd) refuses to start until its C++ core, `ycm_core`,
+has been compiled for the Python that runs it, and a plugin update can leave an
+outdated core behind. Vim and Neovim then report "The ycmd server SHUT DOWN".
+
+Two layers keep it working. The `do` hook on the plugin's `Plug` line in
+`.vim/vimrc` builds it when vim-plug installs or updates the plugin.
+`.local/scripts/ycm.sh` is the idempotent safety net: it does nothing when the
+build already works, and otherwise repairs plugin submodules left behind by an
+interrupted install and runs the plugin's `install.py`. Run it by hand when the
+server will not start: `--check` only reports, `--dry-run` previews, and
+`--force` rebuilds. By default it builds the core plus the bundled clangd, the
+same options as the hook; set `YCM_INSTALL_ARGS` to change them, for example
+`--all` for the extra language completers, which need their own toolchains.
+
+The script never uses `sudo` and never installs packages. The bootstrap
+profiles install what it needs: `cmake`, `git`, the Python headers (for example
+`python3-dev`), and the Neovim Python provider `pynvim`. The compiler comes from
+`build-essential`, `base-devel`, the Xcode Command Line Tools, or the Gentoo
+base system. When a prerequisite is missing, `ycm.sh` names it and stops before
+building. The `arch`, `ubuntu`, and `mac` profiles call the script at the end of
+their Vim step; `work` and `gentoo` use the shared `vim_plugins_install` step,
+which installs the plugins headlessly and then runs it. In every profile a
+failure only warns, and `make repair REPAIR=vim PROFILE=work` repeats the step
+on a work machine.
+
+Run the hermetic test with `bash tests/test_ycm.sh`.

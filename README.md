@@ -70,6 +70,16 @@ command detection may be less precise.
 Create a new agent terminal after changing the profile. Remove
 `chat.tools.terminal.terminalProfile.linux` to return to the default profile.
 
+Interactive Bash gets a dependency-free prompt from `.bashrc` that mirrors the
+zsh p10k "lean" look: blue path, git branch with ahead/behind and
+staged/unstaged/untracked counters, and a prompt character that turns red after
+a failed command. `user@host` is only shown over SSH or as root. `man` pages and
+the completion list are colored too. `PS1` is assigned once and never rewritten,
+which keeps the VS Code and Cursor shell integration working. Set `NO_COLOR=1`
+for the same layout without colors, or `PROMPT_GIT=0` to hide the git segment in
+huge repositories. `TERM=dumb` shells keep the stock prompt, and the chat-tool
+terminals above stay uncolored because they skip `.bashrc`.
+
 The `$DOTFILES` variable (exported by `.zshenv`) points to the repo root,
 auto-detected by resolving the `.zshenv` symlink. Scripts and configs that
 need to reference the repo should use `$DOTFILES`.
@@ -334,7 +344,7 @@ scripts directory.
 
 | Category | Tool / Config | Notes |
 | --- | --- | --- |
-| **Shells** | zsh (antigen, p10k), bash | XDG-compliant `$ZDOTDIR` in `.config/zsh/` |
+| **Shells** | zsh (antigen, p10k), bash (git-aware prompt) | XDG-compliant `$ZDOTDIR` in `.config/zsh/` |
 | **Editors** | Vim, Neovim, Doom Emacs, personal Emacs (chemacs) | Vim config at `.vim/vimrc`; Emacs literate config in `.config/emacs.org` |
 | **Terminals** | kitty, Alacritty, termite | |
 | **Window Managers** | XMonad (+xmobar), i3 (+i3blocks +polybar), qtile, sway | XMonad is the primary config; i3 is the secondary |

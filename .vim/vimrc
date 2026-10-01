@@ -75,7 +75,8 @@ Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'vim-scripts/bufexplorer.zip'
-Plug 'ycm-core/YouCompleteMe'
+" The 'do' hook builds ycm_core and fetches clangd; without it ycmd shuts down
+Plug 'ycm-core/YouCompleteMe', { 'do': 'python3 install.py --clangd-completer' }
 " COLORS
 " Plug 'chriskempson/base16-vim'
 " Plug 'NLKNguyen/papercolor-theme'

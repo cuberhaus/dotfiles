@@ -27,9 +27,10 @@ In this order:
 8. Enables `elogind` (boot runlevel) and `dbus` (default runlevel) on OpenRC. systemd needs nothing.
 9. Adds the user to the `video` group, and to `i2c` when that group exists, for brightness control.
 10. Makes zsh the login shell, when zsh is listed in `/etc/shells`.
-11. Clones the Obsidian vault and installs its plugins.
+11. Installs the Vim and Neovim plugins headlessly, then makes sure YouCompleteMe can start by building its C++ core and bundled clangd when they are missing or outdated (`.local/scripts/ycm.sh`). This needs the network and can compile for several minutes; a failure only warns.
+12. Clones the Obsidian vault and installs its plugins.
 
-Rerunning is safe. Packages, services, the login shell, the distro marker, the inotify limit, SOPS, and the vault clone are each checked first and reported as already satisfied. Adding the user to groups and installing the vault plugins are idempotent and simply run again.
+Rerunning is safe. Packages, services, the login shell, the distro marker, the inotify limit, SOPS, and the vault clone are each checked first and reported as already satisfied. Adding the user to groups and installing the vault plugins are idempotent and simply run again. The plugin install is idempotent too, and compiles nothing once YouCompleteMe works.
 
 ## Assumptions
 
@@ -130,7 +131,7 @@ Real runs mirror their output to `~/.local/state/cuberhaus/bootstrap/gentoo-<tim
 | --- | --- | --- |
 | `base` | yes | Git, GitHub CLI, Stow, search and file tools, tmux, ranger |
 | `shell` | yes | zsh and its completions |
-| `editors` | yes | Vim, Neovim |
+| `editors` | yes | Vim, Neovim, and the `pynvim` provider Neovim needs to load YouCompleteMe |
 | `fonts` | yes | Hack, Noto, DejaVu, Liberation, Roboto, Font Awesome |
 | `x11` | yes | Xorg server, `startx`, X utilities, kitty, dunst, udiskie, polkit, audio utilities |
 | `i3` | yes | i3, i3blocks, picom, rofi, feh, flameshot |
@@ -154,6 +155,7 @@ Before selecting a section that contains `~amd64` packages, accept their keyword
 - **Rerun.** Packages already in `@world` are skipped, and services, group memberships, the login shell, and the distro marker are checked before they are changed. Portage records each package in `@world` as it merges, so a rerun after a failed build should resume with what is missing. "Already in `@world`" is Portage's record of what you asked for, not a check that the package is installed; if a package is listed there but missing (a hand-edited world file, an interrupted unmerge), rerun with `--update-world` to reinstall it.
 - **`emerge` failed.** The profile stops there; `emerge`'s own output explains why. Fix the reported USE, keyword, or blocker problem under `/etc/portage/`, preview with `make bootstrap-gentoo-dry-run`, and rerun.
 - **Stopped at the login shell.** zsh is installed but not listed in `/etc/shells`, which `chsh` requires. The profile never edits that file. As root, add the path of zsh, then rerun.
+- **Vim plugin setup failed.** The profile warns and carries on, because the step needs the network and a compile. Run `nvim +PlugInstall +qall`, then `.local/scripts/ycm.sh`: it names any missing build tool, repairs plugin submodules left behind by an interrupted install, and shows the build output. `.local/scripts/ycm.sh --check` only reports whether YouCompleteMe is ready.
 - **Unattended run refused.** Run `sudo -v` in the same terminal, or configure passwordless `sudo`, then retry.
 - **`GENTOO_INIT` errors in a chroot.** No init is running there; set `GENTOO_INIT=openrc` or `GENTOO_INIT=systemd`.
 - **Backing out.** There is no uninstaller. By hand: `make uninstall` removes the Stow links, `sudo rc-update del elogind boot` and `sudo rc-update del dbus default` disable the services, `sudo emerge --ask --deselect <atom>` followed by `sudo emerge --ask --depclean` removes packages, and deleting `~/.config/distro` clears the marker.

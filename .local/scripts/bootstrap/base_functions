@@ -206,6 +206,40 @@ obsidian_vault_install() {
     make -C "$vault_root" plugin-install
 }
 
+## Install the Vim/Neovim plugins and make sure YouCompleteMe can start.
+##
+## Neovim runs headless, so this needs no terminal and is safe inside the logged,
+## unattended bootstraps. vim-plug's 'do' hook in .vim/vimrc builds YouCompleteMe
+## for a new install; ycm.sh then verifies the result and repairs what the hook
+## missed (an interrupted earlier install, an outdated core). Both steps are
+## idempotent, so rerunning is safe. The profile supplies Neovim, the build tools
+## and the Python provider as packages.
+vim_plugins_install() {
+    local vimrc="$HOME/.vim/vimrc"
+    local ycm="${DOTFILES_ROOT:-$HOME}/.local/scripts/ycm.sh"
+    local status=0
+
+    if [ ! -r "$vimrc" ]; then
+        error "$vimrc not found; link the dotfiles first so the plugin list exists."
+        return 1
+    fi
+    if ! command -v nvim >/dev/null 2>&1; then
+        error "Neovim is not installed, so the Vim plugins cannot be installed."
+        return 1
+    fi
+
+    # vim-plug reports failures in its own window, not in the exit status; the
+    # ycm.sh run below verifies the part that matters. Stdin and credential
+    # prompts are closed so a plugin hook can fail but never hang the bootstrap.
+    GIT_TERMINAL_PROMPT=0 nvim --headless '+PlugInstall --sync' '+qa!' </dev/null ||
+        {
+            warn "Neovim exited with an error while installing the plugins."
+            status=1
+        }
+    bash "$ycm" || status=1
+    return "$status"
+}
+
 resolve_high_dpi_choice() {
     case "${HIGH_DPI_CHOICE:-}" in
         yes) HIGH_DPI=true ;;
@@ -406,6 +440,234 @@ sops_install() {
         sudo install -m 0755 "${temp_dir}/${asset}" /usr/local/bin/sops
     )
     info "SOPS installed successfully."
+}
+
+###############################################################
+# => IDE installs (vendor apt repositories and Cursor)
+###############################################################
+
+# VS Code, Cursor and Antigravity ship as .deb packages and only receive updates
+# while their vendor apt source is enabled.  Ubuntu release upgrades disable
+# third-party sources, and the weekly `apt-get full-upgrade`
+# (cuberhaus-system-maintenance) then skips those packages without any error.
+# So the sources are re-asserted on every bootstrap run and by
+# `make repair REPAIR=ide-repos`, not written once behind a `command -v` guard.
+
+# Succeed when Cursor is installed, either as the .deb (a `cursor` command) or
+# as a complete AppImage.  The 1 MiB floor rejects a failed download or an API
+# reply that was saved as the AppImage.
+cursor_is_installed() {
+    local app_image="$HOME/Applications/cursor.AppImage"
+    local app_image_size=0
+
+    command -v cursor &>/dev/null && return 0
+    if [ -f "$app_image" ]; then
+        app_image_size=$(stat -c%s "$app_image" 2>/dev/null || printf '0\n')
+    fi
+    [ "$app_image_size" -ge 1048576 ]
+}
+
+# Download the latest stable Cursor AppImage to $1 (used where no apt repository
+# is available, such as Arch).  The download API replies with JSON naming the
+# file, so the URL is resolved first.  The file is fetched under a .part name and
+# size-checked, so an interrupted download is never mistaken for an install.
+cursor_appimage_download() {
+    local destination="$1"
+    local partial="$destination.part"
+    local api_url="https://cursor.com/api/download?platform=linux-x64&releaseTrack=stable"
+    local download_url
+
+    if ! download_url=$(curl -fsSL "$api_url" | jq -er '.downloadUrl'); then
+        error "Could not resolve the Cursor AppImage download URL from $api_url"
+        return 1
+    fi
+    if ! curl -fsSL "$download_url" -o "$partial"; then
+        rm -f "$partial"
+        error "Could not download the Cursor AppImage from $download_url"
+        return 1
+    fi
+    if [ "$(stat -c%s "$partial")" -lt 1048576 ]; then
+        rm -f "$partial"
+        error "The downloaded Cursor AppImage is incomplete."
+        return 1
+    fi
+    mv -f "$partial" "$destination"
+}
+
+# Run a command that changes the apt configuration, or only describe it when
+# APT_SOURCES_DRY_RUN=true (`make repair REPAIR=ide-repos DRY_RUN=true`).
+apt_sources_apply() {
+    if [ "${APT_SOURCES_DRY_RUN:-false}" = true ]; then
+        info "[dry-run] would run: $*"
+        return 0
+    fi
+    "$@"
+}
+
+# Download the apt signing key of the vendor named $1 from $2 and install it,
+# dearmored, as the keyring $3.  Fails unless the keyring ends up non-empty.
+apt_vendor_key_install() {
+    local name="$1" key_url="$2" keyring="$3"
+    local key_file
+
+    key_file=$(mktemp)
+    if ! curl -fsSL "$key_url" -o "$key_file"; then
+        rm -f "$key_file"
+        error "Could not download the $name apt signing key from $key_url"
+        return 1
+    fi
+    if ! { sudo install -d -m 0755 "$(dirname "$keyring")" &&
+        sudo gpg --dearmor --yes -o "$keyring" "$key_file" &&
+        sudo chmod a+r "$keyring" &&
+        [ -s "$keyring" ]; }; then
+        rm -f "$key_file"
+        error "Could not install the $name apt signing key at $keyring"
+        return 1
+    fi
+    rm -f "$key_file"
+}
+
+# Write one vendor apt source in deb822 format and install its signing key.
+#   apt_vendor_source_ensure NAME URI SUITE COMPONENTS ARCHITECTURES KEY_URL KEYRING
+# ARCHITECTURES may be empty.  Idempotent: a matching source is left alone, one
+# disabled by a release upgrade (`Enabled: no`) is rewritten, and a legacy
+# one-line NAME.list moves to NAME.list.bak, which apt ignores.  Sets
+# APT_SOURCES_CHANGED=true when anything changed so the caller refreshes apt once.
+# APT_SOURCES_DRY_RUN=true only reports the changes.  APT_SOURCES_DIR overrides
+# /etc/apt/sources.list.d (the tests use it).
+# The file layout matches what the vendors' own postinst scripts write, so their
+# refresh of the file on package upgrade is a no-op.  (Old apt without
+# `modernize-sources` makes the Cursor postinst add a legacy cursor.list; run the
+# bootstrap or the repair step again to retire it.)
+apt_vendor_source_ensure() {
+    local name="$1" uri="$2" suite="$3" components="$4" architectures="$5"
+    local key_url="$6" keyring="$7"
+    local sources_dir="${APT_SOURCES_DIR:-/etc/apt/sources.list.d}"
+    local dry_run="${APT_SOURCES_DRY_RUN:-false}"
+    local target="$sources_dir/$name.sources"
+    local legacy="$sources_dir/$name.list"
+    local desired
+
+    # Every step is checked explicitly: callers may run this inside `|| warn`,
+    # where errexit is off.  A source must never be written without a usable key,
+    # because apt-get update would then fail and, with it, the weekly full-upgrade.
+    if [ ! -s "$keyring" ]; then
+        if [ "$dry_run" = true ]; then
+            info "[dry-run] would download $key_url and install it as $keyring"
+        else
+            info "Installing the $name apt signing key..."
+            apt_vendor_key_install "$name" "$key_url" "$keyring" || return 1
+        fi
+        APT_SOURCES_CHANGED=true
+    fi
+
+    desired="### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# You may comment out this entry, but any other modifications may be lost.
+Types: deb
+URIs: $uri
+Suites: $suite
+Components: $components"
+    if [ -n "$architectures" ]; then
+        desired+=$'\n'"Architectures: $architectures"
+    fi
+    desired+=$'\n'"Signed-By: $keyring"
+
+    if [ "$(cat "$target" 2>/dev/null)" != "$desired" ]; then
+        if [ "$dry_run" = true ]; then
+            info "[dry-run] would write $target:"
+            printf '%s\n' "$desired" | sed 's/^/    /'
+        else
+            info "Configuring the $name apt source..."
+            if ! printf '%s\n' "$desired" | sudo tee "$target" >/dev/null; then
+                error "Could not write $target"
+                return 1
+            fi
+        fi
+        APT_SOURCES_CHANGED=true
+    fi
+
+    if [ -e "$legacy" ]; then
+        info "Retiring the legacy $name.list (kept as $name.list.bak)..."
+        if ! apt_sources_apply sudo mv -f "$legacy" "$legacy.bak"; then
+            error "Could not retire $legacy"
+            return 1
+        fi
+        APT_SOURCES_CHANGED=true
+    fi
+}
+
+# Configure the apt source of every IDE named in the arguments (vscode, cursor,
+# antigravity), then refresh apt once if any source changed.  From there the
+# weekly full-upgrade keeps the packages current.  A vendor that fails (for
+# example, its key host is unreachable) does not stop the others; the function
+# returns non-zero after processing all of them.
+ide_apt_sources_ensure() {
+    local ide status=0
+
+    APT_SOURCES_CHANGED=false
+    for ide in "$@"; do
+        case "$ide" in
+            vscode)
+                apt_vendor_source_ensure vscode \
+                    https://packages.microsoft.com/repos/code stable main \
+                    "$(dpkg --print-architecture)" \
+                    https://packages.microsoft.com/keys/microsoft.asc \
+                    /usr/share/keyrings/microsoft.gpg || status=1
+                ;;
+            cursor)
+                apt_vendor_source_ensure cursor \
+                    https://downloads.cursor.com/aptrepo stable main \
+                    amd64,arm64 \
+                    https://downloads.cursor.com/keys/anysphere.asc \
+                    /usr/share/keyrings/anysphere.gpg || status=1
+                ;;
+            antigravity)
+                # The antigravity package never registers its own repository
+                # (its postinst skips that step), so this source is the only
+                # way apt can update it.
+                apt_vendor_source_ensure antigravity \
+                    https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/ \
+                    antigravity-debian main "" \
+                    https://us-central1-apt.pkg.dev/doc/repo-signing-key.gpg \
+                    /etc/apt/keyrings/antigravity-repo-key.gpg || status=1
+                ;;
+            *)
+                error "Unknown IDE apt source: $ide"
+                return 2
+                ;;
+        esac
+    done
+    if [ "$APT_SOURCES_CHANGED" = true ]; then
+        apt_sources_apply sudo apt-get update || status=1
+    fi
+    return "$status"
+}
+
+# Repair the apt sources of the IDE .deb packages installed on this machine
+# (`make repair REPAIR=ide-repos`).  IDEs installed another way (snap, AppImage)
+# are left alone.
+ide_apt_sources_repair() {
+    local pair package
+    local -a installed=()
+
+    for pair in vscode:code cursor:cursor antigravity:antigravity; do
+        package="${pair#*:}"
+        if dpkg -s "$package" 2>/dev/null | grep -q '^Status: install ok installed'; then
+            installed+=("${pair%%:*}")
+        fi
+    done
+
+    if [ "${#installed[@]}" -eq 0 ]; then
+        info "No IDE .deb package is installed; nothing to repair."
+        return 0
+    fi
+    info "Repairing the apt sources of: ${installed[*]}"
+    ide_apt_sources_ensure "${installed[@]}" || return
+    if [ "$APT_SOURCES_CHANGED" != true ]; then
+        # The sources were already right, so the package lists may be the stale
+        # part; a repair must not end without refreshing them.
+        apt_sources_apply sudo apt-get update
+    fi
 }
 
 ###############################################################

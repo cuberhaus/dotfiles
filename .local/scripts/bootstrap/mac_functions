@@ -186,8 +186,9 @@ vim_install () {
     brew install neovim                         # NeoVim
     cd "$HOME" || exit
     vim +PlugInstall +qall
-    # Vim YouCompleteMe plugin install
-    bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/ycm.sh"
+    # Vim YouCompleteMe plugin install; a failed build must not skip the steps below
+    bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/ycm.sh" ||
+        warn "YouCompleteMe setup failed; rerun it with: bash ${DOTFILES_ROOT:-$HOME}/.local/scripts/ycm.sh"
     sudo npm install -g neovim
     python3 -m pip install --user --upgrade pynvim
     sudo gem install neovim

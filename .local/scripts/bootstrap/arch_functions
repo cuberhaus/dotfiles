@@ -350,7 +350,8 @@ vim_install () {
 
     cd "$HOME" || exit
     vim +PlugInstall +qall
-    bash "$scripts/ycm.sh"
+    # A failed build must not skip the steps below; rerun ycm.sh later.
+    bash "$scripts/ycm.sh" || warn "YouCompleteMe setup failed; rerun it with: bash $scripts/ycm.sh"
     sudo chmod +w "$HOME/.vim/cache/viminfo"
 
     # Parallel language provider installs (pip, npm, gem are independent)
@@ -618,15 +619,17 @@ emacs() {
 ai_tools_install() {
     info "Installing AI tools..."
     mkdir -p "$HOME/Applications"
+    $pac jq # cursor_appimage_download reads the download API reply with it
 
     # ── Parallel downloads (AppImages) ───────────────────────────
     local pids=() names=()
 
-    # Cursor (AI IDE — AppImage)
-    if [ ! -f "$HOME/Applications/cursor.AppImage" ]; then
+    # Cursor (AI IDE — AppImage; Arch has no apt repository, and the AppImage
+    # updates itself).  cursor_is_installed also catches a truncated download,
+    # which the previous `[ -f ]` check kept forever.
+    if ! cursor_is_installed; then
         info "Downloading Cursor..."
-        curl -fsSL "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable" \
-            -o "$HOME/Applications/cursor.AppImage" &
+        cursor_appimage_download "$HOME/Applications/cursor.AppImage" &
         pids+=($!); names+=("Cursor")
     fi
 

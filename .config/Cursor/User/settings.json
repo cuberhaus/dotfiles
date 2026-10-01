@@ -10,5 +10,9 @@
     "window.zoomLevel": 1,
     "cursor.composer.shouldChimeAfterChatFinishes": true,
     "explorer.confirmDragAndDrop": false,
-    "window.autoDetectColorScheme": true
+    "window.autoDetectColorScheme": true,
+    "remote.SSH.remotePlatform": {
+        "erag-test": "linux"
+    },
+    "cursor.composer.queueManualSendBehavior2": "steer"
 }

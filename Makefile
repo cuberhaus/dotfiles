@@ -83,8 +83,10 @@ test: ## Run deterministic unit tests
 	bash tests/test_bootstrap_machine_state.sh
 	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh
+	bash tests/test_ycm.sh
 	bash tests/test_bootstrap_gentoo.sh
 	bash tests/test_shell_path.sh
+	bash tests/test_bashrc_prompt.sh
 	bash tests/test_git_repo_defaults.sh
 	bash tests/test_git_recurse.sh
 
@@ -112,7 +114,7 @@ doctor: ## Check tools, symlinks, configuration, packages, environment, and auto
 audit-installation: ## Report drift between this repo and the installed machine (PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work)
 	$(PYTHON) .local/scripts/audit_installation.py --profile "$(PROFILE)"
 
-repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard; PROFILE=auto|...)
+repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos; PROFILE=auto|...; DRY_RUN=true previews ide-repos)
 	bash .local/scripts/repair-installation "$(REPAIR)" "$(PROFILE)"
 
 ##@ Setup

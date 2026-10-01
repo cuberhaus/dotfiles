@@ -54,6 +54,7 @@ app-shells/zsh-completions
 [editors]
 app-editors/vim
 app-editors/neovim
+dev-python/pynvim               # Python provider Neovim needs to load YouCompleteMe
 
 [fonts]
 media-fonts/hack

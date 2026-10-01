@@ -39,6 +39,9 @@ MACOS_AGENTS = (
     "com.cuberhaus.workspace-pull",
 )
 MANAGER_VARIABLES = {"apt": "apt", "pac": "pacman", "yay": "yay"}
+# IDEs the bootstraps install as .deb packages. They update only while an apt source offers them.
+IDE_APT_PACKAGES = ("code", "cursor", "antigravity")
+MIN_APPIMAGE_BYTES = 1_048_576
 
 
 def uncomment(line: str) -> str:
@@ -425,6 +428,21 @@ def installed_package_names(manager: str) -> set[str]:
     return set()
 
 
+def cursor_installed_outside_apt() -> bool:
+    """Mirror cursor_is_installed in the bootstrap: a `cursor` command or a complete AppImage."""
+    if shutil.which("cursor"):
+        return True
+    app_image = pathlib.Path.home() / "Applications" / "cursor.AppImage"
+    try:
+        return app_image.stat().st_size >= MIN_APPIMAGE_BYTES
+    except OSError:
+        return False
+
+
+# Packages a bootstrap also accepts from another install method, on purpose.
+ALTERNATIVE_INSTALLS = {Package("apt", "cursor"): cursor_installed_outside_apt}
+
+
 def audit_packages(packages: set[Package], reporter: Reporter) -> None:
     print("\nActive bootstrap package declarations")
     for manager in sorted({package.manager for package in packages}):
@@ -434,11 +452,63 @@ def audit_packages(packages: set[Package], reporter: Reporter) -> None:
             reporter.result("MISSING", f"{command} is unavailable; {len(manager_packages)} {manager} package(s) cannot be verified.", "Run the matching bootstrap target.")
             continue
         installed = installed_package_names(manager)
-        missing = [name for name in manager_packages if name not in installed and name.split("/", 1)[-1] not in installed]
+        missing = [
+            name
+            for name in manager_packages
+            if name not in installed
+            and name.split("/", 1)[-1] not in installed
+            and not ALTERNATIVE_INSTALLS.get(Package(manager, name), lambda: False)()
+        ]
         if missing:
             reporter.result("MISSING", f"{len(missing)} expected {manager} package(s): {', '.join(missing)}", "Run the matching bootstrap target.")
         else:
             reporter.result("OK", f"All {len(manager_packages)} expected {manager} package(s) are installed.")
+
+
+def parse_apt_policy(output: str) -> tuple[str, str, bool]:
+    """Return the installed and candidate versions, and whether any repository offers the package."""
+    installed = re.search(r"^\s*Installed:\s*(\S+)", output, re.MULTILINE)
+    candidate = re.search(r"^\s*Candidate:\s*(\S+)", output, re.MULTILINE)
+    has_repository = bool(
+        re.search(r"^\s+\d+\s+(?:https?|ftp|file|cdrom)://", output, re.MULTILINE)
+    )
+    return (
+        installed.group(1) if installed else "(none)",
+        candidate.group(1) if candidate else "(none)",
+        has_repository,
+    )
+
+
+def audit_ide_update_channels(reporter: Reporter) -> None:
+    """Check that every installed IDE .deb can still be updated through apt.
+
+    A release upgrade disables third-party apt sources, after which the weekly
+    full-upgrade skips these packages without any error.
+    """
+    if not (shutil.which("dpkg-query") and shutil.which("apt-cache")):
+        return
+    installed = installed_package_names("apt")
+    ide_packages = [name for name in IDE_APT_PACKAGES if name in installed]
+    if not ide_packages:
+        return
+    print("\nIDE update channels")
+    for name in ide_packages:
+        policy = run(["env", "LC_ALL=C", "apt-cache", "policy", name])
+        current, candidate, has_repository = parse_apt_policy(policy.stdout)
+        if not has_repository:
+            reporter.result(
+                "DRIFT",
+                f"{name} {current} has no enabled apt source, so it never updates.",
+                "make repair REPAIR=ide-repos (DRY_RUN=true previews it)",
+            )
+        elif candidate != current:
+            reporter.result(
+                "WARN",
+                f"{name} {current} can be upgraded to {candidate}.",
+                "sudo apt-get update && sudo apt-get full-upgrade (the weekly maintenance timer also does this)",
+            )
+        else:
+            reporter.result("OK", f"{name} {current} is the newest version its apt source offers.")
 
 
 def command_succeeds(command: list[str]) -> bool:
@@ -517,6 +587,7 @@ def main() -> int:
     audit_git_configuration(reporter)
     audit_editors_and_fonts(profile, reporter)
     audit_packages(packages, reporter)
+    audit_ide_update_channels(reporter)
     audit_automations(profile, reporter)
     print()
     if reporter.issues:

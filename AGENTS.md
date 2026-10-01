@@ -69,6 +69,7 @@ This is a single-context repository. Read the root `CONTEXT.md` when present and
 - **Do not run `sudo apt install`, `pacman -S`, `brew install`, `emerge`, or edit `/etc/`** without asking the user. Bootstrap scripts are opt-in.
 - Keep platform-specific config separate (WSL vs native Linux vs macOS); don't merge Arch and Ubuntu package lists.
 - Destructive helpers must support a dry-run mode and print clear usage.
+- **Bash prompt**: the colored prompt in `.bashrc` assigns `PS1` once and only refreshes the variables it references from `PROMPT_COMMAND`, because VS Code/Cursor shell integration wraps `PS1` and re-wraps it whenever it changes. Do not re-add prompt plugins that rebuild `PS1` on every prompt (the removed `bash-git-prompt` did). It honors `NO_COLOR`, skips `TERM=dumb`, and `PROMPT_GIT=0` hides the git segment. Chat-tool terminals run `bash --noprofile --norc` on purpose and stay plain. `tests/test_bashrc_prompt.sh` covers it.
 - **ROG brightness**: on the G635LX in dGPU/MUX mode `nvidia_wmi_ec_backlight` is a ghost device (values are accepted, the panel ignores them), so brightness tools writing to it appear to do nothing. The fix is `acpi_backlight=native` from `.local/scripts/brightness_fix.sh`; keep it after `shutdown_fix` in the `work` bootstrap and read `docs/ROG-BRIGHTNESS-DIAGNOSIS.md` before changing it.
 
 ## Workspace integration (cuberhaus multi-root)

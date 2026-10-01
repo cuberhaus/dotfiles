@@ -1,7 +1,12 @@
+import contextlib
 import importlib.util
+import io
 import pathlib
 import sys
+import tempfile
+import types
 import unittest
+from unittest import mock
 
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -107,7 +112,15 @@ class InstallationAuditContractTests(unittest.TestCase):
 
         self.assertIn("repair:", makefile)
         self.assertIn('repair-installation "$(REPAIR)" "$(PROFILE)"', makefile)
-        for step in ("config", "aliases", "environment", "vim", "automations", "keyboard"):
+        for step in (
+            "config",
+            "aliases",
+            "environment",
+            "vim",
+            "automations",
+            "keyboard",
+            "ide-repos",
+        ):
             self.assertIn(step, repair)
 
     def test_unattended_bootstrap_choices_are_deterministic(self):
@@ -196,6 +209,10 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertIn(audit.Package("brew-cask", "obsidian"), mac)
         self.assertIn(audit.Package("apt", "age"), work)
         self.assertIn(audit.Package("apt", "docker-ce"), work)
+        # The IDEs install from vendor apt repositories so the weekly upgrade updates them.
+        for package in ("code", "cursor", "antigravity"):
+            self.assertIn(audit.Package("apt", package), work)
+        self.assertIn(audit.Package("apt", "cursor"), ubuntu)
 
     def test_ubuntu_based_profiles_install_verified_sops_binary(self):
         base_functions = (

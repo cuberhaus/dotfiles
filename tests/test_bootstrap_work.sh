@@ -37,6 +37,14 @@ grep -Fq '@github/copilot' "$WORK_UNINSTALL_FUNCTIONS" ||
     fail 'work bootstrap uninstall must clean up GitHub Copilot CLI'
 grep -Fq 'aider' "$WORK_UNINSTALL_FUNCTIONS" ||
     fail 'work bootstrap uninstall must clean up Aider'
+grep -Fq 'python3-dev' "$WORK_FUNCTIONS" ||
+    fail "work bootstrap must install the Python headers YouCompleteMe's build needs"
+grep -Fq 'python3-pynvim' "$WORK_FUNCTIONS" ||
+    fail 'work bootstrap must install the Python provider Neovim needs to load YouCompleteMe'
+grep -Fq 'python3-dev' "$WORK_UNINSTALL_FUNCTIONS" ||
+    fail 'work bootstrap uninstall must remove the Python headers it installed'
+grep -Fq 'python3-pynvim' "$WORK_UNINSTALL_FUNCTIONS" ||
+    fail 'work bootstrap uninstall must remove the Neovim Python provider it installed'
 
 export HOME="$CASE_DIR/home"
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -149,8 +157,8 @@ test_cursor_install_detection() {
     cursor_is_installed || fail 'the installed Cursor command was not detected'
 
     export PATH="$original_path"
-    [ "$(grep -c 'cursor_is_installed' "$WORK_FUNCTIONS")" -ge 3 ] ||
-        fail 'both Cursor installer branches must use the shared installed check'
+    grep -Fq 'if ! cursor_is_installed; then' "$WORK_FUNCTIONS" ||
+        fail 'the Cursor installer must use the shared installed check'
 }
 
 test_workspace_is_cloned_before_sync() {
@@ -222,9 +230,23 @@ EOF
     unset FAKE_WORKSPACE_SYNC_LOG
 }
 
+## The real vim_install must reuse the shared step that installs the plugins and
+## builds YouCompleteMe; this runs before the stage stubs replace it below.
+test_vim_install_runs_the_shared_plugin_step() {
+    local output
+    output="$(
+        info() { :; }
+        vim_plugins_install() { printf 'shared-plugin-step\n'; }
+        vim_install
+    )"
+    [ "$output" = shared-plugin-step ] ||
+        fail "work vim_install must run the shared plugin and YouCompleteMe step, got: $output"
+}
+
 test_dev_tools_preserve_git_credentials
 test_cursor_install_detection
 test_workspace_is_cloned_before_sync
+test_vim_install_runs_the_shared_plugin_step
 
 git check-ignore -q \
     .config/systemd/user/timers.target.wants/cuberhaus-workspace-pull.timer ||
@@ -250,6 +272,7 @@ sops_install() { record 'sops'; }
 work_configure_default_shell() { record 'default-shell'; }
 node_install() { record 'node'; }
 python_install() { record 'python'; }
+vim_install() { record 'vim'; }
 docker_install() { record 'docker'; }
 gcloud_install() { record 'gcloud'; }
 gui_apps_install() { record 'gui-apps'; }
@@ -269,7 +292,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\nvim\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"
@@ -286,5 +309,20 @@ grep -Fqx 'brightness-fix-failed' "$EVENT_LOG" || fail 'the failing brightness f
 grep -Fqx 'brightness-warning' "$EVENT_LOG" || fail 'a failing brightness fix must be reported'
 grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
     fail 'a failing brightness fix must not abort the rest of the work bootstrap'
+
+# The editor plugins need the network and a long compile: when they fail,
+# provisioning must warn with the repair command and carry on.
+brightness_fix() { record 'brightness-fix'; }
+vim_install() { record 'vim-failed'; return 1; }
+warn() { record "vim-warning:$*"; }
+: > "$EVENT_LOG"
+work_main --unattended --no-stow --high-dpi=no </dev/null
+grep -Fqx 'vim-failed' "$EVENT_LOG" || fail 'the failing Vim plugin step did not run'
+grep -Fqx 'vim-warning:Vim plugin setup failed; rerun it with: make repair REPAIR=vim PROFILE=work' "$EVENT_LOG" ||
+    fail 'a failing Vim plugin step must be reported with the command that repairs it'
+grep -Fqx 'docker' "$EVENT_LOG" ||
+    fail 'a failing Vim plugin step must not stop the stages that follow it'
+grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
+    fail 'a failing Vim plugin step must not abort the rest of the work bootstrap'
 
 printf 'Work bootstrap orchestration tests passed.\n'

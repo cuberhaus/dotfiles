@@ -45,6 +45,7 @@ setup_case() {
     unset GENTOO_INIT GENTOO_SECTIONS GENTOO_SYSROOT GENTOO_DRY_RUN GENTOO_EMERGE_OPTS
     unset UNATTENDED SKIP_STOW DOTFILES DOTFILES_ROOT SUDO_COMMAND
     unset FAKE_UID FAKE_USER FAKE_SUDO_FAIL FAKE_EMERGE_FAIL FAKE_LOGIN_SHELL FAKE_RC_DIR FAKE_STOW_PREVIEW
+    unset YCM_DIR YCM_INSTALL_ARGS
     export PATH="$ORIGINAL_PATH"
 }
 
@@ -916,6 +917,7 @@ record_stages() {
     gentoo_enable_services() { record "services:$1"; }
     configure_brightness_access() { record 'brightness'; }
     gentoo_configure_default_shell() { record 'default-shell'; }
+    vim_plugins_install() { record 'vim-plugins'; }
     obsidian_vault_install() { record 'vault'; }
     apply_skip_worktree() { record 'skip-worktree'; }
     sudo() { record "sudo $*"; }
@@ -928,9 +930,9 @@ test_main_runs_the_stages_in_order() {
         record_stages
         gentoo_main --unattended --no-stow
     ) || fail 'a normal run must succeed'
-    assert_equals $'logging\ndetect:dry=false\nprivileges\nstow:gentoo:true\nuser-environment\ndistro-marker\ninotify\npackages:openrc\nsops\nservices:openrc\nbrightness\ndefault-shell\nvault\nskip-worktree' \
+    assert_equals $'logging\ndetect:dry=false\nprivileges\nstow:gentoo:true\nuser-environment\ndistro-marker\ninotify\npackages:openrc\nsops\nservices:openrc\nbrightness\ndefault-shell\nvim-plugins\nvault\nskip-worktree' \
         "$(cat "$EVENT_LOG")" \
-        'stages must run: validate target, elevate, link dotfiles, prepare, install packages, services, shell'
+        'stages must run: validate target, elevate, link dotfiles, prepare, install packages, services, shell, editor plugins'
 
     : > "$EVENT_LOG"
     (
@@ -962,6 +964,24 @@ test_dry_run_changes_nothing() {
     ) || fail 'a dry run must succeed'
     assert_equals $'detect:dry=true\nstow-preview\npackages:openrc\nservices:openrc\ndefault-shell' "$(cat "$EVENT_LOG")" \
         'a dry run may only validate the target and run the self-guarding preview stages'
+    teardown_case
+}
+
+# The editor plugins need the network and a long compile: when they fail, the
+# bootstrap must warn with the way to retry and still run the stages after them.
+test_a_failing_vim_step_does_not_abort_the_bootstrap() {
+    setup_case
+    (
+        record_stages
+        vim_plugins_install() { record 'vim-failed'; return 1; }
+        warn() { record "warning:$*"; }
+        gentoo_main --unattended --no-stow
+    ) || fail 'a failing Vim plugin step must not fail the bootstrap'
+    assert_contains "$(cat "$EVENT_LOG")" 'vim-failed' 'the failing Vim plugin step must run'
+    assert_contains "$(cat "$EVENT_LOG")" 'warning:Vim plugin setup failed; rerun it with: nvim +PlugInstall +qall && ' \
+        'a failing Vim plugin step must be reported with the way to retry it'
+    assert_contains "$(cat "$EVENT_LOG")" $'vault\nskip-worktree' \
+        'the stages after a failing Vim plugin step must still run'
     teardown_case
 }
 
@@ -1139,6 +1159,30 @@ EOF
 #!/usr/bin/env bash
 exit 0
 EOF
+
+    # The editor step: Neovim is only recorded, and YouCompleteMe is already built so
+    # the real ycm.sh finds nothing to compile (it honours YCM_DIR like any user would).
+    stub_command nvim <<'EOF'
+#!/usr/bin/env bash
+printf 'nvim %s\n' "$*" >> "$EVENT_LOG"
+EOF
+    mkdir -p "$HOME/.vim"
+    : > "$HOME/.vim/vimrc"
+    make_built_ycm_plugin "$FAKE_MACHINE/ycm"
+    export YCM_DIR="$FAKE_MACHINE/ycm"
+}
+
+## A YouCompleteMe checkout that is already built: ycmd reports a compatible core
+## and the bundled clangd is present.
+make_built_ycm_plugin() {
+    local plugin="$1" ycmd="$1/third_party/ycmd"
+
+    mkdir -p "$ycmd/ycmd" "$ycmd/third_party/clangd/output/bin"
+    : > "$plugin/install.py"
+    : > "$ycmd/ycmd/__init__.py"
+    printf 'def ImportAndCheckCore():\n    return 0\n' > "$ycmd/ycmd/utils.py"
+    printf '#!/bin/sh\n' > "$ycmd/third_party/clangd/output/bin/clangd"
+    chmod +x "$ycmd/third_party/clangd/output/bin/clangd"
 }
 
 ## Run the real entrypoint in a subprocess; its combined output lands in $1.
@@ -1202,6 +1246,7 @@ test_dry_run_leaves_the_simulated_machine_untouched() {
         'sudo rc-update add dbus default' \
         'configure_brightness_access' \
         "sudo chsh -s $CASE_DIR/bin/zsh tester" \
+        'vim_plugins_install' \
         'obsidian_vault_install' \
         'apply_skip_worktree'; do
         assert_contains "$output" "[dry-run] would run: $step" "a dry run must describe the step: $step"
@@ -1230,6 +1275,8 @@ test_a_second_run_finds_every_step_already_satisfied() {
         'the first run must merge the shipped manifest in one transaction'
     assert_contains "$events" 'rc-update add elogind boot' 'the first run must enable elogind'
     assert_contains "$events" "chsh -s $CASE_DIR/bin/zsh tester" 'the first run must switch the login shell'
+    assert_contains "$events" 'nvim --headless +PlugInstall --sync +qa!' 'the first run must install the Vim plugins'
+    assert_contains "$first" 'YouCompleteMe is already built' 'the first run must verify YouCompleteMe'
     assert_equals "$expected_atoms" "$(tr '\n' ' ' < "$GENTOO_SYSROOT/var/lib/portage/world" | sed 's/ $//')" \
         'every merged package must be recorded in @world'
     case "$events" in
@@ -1374,6 +1421,7 @@ test_the_stow_preview_matches_what_the_real_step_shows
 test_main_runs_the_stages_in_order
 test_tree_sync_and_world_update_are_opt_in
 test_dry_run_changes_nothing
+test_a_failing_vim_step_does_not_abort_the_bootstrap
 test_unsupported_options_are_refused_before_any_change
 test_help_prints_usage_without_doing_anything
 test_dry_run_leaves_the_simulated_machine_untouched

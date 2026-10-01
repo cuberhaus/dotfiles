@@ -81,6 +81,9 @@ gentoo_main() {
     gentoo_enable_services "$GENTOO_INIT"
     gentoo_apply configure_brightness_access
     gentoo_configure_default_shell
+    # Needs the network and a long compile; a failure must not abort the bootstrap.
+    gentoo_apply vim_plugins_install ||
+        warn "Vim plugin setup failed; rerun it with: nvim +PlugInstall +qall && $DOTFILES_ROOT/.local/scripts/ycm.sh"
     gentoo_apply obsidian_vault_install
     gentoo_apply apply_skip_worktree
 

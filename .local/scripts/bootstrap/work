@@ -79,6 +79,9 @@ work_main() {
 
     node_install
     python_install
+    # Needs the network and a long compile; a failure must not abort provisioning.
+    vim_install ||
+        warn "Vim plugin setup failed; rerun it with: make repair REPAIR=vim PROFILE=work"
     docker_install
     gcloud_install
     gui_apps_install

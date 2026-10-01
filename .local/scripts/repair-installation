@@ -6,7 +6,7 @@ step="${1:-}"
 profile="${2:-auto}"
 
 usage() {
-    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work]\n' >&2
+    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos only)]\n' >&2
 }
 
 detect_profile() {
@@ -73,12 +73,33 @@ repair_vim() {
     vim_install
 }
 
+# Re-enable the apt sources of the installed IDE packages (VS Code, Cursor,
+# Antigravity).  Ubuntu release upgrades disable third-party sources, after which
+# the weekly full-upgrade skips those packages silently.  DRY_RUN=true previews
+# the changes without root.
+repair_ide_repos() {
+    command -v apt-get >/dev/null 2>&1 || {
+        printf 'The %s repair needs apt-get (Debian and Ubuntu profiles only).\n' "$step" >&2
+        return 2
+    }
+    case "${DRY_RUN:-false}" in
+        true|1) APT_SOURCES_DRY_RUN=true ;;
+    esac
+
+    # shellcheck source=/dev/null
+    source "$repo_root/.local/scripts/bootstrap/base_functions"
+    ide_apt_sources_repair
+}
+
 case "$step" in
     config|aliases|environment)
         restow_config
         ;;
     vim)
         repair_vim
+        ;;
+    ide-repos)
+        repair_ide_repos
         ;;
     automations)
         bash "$repo_root/.local/scripts/automation/install"
