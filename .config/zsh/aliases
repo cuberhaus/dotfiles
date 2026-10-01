@@ -142,7 +142,7 @@ then
 else
     alias ls="ls -l"
     alias la="ls -a"
-    # alias l="ls"
+    alias l="ls"
 fi
 
 # Print each PATH entry on a separate line

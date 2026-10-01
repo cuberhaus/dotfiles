@@ -437,6 +437,7 @@ elif command -v exa &>/dev/null; then
 else
     alias ls="ls --color=auto"
     alias la="ls -a --color=auto"
+    alias l="ls"
 fi
 
 # Print each PATH entry on a separate line
