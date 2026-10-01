@@ -7,4 +7,5 @@ Current notes:
 - [SSH/IAP/OS Login diagnosis](SSH-IAP-OS-LOGIN-DIAGNOSIS.md)
 - [Remote home access](REMOTE-HOME-ACCESS.md)
 - [Ubuntu GRUB resolution and performance](UBUNTU-GRUB-PERFORMANCE.md)
+- [Gentoo bootstrap (experimental)](GENTOO-BOOTSTRAP.md)
 - [VS Code terminal renderer crash diagnosis](VSCODE-TERMINAL-CRASH-DIAGNOSIS.md)

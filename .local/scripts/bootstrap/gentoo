@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# Gentoo bootstrap (experimental): amd64, OpenRC or systemd, source-based Portage.
+# Author: https://github.com/cuberhaus
+set -euo pipefail
+
+### VARIABLES
+bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
+export DOTFILES_ROOT
+source "$bootstrap_dir/base_functions"
+source "$bootstrap_dir/gentoo_functions"
+
+gentoo_main() {
+    local arg manifest
+    local forwarded=()
+
+    GENTOO_DRY_RUN="${GENTOO_DRY_RUN:-false}"
+    GENTOO_SYNC="${GENTOO_SYNC:-false}"
+    GENTOO_UPDATE_WORLD="${GENTOO_UPDATE_WORLD:-false}"
+    for arg in "$@"; do
+        case "$arg" in
+            --dry-run) GENTOO_DRY_RUN=true ;;
+            --sync) GENTOO_SYNC=true ;;
+            --update-world) GENTOO_UPDATE_WORLD=true ;;
+            -h|--help)
+                gentoo_usage
+                return 0
+                ;;
+            *) forwarded+=("$arg") ;;
+        esac
+    done
+    export GENTOO_DRY_RUN
+
+    parse_bootstrap_args ${forwarded[@]+"${forwarded[@]}"} || return
+
+    manifest="${GENTOO_MANIFEST:-$bootstrap_dir/gentoo.packages}"
+    if [ ! -r "$manifest" ]; then
+        error "Package manifest not found or unreadable: $manifest"
+        return 1
+    fi
+
+    if [ "$GENTOO_DRY_RUN" = true ]; then
+        info "Dry run: the machine is not changed; only read-only checks and previews run."
+    else
+        bootstrap_enable_logging gentoo
+    fi
+
+    ### VALIDATION (read-only)
+    gentoo_detect_target || return
+    if [ "${DUAL_BOOT_UTC:-false}" = true ] && [ "$GENTOO_INIT" != systemd ]; then
+        error "--dual-boot-utc needs systemd on Gentoo. On OpenRC set clock=\"UTC\" in /etc/conf.d/hwclock instead."
+        return 1
+    fi
+
+    if [ "$GENTOO_DRY_RUN" != true ]; then
+        gentoo_prepare_privileges || return
+        trap gentoo_stop_sudo_keepalive EXIT
+    fi
+
+    ### INSTALLATION
+    if [ "${DUAL_BOOT_UTC:-false}" = true ]; then
+        gentoo_apply configure_dual_boot_utc_rtc
+    fi
+    if [ "$GENTOO_SYNC" = true ]; then
+        gentoo_sync_tree
+    fi
+    if [ "$GENTOO_UPDATE_WORLD" = true ]; then
+        gentoo_update_world
+    fi
+
+    if [ "$GENTOO_DRY_RUN" = true ]; then
+        gentoo_preview_stow
+    fi
+    gentoo_apply bootstrap_stow_checkout gentoo
+    gentoo_apply gentoo_prepare_user_environment
+    gentoo_apply gentoo_write_distro_marker
+    gentoo_apply configure_inotify_watches
+
+    gentoo_install_packages "$manifest" "$GENTOO_INIT"
+    gentoo_apply sops_install # app-admin/sops is not in the main Gentoo tree
+    gentoo_enable_services "$GENTOO_INIT"
+    gentoo_apply configure_brightness_access
+    gentoo_configure_default_shell
+    gentoo_apply obsidian_vault_install
+    gentoo_apply apply_skip_worktree
+
+    if [ "$GENTOO_DRY_RUN" = true ]; then
+        info "Dry run complete; nothing was changed."
+    else
+        info "Bootstrap complete! Reboot so enabled services and new group memberships take effect."
+    fi
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    gentoo_main "$@"
+fi

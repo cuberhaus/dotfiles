@@ -38,10 +38,15 @@ fi
 # ---------------------------------------------------------------------------
 conflicts=()
 
+# A plain file standing in the way is worded differently by Stow version:
+#   Stow 2.3 and earlier:  * existing target is neither a link nor a directory: .bashrc
+#   Stow 2.4 and later:    * cannot stow ../dotfiles/.bashrc over existing target .bashrc since neither a link nor a directory and --adopt not specified
+# Both capture the path relative to the target directory as group 1.
+legacy_conflict='^\* existing target is neither a link nor a directory: (.+)$'
+current_conflict='^\* cannot stow .+ over existing target (.+) since neither a link nor a directory and --adopt not specified$'
+
 while IFS= read -r line; do
-    # Lines look like:
-    #   * existing target is neither a link nor a directory: .bashrc
-    if [[ "$line" =~ ^\*\ existing\ target\ is\ neither\ a\ link\ nor\ a\ directory:\ (.+)$ ]]; then
+    if [[ "$line" =~ $legacy_conflict ]] || [[ "$line" =~ $current_conflict ]]; then
         conflicts+=("${BASH_REMATCH[1]}")
     fi
 done < <(stow -n -t "$TARGET" -d "$PARENT_DIR" "$PKG_NAME" 2>&1 | sed 's/^[[:space:]]*//')

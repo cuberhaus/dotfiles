@@ -1,0 +1,145 @@
+# Package manifest for the experimental Gentoo bootstrap profile.
+#
+# STATUS: not yet built or booted on a real Gentoo machine. On 2026-10-01 every
+# atom below was looked up in a read-only mirror of the main Gentoo ebuild
+# repository (gentoo/gentoo) to confirm that the package exists and has an
+# amd64 (stable) or ~amd64 (testing) ebuild. Run `gentoo --dry-run` first and
+# read docs/GENTOO-BOOTSTRAP.md.
+#
+# FORMAT
+#   [name]                 a section installed on every run
+#   [name:optional]        installed only when named in GENTOO_SECTIONS
+#   [name:openrc]          installed only on an OpenRC system
+#   [name:systemd]         installed only on a systemd system
+#   category/package       a plain atom: no versions, slots, sets or options
+# Attributes combine with commas, for example [name:optional,openrc].
+#
+# SCOPE: only the portable core of the dotfiles. Hardware- and machine-specific
+# choices stay out of the repository: video drivers (VIDEO_CARDS), the audio
+# server, network management, a display manager, browsers, and applications.
+#
+# Binary-package and parallelism policy belongs to the operator, not this file:
+# set GENTOO_EMERGE_OPTS, for example "--getbinpkg --usepkg --jobs=4".
+
+# Command-line essentials for the git workflow, search, files, and archives.
+[base]
+app-admin/stow
+dev-vcs/git
+dev-vcs/git-lfs
+dev-util/github-cli
+net-misc/curl
+net-misc/wget
+app-crypt/age                   # encryption backend for SOPS (see vault-secret)
+app-misc/jq
+sys-apps/ripgrep
+sys-apps/fd
+sys-apps/bat
+sys-apps/eza
+app-shells/fzf
+sys-apps/the_silver_searcher
+sys-process/htop
+sys-fs/ncdu
+app-misc/ranger
+www-client/w3m                  # image previews in ranger
+app-misc/tmux
+app-misc/trash-cli
+sys-apps/net-tools
+sys-fs/inotify-tools
+sys-devel/bc                    # used by the i3blocks scripts
+
+[shell]
+app-shells/zsh
+app-shells/zsh-completions
+
+[editors]
+app-editors/vim
+app-editors/neovim
+
+[fonts]
+media-fonts/hack
+media-fonts/noto
+media-fonts/noto-emoji
+media-fonts/dejavu
+media-fonts/liberation-fonts
+media-fonts/roboto
+media-fonts/fontawesome
+
+# X11 server, session plumbing, and the desktop utilities the configs call.
+# xorg-server is a large source build.
+[x11]
+x11-base/xorg-server
+x11-apps/xinit                  # startx; Gentoo ships no display manager
+x11-apps/xrandr
+x11-apps/xset
+x11-apps/xrdb
+x11-apps/xmessage
+x11-apps/setxkbmap
+x11-misc/xclip
+x11-misc/xdotool
+x11-misc/wmctrl
+x11-misc/xss-lock
+x11-misc/xdg-user-dirs
+x11-misc/dex
+x11-misc/arandr
+x11-misc/autorandr
+x11-terms/kitty
+x11-libs/libnotify
+x11-misc/dunst
+sys-fs/udiskie
+sys-apps/dbus
+sys-auth/polkit
+gnome-extra/polkit-gnome
+media-sound/playerctl
+media-sound/pavucontrol         # needs a PulseAudio-compatible server you install
+media-sound/alsa-utils
+
+# The i3 window manager and the tools its config calls. Starting the session is
+# left to the operator (see docs/GENTOO-BOOTSTRAP.md): no display manager is
+# installed and the tracked .xinitrc does not work yet.
+[i3]
+x11-wm/i3
+x11-misc/i3blocks
+x11-misc/picom
+x11-misc/rofi
+media-gfx/feh
+media-gfx/flameshot             # Qt-based, a large source build
+gnome-extra/zenity
+dev-perl/AnyEvent-I3
+dev-python/dbus-python
+sys-power/upower
+sys-power/acpi
+
+# Seat and session management without systemd-logind.
+[session-openrc:openrc]
+sys-auth/elogind
+
+# The xmonad stack. xmonad, xmonad-contrib, and xmobar are keyword-masked
+# (~amd64) and need a Haskell toolchain, which is a very large source build.
+# Accept the keywords in /etc/portage/package.accept_keywords first.
+[xmonad:optional]
+x11-wm/xmonad
+x11-wm/xmonad-contrib
+x11-misc/xmobar
+x11-misc/dmenu
+x11-misc/trayer
+
+# External-monitor brightness over DDC/CI.
+[hardware:optional]
+app-misc/ddcutil
+
+# Visualizer and keyboard-layout indicator for the i3 bar. kbdd is keyword-masked.
+[extras:optional]
+media-sound/cava
+x11-misc/kbdd
+
+# Tooling for working on this repository. shellcheck is keyword-masked (~amd64).
+[dev:optional]
+dev-util/shellcheck
+dev-build/cmake
+dev-vcs/subversion
+
+[tools:optional]
+net-misc/rclone
+net-fs/sshfs
+net-analyzer/nmap
+sys-apps/smartmontools

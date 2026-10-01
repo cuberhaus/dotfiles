@@ -114,6 +114,9 @@ bootstrap_install_stow() {
         arch|manjaro)
             sudo pacman -S --noconfirm --needed stow
             ;;
+        gentoo)
+            sudo emerge --ask=n --noreplace --select app-admin/stow
+            ;;
         mac)
             if ! command -v brew >/dev/null 2>&1; then
                 if declare -F brew_install >/dev/null 2>&1; then

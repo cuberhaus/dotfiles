@@ -30,10 +30,13 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── manjaro            # Manjaro bootstrap entrypoint
 │   │   ├── ubuntu             # Ubuntu bootstrap entrypoint
 │   │   ├── mac                # macOS bootstrap entrypoint
+│   │   ├── gentoo             # Gentoo bootstrap entrypoint (experimental)
 │   │   ├── base_functions     # Shared helpers (logging, $DOTFILES, prep)
 │   │   ├── arch_functions     # Arch/Manjaro package lists & installers
 │   │   ├── ubuntu_functions   # Ubuntu package lists & installers
 │   │   ├── mac_functions      # macOS (Homebrew) package lists & installers
+│   │   ├── gentoo_functions   # Gentoo (Portage, OpenRC/systemd) helpers
+│   │   ├── gentoo.packages    # Gentoo package manifest: plain atoms in sections
 │   │   └── xterm-256color-italic.terminfo
 │   ├── automation/             # Scheduled package updates and workspace pulls
 │   ├── audit_installation.py   # Read-only installation alignment report
@@ -116,6 +119,14 @@ After provisioning, the shared `bootstrap-workspace` Make target clones the
 authenticated private workspace repository when absent, restores its pinned
 skills by default, retries an incomplete initial restore, and runs its Linux
 sync script.
+
+The Gentoo bootstrap deviates from this pattern on purpose: it is experimental
+and has never run on a real machine, so every change goes through one dry-run
+chokepoint (`make bootstrap-gentoo-dry-run`), packages come from the
+`gentoo.packages` manifest rather than inline lists, and it is excluded from
+`make audit-installation` and profile detection until proven. Its assumptions,
+privileges, recovery steps, and unsupported choices are in
+[docs/GENTOO-BOOTSTRAP.md](../docs/GENTOO-BOOTSTRAP.md).
 
 See the root [README](../README.md) for quick-start instructions.
 

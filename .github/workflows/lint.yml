@@ -45,6 +45,9 @@ jobs:
       - name: Run bootstrap Stow tests
         run: bash tests/test_bootstrap_stow.sh
 
+      - name: Run Gentoo bootstrap tests
+        run: bash tests/test_bootstrap_gentoo.sh
+
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-latest

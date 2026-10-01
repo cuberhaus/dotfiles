@@ -1,0 +1,506 @@
+#!/usr/bin/env bash
+# Gentoo-specific bootstrap helpers, sourced by the gentoo entrypoint after
+# base_functions. See docs/GENTOO-BOOTSTRAP.md.
+
+# A plain "category/package" Portage atom. Versions, slots, operators, sets and
+# options are deliberately rejected so a manifest can never change what emerge
+# does beyond "install this package".
+GENTOO_ATOM_PATTERN='^[a-z0-9][a-z0-9+_.-]*/[A-Za-z0-9][A-Za-z0-9+_.-]*$'
+
+## Validate the machine and set GENTOO_INIT to openrc or systemd.
+##
+## The profile supports Gentoo on amd64 under OpenRC or systemd. The init system
+## is taken from the running system; GENTOO_INIT names it where nothing is
+## running (for example inside a chroot) and must agree with a running init.
+## OpenRC and systemd are never mixed implicitly: an ambiguous or contradictory
+## target is refused instead of guessed.
+##
+## GENTOO_SYSROOT prefixes the paths that are inspected; it exists so tests can
+## use a fake root and is empty on a real system.
+gentoo_detect_target() {
+    local root="${GENTOO_SYSROOT:-}"
+    local arch running=none
+
+    if [ ! -f "$root/etc/gentoo-release" ]; then
+        error "This is not a Gentoo system (missing $root/etc/gentoo-release); use the bootstrap profile for your distribution."
+        return 1
+    fi
+
+    arch="$(portageq envvar ARCH 2>/dev/null)" || arch=""
+    if [ -z "$arch" ]; then
+        error "Cannot determine the Portage ARCH; is portageq (sys-apps/portage) available?"
+        return 1
+    fi
+    if [ "$arch" != amd64 ]; then
+        error "Unsupported architecture '$arch'; the Gentoo bootstrap supports amd64 only."
+        return 1
+    fi
+
+    if [ -d "$root/run/openrc" ]; then
+        running=openrc
+    fi
+    if [ -d "$root/run/systemd/system" ]; then
+        if [ "$running" = none ]; then running=systemd; else running=both; fi
+    fi
+
+    case "${GENTOO_INIT:-}" in
+        "")
+            case "$running" in
+                openrc|systemd) GENTOO_INIT="$running" ;;
+                both)
+                    error "Both OpenRC and systemd appear to be running; set GENTOO_INIT to openrc or systemd."
+                    return 1
+                    ;;
+                *)
+                    error "Cannot detect the init system (normal inside a chroot); set GENTOO_INIT to openrc or systemd."
+                    return 1
+                    ;;
+            esac
+            ;;
+        openrc|systemd)
+            if [ "$running" = openrc ] || [ "$running" = systemd ]; then
+                if [ "$running" != "$GENTOO_INIT" ]; then
+                    error "GENTOO_INIT=$GENTOO_INIT contradicts the running init system ($running); unset GENTOO_INIT or correct it."
+                    return 1
+                fi
+            fi
+            ;;
+        *)
+            error "Unsupported init system '$GENTOO_INIT' in GENTOO_INIT; supported values are openrc and systemd."
+            return 1
+            ;;
+    esac
+
+    export GENTOO_INIT
+    info "Gentoo target: arch=$arch init=$GENTOO_INIT"
+}
+
+## Verify that privileged steps can run and keep sudo credentials alive.
+##
+## The profile must run as a normal user with sudo: the dotfiles are linked into
+## that user's $HOME, so running as root would configure the wrong account. A
+## source build can outlast sudo's credential timeout, so credentials are
+## refreshed in the background until the bootstrap ends. Unattended mode never
+## prompts: it needs cached credentials or passwordless sudo, and every later
+## sudo call becomes non-interactive.
+gentoo_prepare_privileges() {
+    if [ "$(id -u)" -eq 0 ]; then
+        error "Do not run the Gentoo bootstrap as root: it configures the invoking user's home. Run it as a normal user with sudo access."
+        return 1
+    fi
+    if ! command -v sudo >/dev/null 2>&1; then
+        error "sudo is required for privileged steps. As root, run 'emerge --ask app-admin/sudo', add your user to the wheel group, and enable it in sudoers."
+        return 1
+    fi
+
+    if [ "${UNATTENDED:-false}" = true ]; then
+        if ! command sudo -n true; then
+            error "Unattended mode requires cached sudo credentials or passwordless sudo. Run 'sudo -v' in this terminal, then retry."
+            return 1
+        fi
+        sudo() { command sudo -n "$@"; }
+    elif ! command sudo -v; then
+        error "Could not obtain sudo credentials."
+        return 1
+    fi
+
+    gentoo_start_sudo_keepalive
+}
+
+## Refresh sudo credentials in the background until gentoo_stop_sudo_keepalive.
+##
+## GENTOO_SUDO_KEEPALIVE_SECONDS sets the refresh interval (default 60).
+gentoo_start_sudo_keepalive() {
+    local interval="${GENTOO_SUDO_KEEPALIVE_SECONDS:-60}" parent=$$
+
+    # Output is detached so this loop cannot hold the bootstrap log's tee pipe open
+    # after the bootstrap exits. On TERM every job (the pending sleep) is killed too.
+    (
+        trap 'kill $(jobs -p) 2>/dev/null; exit 0' TERM
+        while kill -0 "$parent" 2>/dev/null; do
+            sleep "$interval" &
+            wait $! || true
+            command sudo -n true 2>/dev/null || exit 0
+        done
+    ) >/dev/null 2>&1 &
+    GENTOO_SUDO_KEEPALIVE_PID=$!
+}
+
+## Stop the background sudo credential refresh, if one is running.
+gentoo_stop_sudo_keepalive() {
+    [ -n "${GENTOO_SUDO_KEEPALIVE_PID:-}" ] || return 0
+    kill "$GENTOO_SUDO_KEEPALIVE_PID" 2>/dev/null || true
+    wait "$GENTOO_SUDO_KEEPALIVE_PID" 2>/dev/null || true
+    GENTOO_SUDO_KEEPALIVE_PID=""
+}
+
+## Run a command that changes the machine, or only describe it in dry-run mode.
+##
+## Every mutation made by the Gentoo bootstrap goes through here, which is what
+## makes GENTOO_DRY_RUN=true non-destructive by construction.
+gentoo_apply() {
+    if [ "${GENTOO_DRY_RUN:-false}" = true ]; then
+        info "[dry-run] would run: $*"
+        return 0
+    fi
+    "$@"
+}
+
+## Dry run only: show what the Stow step would link and back up.
+##
+## bootstrap_stow_checkout is interactive and installs Stow first, so a dry run
+## cannot call it. This follows the same decisions in the same order and prints
+## the same two read-only views (the simulated links, then the plan for backing
+## up conflicting files), so the conflicts are visible before any real run.
+## Stow is never installed and no file is moved. The tests compare its output
+## with bootstrap_stow_checkout to keep the two from drifting apart.
+gentoo_preview_stow() {
+    local dotfiles_root parent_dir package_name preview
+
+    if [ "${SKIP_STOW:-false}" = true ]; then
+        info "Stow preview skipped: --no-stow was given, so linking is skipped."
+        return 0
+    fi
+    if [ "${UNATTENDED:-false}" = true ] || ! bootstrap_stdin_is_interactive; then
+        info "Stow preview skipped: confirmation is unavailable here (--unattended or no terminal), so linking is skipped. Run from a terminal without --unattended to see the links and conflicts."
+        return 0
+    fi
+    if ! bootstrap_stow_is_available; then
+        info "Stow preview skipped: GNU Stow is not installed yet. A real run installs app-admin/stow, then shows the links and conflicts before asking to apply them."
+        return 0
+    fi
+
+    dotfiles_root="$(bootstrap_repository_root)"
+    parent_dir="$(dirname "$dotfiles_root")"
+    package_name="$(basename "$dotfiles_root")"
+    preview="$(stow -v -n -t "$HOME" -d "$parent_dir" "$package_name" 2>&1 || true)"
+
+    info "Stow dry run for $dotfiles_root:"
+    if [ -z "$preview" ]; then
+        info "No Stow changes are needed."
+        return 0
+    fi
+    printf '%s\n' "$preview"
+
+    info "Conflict backup plan:"
+    bash "$dotfiles_root/.local/scripts/stow-backup-conflicts" --dry-run
+}
+
+## Report whether an OpenRC service is already in a runlevel.
+gentoo_openrc_service_enabled() {
+    local runlevel="$1" service="$2"
+
+    rc-update show "$runlevel" 2>/dev/null | awk -F'|' -v service="$service" '
+        { gsub(/[[:space:]]/, "", $1) }
+        $1 == service { found = 1 }
+        END { exit !found }'
+}
+
+## Add an OpenRC service to a runlevel unless it is already there.
+gentoo_enable_openrc_service() {
+    local service="$1" runlevel="$2"
+
+    if gentoo_openrc_service_enabled "$runlevel" "$service"; then
+        info "OpenRC service $service is already enabled in the $runlevel runlevel."
+        return 0
+    fi
+    info "Enabling OpenRC service $service in the $runlevel runlevel..."
+    gentoo_apply sudo rc-update add "$service" "$runlevel"
+}
+
+## Enable the services a desktop session needs for the given init system.
+##
+## Services are enabled, not started: starting elogind or dbus inside a running
+## session is risky, so they take effect after the next reboot. Networking and
+## display managers are machine-specific and deliberately left alone.
+gentoo_enable_services() {
+    local init="$1"
+
+    case "$init" in
+        openrc)
+            gentoo_enable_openrc_service elogind boot || return
+            gentoo_enable_openrc_service dbus default || return
+            ;;
+        systemd)
+            info "systemd manages logind and D-Bus itself; no services to enable."
+            ;;
+        *)
+            error "Cannot enable services for unsupported init system: $init"
+            return 1
+            ;;
+    esac
+}
+
+## Create the per-user directories and files the shell and editor configs expect.
+##
+## Unlike the shared install_preparation this needs no privileges and does not
+## assume a per-user group named after the account: Gentoo's useradd defaults to
+## the shared "users" group. Existing files are never overwritten.
+gentoo_prepare_user_environment() {
+    local dir created=0
+
+    for dir in "$XDG_DATA_HOME/vim/undo" "$XDG_DATA_HOME/vim/swap" "$XDG_DATA_HOME/vim/backup" \
+        "$XDG_CACHE_HOME/zsh" "$XDG_CACHE_HOME/vlc" "$HOME/.vim/cache"; do
+        if [ ! -d "$dir" ]; then
+            mkdir -p "$dir"
+            created=$((created + 1))
+        fi
+    done
+
+    if [ ! -e "$HOME/.vim/theme" ]; then
+        printf '%s\n' 'colorscheme onedark' 'set background=dark' > "$HOME/.vim/theme"
+        created=$((created + 1))
+    fi
+    for dir in "$HOME/.vim/cache/viminfo" "$XDG_DATA_HOME/vim/viminfo"; do
+        if [ ! -e "$dir" ]; then
+            : > "$dir"
+            created=$((created + 1))
+        fi
+    done
+
+    if [ "$created" -eq 0 ]; then
+        info "User environment is already prepared."
+    else
+        info "Prepared the user environment ($created items created)."
+    fi
+}
+
+## Record the distribution in ~/.config/distro, as the other profiles do.
+gentoo_write_distro_marker() {
+    local marker="$XDG_CONFIG_HOME/distro"
+    local content=$'#! /bin/sh\nexport DISTRO=gentoo'
+
+    if [ -f "$marker" ] && [ "$(cat "$marker")" = "$content" ]; then
+        info "Distro marker $marker is already written."
+        return 0
+    fi
+    mkdir -p "$XDG_CONFIG_HOME"
+    printf '%s\n' "$content" > "$marker"
+    info "Wrote distro marker $marker."
+}
+
+## Make zsh the login shell of the invoking user.
+##
+## Idempotence is judged from the account database, not the session's $SHELL,
+## which stays stale until the next login. chsh only accepts shells listed in
+## /etc/shells, and the bootstrap does not edit /etc/shells itself.
+gentoo_configure_default_shell() {
+    local user entry login_shell candidate zsh_path=""
+    local shells_file="${GENTOO_SYSROOT:-}/etc/shells"
+
+    user="$(id -un)"
+    entry="$(getent passwd "$user")" || entry=""
+    IFS=: read -r _ _ _ _ _ _ login_shell <<< "$entry"
+    if [ "${login_shell##*/}" = zsh ]; then
+        info "zsh is already the login shell of $user."
+        return 0
+    fi
+
+    if [ -r "$shells_file" ]; then
+        while IFS= read -r candidate; do
+            case "$candidate" in
+                /*/zsh)
+                    if [ -x "$candidate" ]; then
+                        zsh_path="$candidate"
+                        break
+                    fi
+                    ;;
+            esac
+        done < "$shells_file"
+    fi
+
+    if [ -z "$zsh_path" ]; then
+        if command -v zsh >/dev/null 2>&1; then
+            error "zsh is installed but not listed in /etc/shells, so chsh would refuse it. As root, add its path to /etc/shells, then rerun."
+        else
+            error "Cannot set the login shell: zsh is not installed (emerge --ask app-shells/zsh)."
+        fi
+        return 1
+    fi
+
+    info "Setting the login shell of $user to $zsh_path..."
+    gentoo_apply sudo chsh -s "$zsh_path" "$user"
+}
+
+## Print the operator's extra emerge options (GENTOO_EMERGE_OPTS), one per line.
+##
+## This is where binary-package and parallelism policy lives, for example
+## "--getbinpkg --usepkg --jobs=4 --load-average=4".
+gentoo_emerge_extra_options() {
+    local -a words
+
+    [ -n "${GENTOO_EMERGE_OPTS:-}" ] || return 0
+    read -r -a words <<< "$GENTOO_EMERGE_OPTS"
+    printf '%s\n' "${words[@]}"
+}
+
+## Synchronize the Portage tree. Off by default; enable with --sync.
+gentoo_sync_tree() {
+    info "Synchronizing the Portage tree..."
+    gentoo_apply sudo emerge --sync
+}
+
+## Update @world. Off by default; enable with --update-world.
+##
+## This can rebuild a large part of the system and may need manual follow-up
+## (configuration file updates, blockers, news), so it is never implicit.
+gentoo_update_world() {
+    local -a extra
+
+    mapfile -t extra < <(gentoo_emerge_extra_options)
+    info "Updating @world; this can recompile much of the system and take many hours..."
+    gentoo_apply sudo emerge --ask=n --verbose --update --deep --newuse ${extra[@]+"${extra[@]}"} @world
+}
+
+## Print usage for the Gentoo bootstrap.
+gentoo_usage() {
+    cat <<'EOF'
+Usage: gentoo [options]
+
+Experimental Gentoo bootstrap (amd64; OpenRC or systemd). Read
+docs/GENTOO-BOOTSTRAP.md first: building from source can take hours.
+
+Options:
+  --dry-run        Validate the machine and preview every change; changes nothing.
+  --sync           Run `emerge --sync` first (off by default).
+  --update-world   Run `emerge --update --deep --newuse @world` (off by default).
+  --unattended     Never prompt; needs cached sudo credentials. Stow linking needs
+                   confirmation, so it is skipped.
+  --no-stow        Skip linking the dotfiles with GNU Stow.
+  --dual-boot-utc  Keep the hardware clock in UTC (systemd only).
+  --high-dpi=yes|no  Accepted for Makefile compatibility; ignored on Gentoo.
+  -h, --help       Show this help.
+
+Environment:
+  GENTOO_INIT         openrc or systemd. Required where no init is running (chroot).
+  GENTOO_SECTIONS     Install exactly these manifest sections (space or comma separated).
+  GENTOO_EMERGE_OPTS  Extra emerge options, e.g. "--getbinpkg --usepkg --jobs=4".
+  GENTOO_MANIFEST     Use another package manifest file.
+EOF
+}
+
+## Install the manifest's packages that are not yet recorded in @world.
+##
+## "In @world" is Portage's record of packages the operator asked for: it makes
+## a rerun a no-op and keeps `emerge --depclean` from removing the package later.
+## It is not a check that the package is installed. Portage keeps the two in
+## step, so a listed but missing package means a hand-edited world file or an
+## interrupted unmerge, and --update-world (emerge --update --deep --newuse
+## @world) reinstalls it. Missing atoms are merged with --noreplace --select, so
+## installed packages are never rebuilt and dependencies pulled in earlier are
+## merely recorded in @world.
+## GENTOO_EMERGE_OPTS carries operator policy such as "--getbinpkg --usepkg" or
+## "--jobs=4". With GENTOO_DRY_RUN=true only `emerge --pretend` runs, unprivileged.
+gentoo_install_packages() {
+    local manifest="$1" init="$2"
+    local world="${GENTOO_SYSROOT:-}/var/lib/portage/world"
+    local selected atom total=0 satisfied=0
+    local pending=() extra=()
+
+    mapfile -t extra < <(gentoo_emerge_extra_options)
+    selected="$(gentoo_manifest_atoms "$manifest" "$init")" || return
+    while IFS= read -r atom; do
+        [ -n "$atom" ] || continue
+        total=$((total + 1))
+        if grep -Fxq -- "$atom" "$world" 2>/dev/null; then
+            satisfied=$((satisfied + 1))
+        else
+            pending+=("$atom")
+        fi
+    done <<< "$selected"
+
+    info "Packages: $total selected, $satisfied already in @world, ${#pending[@]} to install."
+    if [ "${#pending[@]}" -eq 0 ]; then
+        info "All selected packages are already in @world; nothing to install."
+        return 0
+    fi
+
+    if [ "${GENTOO_DRY_RUN:-false}" = true ]; then
+        info "[dry-run] Previewing with emerge --pretend; nothing is installed."
+        emerge --pretend --verbose --noreplace --select ${extra[@]+"${extra[@]}"} "${pending[@]}"
+        return
+    fi
+
+    info "Merging ${#pending[@]} packages; compiling from source can take hours."
+    if ! sudo emerge --ask=n --verbose --noreplace --select ${extra[@]+"${extra[@]}"} "${pending[@]}"; then
+        error "emerge failed. Resolve the reported USE, keyword, or blocker problem (see docs/GENTOO-BOOTSTRAP.md) and rerun the bootstrap; packages that already merged are skipped."
+        return 1
+    fi
+}
+
+## Print the Portage atoms selected from a package manifest, one per line.
+##
+## Sections are declared as "[name]" or "[name:attribute,...]" where an
+## attribute is "optional", "openrc", or "systemd". By default every section
+## that is not optional and not reserved for the other init system is selected;
+## GENTOO_SECTIONS (space or comma separated) selects exactly the named sections.
+## Malformed input is refused with a file:line message and no output.
+gentoo_manifest_atoms() {
+    local manifest="$1" init="$2"
+
+    awk -v init="$init" -v selection="${GENTOO_SECTIONS:-}" -v atom_pattern="$GENTOO_ATOM_PATTERN" '
+        function fail(message) {
+            printf "%s:%d: %s\n", FILENAME, NR, message > "/dev/stderr"
+            failed = 1
+            exit 2
+        }
+        BEGIN {
+            count = split(selection, names, /[ ,]+/)
+            for (i = 1; i <= count; i++) {
+                if (names[i] != "") { requested[names[i]] = 1; explicit = 1 }
+            }
+        }
+        { sub(/[[:space:]]*#.*$/, ""); gsub(/^[[:space:]]+|[[:space:]]+$/, "") }
+        $0 == "" { next }
+        /^\[/ {
+            if ($0 !~ /^\[[a-z0-9][a-z0-9-]*(:[a-z]+(,[a-z]+)*)?\]$/) fail("invalid section header: " $0)
+            header = substr($0, 2, length($0) - 2)
+            colon = index(header, ":")
+            name = colon ? substr(header, 1, colon - 1) : header
+            attributes = colon ? substr(header, colon + 1) : ""
+            if (name in known) fail("duplicate section: " name)
+            known[name] = 1
+            order[++sections] = name
+            n = split(attributes, list, ",")
+            for (i = 1; i <= n; i++) {
+                if (list[i] == "optional") {
+                    optional[name] = 1
+                } else if (list[i] == "openrc" || list[i] == "systemd") {
+                    if (name in only) fail("section " name " names two init systems")
+                    only[name] = list[i]
+                } else {
+                    fail("unknown section attribute: " list[i])
+                }
+            }
+            current = name
+            next
+        }
+        current == "" { fail("package outside a section: " $0) }
+        $0 !~ atom_pattern { fail("not a plain category/package atom: " $0) }
+        { atoms[current, ++total[current]] = $0 }
+        END {
+            if (failed) exit 2
+            for (name in requested) {
+                if (!(name in known)) {
+                    printf "unknown section requested in GENTOO_SECTIONS: %s\n", name > "/dev/stderr"
+                    exit 2
+                }
+                if ((name in only) && only[name] != init) {
+                    printf "section %s applies to %s only, but this target uses %s\n", name, only[name], init > "/dev/stderr"
+                    exit 2
+                }
+            }
+            for (i = 1; i <= sections; i++) {
+                name = order[i]
+                if (explicit) {
+                    if (!(name in requested)) continue
+                } else if ((name in optional) || ((name in only) && only[name] != init)) {
+                    continue
+                }
+                for (j = 1; j <= total[name]; j++) {
+                    if (!seen[atoms[name, j]]++) print atoms[name, j]
+                }
+            }
+        }
+    ' "$manifest"
+}

@@ -37,6 +37,7 @@ LINT_EXCLUDES=(
     'i3blocks-spotify'
     'i3-layout-manager/i3'
     '\.terminfo$'
+    'bootstrap/gentoo\.packages$' # package manifest, not a shell script
 )
 
 # Print all nonignored shell scripts that should be linted (one per line).

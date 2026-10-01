@@ -20,7 +20,7 @@ CUBERHAUS_WORKSPACE_DIR ?= ../cuberhaus-workspace
 CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 RESTORE_WORKSPACE_SKILLS ?= 1
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work bootstrap-gentoo bootstrap-gentoo-dry-run uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -82,6 +82,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_bootstrap_machine_state.sh
 	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh
+	bash tests/test_bootstrap_gentoo.sh
 	bash tests/test_shell_path.sh
 	bash tests/test_git_repo_defaults.sh
 	bash tests/test_git_recurse.sh
@@ -207,7 +208,7 @@ dual-boot-utc: ## Configure this physical Linux machine to use a UTC hardware cl
 	bash -c 'source .local/scripts/bootstrap/base_functions; DUAL_BOOT_UTC=true; configure_dual_boot_utc_rtc'
 
 bootstrap-unattended: ## Provision without prompts (PROFILE required; HIGH_DPI=no)
-	@case "$(PROFILE)" in arch|manjaro|ubuntu|ubuntu-windows|mac|work) ;; *) echo "PROFILE must be arch, manjaro, ubuntu, ubuntu-windows, mac, or work" >&2; exit 2 ;; esac
+	@case "$(PROFILE)" in arch|manjaro|ubuntu|ubuntu-windows|mac|work|gentoo) ;; *) echo "PROFILE must be arch, manjaro, ubuntu, ubuntu-windows, mac, work, or gentoo" >&2; exit 2 ;; esac
 	@$(MAKE) --no-print-directory bootstrap-$(PROFILE) BOOTSTRAP_ARGS="--unattended --high-dpi=$(HIGH_DPI)"
 
 bootstrap-arch: ## Run Arch bootstrap (then deploy workspace files)
@@ -245,6 +246,15 @@ bootstrap-work: ## Run work machine bootstrap (Ubuntu + NVIDIA, then deploy work
 	@$(MAKE) --no-print-directory bootstrap-workspace
 	@$(MAKE) --no-print-directory install-automations
 	@$(MAKE) --no-print-directory restore-apps
+
+# Experimental. Automation is not chained: it needs systemd timers plus apt or
+# pacman, and the app-data restore targets applications the Gentoo manifest omits.
+bootstrap-gentoo: ## Run the experimental Gentoo bootstrap (amd64; read docs/GENTOO-BOOTSTRAP.md first)
+	bash .local/scripts/bootstrap/gentoo $(BOOTSTRAP_ARGS)
+	@$(MAKE) --no-print-directory bootstrap-workspace
+
+bootstrap-gentoo-dry-run: ## Preview the Gentoo bootstrap without changing the machine
+	bash .local/scripts/bootstrap/gentoo --dry-run
 
 ##@ Uninstall (OS-specific)
 

@@ -358,5 +358,5 @@ scripts directory.
 
 ## WIP
 
-- <img src=".github/assets/os-icons/gentoo.png" width="24" height="24" alt="Gentoo"> Gentoo
+- <img src=".github/assets/os-icons/gentoo.png" width="24" height="24" alt="Gentoo"> Gentoo ([experimental bootstrap, never run on a real machine](docs/GENTOO-BOOTSTRAP.md))
 - Openbox

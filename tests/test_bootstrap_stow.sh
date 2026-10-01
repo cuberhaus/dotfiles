@@ -120,6 +120,27 @@ test_conflicts_are_backed_up_after_confirmation() {
     teardown_case
 }
 
+# Stow 2.4 words a plain file in the way differently from Stow 2.3 and earlier.
+# The wording below was captured from GNU Stow 2.4.1.
+test_conflicts_worded_by_stow_2_4_are_backed_up() {
+    setup_case
+    export FAKE_STOW_PREVIEW='WARNING! stowing dotfiles would cause conflicts:
+  * cannot stow ../../../home/user/cuberhaus/dotfiles/.zshenv over existing target .zshenv since neither a link nor a directory and --adopt not specified
+  * cannot stow ../../../home/user/cuberhaus/dotfiles/.config/my app/settings.conf over existing target .config/my app/settings.conf since neither a link nor a directory and --adopt not specified
+All operations aborted.'
+    mkdir -p "$HOME/.config/my app"
+    printf 'existing configuration\n' > "$HOME/.zshenv"
+    printf 'existing settings\n' > "$HOME/.config/my app/settings.conf"
+    run_stow_preflight ubuntu
+    assert_file_missing "$HOME/.zshenv"
+    assert_file_missing "$HOME/.config/my app/settings.conf"
+    find "$HOME/.dotfiles-backup" -type f -name '.zshenv' -print -quit | grep -q . \
+        || fail 'Expected the Stow 2.4 conflict on .zshenv to be backed up'
+    find "$HOME/.dotfiles-backup" -type f -path '*/.config/my app/settings.conf' -print -quit | grep -q . \
+        || fail 'Expected the Stow 2.4 conflict on a nested path with spaces to be backed up'
+    teardown_case
+}
+
 test_decline_preserves_conflicts() {
     setup_case
     export FAKE_STOW_PREVIEW='* existing target is neither a link nor a directory: .zshenv'
@@ -180,7 +201,7 @@ test_noninteractive_input_never_applies_stow() {
 
 test_entrypoints_use_checkout_relative_paths() {
     local entrypoint
-    for entrypoint in arch manjaro ubuntu ubuntu_windows mac work; do
+    for entrypoint in arch manjaro ubuntu ubuntu_windows mac work gentoo; do
         assert_file_contains "$REPO_ROOT/.local/scripts/bootstrap/$entrypoint" 'DOTFILES_ROOT='
         assert_file_contains "$REPO_ROOT/.local/scripts/bootstrap/$entrypoint" 'bootstrap_stow_checkout'
     done
@@ -192,6 +213,7 @@ test_logged_output_retains_interactive_state
 test_clean_install_applies_previewed_links
 test_existing_links_are_idempotent
 test_conflicts_are_backed_up_after_confirmation
+test_conflicts_worded_by_stow_2_4_are_backed_up
 test_decline_preserves_conflicts
 test_no_stow_skips_all_stow_commands
 test_no_stow_argument_sets_skip_flag

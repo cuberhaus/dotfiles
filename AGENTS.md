@@ -18,6 +18,7 @@ Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS — shell, edi
 - `make lint` (shellcheck), `make test` (unit tests), and `make check` (tests + shellcheck + markdownlint + vint).
 - `make audit-installation` — read-only comparison of the checkout, Stow-managed files, active bootstrap package declarations, and native automations. Set `PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work` to override auto-detection.
 - `make bootstrap-{arch,manjaro,ubuntu,mac,work}` — full OS provisioning; **read the script first**, it installs hundreds of packages.
+- `make bootstrap-gentoo-dry-run` / `make bootstrap-gentoo` — experimental Gentoo profile that has never run on a real machine. Always dry-run first; it is excluded from `make audit-installation` and profile detection on purpose. See `docs/GENTOO-BOOTSTRAP.md`.
 
 ## Conventions
 
@@ -65,7 +66,7 @@ This is a single-context repository. Read the root `CONTEXT.md` when present and
 ## Pitfalls
 
 - **Never overwrite `$HOME` files blindly** — symlink via stow or back up first; `make install` already handles conflict backups.
-- **Do not run `sudo apt install`, `pacman -S`, `brew install`, or edit `/etc/`** without asking the user. Bootstrap scripts are opt-in.
+- **Do not run `sudo apt install`, `pacman -S`, `brew install`, `emerge`, or edit `/etc/`** without asking the user. Bootstrap scripts are opt-in.
 - Keep platform-specific config separate (WSL vs native Linux vs macOS); don't merge Arch and Ubuntu package lists.
 - Destructive helpers must support a dry-run mode and print clear usage.
 
