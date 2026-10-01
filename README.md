@@ -147,6 +147,14 @@ and exits `1` when it finds actionable drift. It auto-detects the profile; use
 to override detection. Package expectations are parsed only from functions the
 selected bootstrap actually calls, so commented optional bundles are excluded.
 
+On the `ubuntu` and `work` profiles, Cursor and Antigravity (and VS Code on
+`work`) update through apt. A release upgrade disables third-party apt sources,
+after which the weekly full-upgrade skips them silently; the audit reports that
+as drift for each installed IDE package. `make repair REPAIR=ide-repos`
+re-enables the sources and refreshes the package lists, and `DRY_RUN=true`
+previews its `sudo` commands first. See
+[IDE update channels](.local/README.md#ide-update-channels).
+
 Configuration import is preview-first. `make config-import` shows the Stow
 `--adopt` operations; `make config-import APPLY=1` performs them and then shows
 the changed source files. Review `git diff` before committing. Use

@@ -83,6 +83,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_bootstrap_machine_state.sh
 	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh
+	bash tests/test_ide_apt_sources.sh
 	bash tests/test_ycm.sh
 	bash tests/test_bootstrap_gentoo.sh
 	bash tests/test_shell_path.sh

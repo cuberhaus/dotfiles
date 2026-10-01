@@ -132,6 +132,32 @@ privileges, recovery steps, and unsupported choices are in
 
 See the root [README](../README.md) for quick-start instructions.
 
+## IDE update channels
+
+On the `ubuntu` and `work` profiles, Cursor and Antigravity (and VS Code on
+`work`) update through their vendors' apt repositories. `ide_apt_sources_ensure`
+in `bootstrap/base_functions` registers each repository as a deb822 `.sources`
+file, and only after the signing key is installed and verified, so a failed key
+download never leaves a source that would break `apt-get update` for the whole
+machine. VS Code on `ubuntu` is a snap, and `arch` keeps the Cursor AppImage
+because Arch has no apt. `cursor_is_installed` accepts either form, so a machine
+that already has the AppImage does not get a second copy. Antigravity's package
+does not register its own repository (checked in 1.23.2), so the file the
+bootstrap writes is its only update path.
+
+An Ubuntu release upgrade disables third-party apt sources, and the weekly
+`apt-get full-upgrade` then skips these packages without reporting anything.
+`make audit-installation` reports that state per installed IDE package under
+"IDE update channels". `make repair REPAIR=ide-repos` re-enables the sources for
+the installed IDE packages and refreshes the package lists. Add `DRY_RUN=true`
+to print the `sudo` commands without running them; run the real repair from a
+terminal that can ask for the `sudo` password.
+
+A vendor repository can trail the vendor's in-app updater by a few days, so a
+newer candidate is reported as a warning, not as drift.
+
+Run the hermetic test with `bash tests/test_ide_apt_sources.sh`.
+
 ## Shutdown fix
 
 Run `sudo .local/scripts/permanent_shutdown_fix.sh` on a Linux machine that needs

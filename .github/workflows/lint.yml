@@ -48,6 +48,9 @@ jobs:
       - name: Run Gentoo bootstrap tests
         run: bash tests/test_bootstrap_gentoo.sh
 
+      - name: Run IDE apt source tests
+        run: bash tests/test_ide_apt_sources.sh
+
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-latest

@@ -2,9 +2,9 @@ import contextlib
 import importlib.util
 import io
 import pathlib
+import subprocess
 import sys
 import tempfile
-import types
 import unittest
 from unittest import mock
 
@@ -268,6 +268,193 @@ class InstallationAuditContractTests(unittest.TestCase):
                 "com.cuberhaus.workspace-pull",
             ),
         )
+
+    def test_apt_policy_parser_reads_versions_and_repository_presence(self):
+        audit = load_audit_module()
+        from_repository = """\
+cursor:
+  Installed: 3.19.19-1788887598
+  Candidate: 3.19.19-1788887598
+  Version table:
+ *** 3.19.19-1788887598 500
+        500 https://downloads.cursor.com/aptrepo stable/main amd64 Packages
+        100 /var/lib/dpkg/status
+"""
+        upgradable = """\
+cursor:
+  Installed: 3.19.19-1788887598
+  Candidate: 3.22.12-1790000000
+  Version table:
+     3.22.12-1790000000 500
+        500 https://downloads.cursor.com/aptrepo stable/main amd64 Packages
+ *** 3.19.19-1788887598 100
+        100 /var/lib/dpkg/status
+"""
+        # What apt prints once a release upgrade has disabled the vendor source.
+        orphaned = """\
+antigravity:
+  Installed: 1.23.2-1776332190
+  Candidate: 1.23.2-1776332190
+  Version table:
+ *** 1.23.2-1776332190 100
+        100 /var/lib/dpkg/status
+"""
+
+        self.assertEqual(
+            audit.parse_apt_policy(from_repository),
+            ("3.19.19-1788887598", "3.19.19-1788887598", True),
+        )
+        self.assertEqual(
+            audit.parse_apt_policy(upgradable),
+            ("3.19.19-1788887598", "3.22.12-1790000000", True),
+        )
+        self.assertEqual(
+            audit.parse_apt_policy(orphaned),
+            ("1.23.2-1776332190", "1.23.2-1776332190", False),
+        )
+        self.assertEqual(audit.parse_apt_policy(""), ("(none)", "(none)", False))
+
+    def run_ide_update_channel_audit(self, audit, installed, policies):
+        """Run the IDE update-channel audit against fake dpkg and apt state."""
+
+        def fake_run(command, cwd=None):
+            return subprocess.CompletedProcess(command, 0, stdout=policies[command[-1]], stderr="")
+
+        reporter = audit.Reporter()
+        output = io.StringIO()
+        with (
+            mock.patch.object(audit.shutil, "which", return_value="/usr/bin/tool"),
+            mock.patch.object(audit, "installed_package_names", return_value=installed),
+            mock.patch.object(audit, "run", side_effect=fake_run),
+            contextlib.redirect_stdout(output),
+        ):
+            audit.audit_ide_update_channels(reporter)
+        return reporter, output.getvalue()
+
+    def test_ide_update_channel_audit_reports_each_state(self):
+        audit = load_audit_module()
+        policies = {
+            "code": "code:\n  Installed: 1.140.0-1\n  Candidate: 1.140.0-1\n  Version table:\n"
+            " *** 1.140.0-1 500\n        500 https://packages.microsoft.com/repos/code stable/main amd64 Packages\n",
+            "cursor": "cursor:\n  Installed: 3.19.19-1\n  Candidate: 3.22.12-1\n  Version table:\n"
+            "     3.22.12-1 500\n        500 https://downloads.cursor.com/aptrepo stable/main amd64 Packages\n"
+            " *** 3.19.19-1 100\n        100 /var/lib/dpkg/status\n",
+            "antigravity": "antigravity:\n  Installed: 1.23.2-1\n  Candidate: 1.23.2-1\n  Version table:\n"
+            " *** 1.23.2-1 100\n        100 /var/lib/dpkg/status\n",
+        }
+
+        reporter, output = self.run_ide_update_channel_audit(
+            audit, {"code", "cursor", "antigravity", "unrelated"}, policies
+        )
+
+        self.assertIn("IDE update channels", output)
+        self.assertIn("[OK] code 1.140.0-1 is the newest version its apt source offers.", output)
+        self.assertIn("[WARN] cursor 3.19.19-1 can be upgraded to 3.22.12-1.", output)
+        self.assertIn("[DRIFT] antigravity 1.23.2-1 has no enabled apt source, so it never updates.", output)
+        self.assertIn("Fix: make repair REPAIR=ide-repos", output)
+        self.assertEqual((reporter.issues, reporter.warnings), (1, 1))
+
+    def test_ide_update_channel_audit_only_covers_installed_ide_packages(self):
+        audit = load_audit_module()
+
+        # No IDE .deb installed: stay silent instead of printing an empty section.
+        reporter, output = self.run_ide_update_channel_audit(audit, {"bash", "coreutils"}, {})
+        self.assertEqual(output, "")
+        self.assertEqual((reporter.issues, reporter.warnings), (0, 0))
+
+        # Only the installed one is inspected, so a missing policy entry would raise KeyError.
+        policies = {
+            "code": "code:\n  Installed: 1.140.0-1\n  Candidate: 1.140.0-1\n  Version table:\n"
+            " *** 1.140.0-1 500\n        500 https://packages.microsoft.com/repos/code stable/main amd64 Packages\n"
+        }
+        reporter, output = self.run_ide_update_channel_audit(audit, {"code"}, policies)
+        self.assertIn("[OK] code", output)
+        self.assertNotIn("cursor", output)
+
+        # Machines without dpkg or apt (Arch, macOS) skip the section silently.
+        quiet = io.StringIO()
+        reporter = audit.Reporter()
+        with (
+            mock.patch.object(audit.shutil, "which", return_value=None),
+            contextlib.redirect_stdout(quiet),
+        ):
+            audit.audit_ide_update_channels(reporter)
+        self.assertEqual(quiet.getvalue(), "")
+        self.assertEqual((reporter.issues, reporter.warnings), (0, 0))
+
+    def test_main_audits_ide_update_channels_after_package_declarations(self):
+        source = AUDIT_PATH.read_text(encoding="utf-8")
+
+        self.assertRegex(
+            source,
+            r"audit_packages\(packages, reporter\)\n\s+audit_ide_update_channels\(reporter\)",
+        )
+
+    def test_cursor_installed_outside_apt_mirrors_the_bootstrap_check(self):
+        audit = load_audit_module()
+        bootstrap = (REPO_ROOT / ".local" / "scripts" / "bootstrap" / "base_functions").read_text(encoding="utf-8")
+
+        # The audit and cursor_is_installed must agree on what a complete AppImage is.
+        self.assertIn(f"-ge {audit.MIN_APPIMAGE_BYTES}", bootstrap)
+
+        with tempfile.TemporaryDirectory() as home:
+            app_image = pathlib.Path(home) / "Applications" / "cursor.AppImage"
+            with (
+                mock.patch.object(pathlib.Path, "home", return_value=pathlib.Path(home)),
+                mock.patch.object(audit.shutil, "which", return_value=None),
+            ):
+                self.assertFalse(audit.cursor_installed_outside_apt(), "nothing installed")
+
+                app_image.parent.mkdir()
+                app_image.write_bytes(b"interrupted download")
+                self.assertFalse(audit.cursor_installed_outside_apt(), "a truncated AppImage must not count")
+
+                app_image.write_bytes(bytes(audit.MIN_APPIMAGE_BYTES))
+                self.assertTrue(audit.cursor_installed_outside_apt(), "a complete AppImage counts")
+
+                app_image.unlink()
+                with mock.patch.object(audit.shutil, "which", return_value="/usr/bin/cursor"):
+                    self.assertTrue(audit.cursor_installed_outside_apt(), "a cursor command counts")
+
+    def audit_declared_packages(self, audit, declared, installed, manager="apt"):
+        """Run the package-declaration audit against a fake set of installed names."""
+        reporter = audit.Reporter()
+        output = io.StringIO()
+        with (
+            mock.patch.object(audit.shutil, "which", return_value="/usr/bin/tool"),
+            mock.patch.object(audit, "installed_package_names", return_value=installed),
+            contextlib.redirect_stdout(output),
+        ):
+            audit.audit_packages({audit.Package(manager, name) for name in declared}, reporter)
+        return reporter, output.getvalue()
+
+    def test_alternative_install_satisfies_a_declared_package(self):
+        audit = load_audit_module()
+        cursor = audit.Package("apt", "cursor")
+
+        with mock.patch.dict(audit.ALTERNATIVE_INSTALLS, {cursor: lambda: True}):
+            reporter, output = self.audit_declared_packages(audit, ["cursor"], set())
+        self.assertEqual(reporter.issues, 0)
+        self.assertIn("[OK] All 1 expected apt package(s) are installed.", output)
+
+        with mock.patch.dict(audit.ALTERNATIVE_INSTALLS, {cursor: lambda: False}):
+            reporter, output = self.audit_declared_packages(audit, ["cursor"], set())
+        self.assertEqual(reporter.issues, 1)
+        self.assertIn("[MISSING] 1 expected apt package(s): cursor", output)
+
+    def test_t64_renamed_library_satisfies_its_old_apt_name(self):
+        audit = load_audit_module()
+
+        # Ubuntu 24.04+ ships libfuse2 as libfuse2t64, which still provides the old name.
+        reporter, _ = self.audit_declared_packages(audit, ["libfuse2"], {"libfuse2t64"})
+        self.assertEqual(reporter.issues, 0)
+
+        # Only the exact rename counts, and only for apt.
+        reporter, output = self.audit_declared_packages(audit, ["libfuse2"], {"libfuse2x", "libfuse2-dev"})
+        self.assertEqual(reporter.issues, 1)
+        self.assertIn("libfuse2", output)
+        reporter, _ = self.audit_declared_packages(audit, ["libfuse2"], {"libfuse2t64"}, manager="pacman")
+        self.assertEqual(reporter.issues, 1)
 
 
 if __name__ == "__main__":

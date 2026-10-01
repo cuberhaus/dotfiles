@@ -27,6 +27,7 @@ Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS — shell, edi
 - New aliases/functions in `.config/zsh/aliases` and `.config/zsh/functions` must not shadow standard Unix commands unless they intentionally add defaults to that same command.
 - User-facing output uses ANSI colors: success `\033[32m`, warning `\033[33m`, info `\033[34m`, always reset with `\033[0m`.
 - Parallelize repo/file iteration with `xargs -P`, backgrounded `&` jobs + `wait`, especially for multi-repo helpers like `add_pat`.
+- **Vendor apt repositories**: register them only through `apt_vendor_source_ensure` / `ide_apt_sources_ensure` in `base_functions` (deb822 `.sources`, written after the signing key is verified); never hand-write a legacy `.list`. An Ubuntu release upgrade disables third-party sources and the weekly `apt-get full-upgrade` then skips their packages silently, which is why `make audit-installation` checks the IDE packages and `make repair REPAIR=ide-repos` fixes them. Agents preview that repair with `DRY_RUN=true` and leave the real run (it uses `sudo`) to the user.
 
 ### Shell command catalog
 
