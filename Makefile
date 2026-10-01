@@ -182,9 +182,8 @@ bootstrap-workspace: ## Clone the private workspace repository when needed, then
 	fi
 	@bash "$(CUBERHAUS_WORKSPACE_DIR)/sync.sh"
 
-workspace: bootstrap-workspace ## Sync workspace files, refresh repos.json, then audit workspace policies
+workspace: bootstrap-workspace ## Sync workspace files, then refresh repos.json
 	$(PYTHON) "$(CUBERHAUS_WORKSPACE_DIR)/scripts/build-repos.py"
-	$(PYTHON) "$(CUBERHAUS_WORKSPACE_DIR)/scripts/audit-policies.py"
 
 ##@ Submodules
 

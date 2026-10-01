@@ -71,7 +71,7 @@ This is a single-context repository. Read the root `CONTEXT.md` when present and
 
 ## Workspace integration (cuberhaus multi-root)
 
-The sibling [cuberhaus-workspace/](../cuberhaus-workspace/) repo holds the files that live at the workspace root (`~/cuberhaus`) but couldn't otherwise be versioned, because that root is a plain folder collecting ~50 sibling repos. `make workspace` is the single maintenance command: it syncs central files, rebuilds `repos.json`, then audits policies.
+The sibling [cuberhaus-workspace/](../cuberhaus-workspace/) repo holds the files that live at the workspace root (`~/cuberhaus`) but couldn't otherwise be versioned, because that root is a plain folder collecting ~50 sibling repos. `make workspace` is the single maintenance command: it syncs central files, then rebuilds `repos.json`.
 
 The `cuberhaus-workspace/` repo is the single source of truth on both Windows (via WinDotfiles) and Linux (via this repo); only the sync driver invocation differs (`sync.sh` here, `sync.ps1` on Windows). See [../cuberhaus-workspace/README.md](../cuberhaus-workspace/README.md).
 

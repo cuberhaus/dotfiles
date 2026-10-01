@@ -123,7 +123,7 @@ make config-status     # Show Stow deployment and source-checkout drift
 make config-diff       # Compare tracked configs with existing home targets
 make config-import     # Preview reverse import; add APPLY=1 to adopt
 make maintenance-digest # Show last successful scheduled maintenance runs
-make workspace         # Sync workspace, refresh repos.json, audit policies
+make workspace         # Sync workspace, then refresh repos.json
 make submodules        # Init and update submodules
 make update            # Pull latest for every submodule
 make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac, work)
