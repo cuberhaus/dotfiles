@@ -87,6 +87,9 @@ test: ## Run deterministic unit tests
 	bash tests/test_ycm.sh
 	bash tests/test_bootstrap_gentoo.sh
 	bash tests/test_shell_path.sh
+	bash tests/test_zshrc_bundles.sh
+	bash tests/test_updateall.sh
+	bash tests/test_cleanup.sh
 	bash tests/test_bashrc_prompt.sh
 	bash tests/test_git_repo_defaults.sh
 	bash tests/test_git_recurse.sh

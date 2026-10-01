@@ -28,7 +28,12 @@ antigen use oh-my-zsh
 
 # Bundles from the default repo (robbyrussell's oh-my-zsh).
 antigen bundle systemd
-antigen bundle archlinux
+# The archlinux plugin defines pacman and AUR aliases (pacin, pacupg, ...) and helpers
+# (upgrade, paclist, ...). Anywhere else they are dead names: pacman is missing, so they
+# only clutter completion and highlight red.
+if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
+    antigen bundle archlinux
+fi
 antigen bundle command-not-found
 antigen bundle alias-finder
 # antigen bundle globalias # pressing space after an alias, expands it
