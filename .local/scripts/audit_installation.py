@@ -443,6 +443,17 @@ def cursor_installed_outside_apt() -> bool:
 ALTERNATIVE_INSTALLS = {Package("apt", "cursor"): cursor_installed_outside_apt}
 
 
+def package_is_installed(package: Package, installed: set[str]) -> bool:
+    """Whether a declared package is present, by name or through an accepted alternative."""
+    names = {package.name, package.name.split("/", 1)[-1]}
+    if package.manager == "apt":
+        # Ubuntu's 64-bit time_t transition renamed libraries (libfuse2 -> libfuse2t64).
+        names |= {f"{name}t64" for name in names}
+    if names & installed:
+        return True
+    return ALTERNATIVE_INSTALLS.get(package, lambda: False)()
+
+
 def audit_packages(packages: set[Package], reporter: Reporter) -> None:
     print("\nActive bootstrap package declarations")
     for manager in sorted({package.manager for package in packages}):
@@ -452,13 +463,7 @@ def audit_packages(packages: set[Package], reporter: Reporter) -> None:
             reporter.result("MISSING", f"{command} is unavailable; {len(manager_packages)} {manager} package(s) cannot be verified.", "Run the matching bootstrap target.")
             continue
         installed = installed_package_names(manager)
-        missing = [
-            name
-            for name in manager_packages
-            if name not in installed
-            and name.split("/", 1)[-1] not in installed
-            and not ALTERNATIVE_INSTALLS.get(Package(manager, name), lambda: False)()
-        ]
+        missing = [name for name in manager_packages if not package_is_installed(Package(manager, name), installed)]
         if missing:
             reporter.result("MISSING", f"{len(missing)} expected {manager} package(s): {', '.join(missing)}", "Run the matching bootstrap target.")
         else:
