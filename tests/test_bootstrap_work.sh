@@ -242,6 +242,7 @@ bootstrap_stow_checkout() { record "stow:$1:$SKIP_STOW"; }
 install_preparation() { record 'preparation'; }
 configure_inotify_watches() { record 'inotify'; }
 shutdown_fix() { record 'shutdown-fix'; }
+brightness_fix() { record 'brightness-fix'; }
 nvidia_install() { record 'nvidia-install'; }
 nvidia_display_config() { record 'nvidia-display'; }
 dev_tools_install() { record 'dev-tools'; }
@@ -268,12 +269,22 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"
 
 grep -Fqx 'export DISTRO=ubuntu' "$XDG_CONFIG_HOME/distro" ||
     fail 'work bootstrap did not write the Ubuntu distro marker'
+
+# The brightness fix is cosmetic: when it fails, provisioning must warn and carry on.
+brightness_fix() { record 'brightness-fix-failed'; return 1; }
+warn() { record 'brightness-warning'; }
+: > "$EVENT_LOG"
+work_main --unattended --no-stow --high-dpi=no </dev/null
+grep -Fqx 'brightness-fix-failed' "$EVENT_LOG" || fail 'the failing brightness fix did not run'
+grep -Fqx 'brightness-warning' "$EVENT_LOG" || fail 'a failing brightness fix must be reported'
+grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
+    fail 'a failing brightness fix must not abort the rest of the work bootstrap'
 
 printf 'Work bootstrap orchestration tests passed.\n'

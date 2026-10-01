@@ -78,6 +78,7 @@ lint: ## Run shellcheck on all shell scripts
 test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_installation_audit.py
 	bash tests/test_brightness.sh
+	bash tests/test_brightness_fix.sh
 	bash tests/test_bootstrap_stow.sh
 	bash tests/test_bootstrap_machine_state.sh
 	bash tests/test_obsidian_bootstrap.sh

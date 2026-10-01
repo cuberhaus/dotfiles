@@ -58,6 +58,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   ├── hooks/                  # Git hooks
 │   │   └── pre-commit         # Runs shellcheck on staged shell scripts
 │   │
+│   ├── brightness_fix.sh       # Selects the native NVIDIA backlight on ASUS ROG laptops via kernelstub or GRUB
 │   ├── lint.sh                 # Lint all tracked shell scripts with shellcheck
 │   ├── permanent_shutdown_fix.sh # Applies shutdown kernel parameters via kernelstub or GRUB
 │   ├── toggle_theme            # Switch between light/dark themes
@@ -142,3 +143,25 @@ reboot.
 Use `SHUTDOWN_FIX_BOOTLOADER=kernelstub` or `SHUTDOWN_FIX_BOOTLOADER=grub` to
 select a supported bootloader explicitly. Run the hermetic regression test
 with `bash .local/scripts/test_permanent_shutdown_fix.sh`.
+
+## Brightness fix
+
+On the ASUS ROG Strix SCAR 16 (G635LX) in GPU MUX "Ultimate" mode, the Fn keys
+and the GNOME slider can change a value without changing the built-in panel,
+while external monitors work. The firmware advertises an embedded-controller
+backlight (`nvidia_wmi_ec_backlight`) that the panel ignores. The kernel
+parameter `acpi_backlight=native` makes the kernel skip it so the NVIDIA driver
+can register its own `nvidia_0` backlight.
+
+Run `.local/scripts/brightness_fix.sh --status` to see what a machine needs,
+`--dry-run` to preview the change without root, and
+`sudo .local/scripts/brightness_fix.sh` to apply it, then reboot. `--revert`
+removes the parameter again. The script supports GRUB and Pop!_OS `kernelstub`,
+backs up `/etc/default/grub` to `.bak`, restores it if `update-grub` fails, and
+only acts on boards listed in `AFFECTED_BOARDS` (currently `G635LX`) unless
+`--force` is given. The `work` bootstrap runs it right after the shutdown fix; a
+failure only warns.
+
+Run the hermetic test with `bash tests/test_brightness_fix.sh`. The evidence,
+verification steps, and fallbacks are in
+[docs/ROG-BRIGHTNESS-DIAGNOSIS.md](../docs/ROG-BRIGHTNESS-DIAGNOSIS.md).
