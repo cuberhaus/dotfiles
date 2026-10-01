@@ -147,8 +147,9 @@ reset_inotify_case
 if INOTIFY_MAX_USER_WATCHES='lots' configure_inotify_watches 2> /dev/null; then
     fail 'a non-numeric inotify limit must be rejected'
 fi
-[ ! -s "$EVENT_LOG" ] && [ ! -e "$INOTIFY_SYSCTL_CONF" ] ||
+if [ -s "$EVENT_LOG" ] || [ -e "$INOTIFY_SYSCTL_CONF" ]; then
     fail 'a rejected inotify limit must not change the machine'
+fi
 
 reset_inotify_case
 FAKE_RUNNING_LIMIT=65536
@@ -163,8 +164,9 @@ reset_inotify_case
 uname() { printf 'Darwin\n'; }
 configure_inotify_watches
 unset -f uname
-[ ! -s "$EVENT_LOG" ] && [ ! -e "$INOTIFY_SYSCTL_CONF" ] ||
+if [ -s "$EVENT_LOG" ] || [ -e "$INOTIFY_SYSCTL_CONF" ]; then
     fail 'non-Linux systems have no inotify limit to configure'
+fi
 
 for entrypoint in ubuntu arch manjaro work; do
     grep -Eq '^[[:space:]]*configure_inotify_watches$' \
