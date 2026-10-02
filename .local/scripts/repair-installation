@@ -6,7 +6,7 @@ step="${1:-}"
 profile="${2:-auto}"
 
 usage() {
-    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos only)]\n' >&2
+    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos and asusctl only)]\n' >&2
 }
 
 detect_profile() {
@@ -91,6 +91,16 @@ repair_ide_repos() {
     ide_apt_sources_repair
 }
 
+# Install or repair asusctl on an ASUS laptop; the installer skips every other
+# machine, so PROFILE does not matter.  DRY_RUN=true previews the steps without sudo.
+repair_asusctl() {
+    local -a arguments=()
+    case "${DRY_RUN:-false}" in
+        true|1) arguments+=(--dry-run) ;;
+    esac
+    bash "$repo_root/.local/scripts/asusctl_install.sh" ${arguments[@]+"${arguments[@]}"}
+}
+
 case "$step" in
     config|aliases|environment)
         restow_config
@@ -100,6 +110,9 @@ case "$step" in
         ;;
     ide-repos)
         repair_ide_repos
+        ;;
+    asusctl)
+        repair_asusctl
         ;;
     automations)
         bash "$repo_root/.local/scripts/automation/install"

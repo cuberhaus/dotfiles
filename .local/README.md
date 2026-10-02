@@ -17,6 +17,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   ├── bin/                    # User scripts added to $PATH
 │   │   ├── changeBrightness   # Brightness control (used by i3/xmonad)
 │   │   ├── changeVolume       # Volume control with notification
+│   │   ├── cleanup            # Free disk space; asks before deleting each unused Docker volume
 │   │   ├── clone-all          # Clone all repos from a GitHub user
 │   │   ├── git-recurse        # Run git commands across multiple repos
 │   │   ├── vault-secret       # Access SOPS-encrypted vault credentials
@@ -58,6 +59,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   ├── hooks/                  # Git hooks
 │   │   └── pre-commit         # Runs shellcheck on staged shell scripts
 │   │
+│   ├── asusctl_install.sh      # Builds and installs the pinned asusctl/asusd release on supported ASUS laptops
 │   ├── brightness_fix.sh       # Selects the native NVIDIA backlight on ASUS ROG laptops via kernelstub or GRUB
 │   ├── lint.sh                 # Lint all tracked shell scripts with shellcheck
 │   ├── permanent_shutdown_fix.sh # Applies shutdown kernel parameters via kernelstub or GRUB
@@ -192,6 +194,29 @@ failure only warns.
 Run the hermetic test with `bash tests/test_brightness_fix.sh`. The evidence,
 verification steps, and fallbacks are in
 [docs/ROG-BRIGHTNESS-DIAGNOSIS.md](../docs/ROG-BRIGHTNESS-DIAGNOSIS.md).
+
+## asusctl
+
+ASUS ships no Linux software for its laptops; `asusctl` and its daemon `asusd`
+from the ASUS Linux project control firmware platform profiles, fan curves, the
+battery charge limit, and keyboard lighting.
+`.local/scripts/asusctl_install.sh` builds the pinned release from the
+project's own repository as your user, verifies the commit, copies the files
+under `/usr` with `sudo`, and records each one so `--uninstall` removes exactly
+what it added. It acts only on a supported ASUS laptop (ASUS vendor, a family
+that `asusd` supports, kernel 6.19 or newer, `asus-nb-wmi` bound) and skips every
+other machine, so the bootstrap profiles call it unconditionally.
+
+The `work` and `ubuntu` bootstraps run it through `asusctl_install`; a failure
+only warns. `make repair REPAIR=asusctl` repeats it, and `DRY_RUN=true`
+previews every step without `sudo`. Use `--status` for a read-only report and
+`--unattended` for noninteractive `sudo`. While `power-profiles-daemon` runs, the
+installer switches off `asusd`'s own AC/battery profile switching so the two
+never fight over the profile; GNOME's Power Mode keeps working. The design, the
+comparison with the Homebrew route that the ASUS Linux guide documents, and how
+to bump the pinned release are in [docs/ASUSCTL.md](../docs/ASUSCTL.md).
+
+Run the hermetic test with `bash tests/test_asusctl_install.sh`.
 
 ## YouCompleteMe build
 

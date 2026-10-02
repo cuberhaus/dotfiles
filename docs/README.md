@@ -4,6 +4,7 @@ Put personal setup notes, troubleshooting records, and machine-specific runbooks
 
 Current notes:
 
+- [asusctl on ASUS laptops](ASUSCTL.md)
 - [ROG internal-panel brightness diagnosis](ROG-BRIGHTNESS-DIAGNOSIS.md)
 - [SSH/IAP/OS Login diagnosis](SSH-IAP-OS-LOGIN-DIAGNOSIS.md)
 - [Remote home access](REMOTE-HOME-ACCESS.md)

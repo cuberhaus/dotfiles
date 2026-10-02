@@ -40,6 +40,10 @@ snaps_install
 ubuntu_install
 obsidian_vault_install
 nvidia_display_config
+# The installer skips machines that are not supported ASUS laptops. It needs the
+# network and a few minutes of compiling, so a failure must not abort provisioning.
+asusctl_install ||
+    warn "asusctl setup failed; rerun it with: make repair REPAIR=asusctl PROFILE=ubuntu"
 ai_tools_install
 vim_install
 if [ "$(basename "$SHELL")" != "zsh" ]; then

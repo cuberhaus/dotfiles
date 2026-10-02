@@ -79,6 +79,7 @@ test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_installation_audit.py
 	bash tests/test_brightness.sh
 	bash tests/test_brightness_fix.sh
+	bash tests/test_asusctl_install.sh
 	bash tests/test_bootstrap_stow.sh
 	bash tests/test_bootstrap_machine_state.sh
 	bash tests/test_obsidian_bootstrap.sh
@@ -118,7 +119,7 @@ doctor: ## Check tools, symlinks, configuration, packages, environment, and auto
 audit-installation: ## Report drift between this repo and the installed machine (PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work)
 	$(PYTHON) .local/scripts/audit_installation.py --profile "$(PROFILE)"
 
-repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos; PROFILE=auto|...; DRY_RUN=true previews ide-repos)
+repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl; PROFILE=auto|...; DRY_RUN=true previews ide-repos and asusctl)
 	bash .local/scripts/repair-installation "$(REPAIR)" "$(PROFILE)"
 
 ##@ Setup

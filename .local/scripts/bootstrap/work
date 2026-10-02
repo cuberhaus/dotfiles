@@ -71,6 +71,10 @@ work_main() {
     # failure must not abort provisioning.
     brightness_fix ||
         warn "Brightness fix failed; inspect it with: $DOTFILES_ROOT/.local/scripts/brightness_fix.sh --status"
+    # The installer skips machines that are not supported ASUS laptops. It needs the
+    # network and a few minutes of compiling, so a failure must not abort provisioning.
+    asusctl_install ||
+        warn "asusctl setup failed; rerun it with: make repair REPAIR=asusctl PROFILE=work"
     nvidia_install
     nvidia_display_config
     dev_tools_install

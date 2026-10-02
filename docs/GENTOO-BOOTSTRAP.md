@@ -180,4 +180,4 @@ These are left to you on purpose, or are not supported yet:
 - **Power bindings use `systemctl`.** The i3 power menu (`.config/i3/config`) calls `systemctl poweroff`, `suspend`, `hibernate`, and `reboot`, which do not exist on OpenRC.
 - **No screen locker.** The lock binding calls `betterlockscreen`, which is not in the main Gentoo tree. The config guards it with `command -v`, so the binding silently does nothing.
 - **Polkit agent.** The i3 config autostarts `/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1`, the Arch location. Gentoo installs the agent elsewhere (check the package's installed file list), so it will not start until the path is adjusted.
-- **No package-manager aliases.** `update`, `updateall`, and `cleanup` are defined in `.config/zsh/aliases` for Arch, Manjaro, and Ubuntu only.
+- **No package-manager steps.** `update`, `updateall`, and `cleanup` know the package managers of Arch, Manjaro, and Ubuntu only. On Gentoo they skip the operating-system step: `update` and `updateall` print a note saying so, and `updateall` still runs the pip, Zsh-plugin, and Neovim-plugin steps.

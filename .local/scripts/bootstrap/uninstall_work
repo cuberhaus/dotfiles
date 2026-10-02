@@ -16,6 +16,7 @@ run_selected_uninstalls "Work Machine Uninstaller" \
     node_uninstall          "Node.js & global npm packages"                   OFF \
     python_uninstall        "Python, pip & pipx packages"                     OFF \
     docker_uninstall        "Docker CE & compose"                             OFF \
+    asusctl_uninstall       "asusctl & asusd (ASUS laptops; keeps /etc/asusd)" OFF \
     gui_apps_uninstall      "GUI apps (Chrome, VS Code, Cursor, Spotify, ...)" OFF
 
 if [ "$(basename "$SHELL")" == "zsh" ]; then

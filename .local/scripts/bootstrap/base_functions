@@ -442,6 +442,24 @@ sops_install() {
     info "SOPS installed successfully."
 }
 
+## Install asusctl and its daemon on ASUS laptops. The installer checks the hardware
+## itself and skips every other machine, so profiles can call this unconditionally.
+## It builds the pinned release as the current user and needs sudo only to install;
+## see docs/ASUSCTL.md.
+asusctl_install() {
+    local -a arguments=()
+    if [ "${UNATTENDED:-false}" = true ]; then
+        arguments+=(--unattended)
+    fi
+    ASUSCTL_INSTALL_SUDO="${SUDO_COMMAND:-sudo}" \
+        bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/asusctl_install.sh" ${arguments[@]+"${arguments[@]}"}
+}
+
+## Remove the files asusctl_install added; the daemon settings in /etc/asusd stay.
+asusctl_uninstall() {
+    bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/asusctl_install.sh" --uninstall || true
+}
+
 ###############################################################
 # => IDE installs (vendor apt repositories and Cursor)
 ###############################################################

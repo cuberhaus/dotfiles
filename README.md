@@ -155,6 +155,12 @@ re-enables the sources and refreshes the package lists, and `DRY_RUN=true`
 previews its `sudo` commands first. See
 [IDE update channels](.local/README.md#ide-update-channels).
 
+The `work` and `ubuntu` bootstraps also install `asusctl` (ASUS Linux's daemon
+for platform profiles, fan curves, and the battery charge limit), but only on a
+supported ASUS laptop; other machines skip it. `make repair REPAIR=asusctl`
+repeats the step and `DRY_RUN=true` previews it. See
+[asusctl](.local/README.md#asusctl).
+
 Configuration import is preview-first. `make config-import` shows the Stow
 `--adopt` operations; `make config-import APPLY=1` performs them and then shows
 the changed source files. Review `git diff` before committing. Use

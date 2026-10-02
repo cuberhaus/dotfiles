@@ -38,13 +38,13 @@ alias xmonad_fix="sudo ghc-pkg recache"
 alias ycminstall='python3 $HOME/.vim/plugged/YouCompleteMe/install.py'
 # Rclone (be careful!)
 # "rclone config" first, better to use copy instead of "rclone sync" so that I do not delete books on accident while pushing or pulling, it becomes a mess, since if I pull i will delete any extra books I have locally, and if I push I will delete the extra books I have remotely, overall, a fucking mess
-alias rclonepull_calibre='$HOME/.local/scripts/restore-app-data calibre --apply'
-alias rclonepull_thunderbird='$HOME/.local/scripts/restore-app-data thunderbird --apply'
-alias rclonepull_anki='$HOME/.local/scripts/restore-app-data anki --apply'
+alias rclonepull_calibre='~/.local/scripts/restore-app-data calibre --apply'
+alias rclonepull_thunderbird='~/.local/scripts/restore-app-data thunderbird --apply'
+alias rclonepull_anki='~/.local/scripts/restore-app-data anki --apply'
 alias rclonepush_calibre="rclone -P copy ~/Calibre\ Library drive:Calibre/Calibre\ Library"
 alias rclonepush_thunderbird="rclone -P copy ~/.thunderbird drive:Thunderbird"
 
-alias colemak='$HOME/.local/scripts/BigBagKbdTrixXKB/setxkb.sh "5ca es ks"'
+alias colemak='bash $HOME/.local/scripts/BigBagKbdTrixXKB/setkb.sh "5ca es ks"'
 # Config Files
 alias aliases='nvim $ZDOTDIR/aliases'
 alias arch='nvim $scripts/bootstrap/arch_functions'
@@ -54,7 +54,6 @@ alias i3config='nvim $HOME/.config/i3/config'
 alias kitty.conf='nvim $HOME/.config/kitty/kitty.conf'
 alias mac='nvim $scripts/bootstrap/mac_functions'
 alias ubuntu='nvim $scripts/bootstrap/ubuntu_functions'
-alias pacman.conf="sudo vim /etc/pacman.conf"
 alias tmux.conf='nvim $HOME/.config/tmux/tmux.conf'
 alias vimrc='nvim $HOME/.vim/vimrc'
 alias xinitrc='nvim $HOME/.xinitrc'
@@ -158,177 +157,8 @@ alias tozsh='sudo chsh $USER -s /bin/zsh && echo "Now log out."'
 
 # Generalize commands
 
-# A live alias named cleanup (an older copy of this file already loaded in the running
-# shell) turns the function definitions below into a parse error, so drop it first.
-unalias cleanup 2>/dev/null
-
-## Run one cleanup command, or only print it under --dry-run (helper of cleanup).
-# It reads and updates cleanup's locals (dry_run, colours, failed_steps). `command`
-# skips shell functions, so the real yay runs and not the yay wrapper defined below.
-_cleanup_step() {
-    local label=$1
-    shift
-    printf '%s==> %s%s\n' "$blue" "$label" "$reset"
-    if [ "$dry_run" = true ]; then
-        printf '    would run:'
-        printf ' %q' "$@"
-        printf '\n'
-    elif ! command "$@"; then
-        printf '%s!! %s did not finish%s\n' "$yellow" "$label" "$reset" >&2
-        failed_steps="${failed_steps:+$failed_steps, }$label"
-    fi
-}
-
-# Aliases are expanded inside a function body when it is defined, and this file aliases
-# df to `df -h`, so every external command called directly below goes through `command`.
-## Free disk space by pruning package, language and Docker caches (-n previews it).
-cleanup() {
-    local arg dry_run=false failed_steps='' blue='' yellow='' reset=''
-    local docker_until="${CLEANUP_DOCKER_UNTIL:-168h}"
-    local disk_before='' disk_after snap_name snap_revision
-
-    for arg in "$@"; do
-        case "$arg" in
-            -n|--dry-run) dry_run=true ;;
-            -h|--help)
-                printf '%s\n' \
-                    'Usage: cleanup [-n|--dry-run] [-h|--help]' \
-                    '' \
-                    'Free disk space by pruning caches that the tools rebuild on demand.' \
-                    'Steps for tools that are not installed are skipped.' \
-                    '' \
-                    '  OS packages     apt (Ubuntu), pacman or yay (Arch, Manjaro), Homebrew and RubyGems (macOS)' \
-                    '  Snap            disabled revisions that refreshes leave behind (Ubuntu)' \
-                    '  Neovim          plugins that are no longer in the config (PlugClean asks first)' \
-                    '  Package caches  pip, yarn, npm and uv' \
-                    '  Docker          stopped containers, unused images and build cache older than' \
-                    '                  CLEANUP_DOCKER_UNTIL (default 168h); volumes are never touched' \
-                    '' \
-                    '  -n, --dry-run   Print what would run. Nothing is changed and sudo is not called;' \
-                    '                  read-only probes (docker info, snap list) still run.' \
-                    '  -h, --help      Show this help.'
-                return 0
-                ;;
-            *)
-                printf 'cleanup: unknown option: %s (try cleanup --help)\n' "$arg" >&2
-                return 2
-                ;;
-        esac
-    done
-
-    if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
-        blue=$'\033[34m' yellow=$'\033[33m' reset=$'\033[0m'
-    fi
-    if [ "$dry_run" != true ]; then
-        disk_before=$(command df -Pk / "$HOME" 2>/dev/null)
-    fi
-
-    # OS packages.
-    case "${OSTYPE:-}" in
-        darwin*)
-            if command -v brew >/dev/null 2>&1; then
-                _cleanup_step 'Homebrew cache' brew cleanup
-            fi
-            if command -v gem >/dev/null 2>&1; then
-                _cleanup_step 'RubyGems old versions' sudo gem cleanup
-            fi
-            ;;
-        linux*)
-            case "${DISTRO:-}" in
-                arch|manjaro)
-                    # yay -Sc cleans the pacman cache as well; without yay, ask pacman directly.
-                    # Orphans (sudo pacman -R $(pacman -Qdtq)) are left alone on purpose.
-                    # command -v also finds the yay() wrapper function defined below for Arch
-                    # even when the binary is missing, so look for it with the wrapper unset.
-                    if (unset -f yay; command -v yay) >/dev/null 2>&1; then
-                        _cleanup_step 'pacman and AUR package caches (asks first)' yay -Sc
-                    elif command -v pacman >/dev/null 2>&1; then
-                        _cleanup_step 'pacman package cache (asks first)' sudo pacman -Sc
-                    fi
-                    ;;
-                ubuntu|ubuntu_windows)
-                    # clean empties the whole apt cache, so a preceding autoclean has nothing to do.
-                    _cleanup_step 'apt package cache' sudo apt-get clean
-                    _cleanup_step 'unused apt packages (asks first)' sudo apt-get autoremove
-                    # Every snap refresh leaves the previous revision behind as "disabled".
-                    if command -v snap >/dev/null 2>&1; then
-                        while read -r snap_name snap_revision; do
-                            _cleanup_step "disabled snap $snap_name (revision $snap_revision)" \
-                                sudo snap remove "$snap_name" --revision="$snap_revision" </dev/null
-                        done < <(command snap list --all 2>/dev/null \
-                            | command awk 'NR > 1 && $NF ~ /(^|,)disabled(,|$)/ { print $1, $3 }')
-                    fi
-                    if command -v brew >/dev/null 2>&1; then
-                        _cleanup_step 'Homebrew cache' brew cleanup
-                    fi
-                    ;;
-            esac
-            ;;
-    esac
-
-    if command -v nvim >/dev/null 2>&1; then
-        _cleanup_step 'Neovim plugins missing from the config (asks first)' nvim +PlugClean +qall
-    fi
-
-    if command -v pip3 >/dev/null 2>&1; then
-        _cleanup_step 'pip cache' pip3 cache purge
-    fi
-    if command -v yarn >/dev/null 2>&1; then
-        _cleanup_step 'yarn cache' yarn cache clean
-    fi
-    if command -v npm >/dev/null 2>&1; then
-        _cleanup_step 'npm cache' npm cache clean --force
-    fi
-    # prune keeps the entries virtualenvs still reference; `uv cache clean` would also discard
-    # wheels that are slow to download again.
-    if command -v uv >/dev/null 2>&1; then
-        _cleanup_step 'uv cache' uv cache prune
-    fi
-
-    # Docker comes last: it is the slow, unattended part, so every step that asks a question
-    # has already run. Volumes hold data, so they are never pruned here. Containers go first:
-    # an image that a stopped container still uses counts as in use and would survive the image
-    # prune. A stopped daemon would make each command print the same error, so probe it once.
-    if command -v docker >/dev/null 2>&1; then
-        if command docker info >/dev/null 2>&1; then
-            _cleanup_step 'Docker stopped containers' docker container prune -f --filter "until=$docker_until"
-            _cleanup_step 'Docker unused images' docker image prune -af --filter "until=$docker_until"
-            _cleanup_step 'Docker build cache' docker builder prune -af --filter "until=$docker_until"
-        else
-            printf '%s-- Docker is installed but its daemon is not reachable; skipping it%s\n' "$yellow" "$reset"
-        fi
-    fi
-
-    if [ "$dry_run" = true ]; then
-        printf '%sDry run: nothing was changed.%s\n' "$blue" "$reset"
-    else
-        # Compare free space before and after, once per filesystem (df lists / and $HOME
-        # separately even when they share one). The numeric test skips the localized header.
-        disk_after=$(command df -Pk / "$HOME" 2>/dev/null)
-        printf '%s\n--\n%s\n' "$disk_before" "$disk_after" | command awk -v blue="$blue" -v reset="$reset" '
-            function size(kib) {
-                return kib >= 1048576 ? sprintf("%.1f GiB", kib / 1048576) : sprintf("%.0f MiB", kib / 1024)
-            }
-            $1 == "--" { after = 1; next }
-            $4 !~ /^[0-9]+$/ { next }
-            !after { before[$6] = $4; next }
-            ($6 in before) && !($6 in shown) {
-                shown[$6] = 1
-                change = $4 - before[$6]
-                printf "%sFree space on %s: %s (%s%s)%s\n", blue, $6, size($4), \
-                    (change < 0 ? "-" : "+"), size(change < 0 ? -change : change), reset
-            }
-        '
-    fi
-
-    if [ -n "$failed_steps" ]; then
-        printf '%s!! Did not finish: %s%s\n' "$yellow" "$failed_steps" "$reset" >&2
-        return 1
-    fi
-    return 0
-}
-
-update=""
+# cleanup is a script, not a function or alias: .local/scripts/bin/cleanup. An alias cannot
+# take options, and a script also runs where zsh does not.
 
 # An interpreter marked EXTERNALLY-MANAGED (PEP 668: Debian, Ubuntu, Arch, Homebrew)
 # rejects `pip install --user`, and a virtualenv has no user site. There the system
@@ -347,23 +177,175 @@ sys.exit(1 if os.path.exists(marker) or sys.prefix != sys.base_prefix else 0)
     python3 -m pip install --user --upgrade pip pynvim
 }
 
-# Every step runs in the foreground, one after another. nvim draws a full-screen UI,
-# so as a background job the shell stops it ("suspended (tty output)") before it
-# updates anything, and background output would land in the middle of the prompt.
-updateall="pip_user_upgrade;
-    type antigen &>/dev/null && antigen update;
-    command -v nvim &>/dev/null && nvim +PlugUpgrade +PlugUpdate +qall;
-"
+# update and updateall are functions, because an alias cannot do what they need:
+#   - zsh-syntax-highlighting reads the text of an alias and paints the whole command red
+#     when any command inside it is not installed, however carefully it is guarded
+#   - words typed after an alias are appended to its last command, so it has no --dry-run
+# A live alias of the same name (from an older copy of this file that the running shell
+# already loaded) turns the definitions below into a parse error, so drop it first.
+unalias update 2>/dev/null
+unalias updateall 2>/dev/null
+
+# The command runs as typed, so shell functions work too (antigen, pip_user_upgrade). A
+# binary that a function of the same name shadows needs `command` in front of it.
+# --best-effort keeps a failure out of the summary, for a step that fails when it has
+# nothing to do. It reads and updates the locals of _update_run: dry_run, the colours and
+# failed_steps. A failing step never stops the ones after it.
+## Run one update step, or only print it under --dry-run (helper of update and updateall).
+_update_step() {
+    local best_effort=false label
+    if [ "$1" = --best-effort ]; then
+        best_effort=true
+        shift
+    fi
+    label=$1
+    shift
+    printf '%s==> %s%s\n' "$blue" "$label" "$reset"
+    if [ "$dry_run" = true ]; then
+        printf '    would run:'
+        printf ' %q' "$@"
+        printf '\n'
+        return 0
+    fi
+    if ! "$@" && [ "$best_effort" = false ]; then
+        printf '%s!! %s did not finish%s\n' "$yellow" "$label" "$reset" >&2
+        failed_steps="${failed_steps:+$failed_steps, }$label"
+    fi
+    return 0
+}
+
+# Every step runs in the foreground, one after another, except Emacs. nvim draws a
+# full-screen UI, so as a background job the shell stops it ("suspended (tty output)")
+# before it updates anything, and background output would land in the middle of the prompt.
+# Steps for tools that are not installed are skipped.
+## Run update or updateall; the first argument is the name it was called by (helper).
+_update_run() {
+    local name=$1 arg dry_run=false failed_steps='' blue='' yellow='' reset=''
+    local npm_self=false npm_update=false with_emacs=false with_gcloud=false
+    shift
+    for arg in "$@"; do
+        case "$arg" in
+            -n|--dry-run)
+                dry_run=true
+                ;;
+            -h|--help)
+                printf 'Usage: %s [-n|--dry-run]\n\n' "$name"
+                if [ "$name" = updateall ]; then
+                    printf '%s\n' \
+                        'Update the operating system, then npm, Emacs, the Google Cloud CLI, pip and' \
+                        'pynvim, the Zsh plugins (antigen) and the Neovim plugins.'
+                else
+                    printf '%s\n' "Update the operating system's packages."
+                fi
+                printf '%s\n' \
+                    'Steps for tools that are not installed are skipped. A step that fails does not' \
+                    'stop the others; the exit status is 1 if any of them failed.' \
+                    '' \
+                    '  -n, --dry-run  print what would run, without running it' \
+                    '  -h, --help     show this help'
+                return 0
+                ;;
+            *)
+                printf '%s: unknown option: %s (try %s --help)\n' "$name" "$arg" "$name" >&2
+                return 2
+                ;;
+        esac
+    done
+    if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+        blue=$'\033[34m' yellow=$'\033[33m' reset=$'\033[0m'
+    fi
+
+    case "${OSTYPE:-}:${DISTRO:-}" in
+        darwin*:*)
+            if command -v brew >/dev/null 2>&1; then
+                _update_step 'Homebrew package lists' brew update
+                _update_step 'Homebrew packages' brew upgrade
+            fi
+            _update_step 'macOS software updates' sudo softwareupdate -i -a
+            # xcode-select --install installs developer tools that need to be updated with
+            # every update to MacOS. It fails when they are installed already, which is fine.
+            # sudo xcode-select -switch /Library/Developer/CommandLineTools
+            _update_step --best-effort 'Command line tools' xcode-select --install
+            npm_self=true
+            ;;
+        linux*:arch|linux*:manjaro)
+            # updateall prefers yay, which upgrades the AUR packages along with the repositories.
+            # `command -v` finds the yay() wrapper defined below even without the binary, so look
+            # for the binary with the wrapper unset, and run it through `command`: the wrapper
+            # would turn `yay -Syu` into `yay -S --noconfirm --needed -Syu`.
+            if [ "$name" = updateall ] && (unset -f yay; command -v yay) >/dev/null 2>&1; then
+                _update_step 'pacman and AUR packages' command yay -Syu
+            else
+                _update_step 'pacman packages' sudo pacman -Syu
+            fi
+            if command -v snap >/dev/null 2>&1; then
+                _update_step 'Snap packages' sudo snap refresh
+            fi
+            # Do not add `sudo npm install -g npm` or `sudo gem update`: they break pacman.
+            npm_update=true
+            with_emacs=true
+            ;;
+        linux*:ubuntu|linux*:ubuntu_windows)
+            _update_step 'apt package lists' sudo apt-get update
+            _update_step 'apt packages' sudo apt-get full-upgrade
+            if [ "$DISTRO" = ubuntu ]; then
+                with_emacs=true
+                with_gcloud=true
+            fi
+            ;;
+        *)
+            printf '%s-- No operating-system update is set up for OSTYPE=%s DISTRO=%s; skipping it%s\n' \
+                "$yellow" "${OSTYPE:-unset}" "${DISTRO:-unset}" "$reset"
+            ;;
+    esac
+
+    if [ "$name" = updateall ]; then
+        if [ "$npm_self" = true ] && command -v npm >/dev/null 2>&1; then
+            _update_step 'npm itself' npm install npm -g
+        fi
+        if [ "$npm_update" = true ] && command -v npm >/dev/null 2>&1; then
+            _update_step 'npm packages (current directory)' npm update
+        fi
+        if [ "$with_emacs" = true ] && command -v emacs >/dev/null 2>&1; then
+            # Emacs is its own window, so it updates in the background instead of being waited for.
+            printf '%s==> Emacs packages (started in the background)%s\n' "$blue" "$reset"
+            if [ "$dry_run" = true ]; then
+                printf '    would run: emacs -f auto-package-update-now &\n'
+            else
+                command emacs -f auto-package-update-now &
+            fi
+        fi
+        if [ "$with_gcloud" = true ] && command -v gcloud >/dev/null 2>&1; then
+            _update_step 'Google Cloud CLI' gcloud components update --quiet
+        fi
+        _update_step 'pip and pynvim' pip_user_upgrade
+        if type antigen >/dev/null 2>&1; then
+            _update_step 'Zsh plugins (antigen)' antigen update
+        fi
+        if command -v nvim >/dev/null 2>&1; then
+            _update_step 'Neovim plugins' nvim +PlugUpgrade +PlugUpdate +qall
+        fi
+    fi
+
+    if [ "$dry_run" = true ]; then
+        printf '%sDry run: nothing was changed.%s\n' "$blue" "$reset"
+    fi
+    if [ -n "$failed_steps" ]; then
+        printf '%s!! Did not finish: %s%s\n' "$yellow" "$failed_steps" "$reset" >&2
+        return 1
+    fi
+    return 0
+}
+
+## Update the operating system's packages; -n previews the commands without running them.
+update() { _update_run update "$@"; }
+
+## Update the OS, npm, Emacs, Google Cloud CLI, pip, and the Zsh and Neovim plugins; -n previews it.
+updateall() { _update_run updateall "$@"; }
+
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     alias rm="rm -v"
-    update="command -v brew &>/dev/null && { brew update; brew upgrade; }; sudo softwareupdate -i -a; xcode-select --install; "$update
-    updateall=$update"command -v npm &>/dev/null && npm install npm -g;
-    "$updateall
-    #emacs -f auto-package-update-now &;
-
-    # sudo xcode-select -switch /Library/Developer/CommandLineTools
-    # xcode-select --install installs developer tools that need to be updated with every update to MacOS
     # Recursively delete `.DS_Store` files
     alias clean="find . -type f -name '*.DS_Store' -ls -delete; find . -type f -name '._*' -exec rm -f {} \;
 "
@@ -386,12 +368,8 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        update="sudo pacman -Syu; command -v snap &>/dev/null && sudo snap refresh; "$update
-        updateall="command -v yay &>/dev/null && yay -Syu; command -v npm &>/dev/null && npm update & command -v snap &>/dev/null && sudo snap refresh;
-        command -v emacs &>/dev/null && emacs -f auto-package-update-now &
-        "$updateall
-        # This breaks pacman sudo npm install -g npm; sudo gem update;
         alias unlock="sudo rm /var/lib/pacman/db.lck" #pacman unlock
+        alias pacman.conf="sudo vim /etc/pacman.conf"
     fi
 
     ### Arch
@@ -408,15 +386,11 @@ if [[ "$OSTYPE" == "linux"* ]]; then
 
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
-        update="sudo apt-get update; sudo apt-get full-upgrade; "$update
-        updateall=$update"command -v emacs &>/dev/null && emacs -f auto-package-update-now & command -v gcloud &>/dev/null && gcloud components update --quiet;"$updateall
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
 
     ### Ubuntu_windows
     if [[ "$DISTRO" == "ubuntu_windows" ]]; then
-        update="sudo apt-get update; sudo apt-get full-upgrade; "$update
-        updateall=$update$updateall
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
 
@@ -433,11 +407,6 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     fi
 fi
 
-# Do not surround with quotes
-# shellcheck disable=SC2139,SC2086
-alias updateall="$updateall"
-# shellcheck disable=SC2139,SC2086
-alias update="$update"
 ###############################################################
 # => Clean home directory
 ###############################################################

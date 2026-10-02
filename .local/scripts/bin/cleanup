@@ -1,0 +1,444 @@
+#!/usr/bin/env bash
+# Description: Free disk space by pruning package, snap, language and Docker caches; asks before deleting each unused Docker volume.
+#
+# Usage: cleanup [-n|--dry-run] [-h|--help]
+#
+# Every step prunes a cache that its tool rebuilds on demand, except Docker volumes. Those hold
+# data, so each unused volume is shown with its size, age and origin and is deleted only after
+# you answer y. See `cleanup --help`.
+
+# No `set -e`: one failing step must not stop the steps after it. step() records the failure
+# and the summary at the end reports it.
+set -uo pipefail
+
+dry_run=false
+failed_steps=''
+blue='' yellow='' reset=''
+docker_until="${CLEANUP_DOCKER_UNTIL:-168h}"
+
+# Set by describe_volume and ask_about_volume for the code that runs after them.
+volume_driver=''
+answer=''
+
+# Fields of one volume, joined by the unit separator (0x1f), which no volume field contains.
+# The Docker CLI rewrites a literal \t or \n in a format before parsing it, so keep both out
+# of the braces; this one needs neither. $k and $v are Go template variables, not shell ones.
+# shellcheck disable=SC2016
+inspect_format='{{.CreatedAt}}{{"\x1f"}}{{.Driver}}{{"\x1f"}}{{index .Labels "com.docker.compose.project"}}{{"\x1f"}}{{index .Labels "com.docker.compose.volume"}}{{"\x1f"}}{{range $k, $v := .Options}}{{$k}}={{$v}} {{end}}'
+
+usage() {
+    cat <<'EOF'
+Usage: cleanup [-n|--dry-run] [-h|--help]
+
+Free disk space by pruning caches that the tools rebuild on demand.
+Steps for tools that are not installed are skipped.
+
+  OS packages     apt (Ubuntu), pacman or yay (Arch, Manjaro), Homebrew and RubyGems (macOS)
+  Snap            disabled revisions that refreshes leave behind (Ubuntu)
+  Neovim          plugins that are no longer in the config (PlugClean asks first)
+  Package caches  pip, yarn, npm and uv
+  Docker          stopped containers, unused images and build cache older than
+                  CLEANUP_DOCKER_UNTIL (default 168h)
+  Docker volumes  every volume that no container uses is shown with its size, age and
+                  origin, and you answer y/N for each one (l lists its contents, q stops).
+                  Volumes hold data: nothing is deleted without a terminal to ask on, and
+                  Docker itself refuses to delete a volume that a container still uses.
+
+  -n, --dry-run   Print what would run. Nothing is changed and sudo is not called;
+                  read-only probes (docker info, docker volume ls, snap list) still run.
+  -h, --help      Show this help.
+EOF
+}
+
+have() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Run one command, or only print it under --dry-run. Fails when the command does.
+step() {
+    local label=$1
+    shift
+    printf '%s==> %s%s\n' "$blue" "$label" "$reset"
+    if [ "$dry_run" = true ]; then
+        printf '    would run:'
+        printf ' %q' "$@"
+        printf '\n'
+    elif ! "$@"; then
+        printf '%s!! %s did not finish%s\n' "$yellow" "$label" "$reset" >&2
+        failed_steps="${failed_steps:+$failed_steps, }$label"
+        return 1
+    fi
+}
+
+# "N days ago" for an RFC 3339 timestamp. Prints nothing when date cannot read it
+# (BSD and macOS date have no -d).
+age_of() {
+    local created_epoch now_epoch days
+    created_epoch=$(date -d "$1" +%s 2>/dev/null) || return 0
+    now_epoch=$(date +%s)
+    days=$(((now_epoch - created_epoch) / 86400))
+    case "$days" in
+        0) printf 'today' ;;
+        1) printf '1 day ago' ;;
+        *) printf '%s days ago' "$days" ;;
+    esac
+}
+
+# Docker names the volume of a container's VOLUME instruction with 64 hexadecimal characters.
+is_anonymous_volume() {
+    case "$1" in
+        *[!0-9a-f]*) return 1 ;;
+    esac
+    [ "${#1}" -eq 64 ]
+}
+
+# Print what Docker knows about one volume. Sets volume_driver for show_volume_contents.
+describe_volume() { # describe_volume NAME POSITION TOTAL SIZES
+    local name=$1 position=$2 total=$3 sizes=$4
+    local size created='' project='' compose_volume='' options='' age='' summary origin
+
+    volume_driver=''
+    size=$(printf '%s\n' "$sizes" | awk -F'\t' -v name="$name" '$1 == name { print $2; exit }')
+    IFS=$'\037' read -r created volume_driver project compose_volume options \
+        < <(docker volume inspect --format "$inspect_format" "$name" 2>/dev/null)
+
+    summary=${size:-size unknown}
+    if [ -n "$created" ]; then
+        age=$(age_of "$created")
+        summary="$summary, created ${created%%T*} $(printf '%.5s' "${created#*T}")${age:+ ($age)}"
+    fi
+
+    if is_anonymous_volume "$name"; then
+        origin='anonymous volume (a container asked Docker for one and never named it)'
+    elif [ -n "$project" ]; then
+        origin="named volume of Compose project \"$project\"${compose_volume:+ (volume \"$compose_volume\")}"
+    else
+        origin='named volume'
+    fi
+    if [ -n "$options" ]; then
+        origin="$origin, options: ${options% }"
+    fi
+
+    printf '\n    [%s/%s] %s\n' "$position" "$total" "$name"
+    printf '          %s\n' "$summary"
+    printf '          %s\n' "$origin"
+    if [ "$volume_driver" = local ]; then
+        printf '          driver local, used by no container\n'
+    else
+        printf '          driver %s, used by no container (its data may live off this machine)\n' \
+            "${volume_driver:-unknown}"
+    fi
+}
+
+# List the top level of a local volume. A throwaway container mounts it read-only, offline and
+# without pulling anything, so it borrows a local image that has ls. Nothing is created inside
+# the volume (volume-nocopy), and the container is removed when ls ends.
+show_volume_contents() { # show_volume_contents NAME
+    local name=$1 image listing='' line tries=0 shown=0 count=0 found=false
+
+    if [ "$volume_driver" != local ]; then
+        printf '          contents: only local volumes can be listed\n'
+        return 0
+    fi
+    while IFS= read -r image; do
+        tries=$((tries + 1))
+        [ "$tries" -le 5 ] || break
+        if listing=$(docker run --rm --pull never --network none --user 0:0 --entrypoint ls \
+            --mount "type=volume,source=$name,target=/cleanup-peek,readonly,volume-nocopy" \
+            "$image" -A -1 -F /cleanup-peek 2>/dev/null </dev/null); then
+            found=true
+            break
+        fi
+    done < <(docker image ls --format '{{.ID}}' 2>/dev/null)
+
+    if [ "$found" != true ]; then
+        printf '          contents: not available (no local image with ls could mount it)\n'
+    elif [ -z "$listing" ]; then
+        printf '          contents: empty\n'
+    else
+        printf '          contents (top level):\n'
+        while IFS= read -r line; do
+            count=$((count + 1))
+            if [ "$shown" -lt 15 ]; then
+                printf '            %s\n' "$line"
+                shown=$((shown + 1))
+            fi
+        done <<<"$listing"
+        if [ "$count" -gt "$shown" ]; then
+            printf '            ... and %s more\n' $((count - shown))
+        fi
+    fi
+}
+
+# Throw away keys typed while earlier steps ran, such as one Enter too many at an apt or nvim
+# prompt: a stray y must not answer a question that was not on screen yet. Bash 3.2 has no
+# fractional timeouts or read -N, so there the loop ends at once and nothing is discarded.
+discard_typeahead() {
+    local junk status
+
+    while read -r -t 0; do
+        read -r -t 0.05 -N 4096 junk
+        status=$?
+        # 0: the buffer filled, more may follow; above 128: it timed out holding what was typed.
+        if [ "$status" -ne 0 ] && [ "$status" -le 128 ]; then
+            break
+        fi
+    done
+}
+
+# Ask what to do with one volume and set `answer` to y, n or q. Empty input means no, so only
+# an explicit y can delete. Reaching end of input (Ctrl-D) counts as q.
+ask_about_volume() { # ask_about_volume NAME
+    local reply
+
+    discard_typeahead
+    while true; do
+        if ! read -r -p '    Delete this volume? [y]es / [N]o / [l]ist contents / [q]uit: ' reply; then
+            printf '\n'
+            answer=q
+            return 0
+        fi
+        case "$reply" in
+            y | Y | yes | YES | Yes)
+                answer=y
+                return 0
+                ;;
+            '' | n | N | no | NO | No)
+                answer=n
+                return 0
+                ;;
+            q | Q | quit)
+                answer=q
+                return 0
+                ;;
+            l | L | list) show_volume_contents "$1" ;;
+            *) printf '    Please answer y, n, l or q.\n' ;;
+        esac
+    done
+}
+
+# Unused Docker volumes hold data that cannot be rebuilt, so unlike everything else here each
+# one is shown and deleted only after you answer y. Never use `docker volume prune`, which
+# deletes the whole list at once, or `docker volume rm -f`: without -f, Docker refuses to
+# delete a volume that any container, running or stopped, still references.
+prune_docker_volumes() {
+    local names sizes name total=0 position=0 deleted=0 interactive=false
+
+    printf '%s==> Docker unused volumes%s\n' "$blue" "$reset"
+    if ! names=$(docker volume ls --filter dangling=true --format '{{.Name}}' 2>&1); then
+        printf '%s!! Docker unused volumes did not finish%s\n' "$yellow" "$reset" >&2
+        printf '%s\n' "$names" >&2
+        failed_steps="${failed_steps:+$failed_steps, }Docker unused volumes"
+        return 1
+    fi
+    if [ -z "$names" ]; then
+        printf '    none\n'
+        return 0
+    fi
+    while IFS= read -r name; do
+        total=$((total + 1))
+    done <<<"$names"
+
+    if [ "$dry_run" != true ] && [ -t 0 ] && [ -t 1 ]; then
+        interactive=true
+    fi
+    sizes=$(docker system df -v --format '{{range .Volumes}}{{.Name}}\t{{.Size}}\n{{end}}' 2>/dev/null)
+
+    if [ "$total" -eq 1 ]; then
+        printf '    1 volume is not used by any container.\n'
+    else
+        printf '    %s volumes are not used by any container.\n' "$total"
+    fi
+    printf '    %sDeleting a volume destroys its data for good.%s\n' "$yellow" "$reset"
+    if [ "$dry_run" = true ]; then
+        printf '    Volumes held only by the stopped containers pruned above are not listed yet.\n'
+    fi
+
+    while IFS= read -r name <&3; do
+        position=$((position + 1))
+        describe_volume "$name" "$position" "$total" "$sizes"
+        if [ "$interactive" != true ]; then
+            continue
+        fi
+        ask_about_volume "$name"
+        case "$answer" in
+            y)
+                if step "Delete Docker volume $name" docker volume rm "$name"; then
+                    deleted=$((deleted + 1))
+                fi
+                ;;
+            q)
+                if [ "$position" -lt "$total" ]; then
+                    printf '    Skipping the remaining volumes.\n'
+                fi
+                break
+                ;;
+        esac
+    done 3<<<"$names"
+
+    printf '\n'
+    if [ "$dry_run" = true ]; then
+        printf '    Would ask before deleting each of them.\n'
+    elif [ "$interactive" != true ]; then
+        printf '    No terminal to ask on, so nothing was deleted. Run cleanup in a terminal to choose.\n'
+    else
+        printf '    Deleted %s of %s unused volumes.\n' "$deleted" "$total"
+    fi
+}
+
+clean_os_packages() {
+    local snap_name snap_revision
+
+    case "${OSTYPE:-}" in
+        darwin*)
+            if have brew; then
+                step 'Homebrew cache' brew cleanup
+            fi
+            if have gem; then
+                step 'RubyGems old versions' sudo gem cleanup
+            fi
+            ;;
+        linux*)
+            case "${DISTRO:-}" in
+                arch | manjaro)
+                    # yay -Sc cleans the pacman cache as well; without yay, ask pacman directly.
+                    # Orphans (sudo pacman -R $(pacman -Qdtq)) are left alone on purpose.
+                    if have yay; then
+                        step 'pacman and AUR package caches (asks first)' yay -Sc
+                    elif have pacman; then
+                        step 'pacman package cache (asks first)' sudo pacman -Sc
+                    fi
+                    ;;
+                ubuntu | ubuntu_windows)
+                    # clean empties the whole apt cache, so a preceding autoclean has nothing to do.
+                    step 'apt package cache' sudo apt-get clean
+                    step 'unused apt packages (asks first)' sudo apt-get autoremove
+                    # Every snap refresh leaves the previous revision behind as "disabled".
+                    if have snap; then
+                        while read -r snap_name snap_revision; do
+                            step "disabled snap $snap_name (revision $snap_revision)" \
+                                sudo snap remove "$snap_name" --revision="$snap_revision" </dev/null
+                        done < <(snap list --all 2>/dev/null |
+                            awk 'NR > 1 && $NF ~ /(^|,)disabled(,|$)/ { print $1, $3 }')
+                    fi
+                    if have brew; then
+                        step 'Homebrew cache' brew cleanup
+                    fi
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+clean_package_caches() {
+    if have nvim; then
+        step 'Neovim plugins missing from the config (asks first)' nvim +PlugClean +qall
+    fi
+    if have pip3; then
+        step 'pip cache' pip3 cache purge
+    fi
+    if have yarn; then
+        step 'yarn cache' yarn cache clean
+    fi
+    if have npm; then
+        step 'npm cache' npm cache clean --force
+    fi
+    # prune keeps the entries virtualenvs still reference; `uv cache clean` would also discard
+    # wheels that are slow to download again.
+    if have uv; then
+        step 'uv cache' uv cache prune
+    fi
+}
+
+# Docker comes last because its image and build-cache prunes are the slow, unattended part, and
+# the volume questions come before them. Containers go first: an image that a stopped container
+# still uses counts as in use and would survive the image prune, and a volume that only a
+# stopped container used is unused once that container is gone. A stopped daemon would make
+# each command print the same error, so probe it once.
+clean_docker() {
+    if ! have docker; then
+        return 0
+    fi
+    if ! docker info >/dev/null 2>&1; then
+        printf '%s-- Docker is installed but its daemon is not reachable; skipping it%s\n' "$yellow" "$reset"
+        return 0
+    fi
+    step 'Docker stopped containers' docker container prune -f --filter "until=$docker_until"
+    prune_docker_volumes
+    step 'Docker unused images' docker image prune -af --filter "until=$docker_until"
+    step 'Docker build cache' docker builder prune -af --filter "until=$docker_until"
+}
+
+# Compare free space before and after, once per filesystem (df lists / and $HOME separately even
+# when they share one). Both readings are printed, with the change in words: a lone number
+# followed by a signed difference reads as a total and a saving. The numeric test skips the
+# localized header. The change is the whole disk's net change, so anything else writing to it
+# while cleanup runs counts too.
+report_free_space() { # report_free_space DF_BEFORE
+    printf '%s\n--\n%s\n' "$1" "$(df -Pk / "$HOME" 2>/dev/null)" | awk -v blue="$blue" -v reset="$reset" '
+        function size(kib, decimals) {
+            if (kib >= 1048576) return sprintf("%." decimals "f GiB", kib / 1048576)
+            if (kib >= 1024) return sprintf("%.0f MiB", kib / 1024)
+            return sprintf("%d KiB", kib)
+        }
+        $1 == "--" { after = 1; next }
+        $4 !~ /^[0-9]+$/ { next }
+        !after { before[$6] = $4; next }
+        ($6 in before) && !($6 in shown) {
+            shown[$6] = 1
+            change = $4 - before[$6]
+            if (change > 0) summary = size(change, 1) " more"
+            else if (change < 0) summary = size(-change, 1) " less"
+            else summary = "unchanged"
+            printf "%sFree space on %s: %s before, %s after (%s)%s\n", blue, $6, \
+                size(before[$6] + 0, 2), size($4 + 0, 2), summary, reset
+        }
+    '
+}
+
+main() {
+    local arg disk_before=''
+
+    for arg in "$@"; do
+        case "$arg" in
+            -n | --dry-run) dry_run=true ;;
+            -h | --help)
+                usage
+                return 0
+                ;;
+            *)
+                printf 'cleanup: unknown option: %s (try cleanup --help)\n' "$arg" >&2
+                return 2
+                ;;
+        esac
+    done
+
+    if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+        blue=$'\033[34m' yellow=$'\033[33m' reset=$'\033[0m'
+    fi
+    # zsh exports DISTRO from this file at startup; bash, ssh and cron sessions do not.
+    if [ -z "${DISTRO:-}" ] && [ -r "$HOME/.config/distro" ]; then
+        . "$HOME/.config/distro"
+    fi
+    if [ "$dry_run" != true ]; then
+        disk_before=$(df -Pk / "$HOME" 2>/dev/null)
+    fi
+
+    clean_os_packages
+    clean_package_caches
+    clean_docker
+
+    if [ "$dry_run" = true ]; then
+        printf '%sDry run: nothing was changed.%s\n' "$blue" "$reset"
+    else
+        report_free_space "$disk_before"
+    fi
+
+    if [ -n "$failed_steps" ]; then
+        printf '%s!! Did not finish: %s%s\n' "$yellow" "$failed_steps" "$reset" >&2
+        return 1
+    fi
+    return 0
+}
+
+main "$@"
