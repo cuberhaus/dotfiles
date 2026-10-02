@@ -87,7 +87,11 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 - **`vault-secret`** opens a dynamic credential selector for the Obsidian
   vault's SOPS store. Use `vault-secret list`, `vault-secret <entry>`, or
   `vault-secret edit` for direct operations; set `VAULT_ROOT` when the vault is
-  outside its standard checkout locations.
+  outside its standard checkout locations. `vault-secret key-wrap` keeps the
+  age identity passphrase-protected (`keys.txt.gpg`, unlocked through
+  gpg-agent) instead of a plain `keys.txt` that anyone with sudo can read, and
+  `vault-secret key-status` shows where the identity comes from and whether it
+  opens the store.
 - **`cinnamon_path/`** and **`gnome_path/`** are conditionally added to
   `$PATH` based on the `$DESKTOP_SESSION` environment variable (see `.zshenv`).
 - **`bootstrap/`** scripts are run via `make bootstrap-<os>` (see the root
