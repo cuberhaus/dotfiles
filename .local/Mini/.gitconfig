@@ -39,7 +39,8 @@
     ui = auto
 
 [credential]
-    helper = store
+    # In memory only, for 8 hours. "store" would keep passwords in plain text in ~/.git-credentials.
+    helper = cache --timeout=28800
 
 [alias]
     s  = status

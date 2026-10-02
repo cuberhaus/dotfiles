@@ -20,7 +20,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── cleanup            # Free disk space; asks before deleting each unused Docker volume
 │   │   ├── clone-all          # Clone all repos from a GitHub user
 │   │   ├── git-recurse        # Run git commands across multiple repos
-│   │   ├── logout-all         # Sign out of browsers, editors and CLIs; --audit lists stored credentials
+│   │   ├── logout-all         # Sign out of browsers, editors and CLIs (--close-apps quits them first); --audit lists stored credentials
 │   │   ├── vault-secret       # Access SOPS-encrypted vault credentials
 │   │   ├── pfetch             # Minimal system info display
 │   │   ├── program            # Launch-or-focus helper for scratchpads

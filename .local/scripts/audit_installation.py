@@ -368,12 +368,56 @@ def global_git_value(key: str) -> str:
     return result.stdout.strip() if result.returncode == 0 else ""
 
 
+# Keep in step with git_credential_helper_configure (bootstrap/base_functions) and with
+# .local/Mini/.gitconfig.
+SECURE_CREDENTIAL_HELPER = "cache --timeout=28800"
+# The 'store' helper in every spelling Git accepts. It saves passwords unencrypted.
+PLAINTEXT_CREDENTIAL_HELPER = re.compile(r"^store(\s|$)|credential[ -]store(\s|$)")
+
+
+def global_git_credential_helpers() -> list[tuple[str, str]] | None:
+    """Every global credential helper as (config key, helper), or None when git cannot say.
+
+    This covers the generic credential.helper and the per-host credential.<url>.helper, because
+    either can save a password in plain text.
+    """
+    result = run(["git", "config", "--global", "--get-regexp", r"^credential\.(.*\.)?helper$"])
+    if result.returncode == 1:  # git's answer for "no such key"
+        return []
+    if result.returncode != 0:
+        return None
+    helpers = []
+    for line in result.stdout.splitlines():
+        key, _, helper = line.partition(" ")
+        helpers.append((key, helper.strip()))
+    return helpers
+
+
+def audit_git_credential_helpers(reporter: Reporter) -> None:
+    helpers = global_git_credential_helpers()
+    if helpers is None:
+        reporter.result("WARN", "The global git config could not be read; its credential helpers are unknown.")
+        return
+    plaintext = [(key, helper) for key, helper in helpers if PLAINTEXT_CREDENTIAL_HELPER.search(helper)]
+    for key, helper in plaintext:
+        reporter.result(
+            "DRIFT",
+            f"git {key} is {helper!r}, which saves passwords in plain text in ~/.git-credentials.",
+            f"git config --global {key} {shlex.quote(SECURE_CREDENTIAL_HELPER)}",
+        )
+    if plaintext:
+        return
+    if any(helper for _, helper in helpers):
+        reporter.result("OK", "git credential helpers do not save passwords in plain text.")
+    else:
+        reporter.result("OK", "git has no global credential helper, so it saves no passwords.")
+
+
 def audit_git_configuration(reporter: Reporter) -> None:
     print("\nGlobal Git configuration")
     expected = {
         "user.name": "cuberhaus",
         "user.email": "polcg10@gmail.com",
-        "credential.helper": "store",
     }
     for key, expected_value in expected.items():
         actual = global_git_value(key)
@@ -383,6 +427,7 @@ def audit_git_configuration(reporter: Reporter) -> None:
             reporter.result("DRIFT", f"git {key} is {actual!r}; expected {expected_value!r}.", f"git config --global {key} {shlex.quote(expected_value)}")
         else:
             reporter.result("MISSING", f"git {key} is not configured.", f"git config --global {key} {shlex.quote(expected_value)}")
+    audit_git_credential_helpers(reporter)
 
 
 def font_families() -> str:

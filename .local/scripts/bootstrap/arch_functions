@@ -185,7 +185,7 @@ base_install () {
     )
     $yay "${yay_packages[@]}"
 
-    git config --global credential.helper store
+    git_credential_helper_configure
 
     # Nemo: use kitty as terminal
     gsettings set org.cinnamon.desktop.default-applications.terminal exec "$myTerminal"
@@ -283,7 +283,7 @@ arch_and_manjaro() {
     sudo chown root:sambashare /var/lib/samba/usershares
     sudo chmod 1770 /var/lib/samba/usershares
     sudo gpasswd sambashare -a "$USER"
-    git config --global credential.helper store # Remember git password
+    git_credential_helper_configure
 
     # /etc/samba/smb.conf
     # [global]

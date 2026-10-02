@@ -9,6 +9,11 @@
 #     sign-in rows (no old copy of them is left in the file either).
 #   - An app that is running is skipped, because it would write its session back when it
 #     quits. Without pgrep nothing can be checked, so every app counts as running.
+#   - --close-apps asks only the apps of the plan to quit (SIGTERM to the top process, never a
+#     forced kill), waits for them, and leaves alone the app that hosts the terminal, an app
+#     that does not quit, and one that started after the plan was shown. Real processes stand
+#     in for the apps, and the pgrep they are found with sees nothing else: no case can signal
+#     a process of the machine that runs the tests.
 #   - A symbolic link is never followed: what it points at survives.
 #   - A failing sign-out is reported and the steps after it still run. The keyring is
 #     locked last, because gh needs it unlocked to delete the token it keeps there.
@@ -31,7 +36,6 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 script="$repo_root/.local/scripts/bin/logout-all"
 case_dir="$(mktemp -d)"
-trap 'rm -rf "$case_dir"' EXIT
 
 default_home="$case_dir/home"
 home="$default_home"
@@ -41,7 +45,25 @@ bin="$case_dir/bin"
 calls_log="$case_dir/calls.log"
 bash_bin="$(command -v bash)"
 python_bin="$(command -v python3 || true)"
-mkdir -p "$stubs" "$outside"
+real_pgrep="$(command -v pgrep || true)"
+fake_apps="$case_dir/apps"       # the fake apps: scripts named like the apps they stand in for
+fake_dir="$case_dir/fake"        # what they leave: pid and ready files, and the signals log
+fake_log="$fake_dir/signals.log" # one line per SIGTERM that a fake app got
+mkdir -p "$stubs" "$outside" "$fake_apps" "$fake_dir"
+
+# stop_fake_apps: end every fake app still running, whatever a case did, and wait until they are
+# gone. The path is unique to this run, so nothing else can match it.
+stop_fake_apps() {
+    local waited=0
+    command -v pkill > /dev/null 2>&1 || return 0
+    pkill -KILL -f "$fake_apps/" > /dev/null 2>&1 || true
+    while pgrep -f "$fake_apps/" > /dev/null 2>&1 && [[ $waited -lt 40 ]]; do
+        sleep 0.05
+        waited=$((waited + 1))
+    done
+    return 0
+}
+trap 'stop_fake_apps; rm -rf "$case_dir"' EXIT
 
 fail() {
     printf 'FAIL: %s\n' "$*" >&2
@@ -123,11 +145,30 @@ printf 'ssh-add %s\n' "$*" >> "$STUB_LOG"
 exit 0
 EOF
 
-# The keyring is running unless $STUB_KEYRING is 0.
+# The keyring is running unless $STUB_KEYRING is 0. Listing the bus is the last thing the plan
+# does, after every browser and editor was checked, so it is where a case changes what runs
+# before the sign-out: $STUB_LATE_APP starts that fake app, which then runs when the sign-out
+# comes but was not running when the plan was made, and $STUB_EARLY_QUIT ends that one, as a
+# user does who closes an app while the question waits.
 write_stub busctl <<'EOF'
 printf 'busctl %s\n' "$*" >> "$STUB_LOG"
 case " $* " in
     *' list '*)
+        if [[ -n ${STUB_LATE_APP:-} && ! -e "$FAKE_DIR/$STUB_LATE_APP.top" ]]; then
+            "$FAKE_APPS/$STUB_LATE_APP" > /dev/null 2>&1 < /dev/null &
+            for _ in {1..200}; do
+                [[ -e "$FAKE_DIR/$STUB_LATE_APP.top" ]] && break
+                sleep 0.05
+            done
+        fi
+        if [[ -n ${STUB_EARLY_QUIT:-} && -e "$FAKE_DIR/$STUB_EARLY_QUIT.pid" ]]; then
+            kill -KILL "$(< "$FAKE_DIR/$STUB_EARLY_QUIT.pid")" 2> /dev/null
+            rm -f "$FAKE_DIR/$STUB_EARLY_QUIT.pid"
+            for _ in {1..200}; do
+                pgrep -u "$UID" -x "$STUB_EARLY_QUIT" > /dev/null || break
+                sleep 0.05
+            done
+        fi
         [[ ${STUB_KEYRING:-1} == 1 ]] && printf 'org.freedesktop.secrets 1234 gnome-keyring-d pol :1.45 session-3.scope -\n'
         ;;
     *' ReadAlias '*)
@@ -142,8 +183,20 @@ exit 0
 EOF
 
 # $STUB_RUNNING lists the process names that "run". Like the real pgrep, it matches a part of
-# the name unless it is given -x.
+# the name unless it is given -x. With $STUB_REAL_PGREP the real pgrep answers instead, but it
+# sees only the fake apps (their command line holds $FAKE_APPS/): a case can then never find,
+# and so never signal, a process of the machine that runs the tests. A zombie has no command
+# line, so it is not seen either.
 write_stub pgrep <<'EOF'
+if [[ -n ${STUB_REAL_PGREP:-} ]]; then
+    status=1
+    while IFS= read -r pid; do
+        [[ "$(tr '\0' ' ' < "/proc/$pid/cmdline" 2> /dev/null)" == *"$FAKE_APPS/"* ]] || continue
+        printf '%s\n' "$pid"
+        status=0
+    done < <("$STUB_REAL_PGREP" "$@" 2> /dev/null)
+    exit "$status"
+fi
 exact=false
 for arg; do
     [[ $arg == -x ]] && exact=true
@@ -321,15 +374,15 @@ run_logout() {
     calls="$(< "$calls_log")"
 }
 
-# run_logout_tty
-# Run `logout-all` on a pseudo-terminal and type tty_steps into it: pairs of the prompt text
-# to wait for and the keys to send. Sets the same variables as run_logout.
+# run_logout_tty [ARGS...]
+# Run `logout-all ARGS` on a pseudo-terminal and type tty_steps into it: pairs of the prompt
+# text to wait for and the keys to send. Sets the same variables as run_logout.
 run_logout_tty() {
     local out_file="$case_dir/tty.out"
     prepare_run
     status=0
     in_case_env "$python_bin" "$pty_helper" "$out_file" ${tty_steps[@]+"${tty_steps[@]}"} -- \
-        "$bash_bin" "$script" || status=$?
+        "$bash_bin" "$script" "$@" || status=$?
     output="$(< "$out_file")"
     calls="$(< "$calls_log")"
     if [[ $status == 124 || $status == 125 ]]; then
@@ -792,6 +845,358 @@ assert_equals 1 "$status" 'without pgrep the apps must be skipped'
 assert_contains "$output" 'pgrep is not installed' 'a missing pgrep must be reported'
 assert_exists '.config/google-chrome/Default/Cookies' '.mozilla/firefox/abc.default/cookies.sqlite' '.config/Cursor/Cookies'
 assert_missing .git-credentials
+
+###############################################################
+# => --close-apps
+###############################################################
+
+# write_fake_app NAME: a script that runs as a process named NAME (the kernel names the process
+# of a script after the script). Run with no argument it is the top process: it starts one helper
+# with the same name, as a browser or an Electron editor starts dozens, and logs the SIGTERM it
+# gets. What it does then comes from $FAKE_MODE: quit (the default), slow (quit after a second)
+# or stubborn (keep running, as an app does that asks to save a file). A helper logs its own
+# SIGTERM and quits when its parent is gone. Run as `NAME host OUTPUT -- COMMAND...` it runs
+# COMMAND as its child and writes COMMAND's status to OUTPUT.status, so that COMMAND has this
+# app among its ancestors, like a command typed in the terminal of an editor.
+write_fake_app() {
+    {
+        printf '#!%s\n' "$bash_bin"
+        cat
+    } > "$fake_apps/$1"
+    chmod +x "$fake_apps/$1"
+}
+
+for name in chrome firefox cursor; do
+    write_fake_app "$name" <<'EOF'
+name=${0##*/}
+log() { printf '%s %s\n' "$name" "$1" >> "$FAKE_LOG"; }
+case ${1:-top} in
+    helper)
+        trap 'log helper; exit 0' TERM
+        : > "$FAKE_DIR/$name.helper"
+        while kill -0 "$PPID" 2> /dev/null; do sleep 0.1; done
+        exit 0
+        ;;
+    host)
+        trap 'log top' TERM
+        printf '%s\n' "$$" > "$FAKE_DIR/$name.pid"
+        : > "$FAKE_DIR/$name.top"
+        "${@:4}" > "$2" 2>&1 < /dev/null
+        printf '%s\n' "$?" > "$2.status"
+        exit 0
+        ;;
+esac
+case ${FAKE_MODE:-quit} in
+    slow) trap 'log top; sleep 1; exit 0' TERM ;;
+    stubborn) trap 'log top' TERM ;;
+    *) trap 'log top; exit 0' TERM ;;
+esac
+"$0" helper &
+printf '%s\n' "$$" > "$FAKE_DIR/$name.pid"
+until [[ -e $FAKE_DIR/$name.helper ]]; do sleep 0.05; done
+: > "$FAKE_DIR/$name.top"
+while :; do sleep 0.1; done
+EOF
+done
+
+# start_fake_app NAME [MODE]: start the fake app and return once it and its helper are ready.
+start_fake_app() {
+    local name=$1 mode=${2:-quit} waited=0
+    rm -f "$fake_dir/$name".{pid,top,helper}
+    FAKE_LOG="$fake_log" FAKE_DIR="$fake_dir" FAKE_MODE="$mode" \
+        "$fake_apps/$name" > /dev/null 2>&1 < /dev/null &
+    disown "$!"
+    until [[ -e $fake_dir/$name.top ]]; do
+        sleep 0.05
+        waited=$((waited + 1))
+        [[ $waited -lt 200 ]] || fail "the fake app $name did not start"
+    done
+}
+
+# fake_runs NAME: succeeds while a process of the fake app NAME runs, the top one or a helper.
+fake_runs() {
+    pgrep -f -- "$fake_apps/$1( |\$)" > /dev/null 2>&1
+}
+
+# reset_fake_apps: no fake app runs, and the signals log is empty.
+reset_fake_apps() {
+    stop_fake_apps
+    rm -f "$fake_dir"/*
+    : > "$fake_log"
+}
+
+# real_apps: the case runs fake-app processes. The pgrep stub hands its calls to the real pgrep,
+# which sees only those, and sleep is a real tool, because the script waits with it.
+real_apps() {
+    case_real+=(sleep)
+    case_env+=("STUB_REAL_PGREP=$real_pgrep" "FAKE_APPS=$fake_apps" "FAKE_DIR=$fake_dir" "FAKE_LOG=$fake_log")
+}
+
+# run_logout_hosted APP [ARGS...]
+# Run `logout-all ARGS` as a child of the fake app APP, like a command typed in the terminal of an
+# editor. Sets the same variables as run_logout.
+run_logout_hosted() {
+    local app=$1 out="$case_dir/hosted.out"
+    shift
+    prepare_run
+    rm -f "$out" "$out.status" "$fake_dir/$app".{pid,top,helper}
+    in_case_env "$fake_apps/$app" host "$out" -- "$bash_bin" "$script" "$@" || true
+    [[ -e $out.status ]] || fail 'the run of logout-all inside the fake app did not finish'
+    status="$(< "$out.status")"
+    output="$(< "$out")"
+    calls="$(< "$calls_log")"
+}
+
+set_machine
+run_logout --help
+assert_contains "$output" '--close-apps' '--help must describe --close-apps'
+assert_contains "$output" 'LOGOUT_ALL_CLOSE_WAIT' '--help must name the variable that sets the wait'
+
+run_logout --audit --close-apps
+assert_equals 2 "$status" '--audit with --close-apps must be a usage error'
+assert_contains "$output" '--audit is read-only and takes no other option' 'the conflict must be explained'
+
+for wait in 0 000 abc -1 1.5 1000 ' 5'; do
+    set_machine
+    case_env+=("LOGOUT_ALL_CLOSE_WAIT=$wait")
+    run_logout --close-apps --dry-run
+    assert_equals 2 "$status" "LOGOUT_ALL_CLOSE_WAIT='$wait' must be refused"
+    assert_contains "$output" 'LOGOUT_ALL_CLOSE_WAIT must be a number of seconds' "LOGOUT_ALL_CLOSE_WAIT='$wait' must be explained"
+done
+for wait in 1 08 999; do
+    set_machine
+    case_env+=("LOGOUT_ALL_CLOSE_WAIT=$wait")
+    run_logout --close-apps --dry-run
+    assert_equals 0 "$status" "LOGOUT_ALL_CLOSE_WAIT='$wait' must be accepted (08 is eight seconds, not a bad octal)"
+done
+set_machine
+case_env+=(LOGOUT_ALL_CLOSE_WAIT=abc)
+run_logout --dry-run
+assert_equals 0 "$status" 'LOGOUT_ALL_CLOSE_WAIT only matters with --close-apps'
+
+# Without pgrep nothing can be found, so nothing is closed: every app counts as running.
+set_machine
+build_home
+case_stubs=(gh docker sudo ssh-add busctl)
+run_logout --close-apps --yes
+assert_equals 1 "$status" 'without pgrep the apps must be skipped, with --close-apps too'
+assert_contains "$output" 'pgrep is not installed' 'a missing pgrep must be reported'
+assert_contains "$output" 'Google Chrome is running: close it first (skipped)' 'without pgrep an app must be skipped'
+assert_not_contains "$output" 'will be closed first' 'without pgrep no app may be planned to be closed'
+assert_not_contains "$output" 'Closing apps' 'without pgrep no app may be closed'
+assert_exists '.config/google-chrome/Default/Cookies' '.mozilla/firefox/abc.default/cookies.sqlite' '.config/Cursor/Cookies'
+
+# Nothing may force an app to quit: it is asked with SIGTERM, and left running when it will not.
+code_of_script="$(grep -vE '^[[:space:]]*#' "$script")"
+assert_equals 1 "$(grep -c 'kill -TERM ' <<< "$code_of_script")" 'logout-all must send SIGTERM from exactly one place'
+if grep -qE '(^|[^[:alnum:]_-])(pkill|killall)([^[:alnum:]_-]|$)|kill[[:space:]]+-(9|KILL|SIGKILL|s)' <<< "$code_of_script"; then
+    fail 'logout-all must never force a process to quit'
+fi
+
+# The parent of a process is read from /proc/PID/stat, where the process name may hold spaces
+# and parentheses (systemd keeps a "(sd-pam)" process, Firefox a "Web Content" one).
+if [[ -r /proc/self/stat && -w /proc/self/comm ]]; then
+    parent_check="$(
+        # shellcheck source=/dev/null
+        source <(sed -n '/^parent_of() {/,/^}/p' "$script")
+        me=$BASHPID
+        printf '%s' 'tricky) name (x' > /proc/self/comm
+        printf '%s %s' "$(parent_of "$me")" "$$"
+    )"
+    read -r found_parent expected_parent <<< "$parent_check"
+    assert_equals "$expected_parent" "$found_parent" 'the parent of a process with parentheses in its name must be found'
+else
+    printf 'SKIP: /proc is not available; the parent lookup is not tested.\n'
+fi
+
+if [[ -n $real_pgrep ]] && command -v pkill > /dev/null 2>&1; then
+    # Nothing is signalled before the answer: the plan lists the apps to close and a dry run
+    # leaves them running. Without --close-apps a running app is skipped, as it always was.
+    set_machine
+    build_home
+    reset_fake_apps
+    real_apps
+    start_fake_app chrome
+    start_fake_app firefox
+    before="$(state_of_home)"
+    run_logout --dry-run
+    assert_contains "$output" 'Google Chrome is running: close it first (skipped)' 'without --close-apps a running app must be skipped'
+    assert_not_contains "$output" 'will be closed first' 'without --close-apps no app may be planned to be closed'
+    run_logout --close-apps --dry-run
+    assert_equals 0 "$status" 'a dry run with --close-apps must succeed'
+    assert_contains "$output" 'Google Chrome is running: it will be closed first' 'the plan must list a running browser to close'
+    assert_contains "$output" 'Firefox is running: it will be closed first' 'the plan must list every running browser to close'
+    assert_contains "$output" 'Apps to close first: Google Chrome, Firefox' 'the plan must summarise the apps to close'
+    assert_contains "$output" 'Dry run: nothing was changed.' 'a dry run must say it changed nothing'
+    assert_same_state "$before" 'a dry run with --close-apps must change nothing'
+    assert_equals '' "$(< "$fake_log")" 'a dry run must signal no process'
+    fake_runs chrome || fail 'a dry run must leave Chrome running'
+    fake_runs firefox || fail 'a dry run must leave Firefox running'
+
+    # No terminal and no --yes: it must not guess, and so it closes nothing.
+    run_logout --close-apps
+    assert_contains "$output" 'There is no terminal to ask on, so nothing was changed' 'it must say why it stopped'
+    assert_same_state "$before" 'without --yes and a terminal nothing may change'
+    assert_equals '' "$(< "$fake_log")" 'without an answer no process may be signalled'
+
+    # The real run: each app is asked to quit, through its top process only, and signed out.
+    run_logout --close-apps --yes
+    assert_equals 0 "$status" 'closing the apps and signing out must succeed'
+    assert_contains "$output" 'asked Google Chrome to quit' 'the run must say which app it asked to quit'
+    assert_contains "$output" 'closed: Google Chrome, Firefox' 'the run must say which apps quit'
+    assert_not_contains "$output" 'close it first (skipped)' 'an app that quit must not be skipped'
+    after_signing_out="${output#*Signing out}"
+    assert_contains "${after_signing_out%%==>*}" 'Closing apps' 'the apps must be closed before the first sign-out'
+    assert_missing \
+        '.config/google-chrome/Default/Cookies' '.config/google-chrome/Default/Login Data' \
+        '.mozilla/firefox/abc.default/cookies.sqlite' '.mozilla/firefox/abc.default/logins.json' .git-credentials
+    assert_exists '.config/google-chrome/Default/Bookmarks' '.mozilla/firefox/abc.default/key4.db'
+    assert_equals 'chrome top
+firefox top' "$(sort "$fake_log")" 'each app must be asked once, through its top process and not through its helpers'
+    if fake_runs chrome || fake_runs firefox; then
+        fail 'the apps must have quit, helpers included'
+    fi
+
+    if [[ -n $python_bin ]]; then
+        # The question says that apps will be closed, and a no closes nothing.
+        set_machine
+        build_home
+        reset_fake_apps
+        real_apps
+        start_fake_app chrome
+        before="$(state_of_home)"
+        tty_steps=('[y/N] ' $'n\n')
+        run_logout_tty --close-apps
+        assert_equals 0 "$status" 'a no must end without an error'
+        assert_contains "$output" 'Close the apps listed above, sign out and delete everything listed above? [y/N]' 'the question must say that apps will be closed'
+        assert_contains "$output" 'Nothing was changed.' 'a no must say nothing changed'
+        assert_same_state "$before" 'a no must change nothing'
+        assert_equals '' "$(< "$fake_log")" 'a no must signal no process'
+        fake_runs chrome || fail 'a no must leave Chrome running'
+
+        tty_steps=('[y/N] ' $'y\n')
+        run_logout_tty --close-apps
+        assert_equals 0 "$status" 'a yes must close the apps and sign out'
+        assert_contains "$output" 'closed: Google Chrome' 'a yes must close the app'
+        assert_missing '.config/google-chrome/Default/Cookies' .git-credentials
+        if fake_runs chrome; then
+            fail 'a yes must close Chrome'
+        fi
+
+        # With no app to close the question is the usual one.
+        set_machine
+        build_home
+        reset_fake_apps
+        real_apps
+        tty_steps=('[y/N] ' $'n\n')
+        run_logout_tty --close-apps
+        assert_contains "$output" 'Sign out and delete everything listed above? [y/N]' 'with no app to close the question must be the usual one'
+        assert_not_contains "$output" 'Close the apps listed above' 'with no app to close the question must not mention closing'
+    else
+        printf 'SKIP: python3 is not installed; the --close-apps question is not tested.\n'
+    fi
+
+    # With --close-apps and nothing running, the run is the usual one.
+    set_machine
+    build_home
+    reset_fake_apps
+    real_apps
+    run_logout --close-apps --yes
+    assert_equals 0 "$status" 'with no app running --close-apps must be harmless'
+    assert_not_contains "$output" 'Closing apps' 'with no app running no app may be closed'
+    assert_missing '.config/google-chrome/Default/Cookies' .git-credentials
+
+    # An app that does not quit is left running: nothing forces it. It is skipped like any
+    # running app, so its files stay, and the rest of the sign-out goes on.
+    set_machine
+    build_home
+    reset_fake_apps
+    real_apps
+    case_env+=(LOGOUT_ALL_CLOSE_WAIT=1)
+    start_fake_app chrome stubborn
+    before_chrome="$(cd "$home/.config/google-chrome" && find . -type f -exec sha256sum {} + | LC_ALL=C sort)"
+    run_logout --close-apps --yes
+    assert_equals 1 "$status" 'an app that does not quit must make the run incomplete'
+    assert_contains "$output" 'asked Google Chrome to quit' 'the run must ask the app to quit'
+    assert_contains "$output" 'still running after 1 s: Google Chrome' 'the run must say which app did not quit, after the wait it was given'
+    assert_contains "$output" 'Google Chrome is running: close it first (skipped)' 'an app that did not quit must be skipped like any running app'
+    assert_contains "$output" 'Skipped because they are running: Google Chrome' 'the summary must name the app that did not quit'
+    assert_equals "$before_chrome" "$(cd "$home/.config/google-chrome" && find . -type f -exec sha256sum {} + | LC_ALL=C sort)" \
+        'an app that did not quit must keep every file'
+    assert_missing .git-credentials
+    assert_equals 'chrome top' "$(< "$fake_log")" 'the app must be asked once, through its top process'
+    fake_runs chrome || fail 'an app that does not quit must be left running: nothing may force it'
+
+    # An app that takes a while to quit is waited for.
+    set_machine
+    build_home
+    reset_fake_apps
+    real_apps
+    case_env+=(LOGOUT_ALL_CLOSE_WAIT=10)
+    start_fake_app chrome slow
+    run_logout --close-apps --yes
+    assert_equals 0 "$status" 'an app that quits after a moment must be waited for'
+    assert_contains "$output" 'closed: Google Chrome' 'the run must report the app that quit'
+    assert_missing '.config/google-chrome/Default/Cookies'
+    if fake_runs chrome; then
+        fail 'the slow app must have quit'
+    fi
+
+    # The app that hosts the terminal is never closed: quitting it would end this run. The
+    # others are closed, and the run is incomplete because the host is skipped.
+    set_machine
+    build_home
+    reset_fake_apps
+    real_apps
+    start_fake_app chrome
+    run_logout_hosted cursor --close-apps --yes
+    assert_equals 1 "$status" 'the app that hosts the terminal must be skipped, so the run is incomplete'
+    assert_contains "$output" 'Cursor is running and hosts this terminal, so it stays open (skipped)' 'the plan must say that the host stays open'
+    assert_contains "$output" 'Apps to close first: Google Chrome' 'the other apps must still be closed'
+    assert_not_contains "$output" 'Apps to close first: Google Chrome, Cursor' 'the host must not be planned to be closed'
+    assert_contains "$output" 'closed: Google Chrome' 'the other apps must be closed'
+    assert_equals 'chrome top' "$(< "$fake_log")" 'the app that hosts the terminal must never be signalled'
+    assert_exists '.config/Cursor/Cookies' '.config/Cursor/User/globalStorage/state.vscdb.backup'
+    assert_missing '.config/google-chrome/Default/Cookies'
+
+    # An app that quit by itself after the plan, say because it was closed while the question
+    # waited, is not asked again, and the run says nothing about closing it.
+    set_machine
+    build_home
+    reset_fake_apps
+    real_apps
+    case_env+=(STUB_EARLY_QUIT=chrome)
+    start_fake_app chrome
+    run_logout --close-apps --yes
+    assert_equals 0 "$status" 'an app that quit after the plan must not make the run incomplete'
+    assert_contains "$output" 'Google Chrome is running: it will be closed first' 'the plan must list the app that is running'
+    assert_not_contains "$output" 'Closing apps' 'an app that quit by itself must not be closed again'
+    assert_not_contains "$output" 'asked Google Chrome' 'an app that quit by itself must not be asked to quit'
+    assert_equals '' "$(< "$fake_log")" 'an app that quit by itself must not be signalled'
+    assert_missing '.config/google-chrome/Default/Cookies'
+
+    # Only the apps of the plan are asked. One that starts after the plan was shown is not
+    # signalled, and being then a running app it is skipped.
+    set_machine
+    build_home
+    reset_fake_apps
+    real_apps
+    case_env+=(STUB_LATE_APP=firefox)
+    start_fake_app chrome
+    run_logout --close-apps --yes
+    assert_equals 1 "$status" 'an app that started after the plan must make the run incomplete'
+    assert_contains "$output" 'Google Chrome is running: it will be closed first' 'the app of the plan must be planned to be closed'
+    assert_not_contains "$output" 'Firefox is running: it will be closed first' 'the app that started later was not in the plan'
+    assert_contains "$output" 'Firefox is running: close it first (skipped)' 'the app that started later must be skipped'
+    assert_equals 'chrome top' "$(< "$fake_log")" 'an app that was not in the plan must never be signalled'
+    fake_runs firefox || fail 'an app that was not in the plan must be left running'
+    assert_exists '.mozilla/firefox/abc.default/cookies.sqlite' '.mozilla/firefox/abc.default/logins.json'
+    assert_missing '.config/google-chrome/Default/Cookies'
+
+    reset_fake_apps
+else
+    printf 'SKIP: pgrep and pkill are not installed; --close-apps is not tested with real processes.\n'
+fi
 
 ###############################################################
 # => Symbolic links

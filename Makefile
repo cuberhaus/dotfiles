@@ -96,6 +96,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_bashrc_prompt.sh
 	bash tests/test_git_repo_defaults.sh
 	bash tests/test_git_recurse.sh
+	bash tests/test_git_credential_helper.sh
 
 check: lint test ## Run tests and all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.
 	@echo ""

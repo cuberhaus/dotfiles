@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Description: Sign out of browsers, editors and CLIs and delete stored login tokens; --audit lists the credentials left on this machine.
 #
-# Usage: logout-all [-n|--dry-run] [-y|--yes] [--only GROUPS] [--skip GROUPS]
+# Usage: logout-all [-n|--dry-run] [-y|--yes] [--close-apps] [--only GROUPS] [--skip GROUPS]
 #        logout-all --audit
 #
-# Linux only. It shows a plan and asks before it changes anything. It never prints a secret,
-# never follows a symbolic link and never stops a process (an app that is running is skipped).
+# Linux only. It shows a plan and asks before it changes anything. It never prints a secret
+# and never follows a symbolic link. It stops no process: an app that is running is skipped,
+# unless you add --close-apps, which only asks those apps to quit (never a forced kill).
 # It does not delete SSH or GPG keys, API-key files, kubeconfig or .env files either: --audit
 # lists those for you to decide. See `logout-all --help`.
 
@@ -25,6 +26,10 @@ default_groups='cli files browsers apps agents'
 actions=0 # targets with something to do in the current pass
 failures=''
 skipped=''
+close_apps=false # --close-apps: ask the running apps to quit before signing out of them
+close_wait=20    # seconds to wait for them to quit (LOGOUT_ALL_CLOSE_WAIT)
+close_plan=''    # the apps the plan will close, as label|names, one per line
+terminal_pids='' # this script and its ancestors: an app that has one of them hosts this terminal
 current_label=''
 header_printed=false
 rows=0 # findings printed in the current section of --audit
@@ -66,7 +71,7 @@ history_items=(
 
 usage() {
     cat <<'EOF'
-Usage: logout-all [-n|--dry-run] [-y|--yes] [--only GROUPS] [--skip GROUPS]
+Usage: logout-all [-n|--dry-run] [-y|--yes] [--close-apps] [--only GROUPS] [--skip GROUPS]
        logout-all --audit
        logout-all -h|--help
 
@@ -75,7 +80,7 @@ a plan first and asks before it changes anything; the default answer is No.
 
 Close browsers and editors first. One that is running is skipped, because it would write its
 session back when it quits. Run this from a plain terminal, not from the terminal inside an
-editor that you want signed out.
+editor that you want signed out. Or add --close-apps and let it close them for you.
 
 Groups (for --only and --skip, comma separated):
   cli       Sign out of gh, gcloud, docker, az and aws.
@@ -92,6 +97,13 @@ Groups (for --only and --skip, comma separated):
 Options:
   -n, --dry-run   Show the plan and change nothing.
   -y, --yes       Change without asking (for scripts and hotkeys).
+      --close-apps
+                  Ask the running browsers and editors that the plan names to quit, then sign
+                  out of them. They get a normal close (SIGTERM, never a forced kill) and up
+                  to 20 seconds (LOGOUT_ALL_CLOSE_WAIT=SECONDS changes that). One that does
+                  not quit in time, say because it asks to save a file, stays open and is
+                  skipped, and so does the editor that hosts this terminal. Save your work
+                  first: with --yes nothing asks before the apps are closed.
       --audit     Report every credential on this machine, read-only, including the ones this
                   command never deletes: SSH and API keys, .env files and kubeconfig.
   -h, --help      Show this help.
@@ -159,14 +171,143 @@ is_running() {
 }
 
 # app_is_busy LABEL NAME,NAME: say so and succeed when the app runs, so that its data stays put.
+# With --close-apps the plan reports a running app as not busy and lists it to be closed first;
+# the real run closes it (close_running_apps) before it signs out of it, and an app that still
+# runs by then is busy again, so a wipe never happens under a live app. An app that hosts this
+# terminal is never closed.
 app_is_busy() {
-    local label=$1 process_names
-    local IFS=,
-    read -r -a process_names <<<"$2"
+    local label=$1 process_names closing=false
+    IFS=, read -r -a process_names <<<"$2"
     is_running "${process_names[@]}" || return 1
-    printf '%s!! %s is running: close it first (skipped)%s\n' "$yellow" "$label" "$reset"
+    if [ "$close_apps" = true ] && [ "$dry_run" = true ] && have pgrep; then
+        closing=true
+    fi
+    if [ "$closing" = true ]; then
+        if ! app_hosts_this_terminal "${process_names[@]}"; then
+            printf '%s-> %s is running: it will be closed first%s\n' "$yellow" "$label" "$reset"
+            close_plan="${close_plan:+$close_plan$'\n'}$label|$2"
+            return 1
+        fi
+        printf '%s!! %s is running and hosts this terminal, so it stays open (skipped)%s\n' "$yellow" "$label" "$reset"
+    else
+        printf '%s!! %s is running: close it first (skipped)%s\n' "$yellow" "$label" "$reset"
+    fi
     skipped="${skipped:+$skipped, }$label"
     return 0
+}
+
+# parent_of PID: print the parent of a process, nothing when it is gone. The command name in
+# /proc/PID/stat may hold spaces and parentheses, so the line is cut at the last ")".
+parent_of() {
+    local line rest ppid
+    { line=$(< "/proc/$1/stat"); } 2>/dev/null || return 1
+    rest=${line##*) }
+    read -r _ ppid _ <<<"$rest"
+    printf '%s' "$ppid"
+}
+
+# terminal_ancestors: fill terminal_pids with this script and its ancestors, once. The app that
+# owns one of them hosts this terminal: quitting it would end this run, and the terminal with it.
+terminal_ancestors() {
+    local pid=$$
+    [ -z "$terminal_pids" ] || return 0
+    while [ -n "$pid" ] && [ "$pid" -gt 1 ]; do
+        terminal_pids="${terminal_pids:+$terminal_pids }$pid"
+        pid=$(parent_of "$pid") || break
+    done
+}
+
+# app_pids NAME...: the processes of this user that have one of the names, one per line.
+app_pids() {
+    local name
+    for name in "$@"; do
+        pgrep -u "$UID" -x "${name:0:15}" 2>/dev/null
+    done
+}
+
+# app_hosts_this_terminal NAME...: succeeds when a process of the app is this script or one of
+# its ancestors.
+app_hosts_this_terminal() {
+    local pid
+    terminal_ancestors
+    while IFS= read -r pid; do
+        if [ -n "$pid" ] && in_list "$pid" "$terminal_pids"; then
+            return 0
+        fi
+    done < <(app_pids "$@")
+    return 1
+}
+
+# app_roots NAME...: the top processes of an app, one per line: those whose parent is not another
+# process of the app. Asking the top one to quit closes the rest in order. Signalling every helper
+# would crash them instead, and the app would report a crash the next time it starts.
+app_roots() {
+    local all pid parent
+    all=$(app_pids "$@" | tr '\n' ' ')
+    all=${all% }
+    for pid in $all; do
+        parent=$(parent_of "$pid") || continue
+        if ! in_list "$parent" "$all"; then
+            printf '%s\n' "$pid"
+        fi
+    done
+}
+
+# close_running_apps: ask the apps that the plan listed, and that still run, to quit like a normal
+# close: SIGTERM to the top process of each, never SIGKILL, because a forced kill loses what the
+# app would have saved. Then wait up to $close_wait seconds. An app that has not quit by then is
+# left running, and the sign-out skips it as it does any running app. Only the apps of the plan
+# are asked: one that was started after the plan was shown is not, and the plan never lists the
+# app that hosts this terminal (app_is_busy), so no check is needed here.
+close_running_apps() {
+    local label names pid asked='' closed='' still='' deadline waiting
+    local process_names
+    while IFS='|' read -r label names; do
+        [ -n "$label" ] || continue
+        IFS=, read -r -a process_names <<<"$names"
+        is_running "${process_names[@]}" || continue # it quit by itself since the plan
+        asked="${asked:+$asked$'\n'}$label|$names"
+    done <<<"$close_plan"
+    [ -n "$asked" ] || return 0
+
+    printf '%sClosing apps%s (each is asked to quit; nothing is forced)\n' "$blue" "$reset"
+    while IFS='|' read -r label names; do
+        IFS=, read -r -a process_names <<<"$names"
+        while IFS= read -r pid; do
+            kill -TERM "$pid" 2>/dev/null
+        done < <(app_roots "${process_names[@]}")
+        printf '    asked %s to quit\n' "$label"
+    done <<<"$asked"
+
+    deadline=$((SECONDS + close_wait))
+    while [ "$SECONDS" -lt "$deadline" ]; do # the apps may take a moment to quit
+        waiting=false
+        while IFS='|' read -r label names; do
+            IFS=, read -r -a process_names <<<"$names"
+            if is_running "${process_names[@]}"; then
+                waiting=true
+                break
+            fi
+        done <<<"$asked"
+        [ "$waiting" = true ] || break
+        sleep 0.2
+    done
+
+    while IFS='|' read -r label names; do
+        IFS=, read -r -a process_names <<<"$names"
+        if is_running "${process_names[@]}"; then
+            still="${still:+$still, }$label"
+        else
+            closed="${closed:+$closed, }$label"
+        fi
+    done <<<"$asked"
+    if [ -n "$closed" ]; then
+        printf '    %sclosed: %s%s\n' "$green" "$closed" "$reset"
+    fi
+    if [ -n "$still" ]; then
+        printf '    %s!! still running after %s s: %s. It may be asking you to save something; it is skipped.%s\n' \
+            "$yellow" "$close_wait" "$still" "$reset"
+    fi
 }
 
 ###############################################################
@@ -1200,7 +1341,7 @@ split_groups() {
 
 # Only an explicit y goes ahead: Enter, anything else and the end of the input all stop here.
 confirm_apply() {
-    local reply
+    local reply question='Sign out and delete everything listed above? [y/N] '
     if [ "$assume_yes" = true ]; then
         return 0
     fi
@@ -1208,8 +1349,11 @@ confirm_apply() {
         printf 'There is no terminal to ask on, so nothing was changed. Run it in a terminal, or add --yes.\n'
         return 1
     fi
+    if [ -n "$close_plan" ]; then
+        question='Close the apps listed above, sign out and delete everything listed above? [y/N] '
+    fi
     printf '\n'
-    if ! read -r -p 'Sign out and delete everything listed above? [y/N] ' reply; then
+    if ! read -r -p "$question" reply; then
         printf '\nNothing was changed.\n'
         return 1
     fi
@@ -1238,6 +1382,7 @@ main() {
         case "$arg" in
             -n | --dry-run) dry_run=true ;;
             -y | --yes) assume_yes=true ;;
+            --close-apps) close_apps=true ;;
             --audit) audit_only=true ;;
             -h | --help)
                 usage
@@ -1269,9 +1414,19 @@ main() {
         shift
     done
 
-    if [ "$audit_only" = true ] && { [ "$dry_run" = true ] || [ "$assume_yes" = true ] || [ -n "$only_groups$skip_groups" ]; }; then
+    if [ "$audit_only" = true ] && { [ "$dry_run" = true ] || [ "$assume_yes" = true ] || [ "$close_apps" = true ] || [ -n "$only_groups$skip_groups" ]; }; then
         usage_error '--audit is read-only and takes no other option'
         return 2
+    fi
+    if [ "$close_apps" = true ]; then
+        close_wait=${LOGOUT_ALL_CLOSE_WAIT:-20}
+        case "$close_wait" in
+            '' | 0 | 00 | 000 | *[!0-9]* | ????*)
+                usage_error 'LOGOUT_ALL_CLOSE_WAIT must be a number of seconds from 1 to 999'
+                return 2
+                ;;
+        esac
+        close_wait=$((10#$close_wait)) # "08" is a number of seconds, not a bad octal
     fi
 
     case "${HOME:-}" in
@@ -1320,7 +1475,7 @@ main() {
     dry_run=true
     run_groups
     if [ "$actions" -eq 0 ]; then
-        printf 'Nothing to sign out of.\n'
+        printf 'Nothing to sign out of%s.\n' "${close_plan:+, so no app is closed}"
         if [ -n "$skipped" ]; then
             skipped_hint
             return 1
@@ -1330,6 +1485,9 @@ main() {
     if [ -n "$skipped" ]; then
         skipped_hint
     fi
+    if [ -n "$close_plan" ]; then
+        printf '%sApps to close first:%s %s\n' "$yellow" "$reset" "$(printf '%s\n' "$close_plan" | sed 's/|.*//' | join_lines)"
+    fi
     if [ "$real_dry_run" = true ]; then
         printf '%sDry run: nothing was changed.%s\n' "$blue" "$reset"
         return 0
@@ -1337,6 +1495,9 @@ main() {
     confirm_apply || return 0
 
     printf '\n%sSigning out%s\n' "$blue" "$reset"
+    if [ "$close_apps" = true ]; then
+        close_running_apps
+    fi
     dry_run=false
     run_groups
     printf '\n'

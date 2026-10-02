@@ -61,7 +61,7 @@ base_install () {
     configure_brightness_access
 
     chsh -s "$(which zsh)"
-    git config --global credential.helper store
+    git_credential_helper_configure
 }
 
 windows_install() {

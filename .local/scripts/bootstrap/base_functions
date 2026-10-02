@@ -184,6 +184,100 @@ bootstrap_stow_checkout() {
     stow -v -t "$HOME" -d "$parent_dir" "$package_name"
 }
 
+## Tell whether a Git credential helper saves passwords in plain text.
+##
+## That is the built-in 'store' helper in every spelling Git accepts: 'store',
+## 'store --file=PATH', and an external 'git credential-store' or
+## '.../git-credential-store' command.
+git_credential_helper_is_plaintext() {
+    case "$1" in
+        store | store\ * | *credential-store | *credential-store\ * | *credential\ store | *credential\ store\ *)
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+## Keep Git from saving HTTPS passwords unencrypted in ~/.git-credentials.
+##
+## The 'store' helper writes every password and token it is given to that file as
+## plain text, readable by anyone who can read the home folder, root included. This
+## replaces it, in place, with the in-memory 'cache' helper, which forgets after eight
+## hours and never touches the disk. A helper that is not 'store' (libsecret,
+## osxkeychain, ...) is left alone, so rerunning never downgrades a better choice, and
+## helpers for one host, such as the 'gh' ones, are never touched. A leftover
+## ~/.git-credentials is reported, never deleted or printed. Every failure warns and
+## returns 0, so it cannot stop a bootstrap. Keep the helper in step with
+## SECURE_CREDENTIAL_HELPER in audit_installation.py and .local/Mini/.gitconfig.
+git_credential_helper_configure() {
+    local secure_helper='cache --timeout=28800'
+    local listing first_line helper status=0 plaintext=0 others=0 first=true failed=false
+
+    if ! command -v git >/dev/null 2>&1; then
+        warn "git is not installed, so its credential helper was not checked."
+        return 0
+    fi
+
+    listing="$(git config --global --get-all credential.helper 2>&1)" || status=$?
+    if [ "$status" -gt 1 ]; then
+        first_line=${listing%%$'\n'*}
+        warn "The global Git config could not be read, so its credential helper was left alone: $first_line"
+        return 0
+    fi
+
+    while IFS= read -r helper; do
+        [ -n "$helper" ] || continue
+        if git_credential_helper_is_plaintext "$helper"; then
+            plaintext=$((plaintext + 1))
+        else
+            others=$((others + 1))
+        fi
+    done <<< "$listing"
+
+    if [ "$plaintext" -eq 0 ]; then
+        if [ "$others" -gt 0 ]; then
+            info "Git credential helper left as is: it does not save passwords in plain text."
+        elif git config --global --add credential.helper "$secure_helper"; then
+            info "Git credential helper set to '$secure_helper' (kept in memory, never on disk)."
+        else
+            failed=true
+        fi
+    else
+        # The first plain-text helper becomes the secure one where it stands, unless another
+        # helper already covers it; the other plain-text spellings are removed.
+        while IFS= read -r helper; do
+            git_credential_helper_is_plaintext "$helper" || continue
+            if [ "$first" = true ] && [ "$others" -eq 0 ]; then
+                first=false
+                # --replace-all, because a plain replace refuses a value that is listed twice.
+                git config --global --fixed-value --replace-all credential.helper "$secure_helper" "$helper" || failed=true
+            else
+                # A repeated value is already gone after its first removal, which is not an error.
+                git config --global --fixed-value --unset-all credential.helper "$helper" || true
+            fi
+        done <<< "$listing"
+        info "Git credential helper: the 'store' helper kept passwords in plain text; replaced it with '$secure_helper'."
+    fi
+
+    # Judge by what is in the config now, not by the commands that ran.
+    listing="$(git config --global --get-all credential.helper 2>/dev/null)" || true
+    while IFS= read -r helper; do
+        if [ -n "$helper" ] && git_credential_helper_is_plaintext "$helper"; then
+            failed=true
+        fi
+    done <<< "$listing"
+    if [ "$failed" = true ]; then
+        warn "Git still has a credential helper that saves passwords in plain text; see: git config --global --show-origin --get-all credential.helper"
+    fi
+
+    if [ -e "$HOME/.git-credentials" ]; then
+        # The tilde is meant literally: it is only displayed.
+        # shellcheck disable=SC2088
+        warn "~/.git-credentials still holds saved passwords in plain text; delete it once nothing needs them."
+    fi
+    return 0
+}
+
 obsidian_vault_install() {
     local vault_root="${OBSIDIAN_VAULT_ROOT:-$HOME/cuberhaus/obsidian_vault}"
     local vault_parent

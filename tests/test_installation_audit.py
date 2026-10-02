@@ -456,6 +456,136 @@ antigravity:
         reporter, _ = self.audit_declared_packages(audit, ["libfuse2"], {"libfuse2t64"}, manager="pacman")
         self.assertEqual(reporter.issues, 1)
 
+    def run_git_credential_helper_audit(self, audit, stdout, returncode=0):
+        """Run the credential-helper audit against a fake `git config --get-regexp` answer."""
+        commands = []
+
+        def fake_run(command, cwd=None):
+            commands.append(command)
+            return subprocess.CompletedProcess(command, returncode, stdout=stdout, stderr="")
+
+        reporter = audit.Reporter()
+        output = io.StringIO()
+        with mock.patch.object(audit, "run", side_effect=fake_run), contextlib.redirect_stdout(output):
+            audit.audit_git_credential_helpers(reporter)
+        return reporter, output.getvalue(), commands
+
+    def test_git_audit_flags_every_helper_that_saves_passwords_in_plain_text(self):
+        audit = load_audit_module()
+
+        for helper in (
+            "store",
+            "store --file=/tmp/credentials",
+            "store --file /tmp/credentials",
+            "!git credential-store",
+            "!/usr/lib/git-core/git-credential-store --file x",
+            "/usr/lib/git-core/git-credential-store",
+        ):
+            with self.subTest(helper=helper):
+                reporter, output, commands = self.run_git_credential_helper_audit(
+                    audit, f"credential.helper {helper}\n"
+                )
+                self.assertEqual((reporter.issues, reporter.warnings), (1, 0))
+                self.assertIn(f"[DRIFT] git credential.helper is {helper!r}", output)
+                self.assertIn("saves passwords in plain text", output)
+                self.assertIn("Fix: git config --global credential.helper 'cache --timeout=28800'", output)
+                # Global scope only, and every credential.*.helper key, not just the generic one.
+                self.assertEqual(commands[0][:4], ["git", "config", "--global", "--get-regexp"])
+
+    def test_git_audit_flags_a_host_specific_helper_that_saves_passwords(self):
+        audit = load_audit_module()
+
+        reporter, output, _ = self.run_git_credential_helper_audit(
+            audit,
+            "credential.helper cache --timeout=28800\ncredential.https://gitlab.com.helper store\n",
+        )
+
+        self.assertEqual(reporter.issues, 1)
+        self.assertIn("[DRIFT] git credential.https://gitlab.com.helper is 'store'", output)
+        self.assertIn(
+            "Fix: git config --global credential.https://gitlab.com.helper 'cache --timeout=28800'",
+            output,
+        )
+
+    def test_git_audit_accepts_helpers_that_do_not_save_passwords_in_plain_text(self):
+        audit = load_audit_module()
+        gh = (
+            "credential.https://github.com.helper \n"
+            "credential.https://github.com.helper !/usr/bin/gh auth git-credential\n"
+        )
+
+        for config in (
+            "credential.helper cache --timeout=28800\n",
+            "credential.helper cache\n",
+            "credential.helper libsecret\n",
+            "credential.helper osxkeychain\n",
+            "credential.helper manager\n",
+            # git credential-store-more is another helper, not the plain-text one.
+            "credential.helper store-more\n",
+            # The gh helper for one host, after the empty value that resets the list.
+            "credential.helper cache --timeout=28800\n" + gh,
+        ):
+            with self.subTest(config=config):
+                reporter, output, _ = self.run_git_credential_helper_audit(audit, config)
+                self.assertEqual((reporter.issues, reporter.warnings), (0, 0))
+                self.assertIn("[OK] git credential helpers do not save passwords in plain text.", output)
+
+    def test_git_audit_treats_no_helper_as_fine_and_an_unreadable_config_as_unknown(self):
+        audit = load_audit_module()
+
+        # No helper at all: git asks every time and saves nothing.
+        reporter, output, _ = self.run_git_credential_helper_audit(audit, "", returncode=1)
+        self.assertEqual((reporter.issues, reporter.warnings), (0, 0))
+        self.assertIn("[OK] git has no global credential helper", output)
+
+        # Only the empty value that resets the list is still no helper.
+        reporter, output, _ = self.run_git_credential_helper_audit(
+            audit, "credential.https://github.com.helper \n"
+        )
+        self.assertEqual((reporter.issues, reporter.warnings), (0, 0))
+        self.assertIn("[OK] git has no global credential helper", output)
+
+        # A config git cannot read says nothing about its helpers: never report that as fine.
+        reporter, output, _ = self.run_git_credential_helper_audit(
+            audit, "fatal: bad config line 1 in file /home/user/.gitconfig\n", returncode=128
+        )
+        self.assertEqual((reporter.issues, reporter.warnings), (0, 1))
+        self.assertIn("[WARN] The global git config could not be read", output)
+        self.assertNotIn("[OK]", output)
+
+    def test_git_configuration_audit_includes_the_credential_helpers(self):
+        audit = load_audit_module()
+
+        def fake_run(command, cwd=None):
+            if "--get-regexp" in command:
+                return subprocess.CompletedProcess(command, 0, stdout="credential.helper store\n", stderr="")
+            values = {"user.name": "cuberhaus", "user.email": "polcg10@gmail.com"}
+            return subprocess.CompletedProcess(command, 0, stdout=values[command[-1]] + "\n", stderr="")
+
+        reporter = audit.Reporter()
+        output = io.StringIO()
+        with mock.patch.object(audit, "run", side_effect=fake_run), contextlib.redirect_stdout(output):
+            audit.audit_git_configuration(reporter)
+
+        self.assertIn("[OK] git user.name is cuberhaus.", output.getvalue())
+        self.assertIn("[DRIFT] git credential.helper is 'store'", output.getvalue())
+        self.assertEqual(reporter.issues, 1)
+
+    def test_secure_credential_helper_is_the_same_everywhere(self):
+        audit = load_audit_module()
+        bootstrap = (REPO_ROOT / ".local" / "scripts" / "bootstrap" / "base_functions").read_text(
+            encoding="utf-8"
+        )
+        mini = (REPO_ROOT / ".local" / "Mini" / ".gitconfig").read_text(encoding="utf-8")
+        source = AUDIT_PATH.read_text(encoding="utf-8")
+
+        self.assertEqual(audit.SECURE_CREDENTIAL_HELPER, "cache --timeout=28800")
+        self.assertIn(f"local secure_helper='{audit.SECURE_CREDENTIAL_HELPER}'", bootstrap)
+        self.assertIn(f"helper = {audit.SECURE_CREDENTIAL_HELPER}\n", mini)
+        # Nothing may demand or configure the plain-text helper again.
+        self.assertNotIn('"credential.helper": "store"', source)
+        self.assertNotRegex(mini, r"(?m)^\s*helper\s*=\s*store\b")
+
 
 if __name__ == "__main__":
     unittest.main()
