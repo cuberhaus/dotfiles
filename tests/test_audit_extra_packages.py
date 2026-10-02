@@ -68,7 +68,6 @@ obsidian                   1.13.7                          68     latest/stable 
 prompting-client           0+git.dd8c750                   228    1/stable/…       canonical**    -
 snap-store                 0+git.d402afd5                  1427   2/stable/…       canonical**    -
 snapd                      2.77.1                          28254  latest/stable    canonical**    snapd
-walc                       0.2.1                           19     latest/stable    cstayyab       -
 """
 
 SNAP_SEED_YAML = """\
@@ -286,7 +285,7 @@ class SnapInstalledByHandTests(AuditCase):
         # bare and core22 are bases, snapd is snapd, firefox and snap-store came with the image,
         # gnome-42-2204 and mesa-2404 are what discord takes content from.
         self.assertEqual(
-            installed.names, {"desktop-security-center", "discord", "obsidian", "prompting-client", "walc"}
+            installed.names, {"desktop-security-center", "discord", "obsidian", "prompting-client"}
         )
         self.assertEqual(installed.not_chosen, {"desktop-security-center", "prompting-client"})
 
@@ -1011,6 +1010,7 @@ class MainTests(AuditCase):
         "audit_editors_and_fonts",
         "audit_packages",
         "audit_ide_update_channels",
+        "audit_self_installed_apps",
         "audit_automations",
     )
 
@@ -1080,6 +1080,8 @@ class MainTests(AuditCase):
                 found={"apt": ["ffmpeg", "xdotool"], "snap": [], "brew-cask": ["slack"]}
             ),
         )
+        # The launchers of this machine are none of this test's business; the apps have their own tests.
+        self.patch(self.audit, "find_self_installed_apps", lambda repo_root, profile: None)
         for name in self.AUDITS:
             self.patch(self.audit, name, mock.MagicMock(side_effect=AssertionError(f"{name} must not run")))
         output = io.StringIO()

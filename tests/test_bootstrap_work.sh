@@ -256,6 +256,17 @@ record() {
     printf '%s\n' "$1" >> "$EVENT_LOG"
 }
 
+# Every stage below is stubbed, so nothing in this section may reach the real sudo. A stage
+# added to work_main and forgotten here would otherwise run for real: on a machine whose sudo
+# credentials are cached it would change /etc and the installed packages (the NVIDIA Container
+# Toolkit stage tried to rewrite /etc/apt/sources.list.d five times per run). An unexpected
+# call becomes an event instead, which fails the comparison of the stages below.
+sudo() {
+    record "unexpected-sudo:$*"
+    printf 'unexpected sudo call in the work orchestration test: sudo %s\n' "$*" >&2
+    return 1
+}
+
 bootstrap_enable_logging() { record 'logging'; }
 work_prepare_environment() { record 'prepare-environment'; }
 configure_dual_boot_utc_rtc() { record 'dual-boot'; }
@@ -276,6 +287,7 @@ node_install() { record 'node'; }
 python_install() { record 'python'; }
 vim_install() { record 'vim'; }
 docker_install() { record 'docker'; }
+nvidia_container_toolkit_install() { record 'nvidia-container-toolkit'; }
 gcloud_install() { record 'gcloud'; }
 gui_apps_install() { record 'gui-apps'; }
 obsidian_vault_install() { record 'obsidian-vault'; }
@@ -294,7 +306,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\nvim\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"
@@ -365,5 +377,22 @@ grep -Fqx 'docker' "$EVENT_LOG" ||
     fail 'a failing Vim plugin step must not stop the stages that follow it'
 grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
     fail 'a failing Vim plugin step must not abort the rest of the work bootstrap'
+vim_install() { record 'vim'; }
+
+# The NVIDIA Container Toolkit comes from NVIDIA's own apt repository, so it needs the
+# network: when it fails, provisioning must warn with the repair command and carry on.
+nvidia_container_toolkit_install() { record 'nvidia-container-toolkit-failed'; return 1; }
+warn() { record "toolkit-warning:$*"; }
+: > "$EVENT_LOG"
+work_main --unattended --no-stow --high-dpi=no </dev/null
+grep -Fqx 'nvidia-container-toolkit-failed' "$EVENT_LOG" ||
+    fail 'the failing NVIDIA Container Toolkit step did not run'
+grep -Fqx 'toolkit-warning:NVIDIA Container Toolkit setup failed; rerun it with: make repair REPAIR=nvidia-container-toolkit' "$EVENT_LOG" ||
+    fail 'a failing NVIDIA Container Toolkit step must be reported with the command that repairs it'
+grep -Fqx 'gcloud' "$EVENT_LOG" ||
+    fail 'a failing NVIDIA Container Toolkit step must not stop the stages that follow it'
+grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
+    fail 'a failing NVIDIA Container Toolkit step must not abort the rest of the work bootstrap'
+nvidia_container_toolkit_install() { record 'nvidia-container-toolkit'; }
 
 printf 'Work bootstrap orchestration tests passed.\n'

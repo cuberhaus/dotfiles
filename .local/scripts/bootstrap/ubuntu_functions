@@ -256,7 +256,6 @@ snaps_install() {
     snap list spotify &>/dev/null                 || sudo snap install spotify
     # snap list sublime-merge &>/dev/null         || sudo snap install sublime-merge --classic # Not needed right now
     snap list sublime-text &>/dev/null            || sudo snap install sublime-text --classic
-    snap list walc &>/dev/null                    || sudo snap install walc
 }
 
 # steam_install () {

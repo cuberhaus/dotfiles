@@ -166,6 +166,18 @@ repository). `python3 .local/scripts/audit_installation.py --list-extra` prints
 the current list in that format, so appending its output to that file accepts
 everything listed at once. Long lists wrap to the width of the terminal.
 
+An app that came with its own installer (an AppImage, Zed, GPT4All) is in no
+package manager's database, so that check cannot see it. The audit reads the
+launchers in `~/.local/share/applications` instead and lists, as one `[NOTICE]`,
+every launcher that starts a program from your home folder and that the selected
+bootstrap does not declare. A launcher counts as declared when an active line of
+the bootstrap names its file. No removal command is suggested, because no
+package manager owns these apps: use the app's own uninstaller, or delete its
+folder and its launcher yourself. To keep one, list `app:NAME` (the launcher's
+file name without `.desktop`, as the notice shows it) in the same
+`~/.config/dotfiles/known-extra-packages` file; `--list-extra` prints the apps in
+that format too. An app that leaves no launcher is not seen.
+
 On the `ubuntu` and `work` profiles, Cursor and Antigravity (and VS Code on
 `work`) update through apt. A release upgrade disables third-party apt sources,
 after which the weekly full-upgrade skips them silently; the audit reports that
@@ -180,6 +192,15 @@ supported ASUS laptop; other machines skip it. They then set the keyboard
 backlight to a rainbow when the keyboard supports it. `make repair REPAIR=asusctl`
 and `make repair REPAIR=asusctl-lighting` repeat the two steps and `DRY_RUN=true`
 previews them. See [asusctl](.local/README.md#asusctl).
+
+The `work` bootstrap also installs the NVIDIA Container Toolkit (GPU access for
+containers) from NVIDIA's apt repository, but only on a machine with an NVIDIA
+GPU; other machines skip it. It installs the package only, so run
+`sudo nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker`
+yourself to give Docker the NVIDIA runtime. `make repair REPAIR=nvidia-container-toolkit`
+repeats the step, which also re-enables its apt source after a release upgrade,
+and `DRY_RUN=true` previews its `sudo` commands. See
+[NVIDIA Container Toolkit](.local/README.md#nvidia-container-toolkit).
 
 Configuration import is preview-first. `make config-import` shows the Stow
 `--adopt` operations; `make config-import APPLY=1` performs them and then shows

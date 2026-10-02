@@ -496,9 +496,6 @@ gui_apps_install() {
     # Sublime Merge — not needed right now
     # snap list sublime-merge &>/dev/null 2>&1 || sudo snap install sublime-merge --classic
 
-    # Walc (WhatsApp Linux client)
-    snap list walc &>/dev/null 2>&1 || sudo snap install walc
-
     # Spotify and Discord (snap)
     snap list spotify &>/dev/null 2>&1 || sudo snap install spotify
     snap list discord &>/dev/null 2>&1 || sudo snap install discord

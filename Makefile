@@ -82,6 +82,7 @@ test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_installation_audit.py
 	$(PYTHON) tests/test_profile_detection.py
 	$(PYTHON) tests/test_audit_extra_packages.py
+	$(PYTHON) tests/test_audit_self_installed_apps.py
 	bash tests/test_brightness.sh
 	bash tests/test_brightness_fix.sh
 	bash tests/test_asusctl_install.sh
@@ -92,6 +93,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh
 	bash tests/test_ide_apt_sources.sh
+	bash tests/test_nvidia_container_toolkit.sh
 	bash tests/test_ycm.sh
 	bash tests/test_bootstrap_gentoo.sh
 	bash tests/test_shell_path.sh

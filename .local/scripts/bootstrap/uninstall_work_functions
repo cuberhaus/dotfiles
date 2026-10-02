@@ -93,7 +93,6 @@ gui_apps_uninstall() {
     sudo snap remove obsidian || true
     sudo snap remove spotify || true
     sudo snap remove discord || true
-    sudo snap remove walc || true
     sudo snap remove sublime-text || true
     sudo snap remove sublime-merge || true
     

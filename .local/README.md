@@ -106,8 +106,10 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
   which reads `DOTFILES_PROFILE` (recorded by `bootstrap/work`, whose `DISTRO`
   must stay `ubuntu`), then `DISTRO`, then the operating system. It also
   reports packages that are installed but declared nowhere as `[NOTICE]`
-  findings, which never change the exit code; `--list-extra` prints them as
-  `manager:name`.
+  findings, which never change the exit code, and the apps that came with their
+  own installer (the launchers in `~/.local/share/applications` that start a
+  program from the home folder and that the bootstrap does not declare);
+  `--list-extra` prints them as `manager:name` and `app:name`.
 
 ## Bootstrap flow
 
@@ -170,6 +172,45 @@ A vendor repository can trail the vendor's in-app updater by a few days, so a
 newer candidate is reported as a warning, not as drift.
 
 Run the hermetic test with `bash tests/test_ide_apt_sources.sh`.
+
+## NVIDIA Container Toolkit
+
+On the `work` profile, `nvidia_container_toolkit_install` (in
+`bootstrap/base_functions`) installs `nvidia-container-toolkit` from NVIDIA's
+apt repository when the machine has an NVIDIA GPU, and skips every other
+machine. It looks for a PCI display device from NVIDIA (vendor `0x10de`, class
+`0x03xxxx`) in sysfs, so it works before the driver has loaded; the card's HDMI
+audio function alone does not count. It runs after `docker_install`, and a
+failure only warns, because the repository needs the network.
+
+The repository is registered like the IDE ones, through `apt_vendor_source_ensure`:
+a deb822 `.sources` file, written only after NVIDIA's signing key is installed.
+It is a flat repository, so the file has `Suites: /` and no `Components:` line.
+A release upgrade leaves that file `Enabled: no`, after which the weekly
+full-upgrade skips the toolkit silently; the step rewrites the file and retires
+a one-line `nvidia-container-toolkit.list` that NVIDIA's own guide writes, because
+two sources for one repository break `apt-get update`.
+
+The step installs the package and nothing more. Pointing Docker at the NVIDIA
+runtime edits `/etc/docker/daemon.json` and restarts the daemon, so run
+`sudo nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker`
+yourself; the step prints that command after a first install on a machine that
+has Docker.
+
+`make repair REPAIR=nvidia-container-toolkit` repeats the step on any machine
+with apt. Add `DRY_RUN=true` to print what it would write and run, without root;
+run the real repair from a terminal that can ask for the `sudo` password. The
+uninstall checklist of `work` offers `nvidia_ctk_uninstall`, which removes the
+package, the apt source, and the key but leaves `daemon.json` alone.
+
+Only `work` calls the step for now. To give another profile the step, add the
+same `nvidia_container_toolkit_install ||` call with its warning to that
+profile's entrypoint and `nvidia_ctk_uninstall` to its uninstall checklist;
+`make audit-installation` then declares the package for that profile by itself.
+On a profile that does not call the step, the audit lists an installed toolkit
+under "Packages installed outside the bootstrap".
+
+Run the hermetic test with `bash tests/test_nvidia_container_toolkit.sh`.
 
 ## Shutdown fix
 

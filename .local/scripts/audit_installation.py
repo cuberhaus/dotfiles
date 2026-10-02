@@ -750,6 +750,9 @@ MANAGER_GROUPS = {
     "brew": "brew",
     "brew-cask": "brew",
 }
+# What the known-extra-packages file writes in front of the name of an app that came with its own
+# installer, where a package writes its manager (`app:dev.zed.Zed`, `apt:ffmpeg`).
+APP_KEY = "app"
 # Where the Debian and Ubuntu installers that keep one recorded the packages they installed.
 INSTALLER_INITIAL_STATUS = pathlib.Path("/var/log/installer/initial-status.gz")
 # The snaps the OS image shipped with, and where snapd mounts each installed snap.
@@ -855,7 +858,8 @@ def known_extra_entries(path: pathlib.Path) -> set[tuple[str | None, str]]:
     """The (manager group, name) pairs a known-extra-packages file lists.
 
     One `manager:name` per line, as `--list-extra` prints it, or a bare name that matches under any
-    package manager. Blank lines and `#` comments are ignored, as is a file that cannot be read.
+    package manager. An app that came with its own installer is `app:name`, and its group is
+    APP_KEY. Blank lines and `#` comments are ignored, as is a file that cannot be read.
     """
     try:
         text = path.read_text(encoding="utf-8", errors="ignore")
@@ -869,6 +873,8 @@ def known_extra_entries(path: pathlib.Path) -> set[tuple[str | None, str]]:
         manager, separator, name = entry.partition(":")
         if separator and name and manager in MANAGER_GROUPS:
             entries.add((MANAGER_GROUPS[manager], name))
+        elif separator and name and manager == APP_KEY:
+            entries.add((APP_KEY, name))
         else:
             entries.add((None, entry))
     return entries
@@ -1225,6 +1231,187 @@ def audit_extra_packages(
         print("\n".join(wrap(f"{extras.acknowledged} package(s) accepted in {keep_file} are not reported.", width, "  ")))
 
 
+# Apps that came with their own installer: Zed's install.sh, GPT4All's .run file, an AppImage. They
+# put the program in the home folder, and no package manager records them, so the package report
+# above cannot see them. The launcher they leave in ~/.local/share/applications is the one trace
+# they all share, so that is what this reads. An app without a launcher stays invisible.
+
+
+@dataclasses.dataclass(frozen=True)
+class SelfInstalledApp:
+    # The launcher's file name without .desktop: what the known-extra-packages file lists as app:KEY.
+    key: str
+    # The launcher's Name=, or the key when it has none.
+    name: str
+    # The program the launcher starts, every symbolic link followed. It is inside the home folder.
+    program: pathlib.Path
+
+
+@dataclasses.dataclass
+class SelfInstalledApps:
+    # The apps that no active bootstrap step declares and the known-extra-packages file does not accept.
+    found: list[SelfInstalledApp]
+    # How many more the known-extra-packages file left out of `found`.
+    acknowledged: int = 0
+
+
+def user_applications_dir() -> pathlib.Path:
+    """Where the current user's launchers live: $XDG_DATA_HOME/applications, ~/.local/share by default."""
+    data_home = os.environ.get("XDG_DATA_HOME") or str(pathlib.Path.home() / ".local" / "share")
+    return pathlib.Path(data_home) / "applications"
+
+
+def desktop_entry(path: pathlib.Path) -> dict[str, str]:
+    """The keys of the [Desktop Entry] group of a launcher; empty when the file cannot be read.
+
+    Localized keys (`Name[es]`) are separate keys, and the other groups (`[Desktop Action ...]`, which
+    have an Exec of their own) are left out.
+    """
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return {}
+    entry: dict[str, str] = {}
+    in_group = False
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if line.startswith("["):
+            if in_group:
+                break
+            in_group = line == "[Desktop Entry]"
+        elif in_group and not line.startswith("#"):
+            key, separator, value = line.partition("=")
+            if separator:
+                entry.setdefault(key.strip(), value.strip())
+    return entry
+
+
+def launcher_program(entry: dict[str, str]) -> pathlib.Path | None:
+    """The file a launcher starts, with every symbolic link followed; None when it cannot be told.
+
+    A bare command name is looked up on PATH. An `env VAR=value` prefix is skipped. A launcher that
+    runs the program through a shell (`sh -c "..."`) names the shell, which is not in the home folder,
+    so such an app is not seen.
+    """
+    try:
+        words = shlex.split(entry.get("Exec", ""))
+    except ValueError:
+        return None
+    if words and words[0] == "env":
+        words = words[1:]
+    while words and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=.*", words[0]):
+        words = words[1:]
+    if not words:
+        return None
+    if "/" in words[0]:
+        program = pathlib.Path(words[0]).expanduser()
+        if not program.is_absolute():
+            return None
+    else:
+        found = shutil.which(words[0])
+        if not found:
+            return None
+        program = pathlib.Path(found)
+    return program.resolve()
+
+
+def active_bootstrap_code(repo_root: pathlib.Path, profile: str) -> str:
+    """The code the profile's bootstrap runs, without comments: its entrypoint and the functions it reaches.
+
+    This is the code the package check reads. A function that nothing calls and a block that is
+    commented out run nothing, so they declare nothing.
+    """
+    bootstrap_name, functions_name = PROFILE_SOURCES[profile]
+    bootstrap_dir = repo_root / ".local" / "scripts" / "bootstrap"
+    bootstrap = (bootstrap_dir / bootstrap_name).read_text(encoding="utf-8")
+    functions = function_bodies((bootstrap_dir / functions_name).read_text(encoding="utf-8"))
+    lines = list(logical_lines(bootstrap))
+    for name in sorted(active_function_names(bootstrap, functions)):
+        lines.extend(logical_lines(functions[name]))
+    return "\n".join(lines)
+
+
+def names_file(code: str, file_name: str) -> bool:
+    """Whether the code names this file, and not a longer name that ends the same way."""
+    return re.search(rf"(?<![\w.-]){re.escape(file_name)}(?![\w.-])", code) is not None
+
+
+def find_self_installed_apps(repo_root: pathlib.Path, profile: str) -> SelfInstalledApps | None:
+    """The launchers of apps that start from the home folder and that the bootstrap does not declare.
+
+    A launcher counts when it is an application entry that is not hidden, and the program it starts
+    exists and lies inside the home folder once symbolic links are followed (so `~/.local/bin/code`
+    pointing at a system package does not count, and a launcher left behind for a program that is
+    gone does not either). It is declared when an active line of the profile's bootstrap names the
+    launcher's file, as the Arch bootstraps do for the Cursor and Antigravity AppImages they install.
+    An app whose own installer writes the launcher is not recognized that way: the known-extra-packages
+    file accepts it (`app:KEY`, or the bare key).
+
+    None when the directory of launchers does not exist (macOS, a bare container).
+    """
+    directory = user_applications_dir()
+    if not directory.is_dir():
+        return None
+    home = pathlib.Path.home().resolve()
+    declared = active_bootstrap_code(repo_root, profile)
+    entries = known_extra_entries(known_extra_packages_path())
+    apps = SelfInstalledApps(found=[])
+    for launcher in sorted(directory.glob("*.desktop")):
+        entry = desktop_entry(launcher)
+        if entry.get("Type") != "Application" or entry.get("Hidden", "").lower() == "true":
+            continue
+        program = launcher_program(entry)
+        if program is None or not program.exists() or not program.is_relative_to(home):
+            continue
+        if names_file(declared, launcher.name):
+            continue
+        key = launcher.stem
+        if (APP_KEY, key) in entries or (None, key) in entries:
+            apps.acknowledged += 1
+            continue
+        apps.found.append(SelfInstalledApp(key=key, name=entry.get("Name") or key, program=program))
+    return apps
+
+
+def audit_self_installed_apps(repo_root: pathlib.Path, profile: str, reporter: Reporter) -> None:
+    """Notice apps that came with their own installer and that no active bootstrap step declares.
+
+    Read-only, and silent where there is no directory of launchers. Like the package report, it is a
+    notice that never changes the exit code. It suggests no removal command: no package manager owns
+    these apps, so the owner removes one with its own uninstaller, or keeps it (the
+    known-extra-packages file).
+    """
+    apps = find_self_installed_apps(repo_root, profile)
+    if apps is None:
+        return
+    print("\nApps installed outside the bootstrap")
+    width = output_width()
+    keep_file = display_path(known_extra_packages_path())
+    if not apps.found:
+        directory = display_path(user_applications_dir())
+        message = (
+            f"Every launcher in {directory} that starts a program from your home folder "
+            f"is declared by the {profile} bootstrap or accepted."
+        )
+        reporter.result("OK", "\n".join(wrap(message, width - len("  [OK] "))))
+    else:
+        text_width = width - len("  [NOTICE] ")
+        headline = f"{len(apps.found)} app(s) start from your home folder and are not declared by the {profile} bootstrap:"
+        lines = wrap(headline, text_width)
+        for app in apps.found:
+            lines.extend(wrap(f"{app.name} ({APP_KEY}:{app.key}): {display_path(app.program)}", text_width, "  ", "      "))
+        reporter.result("NOTICE", "\n".join(lines))
+        intro = "Nothing was changed. No package manager owns these apps, so no removal command is suggested. For each app you can:"
+        print("\n".join(wrap(intro, width, "  ")))
+        for option in (
+            "remove it with its own uninstaller, or delete its folder and its launcher yourself;",
+            f"or accept it by listing app:NAME in {keep_file} (`--list-extra` prints that format).",
+        ):
+            print("\n".join(wrap(option, width, "    - ", "      ")))
+    if apps.acknowledged:
+        print("\n".join(wrap(f"{apps.acknowledged} app(s) accepted in {keep_file} are not reported.", width, "  ")))
+
+
 def command_succeeds(command: list[str]) -> bool:
     return run(command).returncode == 0
 
@@ -1272,7 +1459,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--list-extra",
         action="store_true",
-        help="print the packages installed outside the bootstrap as manager:name, the format of the known-extra-packages file, and audit nothing else",
+        help="print the packages and apps installed outside the bootstrap as manager:name and app:name, the format of the known-extra-packages file, and audit nothing else",
     )
     return parser.parse_args()
 
@@ -1300,6 +1487,9 @@ def main() -> int:
         for label, names in find_extra_packages(repo_root, profile, packages).found.items():
             for name in names:
                 print(f"{label}:{name}")
+        apps = find_self_installed_apps(repo_root, profile)
+        for app in apps.found if apps else []:
+            print(f"{APP_KEY}:{app.key}")
         return 0
 
     reporter = Reporter()
@@ -1314,6 +1504,7 @@ def main() -> int:
     audit_packages(packages, reporter, profile)
     audit_ide_update_channels(reporter)
     audit_extra_packages(repo_root, profile, packages, reporter)
+    audit_self_installed_apps(repo_root, profile, reporter)
     audit_automations(profile, reporter)
     print()
     # Notices are not problems, so they only appear in the summary when there are some.

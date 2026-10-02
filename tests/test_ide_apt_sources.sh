@@ -174,6 +174,23 @@ test_architectures_line_is_omitted_when_empty() {
     grep -Fq 'Components: main' "$APT_SOURCES_DIR/demo.sources" || fail 'the components line is missing'
 }
 
+test_components_line_is_omitted_for_a_flat_repository() {
+    new_case flat-repository
+    local expected
+
+    apt_vendor_source_ensure flat https://repo.example/deb/amd64 / "" "" \
+        https://repo.example/key.asc "$CASE/keyrings/flat.gpg" || fail 'the flat source was not written'
+
+    # A flat repository's suite ends in "/" and apt rejects it next to a Components line.
+    expected="### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+# You may comment out this entry, but any other modifications may be lost.
+Types: deb
+URIs: https://repo.example/deb/amd64
+Suites: /
+Signed-By: $CASE/keyrings/flat.gpg"
+    assert_equals "$expected" "$(cat "$APT_SOURCES_DIR/flat.sources")" 'the flat source file content'
+}
+
 test_second_run_changes_nothing() {
     new_case idempotent
     local before after
@@ -461,6 +478,7 @@ test_bootstraps_use_the_shared_helpers() {
 for test_name in \
     test_source_is_written_in_deb822_format \
     test_architectures_line_is_omitted_when_empty \
+    test_components_line_is_omitted_for_a_flat_repository \
     test_second_run_changes_nothing \
     test_a_disabled_source_is_enabled_again \
     test_a_legacy_list_is_retired_to_a_backup \
