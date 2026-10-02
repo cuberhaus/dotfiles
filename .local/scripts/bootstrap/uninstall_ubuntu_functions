@@ -29,7 +29,8 @@ ubuntu_gui_uninstall() {
     $apt_remove lxappearance arc-theme audacity calibre \
         cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils \
         gnome-screensaver gparted pavucontrol thunderbird timeshift \
-        transmission vlc caffeine dconf-editor r-base || true
+        transmission vlc caffeine dconf-editor r-base \
+        wireguard-tools xdotool ydotool qrencode || true
 
     # RStudio
     sudo dpkg -r rstudio 2>/dev/null || true

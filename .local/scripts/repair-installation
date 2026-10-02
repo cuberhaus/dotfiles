@@ -6,7 +6,7 @@ step="${1:-}"
 profile="${2:-auto}"
 
 usage() {
-    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos, asusctl, and asusctl-lighting only)]\n' >&2
+    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting|nvidia-container-toolkit [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos, asusctl, asusctl-lighting, and nvidia-container-toolkit only)]\n' >&2
 }
 
 detect_profile() {
@@ -131,6 +131,24 @@ repair_asusctl_lighting() {
     bash "$repo_root/.local/scripts/asusctl_lighting.sh" ${arguments[@]+"${arguments[@]}"}
 }
 
+# Install or repair the NVIDIA Container Toolkit on a machine with an NVIDIA GPU,
+# re-enabling its apt source when a release upgrade disabled it; every other machine
+# is skipped, so PROFILE does not matter.  DRY_RUN=true previews the changes without
+# root.
+repair_nvidia_container_toolkit() {
+    command -v apt-get >/dev/null 2>&1 || {
+        printf 'The %s repair needs apt-get (Debian and Ubuntu profiles only).\n' "$step" >&2
+        return 2
+    }
+    case "${DRY_RUN:-false}" in
+        true|1) APT_SOURCES_DRY_RUN=true ;;
+    esac
+
+    # shellcheck source=/dev/null
+    source "$repo_root/.local/scripts/bootstrap/base_functions"
+    nvidia_container_toolkit_install
+}
+
 case "$step" in
     config|aliases|environment)
         restow_config
@@ -146,6 +164,9 @@ case "$step" in
         ;;
     asusctl-lighting)
         repair_asusctl_lighting
+        ;;
+    nvidia-container-toolkit)
+        repair_nvidia_container_toolkit
         ;;
     automations)
         bash "$repo_root/.local/scripts/automation/install"

@@ -805,7 +805,13 @@ DEB_FILE_PACKAGES = {
 # Standalone installers that a profile calls and that install apt packages of their own. Each
 # list stays inside its script on purpose (see AGENTS.md); this is the function the profile
 # calls, its script under .local/scripts, and the bash array in it that lists the packages.
-STANDALONE_INSTALLERS = (("asusctl_install", "asusctl_install.sh", "BUILD_PACKAGES"),)
+# A step that several profiles share keeps its array in bootstrap/base_functions; it is gated
+# on hardware there, so a profile function body must not list its package (the audit would then
+# expect it on every machine).
+STANDALONE_INSTALLERS = (
+    ("asusctl_install", "asusctl_install.sh", "BUILD_PACKAGES"),
+    ("nvidia_container_toolkit_install", "bootstrap/base_functions", "NVIDIA_CONTAINER_TOOLKIT_PACKAGES"),
+)
 # One package per line. Any other line (a warning that run merged in) is skipped.
 PACKAGE_LINE = re.compile(r"[A-Za-z0-9][A-Za-z0-9+_.@/-]*(?::[A-Za-z0-9-]+)?")
 

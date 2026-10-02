@@ -129,7 +129,7 @@ doctor: ## Check tools, symlinks, configuration, packages, environment, and auto
 audit-installation: ## Report drift between this repo and the installed machine (PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work)
 	$(PYTHON) .local/scripts/audit_installation.py --profile "$(PROFILE)"
 
-repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting; PROFILE=auto|...; DRY_RUN=true previews ide-repos, asusctl, and asusctl-lighting)
+repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting|nvidia-container-toolkit; PROFILE=auto|...; DRY_RUN=true previews ide-repos, asusctl, asusctl-lighting, and nvidia-container-toolkit)
 	bash .local/scripts/repair-installation "$(REPAIR)" "$(PROFILE)"
 
 ##@ Setup

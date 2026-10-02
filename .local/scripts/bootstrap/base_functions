@@ -649,12 +649,13 @@ apt_vendor_key_install() {
 
 # Write one vendor apt source in deb822 format and install its signing key.
 #   apt_vendor_source_ensure NAME URI SUITE COMPONENTS ARCHITECTURES KEY_URL KEYRING
-# ARCHITECTURES may be empty.  Idempotent: a matching source is left alone, one
-# disabled by a release upgrade (`Enabled: no`) is rewritten, and a legacy
-# one-line NAME.list moves to NAME.list.bak, which apt ignores.  Sets
-# APT_SOURCES_CHANGED=true when anything changed so the caller refreshes apt once.
-# APT_SOURCES_DRY_RUN=true only reports the changes.  APT_SOURCES_DIR overrides
-# /etc/apt/sources.list.d (the tests use it).
+# ARCHITECTURES may be empty.  COMPONENTS may be empty for a flat repository (a
+# SUITE that ends in /, like NVIDIA's), which takes no Components line.
+# Idempotent: a matching source is left alone, one disabled by a release upgrade
+# (`Enabled: no`) is rewritten, and a legacy one-line NAME.list moves to
+# NAME.list.bak, which apt ignores.  Sets APT_SOURCES_CHANGED=true when anything
+# changed so the caller refreshes apt once.  APT_SOURCES_DRY_RUN=true only reports
+# the changes.  APT_SOURCES_DIR overrides /etc/apt/sources.list.d (the tests use it).
 # The file layout matches what the vendors' own postinst scripts write, so their
 # refresh of the file on package upgrade is a no-op.  (Old apt without
 # `modernize-sources` makes the Cursor postinst add a legacy cursor.list; run the
@@ -685,8 +686,10 @@ apt_vendor_source_ensure() {
 # You may comment out this entry, but any other modifications may be lost.
 Types: deb
 URIs: $uri
-Suites: $suite
-Components: $components"
+Suites: $suite"
+    if [ -n "$components" ]; then
+        desired+=$'\n'"Components: $components"
+    fi
     if [ -n "$architectures" ]; then
         desired+=$'\n'"Architectures: $architectures"
     fi
@@ -867,5 +870,109 @@ apply_skip_worktree() {
     if [ -x "$dotfiles_root/.local/scripts/apply-skip-worktree" ]; then
         "$dotfiles_root/.local/scripts/apply-skip-worktree" --verbose "$dotfiles_root"
     fi
+}
+
+###############################################################
+# => NVIDIA Container Toolkit (GPU access for containers)
+###############################################################
+
+# The toolkit comes from NVIDIA's own apt repository (a flat repository, so its
+# source has no Components line) and only receives updates while that source is
+# enabled.  Ubuntu release upgrades disable third-party sources, after which the
+# weekly full-upgrade skips the package without any error (see the IDE installs
+# above).  So the source is re-asserted on every bootstrap run and by
+# `make repair REPAIR=nvidia-container-toolkit`.
+# The package list is a global array on purpose: audit_installation.py reads it
+# (STANDALONE_INSTALLERS), so the audit counts the package as declared by the
+# bootstrap without expecting it on machines that have no NVIDIA GPU.
+NVIDIA_CONTAINER_TOOLKIT_PACKAGES=(
+    nvidia-container-toolkit
+)
+
+## Succeed when this machine has an NVIDIA display adapter: a PCI device from NVIDIA
+## (vendor 0x10de) of a display class (0x03xxxx: VGA, 3D or other display controller).
+## The card's HDMI audio function has the same vendor but class 0x0403, so it does not
+## count.  This reads sysfs, so it needs neither pciutils nor a loaded driver (a driver
+## installed this run may still be waiting for a reboot).  PCI_DEVICES_DIR overrides
+## /sys/bus/pci/devices (the tests use it).
+nvidia_gpu_present() {
+    local devices_dir="${PCI_DEVICES_DIR:-/sys/bus/pci/devices}"
+    local device vendor class
+
+    for device in "$devices_dir"/*; do
+        [ -r "$device/vendor" ] && [ -r "$device/class" ] || continue
+        vendor=$(<"$device/vendor")
+        class=$(<"$device/class")
+        if [ "$vendor" = 0x10de ] && [[ "$class" == 0x03* ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+## Register the NVIDIA Container Toolkit apt source (a deb822 .sources file, written
+## only after NVIDIA's signing key is installed) and refresh apt once when it changed.
+## A source that a release upgrade disabled is rewritten.  NVIDIA_CONTAINER_TOOLKIT_KEYRING
+## overrides the keyring path (the tests use it).
+nvidia_container_toolkit_source_ensure() {
+    local keyring="${NVIDIA_CONTAINER_TOOLKIT_KEYRING:-/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg}"
+    local architecture
+
+    architecture=$(dpkg --print-architecture) || return 1
+    APT_SOURCES_CHANGED=false
+    apt_vendor_source_ensure nvidia-container-toolkit \
+        "https://nvidia.github.io/libnvidia-container/stable/deb/$architecture" / "" "" \
+        https://nvidia.github.io/libnvidia-container/gpgkey "$keyring" || return 1
+    if [ "$APT_SOURCES_CHANGED" = true ]; then
+        apt_sources_apply sudo apt-get update || return 1
+    fi
+}
+
+## Install the NVIDIA Container Toolkit on a machine with an NVIDIA GPU.  Every other
+## machine is skipped, so profiles can call this unconditionally.  It needs the network
+## (NVIDIA's apt repository), so profiles only warn when it fails.  It installs the
+## package and nothing more: pointing Docker at the NVIDIA runtime edits
+## /etc/docker/daemon.json and restarts the daemon, which stays the user's decision, so
+## a first install prints the command instead.  APT_SOURCES_DRY_RUN=true
+## (`make repair REPAIR=nvidia-container-toolkit DRY_RUN=true`) only reports the changes.
+nvidia_container_toolkit_install() {
+    local package was_installed=true
+
+    if ! nvidia_gpu_present; then
+        info "No NVIDIA GPU detected, skipping the NVIDIA Container Toolkit."
+        return 0
+    fi
+
+    info "Installing the NVIDIA Container Toolkit..."
+    for package in "${NVIDIA_CONTAINER_TOOLKIT_PACKAGES[@]}"; do
+        dpkg -s "$package" 2>/dev/null | grep -q '^Status: install ok installed' || was_installed=false
+    done
+
+    nvidia_container_toolkit_source_ensure || return 1
+    apt_sources_apply sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y \
+        "${NVIDIA_CONTAINER_TOOLKIT_PACKAGES[@]}" || return 1
+
+    if [ "$was_installed" = false ] && [ "${APT_SOURCES_DRY_RUN:-false}" != true ] &&
+        command -v docker &>/dev/null; then
+        info "To give Docker GPU access, run: sudo nvidia-ctk runtime configure --runtime=docker && sudo systemctl restart docker"
+    fi
+}
+
+## Remove the NVIDIA Container Toolkit, its apt source (including the one-line files
+## older setups wrote) and its signing key.  Docker's daemon.json is left alone, so
+## delete the nvidia runtime from it by hand if you configured one.
+## The name is short on purpose ("ctk" is NVIDIA's own abbreviation, as in nvidia-ctk):
+## the uninstall checklists show the function name as a tag column as wide as the
+## longest tag, and the full name clipped the description of every other row.
+nvidia_ctk_uninstall() {
+    local sources_dir="${APT_SOURCES_DIR:-/etc/apt/sources.list.d}"
+    local keyring="${NVIDIA_CONTAINER_TOOLKIT_KEYRING:-/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg}"
+
+    info "Uninstalling the NVIDIA Container Toolkit..."
+    sudo apt-get remove --purge -y "${NVIDIA_CONTAINER_TOOLKIT_PACKAGES[@]}" || true
+    sudo rm -f "$sources_dir/nvidia-container-toolkit.sources" \
+        "$sources_dir/nvidia-container-toolkit.list" \
+        "$sources_dir/nvidia-container-toolkit.list.bak" \
+        "$keyring"
 }
 

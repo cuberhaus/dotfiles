@@ -40,6 +40,10 @@ snaps_install
 ubuntu_install
 obsidian_vault_install
 nvidia_display_config
+# Skipped without an NVIDIA GPU. It needs the network (NVIDIA's apt repository), so a
+# failure must not abort provisioning.
+nvidia_container_toolkit_install ||
+    warn "NVIDIA Container Toolkit setup failed; rerun it with: make repair REPAIR=nvidia-container-toolkit"
 # The installer skips machines that are not supported ASUS laptops. It needs the
 # network and a few minutes of compiling, so a failure must not abort provisioning.
 asusctl_install ||

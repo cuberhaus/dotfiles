@@ -92,6 +92,10 @@ work_main() {
     vim_install ||
         warn "Vim plugin setup failed; rerun it with: make repair REPAIR=vim PROFILE=work"
     docker_install
+    # Skipped without an NVIDIA GPU. It needs the network (NVIDIA's apt repository), so
+    # a failure must not abort provisioning.
+    nvidia_container_toolkit_install ||
+        warn "NVIDIA Container Toolkit setup failed; rerun it with: make repair REPAIR=nvidia-container-toolkit"
     gcloud_install
     gui_apps_install
     obsidian_vault_install

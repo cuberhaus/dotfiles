@@ -507,6 +507,19 @@ class RepositoryContractTests(unittest.TestCase):
                 self.assertIn(label, self.audit.MANAGER_GROUPS)
                 self.assertIn(label, self.audit.REMOVE_COMMANDS)
 
+    def test_no_profile_declares_an_apt_name_with_capitals(self) -> None:
+        # Debian package names are lowercase, and apt-get aborts the whole transaction on a name it
+        # cannot find. "LXAppearance" in ubuntu_install therefore kept every other package of that
+        # one call from being installed.
+        for profile in self.audit.PROFILE_SOURCES:
+            with self.subTest(profile=profile):
+                names = {
+                    package.name
+                    for package in self.audit.expected_packages(REPO_ROOT, profile)
+                    if package.manager == "apt"
+                }
+                self.assertEqual(sorted(name for name in names if name != name.lower()), [])
+
     def test_removal_commands_ask_before_acting_and_never_go_through_yay(self) -> None:
         self.assertEqual(
             self.audit.REMOVE_COMMANDS,
@@ -586,7 +599,8 @@ class FindExtraPackagesTests(AuditCase):
         self.assertEqual(extras.not_chosen, {"apt": {"xdotool"}})
 
     def test_a_declared_name_matches_under_the_spellings_apt_uses(self) -> None:
-        # ubuntu_functions declares LXAppearance, while the apt package is lxappearance.
+        # A declaration spelled with capitals (ubuntu_functions once had LXAppearance) must still
+        # match the lowercase name dpkg reports.
         self.installed["apt"] = self.audit.Installed({"lxappearance", "libfuse2t64", "ffmpeg"})
 
         extras = self.find(self.audit.Package("apt", "LXAppearance"), self.audit.Package("apt", "libfuse2"))

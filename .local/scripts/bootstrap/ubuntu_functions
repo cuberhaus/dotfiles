@@ -90,7 +90,7 @@ ensure_virtualization_groups() {
 
 ubuntu_install() {
     local packages=(
-        LXAppearance            # Theme
+        lxappearance            # Theme
         arc-theme
         audacity
         calibre
@@ -106,6 +106,10 @@ ubuntu_install() {
         dconf-editor            # Advanced configs
         obs-studio              # Video recording
         r-base
+        wireguard-tools         # WireGuard VPN (wg, wg-quick)
+        xdotool                 # X11 keyboard and mouse automation
+        ydotool                 # Keyboard and mouse automation through /dev/uinput (needs ydotoold)
+        qrencode                # Generate QR codes from the terminal
     )
     $apt "${packages[@]}"
 

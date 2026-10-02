@@ -56,6 +56,7 @@ dev_tools_install() {
         curl
         ddcutil                 # External monitor DDC brightness control
         git
+        git-lfs                 # Large file storage for Git
         jq
         tree
         wget
@@ -91,11 +92,17 @@ dev_tools_install() {
         sshfs                   # Mount remote filesystems over SSH
         net-tools               # Network utilities (ifconfig, netstat, etc.)
         nmap                    # Network exploration and security auditing
+        ffmpeg                  # Audio/video converter and toolkit
+        wireguard-tools         # WireGuard VPN (wg, wg-quick)
+        xdotool                 # X11 keyboard and mouse automation
+        ydotool                 # Keyboard and mouse automation through /dev/uinput (needs ydotoold)
+        qrencode                # Generate QR codes from the terminal
 
         # Hardware info
         hardinfo                # GUI hardware info & benchmarks
         cpu-x                   # CPU-Z style hardware viewer
         fastfetch               # Terminal system info summary (neofetch left Ubuntu 26.04)
+        smartmontools           # Disk SMART health and self-tests
     )
     $apt "${packages[@]}"
     configure_brightness_access
