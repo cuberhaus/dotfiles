@@ -17,3 +17,11 @@
 # It didn't respect this:
 #/.gitconfig
 /.gitmodules
+
+# The live GNOME settings database, not configuration. dconf replaces a symlink with a
+# plain file the next time it writes, and gnome-shell keeps the file mapped, so Stow can
+# never own it and moving it aside to make room would discard the desktop settings. The
+# tracked file is a 2023 snapshot of just two Eye of GNOME settings (a black viewer
+# background), committed as "This is a placeholder". Settings travel with `dconf dump`
+# and `dconf load` instead (.local/scripts/gnome_path and .local/scripts/cinnamon_path).
+^/\.config/dconf(/|$)

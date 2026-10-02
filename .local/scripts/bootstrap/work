@@ -62,7 +62,9 @@ work_main() {
     install_preparation
 
     mkdir -p "$XDG_CONFIG_HOME"
-    printf '%s\n' '#! /bin/sh' 'export DISTRO=ubuntu' > "$XDG_CONFIG_HOME/distro"
+    # DISTRO stays ubuntu: the shell config branches on it (apt aliases, update, cleanup).
+    # DOTFILES_PROFILE records the profile itself for audit-installation and repair.
+    printf '%s\n' '#! /bin/sh' 'export DISTRO=ubuntu' 'export DOTFILES_PROFILE=work' > "$XDG_CONFIG_HOME/distro"
 
     configure_inotify_watches
     shutdown_fix

@@ -3,9 +3,13 @@
 #
 # Usage: stow-backup-conflicts [--dry-run] [backup-dir]
 #
-# Runs a stow dry-run, parses conflicts, and moves each conflicting file
-# into a timestamped backup folder.  Exits 0 if there were no conflicts
-# or all conflicts were backed up successfully.
+# Runs a stow dry-run, parses conflicts, and moves each conflicting file or
+# symbolic link into a timestamped backup folder.  Exits 0 if there were no
+# conflicts or all conflicts were backed up successfully.
+#
+# STOW_TARGET (default $HOME) names the directory stow links into.  The Makefile
+# passes its TARGET, so a scratch target never moves anything out of the real home
+# folder.  The default backup folder is $STOW_TARGET/.dotfiles-backup.
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
@@ -21,15 +25,15 @@ ok()    { printf '\033[1;32m[OK]\033[0m    %s\n' "$*"; }
 STOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"          # repo root (dotfiles)
 PARENT_DIR="$(dirname "$STOW_DIR")"                      # parent of repo
 PKG_NAME="$(basename "$STOW_DIR")"                       # e.g. "dotfiles"
-TARGET="${HOME}"
+TARGET="${STOW_TARGET:-$HOME}"
 
-BACKUP_ROOT="${1:-$HOME/.dotfiles-backup}"
+BACKUP_ROOT="${1:-$TARGET/.dotfiles-backup}"
 BACKUP_DIR="$BACKUP_ROOT/$(date '+%Y-%m-%d_%H%M%S')"
 DRY_RUN=false
 
 if [ "${1:-}" = "--dry-run" ]; then
     DRY_RUN=true
-    BACKUP_ROOT="${2:-$HOME/.dotfiles-backup}"
+    BACKUP_ROOT="${2:-$TARGET/.dotfiles-backup}"
     BACKUP_DIR="$BACKUP_ROOT/$(date '+%Y-%m-%d_%H%M%S')"
 fi
 
@@ -41,12 +45,20 @@ conflicts=()
 # A plain file standing in the way is worded differently by Stow version:
 #   Stow 2.3 and earlier:  * existing target is neither a link nor a directory: .bashrc
 #   Stow 2.4 and later:    * cannot stow ../dotfiles/.bashrc over existing target .bashrc since neither a link nor a directory and --adopt not specified
-# Both capture the path relative to the target directory as group 1.
+# A symbolic link that Stow did not create is worded the same by every version:
+#   * existing target is not owned by stow: .config/app/settings.json
+# Stow owns only the relative links it makes into its own directory, so this also
+# reports an absolute link to the very file Stow would link, and `restow` cannot
+# replace it.
+# All three capture the path relative to the target directory as group 1.
 legacy_conflict='^\* existing target is neither a link nor a directory: (.+)$'
 current_conflict='^\* cannot stow .+ over existing target (.+) since neither a link nor a directory and --adopt not specified$'
+foreign_link_conflict='^\* existing target is not owned by stow: (.+)$'
 
 while IFS= read -r line; do
-    if [[ "$line" =~ $legacy_conflict ]] || [[ "$line" =~ $current_conflict ]]; then
+    if [[ "$line" =~ $legacy_conflict ]] \
+        || [[ "$line" =~ $current_conflict ]] \
+        || [[ "$line" =~ $foreign_link_conflict ]]; then
         conflicts+=("${BASH_REMATCH[1]}")
     fi
 done < <(stow -n -t "$TARGET" -d "$PARENT_DIR" "$PKG_NAME" 2>&1 | sed 's/^[[:space:]]*//')
@@ -70,13 +82,24 @@ for rel in "${conflicts[@]}"; do
     src="$TARGET/$rel"
     dest="$BACKUP_DIR/$rel"
 
-    if [ ! -e "$src" ]; then
+    # -e follows links, so a dangling symbolic link also needs the -L test.
+    if [ ! -e "$src" ] && [ ! -L "$src" ]; then
         warn "Conflict reported but file missing: $rel (skipping)"
         continue
     fi
 
+    # Stow reports only files and links here.  Never move a real directory.
+    if [ -d "$src" ] && [ ! -L "$src" ]; then
+        warn "Conflict is a directory, not a file or link: $rel (skipping)"
+        continue
+    fi
+
     if [ "$DRY_RUN" = true ]; then
-        info "  Would move $src to $dest"
+        if [ -L "$src" ]; then
+            info "  Would move $src to $dest (symbolic link to $(readlink "$src"))"
+        else
+            info "  Would move $src to $dest"
+        fi
         continue
     fi
 

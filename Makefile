@@ -47,19 +47,22 @@ check-stow:
 	fi
 
 install: check-stow ## Symlink dotfiles into $HOME via stow (backs up conflicts first)
-	@bash .local/scripts/stow-backup-conflicts
+	@STOW_TARGET="$(TARGET)" bash .local/scripts/stow-backup-conflicts
 	$(STOW) -v -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
 	@bash .local/scripts/apply-skip-worktree
 
 uninstall: check-stow uninstall-automations ## Disable automations, remove symlinks, and restore backed-up files
 	@bash .local/scripts/stow-uninstall
 
-restow: check-stow ## Re-stow (uninstall then install — cleans stale links)
+restow: check-stow ## Re-stow (backs up conflicts first, then unlinks and relinks — cleans stale links)
+	@STOW_TARGET="$(TARGET)" bash .local/scripts/stow-backup-conflicts
 	$(STOW) -v -R -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR))
 	@bash .local/scripts/apply-skip-worktree
 
-dry-run: check-stow ## Simulate stow and report conflicts (no changes made)
-	$(STOW) -v -n -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR)) 2>&1
+# A conflict makes stow exit non-zero; keep that status, but first show what install and
+# restow would move to the backup folder so the preview covers both steps.
+dry-run: check-stow ## Simulate stow and report conflicts and what install/restow would back up (no changes made)
+	$(STOW) -v -n -t $(TARGET) -d $(dir $(STOW_DIR)) $(notdir $(STOW_DIR)) 2>&1 || { status=$$?; STOW_TARGET="$(TARGET)" bash .local/scripts/stow-backup-conflicts --dry-run; exit $$status; }
 
 config-status: check-stow ## Show Stow deployment drift and source checkout changes
 	$(PYTHON) .local/scripts/config_lifecycle.py status
@@ -77,11 +80,14 @@ lint: ## Run shellcheck on all shell scripts
 
 test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_installation_audit.py
+	$(PYTHON) tests/test_profile_detection.py
+	$(PYTHON) tests/test_audit_extra_packages.py
 	bash tests/test_brightness.sh
 	bash tests/test_brightness_fix.sh
 	bash tests/test_asusctl_install.sh
 	bash tests/test_asusctl_lighting.sh
 	bash tests/test_bootstrap_stow.sh
+	bash tests/test_stow_conflicts.sh
 	bash tests/test_bootstrap_machine_state.sh
 	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh

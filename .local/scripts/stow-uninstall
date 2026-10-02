@@ -5,7 +5,7 @@
 # 2. Temporarily move those aside so stow -D can succeed
 # 3. Run stow -D to remove all symlinks
 # 4. Put the overwritten files back (they're the user's current data)
-# 5. Restore remaining backed-up files from ~/.dotfiles-backup/
+# 5. Restore remaining backed-up files and symbolic links from ~/.dotfiles-backup/
 # 6. Clean up the backup directory
 set -euo pipefail
 
@@ -107,7 +107,7 @@ while IFS= read -r file; do
     mkdir -p "$(dirname "$dest")"
     mv -v "$file" "$dest"
     (( restored++ )) || true
-done < <(find "$LATEST" -type f)
+done < <(find "$LATEST" \( -type f -o -type l \))
 
 # ---------------------------------------------------------------------------
 # Step 6 — Clean up empty backup

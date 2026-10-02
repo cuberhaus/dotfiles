@@ -301,6 +301,10 @@ actual_events="$(cat "$EVENT_LOG")"
 
 grep -Fqx 'export DISTRO=ubuntu' "$XDG_CONFIG_HOME/distro" ||
     fail 'work bootstrap did not write the Ubuntu distro marker'
+# DISTRO cannot say "work" (the shell config branches on DISTRO=ubuntu), so the bootstrap
+# also records its profile for audit-installation and repair, which read it before DISTRO.
+grep -Fqx 'export DOTFILES_PROFILE=work' "$XDG_CONFIG_HOME/distro" ||
+    fail 'work bootstrap did not record its profile in the distro file'
 
 # The brightness fix is cosmetic: when it fails, provisioning must warn and carry on.
 brightness_fix() { record 'brightness-fix-failed'; return 1; }

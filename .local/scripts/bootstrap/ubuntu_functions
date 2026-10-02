@@ -75,7 +75,7 @@ windows_install() {
 
 bloat_install () {
     brew install pipes-sh
-    $apt cmatrix cowsay fortune neofetch   # A cow, random quotes, system info
+    $apt cmatrix cowsay fortune fastfetch  # A cow, random quotes, system info (neofetch left Ubuntu 26.04)
 }
 
 ensure_virtualization_groups() {
@@ -242,15 +242,15 @@ snaps_install_optional() {
 snaps_install() {
     snap list code &>/dev/null                    || sudo snap install code --classic
     snap list discord &>/dev/null                 || sudo snap install discord
-    snap list intellij-idea-professional &>/dev/null || sudo snap install intellij-idea-professional --classic
+    # snap list intellij-idea-professional &>/dev/null || sudo snap install intellij-idea-professional --classic # Not in use right now
     snap list obsidian &>/dev/null                || sudo snap install obsidian --classic
     #snap list intellij-idea-community &>/dev/null || sudo snap install intellij-idea-community --classic
     # snap list pycharm-community &>/dev/null     || sudo snap install pycharm-community --classic # Does not accept jupyter notebook
-    snap list pycharm-professional &>/dev/null    || sudo snap install pycharm-professional --classic
+    # snap list pycharm-professional &>/dev/null  || sudo snap install pycharm-professional --classic # Not in use right now
     snap list skype &>/dev/null                   || sudo snap install skype --classic
     snap list slack &>/dev/null                   || sudo snap install slack --classic
     snap list spotify &>/dev/null                 || sudo snap install spotify
-    snap list sublime-merge &>/dev/null           || sudo snap install sublime-merge --classic
+    # snap list sublime-merge &>/dev/null         || sudo snap install sublime-merge --classic # Not needed right now
     snap list sublime-text &>/dev/null            || sudo snap install sublime-text --classic
     snap list walc &>/dev/null                    || sudo snap install walc
 }
@@ -268,14 +268,13 @@ ai_tools_install() {
 
     # ── Parallel downloads ───────────────────────────────────────
     local pids=() names=()
-    local warp_deb="/tmp/warp-terminal.deb"
-
-    # Warp (AI terminal — .deb download)
-    if ! command -v warp-terminal &>/dev/null; then
-        info "Downloading Warp terminal..."
-        wget -qO "$warp_deb" "https://app.warp.dev/download?package=deb" &
-        pids+=($!); names+=("Warp")
-    fi
+    # Warp (AI terminal — .deb download) — not needed right now
+    # local warp_deb="/tmp/warp-terminal.deb"
+    # if ! command -v warp-terminal &>/dev/null; then
+    #     info "Downloading Warp terminal..."
+    #     wget -qO "$warp_deb" "https://app.warp.dev/download?package=deb" &
+    #     pids+=($!); names+=("Warp")
+    # fi
 
     # Wait for parallel downloads
     local failures=0
@@ -289,11 +288,11 @@ ai_tools_install() {
     done
 
     # ── Install from downloaded files ────────────────────────────
-    if [ -f "$warp_deb" ]; then
-        info "Installing Warp terminal..."
-        sudo apt-get install -y "$warp_deb"
-        rm -f "$warp_deb"
-    fi
+    # if [ -f "$warp_deb" ]; then
+    #     info "Installing Warp terminal..."
+    #     sudo apt-get install -y "$warp_deb"
+    #     rm -f "$warp_deb"
+    # fi
 
     # ── Apt-repo-based installs ──────────────────────────────────
     # Cursor and Antigravity install from their vendor apt repositories, so the
@@ -320,13 +319,13 @@ ai_tools_install() {
     fi
 
     # ── curl|sh installers ───────────────────────────────────────
-    # LM Studio (local LLM runner)
-    if ! command -v lms &>/dev/null; then
-        info "Installing LM Studio..."
-        curl -fsSL https://lmstudio.ai/install.sh | bash
-    else
-        info "LM Studio already installed, skipping."
-    fi
+    # LM Studio (local LLM runner) — not needed right now
+    # if ! command -v lms &>/dev/null; then
+    #     info "Installing LM Studio..."
+    #     curl -fsSL https://lmstudio.ai/install.sh | bash
+    # else
+    #     info "LM Studio already installed, skipping."
+    # fi
 
     # Ollama (local LLM serving)
     if ! command -v ollama &>/dev/null; then

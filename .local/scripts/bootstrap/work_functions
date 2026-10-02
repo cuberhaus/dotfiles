@@ -95,7 +95,7 @@ dev_tools_install() {
         # Hardware info
         hardinfo                # GUI hardware info & benchmarks
         cpu-x                   # CPU-Z style hardware viewer
-        neofetch                # Terminal system info summary
+        fastfetch               # Terminal system info summary (neofetch left Ubuntu 26.04)
     )
     $apt "${packages[@]}"
     configure_brightness_access
@@ -259,10 +259,10 @@ gui_apps_install() {
     # (apt/dpkg needs exclusive lock so installs can't overlap).
     local pids=() names=()
     local chrome_deb="/tmp/google-chrome-stable_current_amd64.deb"
-    local warp_deb="/tmp/warp-terminal.deb"
-    local lms_ver="0.4.4-1"
-    local lms_deb="/tmp/LM-Studio-${lms_ver}-x64.deb"
-    local gpt4all_run="/tmp/gpt4all-installer.run"
+    # local warp_deb="/tmp/warp-terminal.deb"   # Warp: not needed right now
+    # local lms_ver="0.4.4-1"                    # LM Studio: not needed right now
+    # local lms_deb="/tmp/LM-Studio-${lms_ver}-x64.deb"
+    # local gpt4all_run="/tmp/gpt4all-installer.run"   # GPT4All: not needed right now
 
     # Google Chrome
     if ! command -v google-chrome-stable &>/dev/null; then
@@ -271,31 +271,32 @@ gui_apps_install() {
         pids+=($!); names+=("Chrome")
     fi
 
-    # Warp (AI terminal)
-    if ! command -v warp-terminal &>/dev/null; then
-        info "Downloading Warp terminal..."
-        wget -qO "$warp_deb" "https://app.warp.dev/download?package=deb" &
-        pids+=($!); names+=("Warp")
-    fi
+    # Warp (AI terminal) — not needed right now
+    # if ! command -v warp-terminal &>/dev/null; then
+    #     info "Downloading Warp terminal..."
+    #     wget -qO "$warp_deb" "https://app.warp.dev/download?package=deb" &
+    #     pids+=($!); names+=("Warp")
+    # fi
 
-    # LM Studio (local LLM runner — update version at https://lmstudio.ai/changelog)
-    if ! dpkg -l lm-studio &>/dev/null 2>&1; then
-        info "Downloading LM Studio..."
-        wget -qO "$lms_deb" "https://installers.lmstudio.ai/linux/x64/${lms_ver}/LM-Studio-${lms_ver}-x64.deb" &
-        pids+=($!); names+=("LM Studio")
-    fi
-    # GPT4All (local LLM chat)
-    if command -v gpt4all &>/dev/null || [ -d "$HOME/gpt4all" ] || [ -d /opt/gpt4all ]; then
-        info "GPT4All already installed, skipping."
-    else
-        info "Downloading GPT4All..."
-        (
-            local ver
-            ver=$(curl -sI https://github.com/nomic-ai/gpt4all/releases/latest | grep -i location | sed 's|.*/v||;s/\r//')
-            wget -qO "$gpt4all_run" "https://github.com/nomic-ai/gpt4all/releases/download/v${ver}/gpt4all-installer-linux-v${ver}.run"
-        ) &
-        pids+=($!); names+=("GPT4All")
-    fi
+    # LM Studio (local LLM runner — update version at https://lmstudio.ai/changelog) — not needed right now
+    # if ! dpkg -l lm-studio &>/dev/null 2>&1; then
+    #     info "Downloading LM Studio..."
+    #     wget -qO "$lms_deb" "https://installers.lmstudio.ai/linux/x64/${lms_ver}/LM-Studio-${lms_ver}-x64.deb" &
+    #     pids+=($!); names+=("LM Studio")
+    # fi
+
+    # GPT4All (local LLM chat) — not needed right now
+    # if command -v gpt4all &>/dev/null || [ -d "$HOME/gpt4all" ] || [ -d /opt/gpt4all ]; then
+    #     info "GPT4All already installed, skipping."
+    # else
+    #     info "Downloading GPT4All..."
+    #     (
+    #         local ver
+    #         ver=$(curl -sI https://github.com/nomic-ai/gpt4all/releases/latest | grep -i location | sed 's|.*/v||;s/\r//')
+    #         wget -qO "$gpt4all_run" "https://github.com/nomic-ai/gpt4all/releases/download/v${ver}/gpt4all-installer-linux-v${ver}.run"
+    #     ) &
+    #     pids+=($!); names+=("GPT4All")
+    # fi
 
     # Wait for all downloads to finish
     local failures=0
@@ -318,33 +319,33 @@ gui_apps_install() {
         rm -f "$chrome_deb"
     fi
 
-    if [ -f "$warp_deb" ]; then
-        info "Installing Warp terminal..."
-        sudo apt-get install -y "$warp_deb"
-        rm -f "$warp_deb"
-    fi
+    # if [ -f "$warp_deb" ]; then
+    #     info "Installing Warp terminal..."
+    #     sudo apt-get install -y "$warp_deb"
+    #     rm -f "$warp_deb"
+    # fi
 
-    if [ -f "$lms_deb" ]; then
-        info "Installing LM Studio..."
-        sudo apt-get install -y "$lms_deb"
-        rm -f "$lms_deb"
-    fi
+    # if [ -f "$lms_deb" ]; then
+    #     info "Installing LM Studio..."
+    #     sudo apt-get install -y "$lms_deb"
+    #     rm -f "$lms_deb"
+    # fi
 
-    if [ -f "$gpt4all_run" ] && ! command -v gpt4all &>/dev/null && [ ! -d "$HOME/gpt4all" ] && [ ! -d /opt/gpt4all ]; then
-        info "Installing GPT4All..."
-        chmod +x "$gpt4all_run"
-        "$gpt4all_run" --root "$HOME/gpt4all" --accept-licenses --default-answer --confirm-command install
-        rm -f "$gpt4all_run"
-        cat > "$HOME/.local/share/applications/gpt4all.desktop" <<EOF
-[Desktop Entry]
-Name=GPT4All
-Exec=$HOME/gpt4all/bin/chat
-Icon=$HOME/gpt4all/logo-48.png
-Type=Application
-Categories=Development;Science;
-Comment=Run LLMs locally
-EOF
-    fi
+    # if [ -f "$gpt4all_run" ] && ! command -v gpt4all &>/dev/null && [ ! -d "$HOME/gpt4all" ] && [ ! -d /opt/gpt4all ]; then
+    #     info "Installing GPT4All..."
+    #     chmod +x "$gpt4all_run"
+    #     "$gpt4all_run" --root "$HOME/gpt4all" --accept-licenses --default-answer --confirm-command install
+    #     rm -f "$gpt4all_run"
+    #     cat > "$HOME/.local/share/applications/gpt4all.desktop" <<EOF
+    # [Desktop Entry]
+    # Name=GPT4All
+    # Exec=$HOME/gpt4all/bin/chat
+    # Icon=$HOME/gpt4all/logo-48.png
+    # Type=Application
+    # Categories=Development;Science;
+    # Comment=Run LLMs locally
+    # EOF
+    # fi
 
     # ── Phase 3: apt-repo-based installs ─────────────────────────
     # VS Code, Cursor and Antigravity install from their vendor apt repositories,
@@ -394,13 +395,13 @@ EOF
         info "Ollama already installed, skipping."
     fi
 
-    # Zed (fast AI-powered editor)
-    if ! command -v zed &>/dev/null; then
-        info "Installing Zed..."
-        curl -f https://zed.dev/install.sh | sh
-    else
-        info "Zed already installed, skipping."
-    fi
+    # Zed (fast AI-powered editor) — not needed right now
+    # if ! command -v zed &>/dev/null; then
+    #     info "Installing Zed..."
+    #     curl -f https://zed.dev/install.sh | sh
+    # else
+    #     info "Zed already installed, skipping."
+    # fi
 
     # Claude Code (Anthropic CLI)
     if ! command -v claude &>/dev/null; then
@@ -485,8 +486,8 @@ EOF
     # Sublime Text
     snap list sublime-text &>/dev/null 2>&1 || sudo snap install sublime-text --classic
 
-    # Sublime Merge
-    snap list sublime-merge &>/dev/null 2>&1 || sudo snap install sublime-merge --classic
+    # Sublime Merge — not needed right now
+    # snap list sublime-merge &>/dev/null 2>&1 || sudo snap install sublime-merge --classic
 
     # Walc (WhatsApp Linux client)
     snap list walc &>/dev/null 2>&1 || sudo snap install walc

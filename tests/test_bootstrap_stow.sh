@@ -35,7 +35,7 @@ EOF
 
 setup_case() {
     CASE_DIR="$(mktemp -d)"
-    unset SKIP_STOW TEST_CONFIRM UNATTENDED
+    unset SKIP_STOW STOW_TARGET TEST_CONFIRM UNATTENDED
     export HOME="$CASE_DIR/home"
     export FAKE_BIN="$CASE_DIR/bin"
     export STOW_LOG="$CASE_DIR/stow.log"
@@ -141,6 +141,44 @@ All operations aborted.'
     teardown_case
 }
 
+# Stow owns only the relative links it makes itself, so it words a symbolic link it did not
+# create as "not owned by stow" even when the link already points at the file it would link.
+# That wording is the same in every Stow version; this one was captured from GNU Stow 2.4.1.
+test_links_not_owned_by_stow_are_backed_up() {
+    setup_case
+    export FAKE_STOW_PREVIEW='WARNING! stowing dotfiles would cause conflicts:
+  * existing target is not owned by stow: .config/Code/User/settings.json
+  * existing target is not owned by stow: .config/opencode/tui.json
+All operations aborted.'
+    mkdir -p "$HOME/.config/Code/User" "$HOME/.config/opencode" "$CASE_DIR/repo"
+    printf 'repository settings\n' > "$CASE_DIR/repo/settings.json"
+    # An absolute link to a real file, and one whose target no longer exists.
+    ln -s "$CASE_DIR/repo/settings.json" "$HOME/.config/Code/User/settings.json"
+    ln -s "$CASE_DIR/repo/missing.json" "$HOME/.config/opencode/tui.json"
+    run_stow_preflight ubuntu
+    [ ! -L "$HOME/.config/Code/User/settings.json" ] || fail 'Expected the absolute link to be moved aside'
+    [ ! -L "$HOME/.config/opencode/tui.json" ] || fail 'Expected the dangling link to be moved aside'
+    local backed_up
+    backed_up="$(find "$HOME/.dotfiles-backup" -type l -path '*/.config/Code/User/settings.json' -print -quit)"
+    [ -n "$backed_up" ] || fail 'Expected the absolute link to be backed up as a link'
+    [ "$(readlink "$backed_up")" = "$CASE_DIR/repo/settings.json" ] \
+        || fail 'The backed-up link must keep pointing at its original target'
+    find "$HOME/.dotfiles-backup" -type l -path '*/.config/opencode/tui.json' -print -quit | grep -q . \
+        || fail 'Expected the dangling link to be backed up'
+    assert_file_contains "$CASE_DIR/repo/settings.json" 'repository settings'
+    teardown_case
+}
+
+test_directories_are_never_backed_up() {
+    setup_case
+    export FAKE_STOW_PREVIEW='* existing target is not owned by stow: .config/app'
+    mkdir -p "$HOME/.config/app"
+    printf 'application data\n' > "$HOME/.config/app/data"
+    run_stow_preflight ubuntu
+    assert_file_contains "$HOME/.config/app/data" 'application data'
+    teardown_case
+}
+
 test_decline_preserves_conflicts() {
     setup_case
     export FAKE_STOW_PREVIEW='* existing target is neither a link nor a directory: .zshenv'
@@ -214,6 +252,8 @@ test_clean_install_applies_previewed_links
 test_existing_links_are_idempotent
 test_conflicts_are_backed_up_after_confirmation
 test_conflicts_worded_by_stow_2_4_are_backed_up
+test_links_not_owned_by_stow_are_backed_up
+test_directories_are_never_backed_up
 test_decline_preserves_conflicts
 test_no_stow_skips_all_stow_commands
 test_no_stow_argument_sets_skip_flag

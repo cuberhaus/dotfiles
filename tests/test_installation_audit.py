@@ -387,7 +387,7 @@ antigravity:
 
         self.assertRegex(
             source,
-            r"audit_packages\(packages, reporter\)\n\s+audit_ide_update_channels\(reporter\)",
+            r"audit_packages\(packages, reporter, profile\)\n\s+audit_ide_update_channels\(reporter\)",
         )
 
     def test_cursor_installed_outside_apt_mirrors_the_bootstrap_check(self):
@@ -416,16 +416,22 @@ antigravity:
                 with mock.patch.object(audit.shutil, "which", return_value="/usr/bin/cursor"):
                     self.assertTrue(audit.cursor_installed_outside_apt(), "a cursor command counts")
 
-    def audit_declared_packages(self, audit, declared, installed, manager="apt"):
-        """Run the package-declaration audit against a fake set of installed names."""
+    def audit_declared_packages(self, audit, declared, installed, manager="apt", candidates=None, profile=None):
+        """Run the package-declaration audit against a fake set of installed names.
+
+        `declared` holds names, or Package objects when a test needs the snap flag.
+        `candidates` fakes the apt names an enabled source offers; None means apt-cache cannot tell.
+        """
         reporter = audit.Reporter()
         output = io.StringIO()
+        packages = {item if isinstance(item, audit.Package) else audit.Package(manager, item) for item in declared}
         with (
             mock.patch.object(audit.shutil, "which", return_value="/usr/bin/tool"),
             mock.patch.object(audit, "installed_package_names", return_value=installed),
+            mock.patch.object(audit, "apt_names_with_candidate", return_value=candidates),
             contextlib.redirect_stdout(output),
         ):
-            audit.audit_packages({audit.Package(manager, name) for name in declared}, reporter)
+            audit.audit_packages(packages, reporter, profile)
         return reporter, output.getvalue()
 
     def test_alternative_install_satisfies_a_declared_package(self):
@@ -455,6 +461,229 @@ antigravity:
         self.assertIn("libfuse2", output)
         reporter, _ = self.audit_declared_packages(audit, ["libfuse2"], {"libfuse2t64"}, manager="pacman")
         self.assertEqual(reporter.issues, 1)
+
+    def capture_audit(self, audit, call):
+        """Run an audit function against a fresh Reporter and return it with everything it printed."""
+        reporter = audit.Reporter()
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            call(reporter)
+        return reporter, output.getvalue()
+
+    def test_reporter_aligns_extra_fix_lines_under_the_first(self):
+        audit = load_audit_module()
+
+        _, output = self.capture_audit(
+            audit,
+            lambda reporter: (
+                reporter.result("MISSING", "two things", ["first command", "", "# a note"]),
+                reporter.result("OK", "nothing to fix"),
+            ),
+        )
+
+        self.assertEqual(
+            output,
+            "  [MISSING] two things\n         Fix: first command\n              # a note\n  [OK] nothing to fix\n",
+        )
+
+    def test_no_finding_points_at_the_bootstrap_without_naming_it(self):
+        source = AUDIT_PATH.read_text(encoding="utf-8")
+
+        # A fix is a command the user can run, never "run the bootstrap" with no target.
+        self.assertNotIn("Run the matching bootstrap target", source)
+
+    def test_snap_declarations_keep_the_classic_flag_without_changing_identity(self):
+        audit = load_audit_module()
+        body = (
+            "    snap list code &>/dev/null || sudo snap install code --classic\n"
+            "    snap list obsidian &>/dev/null || sudo snap install obsidian\n"
+        )
+
+        packages = {package.name: package for package in audit.packages_in_function(body)}
+
+        self.assertTrue(packages["code"].classic)
+        self.assertFalse(packages["obsidian"].classic)
+        # The flag is how it installs, not what it is: it must not split or reorder packages.
+        self.assertEqual(audit.Package("snap", "code", True), audit.Package("snap", "code"))
+        self.assertEqual(len({audit.Package("snap", "code", True), audit.Package("snap", "code")}), 1)
+        self.assertEqual(sorted(packages.values()), [audit.Package("snap", "code"), audit.Package("snap", "obsidian")])
+
+    def test_missing_packages_print_the_install_command_of_their_manager(self):
+        audit = load_audit_module()
+        commands = {
+            "apt": "sudo apt-get install -y fd tree",
+            "pacman": "sudo pacman -S --needed fd tree",
+            "yay": "yay -S --needed fd tree",
+            "brew": "brew install fd tree",
+            "brew-cask": "brew install --cask fd tree",
+        }
+
+        for manager, command in commands.items():
+            with self.subTest(manager=manager):
+                reporter, output = self.audit_declared_packages(audit, ["tree", "fd"], set(), manager=manager)
+                self.assertIn(f"[MISSING] 2 expected {manager} package(s): fd, tree\n         Fix: {command}\n", output)
+                self.assertEqual(reporter.issues, 1)
+
+    def test_missing_snaps_print_one_command_each_and_classic_only_when_declared(self):
+        audit = load_audit_module()
+
+        reporter, output = self.audit_declared_packages(
+            audit, [audit.Package("snap", "code", True), audit.Package("snap", "obsidian")], set()
+        )
+
+        self.assertIn("Fix: sudo snap install code --classic\n", output)
+        self.assertIn("\n" + " " * 14 + "sudo snap install obsidian\n", output)
+        self.assertNotIn("obsidian --classic", output)
+        self.assertEqual(reporter.issues, 1)
+
+    def test_apt_names_without_a_candidate_get_the_update_command_and_a_note(self):
+        audit = load_audit_module()
+
+        reporter, output = self.audit_declared_packages(audit, ["tree", "neofetch"], set(), candidates={"tree"})
+
+        self.assertIn("Fix: sudo apt-get install -y tree\n", output)
+        self.assertIn("sudo apt-get update && sudo apt-get install -y neofetch\n", output)
+        self.assertIn("# neofetch: apt shows no install candidate.", output)
+        self.assertIn("(try: apt-cache search neofetch)", output)
+        # One unknown name makes apt-get refuse the whole line, so it never shares a command.
+        self.assertNotIn("neofetch tree", output)
+        self.assertNotIn("tree neofetch", output)
+        self.assertEqual(reporter.issues, 1)
+
+    def test_apt_cache_that_cannot_tell_still_prints_the_plain_install_command(self):
+        audit = load_audit_module()
+
+        _, output = self.audit_declared_packages(audit, ["neofetch"], set(), candidates=None)
+
+        self.assertIn("Fix: sudo apt-get install -y neofetch\n", output)
+        self.assertNotIn("apt-get update", output)
+
+    def test_t64_rename_counts_as_an_install_candidate(self):
+        audit = load_audit_module()
+
+        # libfuse2 exists only because libfuse2t64 provides it, and apt-get installs it by that name.
+        _, output = self.audit_declared_packages(audit, ["libfuse2"], set(), candidates={"libfuse2t64"})
+
+        self.assertIn("Fix: sudo apt-get install -y libfuse2\n", output)
+        self.assertNotIn("apt-get update", output)
+
+    def test_ide_package_without_its_vendor_source_points_at_the_profile_bootstrap(self):
+        audit = load_audit_module()
+
+        _, output = self.audit_declared_packages(audit, ["code", "tree"], set(), candidates={"tree"}, profile="work")
+
+        self.assertIn("Fix: sudo apt-get install -y tree\n", output)
+        self.assertIn("make bootstrap-work\n", output)
+        self.assertIn("# code: no enabled apt source offers it yet;", output)
+        self.assertNotIn("install -y code", output)
+
+    def test_an_unavailable_package_tool_names_the_profile_bootstrap(self):
+        audit = load_audit_module()
+        reporter = audit.Reporter()
+        output = io.StringIO()
+
+        with mock.patch.object(audit.shutil, "which", return_value=None), contextlib.redirect_stdout(output):
+            audit.audit_packages({audit.Package("apt", "tree")}, reporter, "ubuntu")
+
+        self.assertIn("dpkg-query is unavailable; 1 apt package(s) cannot be verified.\n         Fix: make bootstrap-ubuntu\n", output.getvalue())
+
+    def test_apt_candidate_lookup_makes_one_policy_call_and_reads_each_block(self):
+        audit = load_audit_module()
+        policy = (
+            "tree:\n  Installed: (none)\n  Candidate: 2.2.1-1\n  Version table:\n"
+            "     2.2.1-1 500\n        500 http://archive.ubuntu.com/ubuntu resolute/universe amd64 Packages\n"
+            "libfuse2t64:\n  Installed: (none)\n  Candidate: 2.9.9-9\n  Version table:\n"
+            "     2.9.9-9 500\n        500 http://archive.ubuntu.com/ubuntu resolute/main amd64 Packages\n"
+            "ghost:\n  Installed: (none)\n  Candidate: (none)\n  Version table:\n"
+        )
+        calls = []
+
+        def fake_run(command, cwd=None):
+            calls.append(command)
+            return subprocess.CompletedProcess(command, 0, stdout=policy, stderr="")
+
+        with (
+            mock.patch.object(audit.shutil, "which", return_value="/usr/bin/apt-cache"),
+            mock.patch.object(audit, "run", side_effect=fake_run),
+        ):
+            offered = audit.apt_names_with_candidate(["tree", "libfuse2", "ghost", "neofetch"])
+
+        self.assertEqual(offered, {"tree", "libfuse2t64"})
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0][:4], ["env", "LC_ALL=C", "apt-cache", "policy"])
+        self.assertEqual(
+            set(calls[0][4:]),
+            {"tree", "treet64", "libfuse2", "libfuse2t64", "ghost", "ghostt64", "neofetch", "neofetcht64"},
+        )
+
+    def test_apt_candidate_lookup_gives_no_answer_when_apt_cache_cannot_run(self):
+        audit = load_audit_module()
+
+        with mock.patch.object(audit.shutil, "which", return_value=None):
+            self.assertIsNone(audit.apt_names_with_candidate(["tree"]))
+        self.assertIsNone(audit.apt_names_with_candidate([]))
+        failed = subprocess.CompletedProcess([], 100, stdout="E: broken", stderr="")
+        with (
+            mock.patch.object(audit.shutil, "which", return_value="/usr/bin/apt-cache"),
+            mock.patch.object(audit, "run", return_value=failed),
+        ):
+            self.assertIsNone(audit.apt_names_with_candidate(["tree"]))
+
+    def test_missing_stow_names_the_install_command_for_the_profile(self):
+        audit = load_audit_module()
+        commands = {
+            "work": "sudo apt-get install -y stow",
+            "ubuntu-windows": "sudo apt-get install -y stow",
+            "manjaro": "sudo pacman -S --needed stow",
+            "mac": "brew install stow",
+            None: "make bootstrap-<profile>",
+        }
+
+        for profile, command in commands.items():
+            with self.subTest(profile=profile), mock.patch.object(audit.shutil, "which", return_value=None):
+                reporter, output = self.capture_audit(
+                    audit, lambda reporter: audit.audit_stow(REPO_ROOT, reporter, profile)
+                )
+                self.assertIn(f"[MISSING] GNU Stow is not installed.\n         Fix: {command}\n", output)
+                self.assertEqual(reporter.issues, 1)
+
+    def test_missing_editor_and_font_name_the_install_command_for_the_profile(self):
+        audit = load_audit_module()
+        commands = {
+            "ubuntu": ("sudo apt-get install -y vim", "sudo apt-get install -y fonts-powerline"),
+            "mac": ("brew install neovim", "brew install --cask font-meslo-lg-nerd-font"),
+            "arch": ("sudo pacman -S --needed vim", "make bootstrap-arch"),
+        }
+
+        for profile, (editor, font) in commands.items():
+            with (
+                self.subTest(profile=profile),
+                mock.patch.object(audit.shutil, "which", return_value=None),
+                mock.patch.object(audit, "font_families", return_value="DejaVu Sans"),
+            ):
+                reporter, output = self.capture_audit(
+                    audit, lambda reporter: audit.audit_editors_and_fonts(profile, reporter)
+                )
+                self.assertIn(f"Fix: {editor}\n", output)
+                self.assertIn(f"Fix: {font}\n", output)
+                self.assertEqual(reporter.issues, 2)
+
+    def test_unavailable_editor_variables_name_a_fix(self):
+        audit = load_audit_module()
+        environment = {"EDITOR": "vim", "VISUAL": "mycustomeditor --wait", "DOTFILES": str(REPO_ROOT)}
+
+        with (
+            mock.patch.dict("os.environ", environment),
+            mock.patch.object(audit.shutil, "which", return_value=None),
+        ):
+            _, output = self.capture_audit(audit, lambda reporter: audit.audit_environment(REPO_ROOT, reporter, "work"))
+
+        self.assertIn("EDITOR points to unavailable command: vim\n         Fix: sudo apt-get install -y vim\n", output)
+        self.assertIn(
+            "VISUAL points to unavailable command: mycustomeditor --wait\n"
+            "         Fix: install mycustomeditor, or point VISUAL at an installed editor in ~/.zshenv\n",
+            output,
+        )
 
     def run_git_credential_helper_audit(self, audit, stdout, returncode=0):
         """Run the credential-helper audit against a fake `git config --get-regexp` answer."""

@@ -123,7 +123,8 @@ Common tasks are available via `make`:
 make help              # Show all targets
 make install           # Symlink dotfiles into $HOME
 make uninstall         # Remove symlinks from $HOME
-make restow            # Re-stow (cleans stale links)
+make restow            # Back up conflicts, then re-stow (cleans stale links)
+make dry-run           # Preview Stow and the conflict backup, change nothing
 make lint              # Run shellcheck on all scripts
 make test              # Run deterministic unit tests
 make check             # Run tests, Gitleaks, and all linters
@@ -142,10 +143,28 @@ make bootstrap-<os>    # Run bootstrap (arch, manjaro, ubuntu, mac, work)
 Run `make audit-installation` regularly on each Unix machine to compare the
 current checkout, Stow-managed configs and aliases, packages declared by the
 active bootstrap profile, and native automations. The target changes nothing
-and exits `1` when it finds actionable drift. It auto-detects the profile; use
-`make audit-installation PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work`
+and exits `1` when it finds actionable drift. It auto-detects the profile from
+the `DOTFILES_PROFILE` line that `bootstrap-work` records in
+`~/.config/distro`, else from `DISTRO` there, else from the operating system;
+use `make audit-installation PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work`
 to override detection. Package expectations are parsed only from functions the
 selected bootstrap actually calls, so commented optional bundles are excluded.
+
+The audit also looks the other way. A package that is installed by hand but
+that the selected bootstrap does not declare is reported as a `[NOTICE]`, which
+never changes the exit code, with a `Fix:` command that removes it
+(`sudo apt-get remove …`, `sudo snap remove …`, `sudo pacman -Rs …`, or
+`brew uninstall …`). The command only names packages that look like your own
+choices: on apt, those that a `sudo apt` command in the retained apt logs
+installed on request (dependencies are skipped). Kernel, boot loader, firmware,
+driver, and Canonical-published snap packages are listed in a notice of their
+own, without a command. Nothing is removed for you. For each package you can
+remove it, declare it in the bootstrap's `*_functions` file, or accept it by
+listing `manager:name` in `~/.config/dotfiles/known-extra-packages` (one per
+line, `#` comments allowed; the file is per machine and not in this
+repository). `python3 .local/scripts/audit_installation.py --list-extra` prints
+the current list in that format, so appending its output to that file accepts
+everything listed at once. Long lists wrap to the width of the terminal.
 
 On the `ubuntu` and `work` profiles, Cursor and Antigravity (and VS Code on
 `work`) update through apt. A release upgrade disables third-party apt sources,

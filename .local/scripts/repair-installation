@@ -10,6 +10,24 @@ usage() {
 }
 
 detect_profile() {
+    # A profile a bootstrap recorded beats everything inferred below. DISTRO cannot say "work":
+    # the shell config branches on DISTRO=ubuntu, so bootstrap/work records the profile
+    # separately. audit_installation.py has its own copy of this lookup; keep the two in step.
+    local recorded=""
+    if [[ -r "$HOME/.config/distro" ]]; then
+        recorded="$(sed -En 's/^[[:space:]]*(export[[:space:]]+)?DOTFILES_PROFILE=([A-Za-z0-9_-]+).*/\2/p' "$HOME/.config/distro" | head -n 1)"
+    fi
+    case "$recorded" in
+        '') ;;
+        arch|manjaro|ubuntu|ubuntu-windows|mac|work)
+            printf '%s\n' "$recorded"
+            return
+            ;;
+        *)
+            printf 'DOTFILES_PROFILE=%s in ~/.config/distro is not a profile; fix the file or pass PROFILE explicitly.\n' "$recorded" >&2
+            return 2
+            ;;
+    esac
     if [[ "$OSTYPE" == darwin* ]]; then
         printf 'mac\n'
         return

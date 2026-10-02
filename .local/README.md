@@ -102,7 +102,12 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
   removal and `make uninstall-automations` disables/removes them.
 - **`audit_installation.py`** statically reads the selected bootstrap instead
   of sourcing it, then reports checkout, Stow, package, and scheduler drift via
-  `make audit-installation`. Set `PROFILE=<name>` to override auto-detection.
+  `make audit-installation`. Set `PROFILE=<name>` to override auto-detection,
+  which reads `DOTFILES_PROFILE` (recorded by `bootstrap/work`, whose `DISTRO`
+  must stay `ubuntu`), then `DISTRO`, then the operating system. It also
+  reports packages that are installed but declared nowhere as `[NOTICE]`
+  findings, which never change the exit code; `--list-extra` prints them as
+  `manager:name`.
 
 ## Bootstrap flow
 
