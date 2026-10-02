@@ -952,6 +952,8 @@ if [[ -n $python_bin ]]; then
     assert_contains "$output" $'\033[34m==> Docker unused volumes\033[0m' 'a terminal must get blue step headers'
     assert_contains "$output" $'\033[33mDeleting a volume destroys its data for good.\033[0m' \
         'a terminal must get the data-loss warning in yellow'
+    assert_contains "$output" $'\033[34mFree space on /: 100.00 GiB before, 103.00 GiB after (3.0 GiB more)\033[0m' \
+        'a terminal must get the free-space line in blue'
 
     set_machine ubuntu linux-gnu "${volume_tools[@]}"
     case_env=(NO_COLOR=1 STUB_VOLUMES=app_pgdata)
