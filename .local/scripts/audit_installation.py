@@ -15,7 +15,7 @@ import subprocess
 import sys
 import textwrap
 import zlib
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 
 
 @dataclasses.dataclass(frozen=True, order=True)
@@ -1156,18 +1156,20 @@ def wrap(text: str, width: int, first: str = "", rest: str | None = None) -> lis
     )
 
 
-def command_lines(words: Sequence[str], width: int) -> list[str]:
+def command_lines(words: Sequence[str], width: int, quote: Callable[[str], str] = shlex.quote) -> list[str]:
     """One shell command as lines of at most `width` columns; every line but the last ends in a backslash.
 
-    Pasted into a shell, the lines run as the single command that the words spell.
+    Pasted into a shell, the lines run as the single command that the words spell. Each word goes
+    through `quote`; words that are already shell-ready (a path written with ~) pass `str` instead.
     """
     lines: list[str] = []
     line = ""
-    for word in map(shlex.quote, words):
+    for word in map(quote, words):
         # The 2 is the " \" that closes a line when another word follows.
         if line and len(line) + 1 + len(word) + 2 > width:
             lines.append(f"{line} \\")
-            line = f"  {word}"
+            # A continuation is indented by two spaces, unless the word then no longer fits the line.
+            line = f"  {word}" if len(word) + 2 <= width else word
         else:
             line = f"{line} {word}" if line else word
     lines.append(line)
@@ -1235,6 +1237,29 @@ def audit_extra_packages(
 # put the program in the home folder, and no package manager records them, so the package report
 # above cannot see them. The launcher they leave in ~/.local/share/applications is the one trace
 # they all share, so that is what this reads. An app without a launcher stays invisible.
+#
+# A removal command is printed only where the place of the program proves what belongs to the app.
+# A command that deleted a folder on a wrong guess would delete someone's work, so any other layout
+# gets no command and the owner removes the app by hand.
+
+# A folder in one of these (below the home folder) is the folder of one app, by convention.
+APP_FOLDER_PARENTS = (".local/opt", ".opt", "opt", "Applications")
+# What a prefix holds besides apps: a folder with one of these names is never the folder of one app.
+PREFIX_FOLDERS = frozenset(
+    {"bin", "etc", "include", "lib", "lib64", "libexec", "opt", "sbin", "share", "src", "state", "var"}
+)
+# ~/.local is a prefix that tools share (bin, share, pipx, cargo, ...), so only a bundle named like
+# the one Zed's install script unpacks there (~/.local/zed.app) is the folder of one app.
+BUNDLE_PARENT = ".local"
+BUNDLE_SUFFIX = ".app"
+# The Qt Installer Framework leaves its uninstaller in the folder it installed into (GPT4All, the Qt SDK).
+INSTALLER_UNINSTALLERS = ("maintenancetool", "MaintenanceTool")
+# Where an installer links a program onto the PATH, below the home folder.
+LINK_FOLDERS = (".local/bin", "bin")
+# In front of the command that removes an app, under the line that names it.
+APP_FIX_PREFIX = "    Fix: "
+# What shlex.quote leaves unquoted: the characters a path may have to be written with ~.
+SHELL_SAFE_PATH = re.compile(r"[\w@%+=:,./-]+", re.ASCII)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1245,6 +1270,9 @@ class SelfInstalledApp:
     name: str
     # The program the launcher starts, every symbolic link followed. It is inside the home folder.
     program: pathlib.Path
+    # What removing the app deletes: its file or folder, the links onto the PATH, then its launchers
+    # and desktop shortcuts. Empty when the place of the program does not say what belongs to the app.
+    files: tuple[pathlib.Path, ...] = ()
 
 
 @dataclasses.dataclass
@@ -1336,6 +1364,111 @@ def names_file(code: str, file_name: str) -> bool:
     return re.search(rf"(?<![\w.-]){re.escape(file_name)}(?![\w.-])", code) is not None
 
 
+def user_desktop_dir() -> pathlib.Path:
+    """The folder the desktop shows shortcuts from: XDG_DESKTOP_DIR of user-dirs.dirs, ~/Desktop by default."""
+    home = pathlib.Path.home()
+    config_home = os.environ.get("XDG_CONFIG_HOME") or str(home / ".config")
+    try:
+        text = (pathlib.Path(config_home) / "user-dirs.dirs").read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        text = ""
+    match = re.search(r'^XDG_DESKTOP_DIR="([^"]*)"', text, re.MULTILINE)
+    if match:
+        value = match.group(1)
+        # Like GLib, which the desktop reads the file with, expand a leading $HOME/ and nothing else.
+        if value.startswith("$HOME/"):
+            value = str(home) + value[len("$HOME"):]
+        folder = pathlib.Path(value)
+        # The user-dirs specification switches a folder off by pointing it at the home folder.
+        if folder.is_absolute() and folder != home:
+            return folder
+    return home / "Desktop"
+
+
+def app_location(program: pathlib.Path, home: pathlib.Path) -> pathlib.Path | None:
+    """The file or folder that is the app, when the place of its program says so; None otherwise.
+
+    An AppImage is one file. Any other app is a folder: the one an installer made for it, directly
+    in APP_FOLDER_PARENTS or as a `*.app` bundle in ~/.local, or the nearest one that holds the Qt
+    installer's uninstaller. A script in ~/.local/bin, a program in a folder of the owner's own, and
+    one in a folder that tools share say nothing about what else is in their folder, so they get None.
+    The result is never the home folder, a folder that holds apps, or a folder named like a prefix's.
+    """
+    if home not in program.parents:
+        return None
+    if program.suffix.lower() == ".appimage" and program.is_file():
+        return program
+    parents = {home / relative for relative in APP_FOLDER_PARENTS}
+    bundle_parent = home / BUNDLE_PARENT
+    shared = {bundle_parent, *parents, *(home / relative for relative in LINK_FOLDERS)}
+    for folder in program.parents:
+        if folder == home:
+            break
+        if folder in shared or folder.name in PREFIX_FOLDERS:
+            continue
+        if any((folder / name).is_file() for name in INSTALLER_UNINSTALLERS):
+            return folder
+        if folder.parent in parents or (folder.parent == bundle_parent and folder.name.endswith(BUNDLE_SUFFIX)):
+            return folder
+    return None
+
+
+def directory_entries(directory: pathlib.Path, pattern: str = "*") -> list[pathlib.Path]:
+    """The entries of a folder that match the pattern, sorted; none when the folder cannot be read."""
+    try:
+        return sorted(directory.glob(pattern))
+    except OSError:
+        return []
+
+
+def is_within(path: pathlib.Path | None, location: pathlib.Path) -> bool:
+    """Whether the path is the file or folder, or lies inside the folder."""
+    return path is not None and (path == location or location in path.parents)
+
+
+def app_files(program: pathlib.Path, home: pathlib.Path) -> tuple[pathlib.Path, ...]:
+    """What removing the app deletes: its file or folder, the links onto the PATH, then its launchers.
+
+    Empty where app_location cannot tell what belongs to the app. A launcher is every desktop file
+    that starts a program inside what is deleted, in the folder of launchers and on the desktop (an
+    installer often leaves a shortcut there too); a link is a symbolic link in LINK_FOLDERS that
+    leads there. A file that cannot be read, or leads nowhere near, is left alone.
+    """
+    location = app_location(program, home)
+    if location is None:
+        return ()
+    files = [location]
+    for relative in LINK_FOLDERS:
+        for link in directory_entries(home / relative):
+            try:
+                if link.is_symlink() and is_within(link.resolve(), location):
+                    files.append(link)
+            except (OSError, RuntimeError):
+                continue
+    for directory in (user_applications_dir(), user_desktop_dir()):
+        for launcher in directory_entries(directory, "*.desktop"):
+            if is_within(launcher_program(desktop_entry(launcher)), location):
+                files.append(launcher)
+    return tuple(dict.fromkeys(files))
+
+
+def shell_path(path: pathlib.Path) -> str:
+    """The path as one shell word: written with ~ where it lies in the home folder and needs no quoting.
+
+    A tilde inside quotes is not expanded, so a path that needs quoting is quoted whole and written in full.
+    """
+    try:
+        relative = path.relative_to(pathlib.Path.home())
+    except ValueError:
+        return shlex.quote(str(path))
+    return f"~/{relative}" if SHELL_SAFE_PATH.fullmatch(str(relative)) else shlex.quote(str(path))
+
+
+def removal_words(files: Sequence[pathlib.Path]) -> list[str]:
+    """The shell words of the command that removes these files: `rm -rI`, which asks once, never `-f`."""
+    return ["rm", "-rI", "--", *map(shell_path, files)]
+
+
 def find_self_installed_apps(repo_root: pathlib.Path, profile: str) -> SelfInstalledApps | None:
     """The launchers of apps that start from the home folder and that the bootstrap does not declare.
 
@@ -1345,7 +1478,8 @@ def find_self_installed_apps(repo_root: pathlib.Path, profile: str) -> SelfInsta
     gone does not either). It is declared when an active line of the profile's bootstrap names the
     launcher's file, as the Arch bootstraps do for the Cursor and Antigravity AppImages they install.
     An app whose own installer writes the launcher is not recognized that way: the known-extra-packages
-    file accepts it (`app:KEY`, or the bare key).
+    file accepts it (`app:KEY`, or the bare key). Each app found carries the files that removing it
+    deletes (app_files), which stay empty where nothing proves what belongs to it.
 
     None when the directory of launchers does not exist (macOS, a bare container).
     """
@@ -1369,7 +1503,9 @@ def find_self_installed_apps(repo_root: pathlib.Path, profile: str) -> SelfInsta
         if (APP_KEY, key) in entries or (None, key) in entries:
             apps.acknowledged += 1
             continue
-        apps.found.append(SelfInstalledApp(key=key, name=entry.get("Name") or key, program=program))
+        apps.found.append(
+            SelfInstalledApp(key=key, name=entry.get("Name") or key, program=program, files=app_files(program, home))
+        )
     return apps
 
 
@@ -1377,9 +1513,10 @@ def audit_self_installed_apps(repo_root: pathlib.Path, profile: str, reporter: R
     """Notice apps that came with their own installer and that no active bootstrap step declares.
 
     Read-only, and silent where there is no directory of launchers. Like the package report, it is a
-    notice that never changes the exit code. It suggests no removal command: no package manager owns
-    these apps, so the owner removes one with its own uninstaller, or keeps it (the
-    known-extra-packages file).
+    notice that never changes the exit code. Under each app it prints the `Fix:` command that
+    removes the app (`rm -rI`, so it asks once), but only where the place of the program proves what
+    belongs to the app; for any other app there is no command and the owner removes it by hand. The
+    owner can also keep an app (the known-extra-packages file). Settings and data are never named.
     """
     apps = find_self_installed_apps(repo_root, profile)
     if apps is None:
@@ -1400,11 +1537,16 @@ def audit_self_installed_apps(repo_root: pathlib.Path, profile: str, reporter: R
         lines = wrap(headline, text_width)
         for app in apps.found:
             lines.extend(wrap(f"{app.name} ({APP_KEY}:{app.key}): {display_path(app.program)}", text_width, "  ", "      "))
+            if app.files:
+                # The command comes under the app it removes; its words are already shell-ready.
+                fix = command_lines(removal_words(app.files), text_width - len(APP_FIX_PREFIX), quote=str)
+                lines.append(APP_FIX_PREFIX + fix[0])
+                lines.extend(" " * len(APP_FIX_PREFIX) + line for line in fix[1:])
         reporter.result("NOTICE", "\n".join(lines))
-        intro = "Nothing was changed. No package manager owns these apps, so no removal command is suggested. For each app you can:"
-        print("\n".join(wrap(intro, width, "  ")))
+        print("  Nothing was changed. For each app you can:")
         for option in (
-            "remove it with its own uninstaller, or delete its folder and its launcher yourself;",
+            "remove it, with the Fix command under it where one is given (it removes the app, its "
+            "launchers and its links, asks once, and keeps the settings and data of the app);",
             f"or accept it by listing app:NAME in {keep_file} (`--list-extra` prints that format).",
         ):
             print("\n".join(wrap(option, width, "    - ", "      ")))

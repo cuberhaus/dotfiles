@@ -3,10 +3,13 @@
 Zed, GPT4All and AppImages put a program in the home folder and leave a launcher in
 ~/.local/share/applications. No package manager records them, so the package report cannot see them,
 and the audit reads the launcher instead. Like the package report it is a notice that never changes
-the exit code, and it suggests no removal command, because nothing owns these apps.
+the exit code. It prints a `Fix:` command that removes an app only where the place of its program
+proves what belongs to it (an AppImage, an app folder in an install prefix, the folder of a Qt
+installer); for any other app it prints no command.
 
 Every test runs against a throwaway home folder: HOME, XDG_DATA_HOME and XDG_CONFIG_HOME all point
-into a scratch directory, so a test can neither read the real launchers nor touch them.
+into a scratch directory, so a test can neither read the real launchers nor touch them. The tests of
+the removal command run it, with `bash`, against that folder.
 """
 
 import contextlib
@@ -14,6 +17,8 @@ import importlib.util
 import io
 import os
 import pathlib
+import shlex
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -433,6 +438,513 @@ class AcceptedTests(AppsCase):
         self.assertEqual((apps.found, apps.acknowledged), ([], 0))
 
 
+class RemovalCase(AppsCase):
+    """Helpers for the tests of the files that make up an app and of the command that removes them."""
+
+    def installed(self, relative: str, stem: str = "app") -> tuple[pathlib.Path, pathlib.Path]:
+        """An app whose program lies at `relative` in the home folder: (program, launcher)."""
+        program = self.program(relative)
+        return program, self.app(stem, program)
+
+    def shortcut(self, file_name: str, program: pathlib.Path, folder: pathlib.Path | None = None) -> pathlib.Path:
+        """A desktop shortcut for the program, written the way the Qt installer does (quoted Exec)."""
+        folder = folder or self.home / "Desktop"
+        folder.mkdir(parents=True, exist_ok=True)
+        path = folder / file_name
+        path.write_text(f'[Desktop Entry]\nType=Application\nExec="{program}"\nName=Shortcut\n', encoding="utf-8")
+        return path
+
+    def uninstaller(self, folder: str, name: str = "maintenancetool") -> None:
+        (self.home / folder / name).write_text("", encoding="utf-8")
+
+    def files(self, stem: str = "app") -> tuple[pathlib.Path, ...]:
+        """What the audit would delete for the app with this key, once it is shown to be safe to name."""
+        (app,) = [app for app in self.find().found if app.key == stem]
+        never_whole = {self.home, self.home.parent, self.scratch}
+        never_whole |= {
+            self.home / name
+            for name in (
+                ".local", ".local/bin", ".local/share", ".local/share/applications", ".local/opt", ".opt", "opt",
+                "Applications", "bin", "Desktop", ".config", ".cache",
+            )
+        }
+        for path in app.files:
+            self.assertIn(self.home, path.parents, f"{path} is not inside the home folder")
+            self.assertNotIn(path, never_whole, f"{path} must never be removed whole")
+        return app.files
+
+
+class RemovalTests(RemovalCase):
+    """Which files make up an app: SelfInstalledApp.files, empty where nothing proves what belongs to it."""
+
+    def test_an_appimage_goes_with_its_launcher(self) -> None:
+        program, launcher = self.installed("Applications/cursor.AppImage", "cursor")
+
+        self.assertEqual(self.files("cursor"), (program, launcher))
+
+    def test_an_appimage_is_recognised_in_any_folder_and_in_any_case(self) -> None:
+        for relative in ("Downloads/Foo-1.2.AppImage", "stuff/tool.appimage", "x/y/Z.APPIMAGE"):
+            with self.subTest(relative):
+                program, launcher = self.installed(relative, "foo")
+
+                self.assertEqual(self.files("foo"), (program, launcher))
+
+    def test_an_appimage_inside_an_app_folder_goes_without_the_folder(self) -> None:
+        program, launcher = self.installed("Applications/Foo/foo.AppImage", "foo")
+
+        self.assertEqual(self.files("foo"), (program, launcher))
+
+    def test_a_link_to_an_appimage_goes_with_it(self) -> None:
+        program, launcher = self.installed("Applications/cursor.AppImage", "cursor")
+        link = self.home / ".local" / "bin" / "cursor"
+        link.parent.mkdir(parents=True)
+        link.symlink_to(program)
+
+        self.assertEqual(self.files("cursor"), (program, link, launcher))
+
+    def test_an_app_folder_in_an_install_prefix_goes_whole(self) -> None:
+        folders = {
+            ".local/zed.app/bin/zed": ".local/zed.app",
+            ".local/zed-preview.app/libexec/zed-editor": ".local/zed-preview.app",
+            ".local/opt/foo/bin/foo": ".local/opt/foo",
+            ".opt/foo/bin/foo": ".opt/foo",
+            "opt/foo/foo": "opt/foo",
+            "Applications/Foo/bin/foo": "Applications/Foo",
+        }
+        for relative, folder in folders.items():
+            with self.subTest(relative):
+                _, launcher = self.installed(relative, "foo")
+
+                self.assertEqual(self.files("foo"), (self.home / folder, launcher))
+
+    def test_the_folder_of_a_qt_installer_goes_whole(self) -> None:
+        _, launcher = self.installed("gpt4all/bin/chat", "gpt4all")
+        self.uninstaller("gpt4all")
+
+        self.assertEqual(self.files("gpt4all"), (self.home / "gpt4all", launcher))
+
+    def test_the_uninstaller_may_be_spelled_either_way_and_the_program_may_be_deep(self) -> None:
+        _, launcher = self.installed("Qt/Tools/QtCreator/bin/qtcreator", "qtcreator")
+        self.uninstaller("Qt", "MaintenanceTool")
+
+        self.assertEqual(self.files("qtcreator"), (self.home / "Qt", launcher))
+
+    def test_the_nearest_folder_with_an_uninstaller_is_the_app(self) -> None:
+        _, launcher = self.installed("suite/tools/app/bin/app", "app")
+        self.uninstaller("suite")
+        self.uninstaller("suite/tools/app")
+
+        self.assertEqual(self.files("app"), (self.home / "suite" / "tools" / "app", launcher))
+
+    def test_an_uninstaller_in_the_home_folder_itself_does_not_make_the_home_folder_an_app(self) -> None:
+        self.installed("tools/bin/run", "run")
+        self.uninstaller(".")
+
+        self.assertEqual(self.files("run"), ())
+
+    def test_a_place_that_does_not_say_what_belongs_to_the_app_gets_no_files(self) -> None:
+        for relative in (
+            "gpt4all/bin/chat",  # a folder of the home folder, but no uninstaller in it
+            "projects/bin/tool",  # the owner's own folder
+            "code/tool",
+            ".local/bin/script",  # a folder that many programs share
+            ".local/share/foo/bin/foo",
+            ".local/zed.app.old/bin/zed",  # a name that merely contains .app
+            ".local/pipx/venvs/foo/bin/foo",  # a folder that tools share
+            ".local/cargo/bin/foo",
+            ".local/lib/foo/bin/foo",
+            ".local/opt/tool",  # a file straight in the prefix
+            "opt/bin/tool",  # the prefix's own folder
+            "bin/tool",
+            "Applications/tool",  # a file, and not an AppImage
+            "tool",  # straight in the home folder
+        ):
+            with self.subTest(relative):
+                self.installed(relative, "foo")
+
+                self.assertEqual(self.files("foo"), ())
+
+    def test_a_link_onto_the_path_goes_with_the_app(self) -> None:
+        program, launcher = self.installed(".local/zed.app/bin/zed", "zed")
+        inner = self.program(".local/zed.app/libexec/zed-editor")
+        first = self.home / ".local" / "bin" / "zed"
+        second = self.home / "bin" / "zed-editor"
+        for link, target in ((first, program), (second, inner)):
+            link.parent.mkdir(parents=True, exist_ok=True)
+            link.symlink_to(target)
+
+        self.assertEqual(self.files("zed"), (self.home / ".local" / "zed.app", first, second, launcher))
+
+    def test_what_is_not_a_link_into_the_app_stays(self) -> None:
+        _, launcher = self.installed(".local/zed.app/bin/zed", "zed")
+        folder = self.home / ".local" / "bin"
+        folder.mkdir(parents=True)
+        (folder / "other").symlink_to(self.program("elsewhere/bin/other"))
+        (folder / "dangling").symlink_to(self.home / "missing")
+        (folder / "zed-copy").write_text("#!/bin/sh\n", encoding="utf-8")  # a plain file, not a link
+
+        self.assertEqual(self.files("zed"), (self.home / ".local" / "zed.app", launcher))
+
+    def test_every_launcher_and_shortcut_that_starts_the_app_goes_with_it(self) -> None:
+        program, launcher = self.installed("gpt4all/bin/chat", "gpt4all")
+        self.uninstaller("gpt4all")
+        second = self.app("gpt4all-chat", f'"{program}" --chat')
+        shortcut = self.shortcut("GPT4All.desktop", program)
+
+        self.assertEqual(self.files("gpt4all"), (self.home / "gpt4all", second, launcher, shortcut))
+
+    def test_the_desktop_folder_is_the_one_user_dirs_dirs_names(self) -> None:
+        program, _ = self.installed("gpt4all/bin/chat", "gpt4all")
+        self.uninstaller("gpt4all")
+        (self.home / ".config").mkdir()
+        (self.home / ".config" / "user-dirs.dirs").write_text(
+            '# comment\nXDG_DESKTOP_DIR="$HOME/Escritorio"\n', encoding="utf-8"
+        )
+        not_the_desktop = self.shortcut("GPT4All.desktop", program)
+        shortcut = self.shortcut("GPT4All.desktop", program, self.home / "Escritorio")
+
+        files = self.files("gpt4all")
+
+        self.assertIn(shortcut, files)
+        self.assertNotIn(not_the_desktop, files)
+
+    def test_only_desktop_files_are_launchers(self) -> None:
+        # Copies and notes that repeat a launcher's text are not launchers.
+        _, launcher = self.installed(".local/zed.app/bin/zed", "zed")
+        (self.home / "Desktop").mkdir()
+        for path in (self.applications / "zed.desktop.bak", self.applications / "zed.txt", self.home / "Desktop" / "zed-notes"):
+            path.write_text(launcher.read_text(encoding="utf-8"), encoding="utf-8")
+
+        self.assertEqual(self.files("zed"), (self.home / ".local" / "zed.app", launcher))
+
+    def test_a_launcher_of_another_program_stays(self) -> None:
+        _, launcher = self.installed(".local/zed.app/bin/zed", "zed")
+        other = self.program("elsewhere/bin/other")
+        self.app("other", other)
+        self.shortcut("Other.desktop", other)
+
+        self.assertEqual(self.files("zed"), (self.home / ".local" / "zed.app", launcher))
+
+    def test_a_desktop_file_that_cannot_be_read_is_ignored(self) -> None:
+        _, launcher = self.installed(".local/zed.app/bin/zed", "zed")
+        (self.applications / "folder.desktop").mkdir()
+        (self.applications / "garbage.desktop").write_bytes(b"\xff\xfe\x00 not a launcher")
+        (self.home / "Desktop").mkdir()
+        (self.home / "Desktop" / "empty.desktop").write_text("", encoding="utf-8")
+
+        self.assertEqual(self.files("zed"), (self.home / ".local" / "zed.app", launcher))
+
+    def test_a_program_outside_the_home_folder_has_no_location(self) -> None:
+        for relative in ("tool/bin/run", "tool/Foo.AppImage"):
+            with self.subTest(relative):
+                program = self.program(relative, outside=True)
+
+                self.assertIsNone(self.audit.app_location(program, self.home))
+
+    def test_a_folder_named_like_an_appimage_is_not_one(self) -> None:
+        folder = self.home / "Applications" / "Foo.AppImage"
+        folder.mkdir(parents=True)
+        self.app("foo", folder)
+
+        self.assertEqual(self.files("foo"), ())
+
+    def test_an_uninstaller_in_a_folder_that_tools_share_does_not_make_it_an_app(self) -> None:
+        for relative, folder in (
+            ("Applications/tool", "Applications"),
+            ("opt/tool", "opt"),
+            (".local/opt/tool", ".local/opt"),
+            (".local/bin/script", ".local"),
+            ("bin/tool", "bin"),
+            ("projects/lib/tool", "projects/lib"),  # named like the folder of a prefix
+        ):
+            with self.subTest(relative):
+                self.installed(relative, "foo")
+                self.uninstaller(folder)
+
+                self.assertEqual(self.files("foo"), ())
+
+    def test_a_folder_where_links_are_made_is_shared_whatever_it_is_called(self) -> None:
+        self.installed("tools/run", "foo")
+        self.uninstaller("tools")
+
+        with mock.patch.object(self.audit, "LINK_FOLDERS", (".local/bin", "bin", "tools")):
+            files = self.files("foo")
+
+        self.assertEqual(files, ())
+
+    def test_no_folder_named_like_a_part_of_a_prefix_is_an_app(self) -> None:
+        for name in ("bin", "etc", "include", "lib", "lib64", "libexec", "opt", "sbin", "share", "src", "state", "var"):
+            with self.subTest(name):
+                self.installed(f"opt/{name}/tool", "foo")
+                self.uninstaller(f"opt/{name}")
+
+                self.assertEqual(self.files("foo"), ())
+
+    def test_a_folder_named_like_the_uninstaller_is_not_one(self) -> None:
+        self.installed("gpt4all/bin/chat", "gpt4all")
+        (self.home / "gpt4all" / "maintenancetool").mkdir()
+
+        self.assertEqual(self.files("gpt4all"), ())
+
+    def test_a_file_seen_through_a_linked_folder_is_not_taken_for_a_link(self) -> None:
+        # ~/bin leads into the app, so ~/bin/zed is the program itself, which goes with the folder.
+        _, launcher = self.installed(".local/zed.app/bin/zed", "zed")
+        (self.home / "bin").symlink_to(self.home / ".local" / "zed.app" / "bin")
+
+        self.assertEqual(self.files("zed"), (self.home / ".local" / "zed.app", launcher))
+
+    def test_a_link_that_cannot_be_followed_is_left_alone(self) -> None:
+        _, launcher = self.installed(".local/zed.app/bin/zed", "zed")
+        folder = self.home / ".local" / "bin"
+        folder.mkdir(parents=True)
+        for name in ("loop", "locked"):
+            (folder / name).symlink_to(folder / name)
+        failures = {"loop": RuntimeError("Symlink loop"), "locked": PermissionError("Permission denied")}
+        resolve = pathlib.Path.resolve
+
+        def refusing(path: pathlib.Path, *args: object, **kwargs: object) -> pathlib.Path:
+            if path.name in failures:
+                raise failures[path.name]
+            return resolve(path, *args, **kwargs)
+
+        with mock.patch.object(pathlib.Path, "resolve", refusing):
+            files = self.files("zed")
+
+        self.assertEqual(files, (self.home / ".local" / "zed.app", launcher))
+
+    def test_a_file_is_named_once_even_when_two_folders_are_the_same(self) -> None:
+        program, launcher = self.installed("Applications/cursor.AppImage", "cursor")
+        (self.home / ".config").mkdir()
+        (self.home / ".config" / "user-dirs.dirs").write_text(
+            f'XDG_DESKTOP_DIR="{self.applications}"\n', encoding="utf-8"
+        )
+
+        self.assertEqual(self.files("cursor"), (program, launcher))
+
+    def test_the_files_come_in_a_fixed_order_whatever_order_the_folders_list_them_in(self) -> None:
+        program, launcher = self.installed("gpt4all/bin/chat", "gpt4all")
+        self.uninstaller("gpt4all")
+        second = self.app("gpt4all-chat", f'"{program}"')
+        links = [self.home / ".local" / "bin" / name for name in ("a-chat", "b-chat")]
+        links[0].parent.mkdir(parents=True)
+        for link in links:
+            link.symlink_to(program)
+        listing = pathlib.Path.glob
+
+        def backwards(folder: pathlib.Path, pattern: str, **kwargs: object):
+            return iter(sorted(listing(folder, pattern, **kwargs), reverse=True))
+
+        with mock.patch.object(pathlib.Path, "glob", backwards):
+            files = self.files("gpt4all")
+
+        self.assertEqual(files, (self.home / "gpt4all", *links, second, launcher))
+
+    def test_a_folder_that_cannot_be_listed_gives_no_entries(self) -> None:
+        with mock.patch.object(pathlib.Path, "glob", side_effect=PermissionError("denied")):
+            self.assertEqual(self.audit.directory_entries(self.home), [])
+
+    def test_an_accepted_app_needs_no_files(self) -> None:
+        self.installed(".local/zed.app/bin/zed", "zed")
+        self.keep_file("app:zed\n")
+
+        self.assertEqual(self.find().found, [])
+
+
+class DesktopFolderTests(AppsCase):
+    """Where the desktop keeps its shortcuts."""
+
+    def desktop(self, text: str | None = None) -> pathlib.Path:
+        if text is not None:
+            (self.home / ".config").mkdir(exist_ok=True)
+            (self.home / ".config" / "user-dirs.dirs").write_text(text, encoding="utf-8")
+        return self.audit.user_desktop_dir()
+
+    def test_it_is_the_desktop_folder_of_the_home_folder_by_default(self) -> None:
+        self.assertEqual(self.desktop(), self.home / "Desktop")
+
+    def test_it_follows_xdg_desktop_dir(self) -> None:
+        self.assertEqual(self.desktop('XDG_DESKTOP_DIR="$HOME/Escritorio"\n'), self.home / "Escritorio")
+
+    def test_an_absolute_path_is_taken_as_it_is(self) -> None:
+        self.assertEqual(self.desktop(f'XDG_DESKTOP_DIR="{self.outside}/desk"\n'), self.outside / "desk")
+
+    def test_the_home_folder_itself_means_there_is_no_desktop_folder(self) -> None:
+        # The user-dirs specification switches a folder off by pointing it at $HOME/.
+        self.assertEqual(self.desktop('XDG_DESKTOP_DIR="$HOME/"\n'), self.home / "Desktop")
+
+    def test_a_relative_path_is_no_folder_to_look_in(self) -> None:
+        self.assertEqual(self.desktop('XDG_DESKTOP_DIR="Escritorio"\n'), self.home / "Desktop")
+
+    def test_only_a_leading_home_variable_is_expanded(self) -> None:
+        cases = {
+            '"$HOME"': self.home / "Desktop",  # no folder below the home folder, so no desktop folder
+            '"$HOMEFOO"': self.home / "Desktop",  # another variable, which is not a path
+            f'"{self.outside}/$HOME/desk"': self.outside / "$HOME" / "desk",  # a name in an absolute path
+            '"$HOME/a/$HOME"': self.home / "a" / "$HOME",  # the second one is part of a name
+        }
+        for value, expected in cases.items():
+            with self.subTest(value):
+                self.assertEqual(self.desktop(f"XDG_DESKTOP_DIR={value}\n"), expected)
+
+    def test_a_file_without_the_setting_gives_the_default(self) -> None:
+        self.assertEqual(self.desktop('# XDG_DESKTOP_DIR="$HOME/Nope"\nXDG_MUSIC_DIR="$HOME/Musica"\n'), self.home / "Desktop")
+
+    def test_it_reads_the_file_from_xdg_config_home(self) -> None:
+        config = self.outside / "config"
+        config.mkdir()
+        (config / "user-dirs.dirs").write_text('XDG_DESKTOP_DIR="$HOME/Escritorio"\n', encoding="utf-8")
+
+        with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(config)}):
+            self.assertEqual(self.audit.user_desktop_dir(), self.home / "Escritorio")
+
+
+class CommandTests(RemovalCase):
+    """The removal command: its words, and what a shell does when it runs them."""
+
+    def words(self, stem: str = "app") -> list[str]:
+        return self.audit.removal_words(self.files(stem))
+
+    def run_command(self, words: list[str], answer: str) -> subprocess.CompletedProcess[str]:
+        """Run the words as a shell reads them once pasted, with this answer to the question rm asks."""
+        return subprocess.run(
+            ["bash", "-c", " ".join(words)],
+            input=answer,
+            text=True,
+            capture_output=True,
+            check=False,
+            env={"HOME": str(self.home), "PATH": os.environ.get("PATH", "/usr/bin:/bin")},
+        )
+
+    def zed_with_neighbours(self) -> tuple[tuple[pathlib.Path, ...], list[pathlib.Path]]:
+        """Zed as its install script leaves it, and files beside it that must survive: (files, kept)."""
+        program, _ = self.installed(".local/zed.app/bin/zed", "zed")
+        self.program(".local/zed.app/libexec/zed-editor")
+        link = self.home / ".local" / "bin" / "zed"
+        link.parent.mkdir(parents=True)
+        link.symlink_to(program)
+        kept = []
+        for relative in (
+            ".config/zed/settings.json",  # its settings
+            ".local/share/zed/db/data",  # its data
+            ".cache/zed/x",
+            ".local/bin/other",
+            ".local/zed.app.notes",  # starts like the folder's name
+            ".local/share/applications/other.desktop",
+        ):
+            path = self.home / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("keep\n", encoding="utf-8")
+            kept.append(path)
+        return self.files("zed"), kept
+
+    def test_the_command_asks_once_and_never_forces_or_escalates(self) -> None:
+        self.installed(".local/zed.app/bin/zed", "zed")
+
+        self.assertEqual(
+            self.words("zed"),
+            ["rm", "-rI", "--", "~/.local/zed.app", "~/.local/share/applications/zed.desktop"],
+        )
+
+    def test_the_usual_characters_of_a_file_name_need_no_quoting(self) -> None:
+        self.installed("Applications/Foo+Bar_1.0@x,y=z:w%/bin/foo", "foo")
+
+        self.assertEqual(self.words("foo")[3], "~/Applications/Foo+Bar_1.0@x,y=z:w%")
+
+    def test_a_path_that_needs_quoting_is_quoted_whole_and_written_in_full(self) -> None:
+        # A tilde inside quotes is not expanded, so a quoted word has to carry the whole path.
+        program = self.program("Applications/My App $x 'q' *.AppImage")
+        self.app("odd", shlex.quote(str(program)))
+
+        self.assertEqual(self.words("odd")[3:], [shlex.quote(str(program)), "~/.local/share/applications/odd.desktop"])
+
+    def test_running_the_command_removes_the_app_and_nothing_else(self) -> None:
+        files, kept = self.zed_with_neighbours()
+
+        done = self.run_command(self.audit.removal_words(files), "y\n")
+
+        self.assertEqual(done.returncode, 0, done.stderr)
+        for path in files:
+            self.assertFalse(path.exists() or path.is_symlink(), f"{path} is still there")
+        for path in kept:
+            self.assertTrue(path.exists(), f"{path} was removed")
+        self.assertTrue((self.home / ".local").is_dir())
+
+    def test_the_command_removes_nothing_unless_it_is_told_to(self) -> None:
+        files, _ = self.zed_with_neighbours()
+
+        for answer in ("n\n", "\n", ""):
+            with self.subTest(answer=answer):
+                self.run_command(self.audit.removal_words(files), answer)
+
+                for path in files:
+                    self.assertTrue(path.exists() or path.is_symlink(), f"{path} was removed on the answer {answer!r}")
+
+    def test_a_path_with_spaces_and_shell_characters_survives_the_shell(self) -> None:
+        program = self.program("Applications/My App $x 'q' *.AppImage")
+        launcher = self.app("odd", shlex.quote(str(program)))
+        # What a command that split the name, or let the shell expand the star, would remove as well.
+        neighbours = [self.program("Applications/My.AppImage"), self.program("Applications/other.AppImage")]
+
+        done = self.run_command(self.words("odd"), "y\n")
+
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertFalse(program.exists() or launcher.exists())
+        self.assertTrue(all(path.exists() for path in neighbours))
+
+    def test_the_shell_reads_the_word_of_every_special_character_back_as_the_path(self) -> None:
+        # One character per file name, so that a class that lets just one of them through is noticed.
+        for character in " $'\"*?;&|<>()\\`!#~{}[]^\t%@+=:,-":
+            with self.subTest(character=character):
+                program = self.program(f"Applications/a{character}b.AppImage")
+                self.app("odd", shlex.quote(str(program)))
+
+                read = subprocess.run(
+                    ["bash", "-c", f"printf %s {self.words('odd')[3]}"],
+                    capture_output=True, text=True, check=False, env={"HOME": str(self.home), "PATH": os.environ["PATH"]},
+                )
+
+                self.assertEqual(read.stdout, str(program), read.stderr)
+
+    def test_a_name_beyond_ascii_is_quoted_whole(self) -> None:
+        program, _ = self.installed("Applications/Café/bin/cafe", "cafe")
+
+        self.assertEqual(self.words("cafe")[3], shlex.quote(str(program.parent.parent)))
+
+    def test_a_home_folder_reached_through_a_link_gets_a_command_that_works(self) -> None:
+        # Where /home is a link to /var/home, the program resolves to the real path and Path.home() does not.
+        real = self.scratch / "real-home"
+        self.home.rename(real)
+        self.home.symlink_to(real)
+        program = self.program("GPT4All Chat/bin/chat")
+        self.app("gpt4all", shlex.quote(str(program)))
+        self.uninstaller("GPT4All Chat")
+        settings = real / ".config" / "gpt4all" / "settings"
+        settings.parent.mkdir(parents=True)
+        settings.write_text("keep\n", encoding="utf-8")
+
+        (app,) = self.find().found
+        words = self.audit.removal_words(app.files)
+        done = self.run_command(words, "y\n")
+
+        self.assertEqual(app.files, (real / "GPT4All Chat", self.applications / "gpt4all.desktop"))
+        # Outside the unresolved home folder, so written in full and quoted; the launcher still gets the ~.
+        self.assertEqual(words[3:], [shlex.quote(str(real / "GPT4All Chat")), "~/.local/share/applications/gpt4all.desktop"])
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertFalse((real / "GPT4All Chat").exists() or (self.applications / "gpt4all.desktop").exists())
+        self.assertTrue(settings.exists())
+
+    def test_command_lines_can_leave_the_words_as_they_are(self) -> None:
+        self.assertEqual(self.audit.command_lines(["rm", "~/a b"], 80), ["rm '~/a b'"])
+        self.assertEqual(self.audit.command_lines(["rm", "~/a"], 80, quote=str), ["rm ~/a"])
+
+    def test_a_continuation_is_indented_unless_that_would_overflow_the_line(self) -> None:
+        word = "x" * 10
+
+        self.assertEqual(self.audit.command_lines(["rm", word], 12, quote=str), ["rm \\", f"  {word}"])
+        self.assertEqual(self.audit.command_lines(["rm", word], 11, quote=str), ["rm \\", word])
+        self.assertEqual(self.audit.command_lines(["rm", "x" * 20], 11, quote=str), ["rm \\", "x" * 20])
+
+
 class ReportTests(AppsCase):
     """What audit_self_installed_apps prints."""
 
@@ -456,6 +968,8 @@ class ReportTests(AppsCase):
         self.app("cursor", self.program("Applications/cursor.AppImage"), name="Cursor")
 
     def test_the_layout_at_80_columns(self) -> None:
+        # Cursor (an AppImage) and Zed (an app folder in ~/.local) have a command. GPT4All has none here:
+        # nothing in its folder says the folder is the app's.
         self.three_apps()
 
         reporter, output = self.report()
@@ -467,18 +981,100 @@ Apps installed outside the bootstrap
   [NOTICE] 3 app(s) start from your home folder and are not declared by the work
            bootstrap:
              Cursor (app:cursor): ~/Applications/cursor.AppImage
+               Fix: rm -rI -- ~/Applications/cursor.AppImage \\
+                      ~/.local/share/applications/cursor.desktop
              Zed (app:dev.zed.Zed): ~/.local/zed.app/bin/zed
+               Fix: rm -rI -- ~/.local/zed.app \\
+                      ~/.local/share/applications/dev.zed.Zed.desktop
              GPT4All (app:gpt4all): ~/gpt4all/bin/chat
-  Nothing was changed. No package manager owns these apps, so no removal command
-  is suggested. For each app you can:
-    - remove it with its own uninstaller, or delete its folder and its launcher
-      yourself;
+  Nothing was changed. For each app you can:
+    - remove it, with the Fix command under it where one is given (it removes
+      the app, its launchers and its links, asks once, and keeps the settings
+      and data of the app);
     - or accept it by listing app:NAME in
       ~/.config/dotfiles/known-extra-packages (`--list-extra` prints that
       format).
 """,
         )
         self.assertEqual((reporter.notices, reporter.warnings, reporter.issues), (1, 0, 0))
+
+    def test_the_layout_of_an_app_with_a_shortcut_at_80_columns(self) -> None:
+        program = self.program("gpt4all/bin/chat")
+        self.uninstaller_of("gpt4all")
+        self.app("gpt4all", program, name="GPT4All")
+        desktop = self.home / "Desktop"
+        desktop.mkdir()
+        (desktop / "GPT4All.desktop").write_text(f'[Desktop Entry]\nType=Application\nExec="{program}"\n', encoding="utf-8")
+
+        _, output = self.report()
+
+        self.assertIn(
+            """\
+             GPT4All (app:gpt4all): ~/gpt4all/bin/chat
+               Fix: rm -rI -- ~/gpt4all \\
+                      ~/.local/share/applications/gpt4all.desktop \\
+                      ~/Desktop/GPT4All.desktop
+""",
+            output,
+        )
+
+    def uninstaller_of(self, folder: str) -> None:
+        (self.home / folder / "maintenancetool").write_text("", encoding="utf-8")
+
+    def fix_commands(self, output: str) -> list[str]:
+        """The commands printed after `Fix:`, each joined back into the one line a shell reads."""
+        commands: list[str] = []
+        pending: list[str] | None = None
+        for line in output.splitlines():
+            text = line.strip()
+            if pending is None and text.startswith("Fix: "):
+                pending = [text[len("Fix: "):]]
+            elif pending is not None:
+                pending.append(text)
+            else:
+                continue
+            if pending[-1].endswith("\\"):
+                pending[-1] = pending[-1][:-1].rstrip()
+            else:
+                commands.append(" ".join(pending))
+                pending = None
+        return commands
+
+    def test_each_fix_line_is_the_command_that_removes_that_app(self) -> None:
+        self.three_apps()
+        self.uninstaller_of("gpt4all")
+
+        _, output = self.report()
+
+        apps = {app.key: app for app in self.find().found}
+        self.assertEqual(
+            self.fix_commands(output),
+            [" ".join(self.audit.removal_words(apps[key].files)) for key in ("cursor", "dev.zed.Zed", "gpt4all")],
+        )
+
+    def test_an_app_without_a_safe_command_has_no_fix_line(self) -> None:
+        self.three_apps()
+
+        _, output = self.report()
+
+        self.assertEqual(len(self.fix_commands(output)), 2)
+        lines = output.splitlines()
+        entry = next(index for index, line in enumerate(lines) if "GPT4All (app:gpt4all)" in line)
+        self.assertNotIn("Fix:", lines[entry + 1])
+
+    def test_a_fix_command_wraps_with_backslashes_and_never_splits_a_path_at_the_narrowest_width(self) -> None:
+        self.width = 60
+        name = "Some-Very-Long-Application-Name-1.2.3-x86_64.AppImage"
+        program = self.program(f"Applications/{name}")
+        launcher = self.app("long", program, name="Long")
+
+        _, output = self.report()
+
+        self.assertEqual(self.fix_commands(output), [" ".join(self.audit.removal_words((program, launcher)))])
+        fix_lines = [line for line in output.splitlines() if "Fix: " in line or line.rstrip().endswith("\\") or name in line]
+        self.assertGreater(len(fix_lines), 1)
+        for line in output.splitlines():
+            self.assertTrue(len(line) <= 60 or name in line, line)
 
     def test_a_long_path_is_never_split_at_the_narrowest_width(self) -> None:
         self.width = 60
@@ -542,13 +1138,32 @@ Apps installed outside the bootstrap
 
         self.assertEqual((reporter.notices, reporter.warnings, reporter.issues), (1, 0, 0))
 
-    def test_no_removal_command_is_suggested(self) -> None:
+    def test_a_command_never_forces_escalates_or_names_more_than_paths(self) -> None:
         self.three_apps()
+        self.uninstaller_of("gpt4all")
 
         _, output = self.report()
 
-        self.assertNotIn("Fix:", output)
-        self.assertNotRegex(output, r"\b(rm|sudo)\b")
+        commands = self.fix_commands(output)
+        self.assertEqual(len(commands), 3)
+        for command in commands:
+            words = shlex.split(command)
+            self.assertEqual(words[:3], ["rm", "-rI", "--"], command)
+            for word in words[3:]:
+                expanded = pathlib.Path(os.path.expanduser(word))
+                self.assertTrue(expanded.is_absolute(), command)
+                self.assertIn(self.home, expanded.parents, command)
+                self.assertFalse(set(word) & set("*?[]{}$`;&|<>()!"), command)
+        self.assertNotRegex(output, r"\bsudo\b")
+
+    def test_nothing_is_removed_by_the_audit_itself(self) -> None:
+        self.three_apps()
+        self.uninstaller_of("gpt4all")
+        before = sorted(path for path in self.home.rglob("*"))
+
+        self.report()
+
+        self.assertEqual(sorted(path for path in self.home.rglob("*")), before)
 
     def test_the_declaring_profile_is_named_in_the_report(self) -> None:
         self.three_apps()

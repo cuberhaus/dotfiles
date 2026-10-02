@@ -171,10 +171,16 @@ package manager's database, so that check cannot see it. The audit reads the
 launchers in `~/.local/share/applications` instead and lists, as one `[NOTICE]`,
 every launcher that starts a program from your home folder and that the selected
 bootstrap does not declare. A launcher counts as declared when an active line of
-the bootstrap names its file. No removal command is suggested, because no
-package manager owns these apps: use the app's own uninstaller, or delete its
-folder and its launcher yourself. To keep one, list `app:NAME` (the launcher's
-file name without `.desktop`, as the notice shows it) in the same
+the bootstrap names its file. Nothing is removed for you, and a `Fix:` command
+appears under an app only when the place of its program proves what belongs to
+it: an AppImage, a folder of its own in `~/.local/opt`, `~/.opt`, `~/opt` or
+`~/Applications`, a `*.app` folder in `~/.local` (Zed), or the folder of a Qt
+installer (GPT4All, which keeps a `maintenancetool` there). The command is
+`rm -rI -- …`, so it asks once before it deletes; it removes the app, the links
+to it in `~/.local/bin` and `~/bin`, and its launchers and desktop shortcuts,
+and never its settings or data. Under any other app there is no command: use
+its own uninstaller, or delete it yourself. To keep one, list `app:NAME` (the
+launcher's file name without `.desktop`, as the notice shows it) in the same
 `~/.config/dotfiles/known-extra-packages` file; `--list-extra` prints the apps in
 that format too. An app that leaves no launcher is not seen.
 

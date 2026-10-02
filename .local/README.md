@@ -108,8 +108,11 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
   reports packages that are installed but declared nowhere as `[NOTICE]`
   findings, which never change the exit code, and the apps that came with their
   own installer (the launchers in `~/.local/share/applications` that start a
-  program from the home folder and that the bootstrap does not declare);
-  `--list-extra` prints them as `manager:name` and `app:name`.
+  program from the home folder and that the bootstrap does not declare), with
+  a `Fix:` command under an app when the place of its program proves what
+  belongs to it (an AppImage, an app folder in an install prefix, a Qt
+  installer's folder) and none otherwise; `--list-extra` prints them as
+  `manager:name` and `app:name`.
 
 ## Bootstrap flow
 
