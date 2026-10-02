@@ -75,6 +75,9 @@ work_main() {
     # network and a few minutes of compiling, so a failure must not abort provisioning.
     asusctl_install ||
         warn "asusctl setup failed; rerun it with: make repair REPAIR=asusctl PROFILE=work"
+    # Skipped unless asusctl is installed and the keyboard supports the effect.
+    asusctl_lighting ||
+        warn "Keyboard lighting failed; rerun it with: make repair REPAIR=asusctl-lighting"
     nvidia_install
     nvidia_display_config
     dev_tools_install

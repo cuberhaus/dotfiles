@@ -460,6 +460,14 @@ asusctl_uninstall() {
     bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/asusctl_install.sh" --uninstall || true
 }
 
+## Set the keyboard backlight to a rainbow through asusctl. The script skips machines
+## without asusctl, without a lighting device, or whose keyboard lacks the effect, so
+## profiles can call this unconditionally; asusctl without an answering asusd is a
+## failure, which the profiles only warn about. It needs no sudo; see docs/ASUSCTL.md.
+asusctl_lighting() {
+    bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/asusctl_lighting.sh"
+}
+
 ###############################################################
 # => IDE installs (vendor apt repositories and Cursor)
 ###############################################################

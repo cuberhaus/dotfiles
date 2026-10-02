@@ -6,7 +6,7 @@ step="${1:-}"
 profile="${2:-auto}"
 
 usage() {
-    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos and asusctl only)]\n' >&2
+    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos, asusctl, and asusctl-lighting only)]\n' >&2
 }
 
 detect_profile() {
@@ -101,6 +101,18 @@ repair_asusctl() {
     bash "$repo_root/.local/scripts/asusctl_install.sh" ${arguments[@]+"${arguments[@]}"}
 }
 
+# Set the keyboard backlight to a rainbow when asusctl is installed and the keyboard
+# supports it; every other machine is skipped, so PROFILE does not matter. This is not
+# the "keyboard" step below, which deploys the X11 key layout. It needs no sudo, and
+# DRY_RUN=true shows the asusctl command without running it.
+repair_asusctl_lighting() {
+    local -a arguments=()
+    case "${DRY_RUN:-false}" in
+        true|1) arguments+=(--dry-run) ;;
+    esac
+    bash "$repo_root/.local/scripts/asusctl_lighting.sh" ${arguments[@]+"${arguments[@]}"}
+}
+
 case "$step" in
     config|aliases|environment)
         restow_config
@@ -113,6 +125,9 @@ case "$step" in
         ;;
     asusctl)
         repair_asusctl
+        ;;
+    asusctl-lighting)
+        repair_asusctl_lighting
         ;;
     automations)
         bash "$repo_root/.local/scripts/automation/install"

@@ -31,6 +31,12 @@ calls `sudo` only to install. `--unattended` (what the bootstrap passes in
 unattended mode) uses `sudo -n` and stops with an explanation when credentials
 are not cached, so authorize `sudo -v` first.
 
+`.local/scripts/asusctl_lighting.sh` sets the keyboard backlight to a rainbow.
+The `work` and `ubuntu` bootstraps run it right after the installer, through
+`asusctl_lighting` in `bootstrap/base_functions`. It skips machines without
+`asusctl` and keyboards that lack the effect (see
+[Keyboard lighting](#keyboard-lighting)).
+
 ## Which machines
 
 The installer acts only when all of these hold, and prints the first one that
@@ -145,13 +151,83 @@ leaves the settings alone from then on because no other daemon is running.
 (`disable_nvidia_powerd_on_battery` in `/etc/asusd/asusd.ron`). The installer
 does not change that default.
 
+## Keyboard lighting
+
+`.local/scripts/asusctl_lighting.sh` sets the keyboard backlight to the
+`rainbow-wave` effect, at medium speed, moving right. It needs no `sudo`: the
+D-Bus policy of `asusd` lets your own user read and change the keyboard. It does
+not set the brightness, and it leaves the AniMe Matrix display alone, because
+that is a separate device (`xyz.ljones.Anime`) and not an Aura lighting device.
+
+```bash
+.local/scripts/asusctl_lighting.sh --dry-run        # checks everything, changes nothing
+.local/scripts/asusctl_lighting.sh                  # apply the effect, or confirm it
+.local/scripts/asusctl_lighting.sh --effect rainbow-cycle --speed high
+make repair REPAIR=asusctl-lighting DRY_RUN=true    # the same preview through make
+make repair REPAIR=asusctl-lighting                 # the same step through make
+```
+
+A skip prints its reason and exits successfully; a failure exits non-zero. The
+script goes through these cases in order:
+
+| Situation | Result |
+| --- | --- |
+| `asusctl` is not installed | Skips. |
+| `busctl` is missing | Fails. `busctl` (part of systemd) is how the script reads what the keyboard supports. |
+| `asusd` answers but exports no lighting device (an object with the `xyz.ljones.Aura` interface) | Skips: this model has no Aura keyboard. |
+| `asusd` does not answer on the system bus | Fails and points to `systemctl status asusd.service`, because the daemon should be running once `asusctl` is installed. The script polls for up to 15 seconds first, which covers a daemon that has just started after a fresh install. |
+| A lighting device does not list the effect in `SupportedBasicModes` | Skips and names the device. `asusctl aura effect` applies an effect to every lighting device and stops at the first one that refuses it, so running it would leave the devices half changed. |
+| Every device already shows the effect, speed, and direction | Reports that and changes nothing. |
+| Anything else | Runs `asusctl aura effect rainbow-wave --direction right --speed med`, then reads the result back from every device. |
+
+The read-back uses the daemon's `LedModeData` property (`(uu(yyy)(yyy)ss)`: mode,
+zone, two colours, speed, direction). It reads every device again, up to three
+times one second apart, until all of them report the effect, because `asusd` can
+refuse a read for a moment after a change. A device that does not report the
+effect, or a property layout the script does not recognize, counts as a failure:
+an answer the script cannot read is never taken for success.
+
+The daemon stores the effect (in `/etc/asusd/aura_19b6.ron` on the G635LX; the
+name carries the keyboard's USB product ID) and restores it at every boot, so the
+step only has to succeed once per machine. A failure in a bootstrap only warns and
+names the repair command. Rerunning the bootstrap or the repair applies the
+configured effect again whenever the keyboard shows a different one, so it
+replaces an effect that you chose by hand. Edit `EFFECT`, `SPEED`, and `DIRECTION`
+at the top of the script to change what every machine gets, or pass `--effect`,
+`--speed`, and `--direction` for a single run (`rainbow-cycle` has no direction).
+The script accepts only `rainbow-wave` and `rainbow-cycle`, because it needs the
+daemon's mode number for an effect to check support and confirm the result; use
+`asusctl aura effect` directly for anything else.
+
+The step never sets the brightness, but `asusd` raises a backlight that is `Off`
+to `Med` whenever it applies an effect, so a keyboard that you had switched off
+lights up the first time the step changes it. To go back to the daemon's default,
+a static red, run `asusctl aura effect static -c a60000`.
+
+To check the keyboard by hand (the device name differs per model; list the names
+with `busctl --system --list tree xyz.ljones.Asusd`):
+
+```bash
+.local/scripts/asusctl_lighting.sh --dry-run
+busctl --system get-property xyz.ljones.Asusd /xyz/ljones/aura/19b6_3_4 xyz.ljones.Aura LedModeData
+# (uu(yyy)(yyy)ss) 3 0 166 0 0 0 0 0 "Med" "Right"   -> mode 3 is rainbow-wave
+```
+
+The mode numbers are `0` static, `1` breathe, `2` rainbow-cycle, `3` rainbow-wave,
+and `4` and above the other effects. On 2026-10-02 the dry run above, against the
+daemon of the G635LX, reported the keyboard as already showing `rainbow-wave`
+(speed med, direction right).
+
 ## Not installed
 
 - `rog-control-center`, the graphical front end. It needs more build
   dependencies and is optional; everything it shows is also reachable through
   `asusctl`.
-- `asusd-user`, the per-user daemon that creates AniMe Matrix sequences, a
-  display this laptop family does not have.
+- `asusd-user`, the per-user daemon that lets applications create AniMe Matrix
+  sequences. The system daemon already drives this laptop's AniMe Matrix display
+  (upstream lists the `G635L` board as an AniMe model, and `asusd` exports
+  `/xyz/ljones/aura/anime` here), so its built-in animations and `asusctl anime`
+  (images, GIFs, brightness, power saving) work without it.
 - GPU switching tools. The ASUS Linux guide tells you to remove
   distribution-provided graphics switching such as `supergfxd` and `envycontrol`
   before setting up `asusctl`, and calls `supergfxctl` deprecated (its
@@ -226,7 +302,13 @@ uninstallers offer the same removal as an unchecked item.
    the install targets in the Makefile with `stage_files`, and the kernel
    requirement in the ASUS Linux guide with `MIN_KERNEL`. Update the file count
    in this document if the manifest size changes.
-4. Run `bash tests/test_asusctl_install.sh`, then repeat the real run in a
+4. Compare `AuraModeNum` in `rog-aura/src/builtin_modes.rs` with `mode_number`,
+   and the type of the `LedModeData` property (`asusd/src/aura_laptop/trait_impls.rs`,
+   shown by `busctl introspect`) with `MODE_DATA_SIGNATURE`, in
+   `.local/scripts/asusctl_lighting.sh`. If upstream renumbers the modes or changes
+   the layout, the script would misread what a keyboard supports or has applied.
+5. Run `bash tests/test_asusctl_install.sh` and
+   `bash tests/test_asusctl_lighting.sh`, then repeat the real run in a
    disposable container. The hardware checks accept the variables
    `ASUSCTL_INSTALL_DMI_DIR`, `ASUSCTL_INSTALL_PLATFORM_DIR`, and
    `ASUSCTL_INSTALL_OSRELEASE_FILE`, which the test suite also uses to describe a
@@ -239,5 +321,13 @@ temporary system directories, fake `sudo`, `apt-get`, `cargo`, `systemctl`, and
 `busctl`, and a local git repository standing in for upstream. It covers the
 hardware gates, the pin check, staging, unattended mode, the profile policy,
 upgrades and stale files, uninstall, status, and the bootstrap and repair
-wiring. `bash tests/test_bootstrap_work.sh` covers the position of the step in
+wiring. `bash tests/test_bootstrap_work.sh` covers the position of the steps in
 the `work` bootstrap and that a failure does not stop provisioning.
+
+`bash tests/test_asusctl_lighting.sh` runs the lighting script against a fake
+`busctl` and `asusctl` that keep per-device state, so it never touches a real
+keyboard. It covers every case in the table above (including devices that sort
+before and after the keyboard), the wait for a daemon that has just started,
+repeat runs, effects changed by hand, the options, the dry run, failures that
+only the read-back can see, a busy daemon, and the wiring into the bootstraps,
+the repair step, and `make test`.

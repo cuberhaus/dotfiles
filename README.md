@@ -157,9 +157,10 @@ previews its `sudo` commands first. See
 
 The `work` and `ubuntu` bootstraps also install `asusctl` (ASUS Linux's daemon
 for platform profiles, fan curves, and the battery charge limit), but only on a
-supported ASUS laptop; other machines skip it. `make repair REPAIR=asusctl`
-repeats the step and `DRY_RUN=true` previews it. See
-[asusctl](.local/README.md#asusctl).
+supported ASUS laptop; other machines skip it. They then set the keyboard
+backlight to a rainbow when the keyboard supports it. `make repair REPAIR=asusctl`
+and `make repair REPAIR=asusctl-lighting` repeat the two steps and `DRY_RUN=true`
+previews them. See [asusctl](.local/README.md#asusctl).
 
 Configuration import is preview-first. `make config-import` shows the Stow
 `--adopt` operations; `make config-import APPLY=1` performs them and then shows

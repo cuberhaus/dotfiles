@@ -44,6 +44,9 @@ nvidia_display_config
 # network and a few minutes of compiling, so a failure must not abort provisioning.
 asusctl_install ||
     warn "asusctl setup failed; rerun it with: make repair REPAIR=asusctl PROFILE=ubuntu"
+# Skipped unless asusctl is installed and the keyboard supports the effect.
+asusctl_lighting ||
+    warn "Keyboard lighting failed; rerun it with: make repair REPAIR=asusctl-lighting"
 ai_tools_install
 vim_install
 if [ "$(basename "$SHELL")" != "zsh" ]; then

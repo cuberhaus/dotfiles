@@ -1,0 +1,1357 @@
+#!/usr/bin/env bash
+# Description: Sign out of browsers, editors and CLIs and delete stored login tokens; --audit lists the credentials left on this machine.
+#
+# Usage: logout-all [-n|--dry-run] [-y|--yes] [--only GROUPS] [--skip GROUPS]
+#        logout-all --audit
+#
+# Linux only. It shows a plan and asks before it changes anything. It never prints a secret,
+# never follows a symbolic link and never stops a process (an app that is running is skipped).
+# It does not delete SSH or GPG keys, API-key files, kubeconfig or .env files either: --audit
+# lists those for you to decide. See `logout-all --help`.
+
+# No `set -e`: one failing step must not stop the steps after it. step() records the failure
+# and the summary at the end reports it.
+set -uo pipefail
+
+dry_run=false
+assume_yes=false
+audit_only=false
+only_groups=''
+skip_groups=''
+selected_groups=''
+group_order='cli files browsers apps history agents'
+default_groups='cli files browsers apps agents'
+
+actions=0 # targets with something to do in the current pass
+failures=''
+skipped=''
+current_label=''
+header_printed=false
+rows=0 # findings printed in the current section of --audit
+warned_python=false
+blue='' green='' yellow='' reset=''
+
+# What a sign-out deletes inside a profile or an app directory. A "?" matches any one character,
+# so it stands for a space. Bookmarks, history, extensions and preferences are on none of them.
+chromium_items=(
+    'Cookies*' 'Network/Cookies*' 'Extension?Cookies*'
+    'Login?Data*' 'Web?Data*' 'Account?Web?Data*'
+    'Local?Storage' 'Session?Storage' 'IndexedDB' 'Service?Worker' 'File?System' 'databases'
+    'Sync?Data' 'Sync?App?Settings' 'Trust?Tokens*' 'Network/Trust?Tokens*'
+)
+# key4.db stays: it also holds the private keys of client certificates you imported, and
+# without logins.json it protects nothing.
+gecko_items=(
+    'cookies.sqlite*' 'logins.json' 'logins-backup.json' 'signons.sqlite' 'signedInUser.json'
+    'storage/default/http*' 'storage/ls-archive.sqlite*' 'webappsstore.sqlite*'
+)
+# Slack, Discord, Teams and Obsidian keep their whole login in web storage.
+electron_items=(
+    'Cookies*' 'Network/Cookies*' 'Trust?Tokens*' 'Network/Trust?Tokens*'
+    'Local?Storage' 'Session?Storage' 'IndexedDB' 'Service?Worker' 'WebStorage'
+)
+# The editors keep their login in User/globalStorage/state.vscdb, which also holds chat history
+# and other state, so its sign-in rows are removed one by one (clean_editor_state) rather than
+# the file.
+editor_items=(
+    'Cookies*' 'Network/Cookies*' 'Trust?Tokens*' 'Network/Trust?Tokens*'
+    'User/globalStorage/state.vscdb.backup'
+)
+history_items=(
+    '.zsh_history' '.bash_history' '.python_history' '.psql_history' '.mysql_history'
+    '.sqlite_history' '.node_repl_history' '.lesshst' '.viminfo'
+    '.local/share/zsh/history' '.local/share/bash/.bash_history' '.config/zsh/.zsh_history'
+    '.local/state/nvim/shada' '.local/share/nvim/shada' '.local/share/recently-used.xbel'
+)
+
+usage() {
+    cat <<'EOF'
+Usage: logout-all [-n|--dry-run] [-y|--yes] [--only GROUPS] [--skip GROUPS]
+       logout-all --audit
+       logout-all -h|--help
+
+Sign out of everything for this account and delete the login tokens stored on disk. It shows
+a plan first and asks before it changes anything; the default answer is No.
+
+Close browsers and editors first. One that is running is skipped, because it would write its
+session back when it quits. Run this from a plain terminal, not from the terminal inside an
+editor that you want signed out.
+
+Groups (for --only and --skip, comma separated):
+  cli       Sign out of gh, gcloud, docker, az and aws.
+  files     Delete token files left by Git, AI tools and other CLIs, such as ~/.git-credentials.
+  browsers  Delete cookies, saved passwords, autofill and site storage of Chrome, Chromium,
+            Brave, Edge, Vivaldi, Firefox and Thunderbird. Bookmarks, history and extensions
+            stay.
+  apps      Remove the sign-ins of VS Code, Cursor, Antigravity and similar editors, and the
+            web sessions of Slack, Discord, Teams and Obsidian.
+  agents    Forget sudo's cached password, ssh-agent keys, gpg-agent passphrases and Kerberos
+            tickets, then lock the login keyring.
+  history   Delete shell and REPL history. Off by default: open shells write theirs back.
+
+Options:
+  -n, --dry-run   Show the plan and change nothing.
+  -y, --yes       Change without asking (for scripts and hotkeys).
+      --audit     Report every credential on this machine, read-only, including the ones this
+                  command never deletes: SSH and API keys, .env files and kubeconfig.
+  -h, --help      Show this help.
+
+A local sign-out cannot take back a token that someone already copied, and anyone with sudo
+can read your files. Revoke tokens on the provider's site too; --audit says where.
+EOF
+}
+
+have() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# ~/... for a path under $HOME. The tilde is meant literally: it is only displayed.
+tilde() {
+    # shellcheck disable=SC2088
+    case "$1" in
+        "$HOME") printf '~' ;;
+        "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;;
+        *) printf '%s' "$1" ;;
+    esac
+}
+
+# in_list WORD "a b c": succeeds when WORD is one of the words.
+in_list() {
+    case " $2 " in
+        *" $1 "*) return 0 ;;
+    esac
+    return 1
+}
+
+join_lines() {
+    awk '{ printf "%s%s", (NR > 1 ? ", " : ""), $0 } END { if (NR) printf "\n" }'
+}
+
+bytes_of() {
+    du -sb -- "$@" 2>/dev/null | awk '{ total += $1 } END { print total + 0 }'
+}
+
+human_size() {
+    awk -v bytes="$1" 'BEGIN {
+        if (bytes >= 1073741824) printf "%.1f GiB", bytes / 1073741824
+        else if (bytes >= 1048576) printf "%.1f MiB", bytes / 1048576
+        else if (bytes >= 1024) printf "%.1f KiB", bytes / 1024
+        else printf "%d B", bytes
+    }'
+}
+
+###############################################################
+# => Running apps
+###############################################################
+
+# is_running NAME...: succeeds when this user runs a process with one of the names. Process
+# names are cut to 15 characters by the kernel, so the names are cut the same way. Without
+# pgrep nothing can be checked, and a wipe under a live app is the worse mistake: say "running".
+is_running() {
+    local name
+    have pgrep || return 0
+    for name in "$@"; do
+        if pgrep -u "$UID" -x "${name:0:15}" >/dev/null 2>&1; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# app_is_busy LABEL NAME,NAME: say so and succeed when the app runs, so that its data stays put.
+app_is_busy() {
+    local label=$1 process_names
+    local IFS=,
+    read -r -a process_names <<<"$2"
+    is_running "${process_names[@]}" || return 1
+    printf '%s!! %s is running: close it first (skipped)%s\n' "$yellow" "$label" "$reset"
+    skipped="${skipped:+$skipped, }$label"
+    return 0
+}
+
+###############################################################
+# => Output of a pass (the plan, then the real run)
+###############################################################
+
+# target LABEL: the next say prints a heading for LABEL, once.
+target() {
+    if [ "$1" != "$current_label" ]; then
+        current_label=$1
+        header_printed=false
+    fi
+}
+
+say() {
+    if [ "$header_printed" = false ]; then
+        printf '%s==> %s%s\n' "$blue" "$current_label" "$reset"
+        header_printed=true
+        actions=$((actions + 1))
+    fi
+    printf '    %s\n' "$1"
+}
+
+record_failure() {
+    failures="${failures:+$failures, }$1"
+}
+
+# step [--soft] LABEL COMMAND...: run one command, or only print it under --dry-run. A soft
+# step is a courtesy whose failure is no problem (an agent that cannot unload its keys).
+step() {
+    local soft=false label output status=0 command_line
+    if [ "$1" = --soft ]; then
+        soft=true
+        shift
+    fi
+    label=$1
+    shift
+    target "$label"
+    if [ "$dry_run" = true ]; then
+        command_line=$(printf '%q ' "$@")
+        say "would run: ${command_line% }"
+        return 0
+    fi
+    output=$("$@" </dev/null 2>&1) || status=$?
+    if [ "$status" -eq 0 ]; then
+        say "${green}done${reset}"
+    elif [ "$soft" = true ]; then
+        say "${yellow}not possible here (exit $status)${reset}"
+    else
+        say "${yellow}FAILED (exit $status)${reset}"
+        if [ -n "$output" ]; then
+            printf '%s\n' "$output" | head -n 5 | sed 's/^/        /'
+        fi
+        record_failure "$label"
+        return 1
+    fi
+}
+
+note_python() {
+    if [ "$warned_python" = false ]; then
+        printf '%s-- python3 is not installed; skipping what needs it (editor sign-ins, Docker registries)%s\n' \
+            "$yellow" "$reset"
+        warned_python=true
+    fi
+}
+
+###############################################################
+# => Deleting
+###############################################################
+
+# Delete one path under $HOME. A symbolic link is left alone, because it may point at a vault
+# or a repository. A file of up to 64 MiB is overwritten first. That is best effort: SSDs,
+# journals and copy-on-write file systems can keep the old blocks, so revoke tokens as well.
+wipe_path() {
+    local path=$1
+    case "$path" in
+        "$HOME"/?*) ;;
+        *) return 1 ;;
+    esac
+    case "/$path/" in
+        */../*) return 1 ;;
+    esac
+    # remove_items already reports links; this is the last line of defence.
+    if [ -L "$path" ]; then
+        return 0
+    fi
+    if [ -d "$path" ]; then
+        rm -rf -- "$path"
+    elif have shred && [ "$(bytes_of "$path")" -le 67108864 ]; then
+        shred -n 1 -u -- "$path" 2>/dev/null || rm -f -- "$path"
+    else
+        rm -f -- "$path"
+    fi
+}
+
+# expand_patterns BASE PATTERN...: print, NUL separated, the paths inside BASE that exist and
+# match a pattern. The patterns are literals from the lists above; the shell expands them.
+expand_patterns() {
+    local base=$1 pattern path
+    shift
+    [ -d "$base" ] || return 0
+    (
+        cd "$base" 2>/dev/null || exit 0
+        for pattern in "$@"; do
+            for path in $pattern; do
+                if [ -e "$path" ] || [ -L "$path" ]; then
+                    printf '%s\0' "$base/$path"
+                fi
+            done
+        done
+    )
+}
+
+# remove_items LABEL BASE PATTERN...: delete what the patterns match inside BASE, or only say
+# what would go under --dry-run.
+remove_items() {
+    local label=$1 base=$2 found=() path rel listing='' shown=0 hidden=0 size problems=0
+    shift 2
+    while IFS= read -r -d '' path; do
+        if [ -L "$path" ]; then
+            printf '%s-- left alone (symbolic link): %s%s\n' "$yellow" "$(tilde "$path")" "$reset"
+        else
+            found+=("$path")
+        fi
+    done < <(expand_patterns "$base" "$@")
+    [ "${#found[@]}" -gt 0 ] || return 0
+
+    for path in "${found[@]}"; do
+        rel=${path#"$base"/}
+        case "$rel" in
+            *-journal | *-wal | *-shm) continue ;;
+        esac
+        if [ "$shown" -lt 6 ]; then
+            listing="${listing:+$listing, }$rel"
+            shown=$((shown + 1))
+        else
+            hidden=$((hidden + 1))
+        fi
+    done
+    if [ "$hidden" -gt 0 ]; then
+        listing="$listing, and $hidden more"
+    fi
+    size=$(human_size "$(bytes_of "${found[@]}")")
+
+    target "$label"
+    if [ "$dry_run" = true ]; then
+        say "would delete $listing ($size)"
+        return 0
+    fi
+    for path in "${found[@]}"; do
+        wipe_path "$path" || problems=$((problems + 1))
+    done
+    if [ "$problems" -eq 0 ]; then
+        say "${green}deleted${reset} $listing ($size)"
+    else
+        say "${yellow}could not delete $problems item(s) of: $listing${reset}"
+        record_failure "$label"
+        return 1
+    fi
+}
+
+###############################################################
+# => Catalogs: label|directory|process names
+###############################################################
+
+chromium_browsers() {
+    cat <<EOF
+Google Chrome|$HOME/.config/google-chrome|chrome
+Google Chrome Beta|$HOME/.config/google-chrome-beta|chrome
+Chromium|$HOME/.config/chromium|chromium
+Chromium (snap)|$HOME/snap/chromium/common/chromium|chromium
+Brave|$HOME/.config/BraveSoftware/Brave-Browser|brave
+Microsoft Edge|$HOME/.config/microsoft-edge|msedge
+Vivaldi|$HOME/.config/vivaldi|vivaldi-bin
+Google Chrome (Flatpak)|$HOME/.var/app/com.google.Chrome/config/google-chrome|chrome
+Chromium (Flatpak)|$HOME/.var/app/org.chromium.Chromium/config/chromium|chromium
+Brave (Flatpak)|$HOME/.var/app/com.brave.Browser/config/BraveSoftware/Brave-Browser|brave
+Microsoft Edge (Flatpak)|$HOME/.var/app/com.microsoft.Edge/config/microsoft-edge|msedge
+EOF
+}
+
+gecko_browsers() {
+    cat <<EOF
+Firefox|$HOME/.mozilla/firefox|firefox,firefox-bin
+Firefox (snap)|$HOME/snap/firefox/common/.mozilla/firefox|firefox,firefox-bin
+Firefox (Flatpak)|$HOME/.var/app/org.mozilla.firefox/.mozilla/firefox|firefox,firefox-bin
+LibreWolf|$HOME/.librewolf|librewolf
+Thunderbird|$HOME/.thunderbird|thunderbird,thunderbird-bin
+Thunderbird (snap)|$HOME/snap/thunderbird/common/.thunderbird|thunderbird,thunderbird-bin
+EOF
+}
+
+editor_apps() {
+    cat <<EOF
+Visual Studio Code|$HOME/.config/Code|code
+Visual Studio Code Insiders|$HOME/.config/Code - Insiders|code-insiders
+VSCodium|$HOME/.config/VSCodium|codium,vscodium
+Cursor|$HOME/.config/Cursor|cursor
+Antigravity|$HOME/.config/Antigravity|antigravity
+Windsurf|$HOME/.config/Windsurf|windsurf
+EOF
+}
+
+web_apps() {
+    cat <<EOF
+Slack|$HOME/.config/Slack|slack
+Discord|$HOME/.config/discord|Discord,discord
+Microsoft Teams (teams-for-linux)|$HOME/.config/teams-for-linux|teams-for-linux
+Obsidian|$HOME/.config/obsidian|obsidian
+EOF
+}
+
+# path|what it holds. Files that a login recreates, or that hold nothing but credentials.
+credential_files() {
+    cat <<EOF
+$HOME/.git-credentials|Git credential store (HTTPS passwords and tokens)
+$HOME/.netrc|netrc logins
+$HOME/.pypirc|PyPI upload tokens
+$HOME/.authinfo|Emacs auth-source passwords
+$HOME/.cargo/credentials.toml|crates.io token
+$HOME/.cargo/credentials|crates.io token
+$HOME/.terraform.d/credentials.tfrc.json|Terraform Cloud token
+$HOME/.ngc/config|NVIDIA NGC API key
+$HOME/.pi/agent/auth.json|Pi agent OAuth tokens
+$HOME/.local/share/opencode/auth.json|OpenCode provider logins
+$HOME/.config/opencode/auth.json|OpenCode provider logins
+$HOME/.grok/auth.json|Grok CLI OAuth tokens
+$HOME/.codex/auth.json|Codex CLI login
+$HOME/.claude/.credentials.json|Claude Code login
+$HOME/.gemini/oauth_creds.json|Gemini CLI login
+$HOME/.gemini/google_accounts.json|Gemini CLI account list
+$HOME/.config/github-copilot/hosts.json|GitHub Copilot token
+$HOME/.config/github-copilot/apps.json|GitHub Copilot token
+$HOME/.config/cursor/auth.json|Cursor CLI login
+EOF
+    # With the tool installed, its own sign-out removes these. Without it nothing else will.
+    if ! have gh; then
+        printf '%s|GitHub CLI token\n' "$HOME/.config/gh/hosts.yml"
+    fi
+    if ! have gcloud; then
+        printf '%s|Google Cloud credentials\n' "$HOME/.config/gcloud/credentials.db"
+        printf '%s|Google Cloud access tokens\n' "$HOME/.config/gcloud/access_tokens.db"
+        printf '%s|Google Cloud application-default credentials\n' \
+            "$HOME/.config/gcloud/application_default_credentials.json"
+    fi
+}
+
+# Profile directories of a Chromium-family browser (the ones that hold Preferences).
+chromium_profiles() {
+    local profile
+    for profile in "$1"/*/; do
+        if [ -f "${profile}Preferences" ]; then
+            printf '%s\n' "${profile%/}"
+        fi
+    done
+}
+
+# Profile directories of a Gecko-family application (the ones that hold prefs.js).
+gecko_profiles() {
+    local profile
+    for profile in "$1"/*/; do
+        if [ -f "${profile}prefs.js" ]; then
+            printf '%s\n' "${profile%/}"
+        fi
+    done
+}
+
+###############################################################
+# => Helpers that read JSON and SQLite (python3)
+###############################################################
+
+# json_keys FILE KEY: the keys of the object FILE[KEY], one per line.
+json_keys() {
+    if have python3; then
+        python3 - "$1" "$2" <<'PY' 2>/dev/null
+import json
+import sys
+
+try:
+    with open(sys.argv[1]) as handle:
+        data = json.load(handle)
+except (OSError, ValueError):
+    sys.exit(0)
+for key in (data.get(sys.argv[2]) or {}):
+    print(key)
+PY
+    elif have jq; then
+        jq -r --arg key "$2" '(.[$key] // {}) | keys[]' "$1" 2>/dev/null
+    else
+        note_python
+    fi
+}
+
+# Registries in a Docker config.json that hold a login inline (base64, not encrypted).
+docker_inline_logins() {
+    have python3 || return 0
+    python3 - "$1" <<'PY' 2>/dev/null
+import json
+import sys
+
+try:
+    with open(sys.argv[1]) as handle:
+        data = json.load(handle)
+except (OSError, ValueError):
+    sys.exit(0)
+for registry, entry in (data.get('auths') or {}).items():
+    if isinstance(entry, dict) and entry.get('auth'):
+        print(registry)
+PY
+}
+
+# sqlite_value DB SQL: the first column of the first row, read-only. Prints nothing when the
+# database cannot be read. immutable=1 reads the file as it is, even while the app that owns it
+# holds a lock, and creates none of the -wal and -shm files that a read-only connection to a
+# database in WAL mode would. It ignores a non-empty -wal, which holds changes that are not
+# merged into the file yet (an app that is running, or that crashed): when that -wal comes with
+# its -shm, as it does then, the database is read normally. A -wal alone cannot be read
+# without creating the -shm.
+sqlite_value() {
+    have python3 || return 1
+    python3 - "$1" "$2" <<'PY' 2>/dev/null
+import pathlib
+import sqlite3
+import sys
+
+try:
+    database = pathlib.Path(sys.argv[1]).resolve()
+    wal = database.with_name(database.name + '-wal')
+    shm = database.with_name(database.name + '-shm')
+    pending = wal.is_file() and wal.stat().st_size > 0 and shm.is_file()
+    uri = database.as_uri() + ('?mode=ro' if pending else '?mode=ro&immutable=1')
+    row = sqlite3.connect(uri, uri=True).execute(sys.argv[2]).fetchone()
+except Exception:
+    sys.exit(1)
+if row and row[0] is not None:
+    print(row[0])
+PY
+}
+
+# editor_state_rows DB count|delete: how many sign-in rows the state database of a VS Code
+# style editor holds, or delete them. secret:// rows are the extension secret store (GitHub,
+# Microsoft and MCP logins), cursorAuth/ holds Cursor's tokens in plain text, and
+# antigravityUnifiedStateSync.oauthToken is Antigravity's. Deleting sets secure_delete, so
+# the freed pages are zeroed, and vacuums, so that no page keeps the old rows or an older copy
+# of them that the editor left behind when it refreshed a token. It prints the number of rows
+# deleted, and a second line when the vacuum failed (the rows are gone, older copies may not be).
+editor_state_rows() {
+    python3 - "$1" "$2" <<'PY'
+import pathlib
+import sqlite3
+import sys
+
+WHERE = ("key LIKE 'secret://%' OR key LIKE 'cursorAuth/%' "
+         "OR key = 'antigravityUnifiedStateSync.oauthToken'")
+database, action = sys.argv[1], sys.argv[2]
+try:
+    if action == 'count':
+        # A read-only connection to a database in WAL mode creates its -wal and -shm files,
+        # and a count must change nothing. So the file is read as it is, unless a non-empty
+        # -wal, with its -shm, holds changes that are not merged into it yet.
+        wal = pathlib.Path(database + '-wal')
+        shm = pathlib.Path(database + '-shm')
+        pending = wal.is_file() and wal.stat().st_size > 0 and shm.is_file()
+        uri = pathlib.Path(database).resolve().as_uri() + ('?mode=ro' if pending else '?mode=ro&immutable=1')
+        connection = sqlite3.connect(uri, uri=True, timeout=3)
+        print(connection.execute('SELECT COUNT(*) FROM ItemTable WHERE ' + WHERE).fetchone()[0])
+    else:
+        connection = sqlite3.connect(database, timeout=3)
+        connection.execute('PRAGMA secure_delete = ON')
+        removed = connection.execute('DELETE FROM ItemTable WHERE ' + WHERE).rowcount
+        connection.commit()
+        connection.execute('PRAGMA wal_checkpoint(TRUNCATE)')
+        print(removed)
+        try:
+            connection.execute('VACUUM')
+        except sqlite3.Error as error:
+            print('could not compact the file (%s): older copies of the rows may remain in it' % error)
+        connection.close()
+except sqlite3.Error as error:
+    sys.stderr.write('%s\n' % error)
+    sys.exit(1)
+PY
+}
+
+###############################################################
+# => Groups
+###############################################################
+
+# Where gh keeps its tokens: GH_CONFIG_DIR is the folder itself, the XDG one holds a gh folder.
+gh_hosts_file() {
+    if [ -n "${GH_CONFIG_DIR:-}" ]; then
+        printf '%s/hosts.yml' "$GH_CONFIG_DIR"
+    else
+        printf '%s/gh/hosts.yml' "${XDG_CONFIG_HOME:-$HOME/.config}"
+    fi
+}
+
+cli_github() {
+    local status line host account listed=0 hosts
+    local re='Logged in to ([^[:space:]]+) (account|as) ([^[:space:]]+)'
+    have gh || return 0
+    # The listing is read in full first: the logouts below change what it would print.
+    status=$(gh auth status 2>&1)
+    while IFS= read -r line; do
+        [[ $line =~ $re ]] || continue
+        host=${BASH_REMATCH[1]}
+        account=${BASH_REMATCH[3]}
+        listed=$((listed + 1))
+        step "GitHub CLI: $account on $host" gh auth logout --hostname "$host" --user "$account"
+    done <<<"$status"
+    # gh checks its tokens online, so offline it lists no account at all. Its token file must
+    # not survive that silently.
+    hosts=$(gh_hosts_file)
+    if [ "$listed" -eq 0 ] && grep -qs 'oauth_token:' "$hosts"; then
+        remove_items 'GitHub CLI: it listed no account (offline?), so its token file goes instead' \
+            "${hosts%/*}" "${hosts##*/}"
+    fi
+}
+
+cli_gcloud() {
+    have gcloud || return 0
+    if [ -n "$(gcloud auth list --format='value(account)' 2>/dev/null)" ]; then
+        step 'Google Cloud: revoke every signed-in account' gcloud auth revoke --all --quiet
+    fi
+    if [ -f "$HOME/.config/gcloud/application_default_credentials.json" ]; then
+        step 'Google Cloud: revoke the application-default credentials' \
+            gcloud auth application-default revoke --quiet
+    fi
+}
+
+cli_docker() {
+    local config="${DOCKER_CONFIG:-$HOME/.docker}/config.json" registry
+    have docker && [ -f "$config" ] || return 0
+    while IFS= read -r registry; do
+        step "Docker: sign out of $registry" docker logout "$registry"
+    done < <(json_keys "$config" auths)
+}
+
+cli_azure() {
+    have az && [ -d "$HOME/.azure" ] || return 0
+    az account show >/dev/null 2>&1 || return 0
+    step 'Azure CLI: sign out' az logout
+}
+
+cli_aws() {
+    have aws && [ -d "$HOME/.aws/sso/cache" ] || return 0
+    [ -n "$(find "$HOME/.aws/sso/cache" -type f -name '*.json' -print -quit 2>/dev/null)" ] || return 0
+    step 'AWS CLI: sign out of IAM Identity Center' aws sso logout
+}
+
+group_cli() {
+    cli_github
+    cli_gcloud
+    cli_docker
+    cli_azure
+    cli_aws
+}
+
+group_files() {
+    local path what
+    while IFS='|' read -r path what <&3; do
+        if [ -e "$path" ] || [ -L "$path" ]; then
+            remove_items "$(tilde "$path"): $what" "${path%/*}" "${path##*/}"
+        fi
+    done 3< <(credential_files)
+}
+
+group_browsers() {
+    local label dir procs profile
+    while IFS='|' read -r label dir procs <&3; do
+        [ -d "$dir" ] || continue
+        if app_is_busy "$label" "$procs"; then
+            continue
+        fi
+        while IFS= read -r profile <&4; do
+            remove_items "$label / ${profile##*/}" "$profile" "${chromium_items[@]}"
+        done 4< <(chromium_profiles "$dir")
+    done 3< <(chromium_browsers)
+
+    while IFS='|' read -r label dir procs <&3; do
+        [ -d "$dir" ] || continue
+        if app_is_busy "$label" "$procs"; then
+            continue
+        fi
+        while IFS= read -r profile <&4; do
+            remove_items "$label / ${profile##*/}" "$profile" "${gecko_items[@]}"
+        done 4< <(gecko_profiles "$dir")
+    done 3< <(gecko_browsers)
+}
+
+# clean_editor_state LABEL DB: remove the sign-in rows from the state database of an editor.
+clean_editor_state() {
+    local label=$1 db=$2 count result removed note compact=''
+    if [ ! -f "$db" ] || [ -L "$db" ]; then
+        return 0
+    fi
+    if ! have python3; then
+        note_python
+        return 0
+    fi
+    count=$(editor_state_rows "$db" count 2>/dev/null) || return 0
+    case "$count" in
+        '' | 0 | *[!0-9]*) return 0 ;;
+    esac
+    target "$label"
+    if [ "$dry_run" = true ]; then
+        # The vacuum rewrites the whole file; the editors' databases reach gigabytes.
+        if [ "$(bytes_of "$db")" -ge 268435456 ]; then
+            compact=", then compact the $(human_size "$(bytes_of "$db")") file, which takes a while"
+        fi
+        say "would remove $count sign-in token(s) and secret(s) from $(tilde "$db")$compact"
+        return 0
+    fi
+    if result=$(editor_state_rows "$db" delete 2>&1); then
+        removed=${result%%$'\n'*}
+        note=${result#"$removed"}
+        note=${note#$'\n'}
+        say "${green}removed${reset} $removed sign-in token(s) and secret(s) from $(tilde "$db")"
+        if [ -n "$note" ]; then
+            say "${yellow}$note${reset}"
+            record_failure "$label"
+            return 1
+        fi
+    else
+        say "${yellow}FAILED to edit $(tilde "$db"): $result${reset}"
+        record_failure "$label"
+        return 1
+    fi
+}
+
+group_apps() {
+    local label dir procs
+    while IFS='|' read -r label dir procs <&3; do
+        [ -d "$dir" ] || continue
+        if app_is_busy "$label" "$procs"; then
+            continue
+        fi
+        clean_editor_state "$label" "$dir/User/globalStorage/state.vscdb"
+        remove_items "$label" "$dir" "${editor_items[@]}"
+    done 3< <(editor_apps)
+
+    while IFS='|' read -r label dir procs <&3; do
+        [ -d "$dir" ] || continue
+        if app_is_busy "$label" "$procs"; then
+            continue
+        fi
+        remove_items "$label" "$dir" "${electron_items[@]}"
+    done 3< <(web_apps)
+}
+
+group_history() {
+    local label='Shell and REPL history'
+    remove_items "$label" "$HOME" "${history_items[@]}"
+    if [ "$dry_run" != true ] && [ "$current_label" = "$label" ] && [ "$header_printed" = true ]; then
+        say 'Close the other terminals: an open shell writes its history back when it exits.'
+    fi
+}
+
+# The login keyring holds the key that decrypts the browsers' and editors' stored secrets.
+# Locked, nothing reads it until the login password is typed again.
+lock_keyring() {
+    local collection
+    have busctl || return 0
+    # Asking a keyring that is not running would start it just to lock it.
+    busctl --user --no-pager list --acquired 2>/dev/null | grep -q '^org\.freedesktop\.secrets ' || return 0
+    collection=$(busctl --user call org.freedesktop.secrets /org/freedesktop/secrets \
+        org.freedesktop.Secret.Service ReadAlias s default 2>/dev/null |
+        sed -n 's/^o "\(.*\)"$/\1/p')
+    if [ -z "$collection" ] || [ "$collection" = / ]; then
+        return 0
+    fi
+    step --soft 'Keyring: lock the login keyring' busctl --user call org.freedesktop.secrets \
+        /org/freedesktop/secrets org.freedesktop.Secret.Service Lock ao 1 "$collection"
+}
+
+group_agents() {
+    if have sudo; then
+        step "sudo: forget the cached password" sudo -K
+    fi
+    if have ssh-add && ssh-add -l >/dev/null 2>&1; then
+        step --soft 'ssh-agent: unload the keys' ssh-add -D
+    fi
+    if have gpgconf && is_running gpg-agent; then
+        step 'gpg-agent: forget the cached passphrases' gpgconf --kill gpg-agent
+    fi
+    if have klist && klist -s >/dev/null 2>&1; then
+        step 'Kerberos: destroy the tickets' kdestroy -A
+    fi
+    if have git && { [ -S "$HOME/.cache/git/credential/socket" ] || [ -S "$HOME/.git-credential-cache/socket" ]; }; then
+        step 'git: stop the credential cache' git credential-cache exit
+    fi
+    lock_keyring
+}
+
+# One pass over the selected groups. The keyring is locked last (group_agents): gh needs it
+# unlocked to delete a token that it keeps there.
+run_groups() {
+    local group
+    actions=0
+    failures=''
+    skipped=''
+    current_label=''
+    header_printed=false
+    for group in $group_order; do
+        if in_list "$group" "$selected_groups"; then
+            "group_$group"
+        fi
+    done
+}
+
+###############################################################
+# => Audit (read-only)
+###############################################################
+
+# row MARK PATH TEXT: one finding. "!" is something to act on, "+" is fine, "-" is a fact.
+row() {
+    local color=$blue
+    case "$1" in
+        '!') color=$yellow ;;
+        '+') color=$green ;;
+    esac
+    printf '  %s%s%s %-46s %s\n' "$color" "$1" "$reset" "$2" "$3"
+    rows=$((rows + 1))
+}
+
+section() {
+    printf '\n%s%s%s%s\n' "$blue" "$1" "$reset" "${2:+ $2}"
+    rows=0
+}
+
+none_found() {
+    if [ "$rows" -eq 0 ]; then
+        printf '  (none found)\n'
+    fi
+}
+
+# " (group/other can read)" for a mode like 664 or 750, nothing for 600 or 700.
+loose_note() {
+    case "${1: -2}" in
+        00) ;;
+        *) printf ', group/other can read it' ;;
+    esac
+}
+
+audit_exposure() {
+    local admins others mode device fstype flags unit wifi
+    section 'Who can read your files'
+
+    admins=$(getent group sudo wheel admin 2>/dev/null |
+        awk -F: '$4 != "" { n = split($4, names, ","); for (i = 1; i <= n; i++) print names[i] }' |
+        sort -u | join_lines)
+    if [ -n "$admins" ]; then
+        row '-' 'accounts with sudo' "$admins (each can read all of this and act as you)"
+    fi
+    others=$(awk -F: -v me="$(id -un)" \
+        '$3 >= 1000 && $3 < 60000 && $1 != me && $7 !~ /(nologin|false)$/ { print $1 }' \
+        /etc/passwd 2>/dev/null | join_lines)
+    if [ -n "$others" ]; then
+        row '-' 'other login accounts' "$others"
+    fi
+
+    mode=$(stat -c %a -- "$HOME" 2>/dev/null)
+    case "${mode: -1}" in
+        0) row '+' "$(tilde "$HOME")" "mode $mode: other users cannot enter it" ;;
+        *) row '!' "$(tilde "$HOME")" "mode $mode: other users can read it (chmod 700 ~)" ;;
+    esac
+
+    device=$(findmnt -no SOURCE -T "$HOME" 2>/dev/null)
+    fstype=$(findmnt -no FSTYPE -T "$HOME" 2>/dev/null)
+    flags=$(lsattr -d "$HOME" 2>/dev/null)
+    flags=${flags%% *}
+    if [ "$fstype" = ecryptfs ]; then
+        row '+' "$(tilde "$HOME")" 'home folder is encrypted (ecryptfs)'
+    elif [ "${flags#*E}" != "$flags" ]; then
+        row '+' "$(tilde "$HOME")" 'home folder is encrypted (fscrypt)'
+    elif [ "${device#/dev/}" = "$device" ]; then
+        row '-' 'disk' 'could not tell whether it is encrypted'
+    elif lsblk -s -no TYPE "$device" 2>/dev/null | grep -qx crypt; then
+        row '+' "$device" 'disk is encrypted (LUKS)'
+    else
+        row '!' "$device" "disk is not encrypted ($fstype): whoever boots a USB stick reads /home"
+    fi
+
+    for unit in ssh sshd; do
+        if have systemctl && systemctl is-active --quiet "$unit" 2>/dev/null; then
+            row '!' "$unit service" 'running: keys in ~/.ssh/authorized_keys can log in'
+        fi
+    done
+    wifi=$(nmcli -t -f NAME,TYPE connection show 2>/dev/null | awk -F: '$2 ~ /wireless/ { print $1 }' | join_lines)
+    if [ -n "$wifi" ]; then
+        row '-' 'saved Wi-Fi networks' "$wifi (root can read their passwords)"
+    fi
+}
+
+audit_github_cli() {
+    local status line host account where listed=0 hosts
+    local re='Logged in to ([^[:space:]]+) (account|as) ([^[:space:]]+) \((.*)\)'
+    have gh || return 0
+    status=$(gh auth status 2>&1)
+    while IFS= read -r line; do
+        [[ $line =~ $re ]] || continue
+        host=${BASH_REMATCH[1]}
+        account=${BASH_REMATCH[3]}
+        where=${BASH_REMATCH[4]}
+        listed=$((listed + 1))
+        if [ "$where" = keyring ]; then
+            row '+' "GitHub CLI: $account" 'token is in the keyring'
+        else
+            row '!' "$(tilde "$where")" "GitHub CLI token for $account on $host, in plain text"
+        fi
+    done <<<"$status"
+    hosts=$(gh_hosts_file)
+    if [ "$listed" -eq 0 ] && grep -qs 'oauth_token:' "$hosts"; then
+        row '!' "$(tilde "$hosts")" 'GitHub CLI token in plain text (gh listed no account, offline?)'
+    fi
+}
+
+audit_docker_login() {
+    local config="${DOCKER_CONFIG:-$HOME/.docker}/config.json" registry
+    [ -f "$config" ] || return 0
+    while IFS= read -r registry; do
+        row '!' "$(tilde "$config")" "Docker login for $registry (base64, not encrypted)"
+    done < <(docker_inline_logins "$config")
+}
+
+audit_editor_tokens() {
+    local label dir procs db plain secrets
+    while IFS='|' read -r label dir procs <&3; do
+        db="$dir/User/globalStorage/state.vscdb"
+        [ -f "$db" ] || continue
+        plain=$(sqlite_value "$db" "SELECT COUNT(*) FROM ItemTable WHERE key LIKE 'cursorAuth/%Token' OR key = 'antigravityUnifiedStateSync.oauthToken'")
+        secrets=$(sqlite_value "$db" "SELECT COUNT(*) FROM ItemTable WHERE key LIKE 'secret://%'")
+        if [ "${plain:-0}" -gt 0 ] 2>/dev/null; then
+            row '!' "$(tilde "$db")" "$label keeps $plain login token(s) in plain text"
+        fi
+        if [ "${secrets:-0}" -gt 0 ] 2>/dev/null; then
+            row '-' "$(tilde "$db")" "$label: $secrets secret(s) encrypted with the keyring (safe while it is locked)"
+        fi
+    done 3< <(editor_apps)
+}
+
+audit_tokens() {
+    local path what mode detail
+    section 'Tokens stored as plain text' '(anyone who can read the file can use them)'
+    known_paths=''
+    while IFS='|' read -r path what <&3; do
+        [ -e "$path" ] || continue
+        known_paths="$known_paths$path"$'\n'
+        mode=$(stat -c %a -- "$path" 2>/dev/null)
+        detail=''
+        if [ "${path##*/}" = .git-credentials ]; then
+            # Only the host of each URL, and only for lines that are URLs: -n with p prints
+            # nothing for a line the pattern does not match, so no token can leak through.
+            detail=" for $(sed -nE 's#^[A-Za-z+]+://([^@/]*@)?([^/:]+).*#\2#p' "$path" 2>/dev/null | sort -u | join_lines)"
+        fi
+        row '!' "$(tilde "$path")" "$what$detail, mode $mode$(loose_note "$mode")"
+    done 3< <(credential_files)
+    audit_github_cli
+    audit_docker_login
+    audit_editor_tokens
+    none_found
+}
+
+audit_sessions() {
+    local label dir procs profile name report item value signed cookies passwords autofill scheme logins mark
+    section 'Browser and editor sessions' '(what logout-all signs out of)'
+
+    while IFS='|' read -r label dir procs <&3; do
+        [ -d "$dir" ] || continue
+        while IFS= read -r profile <&4; do
+            name=${profile##*/}
+            signed='?' cookies='?' passwords='?' autofill='?' scheme='-'
+            report=$(chromium_profile_report "$dir" "$name") || report=''
+            for item in $report; do
+                value=${item#*=}
+                case "$item" in
+                    signed_in=*) signed=$value ;;
+                    cookies=*) cookies=$value ;;
+                    passwords=*) passwords=$value ;;
+                    autofill=*) autofill=$value ;;
+                    scheme=*) scheme=$value ;;
+                esac
+            done
+            mark='-'
+            case "$scheme" in
+                v10)
+                    mark='!'
+                    value='cookies use a fixed built-in key: readable by anyone who can read the file'
+                    ;;
+                v11) value='cookies are encrypted with the keyring' ;;
+                *) value='' ;;
+            esac
+            row "$mark" "$label / $name" "signed in to Google: $signed; cookies: $cookies; saved passwords: $passwords; autofill entries: $autofill${value:+; $value}"
+        done 4< <(chromium_profiles "$dir")
+    done 3< <(chromium_browsers)
+
+    while IFS='|' read -r label dir procs <&3; do
+        [ -d "$dir" ] || continue
+        while IFS= read -r profile <&4; do
+            name=${profile##*/}
+            logins=0
+            if [ -f "$profile/logins.json" ]; then
+                logins=$(grep -o '"encryptedPassword"' "$profile/logins.json" 2>/dev/null | wc -l)
+            fi
+            logins=${logins// /}
+            cookies=$(sqlite_value "$profile/cookies.sqlite" 'SELECT COUNT(*) FROM moz_cookies' || true)
+            mark='-'
+            if [ "$logins" -gt 0 ]; then
+                mark='!'
+            fi
+            row "$mark" "$label / $name" "saved logins: $logins; cookies: ${cookies:-?}; saved logins are protected only by a Primary Password, not by your login"
+        done 4< <(gecko_profiles "$dir")
+    done 3< <(gecko_browsers)
+
+    while IFS='|' read -r label dir procs <&3; do
+        [ -d "$dir" ] || continue
+        row '-' "$label" "$(tilde "$dir")"
+    done 3< <(editor_apps; web_apps)
+    none_found
+}
+
+# chromium_profile_report DIR PROFILE: "signed_in=… cookies=… passwords=… autofill=… scheme=…".
+chromium_profile_report() {
+    have python3 || return 1
+    python3 - "$1" "$2" <<'PY' 2>/dev/null
+import json
+import pathlib
+import sqlite3
+import sys
+
+base, profile = pathlib.Path(sys.argv[1]), sys.argv[2]
+
+
+def scalar(database, sql):
+    try:
+        uri = (base / profile / database).resolve().as_uri() + '?mode=ro&immutable=1'
+        return sqlite3.connect(uri, uri=True).execute(sql).fetchone()[0]
+    except Exception:
+        return None
+
+
+report = {}
+try:
+    with open(base / 'Local State') as handle:
+        info = json.load(handle).get('profile', {}).get('info_cache', {}).get(profile, {})
+    report['signed_in'] = 'yes' if (info.get('gaia_id') or info.get('user_name')) else 'no'
+except Exception:
+    report['signed_in'] = '?'
+cookie_db = 'Network/Cookies' if (base / profile / 'Network' / 'Cookies').exists() else 'Cookies'
+report['cookies'] = scalar(cookie_db, 'SELECT COUNT(*) FROM cookies')
+report['passwords'] = scalar('Login Data', 'SELECT COUNT(*) FROM logins')
+report['autofill'] = scalar('Web Data', 'SELECT COUNT(*) FROM autofill')
+prefix = scalar(cookie_db, 'SELECT group_concat(DISTINCT substr(hex(encrypted_value), 1, 6)) '
+                           'FROM cookies WHERE length(encrypted_value) > 0')
+report['scheme'] = {'763130': 'v10', '763131': 'v11'}.get(prefix, 'mixed' if prefix else '-')
+print(' '.join('%s=%s' % (key, '?' if value is None else value) for key, value in report.items()))
+PY
+}
+
+# Token shapes, as "label|extended regular expression". They are matched against file
+# contents only to say THAT a file holds one; the match itself is never printed.
+token_shapes() {
+    cat <<'EOF'
+NVIDIA API key|nvapi-[A-Za-z0-9_-]{20,}
+GitHub token|(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,})
+GitLab token|glpat-[A-Za-z0-9_-]{20,}
+Anthropic API key|sk-ant-[A-Za-z0-9_-]{20,}
+OpenAI-style API key|sk-[A-Za-z0-9_-]{32,}
+AWS access key ID|AKIA[0-9A-Z]{16}
+Google API key|AIza[0-9A-Za-z_-]{35}
+Slack token|xox[abprs]-[A-Za-z0-9-]{10,}
+private key|-----BEGIN ([A-Z]+ )?PRIVATE KEY-----
+JSON Web Token|eyJ[A-Za-z0-9_-]{15,}\.eyJ[A-Za-z0-9_-]{15,}\.[A-Za-z0-9_-]{10,}
+EOF
+}
+
+# Folders that hold no files of yours but are big or noisy.
+prune_names=(node_modules .cache .npm .cargo .rustup snap .local .config .mozilla .vscode
+    .cursor .var google-cloud-sdk isaac-sim Trash .Trash venv .venv __pycache__)
+
+# find_pruned MAXDEPTH TEST...: find under $HOME without entering the folders above.
+find_pruned() {
+    local depth=$1 name prune=()
+    shift
+    for name in "${prune_names[@]}"; do
+        if [ "${#prune[@]}" -gt 0 ]; then
+            prune+=(-o)
+        fi
+        prune+=(-name "$name")
+    done
+    find "$HOME" -maxdepth "$depth" \( "${prune[@]}" \) -prune -o "$@"
+}
+
+audit_keys() {
+    local key mode kind label regex file folder reported='' count hits remote repo names
+    local candidates=()
+    section 'Keys and secrets you manage' '(logout-all never deletes these)'
+
+    for key in "$HOME"/.ssh/*; do
+        [ -f "$key" ] || continue
+        mode=$(stat -L -c %a -- "$key" 2>/dev/null)
+        if ! head -c 400 "$key" 2>/dev/null | grep -q 'PRIVATE KEY'; then
+            continue
+        fi
+        # With -P given, ssh-keygen never asks for a passphrase: it just fails on a protected key.
+        if ! have ssh-keygen; then
+            row '-' "$(tilde "$key")" "SSH private key, mode $mode (ssh-keygen is missing, so its passphrase was not checked)"
+        elif ssh-keygen -y -P '' -f "$key" </dev/null >/dev/null 2>&1; then
+            row '!' "$(tilde "$key")" "SSH private key WITHOUT a passphrase$(loose_note "$mode"): ssh-keygen -p -f $(tilde "$key")"
+        else
+            row '+' "$(tilde "$key")" 'SSH private key protected by a passphrase'
+        fi
+    done
+
+    count=$(find "$HOME/.gnupg/private-keys-v1.d" -maxdepth 1 -type f -name '*.key' 2>/dev/null | wc -l)
+    if [ "${count// /}" -gt 0 ]; then
+        row '-' "$(tilde "$HOME/.gnupg/private-keys-v1.d")" "${count// /} GPG secret key(s)"
+    fi
+    if [ -f "$HOME/.kube/config" ]; then
+        kind=$(grep -Eo '^[[:space:]]*(token|client-key-data|client-certificate-data|password):' "$HOME/.kube/config" 2>/dev/null |
+            tr -d ' :' | sort -u | join_lines)
+        row '!' "$(tilde "$HOME/.kube/config")" "cluster credentials (${kind:-none}); delete it, or log in again later with your cluster tool"
+    fi
+    if [ -f "$HOME/.aws/credentials" ]; then
+        row '!' "$(tilde "$HOME/.aws/credentials")" "$(grep -c '^\[' "$HOME/.aws/credentials" 2>/dev/null) profile(s) with long-lived access keys"
+    fi
+    if grep -qs '_authToken\|_password' "$HOME/.npmrc"; then
+        row '!' "$(tilde "$HOME/.npmrc")" 'npm registry token: npm logout'
+    fi
+
+    while IFS= read -r -d '' file; do
+        names=$(grep -Eo '^[[:space:]]*(export[[:space:]]+)?[A-Za-z_]*(TOKEN|SECRET|PASSWORD|API_?KEY|ACCESS_?KEY|PRIVATE_?KEY)[A-Za-z_]*=' "$file" 2>/dev/null |
+            sed -E 's/^[[:space:]]*(export[[:space:]]+)?//; s/=$//' | sort -u | join_lines)
+        if [ -n "$names" ]; then
+            row '!' "$(tilde "$file")" "environment file with $names"
+        fi
+    done < <(find_pruned 5 -type f \( -name '.env' -o -name '.env.*' \) \
+        ! -name '*.example' ! -name '*.sample' ! -name '*.template' ! -name '*.dist' -print0 2>/dev/null)
+
+    # Files of yours that look like they hold a token, outside the known credential files and
+    # the history files (those are counted below).
+    for file in "${history_items[@]}"; do
+        known_paths="$known_paths$HOME/$file"$'\n'
+    done
+    while IFS= read -r -d '' file; do
+        case "$known_paths" in
+            *"$file"$'\n'*) continue ;;
+        esac
+        candidates+=("$file")
+    done < <(
+        find "$HOME" -maxdepth 1 -type f -size -256k -print0
+        for folder in Desktop Documents Downloads; do
+            find "$HOME/$folder" -maxdepth 2 -type f -size -256k -print0 2>/dev/null
+        done
+    )
+    if [ "${#candidates[@]}" -gt 0 ]; then
+        while IFS='|' read -r label regex <&3; do
+            while IFS= read -r file; do
+                case "$reported" in
+                    *"$file"$'\n'*) continue ;;
+                esac
+                reported="$reported$file"$'\n'
+                mode=$(stat -c %a -- "$file" 2>/dev/null)
+                row '!' "$(tilde "$file")" "looks like a $label, mode $mode$(loose_note "$mode"): keep it in a password manager or vault-secret"
+            done < <(grep -I -l -s -E -e "$regex" -- "${candidates[@]}")
+        done 3< <(token_shapes)
+    fi
+
+    # Git remotes that carry a password or a token in the URL (add_pat does that).
+    while IFS= read -r -d '' file; do
+        repo=${file%/.git/config}
+        remote=$(grep -Eo 'https?://([^/@[:space:]]+:[^/@[:space:]]+|[A-Za-z0-9_-]{20,})@' "$file" 2>/dev/null | head -n 1)
+        if [ -n "$remote" ]; then
+            row '!' "$(tilde "$repo")" 'a git remote URL contains a password or token: git remote set-url origin https://github.com/OWNER/REPO.git'
+        fi
+    done < <(find_pruned 5 -type f -path '*/.git/config' -print0 2>/dev/null)
+
+    for file in "${history_items[@]}"; do
+        [ -f "$HOME/$file" ] || continue
+        count=0
+        while IFS='|' read -r label regex <&3; do
+            hits=$(grep -c -E -e "$regex" "$HOME/$file" 2>/dev/null || true)
+            count=$((count + ${hits:-0}))
+        done 3< <(token_shapes)
+        if [ "$count" -gt 0 ]; then
+            row '!' "$(tilde "$HOME/$file")" "$count line(s) look like they contain a token"
+        fi
+    done
+    none_found
+}
+
+print_revoke_links() {
+    printf '\n%sA local sign-out cannot cancel a token that someone already copied. Revoke it at the source:%s\n' \
+        "$blue" "$reset"
+    printf '  GitHub    https://github.com/settings/sessions   /settings/applications   /settings/tokens   /settings/keys\n'
+    printf '  Google    https://myaccount.google.com/device-activity\n'
+    printf '  Others    the API-key or security page of each provider listed above (NVIDIA, xAI, Cursor, ...)\n'
+}
+
+audit() {
+    printf '%sCredentials on this machine%s (read-only; secret values are never printed)\n' "$blue" "$reset"
+    audit_exposure
+    audit_tokens
+    audit_sessions
+    audit_keys
+    printf '\n%sAnyone with sudo can read all of this and act as you while you are logged in. Signing out\nremoves what there is to take; only an encrypted disk or home folder, and logging out (not just\nlocking the screen) when you leave, protect what is left.%s\n' \
+        "$blue" "$reset"
+    print_revoke_links
+}
+
+###############################################################
+# => Main
+###############################################################
+
+usage_error() {
+    printf 'logout-all: %s (try logout-all --help)\n' "$1" >&2
+}
+
+# split_groups LIST: the words of a comma separated list, checked against the known groups.
+split_groups() {
+    local word words
+    words=${1//,/ }
+    for word in $words; do
+        if ! in_list "$word" "$group_order"; then
+            usage_error "unknown group: $word"
+            return 1
+        fi
+    done
+    printf '%s' "$words"
+}
+
+# Only an explicit y goes ahead: Enter, anything else and the end of the input all stop here.
+confirm_apply() {
+    local reply
+    if [ "$assume_yes" = true ]; then
+        return 0
+    fi
+    if [ ! -t 0 ] || [ ! -t 1 ]; then
+        printf 'There is no terminal to ask on, so nothing was changed. Run it in a terminal, or add --yes.\n'
+        return 1
+    fi
+    printf '\n'
+    if ! read -r -p 'Sign out and delete everything listed above? [y/N] ' reply; then
+        printf '\nNothing was changed.\n'
+        return 1
+    fi
+    case "$reply" in
+        y | Y | yes | YES | Yes) return 0 ;;
+    esac
+    printf 'Nothing was changed.\n'
+    return 1
+}
+
+# What to do about the apps that were skipped because they are running.
+skipped_hint() {
+    printf '%sSkipped because they are running: %s. Close them, then run logout-all again.%s\n' \
+        "$yellow" "$skipped" "$reset"
+    if [ "${TERM_PROGRAM:-}" = vscode ] || [ -n "${CURSOR_TRACE_ID:-}" ] || [ -n "${VSCODE_PID:-}" ]; then
+        printf '%sThis terminal belongs to an editor and closes with it: open a plain terminal (Ctrl+Alt+T) first.%s\n' \
+            "$yellow" "$reset"
+    fi
+}
+
+main() {
+    local arg value base word kept=''
+
+    while [ $# -gt 0 ]; do
+        arg=$1
+        case "$arg" in
+            -n | --dry-run) dry_run=true ;;
+            -y | --yes) assume_yes=true ;;
+            --audit) audit_only=true ;;
+            -h | --help)
+                usage
+                return 0
+                ;;
+            --only | --skip | --only=* | --skip=*)
+                if [[ $arg == *=* ]]; then
+                    value=${arg#*=}
+                    arg=${arg%%=*}
+                elif [ $# -ge 2 ]; then
+                    value=$2
+                    shift
+                else
+                    usage_error "$arg needs a list of groups"
+                    return 2
+                fi
+                value=$(split_groups "$value") || return 2
+                if [ "$arg" = --only ]; then
+                    only_groups=$value
+                else
+                    skip_groups=$value
+                fi
+                ;;
+            *)
+                usage_error "unknown option: $arg"
+                return 2
+                ;;
+        esac
+        shift
+    done
+
+    if [ "$audit_only" = true ] && { [ "$dry_run" = true ] || [ "$assume_yes" = true ] || [ -n "$only_groups$skip_groups" ]; }; then
+        usage_error '--audit is read-only and takes no other option'
+        return 2
+    fi
+
+    case "${HOME:-}" in
+        '' | /)
+            usage_error 'HOME is not set to a home folder'
+            return 2
+            ;;
+    esac
+    if [ ! -d "$HOME" ]; then
+        usage_error "HOME is not a directory: $HOME"
+        return 2
+    fi
+    if [ "$(id -u)" -eq 0 ]; then
+        usage_error 'run it as your own user, not as root: it works on the home folder of whoever runs it'
+        return 2
+    fi
+
+    if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+        blue=$'\033[34m' green=$'\033[32m' yellow=$'\033[33m' reset=$'\033[0m'
+    fi
+
+    if [ "$audit_only" = true ]; then
+        audit
+        return 0
+    fi
+
+    base=${only_groups:-$default_groups}
+    for word in $base; do
+        if ! in_list "$word" "$skip_groups"; then
+            kept="${kept:+$kept }$word"
+        fi
+    done
+    selected_groups=$kept
+    if [ -z "$selected_groups" ]; then
+        usage_error 'no group is left to run'
+        return 2
+    fi
+    if ! have pgrep; then
+        printf '%s-- pgrep is not installed, so running apps cannot be detected: browsers and editors are skipped%s\n' \
+            "$yellow" "$reset"
+    fi
+
+    # The plan is the dry run: what it prints is what the real run does.
+    printf '%sPlan%s (nothing has been changed yet)\n' "$blue" "$reset"
+    local real_dry_run=$dry_run
+    dry_run=true
+    run_groups
+    if [ "$actions" -eq 0 ]; then
+        printf 'Nothing to sign out of.\n'
+        if [ -n "$skipped" ]; then
+            skipped_hint
+            return 1
+        fi
+        return 0
+    fi
+    if [ -n "$skipped" ]; then
+        skipped_hint
+    fi
+    if [ "$real_dry_run" = true ]; then
+        printf '%sDry run: nothing was changed.%s\n' "$blue" "$reset"
+        return 0
+    fi
+    confirm_apply || return 0
+
+    printf '\n%sSigning out%s\n' "$blue" "$reset"
+    dry_run=false
+    run_groups
+    printf '\n'
+    if [ -n "$failures" ]; then
+        printf '%s!! Did not finish: %s%s\n' "$yellow" "$failures" "$reset" >&2
+    fi
+    if [ -n "$skipped" ]; then
+        skipped_hint
+    fi
+    if [ -z "$failures" ] && [ -z "$skipped" ]; then
+        printf '%sDone: %s item(s) signed out.%s\n' "$green" "$actions" "$reset"
+    fi
+    print_revoke_links
+    printf 'Run logout-all --audit to see the keys and secrets that this leaves for you to decide.\n'
+    [ -z "$failures" ] && [ -z "$skipped" ]
+}
+
+main "$@"

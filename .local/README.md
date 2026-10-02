@@ -20,6 +20,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── cleanup            # Free disk space; asks before deleting each unused Docker volume
 │   │   ├── clone-all          # Clone all repos from a GitHub user
 │   │   ├── git-recurse        # Run git commands across multiple repos
+│   │   ├── logout-all         # Sign out of browsers, editors and CLIs; --audit lists stored credentials
 │   │   ├── vault-secret       # Access SOPS-encrypted vault credentials
 │   │   ├── pfetch             # Minimal system info display
 │   │   ├── program            # Launch-or-focus helper for scratchpads
@@ -60,6 +61,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   └── pre-commit         # Runs shellcheck on staged shell scripts
 │   │
 │   ├── asusctl_install.sh      # Builds and installs the pinned asusctl/asusd release on supported ASUS laptops
+│   ├── asusctl_lighting.sh     # Sets the keyboard backlight to a rainbow through asusctl when the keyboard supports it
 │   ├── brightness_fix.sh       # Selects the native NVIDIA backlight on ASUS ROG laptops via kernelstub or GRUB
 │   ├── lint.sh                 # Lint all tracked shell scripts with shellcheck
 │   ├── permanent_shutdown_fix.sh # Applies shutdown kernel parameters via kernelstub or GRUB
@@ -216,7 +218,19 @@ never fight over the profile; GNOME's Power Mode keeps working. The design, the
 comparison with the Homebrew route that the ASUS Linux guide documents, and how
 to bump the pinned release are in [docs/ASUSCTL.md](../docs/ASUSCTL.md).
 
-Run the hermetic test with `bash tests/test_asusctl_install.sh`.
+`.local/scripts/asusctl_lighting.sh` sets the keyboard backlight to the
+`rainbow-wave` effect. The `work` and `ubuntu` bootstraps run it right after the
+installer through `asusctl_lighting`; a failure only warns. It needs no `sudo`
+and skips machines without `asusctl`, without a lighting device, or whose
+keyboard lacks the effect. It reads the keyboard's state over D-Bus, changes
+nothing when the effect is already set, and confirms every change before it
+reports success. `make repair REPAIR=asusctl-lighting` repeats it and
+`DRY_RUN=true` previews it (`REPAIR=keyboard` is the unrelated X11 key layout);
+`--effect`, `--speed`, and `--direction` try other settings for one run.
+Rerunning it replaces an effect chosen by hand.
+
+Run the hermetic tests with `bash tests/test_asusctl_install.sh` and
+`bash tests/test_asusctl_lighting.sh`.
 
 ## YouCompleteMe build
 

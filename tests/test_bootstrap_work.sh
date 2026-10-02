@@ -266,6 +266,7 @@ configure_inotify_watches() { record 'inotify'; }
 shutdown_fix() { record 'shutdown-fix'; }
 brightness_fix() { record 'brightness-fix'; }
 asusctl_install() { record 'asusctl'; }
+asusctl_lighting() { record 'asusctl-lighting'; }
 nvidia_install() { record 'nvidia-install'; }
 nvidia_display_config() { record 'nvidia-display'; }
 dev_tools_install() { record 'dev-tools'; }
@@ -293,7 +294,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\nvim\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\nvim\ndocker\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"
@@ -326,6 +327,25 @@ grep -Fqx 'nvidia-install' "$EVENT_LOG" ||
 grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
     fail 'a failing asusctl step must not abort the rest of the work bootstrap'
 asusctl_install() { record 'asusctl'; }
+
+# The keyboard lighting is cosmetic: when it fails, provisioning must warn with the
+# repair command and carry on. It still runs when the asusctl step failed, because
+# asusctl may already be installed from an earlier run.
+asusctl_install() { record 'asusctl-failed'; return 1; }
+asusctl_lighting() { record 'asusctl-lighting-failed'; return 1; }
+warn() { record "lighting-warning:$*"; }
+: > "$EVENT_LOG"
+work_main --unattended --no-stow --high-dpi=no </dev/null
+grep -Fqx 'asusctl-lighting-failed' "$EVENT_LOG" ||
+    fail 'the keyboard lighting must run even when the asusctl step failed'
+grep -Fqx 'lighting-warning:Keyboard lighting failed; rerun it with: make repair REPAIR=asusctl-lighting' "$EVENT_LOG" ||
+    fail 'a failing keyboard lighting step must be reported with the command that repairs it'
+grep -Fqx 'nvidia-install' "$EVENT_LOG" ||
+    fail 'a failing keyboard lighting step must not stop the stages that follow it'
+grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
+    fail 'a failing keyboard lighting step must not abort the rest of the work bootstrap'
+asusctl_install() { record 'asusctl'; }
+asusctl_lighting() { record 'asusctl-lighting'; }
 
 # The editor plugins need the network and a long compile: when they fail,
 # provisioning must warn with the repair command and carry on.
