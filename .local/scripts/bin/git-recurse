@@ -37,13 +37,14 @@ function run_repo_with_retry() {
     local cmd="$3"
     local max_retries="$4"
     local timeout_sec="$5"
-    local track_head="${6:-false}"
+    # none | pull (record HEAD around the command) | status (capture a porcelain probe)
+    local summary_mode="${6:-none}"
     local attempt=0
     local status=0
     local head_before=""
     local head_after=""
 
-    if [[ "$track_head" == true ]]; then
+    if [[ "$summary_mode" == pull ]]; then
         head_before=$(git -C "$dir" rev-parse HEAD 2>/dev/null || true)
     fi
 
@@ -66,7 +67,7 @@ function run_repo_with_retry() {
         fi
 
         if [[ $status -eq 0 ]]; then
-            if [[ "$track_head" == true && -n "$head_before" ]]; then
+            if [[ "$summary_mode" == pull && -n "$head_before" ]]; then
                 head_after=$(git -C "$dir" rev-parse HEAD 2>/dev/null || true)
                 if [[ -n "$head_after" && "$head_before" != "$head_after" ]]; then
                     printf "%s\n%s\n" "$head_before" "$head_after" > "${outfile}.head"
@@ -79,6 +80,16 @@ function run_repo_with_retry() {
                 mv "$temp_attempt" "$outfile"
             fi
             rm -f "$temp_attempt"
+            if [[ "$summary_mode" == status ]]; then
+                # Without its state this repository would be silently missing
+                # from the summary and could be reported as clean, so a failure
+                # here fails the repository, with the reason in its output.
+                summarize_repo_status "$dir" "$outfile" "$timeout_sec" || {
+                    status=$?
+                    printf 'git-recurse: could not read the repository state for the summary (exit %d)\n' "$status" >> "$outfile"
+                    return "$status"
+                }
+            fi
             return 0
         fi
 
@@ -143,6 +154,118 @@ function extract_pull_summary() {
     return 1
 }
 
+# Capture `git status --porcelain --branch` for the status summary. The text of
+# the user's own command cannot be summarised reliably (it is localized and may
+# be --short), while the porcelain format is stable across git versions, locales
+# and status.* settings. GIT_OPTIONAL_LOCKS=0 keeps this read-only probe from
+# taking the index lock, which another git process may be holding.
+function capture_status_probe() {
+    local dir="$1"
+    local probe_file="$2"
+    local timeout_sec="$3"
+
+    if [[ -n "$TIMEOUT_BIN" && "$timeout_sec" -gt 0 ]]; then
+        GIT_OPTIONAL_LOCKS=0 "$TIMEOUT_BIN" -k 3s "${timeout_sec}s" \
+            git -C "$dir" status --porcelain --branch > "$probe_file" 2>/dev/null
+    else
+        GIT_OPTIONAL_LOCKS=0 git -C "$dir" status --porcelain --branch > "$probe_file" 2>/dev/null
+    fi
+}
+
+# Describe what differs in a repository from its porcelain probe, for example
+# "2 modified, 1 untracked, ahead 1". A path that is both staged and modified
+# counts in each of those. Print nothing and return 1 when the working tree is
+# clean and the branch is neither ahead of nor behind its upstream.
+function describe_status() {
+    local probe_file="$1"
+    local line x y part description=""
+    local conflicted=0 staged=0 modified=0 untracked=0 ahead=0 behind=0
+    local ahead_re='ahead ([0-9]+)' behind_re='behind ([0-9]+)'
+    local parts=()
+
+    # A redirect that fails in front of the loop below would look like an empty
+    # (clean) probe, so a file that cannot be read is its own failure (2).
+    [[ -r "$probe_file" ]] || return 2
+
+    # Plain shell on purpose: every repository runs at once, so a program
+    # started per repository (awk, grep) measurably lengthens the whole run.
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        case "$line" in
+        '## '*)
+            [[ "$line" =~ $ahead_re ]] && ahead="${BASH_REMATCH[1]}"
+            [[ "$line" =~ $behind_re ]] && behind="${BASH_REMATCH[1]}"
+            ;;
+        '?? '*)
+            ((untracked++))
+            ;;
+        '!! '*) ;;
+        ???*)
+            x="${line:0:1}"
+            y="${line:1:1}"
+            if [[ "$x" == U || "$y" == U || "$x$y" == AA || "$x$y" == DD ]]; then
+                ((conflicted++))
+            else
+                [[ "$x" != " " ]] && ((staged++))
+                [[ "$y" != " " ]] && ((modified++))
+            fi
+            ;;
+        esac
+    done < "$probe_file"
+
+    (( conflicted > 0 )) && parts+=("$conflicted conflicted")
+    (( staged > 0 )) && parts+=("$staged staged")
+    (( modified > 0 )) && parts+=("$modified modified")
+    (( untracked > 0 )) && parts+=("$untracked untracked")
+    (( ahead > 0 )) && parts+=("ahead $ahead")
+    (( behind > 0 )) && parts+=("behind $behind")
+
+    (( ${#parts[@]} > 0 )) || return 1
+    for part in "${parts[@]}"; do
+        description+="${description:+, }$part"
+    done
+    printf '%s\n' "$description"
+}
+
+# Probe a repository and write its description to "<outfile>.summary" (empty
+# when it is clean). This runs inside the per-repository job, so the work is
+# parallel instead of a step of the main loop. Returns non-zero when the state
+# could not be read or parsed: describe_status uses 1 for "clean", so any other
+# failure is a real one and must not be taken for a clean repository.
+function summarize_repo_status() {
+    local dir="$1"
+    local outfile="$2"
+    local timeout_sec="$3"
+    local rc=0
+
+    capture_status_probe "$dir" "${outfile}.porcelain" "$timeout_sec" || rc=$?
+    if (( rc == 0 )); then
+        describe_status "${outfile}.porcelain" > "${outfile}.summary" || rc=$?
+        if (( rc == 1 )); then
+            rc=0
+        fi
+    fi
+    return "$rc"
+}
+
+# Print the one-line summary of a finished repository for the given summary mode
+# (pull or status), or return 1 when it has nothing to report.
+function extract_repo_summary() {
+    local mode="$1"
+    local dir="$2"
+    local outfile="$3"
+    local line
+
+    case "$mode" in
+    pull) extract_pull_summary "$dir" "$outfile" ;;
+    status)
+        # Already worked out by summarize_repo_status; an empty file means clean.
+        IFS= read -r line < "${outfile}.summary" || return 1
+        printf '%s\n' "$line"
+        ;;
+    *) return 1 ;;
+    esac
+}
+
 function git_recursive() {
     local cmd="$1"
     local depth="${2:-$DEFAULT_DEPTH}"
@@ -150,11 +273,12 @@ function git_recursive() {
     local max_jobs="${4:-$DEFAULT_JOBS}"
     local max_retries="${5:-$DEFAULT_RETRIES}"
     local timeout_sec="${6:-$DEFAULT_TIMEOUT}"
-    local show_summary="${7:-false}"
+    local summary_mode="${7:-none}"
 
-    local blue green red normal dim
+    local blue green yellow red normal dim
     blue=$(tput setaf 4)
     green=$(tput setaf 2)
+    yellow=$(tput setaf 3)
     red=$(tput setaf 1)
     normal=$(tput sgr0)
     dim=$(tput dim 2>/dev/null || true)
@@ -179,8 +303,10 @@ function git_recursive() {
     local total=${#dirs[@]}
     local width=${#total}
     local failures=0
-    local updated_repos=()
-    local updated_summaries=()
+    # Repositories the summary lists (updated by a pull, or with changes for
+    # status) and what to say about each.
+    local summary_repos=()
+    local summary_details=()
     local failed_repos=()
     local failed_statuses=()
 
@@ -222,7 +348,7 @@ function git_recursive() {
 
             (
                 trap 'echo "$i" >&3 2>/dev/null' EXIT
-                run_repo_with_retry "$dir" "$outfile" "$cmd" "$max_retries" "$timeout_sec" "$show_summary"
+                run_repo_with_retry "$dir" "$outfile" "$cmd" "$max_retries" "$timeout_sec" "$summary_mode"
                 echo $? > "$statusfile"
             ) &
         }
@@ -256,9 +382,9 @@ function git_recursive() {
 
             if [[ $status -eq 0 ]]; then
                 printf "[%*d/%d] ${green}✓ %s${normal}\n" "$width" "$completed" "$total" "$dir"
-                if [[ "$show_summary" == true ]]; then
+                if [[ "$summary_mode" != none ]]; then
                     local summary
-                    if summary=$(extract_pull_summary "$dir" "$outfile"); then
+                    if summary=$(extract_repo_summary "$summary_mode" "$dir" "$outfile"); then
                         printf "%s\n" "$summary" > "$tmpdir/$idx.updated"
                     fi
                 fi
@@ -295,8 +421,8 @@ function git_recursive() {
             [[ -f "$r_statusfile" ]] && r_status=$(cat "$r_statusfile")
 
             if [[ -f "$r_updatedfile" ]]; then
-                updated_repos+=("$r_dir")
-                updated_summaries+=("$(cat "$r_updatedfile")")
+                summary_repos+=("$r_dir")
+                summary_details+=("$(cat "$r_updatedfile")")
             fi
             if [[ "$r_status" -ne 0 ]]; then
                 failed_repos+=("$r_dir")
@@ -312,16 +438,16 @@ function git_recursive() {
             ((completed++))
             local tmp_out
             tmp_out=$(mktemp)
-            run_repo_with_retry "$dir" "$tmp_out" "$cmd" "$max_retries" "$timeout_sec" "$show_summary"
+            run_repo_with_retry "$dir" "$tmp_out" "$cmd" "$max_retries" "$timeout_sec" "$summary_mode"
             local seq_status=$?
 
             if [[ $seq_status -eq 0 ]]; then
                 printf "[%*d/%d] ${green}✓ %s${normal}\n" "$width" "$completed" "$total" "$dir"
-                if [[ "$show_summary" == true ]]; then
+                if [[ "$summary_mode" != none ]]; then
                     local summary
-                    if summary=$(extract_pull_summary "$dir" "$tmp_out"); then
-                        updated_repos+=("$dir")
-                        updated_summaries+=("$summary")
+                    if summary=$(extract_repo_summary "$summary_mode" "$dir" "$tmp_out"); then
+                        summary_repos+=("$dir")
+                        summary_details+=("$summary")
                     fi
                 fi
             else
@@ -336,24 +462,37 @@ function git_recursive() {
             else
                 printf "    %s(no output)%s\n" "$dim" "$normal"
             fi
-            rm -f "$tmp_out" "${tmp_out}.head"
+            rm -f "$tmp_out" "${tmp_out}.head" "${tmp_out}.porcelain" "${tmp_out}.summary"
         done
     fi
 
     printf "\n${blue}Done: %d ok, %d failed (of %d)${normal}\n" \
         "$(( total - failures ))" "$failures" "$total"
 
-    if [[ "$show_summary" == true ]]; then
-        if (( ${#updated_repos[@]} > 0 )); then
-            printf "\n${green}Updated repositories (%d):${normal}\n" "${#updated_repos[@]}"
+    if [[ "$summary_mode" != none ]]; then
+        local heading found_color all_quiet none_found
+        if [[ "$summary_mode" == status ]]; then
+            heading="Repositories with changes"
+            found_color="$yellow"
+            all_quiet="All repositories clean."
+            none_found="No repositories with changes."
+        else
+            heading="Updated repositories"
+            found_color="$green"
+            all_quiet="All repositories up to date."
+            none_found="No repositories updated."
+        fi
+
+        if (( ${#summary_repos[@]} > 0 )); then
+            printf "\n%s%s (%d):%s\n" "$found_color" "$heading" "${#summary_repos[@]}" "$normal"
             local j
-            for (( j=0; j < ${#updated_repos[@]}; j++ )); do
-                printf "  ${green}%s${normal}: %s\n" "${updated_repos[j]}" "${updated_summaries[j]}"
+            for (( j=0; j < ${#summary_repos[@]}; j++ )); do
+                printf "  %s%s%s: %s\n" "$found_color" "${summary_repos[j]}" "$normal" "${summary_details[j]}"
             done
         elif (( failures == 0 )); then
-            printf '\n%sAll repositories up to date.%s\n' "$dim" "$normal"
+            printf '\n%s%s%s\n' "$dim" "$all_quiet" "$normal"
         else
-            printf '\n%sNo repositories updated.%s\n' "$dim" "$normal"
+            printf '\n%s%s%s\n' "$dim" "$none_found" "$normal"
         fi
     fi
 
@@ -387,7 +526,9 @@ usage() {
     echo "  -r <retries>    Max retries on transient network/TLS failures (default: $DEFAULT_RETRIES, env: GIT_RECURSE_RETRIES)"
     echo "  -t <seconds>    Timeout per repository in seconds (0 = disabled, default: $DEFAULT_TIMEOUT, env: GIT_RECURSE_TIMEOUT)"
     echo "  -d <depth>      Max depth to search for .git dirs (default: $DEFAULT_DEPTH)"
-    echo "  -S              Show summary of updated repositories (automatic for pull commands)"
+    echo "  -S              Show a summary: the repositories a pull updated, or the ones with changes"
+    echo "                  for git status (automatic for both; env: GIT_RECURSE_SUMMARY=0 turns it off,"
+    echo "                  =1 turns it on for any command)"
 }
 
 function exit_abnormal() {
@@ -477,13 +618,29 @@ if ! [[ "$depth" =~ ^[1-9][0-9]*$ ]]; then
     exit 1
 fi
 
-show_summary=false
+# A git status command gets the "repositories with changes" summary; any other
+# command gets the "updated repositories" one, which only a pull has data for.
+is_status_cmd=false
+if [[ "$cmd" =~ ^[[:space:]]*git[[:space:]]+status([[:space:]]|$) ]]; then
+    is_status_cmd=true
+fi
+
+want_summary=false
 if [[ "$flag_summary" == true ]]; then
-    show_summary=true
-elif [[ "$flag_summary" != false && "${GIT_RECURSE_SUMMARY:-auto}" != "0" ]]; then
-    if [[ "$cmd" =~ (^|[[:space:]])pull([[:space:]]|$) || "${GIT_RECURSE_SUMMARY:-auto}" == "1" ]]; then
-        show_summary=true
+    want_summary=true
+elif [[ "${GIT_RECURSE_SUMMARY:-auto}" != "0" ]]; then
+    if [[ "$is_status_cmd" == true || "$cmd" =~ (^|[[:space:]])pull([[:space:]]|$) || "${GIT_RECURSE_SUMMARY:-auto}" == "1" ]]; then
+        want_summary=true
     fi
 fi
 
-git_recursive "$cmd" "${depth}" "$flag_parallel" "${max_jobs}" "${max_retries}" "${timeout_sec}" "$show_summary"
+summary_mode=none
+if [[ "$want_summary" == true ]]; then
+    if [[ "$is_status_cmd" == true ]]; then
+        summary_mode=status
+    else
+        summary_mode=pull
+    fi
+fi
+
+git_recursive "$cmd" "${depth}" "$flag_parallel" "${max_jobs}" "${max_retries}" "${timeout_sec}" "$summary_mode"

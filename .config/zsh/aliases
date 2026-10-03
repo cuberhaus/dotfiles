@@ -125,7 +125,7 @@ alias yolo="$yolo"
 ## Pull changes in Git repositories recursively.
 pull() { git-recurse "$@" git pull; }
 alias add-pat="add_pat"
-## Show status for Git repositories recursively.
+## Show status for Git repositories recursively and list the ones with changes.
 status() { git-recurse "$@" git status; }
 
 if command -v eza &> /dev/null
@@ -365,6 +365,63 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     alias jctl="journalctl -p 3 -xb"
     # Check vulnerabilities microcode
     alias microcode="grep . /sys/devices/system/cpu/vulnerabilities/*"
+
+    # The AniMe lid display of an ASUS laptop (the G635LX has one) is driven by asusd. This is a
+    # function, not an alias, because a toggle has to read the current state first, and it takes
+    # no arguments so that `anime-toggle off` cannot turn a dark lid on. It exists wherever
+    # asusctl is installed; whether this laptop has the display is asked of asusd on every run,
+    # which exports /xyz/ljones/aura/anime only when it found one.
+    if command -v asusctl >/dev/null 2>&1 && command -v busctl >/dev/null 2>&1; then
+        ## Toggle the ASUS AniMe lid display on or off; says so when this laptop has none.
+        anime-toggle() {
+            local props enabled level green='' yellow='' reset=''
+            case ${1:-} in
+                '') ;;
+                -h|--help)
+                    printf 'Usage: anime-toggle\nSwitch the ASUS AniMe lid display off when it is lit, on otherwise.\n'
+                    return 0
+                    ;;
+                *)
+                    printf 'anime-toggle: unexpected argument: %s (try anime-toggle --help)\n' "$1" >&2
+                    return 2
+                    ;;
+            esac
+            if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+                green=$'\033[32m' yellow=$'\033[33m' reset=$'\033[0m'
+            fi
+            # One line per property: "b true" for EnableDisplay, "u 2" for Brightness (0 is Off).
+            if ! props=$(busctl --system get-property xyz.ljones.Asusd /xyz/ljones/aura/anime \
+                xyz.ljones.Anime EnableDisplay Brightness 2>/dev/null); then
+                printf '%sNo AniMe lid display: asusd is not running or this laptop has none.%s\n' \
+                    "$yellow" "$reset" >&2
+                return 1
+            fi
+            enabled=${props%%$'\n'*}
+            level=${props##*$'\n'}
+            # The lid is lit only when it is enabled and brighter than Off: `--brightness off` alone
+            # leaves EnableDisplay true. Switching off sends both, so it is dark whichever of the
+            # two the daemon honors; switching on raises an Off brightness to med.
+            case "$enabled:$level" in
+                'b true:u '[1-9]*)
+                    asusctl anime --enable-display false --brightness off || return
+                    printf '%sAniMe lid display off%s\n' "$green" "$reset"
+                    ;;
+                'b true:u 0'|'b false:u 0')
+                    asusctl anime --enable-display true --brightness med || return
+                    printf '%sAniMe lid display on%s\n' "$green" "$reset"
+                    ;;
+                'b false:u '[1-9]*)
+                    asusctl anime --enable-display true || return
+                    printf '%sAniMe lid display on%s\n' "$green" "$reset"
+                    ;;
+                *)
+                    printf '%sUnexpected reply from asusd (%s, %s); left the lid display alone.%s\n' \
+                        "$yellow" "$enabled" "$level" "$reset" >&2
+                    return 1
+                    ;;
+            esac
+        }
+    fi
 
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then

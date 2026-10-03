@@ -83,10 +83,12 @@ test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_profile_detection.py
 	$(PYTHON) tests/test_audit_extra_packages.py
 	$(PYTHON) tests/test_audit_self_installed_apps.py
+	$(PYTHON) tests/test_anime_gif_check.py
 	bash tests/test_brightness.sh
 	bash tests/test_brightness_fix.sh
 	bash tests/test_asusctl_install.sh
 	bash tests/test_asusctl_lighting.sh
+	bash tests/test_anime_toggle.sh
 	bash tests/test_bootstrap_stow.sh
 	bash tests/test_stow_conflicts.sh
 	bash tests/test_bootstrap_machine_state.sh
@@ -97,6 +99,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_ycm.sh
 	bash tests/test_bootstrap_gentoo.sh
 	bash tests/test_shell_path.sh
+	bash tests/test_zsh_argv0.sh
 	bash tests/test_zshrc_bundles.sh
 	bash tests/test_updateall.sh
 	bash tests/test_cleanup.sh

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Description: Check whether a GIF will read well on the ASUS AniMe Vision lid (ROG Strix SCAR 16) and write a lid-ready copy.
+#
+# Usage:
+#   anime-gif-check [options] FILE...
+#
+# Simulates what `asusctl anime gif` would show on the 810-LED lid, runs the legibility filter, and
+# prints a verdict per stage. It never plays anything on the lid.
+#
+# Options:
+#   -o, --out DIR     Write NAME.lid.gif and NAME.preview.gif for GIFs that pass
+#   -a, --all         With --out, also write the GIFs that fail
+#   -f, --force       With --out, replace files that already exist
+#   --strip-space     The GIFs are already 702x160 lid-ready art
+#   --max-frames N    Skip GIFs with more frames (default 160)
+#   -j, --json        Print the reports as JSON
+#   -h, --help        Show the full help
+#
+# Needs python3 with NumPy and Pillow; nothing is installed for you.
+
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ -f "$script_dir/anime_gif_check.py" ]]; then
+    target="$script_dir/anime_gif_check.py"
+elif [[ -n "${DOTFILES:-}" && -f "$DOTFILES/.local/scripts/anime_gif_check.py" ]]; then
+    target="$DOTFILES/.local/scripts/anime_gif_check.py"
+else
+    target="$HOME/.local/scripts/anime_gif_check.py"
+fi
+
+exec python3 "$target" "$@"

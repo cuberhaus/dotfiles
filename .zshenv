@@ -4,6 +4,18 @@
 # path_helper is executed from /etc/zprofile and sources /etc/paths then /etc/path.d
 # zshrc and zprofile go after that, check order to make sure
 
+# --- AppImage ARGV0 guard ---
+# An editor installed as an AppImage (Cursor) hands ARGV0 to the shells it starts. zsh uses an exported
+# ARGV0 as argv[0] of every command it runs, so Python started there reports the AppImage as
+# sys.executable and anything that re-launches it (multiprocessing workers, subprocess) starts the
+# editor. The same block is in ~/.zshenv and in $ZDOTDIR/.zshenv (.config/zsh/.zshenv) because zsh reads
+# only one of them: the second when ZDOTDIR is already set, as in the editor's shells. Keep them
+# identical. `ARGV0=name command` on a single line still works.
+if [[ -n "${APPIMAGE:-}" ]]; then
+    unset ARGV0
+fi
+# --- end AppImage ARGV0 guard ---
+
 ###############################################################
 # => XDG Base Directories (must be set before anything else)
 ###############################################################

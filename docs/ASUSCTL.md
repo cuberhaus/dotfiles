@@ -37,6 +37,14 @@ The `work` and `ubuntu` bootstraps run it right after the installer, through
 `asusctl` and keyboards that lack the effect (see
 [Keyboard lighting](#keyboard-lighting)).
 
+`.local/scripts/bin/anime-gif-check` is not part of the installer. It tells you
+whether a GIF will read on the lid display of the G635LX before you play it (see
+[Lid animations](#lid-animations)).
+
+`anime-toggle` is not part of the installer either: it is a function in
+`.config/zsh/aliases` that switches that lid display off and on (see
+[Turning the lid off and on](#turning-the-lid-off-and-on)).
+
 ## Which machines
 
 The installer acts only when all of these hold, and prints the first one that
@@ -218,6 +226,111 @@ and `4` and above the other effects. On 2026-10-02 the dry run above, against th
 daemon of the G635LX, reported the keyboard as already showing `rainbow-wave`
 (speed med, direction right).
 
+## Lid animations
+
+The lid of the G635LX (AniMe Vision) is 810 white LEDs with no colour, 0.77 cm
+apart in a row and 0.28 cm between rows, laid out as a triangle that continues
+into a diagonal band. `asusctl anime gif` lights each LED with the average of
+the red, green, and blue of the pixels around it, so a picture has to survive
+being reduced to 810 brightness dots. Most GIFs do not: faces, small sprites,
+and text turn into noise.
+
+`anime-gif-check` (`.local/scripts/bin/anime-gif-check`, implemented in
+`.local/scripts/anime_gif_check.py`) simulates that reduction with the sampling
+of asusctl 6.3.8 and says whether a GIF will read. It never runs `asusctl` and
+never touches the lid.
+
+```bash
+anime-gif-check ghost.gif                 # one verdict per stage
+anime-gif-check --out ~/lid *.gif         # also write NAME.lid.gif and NAME.preview.gif for each pass
+anime-gif-check --strip-space art.gif     # the GIF is already 702x160 art made for the lid
+anime-gif-check --json *.gif              # the same reports for scripts
+```
+
+The exit status is 0 only when every GIF passes. A GIF is cropped to its
+content, fitted into a 702x160 canvas that lies along the band, and checked in
+nine stages:
+
+| Stage | Passes when | Catches |
+| --- | --- | --- |
+| loop | it loops in 0.3 to 24 s | strobing loops, long clips |
+| lit | 14% to 50% of the LEDs are lit | tiny sprites, floods |
+| peak | the brightest LEDs reach 85% | dim art |
+| bold | 40% of the lit LEDs are above 60% | grey mush |
+| motion | it changes 0.15 to 3.0 per second and under half the steps are still | frozen or frantic art |
+| detail | fine-detail loss is at most 0.22 | faces, small text |
+| flood | the content fills at most 80% of its box | full-frame flashes |
+| text | no run of letter-sized shapes | banners such as "NEW" |
+| solid | the bright shape fills at most 88% of its box | flashing squares |
+
+Light backgrounds are inverted and coloured ones subtracted, so the subject is
+what lights up; transparent pixels count as dark, because asusctl lights opaque
+pixels only. A note appears when the whole lid swings between bright and dark
+more than three times a second, which reads as strobing.
+
+The thresholds come from measurements on 2026-10-02. The sample GIFs from ASUS's
+gallery light 18% to 29% of the LEDs with 58% to 79% of them bold. Detailed
+hand-made animations that proved unreadable on the lid lit 5% to 12% with
+fine-detail loss of 0.25 to 0.50. Of 7,578 GIFs harvested from GifCities (the
+Internet Archive's GeoCities GIF search) and Wikimedia Commons, 6,487 could be
+scored, the first seven stages kept 250, and the text and solid stages left 191.
+Change a threshold only with new measurements.
+
+A pass measures legibility, not subject: the shapes are big, bright, bold, and
+moving, not necessarily what the file name says. The text stage can miss short
+words whose letters fuse into one blob, and the orientation of the strip on the
+lid is not verified, so judge the lid itself and not only the preview. Most
+GifCities art is fan-made with an unknown licence, so keep it for personal use;
+Wikimedia Commons files carry their licence on the file page.
+
+Playing a GIF changes the lid, which is why the tool only prints the command:
+
+```bash
+asusctl anime gif --path ~/lid/ghost.lid.gif --scale 1.225 --angle 0.607 --x-pos -2.43 --y-pos 1.49
+asusctl anime --enable-powersave-anim true   # afterwards: bring the built-in animations back
+```
+
+The command stays attached while it plays and repeats forever by default. The
+first write turns the daemon's built-in animations off, and `asusd` keeps that
+choice in `/etc/asusd/anime.ron`, so restore them yourself when you are done.
+The `--scale`, `--angle`, `--x-pos`, and `--y-pos` values map the 702x160 canvas
+onto the band; the tool uses the same numbers for its simulation and for the
+command it prints.
+
+The tool needs `python3` with NumPy and Pillow. The bootstraps do not install
+them (Debian and Ubuntu mark the system Python as externally managed): use
+`sudo apt install python3-numpy python3-pil`, or the Arch and Homebrew
+equivalents the tool prints. Without them it names the missing module and exits
+with status 2.
+
+### Turning the lid off and on
+
+`anime-toggle` switches the lid display off when it is lit and on otherwise. It
+is a function in `.config/zsh/aliases`, not an alias, because a toggle has to
+read the current state first, and it exists in shells where `asusctl` and
+`busctl` are installed. Whether this laptop has the display is asked of `asusd`
+on every run, which exports `/xyz/ljones/aura/anime` only when it found one, so
+any other machine gets a message and no change.
+
+```bash
+anime-toggle    # lit:  asusctl anime --enable-display false --brightness off
+                # dark: asusctl anime --enable-display true --brightness med
+```
+
+It reads `EnableDisplay` and `Brightness` of that object in one `busctl` call
+(`b false` and `u 0` while the lid is off) and counts the lid as lit only when
+it is enabled and brighter than Off, because `asusctl anime --brightness off`
+leaves `EnableDisplay` true. Switching on therefore raises an Off brightness to
+`med`, while a display that was only disabled keeps the brightness it had.
+Nothing changes, and the exit status is 1, when `asusd` is not running, exports
+no display, or answers with anything but `b true|false` and `u N`. Any argument
+is a usage error (status 2), so `anime-toggle off` can never turn a dark lid on.
+It needs no `sudo`, and `asusd` keeps the result in `/etc/asusd/anime.ron`, so
+it survives a reboot. The daemon also has its own switches that turn the lid off
+when the charger is unplugged, the laptop suspends, or the lid closes
+(`asusctl anime --help`; all three are `true` here), independently of this
+toggle.
+
 ## Not installed
 
 - `rog-control-center`, the graphical front end. It needs more build
@@ -227,7 +340,8 @@ daemon of the G635LX, reported the keyboard as already showing `rainbow-wave`
   sequences. The system daemon already drives this laptop's AniMe Matrix display
   (upstream lists the `G635L` board as an AniMe model, and `asusd` exports
   `/xyz/ljones/aura/anime` here), so its built-in animations and `asusctl anime`
-  (images, GIFs, brightness, power saving) work without it.
+  (images, GIFs, brightness, power saving) work without it (see
+  [Lid animations](#lid-animations)).
 - GPU switching tools. The ASUS Linux guide tells you to remove
   distribution-provided graphics switching such as `supergfxd` and `envycontrol`
   before setting up `asusctl`, and calls `supergfxctl` deprecated (its
@@ -331,3 +445,20 @@ before and after the keyboard), the wait for a daemon that has just started,
 repeat runs, effects changed by hand, the options, the dry run, failures that
 only the read-back can see, a busy daemon, and the wiring into the bootstraps,
 the repair step, and `make test`.
+
+`python3 tests/test_anime_gif_check.py` covers the lid geometry, each stage of
+`anime-gif-check` on synthetic GIFs whose verdict is known by construction, the
+decoder rules (frame delays, transparency, unreadable files), the files that
+`--out` writes, the colour and exit-status rules, and the wrapper. It never
+starts `asusctl`. It is skipped, with a message, where NumPy or Pillow is
+missing. It resolves the Python interpreter itself instead of trusting
+`sys.executable`: the shells of an editor installed as an AppImage can have
+`ARGV0` exported, which zsh uses as `argv[0]` of every command, so Python there
+reports the AppImage as `sys.executable`. `.zshenv` drops it now
+(`tests/test_zsh_argv0.sh`), but a shell that was already running keeps it.
+
+`bash tests/test_anime_toggle.sh` runs `anime-toggle` in clean Bash and Zsh
+shells against a fake `busctl` and `asusctl` that keep the lid's state, so it
+never touches the real daemon or lid. It covers where the function exists (Linux
+with both tools), every state of the lid and a round trip, a laptop without the
+display, unreadable replies, a failing `asusctl`, and the refusal of arguments.

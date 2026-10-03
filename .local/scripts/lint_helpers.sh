@@ -6,6 +6,7 @@
 LINT_PATTERNS=(
     '*.sh'
     '.zshenv'
+    '.config/zsh/.zshenv'
     '.bashrc'
     '.bash_profile'
     '.xinitrc'
