@@ -489,6 +489,18 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertTrue(variables, "no *_deb variable found: the pattern no longer matches the bootstrap")
         self.assertEqual(variables - set(self.audit.DEB_FILE_PACKAGES), set())
 
+    def test_the_ubuntu_profile_declares_the_openlogi_packages_the_way_the_audit_reads_them(self) -> None:
+        # openlogi_install gets minisign with "$apt minisign" and OpenLogi itself from a signed .deb
+        # on GitHub. The audit takes every word after a line-leading "$apt" for a package name, so a
+        # trailing "|| return 1" on that line would be reported as the packages "return" and "1".
+        declared = self.audit.expected_packages(REPO_ROOT, "ubuntu")
+        installed = self.audit.bootstrap_installed_packages(REPO_ROOT, "ubuntu")
+
+        self.assertIn(self.audit.Package("apt", "minisign"), declared)
+        self.assertIn(self.audit.Package("apt", "openlogi"), installed)
+        apt_names = {package.name for package in declared if package.manager == "apt"}
+        self.assertEqual(sorted({"return", "1", "true"} & apt_names), [])
+
     def test_standalone_installers_exist_and_their_arrays_are_readable(self) -> None:
         base_functions = self.audit.function_bodies(
             (REPO_ROOT / ".local" / "scripts" / "bootstrap" / "base_functions").read_text(encoding="utf-8")

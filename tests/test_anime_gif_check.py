@@ -15,6 +15,7 @@ import json
 import os
 import pathlib
 import shutil
+import site
 import subprocess
 import sys
 import tempfile
@@ -339,6 +340,9 @@ def run_cli(*args, env=None, unset=(), executable=None):
     environment = {k: v for k, v in os.environ.items()
                    if k not in ("NO_COLOR", "FORCE_COLOR", "CLICOLOR_FORCE", *unset)}
     environment["PYTHON_COLORS"] = "0"  # Python 3.14 colours argparse help when FORCE_COLOR is set, even to 0
+    # Python finds packages installed with `pip install --user` (NumPy, Pillow) through $HOME. A test that
+    # gives the child another $HOME keeps this process's user base, so the child imports what this one did.
+    environment["PYTHONUSERBASE"] = site.getuserbase()
     environment.update(env or {})
     command = [str(executable)] if executable else [python_command(), str(SCRIPT)]
     return subprocess.run(command + [str(a) for a in args], capture_output=True, text=True, env=environment,

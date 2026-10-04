@@ -215,6 +215,45 @@ under "Packages installed outside the bootstrap".
 
 Run the hermetic test with `bash tests/test_nvidia_container_toolkit.sh`.
 
+## OpenLogi
+
+On the `ubuntu` profile, `openlogi_install` (in `bootstrap/ubuntu_functions`)
+installs [OpenLogi](https://github.com/AprilNEA/OpenLogi), a Linux replacement
+for Logitech Options+ that pairs and configures Bolt and Unifying receivers (it
+cannot pair Lightspeed ones). It runs after `ubuntu_install`, and a failure only
+warns, because the package comes from the network.
+
+OpenLogi has no apt repository. It ships `.deb` files on GitHub releases, each
+signed with minisign. The step resolves the latest stable release (or
+`OPENLOGI_VERSION`, for example `0.8.11`), downloads the `.deb` for the
+machine's architecture (`amd64` or `arm64`) and its `.minisig` into a temporary
+directory, and checks the signature against the vendor's key before `apt-get`
+opens the file. A refused release tag, a failed download, or a bad signature
+installs nothing and removes the directory. `minisign` comes from Ubuntu's
+universe repository (24.04 and later). 22.04 does not package it, and there the
+step stops with a warning before it downloads anything.
+
+The key is pinned in `ubuntu_functions`. It is the trust anchor in the vendor's
+`packaging/linux/install.sh`, so check it there before changing it;
+`tests/test_openlogi_install.sh` holds a second copy so that a change is
+deliberate.
+
+The package ships a systemd user unit for the agent that owns the receiver and
+a udev rule. The step starts the agent with
+`systemctl --user enable --now openlogi-agent.service`, and prints that command
+when it cannot (over SSH, for example). Replug the receiver after a first
+install so the udev rule applies. Only one program can own a receiver, so stop
+Solaar first if you used it. OpenLogi's per-application profiles work on X11
+and XWayland only.
+
+The uninstall checklist of `ubuntu` offers `openlogi_uninstall`, which stops the
+agent and purges the package. apt leaves your own settings in your home folder
+alone, and `minisign` stays. `make audit-installation` declares `minisign`
+through the profile and `openlogi` through `DEB_FILE_PACKAGES`. There is no
+`make repair` step: to repeat the step, run the command that its warning prints.
+
+Run the hermetic test with `bash tests/test_openlogi_install.sh`.
+
 ## Shutdown fix
 
 Run `sudo .local/scripts/permanent_shutdown_fix.sh` on a Linux machine that needs

@@ -801,6 +801,7 @@ SYSTEM_PACKAGE_PATTERNS = {
 # holds the file ("$chrome_deb"), so expected_packages cannot read it from the install line.
 DEB_FILE_PACKAGES = {
     "chrome_deb": "google-chrome-stable",
+    "openlogi_deb": "openlogi",
     "rstudio_deb": "rstudio",
     "warp_deb": "warp-terminal",
     "lms_deb": "lm-studio",

@@ -64,6 +64,17 @@ chrome_uninstall() {
 }
 
 ###############################################################
+# => OpenLogi uninstall
+###############################################################
+# Removes the package and its udev rule. Your OpenLogi settings stay in your home folder,
+# and minisign stays because other things can use it.
+openlogi_uninstall() {
+    info "Uninstalling OpenLogi..."
+    systemctl --user disable --now openlogi-agent.service 2>/dev/null || true
+    $apt_remove openlogi || true
+}
+
+###############################################################
 # => Snaps uninstall
 ###############################################################
 snaps_uninstall() {

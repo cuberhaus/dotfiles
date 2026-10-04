@@ -173,6 +173,80 @@ chrome_install () {
     rm -f "$chrome_deb"
 }
 
+# OpenLogi (Logitech Options+ alternative for Bolt and Unifying receivers) has no apt repository:
+# it ships as .deb files on GitHub releases, each signed with minisign. The file must verify
+# against the vendor key below before sudo opens it. The key is the trust anchor in
+# packaging/linux/install.sh of https://github.com/AprilNEA/OpenLogi; check it there before
+# changing it. Installs the latest stable release, or OPENLOGI_VERSION (for example 0.8.11).
+# Callers run this as `openlogi_install ||`, where the shell ignores `set -e`, so every step is
+# chained and a failure warns and returns 1.
+openlogi_install () {
+    if command -v openlogi-agent &>/dev/null; then
+        info "OpenLogi already installed, skipping."
+        return
+    fi
+
+    local releases="https://github.com/AprilNEA/OpenLogi/releases"
+    local minisign_key="RWRRkFtw+rqkvTlCTGKUszSE5dX9CK1teaQD45jO4P9rYlWLO4/nHVUF" # gitleaks:allow (public key)
+    local tag_pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$'
+    local -a fetch=(curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --location
+        --silent --show-error --retry 3 --retry-connrefused)
+    local arch tag latest_url work package
+
+    arch="$(dpkg --print-architecture)"
+    case "$arch" in
+        amd64|arm64) ;;
+        *)
+            warn "OpenLogi publishes amd64 and arm64 packages, not $arch."
+            return 1
+            ;;
+    esac
+
+    if [ -n "${OPENLOGI_VERSION:-}" ]; then
+        tag="v${OPENLOGI_VERSION#v}"
+    else
+        latest_url="$("${fetch[@]}" --output /dev/null --write-out '%{url_effective}' "$releases/latest")" || {
+            warn "Could not resolve the latest OpenLogi release."
+            return 1
+        }
+        tag="${latest_url#"$releases/tag/"}"
+    fi
+    if ! [[ "$tag" =~ $tag_pattern ]]; then
+        warn "Refusing the OpenLogi release tag [$tag]."
+        return 1
+    fi
+
+    $apt minisign               # Verifies the release signature
+    if ! command -v minisign &>/dev/null; then
+        warn "minisign could not be installed, so the OpenLogi package cannot be verified."
+        return 1
+    fi
+
+    package="openlogi-${tag}-linux-${arch}.deb"
+    work="$(mktemp -d)" || return 1
+    chmod 755 "$work"           # apt reads the file as its unprivileged _apt user
+    local openlogi_deb="$work/$package"
+    info "Installing OpenLogi $tag..."
+    if "${fetch[@]}" --output "$openlogi_deb" "$releases/download/$tag/$package" &&
+        "${fetch[@]}" --output "$openlogi_deb.minisig" "$releases/download/$tag/$package.minisig" &&
+        minisign -V -P "$minisign_key" -m "$openlogi_deb" -x "$openlogi_deb.minisig" &&
+        sudo apt-get install -y "$openlogi_deb"; then
+        rm -rf "$work"
+    else
+        rm -rf "$work"
+        warn "OpenLogi $tag was not installed: the download, its signature check, or apt failed."
+        return 1
+    fi
+
+    # The package ships a systemd user unit for the agent that owns the receiver.
+    if systemctl --user enable --now openlogi-agent.service; then
+        info "OpenLogi agent started."
+    else
+        warn "Start the OpenLogi agent from a graphical session: systemctl --user enable --now openlogi-agent.service"
+    fi
+    info "Replug the Logitech receiver so the new udev rules apply, then open OpenLogi."
+}
+
 emacs_install () {
     $apt emacs-gtk              # Emacs
     # Doom
