@@ -38,7 +38,7 @@ teardown_case() {
 }
 
 run_stow() {
-    stow -R -t "${1:-$HOME}" -d "$CASE_DIR/cuberhaus" dotfiles
+    stow -R -t "$HOME" -d "$CASE_DIR/cuberhaus" dotfiles
 }
 
 run_backup() {
@@ -128,7 +128,7 @@ test_live_dconf_database_is_left_alone() {
     run_backup
     run_stow || fail 'Stow must succeed while a live dconf database exists'
 
-    [ -f "$HOME/.config/dconf/user" ] && [ ! -L "$HOME/.config/dconf/user" ] \
+    { [ -f "$HOME/.config/dconf/user" ] && [ ! -L "$HOME/.config/dconf/user" ]; } \
         || fail 'The live dconf database must stay a regular file'
     [ "$(cat "$HOME/.config/dconf/user")" = 'live desktop settings' ] \
         || fail 'The live dconf database must keep its content'
@@ -146,7 +146,7 @@ test_dconf_directory_is_never_linked_into_the_repository() {
 
     run_stow || fail 'Stow must succeed on a machine without a dconf directory'
 
-    [ ! -e "$HOME/.config/dconf" ] && [ ! -L "$HOME/.config/dconf" ] \
+    { [ ! -e "$HOME/.config/dconf" ] && [ ! -L "$HOME/.config/dconf" ]; } \
         || fail 'Stow must not create ~/.config/dconf'
     [ "$HOME/.config/dconf-settings.ini" -ef "$PACKAGE/.config/dconf-settings.ini" ] \
         || fail 'The ignore rule must not swallow a sibling whose name only starts with "dconf"'

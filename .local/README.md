@@ -254,6 +254,44 @@ through the profile and `openlogi` through `DEB_FILE_PACKAGES`. There is no
 
 Run the hermetic test with `bash tests/test_openlogi_install.sh`.
 
+## kondo
+
+[kondo](https://github.com/tbillington/kondo) deletes the folders that a project
+can rebuild (`node_modules`, `target`, `build`, `.venv`, and so on) to free disk
+space. It asks before it cleans each project it finds (`--all` skips the
+question), deletes for good, and does not ask Git, so a tracked `build/` folder
+goes too. `kondo --dry-run DIR` only lists what it would clean, and
+`--older 3M` leaves alone the projects that changed in the last three months.
+
+The `arch`, `manjaro`, and `mac` profiles install it from the package manager
+(`kondo` in `bootstrap/arch_functions` and `bootstrap/mac_functions`). Ubuntu
+has no package, so on the `ubuntu` profile `kondo_install` (in
+`bootstrap/ubuntu_functions`) downloads the pinned release for the machine's
+architecture (`amd64` or `arm64`) into a temporary directory, checks it against
+the SHA-256 pinned in the function, and only then lets `sudo install` copy the
+program to `/usr/local/bin/kondo`. A failed download or a digest that does not
+match installs nothing and removes the directory. The step runs after
+`openlogi_install`, and a failure only warns, because the file comes from the
+network.
+
+Upstream publishes no checksum file, so the digests in the function are the
+trust anchor. GitHub shows the same value as the digest of each release asset:
+
+```sh
+gh api repos/tbillington/kondo/releases/tags/vX.Y.Z --jq '.assets[] | {name, digest}'
+```
+
+To update kondo, change `version` and both digests in `kondo_install` together,
+and the copies in `tests/test_kondo_install.sh` with them; the test fails until
+they agree. The `ubuntu-windows`, `work`, and `gentoo` profiles do not install
+kondo.
+
+The uninstall checklist of `ubuntu` offers `kondo_uninstall`, which removes
+`/usr/local/bin/kondo`. There is no `make repair` step: to repeat the install,
+run the command that its warning prints.
+
+Run the hermetic test with `bash tests/test_kondo_install.sh`.
+
 ## Shutdown fix
 
 Run `sudo .local/scripts/permanent_shutdown_fix.sh` on a Linux machine that needs

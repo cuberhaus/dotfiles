@@ -15,6 +15,7 @@ run_selected_uninstalls "Ubuntu Uninstaller" \
     ubuntu_gui_uninstall "Ubuntu GUI apps (calibre, VLC, RStudio, ...)"    OFF \
     chrome_uninstall    "Google Chrome"                                     OFF \
     openlogi_uninstall  "OpenLogi (Logitech Options+ alternative)"          OFF \
+    kondo_uninstall     "kondo (project build-folder cleaner)"              OFF \
     snaps_uninstall     "Snap packages (VS Code, Discord, IDEs, ...)"      OFF \
     emacs_uninstall     "Emacs & Doom Emacs"                               OFF \
     vim_uninstall       "Vim / Neovim extras"                              OFF \

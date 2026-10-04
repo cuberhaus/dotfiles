@@ -26,7 +26,7 @@ base_uninstall() {
 ubuntu_gui_uninstall() {
     info "Uninstalling Ubuntu GUI packages..."
 
-    $apt_remove lxappearance arc-theme audacity calibre \
+    $apt_remove lxappearance arc-theme audacity bleachbit calibre \
         cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils \
         gnome-screensaver gparted pavucontrol thunderbird timeshift \
         transmission vlc caffeine dconf-editor r-base \
@@ -72,6 +72,15 @@ openlogi_uninstall() {
     info "Uninstalling OpenLogi..."
     systemctl --user disable --now openlogi-agent.service 2>/dev/null || true
     $apt_remove openlogi || true
+}
+
+###############################################################
+# => kondo uninstall
+###############################################################
+# Removes the binary that kondo_install put in /usr/local/bin.
+kondo_uninstall() {
+    info "Uninstalling kondo..."
+    sudo rm -f /usr/local/bin/kondo || true
 }
 
 ###############################################################

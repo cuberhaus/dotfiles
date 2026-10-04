@@ -93,6 +93,7 @@ ubuntu_install() {
         lxappearance            # Theme
         arc-theme
         audacity
+        bleachbit               # Junk and cache cleaner (open source)
         calibre
         cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
         gnome-screensaver       # Screensaver
@@ -245,6 +246,58 @@ openlogi_install () {
         warn "Start the OpenLogi agent from a graphical session: systemctl --user enable --now openlogi-agent.service"
     fi
     info "Replug the Logitech receiver so the new udev rules apply, then open OpenLogi."
+}
+
+# kondo removes rebuildable folders (node_modules, target, build, ...) from project directories.
+# Ubuntu does not package it and its releases carry no checksum file, so the SHA-256 of each
+# build is pinned below; GitHub shows the same value as the asset's digest. Change the version
+# and both digests together, and the copies in tests/test_kondo_install.sh with them.
+# kondo 0.9 has no --version flag, so the skip message below names no version.
+# Callers run this as `kondo_install ||`, where the shell ignores `set -e`, so every step is
+# chained and a failure warns and returns 1.
+kondo_install () {
+    if command -v kondo &>/dev/null; then
+        info "kondo already installed, skipping."
+        return
+    fi
+
+    local version="0.9"
+    local releases="https://github.com/tbillington/kondo/releases/download/v${version}"
+    local -a fetch=(curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --location
+        --silent --show-error --retry 3 --retry-connrefused)
+    local arch target digest work asset
+
+    arch="$(dpkg --print-architecture)"
+    case "$arch" in
+        amd64)
+            target="x86_64-unknown-linux-gnu"
+            digest="56f89890fd4e16cf5e11bb212bb812b60a8319dabfb05fabaf80c6c8b5133b65"
+            ;;
+        arm64)
+            target="aarch64-unknown-linux-gnu"
+            digest="531cfc381e851300878e20f77ebd58724ddc28ecf5e48bec654f630f0bfc7fb0"
+            ;;
+        *)
+            warn "kondo publishes amd64 and arm64 Linux builds, not $arch."
+            return 1
+            ;;
+    esac
+
+    asset="kondo-${target}.tar.gz"
+    work="$(mktemp -d)" || return 1
+    info "Installing kondo ${version}..."
+    if "${fetch[@]}" --output "$work/$asset" "$releases/$asset" &&
+        printf '%s  %s\n' "$digest" "$asset" > "$work/$asset.sha256" &&
+        (cd "$work" && sha256sum --check --strict "$asset.sha256") &&
+        tar -xzf "$work/$asset" -C "$work" kondo &&
+        sudo install -m 0755 "$work/kondo" /usr/local/bin/kondo; then
+        rm -rf "$work"
+    else
+        rm -rf "$work"
+        warn "kondo ${version} was not installed: the download, its checksum, or the install failed."
+        return 1
+    fi
+    info "kondo ${version} installed."
 }
 
 emacs_install () {

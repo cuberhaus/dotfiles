@@ -37,6 +37,7 @@ mac_install () {
         go
         gpg
         htop                    # Resource viewer
+        kondo                   # Project cleaner (node_modules, target, build)
         llvm                    # Compiler
         mono
         ncdu                    # Storage manager

@@ -69,6 +69,7 @@ base_install () {
         eza                     # ls on steroids (exa replacement)
         fzf                     # Fuzzy finder
         htop                    # Show system resources
+        kondo                   # Project cleaner (node_modules, target, build)
         ncdu                    # Manage storage
         ranger                  # Ranger
         rclone                  # Rsync to remote
@@ -86,6 +87,7 @@ base_install () {
 
         # GUI apps
         biber                   # LaTeX bibliography
+        bleachbit               # Junk and cache cleaner (open source)
         calibre                 # Book manager
         cron                    # Backups (sudo timeshift-gtk)
         dconf-editor            # Edit gnome configuration

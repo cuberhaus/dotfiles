@@ -900,7 +900,7 @@ nvidia_gpu_present() {
     local device vendor class
 
     for device in "$devices_dir"/*; do
-        [ -r "$device/vendor" ] && [ -r "$device/class" ] || continue
+        { [ -r "$device/vendor" ] && [ -r "$device/class" ]; } || continue
         vendor=$(<"$device/vendor")
         class=$(<"$device/class")
         if [ "$vendor" = 0x10de ] && [[ "$class" == 0x03* ]]; then

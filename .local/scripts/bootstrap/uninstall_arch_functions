@@ -13,11 +13,11 @@ base_uninstall() {
 
     $pac_remove cmake opencl-headers bazel cudnn cuda conky \
         adapta-gtk-theme arc-gtk-theme arc-icon-theme \
-        bat biber breeze calibre cron dconf-editor dex discord dnsutils github-cli \
+        bat biber bleachbit breeze calibre cron dconf-editor dex discord dnsutils github-cli \
         dunst eza exfat-utils file-roller firefox fzf gcc gdb \
         gnome-calculator gnome-font-viewer gnome-keyring gtk2 gtk3 \
         gucharmap gvim hardinfo cpu-x htop inotify-tools kcolorchooser \
-        kdiff3 kitty kvantum-qt5 laptop-detect \
+        kdiff3 kitty kondo kvantum-qt5 laptop-detect \
         libmythes mythes-en mythes-es \
         libreoffice-still libreoffice-still-ca lxappearance ncdu \
         nemo nemo-fileroller nemo-preview nemo-seahorse nemo-share \

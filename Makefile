@@ -97,6 +97,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_ide_apt_sources.sh
 	bash tests/test_nvidia_container_toolkit.sh
 	bash tests/test_openlogi_install.sh
+	bash tests/test_kondo_install.sh
 	bash tests/test_ycm.sh
 	bash tests/test_bootstrap_gentoo.sh
 	bash tests/test_shell_path.sh
