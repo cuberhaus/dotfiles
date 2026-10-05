@@ -111,6 +111,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_logout_all.sh
 	bash tests/test_bashrc_prompt.sh
 	bash tests/test_git_repo_defaults.sh
+	bash tests/test_mini_bashrc.sh
 	bash tests/test_git_recurse.sh
 	bash tests/test_git_credential_helper.sh
 	bash tests/test_vault_secret.sh

@@ -37,13 +37,19 @@ configure_tracked_repo_git() {
     fi
 
     if [ -f "$dir/lefthook.yml" ] || [ -f "$dir/.lefthook.yml" ]; then
-        if [ -x "$dir/node_modules/.bin/lefthook" ]; then
-            (cd "$dir" && "$dir/node_modules/.bin/lefthook" install 2>/dev/null) || true
-        elif command -v lefthook >/dev/null 2>&1; then
-            (cd "$dir" && lefthook install 2>/dev/null) || true
-        elif command -v npx >/dev/null 2>&1; then
-            (cd "$dir" && npx --yes lefthook install 2>/dev/null) || true
-        fi
+        # DIR is usually relative (clone-all and clone-team pass "cv"), so look for the program
+        # after the cd, not through DIR: "$dir/node_modules/.bin/lefthook" would then be searched
+        # for inside DIR itself. Say nothing: clone-all runs many of these at once.
+        (
+            cd "$dir" || exit 0
+            if [ -x ./node_modules/.bin/lefthook ]; then
+                ./node_modules/.bin/lefthook install
+            elif command -v lefthook >/dev/null 2>&1; then
+                lefthook install
+            elif command -v npx >/dev/null 2>&1; then
+                npx --yes lefthook install
+            fi
+        ) >/dev/null 2>&1 || true
     fi
 
     if [ -x "$dir/.local/scripts/apply-skip-worktree" ]; then

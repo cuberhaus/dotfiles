@@ -113,8 +113,11 @@ for full in "${repos[@]}"; do
 
     if [ -d "$dir/.git" ]; then
         output=""
+        # A quiet pull prints nothing even when it moves HEAD, so compare HEAD instead.
+        before=$(git -C "$dir" rev-parse HEAD 2>/dev/null)
         if output=$(git -C "$dir" pull --ff-only --quiet 2>&1); then
-            if [ -z "$output" ]; then
+            after=$(git -C "$dir" rev-parse HEAD 2>/dev/null)
+            if [ "$before" = "$after" ]; then
                 printf '  %s%s%s   %s\n' "$dim" "up-to-date" "$reset" "$full"
             else
                 printf '  %s%s%s   %s\n' "$green" "updated" "$reset" "$full"

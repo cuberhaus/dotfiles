@@ -10,7 +10,11 @@ set -euo pipefail
 export TERM=dumb
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-GIT_RECURSE="$ROOT/.local/scripts/bin/git-recurse"
+# The implementation under test is the script. tests/test_mini_bashrc.sh sets
+# GIT_RECURSE_UNDER_TEST to a wrapper around the git-recurse function of
+# .local/Mini/.bashrc, which must pass every test that goes through the command alone;
+# the tests of the script's own functions (the last ones) run only on the script.
+GIT_RECURSE="${GIT_RECURSE_UNDER_TEST:-$ROOT/.local/scripts/bin/git-recurse}"
 
 tmpdir=$(mktemp -d)
 trap 'rm -rf "$tmpdir"' EXIT
@@ -378,6 +382,371 @@ if ! grep -q "Failed repositories (3):" <<< "$out_probe"; then
 fi
 if grep -q "All repositories clean" <<< "$out_probe"; then
     fail 'Repositories without a readable state must not be reported as clean' "$out_probe"
+fi
+
+# --- more tests through the command alone --------------------------------------
+# These hold for any implementation of git-recurse, so the copy in Mini's .bashrc
+# is held to them too.
+
+assert_has() { # NAME OUTPUT TEXT
+    grep -qF -- "$3" <<< "$2" || fail "$1: expected \"$3\"" "$2"
+}
+
+assert_lacks() { # NAME OUTPUT TEXT
+    if grep -qF -- "$3" <<< "$2"; then
+        fail "$1: did not expect \"$3\"" "$2"
+    fi
+}
+
+assert_same() { # NAME ACTUAL EXPECTED
+    [[ "$2" == "$3" ]] || fail "$1: expected [$3], got [$2]"
+}
+
+# run_git_recurse ARGS...: sets cap_out (stdout and stderr) and cap_rc (exit status).
+run_git_recurse() {
+    cap_rc=0
+    cap_out=$("$GIT_RECURSE" "$@" 2>&1) || cap_rc=$?
+}
+
+# Test 16: what the status summary says for each state of a repository, through
+# the whole command. A stub git answers the porcelain probe of each repository
+# from a file named after it and hands every other call to the real git, so the
+# cases that are hard to build with real repositories (renames, ignored files,
+# an unterminated last line) are covered for any implementation.
+porcelain_ws="$tmpdir/porcelain-ws"
+porcelain_dir="$tmpdir/porcelain"
+mkdir -p "$porcelain_ws" "$porcelain_dir" "$tmpdir/porcelain-bin"
+cat > "$tmpdir/porcelain-bin/git" <<'EOF'
+#!/usr/bin/env bash
+# Answer `git -C DIR status --porcelain --branch` from $PORCELAIN_DIR/<name of DIR>;
+# every other call is the real git.
+dir=""
+probe=false
+args=("$@")
+for (( i = 0; i < ${#args[@]}; i++ )); do
+    [[ "${args[i]}" == -C ]] && dir="${args[i+1]}"
+    [[ "${args[i]}" == --porcelain* ]] && probe=true
+done
+if [[ $probe == true ]]; then
+    cat "$PORCELAIN_DIR/$(basename "$dir")"
+    exit 0
+fi
+exec "$REAL_GIT" "$@"
+EOF
+chmod +x "$tmpdir/porcelain-bin/git"
+
+# name|porcelain output|what the summary says (nothing: the repository is clean)
+porcelain_cases=(
+    'in-sync|## main...origin/main\n|'
+    'no-upstream|## main\n|'
+    'no-commit-yet|## No commits yet on main\n|'
+    'upstream-gone|## main...origin/main [gone]\n|'
+    'detached|## HEAD (no branch)\n|'
+    'branch-named-ahead|## ahead...origin/ahead\n|'
+    'ignored-only|## main\n!! build/\n|'
+    'empty-probe||'
+    'ahead|## main...origin/main [ahead 3]\n|ahead 3'
+    'behind|## main...origin/main [behind 14]\n|behind 14'
+    'diverged|## main...o/main [ahead 2, behind 15]\n|ahead 2, behind 15'
+    'modified-untracked|## main\n M a\n M b\n?? c\n|2 modified, 1 untracked'
+    'staged-and-modified|## main\nMM a\nA  b\n|2 staged, 1 modified'
+    'rename|## main\nR  old -> new\n|1 staged'
+    'type-change|## main\n T a\nT  b\n|1 staged, 1 modified'
+    'deletions|## main\n D a\nD  b\n|1 staged, 1 modified'
+    'intent-to-add|## main\n A a\n|1 modified'
+    'spaces-in-names|## main\n M my file.txt\n?? a b c\n|1 modified, 1 untracked'
+    'unterminated-last-line|## main\n M a|1 modified'
+    'every-conflict-code|## main\nDD a\nAU b\nUD c\nUA d\nDU e\nAA f\nUU g\n|7 conflicted'
+    'order-of-the-parts|## main...o/main [ahead 1, behind 2]\nUU a\nM  b\n M c\n?? d\n|1 conflicted, 1 staged, 1 modified, 1 untracked, ahead 1, behind 2'
+)
+expected_porcelain=""
+for entry in "${porcelain_cases[@]}"; do
+    IFS='|' read -r case_name case_porcelain case_summary <<< "$entry"
+    git init -q -b main "$porcelain_ws/$case_name"
+    printf '%b' "$case_porcelain" > "$porcelain_dir/$case_name"
+    if [[ -n "$case_summary" ]]; then
+        expected_porcelain+="  ./$case_name/: $case_summary"$'\n'
+    fi
+done
+expected_porcelain=$(LC_ALL=C sort <<< "${expected_porcelain%$'\n'}")
+cd "$porcelain_ws"
+out_porcelain=$(REAL_GIT="$real_git" PORCELAIN_DIR="$porcelain_dir" PATH="$tmpdir/porcelain-bin:$PATH" "$GIT_RECURSE" git status)
+assert_same 'Test 16: every state is described as expected' "$(changes_listed "$out_porcelain")" "$expected_porcelain"
+assert_has 'Test 16: every repository is processed' "$out_porcelain" "Done: ${#porcelain_cases[@]} ok, 0 failed (of ${#porcelain_cases[@]})"
+
+# Test 17: help, and what a wrong option or value is answered with. All of these
+# finish before the command looks for a repository.
+cd "$tmpdir"
+for flag in --help -h; do
+    run_git_recurse "$flag"
+    assert_same "Test 17: $flag exits 0" "$cap_rc" 0
+    assert_has "Test 17: $flag shows the usage" "$cap_out" 'Usage: git-recurse [options] <command> [args...]'
+    assert_has "Test 17: $flag shows the job limit" "$cap_out" 'default: 0, env: GIT_RECURSE_JOBS'
+    assert_has "Test 17: $flag shows the retries" "$cap_out" 'default: 2, env: GIT_RECURSE_RETRIES'
+    assert_has "Test 17: $flag shows the timeout" "$cap_out" 'default: 12, env: GIT_RECURSE_TIMEOUT'
+    assert_has "Test 17: $flag shows the depth" "$cap_out" '(default: 3)'
+done
+
+expect_rejected() { # NAME TEXT ARGS...: exit status 1 and TEXT in what it printed
+    local name="$1" text="$2"
+    shift 2
+    run_git_recurse "$@"
+    assert_same "Test 17: $name exits 1" "$cap_rc" 1
+    assert_has "Test 17: $name says why" "$cap_out" "$text"
+}
+expect_rejected 'no command' 'Error: missing command' 
+expect_rejected 'only options' 'Error: missing command' -s -p
+expect_rejected 'a blank command' 'Error: missing command' ' '
+expect_rejected 'jobs that are not a number' 'Error: -j requires a non-negative integer (0 for unlimited).' -j many git status
+expect_rejected 'negative jobs' 'Error: -j requires a non-negative integer' -j -1 git status
+expect_rejected 'retries that are not a number' 'Error: -r requires a non-negative integer.' -r x git status
+expect_rejected 'a fractional timeout' 'Error: -t requires a non-negative integer (0 for disabled).' -t 1.5 git status
+expect_rejected 'depth zero' 'Error: -d requires a positive integer.' -d 0 git status
+expect_rejected 'depth that is not a number' 'Error: -d requires a positive integer.' -d deep git status
+expect_rejected 'an unknown option' 'Usage: git-recurse' -Z git status
+expect_rejected 'an option without its value' 'Usage: git-recurse' -j
+for assignment in GIT_RECURSE_JOBS=lots GIT_RECURSE_RETRIES=-1 GIT_RECURSE_TIMEOUT=soon; do
+    cap_rc=0
+    cap_out=$(env "$assignment" "$GIT_RECURSE" git status 2>&1) || cap_rc=$?
+    assert_same "Test 17: $assignment exits 1" "$cap_rc" 1
+    assert_has "Test 17: $assignment is refused like its option" "$cap_out" 'requires a non-negative integer'
+done
+
+# Test 18: no repositories, one folder only (-d 1), and the depth limit
+empty_ws="$tmpdir/empty-ws"
+mkdir -p "$empty_ws"
+cd "$empty_ws"
+run_git_recurse git status
+assert_same 'Test 18: an empty folder is not a failure' "$cap_rc" 0
+assert_has 'Test 18: the depth is announced' "$cap_out" 'depth: 3'
+assert_has 'Test 18: no repositories' "$cap_out" 'No git repositories found'
+
+cd "$clean_ws/ok1"
+run_git_recurse -d 1 git rev-parse --is-inside-work-tree
+assert_same 'Test 18: -d 1 runs the command here' "$cap_rc" 0
+assert_has 'Test 18: -d 1 announces the depth' "$cap_out" 'depth: 1'
+assert_has 'Test 18: -d 1 names the folder' "$cap_out" "Executing \"git rev-parse --is-inside-work-tree\" in $PWD"
+assert_has 'Test 18: -d 1 prints what the command printed' "$cap_out" 'true'
+run_git_recurse -d 1 false
+assert_same 'Test 18: -d 1 returns the status of the command' "$cap_rc" 1
+run_git_recurse -d 1 true
+assert_same 'Test 18: -d 1 returns the status of the command (success)' "$cap_rc" 0
+
+deep_ws="$tmpdir/deep-ws"
+mkdir -p "$deep_ws/x"
+new_repo "$deep_ws" top
+new_repo "$deep_ws/x" inner
+cd "$deep_ws"
+run_git_recurse git rev-parse --git-dir
+assert_has 'Test 18: the default depth reaches ./x/inner' "$cap_out" 'Done: 2 ok, 0 failed (of 2)'
+run_git_recurse -d 2 git rev-parse --git-dir
+assert_has 'Test 18: -d 2 stops above ./x/inner' "$cap_out" 'Done: 1 ok, 0 failed (of 1)'
+assert_lacks 'Test 18: -d 2 stops above ./x/inner' "$cap_out" './x/inner'
+
+# Test 19: how the work is shared out. The announcement, the numbering of the
+# lines, the output of a command that prints nothing, and how many copies of a
+# command run at once.
+cd "$status_ws"
+run_git_recurse git rev-parse --git-dir
+assert_has 'Test 19: default announcement' "$cap_out" 'Launching "git rev-parse --git-dir" in 10 repo(s) in parallel...'
+assert_lacks 'Test 19: default announcement' "$cap_out" 'concurrency'
+run_git_recurse -j 3 git rev-parse --git-dir
+assert_has 'Test 19: -j 3 announces the limit' "$cap_out" 'in 10 repo(s) in parallel (concurrency: 3)...'
+run_git_recurse -j 0 git rev-parse --git-dir
+assert_lacks 'Test 19: -j 0 means all at once' "$cap_out" 'concurrency'
+run_git_recurse -j 99 git rev-parse --git-dir
+assert_lacks 'Test 19: more jobs than repositories means all at once' "$cap_out" 'concurrency'
+run_git_recurse -s git rev-parse --git-dir
+assert_lacks 'Test 19: -s announces no launch' "$cap_out" 'Launching'
+cap_rc=0
+cap_out=$(GIT_RECURSE_JOBS=4 "$GIT_RECURSE" git rev-parse --git-dir 2>&1) || cap_rc=$?
+assert_has 'Test 19: GIT_RECURSE_JOBS sets the limit' "$cap_out" '(concurrency: 4)'
+
+for mode in "" -s; do
+    run_git_recurse ${mode:+"$mode"} git rev-parse --git-dir
+    numbers=$(sed -n 's|^\[ *\([0-9]*\)/10\] .*|\1|p' <<< "$cap_out" | tr '\n' ' ')
+    assert_same "Test 19: ${mode:-parallel} numbers its lines in order" "$numbers" '1 2 3 4 5 6 7 8 9 10 '
+    assert_has "Test 19: ${mode:-parallel} pads the number to the width of the total" "$cap_out" '[ 1/10] '
+done
+
+run_git_recurse true
+assert_same 'Test 19: a command without output says so for every repository' \
+    "$(grep -c '^    (no output)$' <<< "$cap_out")" 10
+
+conc_ws="$tmpdir/conc-ws"
+mkdir -p "$conc_ws"
+for n in 1 2 3 4 5 6; do
+    git init -q -b main "$conc_ws/c$n"
+done
+occupy="$tmpdir/occupy.sh"
+cat > "$occupy" <<'EOF'
+#!/usr/bin/env bash
+# Register, wait until OCCUPY_WAIT_FOR copies are registered (at most 5 s), write down how
+# many there are, and leave. The largest number written is how many ran at the same time.
+touch "$OCCUPY_DIR/$$"
+for (( n = 0; n < 50; n++ )); do
+    (( $(ls "$OCCUPY_DIR" | wc -l) >= OCCUPY_WAIT_FOR )) && break
+    sleep 0.1
+done
+printf '%d\n' "$(ls "$OCCUPY_DIR" | wc -l)" >> "$OCCUPY_LOG"
+sleep 0.2
+rm -f "$OCCUPY_DIR/$$"
+EOF
+# max_concurrent WAIT_FOR ARGS...: the most copies of $occupy that ran at once.
+max_concurrent() {
+    local wait_for="$1"
+    shift
+    rm -rf "$tmpdir/occupy"
+    mkdir -p "$tmpdir/occupy"
+    : > "$tmpdir/occupy.log"
+    OCCUPY_DIR="$tmpdir/occupy" OCCUPY_LOG="$tmpdir/occupy.log" OCCUPY_WAIT_FOR="$wait_for" \
+        "$GIT_RECURSE" "$@" bash "$occupy" > "$tmpdir/occupy.out" 2>&1 \
+        || fail "Test 19: the command failed" "$(cat "$tmpdir/occupy.out")"
+    sort -n "$tmpdir/occupy.log" | tail -n 1
+}
+cd "$conc_ws"
+assert_same 'Test 19: -j 2 runs two at once and no more' "$(max_concurrent 2 -j 2)" 2
+assert_same 'Test 19: by default every repository runs at once' "$(max_concurrent 6)" 6
+assert_same 'Test 19: -s never overlaps' "$(max_concurrent 1 -s)" 1
+
+# Test 20: a failure that looks like the network is retried; any other is not
+retry_ws="$tmpdir/retry-ws"
+mkdir -p "$retry_ws" "$tmpdir/flaky-bin"
+new_repo "$retry_ws" only
+cat > "$tmpdir/flaky-bin/git" <<'EOF'
+#!/usr/bin/env bash
+# `git fetch` fails FLAKY_FAILURES times (counted in FLAKY_COUNT) with the message
+# FLAKY_MESSAGE and the status FLAKY_EXIT, then works; everything else is the real git.
+if [[ "$1" == fetch ]]; then
+    n=$(cat "$FLAKY_COUNT" 2>/dev/null || echo 0)
+    echo $((n + 1)) > "$FLAKY_COUNT"
+    if (( n < FLAKY_FAILURES )); then
+        echo "$FLAKY_MESSAGE" >&2
+        exit "${FLAKY_EXIT:-128}"
+    fi
+    exit 0
+fi
+exec "$REAL_GIT" "$@"
+EOF
+chmod +x "$tmpdir/flaky-bin/git"
+
+# run_flaky FAILURES MESSAGE EXIT ARGS...: git-recurse ARGS git fetch against the stub;
+# sets cap_out, cap_rc and flaky_calls (how many times git fetch was started).
+run_flaky() {
+    local failures="$1" message="$2" exit_code="$3"
+    shift 3
+    rm -f "$tmpdir/flaky.count"
+    cap_rc=0
+    cap_out=$(cd "$retry_ws" && REAL_GIT="$real_git" FLAKY_COUNT="$tmpdir/flaky.count" \
+        FLAKY_FAILURES="$failures" FLAKY_MESSAGE="$message" FLAKY_EXIT="$exit_code" \
+        PATH="$tmpdir/flaky-bin:$PATH" "$GIT_RECURSE" "$@" git fetch 2>&1) || cap_rc=$?
+    flaky_calls=$(cat "$tmpdir/flaky.count" 2>/dev/null || echo 0)
+}
+
+run_flaky 1 "fatal: unable to access 'https://example.invalid/r.git/': Could not resolve host: example.invalid" 128 -r 2
+assert_same 'Test 20: a network failure that passes is a success' "$cap_rc" 0
+assert_has 'Test 20: the retry is noted' "$cap_out" '[retry 1/2 succeeded]'
+assert_has 'Test 20: the repository is listed as passed' "$cap_out" '✓ ./only/'
+assert_same 'Test 20: it took two attempts' "$flaky_calls" 2
+
+run_flaky 99 'error: RPC failed; HTTP 502 curl 22 The requested URL returned error: 502' 128 -r 1
+assert_same 'Test 20: a network failure that stays is a failure' "$cap_rc" 1
+assert_has 'Test 20: the retries are noted' "$cap_out" '[failed after 1 retries]'
+assert_has 'Test 20: the status is reported' "$cap_out" '✗ ./only/ (exit 128)'
+assert_has 'Test 20: the failure is listed' "$cap_out" 'Failed repositories (1):'
+assert_same 'Test 20: it stopped after the retries it was given' "$flaky_calls" 2
+
+run_flaky 99 'fatal: bad object HEAD' 1 -r 2
+assert_same 'Test 20: another failure is a failure' "$cap_rc" 1
+assert_same 'Test 20: another failure is not retried' "$flaky_calls" 1
+assert_lacks 'Test 20: another failure is not retried' "$cap_out" 'retries'
+assert_has 'Test 20: another failure keeps its status' "$cap_out" '✗ ./only/ (exit 1)'
+
+run_flaky 99 'Could not resolve host: x' 128 -r 0
+assert_same 'Test 20: -r 0 never retries' "$flaky_calls" 1
+cap_rc=0
+rm -f "$tmpdir/flaky.count"
+cap_out=$(cd "$retry_ws" && REAL_GIT="$real_git" FLAKY_COUNT="$tmpdir/flaky.count" FLAKY_FAILURES=99 \
+    FLAKY_MESSAGE='Could not resolve host: x' GIT_RECURSE_RETRIES=0 PATH="$tmpdir/flaky-bin:$PATH" \
+    "$GIT_RECURSE" git fetch 2>&1) || cap_rc=$?
+assert_same 'Test 20: GIT_RECURSE_RETRIES=0 never retries' "$(cat "$tmpdir/flaky.count")" 1
+
+# Test 21: the time limit. A command that stalls is stopped at the limit, a status
+# probe that hangs fails its repository, and without a timeout command everything
+# still works (macOS has none by default).
+time_limit_cmd=$(command -v timeout || command -v gtimeout || true)
+if [[ -n "$time_limit_cmd" ]]; then
+    mkdir -p "$tmpdir/stall-bin"
+    cat > "$tmpdir/stall-bin/git" <<'EOF'
+#!/usr/bin/env bash
+# With STALL=fetch `git fetch` hangs; with STALL=probe the porcelain probe hangs;
+# everything else is the real git.
+case "$STALL:$*" in
+    fetch:fetch*) exec sleep 30 ;;
+    probe:*--porcelain*) exec sleep 30 ;;
+esac
+exec "$REAL_GIT" "$@"
+EOF
+    chmod +x "$tmpdir/stall-bin/git"
+    cd "$retry_ws"
+
+    started=$SECONDS
+    cap_rc=0
+    cap_out=$(STALL=fetch REAL_GIT="$real_git" PATH="$tmpdir/stall-bin:$PATH" "$GIT_RECURSE" -t 1 -r 0 git fetch 2>&1) || cap_rc=$?
+    assert_same 'Test 21: a stalled command fails' "$cap_rc" 1
+    assert_has 'Test 21: a stalled command is said to have timed out' "$cap_out" 'Operation timed out after 1s (stalled connection killed)'
+    assert_has 'Test 21: a stalled command has the status of the timeout' "$cap_out" '✗ ./only/ (exit 124)'
+    if (( SECONDS - started > 10 )); then
+        fail "Test 21: a stalled command was not stopped at the limit ($((SECONDS - started))s)"
+    fi
+
+    cap_rc=0
+    cap_out=$(STALL=fetch REAL_GIT="$real_git" GIT_RECURSE_TIMEOUT=1 PATH="$tmpdir/stall-bin:$PATH" "$GIT_RECURSE" -r 0 git fetch 2>&1) || cap_rc=$?
+    assert_has 'Test 21: GIT_RECURSE_TIMEOUT sets the limit' "$cap_out" 'Operation timed out after 1s'
+
+    started=$SECONDS
+    cap_rc=0
+    cap_out=$(STALL=probe REAL_GIT="$real_git" PATH="$tmpdir/stall-bin:$PATH" "$GIT_RECURSE" -t 1 git status 2>&1) || cap_rc=$?
+    assert_same 'Test 21: a hanging status probe fails the repository' "$cap_rc" 1
+    assert_has 'Test 21: a hanging status probe says why' "$cap_out" 'could not read the repository state for the summary (exit 124)'
+    assert_lacks 'Test 21: a repository without a readable state is not clean' "$cap_out" 'All repositories clean'
+    if (( SECONDS - started > 10 )); then
+        fail "Test 21: a hanging status probe was not stopped at the limit ($((SECONDS - started))s)"
+    fi
+fi
+
+mkdir -p "$tmpdir/notimeout-bin"
+for tool in bash cat find git grep head mkfifo mktemp mv rm sed sleep sort tail tput; do
+    tool_path=$(command -v "$tool" 2>/dev/null || true)
+    if [[ "$tool_path" == /* ]]; then
+        ln -sf "$tool_path" "$tmpdir/notimeout-bin/$tool"
+    fi
+done
+cd "$status_ws"
+for limit in 5 0; do
+    cap_rc=0
+    cap_out=$(PATH="$tmpdir/notimeout-bin" "$GIT_RECURSE" -t "$limit" git status 2>&1) || cap_rc=$?
+    assert_same "Test 21: without timeout and with -t $limit the command works" "$cap_rc" 0
+    assert_same "Test 21: without timeout and with -t $limit the summary is complete" "$(changes_listed "$cap_out")" "$expected_changes"
+    assert_lacks "Test 21: without timeout and with -t $limit nothing is missing" "$cap_out" 'not found'
+done
+
+# Test 22: -S and GIT_RECURSE_SUMMARY=1 give any command the pull summary, and
+# when something failed and nothing was updated it says so
+cd "$clean_ws"
+run_git_recurse -S git rev-parse --git-dir
+assert_has 'Test 22: -S gives any command a summary' "$cap_out" 'All repositories up to date.'
+cap_out=$(GIT_RECURSE_SUMMARY=1 "$GIT_RECURSE" git rev-parse --git-dir 2>&1)
+assert_has 'Test 22: GIT_RECURSE_SUMMARY=1 gives any command a summary' "$cap_out" 'All repositories up to date.'
+cd "$fail_ws"
+run_git_recurse -S git rev-parse --git-dir
+assert_same 'Test 22: a repository that fails fails the command' "$cap_rc" 1
+assert_has 'Test 22: nothing updated is said when something failed' "$cap_out" 'No repositories updated.'
+assert_lacks 'Test 22: nothing updated is not "up to date" when something failed' "$cap_out" 'All repositories up to date.'
+
+if [[ -n "${GIT_RECURSE_UNDER_TEST:-}" ]]; then
+    printf 'OK: git-recurse tests through the command passed (%s)\n' "$GIT_RECURSE_UNDER_TEST"
+    exit 0
 fi
 
 # --- the parser on its own ---------------------------------------------------

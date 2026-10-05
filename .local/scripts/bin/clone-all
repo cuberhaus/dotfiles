@@ -92,11 +92,14 @@ process_repo() {
     local nameWithOwner="$1"
     local dir
     dir="$(resolve_repo_dir "$nameWithOwner")"
-    local attempt output status label
+    local attempt output status label before after
 
     if [ -d "$dir/.git" ]; then
+        # A quiet pull prints nothing even when it moves HEAD, so compare HEAD instead.
+        before=$(git -C "$dir" rev-parse HEAD 2>/dev/null)
         if output=$(git -C "$dir" pull --ff-only --quiet --jobs=4 2>&1); then
-            if [ -z "$output" ]; then
+            after=$(git -C "$dir" rev-parse HEAD 2>/dev/null)
+            if [ "$before" = "$after" ]; then
                 label="${C_DIM}up-to-date${C_RESET}"
             else
                 label="${C_GREEN}updated${C_RESET}"
@@ -141,7 +144,9 @@ process_repo() {
     fi
     return $status
 }
-export -f resolve_repo_dir process_repo
+# Each repository runs in its own bash (xargs below), which sees only exported functions:
+# process_repo calls the other two.
+export -f resolve_repo_dir configure_tracked_repo_git process_repo
 export C_RESET C_GREEN C_BLUE C_YELLOW C_RED C_DIM clone_retries
 
 gh repo list "$orgname" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' \
