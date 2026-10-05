@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Description: Report repositories with failing commit status checks on their default branch.
+# Group: Git across repositories
 #
 # Usage:
 #   git-ci-status [options]

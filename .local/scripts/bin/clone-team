@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Description: Clone every repository that a GitHub team you belong to can access, or fast-forward the ones already present.
+# Group: Git across repositories
 # clone-team: clone every repository a GitHub team you belong to can access.
 #
 # Usage:
@@ -33,7 +35,7 @@ dest="."
 while [ $# -gt 0 ]; do
     case "$1" in
         -h|--help)
-            sed -n '2,20p' "$0" | sed 's/^# \?//'
+            sed -n '4,22p' "$0" | sed 's/^# \?//'
             exit 0
             ;;
         -*)

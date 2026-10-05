@@ -1,6 +1,8 @@
 #!/bin/bash
+# Description: Focus the window of a program when one is already open, otherwise launch it.
+# Group: Desktop & hardware
 # Author: Serg Kolo modified by Pol Casacuberta
-# Description: A launcher script that checks whether
+# A launcher script that checks whether
 #       or not a window of a particular program already exists
 #       If a window of such program is open, bring it to focus
 #       Otherwise - launch a new window

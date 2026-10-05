@@ -1,4 +1,6 @@
 #!/bin/sh
+# Description: Print a short system summary (OS, host, kernel, uptime, packages, memory) beside the distro logo.
+# Group: System info & power
 #
 # pfetch - Simple POSIX sh fetch script.
 

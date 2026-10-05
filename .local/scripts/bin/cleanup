@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Description: Free disk space by pruning package, snap, language and Docker caches; asks before deleting each unused Docker volume.
+# Group: Packages & updates
 #
 # Usage: cleanup [-n|--dry-run] [-h|--help]
 #

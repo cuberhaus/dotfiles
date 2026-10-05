@@ -1,4 +1,6 @@
 #!/bin/bash
+# Description: Set, raise or lower the volume (changeVolume 50, +5 or -5), or just show it, with a desktop notification.
+# Group: Desktop & hardware
 # changeVolume
 # Author: https://github.com/cuberhaus/dotfiles
 

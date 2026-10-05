@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Description: Report remote branches that have commits ahead of main/master in every repository below a directory.
+# Group: Git across repositories
 # git-ahead: scan all git repos under a directory, fetch all remotes, and
 # report any remote branch that has commits ahead of remote main/master.
 #
@@ -23,7 +25,7 @@ while [ $# -gt 0 ]; do
         --depth)       depth="$2"; shift 2 ;;
         -v|--verbose)  verbose=1; shift ;;
         -h|--help)
-            sed -n '2,11p' "$0" | sed 's/^# \?//'
+            sed -n '4,13p' "$0" | sed 's/^# \?//'
             exit 0
             ;;
         -*)

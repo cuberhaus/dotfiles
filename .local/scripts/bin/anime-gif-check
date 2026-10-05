@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Description: Check whether a GIF will read well on the ASUS AniMe Vision lid (ROG Strix SCAR 16) and write a lid-ready copy.
+# Group: Desktop & hardware
 #
 # Usage:
 #   anime-gif-check [options] FILE...

@@ -1,5 +1,6 @@
 #!/bin/bash
-# Description: Run a git command in all repositories under the current directory.
+# Description: Run any git command in every repository below the current directory, in parallel.
+# Group: Git across repositories
 # Author: Pol Casacuberta
 # Date: 19/3/2023
 

@@ -1,4 +1,6 @@
 #!/bin/bash
+# Description: Print user@host in color, the context that is kept out of the shell prompt.
+# Group: Shell & terminal
 name=$(whoami)  # user name
 host=$(hostname) # host name
 tput setaf 1 # red

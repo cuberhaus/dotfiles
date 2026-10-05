@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Clone all repos for a GitHub owner, or fast-forward update the ones already present.
+# Description: Clone all repos for a GitHub owner, or fast-forward update the ones already present.
+# Group: Git across repositories
 # One concise status line per repo; error output is indented underneath.
 #
 # Owner defaults to the currently authenticated gh account (the "selected user").

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Description: Adjust the active backlight and optionally show a notification.
+# Description: Raise or lower the screen backlight by a number of percent points (changeBrightness -5) and show a notification.
+# Group: Desktop & hardware
 set -euo pipefail
 
 usage() {

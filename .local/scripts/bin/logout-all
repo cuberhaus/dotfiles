@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Description: Sign out of browsers, editors and CLIs and delete stored login tokens; --audit lists the credentials left on this machine.
+# Group: Accounts & secrets
 #
 # Usage: logout-all [-n|--dry-run] [-y|--yes] [--close-apps] [--only GROUPS] [--skip GROUPS]
 #        logout-all --audit

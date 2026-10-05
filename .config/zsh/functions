@@ -1,6 +1,13 @@
 #! /bin/bash
 
-## Extract an archive based on its file extension.
+# The `commands` function lists what is defined here and in `aliases`, grouped by purpose:
+#   ##@ Group name   starts a group for the aliases and functions below it, up to the next ##@
+#   ## Description.  directly above an alias or function: what it does, in one sentence
+# See "Shell command catalog" in AGENTS.md.
+
+##@ Files & navigation
+
+## Extract an archive, choosing the tool from its file extension.
 ex ()
 {
     if [ -f "$1" ] ; then
@@ -31,13 +38,14 @@ ex ()
 if [ ! "$(uname -s)" = 'Darwin' ]; then
 	if grep -q Microsoft /proc/version; then
 		# Ubuntu on Windows using the Linux subsystem
+		## Open a file or URL with the desktop's default app (xdg-open; explorer.exe on WSL).
 		alias open='explorer.exe';
 	else
 		alias open='xdg-open';
 	fi
 fi
 
-## Open a path, or the current directory when omitted.
+## Open a file or folder (the current directory by default) with the default app, detached from the terminal.
 function o() {
 	if [ $# -eq 0 ]; then
 		open . </dev/null &>/dev/null &
@@ -60,215 +68,532 @@ function o() {
 # 	fi;
 # }
 
-## Create a directory and enter it.
+## Create a directory, parents included, and enter it.
 function mkd() {
 	mkdir -p "$@" && cd "$_" || exit;
 }
 
-## List dotfiles aliases, functions, and managed commands.
+##@ Shell & terminal
+
+## List the shell commands these dotfiles define, grouped by purpose; give words to filter them.
 commands() {
     local aliases_file="${ZDOTDIR:-$HOME/.config/zsh}/aliases"
     local functions_file="${ZDOTDIR:-$HOME/.config/zsh}/functions"
     local command_dir="$HOME/.local/scripts/bin"
-    local alias_group command_name definition description first_word source_file
-    local first_line was_multiline wrapped_line
-    local columns="${COLUMNS:-100}"
-    local inline_width detail_width
+    local us=$'\037'
+    local verbose=0 show_all=0 force_color=0 use_color=0 show_hint=0 options_done=0
+    local terms='' columns="${COLUMNS:-}" arg
+    local kind name group description file expansion
+
+    while [ $# -gt 0 ]; do
+        arg=$1
+        shift
+        if [ "$options_done" = 0 ]; then
+            case "$arg" in
+                -h|--help)
+                    printf '%s\n' \
+                        'Usage: commands [-v|--verbose] [-a|--all] [--color] [WORD...]' \
+                        '' \
+                        'List the aliases, functions and scripts of these dotfiles, grouped by purpose.' \
+                        'With WORDs, show only the commands whose name, group, description or expansion' \
+                        'contains every WORD (case-insensitive).' \
+                        '' \
+                        '  -v, --verbose  also show what each alias runs and where each function and script lives' \
+                        '  -a, --all      include internal helpers (names that start with an underscore)' \
+                        '      --color    colorize even when the output is not a terminal' \
+                        '  -h, --help     show this help' \
+                        '' \
+                        'Examples: commands git    commands sleep    commands -v update'
+                    return 0
+                    ;;
+                -v|--verbose) verbose=1; continue ;;
+                -a|--all) show_all=1; continue ;;
+                --color) force_color=1; continue ;;
+                --) options_done=1; continue ;;
+                -?*)
+                    printf 'commands: unknown option: %s (try commands --help)\n' "$arg" >&2
+                    return 2
+                    ;;
+            esac
+        fi
+        arg=${arg//$'\n'/ }
+        arg=${arg//$us/ }
+        if [ -n "$arg" ]; then
+            terms="${terms}O${us}term${us}${arg}"$'\n'
+        fi
+    done
+
+    if [ "$force_color" = 1 ]; then
+        use_color=1
+    elif [ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ "${TERM:-}" != dumb ]; then
+        use_color=1
+    fi
+    if [ -t 1 ] && [ -z "$terms" ] && [ "$verbose" = 0 ]; then
+        show_hint=1
+    fi
 
     case "$columns" in
-        ''|*[!0-9]*) columns=100 ;;
+        ''|*[!0-9]*) columns='' ;;
     esac
-    [ "$columns" -lt 40 ] && columns=40
-    inline_width=$((columns - 29))
-    detail_width=$((inline_width * 2))
-
-    for alias_group in aliases defaults; do
-        if [ "$alias_group" = aliases ]; then
-            printf '\033[34mAliases and workflows\033[0m\n'
-            printf '\033[1;36m  %-24s %s\033[0m\n' 'NAME' 'EXPANDS TO'
-        else
-            printf '\n\033[34mCommand defaults\033[0m\n'
-            printf '\033[1;36m  %-24s %s\033[0m\n' 'COMMAND' 'ADDS'
-        fi
-
-        if [ -f "$aliases_file" ]; then
-            while IFS= read -r command_name; do
-                definition=$(alias "$command_name" 2>/dev/null) || continue
-                definition=${definition#*=}
-                case "$definition" in
-                    \$\'*) was_multiline=true ;;
-                    *) was_multiline=false ;;
-                esac
-                definition=$(printf '%s' "$definition" \
-                    | tr '\r\n\t' '   ' \
-                    | sed -e "s/^\\$'//" -e "s/^'//" -e "s/'$//" \
-                        -e 's/[[:space:]][[:space:]]*/ /g')
-                if [ "$was_multiline" = true ]; then
-                    definition=$(printf '%s' "$definition" \
-                        | sed -e 's/\\n/ /g' -e "s/\\\\'/'/g" \
-                            -e 's/[[:space:]][[:space:]]*/ /g')
-                fi
-                first_word=${definition%%[[:space:]]*}
-
-                if [ "$alias_group" = defaults ]; then
-                    [ "$first_word" = "$command_name" ] || continue
-                    definition=${definition#"$command_name"}
-                    definition=${definition# }
-                else
-                    [ "$first_word" = "$command_name" ] && continue
-                fi
-
-                if [ "${#definition}" -gt "$detail_width" ]; then
-                    definition="${definition:0:$((detail_width - 3))}..."
-                fi
-                first_line=true
-                while IFS= read -r wrapped_line; do
-                    if [ "$first_line" = true ]; then
-                        printf '  %-24s %s\n' "$command_name" "$wrapped_line"
-                        first_line=false
-                    else
-                        printf '  %-24s %s\n' '' "$wrapped_line"
-                    fi
-                done < <(
-                    printf '%s\n' "$definition" | awk -v width="$inline_width" '
-                        {
-                            current_line = ""
-                            for (word_index = 1; word_index <= NF; word_index++) {
-                                word = $word_index
-                                if (length(word) > width) {
-                                    word = substr(word, 1, width - 3) "..."
-                                }
-                                if (!length(current_line)) {
-                                    current_line = word
-                                } else if (length(current_line) + length(word) + 1 <= width) {
-                                    current_line = current_line " " word
-                                } else {
-                                    print current_line
-                                    current_line = word
-                                }
-                            }
-                            print current_line
-                        }
-                    '
-                )
-            done < <(
-                awk '
-                    {
-                        line = $0
-                        sub(/^[[:space:]]*/, "", line)
-                        if (line ~ /^alias[[:space:]]+/) {
-                            sub(/^alias[[:space:]]+/, "", line)
-                        } else if (line ~ /&&[[:space:]]*alias[[:space:]]+/) {
-                            sub(/^.*&&[[:space:]]*alias[[:space:]]+/, "", line)
-                        } else {
-                            next
-                        }
-                        sub(/=.*/, "", line)
-                        print line
-                    }
-                ' "$aliases_file" | LC_ALL=C sort -u
-            )
-        fi
-    done
-
-    printf '\n\033[34mFunctions\033[0m\n'
-    printf '\033[1;36m  %-24s %s\033[0m\n' 'NAME' 'DESCRIPTION'
-    for source_file in "$aliases_file" "$functions_file"; do
-        [ -f "$source_file" ] || continue
-        while IFS=$'\t' read -r command_name description; do
-            typeset -f "$command_name" >/dev/null 2>&1 || continue
-            [ -n "$description" ] || description='No description provided.'
-            first_line=true
-            while IFS= read -r wrapped_line; do
-                if [ "$first_line" = true ]; then
-                    printf '  %-24s %s\n' "$command_name" "$wrapped_line"
-                    first_line=false
-                else
-                    printf '  %-24s %s\n' '' "$wrapped_line"
-                fi
-            done < <(printf '%s\n' "$description" | fold -s -w "$inline_width")
-        done < <(
-            awk '
-                /^[[:space:]]*##[[:space:]]+/ {
-                    description = $0
-                    sub(/^[[:space:]]*##[[:space:]]+/, "", description)
-                    next
-                }
-                /^[[:space:]]*(function[[:space:]]+)?[^#[:space:]()=]+[[:space:]]*\(\)/ {
-                    function_name = $0
-                    sub(/^[[:space:]]*/, "", function_name)
-                    sub(/^function[[:space:]]+/, "", function_name)
-                    sub(/[[:space:]]*\(\).*/, "", function_name)
-                    print function_name "\t" description
-                    description = ""
-                    next
-                }
-                /^[[:space:]]*#/ { next }
-                /[^[:space:]]/ { description = "" }
-            ' "$source_file" | LC_ALL=C sort -u
-        )
-    done
-
-    printf '\n\033[34mManaged commands\033[0m\n'
-    printf '\033[1;36m  %-24s %s\033[0m\n' 'NAME' 'DESCRIPTION'
-    if [ -d "$command_dir" ]; then
-        while IFS= read -r source_file; do
-            description=$(awk -v command_name="${source_file##*/}" '
-                NR == 1 && /^#!/ { next }
-                /^[[:space:]]*#/ {
-                    sub(/^[[:space:]]*#[[:space:]]*/, "")
-                    if (/^Description:[[:space:]]*/) {
-                        sub(/^Description:[[:space:]]*/, "")
-                        description = $0
-                    } else if (!description && length && $0 != command_name &&
-                               $0 !~ /^(Author|Date|Script inspired by|https?:|shellcheck|=+)/) {
-                        description = $0
-                    }
-                    next
-                }
-                /^[[:space:]]*$/ { next }
-                { if (description) print description; found = 1; exit }
-                END { if (!found && description) print description }
-            ' "$source_file")
-            [ -n "$description" ] || description='Executable managed by dotfiles'
-            if [ "${#description}" -gt "$detail_width" ]; then
-                description="${description:0:$((detail_width - 3))}..."
-            fi
-            first_line=true
-            while IFS= read -r wrapped_line; do
-                if [ "$first_line" = true ]; then
-                    printf '  %-24s %s\n' "${source_file##*/}" "$wrapped_line"
-                    first_line=false
-                else
-                    printf '  %-24s %s\n' '' "$wrapped_line"
-                fi
-            done < <(
-                printf '%s\n' "$description" | awk -v width="$inline_width" '
-                    {
-                        current_line = ""
-                        for (word_index = 1; word_index <= NF; word_index++) {
-                            word = $word_index
-                            if (length(word) > width) {
-                                word = substr(word, 1, width - 3) "..."
-                            }
-                            if (!length(current_line)) {
-                                current_line = word
-                            } else if (length(current_line) + length(word) + 1 <= width) {
-                                current_line = current_line " " word
-                            } else {
-                                print current_line
-                                current_line = word
-                            }
-                        }
-                        print current_line
-                    }
-                '
-            )
-        done < <(find "$command_dir" -maxdepth 1 -type f -perm -u+x -print | LC_ALL=C sort)
+    if [ -z "$columns" ] && [ -t 1 ]; then
+        # Bash sets COLUMNS only in an interactive shell. stty reads the size from fd 3, a copy
+        # of the real stdout made outside the command substitution (whose own stdout is a pipe).
+        { columns=$(stty size <&3 2>/dev/null); } 3>&1
+        columns=${columns#* }
+        case "$columns" in
+            ''|*[!0-9]*) columns='' ;;
+        esac
     fi
+    : "${columns:=100}"
+    if [ "$columns" -lt 40 ]; then columns=40; fi
+    if [ "$columns" -gt 120 ]; then columns=120; fi
+
+    # Every definition becomes one record, fields separated by the ASCII unit separator so an
+    # empty field survives: "E kind name group description expansion source". Records of the
+    # form "O key value" carry the options. Group and description come from the annotations
+    # in the files; whether a name exists, and what an alias expands to, come from this shell.
+    {
+        printf 'O\037columns\037%s\n' "$columns"
+        printf 'O\037verbose\037%s\n' "$verbose"
+        printf 'O\037all\037%s\n' "$show_all"
+        printf 'O\037color\037%s\n' "$use_color"
+        printf 'O\037hint\037%s\n' "$show_hint"
+        printf 'O\037home\037%s\n' "$HOME"
+        printf '%s' "$terms"
+
+        set --
+        if [ -f "$aliases_file" ]; then set -- "$aliases_file"; fi
+        if [ -f "$functions_file" ]; then set -- "$@" "$functions_file"; fi
+        if [ $# -gt 0 ]; then
+            # One line per alias or function the files annotate: kind, name, group,
+            # description, file. A name defined twice (an alias in each branch of an if)
+            # keeps the first description it was given.
+            LC_ALL=C awk '
+                BEGIN { US = sprintf("%c", 31) }
+                function trim(s) {
+                    sub(/^[[:space:]]+/, "", s)
+                    sub(/[[:space:]]+$/, "", s)
+                    return s
+                }
+                function clean(s) {
+                    gsub(US, " ", s)
+                    gsub(/[[:space:]]+/, " ", s)
+                    return trim(s)
+                }
+                function emit(kind, name,    key) {
+                    key = kind US name
+                    if (!(key in seen)) {
+                        seen[key] = 1
+                        total++
+                        order[total] = key
+                        kinds[key] = kind
+                        names[key] = name
+                        groups[key] = group
+                        descs[key] = desc
+                        files[key] = FILENAME
+                    } else if (descs[key] == "" && desc != "") {
+                        descs[key] = desc
+                        groups[key] = group
+                    }
+                }
+                FNR == 1 { group = ""; desc = "" }
+                /^[[:space:]]*##@/ {
+                    line = $0
+                    sub(/^[[:space:]]*##@[[:space:]]*/, "", line)
+                    group = clean(line)
+                    next
+                }
+                /^[[:space:]]*##[[:space:]]/ {
+                    line = $0
+                    sub(/^[[:space:]]*##[[:space:]]+/, "", line)
+                    line = clean(line)
+                    if (line != "") desc = (desc == "") ? line : desc " " line
+                    next
+                }
+                /^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
+                {
+                    code = $0
+                    sub(/^[[:space:]]+/, "", code)
+                    if (code ~ /^alias[[:space:]]+[^=[:space:]]+=/) {
+                        sub(/^alias[[:space:]]+/, "", code)
+                        sub(/=.*/, "", code)
+                        emit("alias", code)
+                    } else if (code ~ /&&[[:space:]]*alias[[:space:]]+[^=[:space:]]+=/) {
+                        sub(/^.*&&[[:space:]]*alias[[:space:]]+/, "", code)
+                        sub(/=.*/, "", code)
+                        emit("alias", code)
+                    } else if (code ~ /^(function[[:space:]]+)?[^#[:space:]()=]+[[:space:]]*\(\)/) {
+                        sub(/^function[[:space:]]+/, "", code)
+                        sub(/[[:space:]]*\(\).*/, "", code)
+                        emit("function", code)
+                    } else if (code ~ /^function[[:space:]]+[^#[:space:]()=]+/) {
+                        sub(/^function[[:space:]]+/, "", code)
+                        sub(/[[:space:](;{].*/, "", code)
+                        emit("function", code)
+                    }
+                    desc = ""
+                }
+                END {
+                    for (i = 1; i <= total; i++) {
+                        key = order[i]
+                        print kinds[key] US names[key] US groups[key] US descs[key] US files[key]
+                    }
+                }
+            ' "$@" 2>/dev/null | while IFS=$us read -r kind name group description file; do
+                case "$kind" in
+                    alias)
+                        alias "$name" >/dev/null 2>&1 || continue
+                        # The raw alias table needs no unquoting; Bash before 4.0 has none, so
+                        # it falls back to the text `alias NAME` prints.
+                        if [ -n "${ZSH_VERSION:-}" ]; then
+                            expansion=${aliases[$name]-}
+                        else
+                            expansion=${BASH_ALIASES[$name]-}
+                        fi
+                        if [ -z "$expansion" ]; then
+                            expansion=$(alias "$name" 2>/dev/null)
+                            expansion=${expansion#*=}
+                            expansion=${expansion#\'}
+                            expansion=${expansion%\'}
+                        fi
+                        expansion=${expansion//$'\n'/ }
+                        expansion=${expansion//$'\t'/ }
+                        expansion=${expansion//$us/ }
+                        printf 'E\037alias\037%s\037%s\037%s\037%s\037%s\n' \
+                            "$name" "$group" "$description" "$expansion" "$file"
+                        ;;
+                    function)
+                        typeset -f "$name" >/dev/null 2>&1 || continue
+                        printf 'E\037function\037%s\037%s\037%s\037\037%s\n' \
+                            "$name" "$group" "$description" "$file"
+                        ;;
+                esac
+            done
+        fi
+
+        if [ -d "$command_dir" ]; then
+            # One line per executable: its Description: and Group: header comments. A trailing
+            # slash makes find follow a symbolic link to the directory; sorting by name keeps
+            # the order of the groups the same from run to run.
+            LC_ALL=C find "$command_dir/" -maxdepth 1 -type f -perm -u+x -exec awk '
+                BEGIN { US = sprintf("%c", 31) }
+                function clean(s) {
+                    gsub(US, " ", s)
+                    gsub(/[[:space:]]+/, " ", s)
+                    sub(/^ /, "", s)
+                    sub(/ $/, "", s)
+                    return s
+                }
+                function flush() {
+                    if (name != "") print "E" US "script" US name US group US desc US "" US path
+                    name = ""
+                }
+                FNR == 1 {
+                    flush()
+                    parts_count = split(FILENAME, parts, "/")
+                    name = parts[parts_count]
+                    path = FILENAME
+                    group = ""
+                    desc = ""
+                    header = 1
+                }
+                header {
+                    if (FNR == 1 && /^#!/) next
+                    if (/^[[:space:]]*$/) next
+                    if (!/^[[:space:]]*#/) { header = 0; next }
+                    line = $0
+                    sub(/^[[:space:]]*#[[:space:]]*/, "", line)
+                    if (line ~ /^Description:/ && desc == "") {
+                        sub(/^Description:[[:space:]]*/, "", line)
+                        desc = clean(line)
+                    } else if (line ~ /^Group:/ && group == "") {
+                        sub(/^Group:[[:space:]]*/, "", line)
+                        group = clean(line)
+                    }
+                }
+                END { flush() }
+            ' {} + 2>/dev/null | LC_ALL=C sort -t "$us" -k3,3
+        fi
+    } | LC_ALL=C awk '
+        BEGIN {
+            US = sprintf("%c", 31)
+            FS = US
+            ESC = sprintf("%c", 27)
+        }
+        function trim(s) {
+            sub(/^[[:space:]]+/, "", s)
+            sub(/[[:space:]]+$/, "", s)
+            return s
+        }
+        function squeeze(s) {
+            gsub(/[[:space:]]+/, " ", s)
+            return trim(s)
+        }
+        function wordify(s) {
+            gsub(/[^a-z0-9_.-]+/, " ", s)
+            gsub(/(^| )-+/, " ", s)
+            return s
+        }
+        function rank(k) {
+            if (k == "alias") return 1
+            if (k == "function") return 2
+            return 3
+        }
+        function tilde(path) {
+            if (home != "" && index(path, home "/") == 1) return "~" substr(path, length(home) + 1)
+            return path
+        }
+        function spaces(count,    s) {
+            s = ""
+            while (count-- > 0) s = s " "
+            return s
+        }
+        function words(text, style,    parts, count, k) {
+            count = split(text, parts, " ")
+            for (k = 1; k <= count; k++) {
+                ntok++
+                tok[ntok] = parts[k]
+                tstyle[ntok] = style
+            }
+        }
+        function flush_tokens(first_prefix, rest_prefix, width,    k, prefix, line, len, word, wlen, dim) {
+            prefix = first_prefix
+            line = ""
+            len = 0
+            dim = 0
+            for (k = 1; k <= ntok; k++) {
+                word = tok[k]
+                if (length(word) > width) word = substr(word, 1, width - 3) "..."
+                wlen = length(word)
+                if (len > 0 && len + 1 + wlen > width) {
+                    if (dim) line = line RESET
+                    dim = 0
+                    print prefix line
+                    prefix = rest_prefix
+                    line = ""
+                    len = 0
+                }
+                if (len > 0) {
+                    if (dim && tstyle[k] != 1) {
+                        line = line RESET
+                        dim = 0
+                    }
+                    line = line " "
+                    len++
+                }
+                if (tstyle[k] == 1 && !dim) {
+                    line = line DIM
+                    dim = 1
+                }
+                line = line word
+                len += wlen
+            }
+            if (dim) line = line RESET
+            if (len > 0) print prefix line
+        }
+        function detail(label, value) {
+            ntok = 0
+            words(label ": " value, 1)
+            flush_tokens(rest "  ", rest "  ", dw - 2)
+        }
+        function show(i,    k, c, first, adds) {
+            ntok = 0
+            if (desc[i] != "") {
+                words(desc[i], 0)
+            } else {
+                words("(no description)", 0)
+                if (kind[i] == "alias") words("runs: " run[i], 1)
+            }
+            # An alias that starts with its own name only adds options to a command.
+            if (!verbose && kind[i] == "alias") {
+                first = run[i]
+                sub(/[[:space:]].*$/, "", first)
+                if (first == name[i] && length(run[i]) > length(first)) {
+                    adds = trim(substr(run[i], length(first) + 1))
+                    words("(adds " adds ")", 1)
+                }
+            }
+            c = cell[i]
+            if (length(c) <= nw) {
+                flush_tokens("  " CYAN c RESET spaces(nw - length(c)) "  ", rest, dw)
+            } else {
+                print "  " CYAN c RESET
+                flush_tokens(rest, rest, dw)
+            }
+            if (verbose) {
+                if (kind[i] == "alias") detail("runs", run[i])
+                else if (kind[i] == "function") detail("function", tilde(src[i]))
+                else detail("script", tilde(src[i]))
+                for (k = 1; k <= nhid[i]; k++) detail("hides", hides[i, k])
+            }
+        }
+        $1 == "O" {
+            if ($2 == "term") {
+                if ($3 != "") {
+                    nterms++
+                    torig[nterms] = $3
+                    term[nterms] = tolower($3)
+                    termw[nterms] = trim(wordify(term[nterms]))
+                }
+            } else {
+                opt[$2] = $3
+            }
+            next
+        }
+        $1 == "E" {
+            total++
+            kind[total] = $2
+            name[total] = $3
+            grp[total] = squeeze($4)
+            desc[total] = squeeze($5)
+            run[total] = squeeze($6)
+            src[total] = $7
+        }
+        END {
+            columns = opt["columns"] + 0
+            if (columns < 40) columns = 40
+            verbose = opt["verbose"] + 0
+            show_all = opt["all"] + 0
+            color = opt["color"] + 0
+            hint = opt["hint"] + 0
+            home = opt["home"]
+            if (color) {
+                BLUE = ESC "[1;34m"
+                CYAN = ESC "[36m"
+                DIM = ESC "[2m"
+                RESET = ESC "[0m"
+            }
+
+            # The definition that runs is the first one the shell finds: alias, function, script.
+            for (i = 1; i <= total; i++) {
+                key = name[i]
+                if (!(key in best)) {
+                    best[key] = i
+                } else if (rank(kind[i]) < rank(kind[best[key]])) {
+                    best[key] = i
+                } else if (kind[i] == kind[best[key]] && desc[best[key]] == "" && desc[i] != "") {
+                    best[key] = i
+                }
+            }
+            for (i = 1; i <= total; i++) {
+                b = best[name[i]]
+                if (b != i && kind[i] != kind[b]) {
+                    nhid[b]++
+                    hides[b, nhid[b]] = kind[i] " in " tilde(src[i])
+                }
+            }
+            for (i = 1; i <= total; i++) {
+                if (best[name[i]] != i) continue
+                if (!show_all && substr(name[i], 1, 1) == "_") continue
+                vis[i] = 1
+            }
+
+            # An alias that only renames one function or script, and has no description of its
+            # own, is listed next to its target instead of on a row of its own.
+            for (i = 1; i <= total; i++) {
+                if (!vis[i] || kind[i] != "alias" || desc[i] != "") continue
+                target = run[i]
+                if (target == "" || index(target, " ") > 0 || target == name[i]) continue
+                if (!(target in best)) continue
+                t = best[target]
+                if (!vis[t] || kind[t] == "alias") continue
+                fold[t] = (fold[t] == "") ? name[i] : fold[t] ", " name[i]
+                vis[i] = 0
+            }
+
+            # Groups appear in the order they first show up; entries without one go last.
+            for (i = 1; i <= total; i++) {
+                if (!vis[i]) continue
+                cell[i] = (fold[i] == "") ? name[i] : name[i] " (" fold[i] ")"
+                g = (grp[i] == "") ? "Other" : grp[i]
+                lg = tolower(g)
+                if (!(lg in gnum)) {
+                    ng++
+                    gnum[lg] = ng
+                    gname[ng] = g
+                }
+                rowgroup[i] = gnum[lg]
+            }
+            for (gi = 1; gi <= ng; gi++) {
+                if (tolower(gname[gi]) != "other") gorder[++norder] = gi
+            }
+            if ("other" in gnum) gorder[++norder] = gnum["other"]
+
+            # Every word has to match the name, the group or the description as typed, or be a
+            # whole word of the expansion (cp must not find the cpu in /sys/devices/system/cpu).
+            for (i = 1; i <= total; i++) {
+                if (!vis[i]) continue
+                hay = tolower(name[i] " " fold[i] " " gname[rowgroup[i]] " " desc[i])
+                runw = " " wordify(tolower(run[i])) " "
+                keep = 1
+                for (t = 1; t <= nterms; t++) {
+                    if (index(hay, term[t]) > 0) continue
+                    if (termw[t] != "" && index(runw, " " termw[t] " ") > 0) continue
+                    keep = 0
+                    break
+                }
+                if (!keep) continue
+                gi = rowgroup[i]
+                cnt[gi]++
+                rows[gi, cnt[gi]] = i
+                shown++
+                if (length(cell[i]) > maxlen) maxlen = length(cell[i])
+            }
+            if (shown == 0) {
+                if (nterms > 0) {
+                    msg = ""
+                    for (t = 1; t <= nterms; t++) msg = msg ((t > 1) ? " " : "") torig[t]
+                    print "commands: nothing matches: " msg > "/dev/stderr"
+                } else {
+                    print "commands: no aliases, functions or scripts found" > "/dev/stderr"
+                }
+                exit 1
+            }
+
+            # Alphabetical inside a group, ignoring case.
+            for (gi = 1; gi <= ng; gi++) {
+                for (a = 2; a <= cnt[gi]; a++) {
+                    cur = rows[gi, a]
+                    ckey = tolower(name[cur])
+                    b = a - 1
+                    while (b >= 1 && tolower(name[rows[gi, b]]) > ckey) {
+                        rows[gi, b + 1] = rows[gi, b]
+                        b--
+                    }
+                    rows[gi, b + 1] = cur
+                }
+            }
+
+            cap = columns - 24
+            if (cap > 30) cap = 30
+            nw = maxlen
+            if (nw > cap) nw = cap
+            if (nw < 8) nw = 8
+            rest = spaces(2 + nw + 2)
+            dw = columns - (2 + nw + 2)
+
+            printed = 0
+            for (oi = 1; oi <= norder; oi++) {
+                gi = gorder[oi]
+                if (cnt[gi] == 0) continue
+                if (printed) print ""
+                printed = 1
+                print BLUE gname[gi] RESET
+                for (a = 1; a <= cnt[gi]; a++) show(rows[gi, a])
+            }
+            if (hint) {
+                print ""
+                ntok = 0
+                words("commands WORD filters the list; commands -v shows what each command runs; commands -h lists the options.", 1)
+                flush_tokens("", "", columns)
+            }
+        }
+    '
 }
 
-## Apply a GitHub PAT to HTTPS remotes recursively.
+##@ Git across repositories
+
+## Embed a GitHub token in the HTTPS remotes of every repository below the current directory.
 function add_pat() {
     local pat="$1"
     if [ -z "$pat" ]; then

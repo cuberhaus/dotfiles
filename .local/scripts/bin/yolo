@@ -1,4 +1,6 @@
 #! /bin/bash
+# Description: Stage everything, commit with a placeholder message and push, with no review.
+# Group: Git
 git add -A
 git commit -m "This is a placeholder"
 git push

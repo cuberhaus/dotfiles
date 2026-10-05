@@ -15,123 +15,35 @@
 # Use mimeopen to set default apps
 ###############################################################
 
+# The `commands` function reads this file to build its listing: a `##@ Group` line starts a
+# group for everything below it, and a `## Description.` line directly above an alias or a
+# function says what it does. A new alias is documented by writing that line; see "Shell
+# command catalog" in AGENTS.md. An alias with no `##` line that only renames one command
+# (gr="git-recurse") is listed next to that command.
+
 scripts=$HOME/.local/scripts
 
-# Alias to get context, since we do not want it cluttering our prompt all of the time, we want to  focus on what is important.
-# name=$(whoami)
-# host=$(hostname)
-# context=$name@$host
-# alias prompt="echo $context"
-
-# Burn iso into usb
-# sudo lsblk to look for usb
-#sudo dd if=.iso of=/dev/sdb status=progress
-
-# Fix discord long calls
-# alias discord="discord --no-sandbox </dev/null &>/dev/null &"
-alias rs="open -a Rstudio"
-alias discord="discord --no-sandbox &"
-
-# xmonad can't find dependancies https://wiki.archlinux.org/title/Xmonad#Problems_with_finding_shared_libraries_after_update
-alias xmonad_fix="sudo ghc-pkg recache"
-# Recompile ycm (if autocompletion stops working execute this)
-alias ycminstall='python3 $HOME/.vim/plugged/YouCompleteMe/install.py'
-# Rclone (be careful!)
-# "rclone config" first, better to use copy instead of "rclone sync" so that I do not delete books on accident while pushing or pulling, it becomes a mess, since if I pull i will delete any extra books I have locally, and if I push I will delete the extra books I have remotely, overall, a fucking mess
-alias rclonepull_calibre='~/.local/scripts/restore-app-data calibre --apply'
-alias rclonepull_thunderbird='~/.local/scripts/restore-app-data thunderbird --apply'
-alias rclonepull_anki='~/.local/scripts/restore-app-data anki --apply'
-alias rclonepush_calibre="rclone -P copy ~/Calibre\ Library drive:Calibre/Calibre\ Library"
-alias rclonepush_thunderbird="rclone -P copy ~/.thunderbird drive:Thunderbird"
-
-alias colemak='bash $HOME/.local/scripts/BigBagKbdTrixXKB/setkb.sh "5ca es ks"'
-# Config Files
-alias aliases='nvim $ZDOTDIR/aliases'
-alias arch='nvim $scripts/bootstrap/arch_functions'
-alias bashrc='nvim $HOME/.bashrc'
-alias dunstrc='nvim $HOME/.config/dunst/dunstrc'
-alias i3config='nvim $HOME/.config/i3/config'
-alias kitty.conf='nvim $HOME/.config/kitty/kitty.conf'
-alias mac='nvim $scripts/bootstrap/mac_functions'
-alias ubuntu='nvim $scripts/bootstrap/ubuntu_functions'
-alias tmux.conf='nvim $HOME/.config/tmux/tmux.conf'
-alias vimrc='nvim $HOME/.vim/vimrc'
-alias xinitrc='nvim $HOME/.xinitrc'
-alias xmonad.hs='nvim $HOME/.xmonad/xmonad.hs'
-alias xprofile='nvim $HOME/.xprofile'
-alias zprofile='nvim $ZDOTDIR/.zprofile'
-alias zshenv='nvim $HOME/.zshenv'
-alias zshrc='nvim $ZDOTDIR/.zshrc'
-#alias vconfgrub="sudo vim /boot/grub/grub.cfg"
-#alias vgrub="sudo vim /etc/default/grub"
-#alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
-#alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
-#alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
-
-command -v nvim &>/dev/null && alias vim="nvim"
-alias e="emacsclient -nc"
-# modify in  /usr/share/applications as well
-alias rstudio="rstudio-bin --no-sandbox"
-
-alias disableSleep="sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target"
-alias enableSleep="sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target"
+##@ Files & navigation
 
 # Easier navigation: .., ..., ...., ....., ~ and -
-alias cr='cd $HOME/repos'
+## Go up one directory.
 alias ..="cd .."
+## Go up two directories.
 alias ...="cd ../.."
+## Go up three directories.
 alias ....="cd ../../.."
+## Go up four directories.
 alias .....="cd ../../../.."
-
-## Colorize the grep command output for ease of use (good for log files)##
-alias grep='grep -i --color=auto'
-alias egrep='egrep -i --color=auto'
-alias fgrep='fgrep -i --color=auto'
-
-# adding flags
-alias cp="cp -iv"          # confirm before overwriting something
-alias mv="mv -iv"
-alias mkd="mkdir -pv"
-alias df="df -h"          # human-readable sizes
-alias free="free -m"      # show sizes in MB
-
-# Clear
-alias c="clear"
-
-# Git
-alias g="git"
-alias gs="git status"
-alias gf="git fetch"
-alias gl="git pull"
-alias ga="git add "
-alias gm="git merge"
-alias gc="git commit -m "
-alias gp="git push"
-alias gpf="git push --force-with-lease"
-alias gitsync="git submodule sync; git submodule update --init --recursive"
-alias gsu="git submodule update --recursive --remote"
-
-alias gr="git-recurse"
-alias gah="git-ahead"
-alias gclean="git-clean-branches"
-alias gci="git-ci-status"
-## Show Claude usage and cost statistics.
-ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
-#yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
-yolo='git add -A; git commit -m "This is a placeholder"; git push'
-# shellcheck disable=SC2139
-alias yolo="$yolo"
-
-## Pull changes in Git repositories recursively.
-pull() { git-recurse "$@" git pull; }
-alias add-pat="add_pat"
-## Show status for Git repositories recursively and list the ones with changes.
-status() { git-recurse "$@" git status; }
+## Go to the repos folder, ~/repos.
+alias cr='cd $HOME/repos'
 
 if command -v eza &> /dev/null
 then
+    ## List files, directories first (eza; exa or plain ls when eza is missing).
     alias ls="eza --group-directories-first"
+    ## List all files, hidden ones included.
     alias la="eza --group-directories-first -a"
+    ## List all files in long format with owner, size and git status (eza or exa; plain ls otherwise).
     alias l="eza -a -F --long --header --links --group --group-directories-first --git"
 elif command -v exa &> /dev/null
 then
@@ -144,18 +56,56 @@ else
     alias l="ls"
 fi
 
-# Print each PATH entry on a separate line
-alias path='echo -e ${PATH//:/\\n}'
-# Print enviroment variables: printenv
+## Copy, asking before it overwrites a file and printing each one copied.
+alias cp="cp -iv"          # confirm before overwriting something
+## Move, asking before it overwrites a file and printing each one moved.
+alias mv="mv -iv"
+## Create a directory, parents included, and print each one created.
+alias mkd="mkdir -pv"
 
-# Userlist
-alias userlist="cut -d: -f1 /etc/passwd"
+##@ Git
 
-# Switch between bash and zsh
-alias tobash='sudo chsh $USER -s /bin/bash && echo "Now log out."'
-alias tozsh='sudo chsh $USER -s /bin/zsh && echo "Now log out."'
+## Run git.
+alias g="git"
+## Show the working tree status.
+alias gs="git status"
+## Fetch from the remotes without changing your branch.
+alias gf="git fetch"
+## Pull the current branch from its upstream.
+alias gl="git pull"
+## Stage the files you name.
+alias ga="git add "
+## Merge a branch into the current one.
+alias gm="git merge"
+## Commit the staged changes with the quoted message that follows: gc "fix typo".
+alias gc="git commit -m "
+## Push the current branch.
+alias gp="git push"
+## Force-push, but only when nobody else has pushed to the branch since your last fetch.
+alias gpf="git push --force-with-lease"
+## Sync the submodule URLs, then initialize and update every submodule recursively.
+alias gitsync="git submodule sync; git submodule update --init --recursive"
+## Update every submodule to the newest commit of its remote branch.
+alias gsu="git submodule update --recursive --remote"
+#yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
+yolo='git add -A; git commit -m "This is a placeholder"; git push'
+## Stage everything, commit with a placeholder message and push, with no review.
+# shellcheck disable=SC2139
+alias yolo="$yolo"
 
-# Generalize commands
+##@ Git across repositories
+
+alias gr="git-recurse"
+alias gah="git-ahead"
+alias gclean="git-clean-branches"
+alias gci="git-ci-status"
+## Pull every repository below the current directory and list the ones that changed.
+pull() { git-recurse "$@" git pull; }
+alias add-pat="add_pat"
+## Show git status for every repository below the current directory and list the ones with changes.
+status() { git-recurse "$@" git status; }
+
+##@ Packages & updates
 
 # cleanup is a script, not a function or alias: .local/scripts/bin/cleanup. An alias cannot
 # take options, and a script also runs where zsh does not.
@@ -343,10 +293,143 @@ update() { _update_run update "$@"; }
 ## Update the OS, npm, Emacs, Google Cloud CLI, pip, and the Zsh and Neovim plugins; -n previews it.
 updateall() { _update_run updateall "$@"; }
 
+##@ Shell & terminal
+
+## Clear the screen.
+alias c="clear"
+
+# Alias to get context, since we do not want it cluttering our prompt all of the time, we want to  focus on what is important.
+# name=$(whoami)
+# host=$(hostname)
+# context=$name@$host
+# alias prompt="echo $context"
+
+# Print each PATH entry on a separate line
+## Print each PATH entry on its own line.
+alias path='echo -e ${PATH//:/\\n}'
+# Print enviroment variables: printenv
+
+# Switch between bash and zsh
+## Make bash your login shell (asks for sudo); log out and back in to apply it.
+alias tobash='sudo chsh $USER -s /bin/bash && echo "Now log out."'
+## Make zsh your login shell (asks for sudo); log out and back in to apply it.
+alias tozsh='sudo chsh $USER -s /bin/zsh && echo "Now log out."'
+
+## Search case-insensitively and color the matches, which helps with log files.
+alias grep='grep -i --color=auto'
+## Search with extended regular expressions, case-insensitively, with colored matches.
+alias egrep='egrep -i --color=auto'
+## Search for fixed strings, case-insensitively, with colored matches.
+alias fgrep='fgrep -i --color=auto'
+
+##@ Editors & apps
+
+## Run Neovim whenever you type vim, when nvim is installed.
+command -v nvim &>/dev/null && alias vim="nvim"
+## Open files in a new Emacs window through the running Emacs server (emacsclient).
+alias e="emacsclient -nc"
+# modify in  /usr/share/applications as well
+## Start RStudio without the Chromium sandbox.
+alias rstudio="rstudio-bin --no-sandbox"
+## Open the RStudio app with macOS open -a; on Linux use rstudio.
+alias rs="open -a Rstudio"
+# Fix discord long calls
+# alias discord="discord --no-sandbox </dev/null &>/dev/null &"
+## Start Discord without the sandbox, in the background.
+alias discord="discord --no-sandbox &"
+# Recompile ycm (if autocompletion stops working execute this)
+## Recompile YouCompleteMe; run it when Vim autocompletion stops working.
+alias ycminstall='python3 $HOME/.vim/plugged/YouCompleteMe/install.py'
+
+##@ Edit config files
+
+## Edit the zsh aliases (this file).
+alias aliases='nvim $ZDOTDIR/aliases'
+## Edit the Arch bootstrap functions (packages and setup).
+alias arch='nvim $scripts/bootstrap/arch_functions'
+## Edit ~/.bashrc.
+alias bashrc='nvim $HOME/.bashrc'
+## Edit the dunst notification config.
+alias dunstrc='nvim $HOME/.config/dunst/dunstrc'
+## Edit the i3 window manager config.
+alias i3config='nvim $HOME/.config/i3/config'
+## Edit the kitty terminal config.
+alias kitty.conf='nvim $HOME/.config/kitty/kitty.conf'
+## Edit the macOS bootstrap functions (packages and setup).
+alias mac='nvim $scripts/bootstrap/mac_functions'
+## Edit the Ubuntu bootstrap functions (packages and setup).
+alias ubuntu='nvim $scripts/bootstrap/ubuntu_functions'
+## Edit the tmux config.
+alias tmux.conf='nvim $HOME/.config/tmux/tmux.conf'
+## Edit the Vim and Neovim config.
+alias vimrc='nvim $HOME/.vim/vimrc'
+## Edit ~/.xinitrc, which startx runs when it starts X.
+alias xinitrc='nvim $HOME/.xinitrc'
+## Edit the xmonad window manager config.
+alias xmonad.hs='nvim $HOME/.xmonad/xmonad.hs'
+## Edit ~/.xprofile, which display managers read at login.
+alias xprofile='nvim $HOME/.xprofile'
+## Edit the zsh login profile.
+alias zprofile='nvim $ZDOTDIR/.zprofile'
+## Edit ~/.zshenv, which every zsh reads.
+alias zshenv='nvim $HOME/.zshenv'
+## Edit the interactive zsh config.
+alias zshrc='nvim $ZDOTDIR/.zshrc'
+#alias vconfgrub="sudo vim /boot/grub/grub.cfg"
+#alias vgrub="sudo vim /etc/default/grub"
+#alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"
+#alias vmirrorlist="sudo vim /etc/pacman.d/mirrorlist"
+#alias vmkinitcpio="sudo vim /etc/mkinitcpio.conf"
+
+##@ System info & power
+
+## Show disk space with human-readable sizes.
+alias df="df -h"          # human-readable sizes
+## Show memory use in megabytes.
+alias free="free -m"      # show sizes in MB
+# Userlist
+## List the user names on this machine.
+alias userlist="cut -d: -f1 /etc/passwd"
+## Stop the machine from sleeping: mask the sleep, suspend, hibernate and hybrid-sleep targets.
+alias disableSleep="sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target"
+## Let the machine sleep again: unmask the sleep, suspend, hibernate and hybrid-sleep targets.
+alias enableSleep="sudo systemctl unmask sleep.target suspend.target hibernate.target hybrid-sleep.target"
+
+# Burn iso into usb
+# sudo lsblk to look for usb
+#sudo dd if=.iso of=/dev/sdb status=progress
+
+##@ Desktop & hardware
+
+# xmonad can't find dependancies https://wiki.archlinux.org/title/Xmonad#Problems_with_finding_shared_libraries_after_update
+## Rebuild the GHC package cache; run it when xmonad cannot find its libraries after an update.
+alias xmonad_fix="sudo ghc-pkg recache"
+## Switch the X11 keyboard layout to Colemak with the setkb.sh script (BigBagKbdTrixXKB).
+alias colemak='bash $HOME/.local/scripts/BigBagKbdTrixXKB/setkb.sh "5ca es ks"'
+
+##@ Backup & sync
+
+# Rclone (be careful!)
+# "rclone config" first, better to use copy instead of "rclone sync" so that I do not delete books on accident while pushing or pulling, it becomes a mess, since if I pull i will delete any extra books I have locally, and if I push I will delete the extra books I have remotely, overall, a fucking mess
+## Restore the Calibre library from Google Drive (close Calibre first; nothing is deleted).
+alias rclonepull_calibre='~/.local/scripts/restore-app-data calibre --apply'
+## Restore the Thunderbird profile from Google Drive (close Thunderbird first; nothing is deleted).
+alias rclonepull_thunderbird='~/.local/scripts/restore-app-data thunderbird --apply'
+## Restore Anki's data from Google Drive (close Anki first; nothing is deleted).
+alias rclonepull_anki='~/.local/scripts/restore-app-data anki --apply'
+## Copy the Calibre library to Google Drive (copy, so nothing is deleted there).
+alias rclonepush_calibre="rclone -P copy ~/Calibre\ Library drive:Calibre/Calibre\ Library"
+## Copy the Thunderbird profile to Google Drive (copy, so nothing is deleted there).
+alias rclonepush_thunderbird="rclone -P copy ~/.thunderbird drive:Thunderbird"
+
+##@ Files & navigation
+
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    ## Remove files and print each one; on Linux it also asks once before deleting more than three files or whole folders.
     alias rm="rm -v"
     # Recursively delete `.DS_Store` files
+    ## Delete the .DS_Store and ._* files below the current directory (macOS).
     alias clean="find . -type f -name '*.DS_Store' -ls -delete; find . -type f -name '._*' -exec rm -f {} \;
 "
 fi
@@ -354,18 +437,24 @@ fi
 if [[ "$OSTYPE" == "linux"* ]]; then
 
     alias rm="rm -vI"
+    ##@ Desktop & hardware
     # Lock screen
     LockScreens=()
     command -v pipes.sh &>/dev/null && LockScreens+=('pipes.sh')
     command -v cmatrix &>/dev/null && LockScreens+=('cmatrix')
     if (( ${#LockScreens[@]} > 0 )); then
+        ## Run a random terminal screensaver (pipes.sh or cmatrix); it does not lock the session.
         alias lock='${LockScreens[$RANDOM % ${#LockScreens[@]}]}'
     fi
+    ##@ System info & power
     # Get the error messages from journalctl
+    ## Show this boot's journal errors (priority 3 and worse) with explanations.
     alias jctl="journalctl -p 3 -xb"
     # Check vulnerabilities microcode
+    ## Show which CPU vulnerabilities the kernel reports and how it mitigates them.
     alias microcode="grep . /sys/devices/system/cpu/vulnerabilities/*"
 
+    ##@ Desktop & hardware
     # The AniMe lid display of an ASUS laptop (the G635LX has one) is driven by asusd. This is a
     # function, not an alias, because a toggle has to read the current state first, and it takes
     # no arguments so that `anime-toggle off` cannot turn a dark lid on. It exists wherever
@@ -423,15 +512,21 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         }
     fi
 
+    ##@ Packages & updates
     ### Arch & Manjaro
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
+        ## Remove the pacman database lock that an interrupted run leaves behind.
         alias unlock="sudo rm /var/lib/pacman/db.lck" #pacman unlock
+        ##@ Edit config files
+        ## Edit /etc/pacman.conf as root.
         alias pacman.conf="sudo vim /etc/pacman.conf"
     fi
 
+    ##@ Packages & updates
     ### Arch
     if [[ "$DISTRO" == "arch" ]]; then
         # Get fastest mirrors in your neighborhood
+        ## Refresh the pacman mirror list with the fastest mirrors (reflector on Arch; pacman-mirrors and a full upgrade on Manjaro).
         alias mirror="sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist"
     fi
 
@@ -441,8 +536,10 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         alias mirror="sudo pacman-mirrors -f && sudo pacman -Syyu"
     fi
 
+    ##@ Shell & terminal
     ### Ubuntu
     if [[ "$DISTRO" == "ubuntu" ]]; then
+        ## Start tmux with the config in ~/.config/tmux/tmux.conf.
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
 
@@ -451,15 +548,16 @@ if [[ "$OSTYPE" == "linux"* ]]; then
         alias tmux='tmux -f $HOME/.config/tmux/tmux.conf'
     fi
 
+    ##@ Packages & updates
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
-        ## Install Arch packages non-interactively with pacman.
+        ## Install packages from the Arch repositories with pacman, with no prompts.
         pac() { sudo pacman -S --noconfirm --needed "$@"; }
-        ## Install AUR packages non-interactively with yay.
+        ## Install packages from the AUR or the repositories with yay, with no prompts; it replaces the yay command.
         yay() { command yay -S --noconfirm --needed "$@"; }
     fi
 
     if [[ "$DISTRO" == "ubuntu"* ]]; then
-        ## Install Debian packages non-interactively with apt-get.
+        ## Install packages with apt-get -y. It replaces the apt command; use apt-get or /usr/bin/apt for anything else.
         apt() { sudo apt-get -y install "$@"; }
     fi
 fi
@@ -468,8 +566,17 @@ fi
 # => Clean home directory
 ###############################################################
 
+##@ Desktop & hardware
+## Load the X resources from ~/.config/X11/xresources instead of ~/.Xresources.
 alias Xres='xrdb -load $HOME/.config/X11/xresources'
+##@ Shell & terminal
+## Download with wget but keep its HSTS history in the XDG cache folder, not in the home folder.
 alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
+
+##@ AI & work tools
+
+## Show Claude Code token usage and estimated cost across every recorded session.
+ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
 
 ###############################################################
 # => Enterprise RAG test environment
@@ -478,6 +585,8 @@ alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
 # Local k3s (Traefik) intercepts port 443 via iptables, so the tunnel uses 8443
 # and Chrome maps erag.com hostnames to it. Host details live in ~/.ssh/config.
 # 1) Start the tunnel (prompts for the jump host passphrase and sdp password).
+## Open the SSH tunnel to the Enterprise RAG test environment on local port 8443.
 alias erag-tunnel='ssh -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 8443:localhost:443 erag-test'
 # 2) Open a throwaway Chrome profile that resolves erag.com to the tunnel.
+## Open a throwaway Chrome profile that resolves erag.com to the tunnel; start erag-tunnel first.
 alias erag-chrome='google-chrome --user-data-dir=/tmp/chrome-erag --host-resolver-rules="MAP erag.com 127.0.0.1:8443, MAP *.erag.com 127.0.0.1:8443" --ignore-certificate-errors https://erag.com/'

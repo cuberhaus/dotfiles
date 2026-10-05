@@ -89,6 +89,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_asusctl_install.sh
 	bash tests/test_asusctl_lighting.sh
 	bash tests/test_anime_toggle.sh
+	bash tests/test_commands.sh
 	bash tests/test_bootstrap_stow.sh
 	bash tests/test_stow_conflicts.sh
 	bash tests/test_bootstrap_machine_state.sh
