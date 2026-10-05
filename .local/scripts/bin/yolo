@@ -1,6 +1,28 @@
 #! /bin/bash
 # Description: Stage everything, commit with a placeholder message and push, with no review.
 # Group: Git
+usage() {
+    cat <<'EOF'
+Usage: yolo
+
+Stage everything (git add -A), commit it with the message "This is a placeholder"
+and push, with no review. Run it inside a Git repository. It takes no arguments:
+anything else is refused, so a mistyped flag such as --dry-run never pushes.
+EOF
+}
+
+case ${1:-} in
+    -h | --help)
+        usage
+        exit 0
+        ;;
+esac
+if [ "$#" -ne 0 ]; then
+    printf 'yolo: unexpected argument: %s (try yolo --help)\n' "$1" >&2
+    exit 2
+fi
+
 git add -A
+# Another message that has been tried: -m "$(curl -s http://whatthecommit.com/index.txt)"
 git commit -m "This is a placeholder"
 git push

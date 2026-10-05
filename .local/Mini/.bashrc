@@ -355,7 +355,6 @@ gclean() {
 }
 
 # Git functions
-ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
 add-pat() {
     local pat="$1"
     if [ -z "$pat" ]; then

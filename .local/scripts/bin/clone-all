@@ -11,6 +11,37 @@
 # Run from the directory that should contain checkouts (e.g. ~/cuberhaus).
 # Repos may live flat (./cv) or nested (./cuberhaus/cv); existing .git wins.
 
+usage() {
+    cat <<'EOF'
+Usage: clone-all [OWNER]
+
+Clone every repository of a GitHub owner, or fast-forward the ones already present,
+with one status line per repository. Run it from the directory that should hold the
+checkouts (for example ~/cuberhaus). A repository may live flat (./cv) or nested
+(./cuberhaus/cv), and an existing .git wins.
+
+OWNER defaults to $CLONE_ALL_OWNER, then to the account gh is signed in as.
+
+Environment:
+  CLONE_ALL_OWNER    owner to use when no argument is given
+  CLONE_ALL_JOBS     parallel jobs (default: CPU count, at least 4, at most 32)
+  CLONE_ALL_RETRIES  attempts per repository (default: 3)
+EOF
+}
+
+# A GitHub owner never starts with a hyphen, so a leading one is a mistyped option and
+# must not reach gh as if it were the owner.
+case ${1:-} in
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    -*)
+        printf 'clone-all: unknown option: %s (try clone-all --help)\n' "$1" >&2
+        exit 2
+        ;;
+esac
+
 # Cloning/pulling is network + disk bound, not CPU bound, so parallelism
 # well above core count is fine. Default: detected cores (min 4, cap 32).
 # Override with CLONE_ALL_JOBS=N.

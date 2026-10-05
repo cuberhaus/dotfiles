@@ -77,21 +77,47 @@ alias gl="git pull"
 alias ga="git add "
 ## Merge a branch into the current one.
 alias gm="git merge"
+# gc, gitsync and the other commands below that read `function` where they once were aliases
+# answer -h and --help. As an alias, -h would have reached `git commit -m` as the message,
+# or only the last command of a chain after the earlier ones had already run. A live alias
+# of the same name (from an older copy of this file that the running shell already loaded)
+# turns the function definition into a parse error, so drop it first.
+unalias gc 2>/dev/null
 ## Commit the staged changes with the quoted message that follows: gc "fix typo".
-alias gc="git commit -m "
+gc() {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: gc MESSAGE [git commit options]\n\n'
+            printf 'Commit the staged changes with MESSAGE (git commit -m MESSAGE).\n'
+            printf 'Example: gc "fix typo"\n'
+            return 0
+            ;;
+    esac
+    git commit -m "$@"
+}
 ## Push the current branch.
 alias gp="git push"
 ## Force-push, but only when nobody else has pushed to the branch since your last fetch.
 alias gpf="git push --force-with-lease"
+unalias gitsync 2>/dev/null
 ## Sync the submodule URLs, then initialize and update every submodule recursively.
-alias gitsync="git submodule sync; git submodule update --init --recursive"
+gitsync() {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: gitsync [git submodule update options]\n\n'
+            printf 'Sync the submodule URLs, then initialize and update every submodule recursively\n'
+            printf '(git submodule sync, then git submodule update --init --recursive).\n'
+            return 0
+            ;;
+    esac
+    git submodule sync
+    git submodule update --init --recursive "$@"
+}
 ## Update every submodule to the newest commit of its remote branch.
 alias gsu="git submodule update --recursive --remote"
-#yolo='git add -A; git commit -m "$(curl -s http://whatthecommit.com/index.txt)"; git push'
-yolo='git add -A; git commit -m "This is a placeholder"; git push'
-## Stage everything, commit with a placeholder message and push, with no review.
-# shellcheck disable=SC2139
-alias yolo="$yolo"
+# yolo is a script, not an alias: .local/scripts/bin/yolo. An alias would have handed -h to
+# `git push` after the add and the commit had already run. Zsh puts that folder on PATH
+# (.zshenv); plain bash does not.
 
 ##@ Git across repositories
 
@@ -100,10 +126,32 @@ alias gah="git-ahead"
 alias gclean="git-clean-branches"
 alias gci="git-ci-status"
 ## Pull every repository below the current directory and list the ones that changed.
-pull() { git-recurse "$@" git pull; }
+pull() {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: pull [git-recurse options]\n\n'
+            printf 'Run git pull in every Git repository below the current directory, in parallel,\n'
+            printf 'and list the repositories it updated. The options are those of git-recurse, for\n'
+            printf 'example pull -j 6 (see git-recurse --help).\n'
+            return 0
+            ;;
+    esac
+    git-recurse "$@" git pull
+}
 alias add-pat="add_pat"
 ## Show git status for every repository below the current directory and list the ones with changes.
-status() { git-recurse "$@" git status; }
+status() {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: status [git-recurse options]\n\n'
+            printf 'Run git status in every Git repository below the current directory, in parallel,\n'
+            printf 'and list the repositories with changes. The options are those of git-recurse, for\n'
+            printf 'example status -s (see git-recurse --help).\n'
+            return 0
+            ;;
+    esac
+    git-recurse "$@" git status
+}
 
 ##@ Packages & updates
 
@@ -115,6 +163,14 @@ status() { git-recurse "$@" git status; }
 # package manager keeps python3-pynvim and pip current, so pip must leave them alone.
 ## Upgrade pip and pynvim for the current user unless the OS manages Python.
 pip_user_upgrade() {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: pip_user_upgrade\n\n'
+            printf 'Upgrade pip and pynvim for the current user (pip install --user --upgrade).\n'
+            printf 'It does nothing where the OS manages Python (PEP 668) or in a virtualenv.\n'
+            return 0
+            ;;
+    esac
     command -v python3 >/dev/null 2>&1 || return 0
     if ! python3 -c '
 import os, sys, sysconfig
@@ -310,10 +366,29 @@ alias path='echo -e ${PATH//:/\\n}'
 # Print enviroment variables: printenv
 
 # Switch between bash and zsh
+unalias tobash tozsh 2>/dev/null
+## Change the login shell with chsh, or print the help of tobash or tozsh (helper of both).
+_use_login_shell() {
+    local name=$1 shell_name=$2
+    shift 2
+    case ${1:-} in
+        '') ;;
+        -h|--help)
+            printf 'Usage: %s\n\n' "$name"
+            printf 'Make %s your login shell (sudo chsh). Log out and back in to apply it.\n' "$shell_name"
+            return 0
+            ;;
+        *)
+            printf '%s: unexpected argument: %s (try %s --help)\n' "$name" "$1" "$name" >&2
+            return 2
+            ;;
+    esac
+    sudo chsh "$USER" -s "/bin/$shell_name" && echo "Now log out."
+}
 ## Make bash your login shell (asks for sudo); log out and back in to apply it.
-alias tobash='sudo chsh $USER -s /bin/bash && echo "Now log out."'
+tobash() { _use_login_shell tobash bash "$@"; }
 ## Make zsh your login shell (asks for sudo); log out and back in to apply it.
-alias tozsh='sudo chsh $USER -s /bin/zsh && echo "Now log out."'
+tozsh() { _use_login_shell tozsh zsh "$@"; }
 
 ## Search case-insensitively and color the matches, which helps with log files.
 alias grep='grep -i --color=auto'
@@ -329,14 +404,46 @@ command -v nvim &>/dev/null && alias vim="nvim"
 ## Open files in a new Emacs window through the running Emacs server (emacsclient).
 alias e="emacsclient -nc"
 # modify in  /usr/share/applications as well
+# Launchers that start an app with the files you add: an alias would pass -h to the app
+# instead of answering it, and an app that does not know -h just starts.
+unalias rstudio rs 2>/dev/null
 ## Start RStudio without the Chromium sandbox.
-alias rstudio="rstudio-bin --no-sandbox"
+rstudio() {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: rstudio [FILE...]\n\n'
+            printf 'Start RStudio without the Chromium sandbox (rstudio-bin --no-sandbox).\n'
+            return 0
+            ;;
+    esac
+    rstudio-bin --no-sandbox "$@"
+}
 ## Open the RStudio app with macOS open -a; on Linux use rstudio.
-alias rs="open -a Rstudio"
+rs() {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: rs [FILE...]\n\n'
+            printf 'Open the RStudio app with open -a Rstudio (macOS). On Linux use rstudio.\n'
+            return 0
+            ;;
+    esac
+    open -a Rstudio "$@"
+}
 # Fix discord long calls
 # alias discord="discord --no-sandbox </dev/null &>/dev/null &"
+unalias discord 2>/dev/null
 ## Start Discord without the sandbox, in the background.
-alias discord="discord --no-sandbox &"
+discord() {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: discord [discord options]\n\n'
+            printf 'Start Discord without the Chromium sandbox (discord --no-sandbox), in the\n'
+            printf 'background. Other arguments go to Discord.\n'
+            return 0
+            ;;
+    esac
+    command discord --no-sandbox "$@" &
+}
 # Recompile ycm (if autocompletion stops working execute this)
 ## Recompile YouCompleteMe; run it when Vim autocompletion stops working.
 alias ycminstall='python3 $HOME/.vim/plugged/YouCompleteMe/install.py'
@@ -404,19 +511,58 @@ alias enableSleep="sudo systemctl unmask sleep.target suspend.target hibernate.t
 # xmonad can't find dependancies https://wiki.archlinux.org/title/Xmonad#Problems_with_finding_shared_libraries_after_update
 ## Rebuild the GHC package cache; run it when xmonad cannot find its libraries after an update.
 alias xmonad_fix="sudo ghc-pkg recache"
+unalias colemak 2>/dev/null
 ## Switch the X11 keyboard layout to Colemak with the setkb.sh script (BigBagKbdTrixXKB).
-alias colemak='bash $HOME/.local/scripts/BigBagKbdTrixXKB/setkb.sh "5ca es ks"'
+colemak() {
+    case ${1:-} in
+        '') ;;
+        -h|--help)
+            printf 'Usage: colemak\n\n'
+            printf 'Switch the X11 keyboard layout to Colemak: setkb.sh "5ca es ks" of BigBagKbdTrixXKB.\n'
+            return 0
+            ;;
+        *)
+            printf 'colemak: unexpected argument: %s (try colemak --help)\n' "$1" >&2
+            return 2
+            ;;
+    esac
+    bash "$HOME/.local/scripts/BigBagKbdTrixXKB/setkb.sh" "5ca es ks"
+}
 
 ##@ Backup & sync
 
 # Rclone (be careful!)
 # "rclone config" first, better to use copy instead of "rclone sync" so that I do not delete books on accident while pushing or pulling, it becomes a mess, since if I pull i will delete any extra books I have locally, and if I push I will delete the extra books I have remotely, overall, a fucking mess
+# restore-app-data only previews a restore unless it is given --apply, and it ignores every
+# argument after that. So the rclonepull_* commands always pass --apply and refuse any other
+# argument: as aliases, a stray -h reached it after --apply and restored the files.
+unalias rclonepull_calibre rclonepull_thunderbird rclonepull_anki 2>/dev/null
+## Restore one app's data from Google Drive with restore-app-data (helper of the rclonepull_* commands).
+_rclonepull() {
+    local name=$1 app=$2 what=$3
+    shift 3
+    case ${1:-} in
+        '') ;;
+        -h|--help)
+            printf 'Usage: %s\n\n' "$name"
+            printf 'Restore %s from Google Drive: restore-app-data %s --apply.\n' "$what" "$app"
+            printf 'Close the app first. Nothing is deleted. Run ~/.local/scripts/restore-app-data %s\n' "$app"
+            printf 'without --apply to preview the restore.\n'
+            return 0
+            ;;
+        *)
+            printf '%s: unexpected argument: %s (try %s --help)\n' "$name" "$1" "$name" >&2
+            return 2
+            ;;
+    esac
+    "$HOME/.local/scripts/restore-app-data" "$app" --apply
+}
 ## Restore the Calibre library from Google Drive (close Calibre first; nothing is deleted).
-alias rclonepull_calibre='~/.local/scripts/restore-app-data calibre --apply'
+rclonepull_calibre() { _rclonepull rclonepull_calibre calibre 'the Calibre library' "$@"; }
 ## Restore the Thunderbird profile from Google Drive (close Thunderbird first; nothing is deleted).
-alias rclonepull_thunderbird='~/.local/scripts/restore-app-data thunderbird --apply'
+rclonepull_thunderbird() { _rclonepull rclonepull_thunderbird thunderbird 'the Thunderbird profile' "$@"; }
 ## Restore Anki's data from Google Drive (close Anki first; nothing is deleted).
-alias rclonepull_anki='~/.local/scripts/restore-app-data anki --apply'
+rclonepull_anki() { _rclonepull rclonepull_anki anki "Anki's data" "$@"; }
 ## Copy the Calibre library to Google Drive (copy, so nothing is deleted there).
 alias rclonepush_calibre="rclone -P copy ~/Calibre\ Library drive:Calibre/Calibre\ Library"
 ## Copy the Thunderbird profile to Google Drive (copy, so nothing is deleted there).
@@ -424,14 +570,33 @@ alias rclonepush_thunderbird="rclone -P copy ~/.thunderbird drive:Thunderbird"
 
 ##@ Files & navigation
 
+# clean (macOS) and mirror (Manjaro) are functions defined inside the if blocks below. The
+# shell parses a whole block before it runs any of it, so an unalias inside the block would
+# come too late for a live alias of the old copy of this file: drop them here instead.
+unalias clean mirror 2>/dev/null
+
 ### MacOS
 if [[ "$OSTYPE" == "darwin"* ]]; then
     ## Remove files and print each one; on Linux it also asks once before deleting more than three files or whole folders.
     alias rm="rm -v"
     # Recursively delete `.DS_Store` files
     ## Delete the .DS_Store and ._* files below the current directory (macOS).
-    alias clean="find . -type f -name '*.DS_Store' -ls -delete; find . -type f -name '._*' -exec rm -f {} \;
-"
+    clean() {
+        case ${1:-} in
+            '') ;;
+            -h|--help)
+                printf 'Usage: clean\n\n'
+                printf 'Delete the .DS_Store and ._* files below the current directory, for good.\n'
+                return 0
+                ;;
+            *)
+                printf 'clean: unexpected argument: %s (try clean --help)\n' "$1" >&2
+                return 2
+                ;;
+        esac
+        find . -type f -name '*.DS_Store' -ls -delete
+        find . -type f -name '._*' -delete
+    }
 fi
 
 if [[ "$OSTYPE" == "linux"* ]]; then
@@ -533,7 +698,23 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     ### Manjaro
     if [[ "$DISTRO" == "manjaro" ]]; then
         # Update mirrors and update
-        alias mirror="sudo pacman-mirrors -f && sudo pacman -Syyu"
+        ## Rank the Manjaro mirrors by speed with pacman-mirrors, then refresh the databases and upgrade.
+        mirror() {
+            case ${1:-} in
+                '') ;;
+                -h|--help)
+                    printf 'Usage: mirror\n\n'
+                    printf 'Rank the Manjaro mirrors by speed (sudo pacman-mirrors -f), then refresh the\n'
+                    printf 'package databases and upgrade (sudo pacman -Syyu).\n'
+                    return 0
+                    ;;
+                *)
+                    printf 'mirror: unexpected argument: %s (try mirror --help)\n' "$1" >&2
+                    return 2
+                    ;;
+            esac
+            sudo pacman-mirrors -f && sudo pacman -Syyu
+        }
     fi
 
     ##@ Shell & terminal
@@ -551,14 +732,43 @@ if [[ "$OSTYPE" == "linux"* ]]; then
     ##@ Packages & updates
     if [[ "$DISTRO" == "arch" || "$DISTRO" == "manjaro" ]]; then
         ## Install packages from the Arch repositories with pacman, with no prompts.
-        pac() { sudo pacman -S --noconfirm --needed "$@"; }
+        pac() {
+            case ${1:-} in
+                -h|--help)
+                    printf 'Usage: pac PACKAGE...\n\n'
+                    printf 'Install packages from the Arch repositories: sudo pacman -S --noconfirm --needed.\n'
+                    return 0
+                    ;;
+            esac
+            sudo pacman -S --noconfirm --needed "$@"
+        }
         ## Install packages from the AUR or the repositories with yay, with no prompts; it replaces the yay command.
-        yay() { command yay -S --noconfirm --needed "$@"; }
+        yay() {
+            case ${1:-} in
+                -h|--help)
+                    printf 'Usage: yay PACKAGE...\n\n'
+                    printf 'Install packages from the AUR or the repositories: yay -S --noconfirm --needed.\n'
+                    printf 'This function replaces the yay command; run the real one as: command yay\n'
+                    return 0
+                    ;;
+            esac
+            command yay -S --noconfirm --needed "$@"
+        }
     fi
 
     if [[ "$DISTRO" == "ubuntu"* ]]; then
         ## Install packages with apt-get -y. It replaces the apt command; use apt-get or /usr/bin/apt for anything else.
-        apt() { sudo apt-get -y install "$@"; }
+        apt() {
+            case ${1:-} in
+                -h|--help)
+                    printf 'Usage: apt PACKAGE...\n\n'
+                    printf 'Install packages: sudo apt-get -y install. This function replaces the apt command;\n'
+                    printf 'use apt-get or /usr/bin/apt for anything else.\n'
+                    return 0
+                    ;;
+            esac
+            sudo apt-get -y install "$@"
+        }
     fi
 fi
 
@@ -573,10 +783,7 @@ alias Xres='xrdb -load $HOME/.config/X11/xresources'
 ## Download with wget but keep its HSTS history in the XDG cache folder, not in the home folder.
 alias wget='wget --hsts-file="$XDG_CACHE_HOME/wget-hsts"'
 
-##@ AI & work tools
-
-## Show Claude Code token usage and estimated cost across every recorded session.
-ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
+##@ Work tools
 
 ###############################################################
 # => Enterprise RAG test environment
@@ -584,9 +791,40 @@ ccost() { "$HOME/.local/scripts/claude-cost-stats.py" "$@"; }
 
 # Local k3s (Traefik) intercepts port 443 via iptables, so the tunnel uses 8443
 # and Chrome maps erag.com hostnames to it. Host details live in ~/.ssh/config.
+# Both are functions, not aliases: what an alias is given lands after its fixed host or URL,
+# where ssh takes it as a remote command and Chrome as another page, so -h would open the
+# tunnel or a browser instead of answering.
+unalias erag-tunnel erag-chrome 2>/dev/null
 # 1) Start the tunnel (prompts for the jump host passphrase and sdp password).
 ## Open the SSH tunnel to the Enterprise RAG test environment on local port 8443.
-alias erag-tunnel='ssh -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 8443:localhost:443 erag-test'
+erag-tunnel() {
+    case ${1:-} in
+        '') ;;
+        -h|--help)
+            printf 'Usage: erag-tunnel\n\n'
+            printf 'Open the SSH tunnel to the Enterprise RAG test environment (the erag-test host in\n'
+            printf 'your ~/.ssh/config) on local port 8443. It asks for the jump host passphrase and the\n'
+            printf 'sdp password, then stays open until you press Ctrl-C.\n'
+            return 0
+            ;;
+        *)
+            printf 'erag-tunnel: unexpected argument: %s (try erag-tunnel --help)\n' "$1" >&2
+            return 2
+            ;;
+    esac
+    ssh -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -L 8443:localhost:443 erag-test
+}
 # 2) Open a throwaway Chrome profile that resolves erag.com to the tunnel.
 ## Open a throwaway Chrome profile that resolves erag.com to the tunnel; start erag-tunnel first.
-alias erag-chrome='google-chrome --user-data-dir=/tmp/chrome-erag --host-resolver-rules="MAP erag.com 127.0.0.1:8443, MAP *.erag.com 127.0.0.1:8443" --ignore-certificate-errors https://erag.com/'
+erag-chrome() {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: erag-chrome [URL...]\n\n'
+            printf 'Open https://erag.com/ (and any URLs you add) in a throwaway Chrome profile,\n'
+            printf '/tmp/chrome-erag, that resolves erag.com to the tunnel on local port 8443. Start\n'
+            printf 'erag-tunnel first.\n'
+            return 0
+            ;;
+    esac
+    google-chrome --user-data-dir=/tmp/chrome-erag --host-resolver-rules="MAP erag.com 127.0.0.1:8443, MAP *.erag.com 127.0.0.1:8443" --ignore-certificate-errors https://erag.com/ "$@"
+}

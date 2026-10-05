@@ -22,10 +22,9 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── git-recurse        # Run git commands across multiple repos
 │   │   ├── logout-all         # Sign out of browsers, editors and CLIs (--close-apps quits them first); --audit lists stored credentials
 │   │   ├── vault-secret       # Access SOPS-encrypted vault credentials
-│   │   ├── pfetch             # Minimal system info display
 │   │   ├── program            # Launch-or-focus helper for scratchpads
 │   │   ├── prompt             # Custom prompt helper
-│   │   └── yolo               # Alias for quick git push
+│   │   └── yolo               # Stage everything, commit and push with no review
 │   │
 │   ├── bootstrap/              # OS-specific bootstrap scripts
 │   │   ├── arch               # Arch Linux bootstrap entrypoint

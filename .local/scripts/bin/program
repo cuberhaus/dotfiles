@@ -13,6 +13,21 @@
 # command to run
 # name of the class $2
 
+case ${1:-} in
+    -h | --help)
+        cat <<'EOF'
+Usage: program COMMAND [WINDOW_CLASS]
+
+Focus the window of a program when one is already open, otherwise launch it.
+COMMAND is the command to run. WINDOW_CLASS is the window class to look for in
+the output of wmctrl -lx, and defaults to COMMAND. It needs wmctrl.
+
+Example: program firefox
+EOF
+        exit 0
+        ;;
+esac
+
 if ! command -v wmctrl &>/dev/null; then
     echo "error: wmctrl is not installed" >&2
     exit 1

@@ -1,6 +1,18 @@
 #!/bin/bash
 # Description: Print user@host in color, the context that is kept out of the shell prompt.
 # Group: Shell & terminal
+case ${1:-} in
+    -h | --help)
+        cat <<'EOF'
+Usage: prompt
+
+Print user@host with the user in red and the host in green: the context that is
+kept out of the shell prompt, one command away.
+EOF
+        exit 0
+        ;;
+esac
+
 name=$(whoami)  # user name
 host=$(hostname) # host name
 tput setaf 1 # red

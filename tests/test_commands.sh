@@ -465,6 +465,67 @@ check_options() {
 }
 in_every_shell check_options
 
+# --list is the interface for scripts and tests (tests/test_command_help.sh finds every command
+# with it): one tab-separated line per command that runs, with its kind, name, group, expansion
+# and source. It comes before the folding and the filter of the default view, so the alias gr is
+# listed on a line of its own, and it leaves out what the default view hides (a helper, a name
+# that another definition hides).
+row() { printf '%s\t%s\t%s\t%s\n' "$1" "$2" "$3" "$4"; }
+expected_list=$(
+    row alias '..' 'First group' 'cd ..'
+    row alias cp 'First group' 'cp -i -v'
+    row alias two 'First group' 'echo two'
+    row alias plain 'First group' 'echo not described'
+    row alias gr 'First group' 'fixture-recurse'
+    row alias gx 'First group' 'fixture-recurse'
+    row alias dup 'First group' 'echo alias wins'
+    row alias fromvar 'First group' 'echo from variable'
+    row alias andalias 'First group' 'echo and'
+    row alias multi 'First group' 'echo one echo two'
+    row alias both 'First group' 'echo one'
+    row function fn_alias_file 'Second group' ''
+    row alias chain_b 'Second group' 'echo end'
+    row alias chain_a 'Second group' 'chain_b'
+    row function fn_keyword 'Third group' ''
+    row function fn_spaced 'Third group' ''
+    row function fn_bare 'Third group' ''
+    row function fn_brace 'Third group' ''
+    row script bare-script '' ''
+    row script fixture-recurse 'Third group' ''
+    row script late-header '' ''
+)
+
+check_list() {
+    local shell=$1 tab=$'\t' bad_lines
+    use_fixture
+
+    run_case "$shell" --list
+    assert_equals 0 "$rc" "$shell: --list exits 0"
+    assert_equals '' "$err" "$shell: --list prints nothing on stderr"
+    assert_equals "$expected_list" "$(printf '%s\n' "$out" | cut -f1-4)" "$shell: --list names each command that runs, in the order the files define them"
+    bad_lines=$(printf '%s\n' "$out" | awk -F '\t' 'NF != 5 { print }')
+    assert_equals '' "$bad_lines" "$shell: every --list line has exactly five tab-separated fields"
+    assert_line "$shell: --list gives the file an alias comes from" "$out" "alias${tab}..${tab}" "$fixture_home/.config/zsh/aliases"
+    assert_line "$shell: --list gives the file a function comes from" "$out" "function${tab}fn_keyword${tab}" "$fixture_home/.config/zsh/functions"
+    assert_line "$shell: --list gives the path of a script" "$out" "script${tab}fixture-recurse${tab}" "$fixture_home/.local/scripts/bin/fixture-recurse"
+    assert_no_line "$shell: --list leaves out a helper" "$out" "_hidden_helper"
+    assert_no_line "$shell: --list leaves out the function that an alias hides" "$out" "function${tab}dup${tab}"
+    assert_no_line "$shell: --list leaves out the script that an alias hides" "$out" "script${tab}dup${tab}"
+    assert_no_line "$shell: --list leaves out a script the shell cannot run" "$out" "not-executable"
+
+    run_case "$shell" --list -a
+    assert_equals 0 "$rc" "$shell: --list -a exits 0"
+    assert_line "$shell: --list -a includes the helpers" "$out" "function${tab}_hidden_helper${tab}"
+
+    run_case "$shell" --list two
+    assert_equals 2 "$rc" "$shell: --list with a filter word exits 2"
+    assert_equals '' "$out" "$shell: --list with a filter word prints nothing on stdout"
+    assert_equals 'commands: --list takes no words and no --verbose (try commands --help)' "$err" "$shell: --list with a filter word says why"
+    run_case "$shell" --list -v
+    assert_equals 2 "$rc" "$shell: --list -v exits 2"
+}
+in_every_shell check_list
+
 check_color_and_width() {
     local shell=$1
     use_fixture
@@ -496,13 +557,16 @@ check_color_and_width() {
     assert_width "$out" 0 40 "$shell: a tiny COLUMNS is raised to 40"
 
     # Zsh keeps COLUMNS as an integer, so it turns a value that is not a number into 0 before
-    # the function sees it, and the clamp above raises that to 40; only Bash passes it through.
-    if [[ $shell == bash ]]; then
-        case_columns=abc
-        run_case "$shell"
-        assert_equals 0 "$rc" "$shell: a COLUMNS that is not a number is ignored"
-        assert_equals "$expected_default" "$out" "$shell: ... and the default width applies"
-    fi
+    # the function sees it, and a zsh without a terminal (a script, a pipe, a chat tool) reports 0
+    # as well. Zero means "unknown" and gets the default, not the 40 columns of the lower clamp.
+    case_columns=abc
+    run_case "$shell"
+    assert_equals 0 "$rc" "$shell: a COLUMNS that is not a number is ignored"
+    assert_equals "$expected_default" "$out" "$shell: ... and the default width applies"
+    case_columns=0
+    run_case "$shell"
+    assert_equals 0 "$rc" "$shell: COLUMNS=0 is accepted"
+    assert_equals "$expected_default" "$out" "$shell: ... and means an unknown width, so the default applies"
 }
 in_every_shell check_color_and_width
 

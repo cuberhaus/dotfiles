@@ -42,4 +42,21 @@ grep -Fq 'Brightness: 21%' "$DUNSTIFY_LOG" \
 grep -Fxq 'set 5%-' "$BRIGHTNESSCTL_LOG" \
     || fail 'negative changes must use brightnessctl decrease syntax'
 
+# Help answers on stdout with exit 0; a missing step is a usage error on stderr with exit 2. Neither
+# may touch the backlight.
+: > "$BRIGHTNESSCTL_LOG"
+"$SCRIPT" -h > "$CASE_DIR/help.out" 2> "$CASE_DIR/help.err" \
+    || fail '-h must exit 0'
+grep -Fq 'Usage: changeBrightness STEP' "$CASE_DIR/help.out" \
+    || fail '-h must print the usage on stdout'
+[ ! -s "$CASE_DIR/help.err" ] || fail '-h must not write to stderr'
+
+status=0
+"$SCRIPT" > "$CASE_DIR/usage.out" 2> "$CASE_DIR/usage.err" || status=$?
+[ "$status" -eq 2 ] || fail "a call without a step must exit 2, got $status"
+grep -Fq 'Usage: changeBrightness STEP' "$CASE_DIR/usage.err" \
+    || fail 'a call without a step must print the usage on stderr'
+[ ! -s "$CASE_DIR/usage.out" ] || fail 'a call without a step must keep stdout empty'
+[ ! -s "$BRIGHTNESSCTL_LOG" ] || fail 'help and usage errors must not touch the backlight'
+
 printf 'PASS: brightness control uses brightnessctl for both directions\n'

@@ -4,6 +4,23 @@
 # changeVolume
 # Author: https://github.com/cuberhaus/dotfiles
 
+function Usage() {
+    echo "Usage: changeVolume [INT | +INT | -INT]"
+    echo "Set, raise or lower the volume and show it in a desktop notification."
+    echo "Called without arguments it only shows the current volume"
+    echo "Called with an INT it sets the volume to that percent"
+    echo "Called with +INT or -INT it raises or lowers the volume by that many percent points"
+    echo "Example: changeVolume +5"
+}
+
+# Help comes before the dependency check, so it works on a machine that lacks the tools.
+case ${1:-} in
+    -h | --help)
+        Usage
+        exit 0
+        ;;
+esac
+
 # Arbitrary but unique message id
 msgId="991049"
 
@@ -19,19 +36,6 @@ done
 # echo "$@"
 # echo "$1"
 # Check number of arguments
-
-function Usage() {
-    echo "Usage: changeVolume [INT] | [+/-] [INT]"
-    echo "Called without arguments will display current volume"
-    echo "Called with an INT will change volume to that number"
-    echo "Called with an INT preceded by +/- will increase or decrease current volume by that number"
-    echo "Example: changeVolume +5"
-}
-
-if [[ $1 == "-h" ]]; then
-    Usage
-    exit
-fi
 
 if [ $# != 0 ]; then
 	pactl set-sink-volume @DEFAULT_SINK@ "$1"% && pkill -SIGRTMIN+1 i3blocks

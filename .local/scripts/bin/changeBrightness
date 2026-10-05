@@ -4,7 +4,10 @@
 set -euo pipefail
 
 usage() {
-    printf 'Usage: changeBrightness [INT]\n'
+    printf 'Usage: changeBrightness STEP\n'
+    printf '\n'
+    printf 'Raise (positive) or lower (negative) the screen backlight by STEP percent points\n'
+    printf 'and show a notification when dunstify is installed.\n'
     printf 'Example: changeBrightness -5\n'
 }
 
@@ -16,8 +19,15 @@ get_brightness() {
     fi
 }
 
-if [ "$#" -ne 1 ] || [ "$1" = '-h' ]; then
-    usage
+case ${1:-} in
+    -h | --help)
+        usage
+        exit 0
+        ;;
+esac
+
+if [ "$#" -ne 1 ]; then
+    usage >&2
     exit 2
 fi
 

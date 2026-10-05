@@ -10,6 +10,14 @@
 ## Extract an archive, choosing the tool from its file extension.
 ex ()
 {
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: ex ARCHIVE\n\n'
+            printf 'Extract ARCHIVE, choosing the tool from its file extension: .tar, .tar.gz, .tgz,\n'
+            printf '.tar.bz2, .tbz2, .tar.xz, .tar.zst, .gz, .bz2, .Z, .zip, .rar, .7z and .deb.\n'
+            return 0
+            ;;
+    esac
     if [ -f "$1" ] ; then
         case $1 in
             *.tar.bz2)   tar xjf "$1"   ;;
@@ -47,6 +55,14 @@ fi
 
 ## Open a file or folder (the current directory by default) with the default app, detached from the terminal.
 function o() {
+	case ${1:-} in
+		-h|--help)
+			printf 'Usage: o [FILE_OR_URL...]\n\n'
+			printf 'Open files, folders or URLs with the default app, detached from the terminal.\n'
+			printf 'With no argument it opens the current directory.\n'
+			return 0
+			;;
+	esac
 	if [ $# -eq 0 ]; then
 		open . </dev/null &>/dev/null &
 	else
@@ -68,11 +84,6 @@ function o() {
 # 	fi;
 # }
 
-## Create a directory, parents included, and enter it.
-function mkd() {
-	mkdir -p "$@" && cd "$_" || exit;
-}
-
 ##@ Shell & terminal
 
 ## List the shell commands these dotfiles define, grouped by purpose; give words to filter them.
@@ -81,7 +92,7 @@ commands() {
     local functions_file="${ZDOTDIR:-$HOME/.config/zsh}/functions"
     local command_dir="$HOME/.local/scripts/bin"
     local us=$'\037'
-    local verbose=0 show_all=0 force_color=0 use_color=0 show_hint=0 options_done=0
+    local verbose=0 show_all=0 force_color=0 use_color=0 show_hint=0 options_done=0 list_only=0
     local terms='' columns="${COLUMNS:-}" arg
     local kind name group description file expansion
 
@@ -93,6 +104,7 @@ commands() {
                 -h|--help)
                     printf '%s\n' \
                         'Usage: commands [-v|--verbose] [-a|--all] [--color] [WORD...]' \
+                        '       commands --list [-a|--all]' \
                         '' \
                         'List the aliases, functions and scripts of these dotfiles, grouped by purpose.' \
                         'With WORDs, show only the commands whose name, group, description or expansion' \
@@ -101,6 +113,8 @@ commands() {
                         '  -v, --verbose  also show what each alias runs and where each function and script lives' \
                         '  -a, --all      include internal helpers (names that start with an underscore)' \
                         '      --color    colorize even when the output is not a terminal' \
+                        '      --list     print one tab-separated line per command (kind, name, group, expansion,' \
+                        '                 source) for scripts and tests; takes no words and no --verbose' \
                         '  -h, --help     show this help' \
                         '' \
                         'Examples: commands git    commands sleep    commands -v update'
@@ -109,6 +123,7 @@ commands() {
                 -v|--verbose) verbose=1; continue ;;
                 -a|--all) show_all=1; continue ;;
                 --color) force_color=1; continue ;;
+                --list) list_only=1; continue ;;
                 --) options_done=1; continue ;;
                 -?*)
                     printf 'commands: unknown option: %s (try commands --help)\n' "$arg" >&2
@@ -123,6 +138,11 @@ commands() {
         fi
     done
 
+    if [ "$list_only" = 1 ] && { [ -n "$terms" ] || [ "$verbose" = 1 ]; }; then
+        printf 'commands: --list takes no words and no --verbose (try commands --help)\n' >&2
+        return 2
+    fi
+
     if [ "$force_color" = 1 ]; then
         use_color=1
     elif [ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ "${TERM:-}" != dumb ]; then
@@ -132,8 +152,10 @@ commands() {
         show_hint=1
     fi
 
+    # 0 means "unknown", not a width: a zsh without a terminal (a script, a pipe, a chat tool)
+    # reports COLUMNS=0, and so does a zsh that was handed a COLUMNS that is not a number.
     case "$columns" in
-        ''|*[!0-9]*) columns='' ;;
+        ''|*[!0-9]*|0) columns='' ;;
     esac
     if [ -z "$columns" ] && [ -t 1 ]; then
         # Bash sets COLUMNS only in an interactive shell. stty reads the size from fd 3, a copy
@@ -141,7 +163,7 @@ commands() {
         { columns=$(stty size <&3 2>/dev/null); } 3>&1
         columns=${columns#* }
         case "$columns" in
-            ''|*[!0-9]*) columns='' ;;
+            ''|*[!0-9]*|0) columns='' ;;
         esac
     fi
     : "${columns:=100}"
@@ -156,6 +178,7 @@ commands() {
         printf 'O\037columns\037%s\n' "$columns"
         printf 'O\037verbose\037%s\n' "$verbose"
         printf 'O\037all\037%s\n' "$show_all"
+        printf 'O\037list\037%s\n' "$list_only"
         printf 'O\037color\037%s\n' "$use_color"
         printf 'O\037hint\037%s\n' "$show_hint"
         printf 'O\037home\037%s\n' "$HOME"
@@ -488,6 +511,14 @@ commands() {
                 vis[i] = 1
             }
 
+            # --list: every command that runs, one line each, before any folding or filtering.
+            if (opt["list"] + 0) {
+                for (i = 1; i <= total; i++) {
+                    if (vis[i]) printf "%s\t%s\t%s\t%s\t%s\n", kind[i], name[i], grp[i], run[i], src[i]
+                }
+                exit 0
+            }
+
             # An alias that only renames one function or script, and has no description of its
             # own, is listed next to its target instead of on a row of its own.
             for (i = 1; i <= total; i++) {
@@ -595,7 +626,22 @@ commands() {
 
 ## Embed a GitHub token in the HTTPS remotes of every repository below the current directory.
 function add_pat() {
-    local pat="$1"
+    local pat="${1:-}"
+    # A token never starts with a hyphen, so an option-like word is a mistake and must not be
+    # written into every remote as if it were the token.
+    case $pat in
+        -h|--help)
+            printf 'Usage: add_pat TOKEN\n\n'
+            printf 'Rewrite the HTTPS GitHub remote (origin) of every repository up to two levels below\n'
+            printf 'the current directory so that it carries TOKEN as a personal access token. The token\n'
+            printf 'is stored in plain text in each .git/config; logout-all --audit lists such remotes.\n'
+            return 0
+            ;;
+        -*)
+            printf 'add_pat: unknown option: %s (try add_pat --help)\n' "$pat" >&2
+            return 2
+            ;;
+    esac
     if [ -z "$pat" ]; then
         echo "Usage: add_pat <token>"
         echo "Recursively changes all https://github.com/... remotes to use the defined PAT."
