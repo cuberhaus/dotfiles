@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Description: Give every connected monitor the same display scale on GNOME so Chromium apps stop wiggling in fullscreen.
+# Group: Desktop & hardware
+#
+# Usage:
+#   match-monitor-scales [--scale SCALE] [--persistent] [--dry-run]
+#
+# A fractional-scale monitor next to a 100% one makes Chromium-based apps jitter in fullscreen on
+# the other monitor. This reads the layout from mutter, recomputes the positions so the monitors
+# keep their arrangement, asks mutter to check the result, and only then applies it.
+# docs/FULLSCREEN-WIGGLE-DIAGNOSIS.md has the evidence. The work is done by
+# .local/scripts/match_monitor_scales.py; this wrapper answers -h itself, before it needs Python.
+
+set -euo pipefail
+
+# Keep this text identical to USAGE in match_monitor_scales.py (tests/test_match_monitor_scales.py
+# compares the two).
+usage() {
+    cat <<'EOF'
+Usage: match-monitor-scales [--scale SCALE] [--persistent] [--dry-run]
+
+Give every connected monitor the same display scale on GNOME. A fractional-scale
+monitor next to a 100% one makes Chromium-based apps (Cursor, VS Code, Chrome,
+Obsidian) jitter in fullscreen on the other monitor; equal scales stop it.
+
+It reads the layout from mutter, recomputes the positions so the monitors keep
+sitting next to each other as they do now, asks mutter to check the result, and
+only then applies it. Modes, rotation, the primary monitor, color mode and RGB
+range are carried over. It prints the gdctl command that goes back.
+
+Options:
+  -s, --scale SCALE  Scale for every monitor, as 1.25 or 125%
+                     (default: the primary monitor's scale)
+  -P, --persistent   Also save the layout in ~/.config/monitors.xml; the old
+                     file is copied to monitors.xml.bak-DATE first
+  -n, --dry-run      Only ask mutter whether it accepts the layout; change nothing
+  -h, --help         Show this help
+
+Without --persistent the change is temporary: GNOME forgets it when the monitors
+change or you log out. MATCH_MONITOR_SCALES_WAIT sets how many seconds to wait
+for mutter to confirm (default 8).
+Needs gdctl (part of mutter) and busctl in a GNOME session.
+Exit status: 0 done or nothing to do, 1 refused or failed, 2 usage or setup.
+EOF
+}
+
+for arg in "$@"; do
+    case $arg in
+        -h | --help)
+            usage
+            exit 0
+            ;;
+    esac
+done
+
+if ! command -v python3 >/dev/null 2>&1; then
+    printf 'match-monitor-scales: python3 is required\n' >&2
+    exit 2
+fi
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ -f "$script_dir/match_monitor_scales.py" ]]; then
+    target="$script_dir/match_monitor_scales.py"
+elif [[ -n "${DOTFILES:-}" && -f "$DOTFILES/.local/scripts/match_monitor_scales.py" ]]; then
+    target="$DOTFILES/.local/scripts/match_monitor_scales.py"
+else
+    target="$HOME/.local/scripts/match_monitor_scales.py"
+fi
+
+exec python3 "$target" "$@"

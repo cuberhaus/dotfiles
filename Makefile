@@ -84,6 +84,7 @@ test: ## Run deterministic unit tests
 	$(PYTHON) tests/test_audit_extra_packages.py
 	$(PYTHON) tests/test_audit_self_installed_apps.py
 	$(PYTHON) tests/test_anime_gif_check.py
+	$(PYTHON) tests/test_match_monitor_scales.py
 	bash tests/test_brightness.sh
 	bash tests/test_brightness_fix.sh
 	bash tests/test_asusctl_install.sh

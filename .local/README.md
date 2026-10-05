@@ -21,6 +21,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── clone-all          # Clone all repos from a GitHub user
 │   │   ├── git-recurse        # Run git commands across multiple repos
 │   │   ├── logout-all         # Sign out of browsers, editors and CLIs (--close-apps quits them first); --audit lists stored credentials
+│   │   ├── match-monitor-scales # Give every monitor the same scale on GNOME (stops the Chromium fullscreen wiggle)
 │   │   ├── vault-secret       # Access SOPS-encrypted vault credentials
 │   │   ├── program            # Launch-or-focus helper for scratchpads
 │   │   ├── prompt             # Custom prompt helper
@@ -63,6 +64,7 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   ├── asusctl_lighting.sh     # Sets the keyboard backlight to a rainbow through asusctl when the keyboard supports it
 │   ├── brightness_fix.sh       # Selects the native NVIDIA backlight on ASUS ROG laptops via kernelstub or GRUB
 │   ├── lint.sh                 # Lint all tracked shell scripts with shellcheck
+│   ├── match_monitor_scales.py # Python module behind match-monitor-scales: plans and applies equal monitor scales through mutter and gdctl
 │   ├── permanent_shutdown_fix.sh # Applies shutdown kernel parameters via kernelstub or GRUB
 │   ├── toggle_theme            # Switch between light/dark themes
 │   ├── ycm.sh                  # Builds or verifies YouCompleteMe's compiled core and bundled clangd
@@ -499,6 +501,33 @@ Rerunning it replaces an effect chosen by hand.
 
 Run the hermetic tests with `bash tests/test_asusctl_install.sh` and
 `bash tests/test_asusctl_lighting.sh`.
+
+## Monitor scales
+
+On the ASUS ROG Strix SCAR 16 (G635LX) under GNOME on Wayland, a monitor at a
+fractional scale next to one at 100% makes Chromium-based apps (Cursor, VS Code,
+Chrome, Obsidian) shake in fullscreen on the 100% monitor: text and buttons
+jitter and the pointer flips between the text cursor and the arrow. With every
+monitor at one scale it stops.
+
+`match-monitor-scales` gives all connected monitors the same scale, the primary
+monitor's unless `--scale 125%` (or `--scale 1.25`) says otherwise, and works
+out the new positions, because a scale change alters a monitor's logical size.
+Run `match-monitor-scales --dry-run` to see the plan and have mutter check it
+without applying anything, `match-monitor-scales` to apply it until the
+monitors change or you log out, and `match-monitor-scales --persistent` to also
+save it in `~/.config/monitors.xml`, GNOME's own per-machine file that Stow
+does not manage. The old file is copied to `monitors.xml.bak-DATE-TIME` first.
+Each run that changes something prints the `gdctl` command that goes back.
+
+It needs `gdctl` (package `mutter-common-bin`) and `busctl`, and no bootstrap
+runs it: use it after a dock reconnect or a change in GNOME Settings. GNOME
+matches a saved layout by connector and monitor, so a monitor on another dock
+port has none; run it with `--persistent` once for that combination.
+
+Run the hermetic test with `python3 tests/test_match_monitor_scales.py`. The
+evidence, the rollback, and what is still unknown are in
+[docs/FULLSCREEN-WIGGLE-DIAGNOSIS.md](../docs/FULLSCREEN-WIGGLE-DIAGNOSIS.md).
 
 ## YouCompleteMe build
 
