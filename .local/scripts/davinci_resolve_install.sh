@@ -5,6 +5,9 @@
 # libraries Resolve needs, runs Blackmagic's installer in terminal mode, moves the glib
 # libraries Resolve bundles out of its way so the system ones are used, and reports every
 # library that is still missing. Machines without an NVIDIA GPU are skipped unless --force.
+# Before Blackmagic's installer runs, it also limits the vendor's control-panel udev rule to
+# Blackmagic's own USB devices, because the vendor's file makes every /dev/hidraw* device
+# writable by every user (--keep-vendor-udev-rules skips that).
 #
 # Rationale, trade-offs, and recovery: .local/README.md ("DaVinci Resolve")
 set -euo pipefail
@@ -13,6 +16,7 @@ set -euo pipefail
 # DAVINCI_RESOLVE_ROOT works like DESTDIR for the files outside the prefix (launchers, udev rules).
 readonly PREFIX="${DAVINCI_RESOLVE_PREFIX:-/opt/resolve}"
 readonly ROOT_DIR="${DAVINCI_RESOLVE_ROOT:-}"
+readonly DEV_DIR="${DAVINCI_RESOLVE_DEV_DIR:-/dev}"
 readonly PCI_DEVICES_DIR="${DAVINCI_RESOLVE_PCI_DIR:-/sys/bus/pci/devices}"
 readonly SUDO_PROGRAM="${DAVINCI_RESOLVE_SUDO:-sudo}"
 readonly SEARCH_DIRS="${DAVINCI_RESOLVE_SEARCH_DIRS:-}"
@@ -22,21 +26,73 @@ readonly REQUIRE_TERMINAL="${DAVINCI_RESOLVE_REQUIRE_TERMINAL:-true}"
 readonly SUPPORT_URL='https://www.blackmagicdesign.com/support/family/davinci-resolve-and-fusion'
 readonly TAB=$'\t'
 
-# Package names of Ubuntu 24.04 and later (the t64 transition). The audit reads this array.
+# The libraries Blackmagic's installer requires on Ubuntu (check_ubuntu_package_deps in the
+# AppRun of DaVinci Resolve 21.1.1), under the package names of Ubuntu 24.04 and later: the t64
+# transition renamed libapr1, libaprutil1, libasound2, and libglib2.0-0, and the old names no
+# longer install. unzip opens the download and libfuse2t64 runs the .run file, an AppImage.
+# The audit reads this array: one name per line, no comments inside it.
 readonly PREREQUISITE_PACKAGES=(
     unzip
     libfuse2t64
+    dbus
+    fontconfig
     libapr1t64
     libaprutil1t64
     libasound2t64
+    libbz2-1.0
+    libexpat1
+    libfreetype6
     libglib2.0-0t64
     libglu1-mesa
+    libglvnd0
+    libgomp1
+    libice6
+    libnuma1
+    libsm6
+    libstdc++6
+    libsystemd0
+    libuuid1
+    libx11-6
+    libxau6
+    libxcb-composite0
     libxcb-cursor0
+    libxcb-damage0
+    libxcb-glx0
+    libxcb-icccm4
+    libxcb-image0
+    libxcb-keysyms1
+    libxcb-randr0
+    libxcb-render-util0
+    libxcb-render0
+    libxcb-shape0
+    libxcb-shm0
+    libxcb-sync1
+    libxcb-util1
+    libxcb-xfixes0
     libxcb-xinerama0
     libxcb-xinput0
+    libxcb-xkb1
+    libxcb1
+    libxcursor1
+    libxext6
+    libxfixes3
+    libxi6
+    libxinerama1
     libxkbcommon-x11-0
+    libxkbcommon0
+    libxrandr2
+    libxrender1
+    libxtst6
+    libxxf86vm1
     ocl-icd-libopencl1
 )
+
+# What identifies a udev rules file as Blackmagic's (its USB vendor ID, and the one of the
+# Feitian dongle that Resolve Studio uses) or as this script's, so that --uninstall never
+# removes a file of someone else that happens to have the same name.
+readonly BLACKMAGIC_VENDOR_MATCH='ATTRS{idVendor}=="1edb"'
+readonly DONGLE_VENDOR_MATCH='ATTRS{idVendor}=="096e"'
+readonly OVERRIDE_MARKER='Written by davinci_resolve_install.sh'
 
 # Resolve bundles older copies of these glib libraries than the ones the system and the Qt
 # plugins use, which ends in "symbol lookup error". Moved aside, Resolve loads the system ones.
@@ -46,6 +102,7 @@ MODE=install
 DRY_RUN=false
 FORCE=false
 UNATTENDED=false
+KEEP_VENDOR_UDEV_RULES=false
 INSTALLER_ARGUMENT=''
 INSTALLER=''
 INSTALLER_VERSION=''
@@ -61,14 +118,16 @@ plan() { printf '\033[34m[DRY RUN]\033[0m %s\n' "$*"; }
 usage() {
     cat <<'EOF'
 Usage: davinci_resolve_install.sh [--installer FILE] [--dry-run] [--force] [--unattended]
+                                  [--keep-vendor-udev-rules]
        davinci_resolve_install.sh --uninstall [--dry-run] [--unattended]
 
 Install the free DaVinci Resolve (Blackmagic Design) on Ubuntu. Blackmagic offers the
 download only behind a registration form, so download the Linux ZIP yourself first
 (DaVinci_Resolve_<version>_Linux.zip, in ~/Downloads or your home folder); this script
-never fetches it. It then installs the libraries Resolve needs, runs Blackmagic's own
-installer in terminal mode (it asks questions, so run this from a terminal), moves the glib
-libraries Resolve bundles out of its way, and reports every library that is still missing.
+never fetches it. It then installs the libraries Resolve needs, limits the vendor's udev
+rule for control panels to Blackmagic's own USB devices, runs Blackmagic's own installer in
+terminal mode (it asks questions, so run this from a terminal), moves the glib libraries
+Resolve bundles out of its way, and reports every library that is still missing.
 Machines without an NVIDIA GPU, and ones that already have Resolve, are skipped.
 
 Options:
@@ -77,8 +136,14 @@ Options:
   --force           Skip the NVIDIA check and install again over an existing installation.
   --unattended      Never prompt for the sudo password, and stop before Blackmagic's installer,
                     which cannot run without a person.
-  --uninstall       Remove /opt/resolve and the launchers and udev rules that point into it.
-                    Projects and settings in your home folder stay.
+  --keep-vendor-udev-rules
+                    Leave Blackmagic's udev rules as its installer writes them. By default the
+                    script first writes /etc/udev/rules.d/75-davincipanel.rules with only the
+                    Blackmagic USB rule: the vendor's file of that name also makes every
+                    /dev/hidraw* device (touchpad, keyboard interfaces, security keys)
+                    writable by every user.
+  --uninstall       Remove /opt/resolve and the launchers, menu entries, and udev rules that
+                    belong to it. Projects and settings in your home folder stay.
   -h, --help        Show this help.
 
 Run it as your own user: it uses sudo for the steps that need it.
@@ -101,6 +166,7 @@ parse_args() {
             --dry-run) DRY_RUN=true ;;
             --force) FORCE=true ;;
             --unattended) UNATTENDED=true ;;
+            --keep-vendor-udev-rules) KEEP_VENDOR_UDEV_RULES=true ;;
             --uninstall) MODE=uninstall ;;
             --installer)
                 [[ $# -ge 2 ]] || usage_error '--installer needs a file'
@@ -115,6 +181,7 @@ parse_args() {
     if [[ "$MODE" == uninstall ]]; then
         [[ "$FORCE" != true ]] || usage_error '--uninstall does not take --force'
         [[ -z "$INSTALLER_ARGUMENT" ]] || usage_error '--uninstall does not take --installer'
+        [[ "$KEEP_VENDOR_UDEV_RULES" != true ]] || usage_error '--uninstall does not take --keep-vendor-udev-rules'
     fi
 }
 
@@ -291,6 +358,7 @@ plan_install() {
     else
         plan 'every prerequisite library is already installed'
     fi
+    plan_panel_udev_rule
     plan "would run: sudo env SKIP_PACKAGE_CHECK=1 $run_description -i"
     plan "would move the glib libraries that Resolve bundles to $PREFIX/libs/not_used"
     plan 'nothing was changed'
@@ -321,6 +389,77 @@ install_prerequisites() {
         error "apt-get could not install them. If it cannot find a package, run 'sudo apt-get update' and try again."
         return 1
     fi
+}
+
+## The rules file that replaces Blackmagic's 75-davincipanel.rules: udev lets a file in
+## /etc/udev/rules.d replace the file of the same name in /usr/lib/udev/rules.d.
+panel_rules_override() {
+    printf '%s\n' "$ROOT_DIR/etc/udev/rules.d/75-davincipanel.rules"
+}
+
+## What goes into that file: the one rule for Blackmagic's USB devices and nothing else.
+panel_rules_override_content() {
+    cat <<EOF
+# $OVERRIDE_MARKER from the dotfiles repository. Delete this file to undo it.
+# Blackmagic's installer writes /usr/lib/udev/rules.d/75-davincipanel.rules with the rule
+# below and one more, KERNEL=="hidraw*", MODE="0777", which would make every raw HID device
+# (touchpad, keyboard interfaces, security keys) writable by every user. A file of the same
+# name in /etc/udev/rules.d replaces that one, so only the Blackmagic rule applies.
+SUBSYSTEM=="usb", $BLACKMAGIC_VENDOR_MATCH, MODE="0666"
+EOF
+}
+
+## Write that file before Blackmagic's installer runs, so its world-writable hidraw rule never
+## applies and no device is exposed in between. A file of that name that already exists is the
+## user's own and stays. When the file cannot be written the installation stops here, instead
+## of installing the rule it was meant to prevent.
+scope_panel_udev_rule() {
+    local override
+    override="$(panel_rules_override)"
+    if [[ "$KEEP_VENDOR_UDEV_RULES" == true ]]; then
+        warn "Keeping Blackmagic's udev rules as its installer writes them: 75-davincipanel.rules makes every /dev/hidraw* device writable by every user."
+        return 0
+    fi
+    if [[ -e "$override" || -L "$override" ]]; then
+        info "$override already exists and replaces Blackmagic's panel udev rule; leaving it as it is."
+        return 0
+    fi
+    info "Limiting Blackmagic's panel udev rule to Blackmagic USB devices: $override (delete it to use Blackmagic's own)."
+    if ! as_root mkdir -p -- "$(dirname -- "$override")" ||
+        ! panel_rules_override_content | as_root tee -- "$override" >/dev/null ||
+        ! as_root chmod 644 -- "$override"; then
+        error "Could not write $override, so Blackmagic's installer was not started: its own rule would make every /dev/hidraw* device writable by every user. Fix the cause, or rerun with --keep-vendor-udev-rules to accept that."
+        return 1
+    fi
+}
+
+plan_panel_udev_rule() {
+    local override
+    override="$(panel_rules_override)"
+    if [[ "$KEEP_VENDOR_UDEV_RULES" == true ]]; then
+        plan "would keep Blackmagic's udev rules as its installer writes them (--keep-vendor-udev-rules)"
+    elif [[ -e "$override" || -L "$override" ]]; then
+        plan "$override exists and would stay as it is"
+    else
+        plan "would write $override, which limits Blackmagic's panel udev rule to Blackmagic USB devices (its own rule also makes every /dev/hidraw* device writable by every user)"
+    fi
+}
+
+## After the installation: list every raw HID device that any user can write to, which is what
+## Blackmagic's own udev rule causes. Read-only.
+report_world_writable_hidraw() {
+    local nodes node
+    nodes="$(find "$DEV_DIR" -maxdepth 1 -name 'hidraw*' -perm -0002 2>/dev/null | sort || true)"
+    if [[ -z "$nodes" ]]; then
+        info "No $DEV_DIR/hidraw* device is writable by every user."
+        return 0
+    fi
+    warn 'These raw HID devices are writable by every user:'
+    while IFS= read -r node; do
+        warn "  $node"
+    done <<<"$nodes"
+    warn 'Find the udev rule that does it with: grep -l hidraw /etc/udev/rules.d/* /usr/lib/udev/rules.d/*'
+    warn 'Then fix it and replug the devices or reboot: udev sets permissions when a device appears.'
 }
 
 ## Unpack the ZIP into a temporary folder and set RUN_FILE to the installer inside it.
@@ -448,28 +587,49 @@ apply() {
     # anything on the system changes.
     prepare_run_file || return 1
     install_prerequisites || return 1
+    scope_panel_udev_rule || return 1
     run_installer || return 1
     park_bundled_glib
     report_missing_libraries
+    report_world_writable_hidraw
     success "DaVinci Resolve${INSTALLER_VERSION:+ $INSTALLER_VERSION} is installed in $PREFIX."
     next_steps
 }
 
+## Print file $1 when it exists and contains the fixed text $2, the mark that shows it is
+## Blackmagic's or this script's. A file of someone else with the same name is not listed.
+list_if_marked() {
+    if [[ -f "$1" ]] && grep -Fq -- "$2" "$1"; then
+        printf '%s\n' "$1"
+    fi
+}
+
 ## The files outside the prefix that belong to Resolve, one per line: the launchers whose Exec
-## line starts a program inside the prefix, and the two udev rules its installer writes.
+## line starts a program inside the prefix (also the one on the Desktop), its menu entries, and
+## the udev rules that Blackmagic's installer, or this script, wrote.
 system_files() {
-    local file directory name
-    for file in "$ROOT_DIR"/usr/share/applications/*.desktop; do
+    local file directory
+    local rules="$ROOT_DIR/usr/lib/udev/rules.d" admin_rules="$ROOT_DIR/etc/udev/rules.d"
+    for file in "$ROOT_DIR"/usr/share/applications/*.desktop "$HOME/Desktop/com.blackmagicdesign.resolve.desktop"; do
         if [[ -f "$file" ]] && awk -v prefix="$PREFIX/" '/^Exec=/ && index($0, prefix) { found = 1 } END { exit !found }' "$file"; then
             printf '%s\n' "$file"
         fi
     done
-    for directory in "$ROOT_DIR/etc/udev/rules.d" "$ROOT_DIR/usr/lib/udev/rules.d"; do
-        for name in 99-BlackmagicDevices.rules 99-ResolveKeyboardHID.rules; do
-            if [[ -f "$directory/$name" ]]; then
-                printf '%s\n' "$directory/$name"
-            fi
-        done
+    for file in "$ROOT_DIR/usr/share/desktop-directories/com.blackmagicdesign.resolve.directory" \
+        "$ROOT_DIR/etc/xdg/menus/applications-merged/com.blackmagicdesign.resolve.menu"; do
+        if [[ -f "$file" ]]; then
+            printf '%s\n' "$file"
+        fi
+    done
+    list_if_marked "$rules/75-davincipanel.rules" "$BLACKMAGIC_VENDOR_MATCH"
+    list_if_marked "$rules/75-davincikb.rules" "$BLACKMAGIC_VENDOR_MATCH"
+    list_if_marked "$rules/75-sdx.rules" "$DONGLE_VENDOR_MATCH"
+    list_if_marked "$admin_rules/75-davincipanel.rules" "$OVERRIDE_MARKER"
+    # The names the rules have in Blackmagic's payload, which an older release or a manual
+    # setup may have installed as they are.
+    for directory in "$admin_rules" "$rules"; do
+        list_if_marked "$directory/99-BlackmagicDevices.rules" "$BLACKMAGIC_VENDOR_MATCH"
+        list_if_marked "$directory/99-ResolveKeyboardHID.rules" "$BLACKMAGIC_VENDOR_MATCH"
     done
 }
 
@@ -502,8 +662,9 @@ uninstall() {
     if [[ ${#files[@]} -gt 0 ]]; then
         as_root rm -f -- "${files[@]}"
     fi
-    success "Removed DaVinci Resolve from $PREFIX (${#files[@]} launcher and rules file(s) outside it)."
+    success "Removed DaVinci Resolve from $PREFIX (${#files[@]} launcher, menu, and rules file(s) outside it)."
     info 'Kept: your projects and settings (~/.local/share/DaVinciResolve), and the libraries apt installed for it.'
+    info "Not removed: what Blackmagic's installer put in shared places (panel libraries in /usr/lib64 or /usr/lib, /var/BlackmagicDesign, icons, MIME types, the OFX renderer). See .local/README.md."
 }
 
 main() {

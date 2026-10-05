@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Hermetic tests for .local/scripts/davinci_resolve_install.sh, its bootstrap and repair wiring,
 # and the OpenShot and Blender entries that ship beside it. Fake id, sudo, apt-get, dpkg-query,
-# ldd, and xdg-user-dir binaries, an env-redirected PCI tree, prefix, and system root, and a real
-# ZIP (built with Python's zipfile, unpacked by the real unzip) that holds a fake Blackmagic
-# installer keep every case off the real machine, the network, and the real package manager.
+# ldd, and xdg-user-dir binaries, an env-redirected PCI tree, prefix, system root, and /dev, and
+# a real ZIP (built with Python's zipfile, unpacked by the real unzip) that holds a fake
+# Blackmagic installer keep every case off the real machine, the network, and the real package
+# manager. The fake installer writes the udev rules files that Resolve 21.1.1 writes, and
+# imitates what udev does with them, so the tests can tell a protected machine from an exposed one.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -22,8 +24,10 @@ done
 TEST_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 
-# What a fresh Ubuntu desktop lacks of the script's prerequisite packages.
-readonly MISSING_AT_START=(libapr1t64 libaprutil1t64 libglu1-mesa)
+# What a fresh Ubuntu desktop lacks of the script's prerequisite packages: the four that the work
+# laptop lacked, among them libxcb-damage0, which Blackmagic requires and the first version of
+# the script did not install. The order is the one of the script's array.
+readonly MISSING_AT_START=(libapr1t64 libaprutil1t64 libglu1-mesa libxcb-damage0)
 readonly GLIB_FILES=(libglib-2.0.so.0 libglib-2.0.so.0.7800.0 libgobject-2.0.so.0 libgio-2.0.so.0 libgmodule-2.0.so.0)
 
 CASE=''
@@ -107,7 +111,8 @@ EOF
 }
 
 ## Write the stand-in for Blackmagic's .run installer to $1. It records how it was started and
-## installs a Resolve tree under the prefix, plus a launcher and the two udev rules.
+## installs a Resolve tree under the prefix, plus what post_install.sh of Resolve 21.1.1 puts
+## outside it: the launchers (one on the Desktop), the menu entries, and three udev rules files.
 write_fake_run() {
     cat >"$1" <<'EOF'
 #!/usr/bin/env bash
@@ -116,7 +121,9 @@ printf 'args=%s skip=%s\n' "$*" "${SKIP_PACKAGE_CHECK:-}" >>"$FAKE_LOG_DIR/insta
 [[ "${FAKE_INSTALLER_NOOP:-false}" != true ]] || exit 0
 prefix="$DAVINCI_RESOLVE_PREFIX"
 root="$DAVINCI_RESOLVE_ROOT"
-mkdir -p "$prefix/bin" "$prefix/libs/plugins/platforms" "$root/usr/share/applications" "$root/usr/lib/udev/rules.d"
+rules="$root/usr/lib/udev/rules.d"
+mkdir -p "$prefix/bin" "$prefix/libs/plugins/platforms" "$root/usr/share/applications" "$rules" \
+    "$root/usr/share/desktop-directories" "$root/etc/xdg/menus/applications-merged" "$HOME/Desktop"
 printf '#!/bin/sh\n' >"$prefix/bin/resolve"
 chmod 755 "$prefix/bin/resolve"
 for library in libglib-2.0.so.0 libglib-2.0.so.0.7800.0 libgobject-2.0.so.0 libgio-2.0.so.0 \
@@ -126,8 +133,23 @@ done
 : >"$prefix/libs/plugins/platforms/libqxcb.so"
 printf '[Desktop Entry]\nName=DaVinci Resolve\nExec=%s/bin/resolve %%u\n' "$prefix" \
     >"$root/usr/share/applications/com.blackmagicdesign.resolve.desktop"
-: >"$root/usr/lib/udev/rules.d/99-BlackmagicDevices.rules"
-: >"$root/usr/lib/udev/rules.d/99-ResolveKeyboardHID.rules"
+cp "$root/usr/share/applications/com.blackmagicdesign.resolve.desktop" \
+    "$HOME/Desktop/com.blackmagicdesign.resolve.desktop"
+: >"$root/usr/share/desktop-directories/com.blackmagicdesign.resolve.directory"
+: >"$root/etc/xdg/menus/applications-merged/com.blackmagicdesign.resolve.menu"
+# The three rules files of post_install.sh. The first one ends in the rule that makes every raw
+# HID device writable by every user.
+printf 'SUBSYSTEM=="usb", ATTRS{idVendor}=="1edb", MODE="0666"\nKERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0777", GROUP="resolve"\n' \
+    >"$rules/75-davincipanel.rules"
+printf 'SUBSYSTEM=="hidraw", KERNEL=="hidraw*", ATTRS{idVendor}=="1edb", ATTRS{idProduct}=="da0b", MODE="0666"\n' \
+    >"$rules/75-davincikb.rules"
+printf 'SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="096e", MODE="0666"\n' \
+    >"$rules/75-sdx.rules"
+# What udev does with them: a file of the same name in /etc/udev/rules.d replaces the first one,
+# and without such a file its last rule makes every raw HID device writable by every user.
+if [[ ! -e "$root/etc/udev/rules.d/75-davincipanel.rules" ]]; then
+    chmod 0777 "$DAVINCI_RESOLVE_DEV_DIR"/hidraw* 2>/dev/null || true
+fi
 EOF
 }
 
@@ -155,12 +177,16 @@ add_zip() {
 }
 
 ## A fresh fake machine in $CASE: an NVIDIA card with its audio function, a fresh Ubuntu that
-## lacks MISSING_AT_START, an empty download folder, and nothing installed.
+## lacks MISSING_AT_START, two raw HID devices only their owner can write to (as udev creates
+## them), an empty download folder, and nothing installed.
 new_case() {
     CASE="$TEST_ROOT/$1"
     ENV_OVERRIDES=()
-    mkdir -p "$CASE/bin" "$CASE/home/Downloads" "$CASE/cache" "$CASE/root" "$CASE/downloads" \
+    mkdir -p "$CASE/bin" "$CASE/home/Downloads" "$CASE/cache" "$CASE/root" "$CASE/downloads" "$CASE/dev" \
         "$CASE/pci/0000:01:00.0" "$CASE/pci/0000:01:00.1"
+    : >"$CASE/dev/hidraw0"
+    : >"$CASE/dev/hidraw1"
+    chmod 600 "$CASE/dev/hidraw0" "$CASE/dev/hidraw1"
     printf '0x10de\n' >"$CASE/pci/0000:01:00.0/vendor"
     printf '0x030000\n' >"$CASE/pci/0000:01:00.0/class"
     printf '0x10de\n' >"$CASE/pci/0000:01:00.1/vendor"
@@ -181,6 +207,7 @@ run_script() {
             FAKE_LOG_DIR="$CASE" \
             DAVINCI_RESOLVE_PREFIX="$CASE/opt/resolve" \
             DAVINCI_RESOLVE_ROOT="$CASE/root" \
+            DAVINCI_RESOLVE_DEV_DIR="$CASE/dev" \
             DAVINCI_RESOLVE_PCI_DIR="$CASE/pci" \
             DAVINCI_RESOLVE_SUDO="$CASE/bin/sudo" \
             DAVINCI_RESOLVE_SEARCH_DIRS="$CASE/downloads" \
@@ -222,6 +249,16 @@ assert_log_matches() {
         fail "$3: $1.log has no line matching /$2/" "$(cat "$CASE/$1.log" 2>/dev/null || echo '(no log)')"
 }
 
+## The number of the first line of $1.log that contains the fixed text $2; nothing when none does.
+log_line_of() {
+    grep -nF -- "$2" "$CASE/$1.log" 2>/dev/null | head -n 1 | cut -d: -f1 || true
+}
+
+## The fake raw HID devices that every user can write to, one per line.
+exposed_hidraw() {
+    find "$CASE/dev" -maxdepth 1 -name 'hidraw*' -perm -0002 | sort
+}
+
 ## Nothing was escalated, installed, unpacked, or written: no command ran and no file exists.
 assert_untouched() {
     local name
@@ -250,6 +287,8 @@ test_help_and_usage_errors() {
     assert_status 0 '--help'
     assert_output 'Usage: davinci_resolve_install.sh' '--help prints the usage'
     assert_output 'registration form' '--help explains the manual download'
+    assert_output '--keep-vendor-udev-rules' '--help documents the udev opt-out'
+    assert_output '/dev/hidraw*' '--help says why the udev rule is limited'
     bash "$SCRIPT" --help >/dev/null 2>"$CASE/stderr"
     [[ ! -s "$CASE/stderr" ]] || fail '--help must write nothing to stderr' "$(cat "$CASE/stderr")"
 
@@ -267,6 +306,8 @@ test_help_and_usage_errors() {
     assert_status 2 '--uninstall with --force'
     run_script --uninstall --installer "$CASE/x.zip"
     assert_status 2 '--uninstall with --installer'
+    run_script --uninstall --keep-vendor-udev-rules
+    assert_status 2 '--uninstall with --keep-vendor-udev-rules'
     assert_untouched 'usage errors'
 }
 
@@ -422,21 +463,39 @@ test_newest_installer_is_chosen() {
 
 test_dry_run_changes_nothing() {
     new_case dry-run
+    local override="$CASE/root/etc/udev/rules.d/75-davincipanel.rules"
     add_zip
     run_script --dry-run
     assert_status 0 'dry run'
     assert_output 'would unpack' 'dry run'
     assert_output "would install with apt-get: ${MISSING_AT_START[*]}" 'dry run lists only the missing libraries'
+    assert_output "would write $override, which limits Blackmagic's panel udev rule to Blackmagic USB devices" 'dry run plans the udev override'
     assert_output 'would run: sudo env SKIP_PACKAGE_CHECK=1 <the .run file from the ZIP> -i' 'dry run'
     assert_output 'would move the glib libraries' 'dry run'
     assert_output 'nothing was changed' 'dry run'
     assert_untouched 'dry run'
+
+    run_script --dry-run --keep-vendor-udev-rules
+    assert_status 0 'dry run that keeps the vendor rules'
+    assert_output "would keep Blackmagic's udev rules as its installer writes them" 'dry run that keeps the vendor rules'
+    refute_output "would write $override" 'dry run that keeps the vendor rules'
+    assert_untouched 'dry run that keeps the vendor rules'
 
     printf '%s\n' "${MISSING_AT_START[@]}" >>"$CASE/installed.list"
     run_script --dry-run
     assert_status 0 'dry run with every prerequisite present'
     assert_output 'every prerequisite library is already installed' 'dry run with every prerequisite present'
     refute_output 'would install with apt-get' 'dry run with every prerequisite present'
+    assert_untouched 'dry run with every prerequisite present'
+
+    # A file of that name that already exists is the user's own, so the plan leaves it.
+    mkdir -p "$(dirname "$override")"
+    printf '# mine\n' >"$override"
+    run_script --dry-run
+    assert_status 0 'dry run with an existing override'
+    assert_output "$override exists and would stay as it is" 'dry run with an existing override'
+    refute_output "would write $override" 'dry run with an existing override'
+    [[ "$(cat "$override")" == '# mine' ]] || fail 'a dry run must not touch an existing override'
 }
 
 test_full_installation() {
@@ -502,6 +561,132 @@ test_every_prerequisite_present() {
     assert_output 'Every library DaVinci Resolve needs is already installed' 'prerequisites present'
     assert_log_lines apt-get 0 'nothing to install'
     assert_log_lines installer 1 'prerequisites present'
+}
+
+test_prerequisites_match_the_vendor_list() {
+    local packages name
+    packages="$(prerequisite_packages)"
+    # What Blackmagic's installer requires on Ubuntu, among them the xcb libraries that the
+    # first version of the script left out (libxcb-damage0 was missing on the work laptop).
+    for name in unzip libfuse2t64 dbus fontconfig libglu1-mesa libnuma1 libxkbcommon-x11-0 ocl-icd-libopencl1 \
+        libxcb-composite0 libxcb-cursor0 libxcb-damage0 libxcb-glx0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+        libxcb-randr0 libxcb-render-util0 libxcb-render0 libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-util1 \
+        libxcb-xfixes0 libxcb-xinerama0 libxcb-xinput0 libxcb-xkb1; do
+        grep -Fxq -- "$name" <<<"$packages" || fail "PREREQUISITE_PACKAGES must list $name"
+    done
+    # Ubuntu 24.04 renamed these four, and the old names (and libfuse2) no longer install.
+    for name in libapr1 libaprutil1 libasound2 libglib2.0-0 libfuse2; do
+        if grep -Fxq -- "$name" <<<"$packages"; then
+            fail "PREREQUISITE_PACKAGES must use the t64 name of $name"
+        fi
+    done
+    for name in libapr1t64 libaprutil1t64 libasound2t64 libglib2.0-0t64; do
+        grep -Fxq -- "$name" <<<"$packages" || fail "PREREQUISITE_PACKAGES must list $name"
+    done
+    [[ -z "$(sort <<<"$packages" | uniq -d)" ]] || fail 'PREREQUISITE_PACKAGES lists a package twice' "$(sort <<<"$packages" | uniq -d)"
+    # The audit reads the array line by line: a comment or two names on a line would break it.
+    if prerequisite_packages | grep -Eq '[[:space:]#]'; then
+        fail 'every line of PREREQUISITE_PACKAGES must be one bare package name'
+    fi
+}
+
+test_vendor_udev_rule_is_scoped() {
+    local override tee_line installer_line
+    new_case udev-scoped
+    override="$CASE/root/etc/udev/rules.d/75-davincipanel.rules"
+    install_ok
+
+    # Blackmagic's panel rule is replaced by a file of the same name that holds only the
+    # Blackmagic USB rule, so the vendor's world-writable hidraw rule never applies.
+    [[ -f "$override" ]] || fail 'the panel rules override must be written'
+    [[ "$(grep -v '^#' "$override")" == 'SUBSYSTEM=="usb", ATTRS{idVendor}=="1edb", MODE="0666"' ]] ||
+        fail 'the override must hold the Blackmagic USB rule and nothing else' "$(cat "$override")"
+    [[ "$(head -n 1 "$override")" == '# Written by davinci_resolve_install.sh '* ]] ||
+        fail 'the override must say who wrote it, so that --uninstall can tell it from yours' "$(cat "$override")"
+    [[ -n "$(find "$override" -perm 644)" ]] || fail 'the override must be mode 644'
+    if command -v udevadm >/dev/null 2>&1 && udevadm verify --help >/dev/null 2>&1; then
+        udevadm verify --no-style "$override" >/dev/null 2>"$CASE/verify.err" ||
+            fail 'udevadm verify must accept the override' "$(cat "$CASE/verify.err")" "$(cat "$override")"
+    fi
+    grep -Fq 'KERNEL=="hidraw*"' "$CASE/root/usr/lib/udev/rules.d/75-davincipanel.rules" ||
+        fail 'the fake installer must write the vendor rule that the override replaces'
+
+    # It exists before Blackmagic's installer starts, so no device is exposed in between.
+    tee_line="$(log_line_of sudo "tee -- $override")"
+    installer_line="$(log_line_of sudo 'SKIP_PACKAGE_CHECK=1')"
+    [[ -n "$tee_line" && -n "$installer_line" && "$tee_line" -lt "$installer_line" ]] ||
+        fail 'the override must be written before the installer starts' "$(cat "$CASE/sudo.log")"
+    assert_output "Limiting Blackmagic's panel udev rule to Blackmagic USB devices: $override" 'install'
+    [[ -z "$(exposed_hidraw)" ]] || fail 'no raw HID device may become writable by every user' "$(exposed_hidraw)"
+    assert_output "No $CASE/dev/hidraw* device is writable by every user" 'install'
+    refute_output 'These raw HID devices are writable by every user' 'install'
+
+    # Opting out leaves Blackmagic's rules alone, and says what that exposes.
+    new_case udev-kept
+    override="$CASE/root/etc/udev/rules.d/75-davincipanel.rules"
+    add_zip
+    run_script --keep-vendor-udev-rules
+    assert_status 0 '--keep-vendor-udev-rules'
+    [[ ! -e "$override" ]] || fail '--keep-vendor-udev-rules must not write the override'
+    if grep -Fq 'tee --' "$CASE/sudo.log"; then fail '--keep-vendor-udev-rules must not write any file' "$(cat "$CASE/sudo.log")"; fi
+    assert_output "Keeping Blackmagic's udev rules as its installer writes them" '--keep-vendor-udev-rules'
+    assert_output 'These raw HID devices are writable by every user:' 'the exposure that was accepted is reported'
+    assert_output "$CASE/dev/hidraw0" 'the report names the first device'
+    assert_output "$CASE/dev/hidraw1" 'the report names the second device'
+    assert_output 'grep -l hidraw' 'the report says how to find the rule'
+    assert_log_lines installer 1 '--keep-vendor-udev-rules still installs Resolve'
+
+    # A file of that name that already exists is the user's own: it stays, and only the device
+    # that something else made writable is reported.
+    new_case udev-own-file
+    override="$CASE/root/etc/udev/rules.d/75-davincipanel.rules"
+    mkdir -p "$(dirname "$override")"
+    printf '# my own rule\n' >"$override"
+    chmod 666 "$CASE/dev/hidraw1"
+    add_zip
+    run_script
+    assert_status 0 'an override that already exists'
+    [[ "$(cat "$override")" == '# my own rule' ]] || fail 'an existing file of that name must stay as it is' "$(cat "$override")"
+    if grep -Fq 'tee --' "$CASE/sudo.log"; then fail 'an existing override must not be rewritten' "$(cat "$CASE/sudo.log")"; fi
+    assert_output "$override already exists and replaces Blackmagic's panel udev rule" 'an override that already exists'
+    assert_output 'These raw HID devices are writable by every user:' 'a device that something else exposed'
+    assert_output "$CASE/dev/hidraw1" 'the exposed device is named'
+    refute_output "$CASE/dev/hidraw0" 'the protected device is not named'
+
+    # A link to /dev/null is the usual way to disable a rules file: it counts as existing.
+    new_case udev-masked
+    override="$CASE/root/etc/udev/rules.d/75-davincipanel.rules"
+    mkdir -p "$(dirname "$override")"
+    ln -s /dev/null "$override"
+    add_zip
+    run_script
+    assert_status 0 'a vendor rule disabled with a link to /dev/null'
+    [[ -L "$override" ]] || fail 'a link to /dev/null must stay'
+    assert_output "$override already exists" 'a link to /dev/null'
+    [[ -z "$(exposed_hidraw)" ]] || fail 'a masked vendor rule exposes nothing' "$(exposed_hidraw)"
+}
+
+test_failed_udev_override_stops_the_installation() {
+    new_case udev-write-fails
+    # Every prerequisite is present, so the override is the first thing sudo is asked to do.
+    printf '%s\n' "${MISSING_AT_START[@]}" >>"$CASE/installed.list"
+    ENV_OVERRIDES=(FAKE_SUDO_FAIL=true)
+    add_zip
+    run_script
+    assert_status 1 'an override that cannot be written'
+    assert_output "Could not write $CASE/root/etc/udev/rules.d/75-davincipanel.rules" 'an override that cannot be written'
+    assert_output "Blackmagic's installer was not started" 'the vendor rule must not be installed unprotected'
+    assert_output 'rerun with --keep-vendor-udev-rules' 'the way out is named'
+    assert_log_lines installer 0 'the installer must not start without the override'
+    [[ ! -e "$CASE/opt" ]] || fail 'nothing may be installed'
+    [[ -z "$(exposed_hidraw)" ]] || fail 'nothing may be exposed' "$(exposed_hidraw)"
+    assert_no_leftovers 'an override that cannot be written'
+
+    # With the flag the same machine installs, and the exposure is reported.
+    ENV_OVERRIDES=()
+    run_script --keep-vendor-udev-rules
+    assert_status 0 'the same machine with --keep-vendor-udev-rules'
+    assert_log_lines installer 1 'the same machine with --keep-vendor-udev-rules'
 }
 
 test_zip_layouts() {
@@ -664,13 +849,36 @@ test_uninstall() {
     new_case uninstall
     install_ok
     local prefix="$CASE/opt/resolve"
-    local launcher="$CASE/root/usr/share/applications/com.blackmagicdesign.resolve.desktop"
-    local rules_dir="$CASE/root/usr/lib/udev/rules.d"
+    local rules_dir="$CASE/root/usr/lib/udev/rules.d" admin_rules="$CASE/root/etc/udev/rules.d"
+    # Everything Resolve 21.1.1 puts outside its prefix, as the fake installer writes it, plus
+    # the override this script wrote: the launchers (one on the Desktop), the menu entries, and
+    # the udev rules files.
+    local -a resolve_files=(
+        "$CASE/root/usr/share/applications/com.blackmagicdesign.resolve.desktop"
+        "$CASE/home/Desktop/com.blackmagicdesign.resolve.desktop"
+        "$CASE/root/usr/share/desktop-directories/com.blackmagicdesign.resolve.directory"
+        "$CASE/root/etc/xdg/menus/applications-merged/com.blackmagicdesign.resolve.menu"
+        "$rules_dir/75-davincipanel.rules"
+        "$rules_dir/75-davincikb.rules"
+        "$rules_dir/75-sdx.rules"
+        "$admin_rules/75-davincipanel.rules"
+    )
     # Neighbours that must survive: another app's launcher and rules, the user's data, and a
     # launcher of the same name pattern that starts a program elsewhere.
+    local -a neighbours=(
+        "$CASE/root/usr/share/applications/other.desktop"
+        "$CASE/root/usr/share/applications/lookalike.desktop"
+        "$CASE/home/Desktop/other.desktop"
+        "$rules_dir/60-other.rules"
+        "$admin_rules/60-other.rules"
+        "$CASE/home/.local/share/DaVinciResolve/project.db"
+    )
+    local file
     printf '[Desktop Entry]\nExec=/usr/bin/other\n' >"$CASE/root/usr/share/applications/other.desktop"
     printf '[Desktop Entry]\nExec=/opt/resolve-extra/bin/tool\n' >"$CASE/root/usr/share/applications/lookalike.desktop"
+    printf '[Desktop Entry]\nExec=/usr/bin/other\n' >"$CASE/home/Desktop/other.desktop"
     : >"$rules_dir/60-other.rules"
+    : >"$admin_rules/60-other.rules"
     mkdir -p "$CASE/home/.local/share/DaVinciResolve"
     : >"$CASE/home/.local/share/DaVinciResolve/project.db"
     local sudo_lines
@@ -679,25 +887,28 @@ test_uninstall() {
     run_script --uninstall --dry-run
     assert_status 0 'uninstall dry run'
     assert_output "would remove $prefix" 'uninstall dry run'
-    assert_output "would remove $launcher" 'uninstall dry run'
-    assert_output "would remove $rules_dir/99-BlackmagicDevices.rules" 'uninstall dry run'
-    assert_output "would remove $rules_dir/99-ResolveKeyboardHID.rules" 'uninstall dry run'
+    for file in "${resolve_files[@]}"; do
+        assert_output "would remove $file" 'uninstall dry run'
+        [[ -e "$file" ]] || fail "a dry run must not remove $file"
+    done
     refute_output 'other.desktop' 'uninstall dry run'
     refute_output 'lookalike.desktop' 'uninstall dry run'
+    refute_output '60-other.rules' 'uninstall dry run'
     [[ -x "$prefix/bin/resolve" ]] || fail 'a dry run must not remove Resolve'
     assert_log_lines sudo "$sudo_lines" 'uninstall dry run'
 
     run_script --uninstall --unattended
     assert_status 0 'uninstall'
     assert_output 'Removed DaVinci Resolve' 'uninstall'
+    assert_output "(${#resolve_files[@]} launcher, menu, and rules file(s) outside it)" 'uninstall counts every file it removed'
+    assert_output 'Not removed' 'uninstall says what the installer left in shared places'
     [[ ! -e "$prefix" ]] || fail 'the prefix must be removed'
-    [[ ! -e "$launcher" ]] || fail 'the launcher must be removed'
-    [[ ! -e "$rules_dir/99-BlackmagicDevices.rules" && ! -e "$rules_dir/99-ResolveKeyboardHID.rules" ]] ||
-        fail 'the udev rules must be removed'
-    [[ -f "$CASE/root/usr/share/applications/other.desktop" ]] || fail "another app's launcher must stay"
-    [[ -f "$CASE/root/usr/share/applications/lookalike.desktop" ]] || fail 'a launcher that starts a program outside the prefix must stay'
-    [[ -f "$rules_dir/60-other.rules" ]] || fail "another package's udev rules must stay"
-    [[ -f "$CASE/home/.local/share/DaVinciResolve/project.db" ]] || fail 'the projects and settings must stay'
+    for file in "${resolve_files[@]}"; do
+        [[ ! -e "$file" ]] || fail "$file must be removed"
+    done
+    for file in "${neighbours[@]}"; do
+        [[ -f "$file" ]] || fail "$file belongs to something else and must stay"
+    done
     assert_log_matches sudo "^noninteractive rm -rf -- $prefix\$" 'uninstall never prompts when unattended'
 
     sudo_lines="$(log_lines sudo)"
@@ -705,6 +916,31 @@ test_uninstall() {
     assert_status 0 'second uninstall'
     assert_output 'not installed' 'second uninstall'
     assert_log_lines sudo "$sudo_lines" 'second uninstall'
+}
+
+test_uninstall_recognises_rules_by_content() {
+    new_case rules-by-content
+    install_ok
+    local rules_dir="$CASE/root/usr/lib/udev/rules.d" admin_rules="$CASE/root/etc/udev/rules.d"
+    # Same names, someone else's content: a rules file is Blackmagic's only when it names their
+    # USB vendor ID (or the Feitian dongle's, or carries the mark of this script).
+    printf 'SUBSYSTEM=="usb", ATTRS{idVendor}=="dead", MODE="0660"\n' >"$rules_dir/75-sdx.rules"
+    printf 'SUBSYSTEM=="usb", ATTRS{idVendor}=="beef", MODE="0666"\n' >"$rules_dir/99-BlackmagicDevices.rules"
+    # The user's own file in /etc: it names the Blackmagic ID but was not written by this script.
+    printf '# hand-written\nSUBSYSTEM=="usb", ATTRS{idVendor}=="1edb", MODE="0660"\n' >"$admin_rules/75-davincipanel.rules"
+    # The names the rules have in Blackmagic's payload, as an older release may have installed them.
+    printf 'SUBSYSTEM=="usb", ATTRS{idVendor}=="1edb", MODE="0666"\n' >"$admin_rules/99-BlackmagicDevices.rules"
+    printf 'SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1edb", MODE="0666"\n' >"$rules_dir/99-ResolveKeyboardHID.rules"
+
+    run_script --uninstall --unattended
+    assert_status 0 'uninstall with lookalike rules'
+    [[ -f "$rules_dir/75-sdx.rules" ]] || fail 'a 75-sdx.rules without the dongle vendor ID must stay'
+    [[ -f "$rules_dir/99-BlackmagicDevices.rules" ]] || fail 'a rules file of another vendor must stay, whatever its name'
+    [[ -f "$admin_rules/75-davincipanel.rules" ]] || fail 'a hand-written file in /etc must stay, even when it names the Blackmagic ID'
+    [[ ! -e "$admin_rules/99-BlackmagicDevices.rules" ]] || fail 'the older rules name in /etc must be removed'
+    [[ ! -e "$rules_dir/99-ResolveKeyboardHID.rules" ]] || fail 'the older keyboard rules name must be removed'
+    [[ ! -e "$rules_dir/75-davincipanel.rules" && ! -e "$rules_dir/75-davincikb.rules" ]] ||
+        fail "Blackmagic's own rules must be removed"
 }
 
 test_uninstall_removes_only_what_is_resolve() {
@@ -827,6 +1063,9 @@ test_dry_run_changes_nothing
 test_full_installation
 test_second_run_changes_nothing
 test_every_prerequisite_present
+test_prerequisites_match_the_vendor_list
+test_vendor_udev_rule_is_scoped
+test_failed_udev_override_stops_the_installation
 test_zip_layouts
 test_explicit_installer
 test_broken_downloads_fail_before_the_system_changes
@@ -836,6 +1075,7 @@ test_unattended_and_terminal
 test_root_is_refused
 test_free_space_is_checked
 test_uninstall
+test_uninstall_recognises_rules_by_content
 test_uninstall_removes_only_what_is_resolve
 test_bootstrap_and_repair_wiring
 test_video_apps_are_declared

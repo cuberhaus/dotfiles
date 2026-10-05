@@ -352,18 +352,45 @@ as the NVIDIA Container Toolkit; `--force` overrides it) or already has
 3. Unpacks the ZIP into a temporary folder and finds the `.run` inside it, before
    anything on the system changes, because a truncated 3 GB download is the likeliest
    failure. The folder is removed afterwards; the ZIP stays.
-4. Installs the libraries Resolve needs with `apt-get` (the list is the
-   `PREREQUISITE_PACKAGES` array in the script, with the `t64` names of Ubuntu 24.04
-   and later; only the missing ones are installed).
-5. Runs Blackmagic's installer as `sudo env SKIP_PACKAGE_CHECK=1 ./DaVinci_Resolve_<version>_Linux.run -i`.
-   It asks questions, so the step needs a terminal and refuses `--unattended` runs
-   instead of hanging.
-6. Moves the glib libraries that Resolve bundles (`libglib-2.0`, `libgobject-2.0`,
+4. Installs the libraries Resolve needs with `apt-get`. The list is the
+   `PREREQUISITE_PACKAGES` array in the script: every package that the `AppRun` of
+   Resolve 21.1.1 checks on Ubuntu (`check_ubuntu_package_deps`), under the `t64`
+   names of Ubuntu 24.04 and later, plus `unzip` and `libfuse2t64`. Only the missing
+   ones are installed. It is the whole vendor list rather than what `ldd` reports,
+   because Resolve's Qt xcb plugin and `libQt5XcbQpa.so.5` do not link
+   `libxcb-damage0`, which Blackmagic requires and the first version of the script
+   left out.
+5. Writes `/etc/udev/rules.d/75-davincipanel.rules` with only the Blackmagic USB rule
+   (`SUBSYSTEM=="usb", ATTRS{idVendor}=="1edb", MODE="0666"`), before Blackmagic's
+   installer runs. Resolve's `post_install.sh` writes three rules files to
+   `/usr/lib/udev/rules.d` (`75-davincipanel.rules`, `75-davincikb.rules`,
+   `75-sdx.rules`). The first ends in
+   `KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0777", GROUP="resolve"`, which is not
+   limited to Blackmagic hardware: it makes every raw HID device (touchpad, keyboard
+   interfaces, security keys) writable by every local process. udev lets a file in
+   `/etc/udev/rules.d` replace the file of the same name in `/usr/lib/udev/rules.d`, so
+   the override keeps the panel rule and drops the broad one. Because it exists before
+   the installer runs, no device is exposed in between, and a reinstall or upgrade
+   cannot bring the rule back. The other two rules name the vendor ID of Blackmagic's
+   keyboard and the Feitian dongle (`096e`) of Resolve Studio, and stay. An existing
+   file or link of that name (yours, or a link to `/dev/null`) is never overwritten, and
+   if the file cannot be written the installation stops instead of installing the rule
+   it was meant to prevent. `--keep-vendor-udev-rules` skips the step if you own a
+   Blackmagic panel and want the vendor's file exactly as shipped. To undo it, delete
+   the override file.
+6. Runs Blackmagic's installer as `sudo env SKIP_PACKAGE_CHECK=1 ./DaVinci_Resolve_<version>_Linux.run -i`.
+   It asks questions (the license, then "Do you wish to continue?"), so the step needs a
+   terminal and refuses `--unattended` runs instead of hanging.
+7. Moves the glib libraries that Resolve bundles (`libglib-2.0`, `libgobject-2.0`,
    `libgio-2.0`, `libgmodule-2.0`) into `/opt/resolve/libs/not_used`, so Resolve uses
    the newer system ones. Bundled copies that are older than the system's end in
    `symbol lookup error`. To undo it: `sudo mv /opt/resolve/libs/not_used/* /opt/resolve/libs/`.
-7. Runs `ldd` on the program and on its Qt platform plugin and lists every library
+8. Runs `ldd` on the program and on its Qt platform plugin and lists every library
    that is still not found, with the way to find its package (`apt-file search`).
+9. Lists every `/dev/hidraw*` device that any user can write to, which should be none.
+   If one is, it says how to find the udev rule that does it. A device that was
+   exposed before the rule was fixed keeps its mode until it is replugged or the
+   machine reboots, because udev sets permissions when a device appears.
 
 `make repair REPAIR=davinci-resolve` repeats it, and `DRY_RUN=true` shows the plan
 without `sudo` or unpacking anything. `make audit-installation` declares the
@@ -383,9 +410,23 @@ Things to know before the first start:
 
 The uninstall checklists of `ubuntu` and `work` offer `davinci_uninstall`, which
 removes `/opt/resolve` (only when `bin/resolve` is there, so a mistyped prefix
-deletes nothing), the launchers whose `Exec=` line starts a program inside it, and
-the two udev rules its installer writes. Your projects and settings
-(`~/.local/share/DaVinciResolve`) and the libraries apt installed stay.
+deletes nothing), the launchers whose `Exec=` line starts a program inside it
+(also `~/Desktop/com.blackmagicdesign.resolve.desktop`), Resolve's two menu files
+(`com.blackmagicdesign.resolve.directory` and `.menu`), and the udev rules files its
+installer writes (`75-davincipanel.rules`, `75-davincikb.rules`, `75-sdx.rules`) plus
+the override from step 5. A rules file goes only when it names Blackmagic's USB vendor
+ID (`1edb`, or `096e` for the dongle) or carries this script's mark in its first line,
+so a file of someone else with the same name stays. The `99-BlackmagicDevices.rules`
+and `99-ResolveKeyboardHID.rules` names, which are the ones inside Blackmagic's
+payload, are matched the same way for an older or manual installation. Your projects
+and settings (`~/.local/share/DaVinciResolve`) and the libraries apt installed stay.
+
+The installer also writes to shared places that the uninstall leaves alone, and says
+so: panel libraries in `/usr/lib64` (or `/usr/lib` when that folder does not exist),
+the data folder `/var/BlackmagicDesign/DaVinci Resolve` (mode 0777), icons and MIME
+types registered with `xdg-icon-resource` and `xdg-mime`, and, when the installer's
+Open FX Renderer option is on, the OFX renderer in `/usr/OFX/Plugins`. Delete those by
+hand if you want them gone.
 
 Run the hermetic tests with `bash tests/test_davinci_resolve_install.sh`.
 

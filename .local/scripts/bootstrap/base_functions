@@ -566,8 +566,10 @@ asusctl_lighting() {
 ## registration form (the script cannot fetch it). The script skips machines without an
 ## NVIDIA GPU and ones that already have Resolve, so profiles can call this unconditionally.
 ## With no ZIP in the download folders, or unattended (Blackmagic's installer asks
-## questions), it fails with instructions, which the profiles only warn about; see
-## .local/README.md.
+## questions), it fails with instructions, which the profiles only warn about. Before
+## Blackmagic's installer runs, the script limits its udev rule for control panels to
+## Blackmagic's USB devices (the vendor's file makes every /dev/hidraw* device writable
+## by every user); see .local/README.md.
 davinci_resolve_install() {
     local -a arguments=()
     if [ "${UNATTENDED:-false}" = true ]; then
@@ -577,8 +579,8 @@ davinci_resolve_install() {
         bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/davinci_resolve_install.sh" ${arguments[@]+"${arguments[@]}"}
 }
 
-## Remove DaVinci Resolve and the launchers and udev rules that point into it; projects
-## and settings in the home folder stay.
+## Remove DaVinci Resolve and the launchers, menu entries, and udev rules that belong to
+## it; projects and settings in the home folder stay.
 davinci_uninstall() {
     bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/davinci_resolve_install.sh" --uninstall || true
 }
