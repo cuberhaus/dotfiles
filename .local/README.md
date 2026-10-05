@@ -291,6 +291,104 @@ run the command that its warning prints.
 
 Run the hermetic test with `bash tests/test_kondo_install.sh`.
 
+## Video editing: OpenShot, Blender, and DaVinci Resolve
+
+Three editors for three jobs: OpenShot for quick cuts, Blender for 3D (and its
+video sequencer), and DaVinci Resolve for colour work and heavier editing.
+
+### OpenShot and Blender
+
+On `ubuntu` and `work` both are snaps, one line each in `snaps_install`
+(`bootstrap/ubuntu_functions`) and `gui_apps_install` (`bootstrap/work_functions`):
+`openshot-qt` (strictly confined) and `blender --classic`. `arch` and `manjaro`
+install `openshot` and `blender` with pacman, and `mac` installs the
+`openshot-video-editor` and `blender` casks. The WSL profile has no desktop to
+run them on and installs neither.
+
+The OpenShot snap is the choice over the alternatives, measured on Ubuntu 26.04:
+
+| Option | Why not |
+| --- | --- |
+| Stable PPA (`ppa:openshot.developers/ppa`) | Installs about 70 packages (OpenCV, GDAL, HDF5 and their dependencies; roughly 148 MiB to download and 412 MiB on disk), ships `python3-openshot` as a daily build, and an Ubuntu release upgrade disables third-party sources |
+| Ubuntu archive package | 3.4, two releases behind the snap (4.0) |
+| AppImage | Updates by hand, and reportedly no GPU acceleration |
+| Flatpak | Lags behind the snap, and this repository does not use Flatpak |
+
+The snap bundles an FFmpeg with the NVENC encoders (`h264_nvenc`, `hevc_nvenc`,
+`av1_nvenc`), and snapd mounts the host's NVIDIA libraries into the snap, so GPU
+export should work; confirm it once with a test export. The snap's publisher is
+not verified by Canonical (`snap info openshot-qt`). Blender's classic snap is the
+upstream build; the Ubuntu archive one is a distro build that may lack Cycles GPU
+support. If the snap cannot read an external drive, run
+`sudo snap connect openshot-qt:removable-media`.
+
+The `uninstall` checklists remove the snaps with the other snaps (`ubuntu`) or the
+GUI apps (`work`), and the pacman and cask lists with their profile.
+
+### DaVinci Resolve
+
+Blackmagic Design offers the download only behind a registration form, so nothing
+here can fetch it. You download the free Linux ZIP once
+(`DaVinci_Resolve_<version>_Linux.zip`, from the
+[support page](https://www.blackmagicdesign.com/support/family/davinci-resolve-and-fusion))
+into `~/Downloads` (or your XDG download folder, or your home folder), and
+`davinci_resolve_install` (in `bootstrap/base_functions`, running
+`.local/scripts/davinci_resolve_install.sh`) does the rest. Only the `ubuntu` and
+`work` entrypoints call it, after `gui_apps_install` on `work` and before
+`ai_tools_install` on `ubuntu`, non-fatally as `davinci_resolve_install ||`: a
+missing ZIP is the normal state of a new machine, so it only warns. The `arch`
+profile does not install it because the `davinci-resolve` AUR package needs the
+same ZIP placed by hand, and Homebrew has no cask.
+
+The script stops quietly when the machine has no NVIDIA GPU (the same sysfs check
+as the NVIDIA Container Toolkit; `--force` overrides it) or already has
+`/opt/resolve/bin/resolve`. Otherwise, in this order:
+
+1. Picks the newest `DaVinci_Resolve_<version>_Linux.zip` or `.run` in the search
+   folders (an unpacked `.run` beats its ZIP; versions compare by number, so
+   `21.10` is newer than `21.1.1`), or the file named by `--installer FILE`. The
+   Studio edition has a different file name, so pass it with `--installer`.
+2. Checks about 12 GiB of free space where Resolve and the unpacked ZIP go.
+3. Unpacks the ZIP into a temporary folder and finds the `.run` inside it, before
+   anything on the system changes, because a truncated 3 GB download is the likeliest
+   failure. The folder is removed afterwards; the ZIP stays.
+4. Installs the libraries Resolve needs with `apt-get` (the list is the
+   `PREREQUISITE_PACKAGES` array in the script, with the `t64` names of Ubuntu 24.04
+   and later; only the missing ones are installed).
+5. Runs Blackmagic's installer as `sudo env SKIP_PACKAGE_CHECK=1 ./DaVinci_Resolve_<version>_Linux.run -i`.
+   It asks questions, so the step needs a terminal and refuses `--unattended` runs
+   instead of hanging.
+6. Moves the glib libraries that Resolve bundles (`libglib-2.0`, `libgobject-2.0`,
+   `libgio-2.0`, `libgmodule-2.0`) into `/opt/resolve/libs/not_used`, so Resolve uses
+   the newer system ones. Bundled copies that are older than the system's end in
+   `symbol lookup error`. To undo it: `sudo mv /opt/resolve/libs/not_used/* /opt/resolve/libs/`.
+7. Runs `ldd` on the program and on its Qt platform plugin and lists every library
+   that is still not found, with the way to find its package (`apt-file search`).
+
+`make repair REPAIR=davinci-resolve` repeats it, and `DRY_RUN=true` shows the plan
+without `sudo` or unpacking anything. `make audit-installation` declares the
+prerequisite libraries for the profiles that call the step (`STANDALONE_INSTALLERS`
+in `audit_installation.py`); it does not check Resolve itself.
+
+Things to know before the first start:
+
+- The free edition on Linux does not decode H.264/H.265 video or AAC audio. Convert
+  such clips first, for example
+  `ffmpeg -i clip.mp4 -c:v dnxhd -profile:v dnxhr_hq -pix_fmt yuv422p -c:a pcm_s16le clip.mov`.
+- If the window does not open on Wayland, start it through XWayland:
+  `QT_QPA_PLATFORM=xcb /opt/resolve/bin/resolve`.
+- Blackmagic's installer is not under this repository's control. The tests run the
+  script against a fake installer, so the first real run on a new Resolve release
+  is the real test; the `ldd` report and the `not_used` folder show what happened.
+
+The uninstall checklists of `ubuntu` and `work` offer `davinci_uninstall`, which
+removes `/opt/resolve` (only when `bin/resolve` is there, so a mistyped prefix
+deletes nothing), the launchers whose `Exec=` line starts a program inside it, and
+the two udev rules its installer writes. Your projects and settings
+(`~/.local/share/DaVinciResolve`) and the libraries apt installed stay.
+
+Run the hermetic tests with `bash tests/test_davinci_resolve_install.sh`.
+
 ## Shutdown fix
 
 Run `sudo .local/scripts/permanent_shutdown_fix.sh` on a Linux machine that needs

@@ -503,7 +503,7 @@ uninstall() {
         as_root rm -f -- "${files[@]}"
     fi
     success "Removed DaVinci Resolve from $PREFIX (${#files[@]} launcher and rules file(s) outside it)."
-    info 'Kept: your projects and settings (~/.local/share/DaVinciResolve, ~/.config/Blackmagic Design), and the libraries apt installed for it.'
+    info 'Kept: your projects and settings (~/.local/share/DaVinciResolve), and the libraries apt installed for it.'
 }
 
 main() {

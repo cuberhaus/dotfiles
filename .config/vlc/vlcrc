@@ -2469,7 +2469,7 @@
 #avcodec-codec=
 
 # Hardware decoding (string)
-#avcodec-hw=any
+avcodec-hw=none
 
 # Threads (integer)
 #avcodec-threads=0

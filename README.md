@@ -216,6 +216,15 @@ after the first install, and stop Solaar first if you used it, because only one
 program can own a receiver. `OPENLOGI_VERSION=0.8.11` pins a release. See
 [OpenLogi](.local/README.md#openlogi).
 
+The `ubuntu` and `work` bootstraps install the video editors OpenShot (the official
+snap, which is newer than Ubuntu's package and avoids the PPA's dependency stack) and
+Blender (its classic snap), and also try the free DaVinci Resolve on a machine with an
+NVIDIA GPU. Blackmagic offers the Resolve download only behind a registration form, so
+download `DaVinci_Resolve_<version>_Linux.zip` into `~/Downloads` once and run
+`make repair REPAIR=davinci-resolve` (`DRY_RUN=true` previews it); until then the
+bootstrap only warns. See
+[Video editing](.local/README.md#video-editing-openshot-blender-and-davinci-resolve).
+
 Configuration import is preview-first. `make config-import` shows the Stow
 `--adopt` operations; `make config-import APPLY=1` performs them and then shows
 the changed source files. Review `git diff` before committing. Use

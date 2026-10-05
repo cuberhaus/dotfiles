@@ -45,7 +45,6 @@ grep -Fq 'python3-dev' "$WORK_UNINSTALL_FUNCTIONS" ||
     fail 'work bootstrap uninstall must remove the Python headers it installed'
 grep -Fq 'python3-pynvim' "$WORK_UNINSTALL_FUNCTIONS" ||
     fail 'work bootstrap uninstall must remove the Neovim Python provider it installed'
-
 export HOME="$CASE_DIR/home"
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_STATE_HOME="$HOME/.local/state"
@@ -290,6 +289,7 @@ docker_install() { record 'docker'; }
 nvidia_container_toolkit_install() { record 'nvidia-container-toolkit'; }
 gcloud_install() { record 'gcloud'; }
 gui_apps_install() { record 'gui-apps'; }
+davinci_resolve_install() { record 'davinci-resolve'; }
 obsidian_vault_install() { record 'obsidian-vault'; }
 resolve_high_dpi_choice() {
     record "high-dpi-choice:$HIGH_DPI_CHOICE"
@@ -306,7 +306,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\ndavinci-resolve\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"
@@ -394,5 +394,22 @@ grep -Fqx 'gcloud' "$EVENT_LOG" ||
 grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
     fail 'a failing NVIDIA Container Toolkit step must not abort the rest of the work bootstrap'
 nvidia_container_toolkit_install() { record 'nvidia-container-toolkit'; }
+
+# DaVinci Resolve needs a ZIP that only the user can download (Blackmagic asks for a
+# registration), so on a fresh machine this step normally fails: provisioning must warn with
+# the repair command and carry on.
+davinci_resolve_install() { record 'davinci-resolve-failed'; return 1; }
+warn() { record "resolve-warning:$*"; }
+: > "$EVENT_LOG"
+work_main --unattended --no-stow --high-dpi=no </dev/null
+grep -Fqx 'davinci-resolve-failed' "$EVENT_LOG" ||
+    fail 'the failing DaVinci Resolve step did not run'
+grep -Fqx 'resolve-warning:DaVinci Resolve setup failed; rerun it with: make repair REPAIR=davinci-resolve' "$EVENT_LOG" ||
+    fail 'a failing DaVinci Resolve step must be reported with the command that repairs it'
+grep -Fqx 'obsidian-vault' "$EVENT_LOG" ||
+    fail 'a failing DaVinci Resolve step must not stop the stages that follow it'
+grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
+    fail 'a failing DaVinci Resolve step must not abort the rest of the work bootstrap'
+davinci_resolve_install() { record 'davinci-resolve'; }
 
 printf 'Work bootstrap orchestration tests passed.\n'

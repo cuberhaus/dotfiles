@@ -198,6 +198,12 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertIn(audit.Package("apt", "antigravity"), ubuntu)
         self.assertIn(audit.Package("snap", "obsidian"), ubuntu)
         self.assertNotIn(audit.Package("snap", "android-studio"), ubuntu)
+        # The video editors: the official OpenShot snap (not the PPA or the archive build) and
+        # Blender's classic snap on Ubuntu, the distro packages on Arch, casks on macOS.
+        self.assertIn(audit.Package("snap", "openshot-qt"), ubuntu)
+        self.assertIn(audit.Package("snap", "blender"), ubuntu)
+        self.assertIn(audit.Package("brew-cask", "blender"), mac)
+        self.assertIn(audit.Package("brew-cask", "openshot-video-editor"), mac)
         self.assertIn(audit.Package("brew", "age"), mac)
         self.assertIn(audit.Package("brew", "opencode"), mac)
         self.assertIn(audit.Package("brew", "pi-coding-agent"), mac)
@@ -213,6 +219,32 @@ class InstallationAuditContractTests(unittest.TestCase):
         for package in ("code", "cursor", "antigravity"):
             self.assertIn(audit.Package("apt", package), work)
         self.assertIn(audit.Package("apt", "cursor"), ubuntu)
+        self.assertIn(audit.Package("snap", "openshot-qt"), work)
+        self.assertIn(audit.Package("snap", "blender"), work)
+
+    def test_blender_snap_is_classic_so_the_fix_command_says_so(self):
+        audit = load_audit_module()
+
+        for profile in ("ubuntu", "work"):
+            declared = audit.expected_packages(REPO_ROOT, profile)
+            blender = next(package for package in declared if package == audit.Package("snap", "blender"))
+            openshot = next(package for package in declared if package == audit.Package("snap", "openshot-qt"))
+            self.assertTrue(blender.classic, f"{profile}: Blender's official snap needs --classic")
+            self.assertFalse(openshot.classic, f"{profile}: the OpenShot snap is strictly confined")
+
+    def test_davinci_resolve_prerequisites_follow_the_profiles_that_call_the_step(self):
+        audit = load_audit_module()
+        prerequisites = ("unzip", "libfuse2t64", "libapr1t64", "libaprutil1t64", "libglu1-mesa")
+
+        for profile in ("ubuntu", "work"):
+            declared = audit.bootstrap_installed_packages(REPO_ROOT, profile)
+            for name in prerequisites:
+                self.assertIn(audit.Package("apt", name), declared, f"{profile} must declare {name} for DaVinci Resolve")
+        # WSL has no desktop to run a video editor on, and Arch, Manjaro, and macOS do not call the step.
+        for profile in ("ubuntu-windows", "arch", "manjaro", "mac"):
+            declared = audit.bootstrap_installed_packages(REPO_ROOT, profile)
+            for name in prerequisites:
+                self.assertNotIn(audit.Package("apt", name), declared, f"{profile} must not declare {name}")
 
     def test_ubuntu_based_profiles_install_verified_sops_binary(self):
         base_functions = (
@@ -239,6 +271,10 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertIn(audit.Package("pacman", "age"), arch)
         self.assertIn(audit.Package("pacman", "opencode"), arch)
         self.assertIn(audit.Package("pacman", "sops"), arch)
+        self.assertIn(audit.Package("pacman", "blender"), arch)
+        self.assertIn(audit.Package("pacman", "openshot"), arch)
+        self.assertIn(audit.Package("pacman", "blender"), manjaro)
+        self.assertIn(audit.Package("pacman", "openshot"), manjaro)
         self.assertIn(audit.Package("pacman", "stow"), arch)
         self.assertIn(audit.Package("yay", "warp-terminal-bin"), arch)
         self.assertIn(audit.Package("yay", "pi-coding-agent-bin"), arch)
