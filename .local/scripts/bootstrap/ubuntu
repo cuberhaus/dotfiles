@@ -55,6 +55,11 @@ asusctl_install ||
 # Skipped unless asusctl is installed and the keyboard supports the effect.
 asusctl_lighting ||
     warn "Keyboard lighting failed; rerun it with: make repair REPAIR=asusctl-lighting"
+# The free DaVinci Resolve needs a ZIP that only you can download (Blackmagic asks for a
+# registration), and its installer asks questions. The step skips machines without an NVIDIA
+# GPU, and a missing ZIP must not abort provisioning.
+davinci_resolve_install ||
+    warn "DaVinci Resolve setup failed; rerun it with: make repair REPAIR=davinci-resolve"
 ai_tools_install
 vim_install
 if [ "$(basename "$SHELL")" != "zsh" ]; then

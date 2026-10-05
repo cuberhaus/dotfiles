@@ -21,6 +21,7 @@ run_selected_uninstalls "Ubuntu Uninstaller" \
     vim_uninstall       "Vim / Neovim extras"                              OFF \
     brew_uninstall      "Homebrew"                                         OFF \
     asusctl_uninstall   "asusctl & asusd (ASUS laptops; keeps /etc/asusd)" OFF \
+    davinci_uninstall   "DaVinci Resolve (keeps projects and settings)"    OFF \
     cleanup             "Run apt autoremove cleanup"                       OFF
 
 if [ "$(basename "$SHELL")" == "zsh" ]; then

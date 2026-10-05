@@ -6,7 +6,7 @@ step="${1:-}"
 profile="${2:-auto}"
 
 usage() {
-    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting|nvidia-container-toolkit [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos, asusctl, asusctl-lighting, and nvidia-container-toolkit only)]\n' >&2
+    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting|nvidia-container-toolkit|davinci-resolve [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos, asusctl, asusctl-lighting, nvidia-container-toolkit, and davinci-resolve only)]\n' >&2
 }
 
 detect_profile() {
@@ -149,6 +149,17 @@ repair_nvidia_container_toolkit() {
     nvidia_container_toolkit_install
 }
 
+# Install the free DaVinci Resolve from the ZIP you downloaded from Blackmagic Design (it
+# asks for a registration, so nothing here can fetch it). The script skips machines without
+# an NVIDIA GPU, so PROFILE does not matter. DRY_RUN=true shows every step without sudo.
+repair_davinci_resolve() {
+    local -a arguments=()
+    case "${DRY_RUN:-false}" in
+        true|1) arguments+=(--dry-run) ;;
+    esac
+    bash "$repo_root/.local/scripts/davinci_resolve_install.sh" ${arguments[@]+"${arguments[@]}"}
+}
+
 case "$step" in
     config|aliases|environment)
         restow_config
@@ -167,6 +178,9 @@ case "$step" in
         ;;
     nvidia-container-toolkit)
         repair_nvidia_container_toolkit
+        ;;
+    davinci-resolve)
+        repair_davinci_resolve
         ;;
     automations)
         bash "$repo_root/.local/scripts/automation/install"

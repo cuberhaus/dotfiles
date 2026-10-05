@@ -98,6 +98,11 @@ work_main() {
         warn "NVIDIA Container Toolkit setup failed; rerun it with: make repair REPAIR=nvidia-container-toolkit"
     gcloud_install
     gui_apps_install
+    # The free DaVinci Resolve needs a ZIP that only you can download (Blackmagic asks for a
+    # registration), and its installer asks questions, so a missing ZIP or an unattended
+    # run must not abort provisioning.
+    davinci_resolve_install ||
+        warn "DaVinci Resolve setup failed; rerun it with: make repair REPAIR=davinci-resolve"
     obsidian_vault_install
 
     local current_scale

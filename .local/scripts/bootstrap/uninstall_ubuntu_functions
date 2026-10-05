@@ -89,9 +89,11 @@ kondo_uninstall() {
 snaps_uninstall() {
     info "Uninstalling snaps..."
 
+    sudo snap remove blender 2>/dev/null || true
     sudo snap remove code 2>/dev/null || true
     sudo snap remove discord 2>/dev/null || true
     sudo snap remove intellij-idea-professional 2>/dev/null || true
+    sudo snap remove openshot-qt 2>/dev/null || true
     sudo snap remove pycharm-professional 2>/dev/null || true
     sudo snap remove skype 2>/dev/null || true
     sudo snap remove slack 2>/dev/null || true

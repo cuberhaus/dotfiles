@@ -88,6 +88,7 @@ base_install () {
         # GUI apps
         biber                   # LaTeX bibliography
         bleachbit               # Junk and cache cleaner (open source)
+        blender                 # 3D creation suite
         calibre                 # Book manager
         cron                    # Backups (sudo timeshift-gtk)
         dconf-editor            # Edit gnome configuration
@@ -126,6 +127,7 @@ base_install () {
         nomacs                  # Image viewer
         ntfs-3g                 # NTFS read/write
         okular                  # Best PDF viewer
+        openshot                # Easy video editor
         partitionmanager        # KDE partition manager
         perl-file-mimeinfo      # mimeopen
         playerctl               # Audio

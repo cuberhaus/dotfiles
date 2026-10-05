@@ -499,6 +499,12 @@ gui_apps_install() {
     # Spotify and Discord (snap)
     snap list spotify &>/dev/null 2>&1 || sudo snap install spotify
     snap list discord &>/dev/null 2>&1 || sudo snap install discord
+
+    # Video: the official OpenShot snap is newer than the Ubuntu archive and has no PPA
+    # dependency stack; Blender's official classic snap is the upstream build (the archive
+    # one is a distro build).
+    snap list openshot-qt &>/dev/null 2>&1 || sudo snap install openshot-qt
+    snap list blender &>/dev/null 2>&1 || sudo snap install blender --classic
 }
 
 ###############################################################

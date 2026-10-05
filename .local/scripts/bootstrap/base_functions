@@ -562,6 +562,27 @@ asusctl_lighting() {
     bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/asusctl_lighting.sh"
 }
 
+## Install the free DaVinci Resolve from the ZIP that Blackmagic Design offers behind a
+## registration form (the script cannot fetch it). The script skips machines without an
+## NVIDIA GPU and ones that already have Resolve, so profiles can call this unconditionally.
+## With no ZIP in the download folders, or unattended (Blackmagic's installer asks
+## questions), it fails with instructions, which the profiles only warn about; see
+## .local/README.md.
+davinci_resolve_install() {
+    local -a arguments=()
+    if [ "${UNATTENDED:-false}" = true ]; then
+        arguments+=(--unattended)
+    fi
+    DAVINCI_RESOLVE_SUDO="${SUDO_COMMAND:-sudo}" \
+        bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/davinci_resolve_install.sh" ${arguments[@]+"${arguments[@]}"}
+}
+
+## Remove DaVinci Resolve and the launchers and udev rules that point into it; projects
+## and settings in the home folder stay.
+davinci_uninstall() {
+    bash "${DOTFILES_ROOT:-$HOME}/.local/scripts/davinci_resolve_install.sh" --uninstall || true
+}
+
 ###############################################################
 # => IDE installs (vendor apt repositories and Cursor)
 ###############################################################

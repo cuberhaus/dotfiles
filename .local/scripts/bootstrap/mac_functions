@@ -99,6 +99,8 @@ mac_install () {
         notion                  # Project management, notes
         notion-calendar         # Google Calendar UI
         obsidian                # Journal, book notes
+        blender                 # 3D creation suite
+        openshot-video-editor   # Easy video editor
         todoist                 # Task manager
     )
     brew install --cask "${cask_apps[@]}"

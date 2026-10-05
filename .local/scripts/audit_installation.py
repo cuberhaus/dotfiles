@@ -815,6 +815,7 @@ DEB_FILE_PACKAGES = {
 STANDALONE_INSTALLERS = (
     ("asusctl_install", "asusctl_install.sh", "BUILD_PACKAGES"),
     ("nvidia_container_toolkit_install", "bootstrap/base_functions", "NVIDIA_CONTAINER_TOOLKIT_PACKAGES"),
+    ("davinci_resolve_install", "davinci_resolve_install.sh", "PREREQUISITE_PACKAGES"),
 )
 # One package per line. Any other line (a warning that run merged in) is skipped.
 PACKAGE_LINE = re.compile(r"[A-Za-z0-9][A-Za-z0-9+_.@/-]*(?::[A-Za-z0-9-]+)?")

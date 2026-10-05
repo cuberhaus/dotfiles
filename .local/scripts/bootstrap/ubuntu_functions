@@ -375,6 +375,11 @@ snaps_install() {
     snap list discord &>/dev/null                 || sudo snap install discord
     # snap list intellij-idea-professional &>/dev/null || sudo snap install intellij-idea-professional --classic # Not in use right now
     snap list obsidian &>/dev/null                || sudo snap install obsidian --classic
+    # Video: the official OpenShot snap is newer than the Ubuntu archive and has no PPA
+    # dependency stack; Blender's official classic snap is the upstream build (the archive
+    # one is a distro build).
+    snap list openshot-qt &>/dev/null             || sudo snap install openshot-qt
+    snap list blender &>/dev/null                 || sudo snap install blender --classic
     #snap list intellij-idea-community &>/dev/null || sudo snap install intellij-idea-community --classic
     # snap list pycharm-community &>/dev/null     || sudo snap install pycharm-community --classic # Does not accept jupyter notebook
     # snap list pycharm-professional &>/dev/null  || sudo snap install pycharm-professional --classic # Not in use right now

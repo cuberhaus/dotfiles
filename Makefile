@@ -100,6 +100,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_nvidia_container_toolkit.sh
 	bash tests/test_openlogi_install.sh
 	bash tests/test_kondo_install.sh
+	bash tests/test_davinci_resolve_install.sh
 	bash tests/test_ycm.sh
 	bash tests/test_bootstrap_gentoo.sh
 	bash tests/test_shell_path.sh
@@ -138,7 +139,7 @@ doctor: ## Check tools, symlinks, configuration, packages, environment, and auto
 audit-installation: ## Report drift between this repo and the installed machine (PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work)
 	$(PYTHON) .local/scripts/audit_installation.py --profile "$(PROFILE)"
 
-repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting|nvidia-container-toolkit; PROFILE=auto|...; DRY_RUN=true previews ide-repos, asusctl, asusctl-lighting, and nvidia-container-toolkit)
+repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting|nvidia-container-toolkit|davinci-resolve; PROFILE=auto|...; DRY_RUN=true previews ide-repos, asusctl, asusctl-lighting, nvidia-container-toolkit, and davinci-resolve)
 	bash .local/scripts/repair-installation "$(REPAIR)" "$(PROFILE)"
 
 ##@ Setup

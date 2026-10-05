@@ -95,6 +95,8 @@ gui_apps_uninstall() {
     sudo snap remove discord || true
     sudo snap remove sublime-text || true
     sudo snap remove sublime-merge || true
+    sudo snap remove openshot-qt || true
+    sudo snap remove blender || true
     
     # Remove the IDE apt sources and signing keys (VS Code, Cursor, Antigravity),
     # including the legacy one-line files and keyring paths older bootstraps wrote
