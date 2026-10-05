@@ -134,7 +134,7 @@ assert_eq "$rel_output" ""
 # 4. With none of them nothing runs and nothing is said.
 lefthook_repo nothing
 configure_relative nothing "$tmpdir/path-base"
-assert_eq "$(ls -A "$tmpdir/rel/nothing" | grep -c -- '-ran$' || true)" "0"
+assert_eq "$(find "$tmpdir/rel/nothing" -maxdepth 1 -name '*-ran' | wc -l | tr -d ' ')" "0"
 assert_eq "$rel_output" ""
 
 printf 'OK: git-repo-defaults\n'

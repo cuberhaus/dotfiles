@@ -180,6 +180,11 @@ changes_listed() {
     sed -n '/^Repositories with changes/,$p' <<< "$1" | sed '1d;/^$/,$d' | LC_ALL=C sort
 }
 
+# failed_listed OUTPUT: the lines under the "Failed repositories" heading, sorted.
+failed_listed() {
+    sed -n '/^Failed repositories/,$p' <<< "$1" | sed '1d;/^$/,$d' | LC_ALL=C sort
+}
+
 # strip_ansi: remove the escape codes tput writes (colour, dim, reset).
 strip_ansi() {
     sed -e $'s/\033(B//g' -e $'s/\033\\[[0-9;]*m//g'
@@ -349,6 +354,10 @@ fi
 if ! grep -q "./broken/ (exit 128)" <<< "$out_broken"; then
     fail 'Expected ./broken/ in the failed repositories' "$out_broken"
 fi
+# Only the repository that failed is listed as failed, not the ones that worked.
+if [[ "$(failed_listed "$out_broken")" != "  ./broken/ (exit 128)" ]]; then
+    fail 'Expected only ./broken/ under the failed repositories' "$out_broken"
+fi
 
 # Test 15: if the summary cannot be read for a repository, that repository fails
 # instead of being silently left out (and so reported as clean)
@@ -503,6 +512,12 @@ expect_rejected 'retries that are not a number' 'Error: -r requires a non-negati
 expect_rejected 'a fractional timeout' 'Error: -t requires a non-negative integer (0 for disabled).' -t 1.5 git status
 expect_rejected 'depth zero' 'Error: -d requires a positive integer.' -d 0 git status
 expect_rejected 'depth that is not a number' 'Error: -d requires a positive integer.' -d deep git status
+# An option given with an empty value is a mistake, not a request for the default (an empty
+# variable in `-j "$JOBS"` would otherwise run unlimited jobs without a word).
+expect_rejected 'empty jobs' 'Error: -j requires a non-negative integer' -j '' git status
+expect_rejected 'empty retries' 'Error: -r requires a non-negative integer.' -r '' git status
+expect_rejected 'an empty timeout' 'Error: -t requires a non-negative integer (0 for disabled).' -t '' git status
+expect_rejected 'an empty depth' 'Error: -d requires a positive integer.' -d '' git status
 expect_rejected 'an unknown option' 'Usage: git-recurse' -Z git status
 expect_rejected 'an option without its value' 'Usage: git-recurse' -j
 for assignment in GIT_RECURSE_JOBS=lots GIT_RECURSE_RETRIES=-1 GIT_RECURSE_TIMEOUT=soon; do
@@ -704,6 +719,17 @@ EOF
     cap_out=$(STALL=fetch REAL_GIT="$real_git" GIT_RECURSE_TIMEOUT=1 PATH="$tmpdir/stall-bin:$PATH" "$GIT_RECURSE" -r 0 git fetch 2>&1) || cap_rc=$?
     assert_has 'Test 21: GIT_RECURSE_TIMEOUT sets the limit' "$cap_out" 'Operation timed out after 1s'
 
+    # A command that was killed for stalling is retried like a network failure.
+    started=$SECONDS
+    cap_rc=0
+    cap_out=$(STALL=fetch REAL_GIT="$real_git" PATH="$tmpdir/stall-bin:$PATH" "$GIT_RECURSE" -t 1 -r 1 git fetch 2>&1) || cap_rc=$?
+    assert_same 'Test 21: a command that stalls again still fails' "$cap_rc" 1
+    assert_has 'Test 21: a stalled command is retried' "$cap_out" '[failed after 1 retries]'
+    assert_has 'Test 21: the retry is stopped at the limit too' "$cap_out" 'Operation timed out after 1s (stalled connection killed)'
+    if (( SECONDS - started > 15 )); then
+        fail "Test 21: a stalled command and its retry were not stopped at the limit ($((SECONDS - started))s)"
+    fi
+
     started=$SECONDS
     cap_rc=0
     cap_out=$(STALL=probe REAL_GIT="$real_git" PATH="$tmpdir/stall-bin:$PATH" "$GIT_RECURSE" -t 1 git status 2>&1) || cap_rc=$?
@@ -744,6 +770,143 @@ assert_same 'Test 22: a repository that fails fails the command' "$cap_rc" 1
 assert_has 'Test 22: nothing updated is said when something failed' "$cap_out" 'No repositories updated.'
 assert_lacks 'Test 22: nothing updated is not "up to date" when something failed' "$cap_out" 'All repositories up to date.'
 
+# Test 23: a pull that prints nothing (--quiet) still reports what it updated, because the
+# command compares HEAD before and after instead of reading the text
+quiet_ws="$tmpdir/quiet-ws"
+mkdir -p "$quiet_ws"
+new_repo "$quiet_ws" moved
+new_repo "$quiet_ws" same
+new_repo "$quiet_ws" empty
+push_remote_commit "$quiet_ws" moved
+# An empty commit has no diffstat, so the report falls back to naming the two commits.
+pusher=$(mktemp -d)
+git clone "$tmpdir/remotes/quiet-ws-empty" "$pusher" >/dev/null 2>&1
+git -C "$pusher" -c user.email=test@example.com -c user.name=test -c commit.gpgsign=false \
+    commit -q --allow-empty -m 'nothing changes'
+git -C "$pusher" push -q origin main
+rm -rf "$pusher"
+git -C "$quiet_ws/empty" fetch -q
+empty_before=$(git -C "$quiet_ws/empty" rev-parse HEAD)
+empty_after=$(git -C "$quiet_ws/empty" rev-parse origin/main)
+cd "$quiet_ws"
+run_git_recurse git pull --quiet
+assert_same 'Test 23: a quiet pull succeeds' "$cap_rc" 0
+assert_has 'Test 23: a quiet pull reports the repositories it updated' "$cap_out" 'Updated repositories (2):'
+assert_has 'Test 23: the report is the diffstat of what changed' "$cap_out" '  ./moved/: 1 file changed, 1 insertion(+)'
+assert_has 'Test 23: without a diffstat the report names the two commits' "$cap_out" \
+    "  ./empty/: updated (${empty_before:0:7}..${empty_after:0:7})"
+assert_lacks 'Test 23: a repository that did not move is not reported' "$cap_out" './same/:'
+run_git_recurse git pull --quiet
+assert_has 'Test 23: nothing moved the second time' "$cap_out" 'All repositories up to date.'
+
+# Test 24: when HEAD did not move, the text the pull printed decides what the summary says. A
+# stub answers `git pull` with a given text and leaves the repository alone.
+text_ws="$tmpdir/text-ws"
+mkdir -p "$text_ws" "$tmpdir/pulltext-bin"
+new_repo "$text_ws" only
+cat > "$tmpdir/pulltext-bin/git" <<'EOF'
+#!/usr/bin/env bash
+# `git pull` prints PULL_TEXT and changes nothing; everything else is the real git.
+if [[ "$1" == pull ]]; then
+    printf '%b' "$PULL_TEXT"
+    exit 0
+fi
+exec "$REAL_GIT" "$@"
+EOF
+chmod +x "$tmpdir/pulltext-bin/git"
+
+# pull_text TEXT: git-recurse git pull against the stub; sets cap_out and cap_rc.
+pull_text() {
+    cap_rc=0
+    cap_out=$(cd "$text_ws" && REAL_GIT="$real_git" PULL_TEXT="$1" PATH="$tmpdir/pulltext-bin:$PATH" \
+        "$GIT_RECURSE" git pull 2>&1) || cap_rc=$?
+}
+
+pull_text 'Updating 1a2b3c4..5d6e7f8\nFast-forward\n file.txt | 1 +\n'
+assert_has 'Test 24: the Updating line is the report' "$cap_out" '  ./only/: Updating 1a2b3c4..5d6e7f8'
+pull_text 'Fast-forward\n file.txt | 1 +\n'
+assert_has 'Test 24: Fast-forward is the report' "$cap_out" '  ./only/: Fast-forward'
+pull_text 'Successfully rebased and updated refs/heads/main.\n'
+assert_has 'Test 24: a rebase is the report' "$cap_out" '  ./only/: Successfully rebased and updated refs/heads/main.'
+pull_text "Merge made by the 'ort' strategy.\n file.txt | 1 +\n"
+assert_has 'Test 24: a merge is the report' "$cap_out" "  ./only/: Merge made by the 'ort' strategy."
+pull_text ' 3 files changed, 5 insertions(+), 2 deletions(-)\n'
+assert_has 'Test 24: a diffstat is trimmed and kept whole' "$cap_out" '  ./only/: 3 files changed, 5 insertions(+), 2 deletions(-)'
+pull_text ' 1 file changed, 1 insertion(+)\n'
+assert_has 'Test 24: a diffstat of a single file is the report too' "$cap_out" '  ./only/: 1 file changed, 1 insertion(+)'
+pull_text 'Updating 1a2b3c4..5d6e7f8\nFast-forward\n 2 files changed, 3 insertions(+)\n'
+assert_has 'Test 24: the diffstat wins over the other lines' "$cap_out" '  ./only/: 2 files changed, 3 insertions(+)'
+pull_text ' 1 file changed, 1 insertion(+)\n 2 files changed, 3 insertions(+)\n'
+assert_has 'Test 24: the last diffstat line is the report' "$cap_out" '  ./only/: 2 files changed, 3 insertions(+)'
+for text in 'Already up to date.\n' 'Already up-to-date.\n' 'ALREADY UP TO DATE\n' 'Current branch main is up to date.\n' ''; do
+    pull_text "$text"
+    assert_same "Test 24: '$text' is not an update" "$cap_rc" 0
+    assert_has "Test 24: '$text' leaves everything up to date" "$cap_out" 'All repositories up to date.'
+done
+
+# Test 25: every kind of message that counts as a network failure is retried (the others are not,
+# see Test 20). Each message matches exactly one of the patterns of is_transient_error, so
+# dropping any pattern fails its repository. One repository per message, all in one run, because
+# every retry waits a second.
+transient_messages=(
+    'error: GnuTLS recv error (-9): A TLS packet with unexpected length was received.'
+    'fatal: handshake failed'
+    'fatal: Connection to the peer terminated abnormally'
+    'fatal: Connection was reset'
+    'fatal: Connection was refused'
+    'fatal: Could not resolve hostname github.com'
+    'fatal: Read timed out after 30 seconds'
+    "fatal: unable to access 'https://example.invalid/r.git/': The requested URL returned error: 403"
+    "fatal: Unable to create '/tmp/r/.git/refs/heads/main.lock': File exists."
+    'fatal: the remote end hung up unexpectedly'
+    'error: RPC failed; curl 92 HTTP/2 stream 0 was not closed cleanly'
+    'error: 502 Bad Gateway'
+    'error: 503 Service Unavailable'
+    'error: 504 Gateway Time-out'
+    'error: 429 Too Many Requests'
+)
+transient_ws="$tmpdir/transient-ws"
+mkdir -p "$transient_ws" "$tmpdir/transient-bin" "$tmpdir/transient-state"
+cat > "$tmpdir/transient-bin/git" <<'EOF'
+#!/usr/bin/env bash
+# The first `git fetch` of a repository fails with the message stored under the repository's
+# name, the next one works; everything else is the real git.
+if [[ "$1" == fetch ]]; then
+    name=$(basename "$PWD")
+    if [[ ! -e "$TRANSIENT_STATE/$name.tried" ]]; then
+        : > "$TRANSIENT_STATE/$name.tried"
+        cat "$TRANSIENT_STATE/$name.message" >&2
+        exit 128
+    fi
+    exit 0
+fi
+exec "$REAL_GIT" "$@"
+EOF
+chmod +x "$tmpdir/transient-bin/git"
+for i in "${!transient_messages[@]}"; do
+    mkdir -p "$transient_ws/m$i/.git"
+    printf '%s\n' "${transient_messages[i]}" > "$tmpdir/transient-state/m$i.message"
+done
+cd "$transient_ws"
+cap_rc=0
+cap_out=$(REAL_GIT="$real_git" TRANSIENT_STATE="$tmpdir/transient-state" PATH="$tmpdir/transient-bin:$PATH" \
+    "$GIT_RECURSE" -r 1 git fetch 2>&1) || cap_rc=$?
+assert_same 'Test 25: every network failure is retried and passes' "$cap_rc" 0
+assert_has 'Test 25: every repository passed' "$cap_out" "Done: ${#transient_messages[@]} ok, 0 failed (of ${#transient_messages[@]})"
+assert_same 'Test 25: every repository says it was retried' "$(grep -cF '[retry 1/1 succeeded]' <<< "$cap_out")" "${#transient_messages[@]}"
+
+# Test 26: nothing is left in the temporary folder, whether the run worked, failed or was sequential
+own_tmp="$tmpdir/own-tmp"
+mkdir -p "$own_tmp"
+for where in "$status_ws" "$fail_ws" "$clean_ws" "$text_ws"; do
+    cd "$where"
+    for flags in "-p" "-s" "-d 1" "-S"; do
+        # shellcheck disable=SC2086 # the flags are separate words on purpose
+        TMPDIR="$own_tmp" "$GIT_RECURSE" $flags git status >/dev/null 2>&1 || true
+        assert_same "Test 26: a run in $(basename "$where") with ${flags} leaves nothing behind" "$(ls -A "$own_tmp")" ''
+    done
+done
+
 if [[ -n "${GIT_RECURSE_UNDER_TEST:-}" ]]; then
     printf 'OK: git-recurse tests through the command passed (%s)\n' "$GIT_RECURSE_UNDER_TEST"
     exit 0
@@ -769,7 +932,7 @@ expect_describe() {
     fi
 }
 
-# Test 16: what the parser says for each state of a repository
+# Test 27: what the parser says for each state of a repository
 expect_describe 'in sync'              '## main...origin/main\n'                    '1|'
 expect_describe 'no upstream'          '## main\n'                                  '1|'
 expect_describe 'no commit yet'        '## No commits yet on main\n'                '1|'
@@ -789,14 +952,14 @@ expect_describe 'every conflict code'  '## main\nDD a\nAU b\nUD c\nUA d\nDU e\nA
 expect_describe 'order of the parts'   '## main...o/main [ahead 1, behind 2]\nUU a\nM  b\n M c\n?? d\n' \
     '0|1 conflicted, 1 staged, 1 modified, 1 untracked, ahead 1, behind 2'
 
-# Test 17: a probe file that cannot be read is a failure (2), not a clean repository
+# Test 28: a probe file that cannot be read is a failure (2), not a clean repository
 rc=0
 describe_status "$tmpdir/does-not-exist" >/dev/null || rc=$?
 if [[ $rc -ne 2 ]]; then
     fail "describe_status on a missing file should return 2, got $rc"
 fi
 
-# Test 18: summarize_repo_status keeps "clean" (parser answer 1) apart from every
+# Test 29: summarize_repo_status keeps "clean" (parser answer 1) apart from every
 # real failure, with the probe replaced by a stub
 unit_out="$tmpdir/unit.out"
 
@@ -825,7 +988,7 @@ if [[ $rc -ne 2 ]]; then
     fail "A probe that left nothing to read should fail, not look clean (got $rc)"
 fi
 
-# Test 19: the real probe, with and without a timeout command (macOS has none by
+# Test 30: the real probe, with and without a timeout command (macOS has none by
 # default, and -t 0 turns the timeout off)
 eval "$(sed -n '/^function capture_status_probe() {$/,/^}$/p' "$GIT_RECURSE")"
 if ! declare -F capture_status_probe >/dev/null; then
@@ -845,7 +1008,7 @@ for variant in "none 12" "none 0" "${timeout_bin:-none} 12" "${timeout_bin:-none
     fi
 done
 
-# Test 20: a probe that hangs is stopped by the timeout instead of hanging the job
+# Test 31: a probe that hangs is stopped by the timeout instead of hanging the job
 if [[ -n "$timeout_bin" ]]; then
     TIMEOUT_BIN="$timeout_bin"
     mkdir -p "$tmpdir/hang-bin"

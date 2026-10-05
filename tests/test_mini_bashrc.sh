@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Tests for the commands that .local/Mini/.bashrc defines on its own: clone-all and clone-team.
+# Tests for the commands that .local/Mini/.bashrc defines on its own: clone-all, clone-team,
+# git-recurse and git-ahead (and the gr, gah and status shortcuts that call the last two).
 #
-# Mini is one portable file, so it carries its own copies of the clone-all and clone-team scripts
-# and of the helpers they share (.local/scripts/lib/git-repo-defaults.sh). These tests run the
+# Mini is one portable file, so it carries its own copies of these scripts and of the helpers
+# clone-all and clone-team share (.local/scripts/lib/git-repo-defaults.sh). These tests run the
 # copies in a real interactive Bash against real git repositories (local bare repositories stand
-# in for GitHub) and a stub `gh`, and compare the shared logic with the originals so the copies
-# cannot drift apart unnoticed.
+# in for GitHub) and a stub `gh`, and compare them with the originals so the copies cannot drift
+# apart unnoticed. git-recurse is also run through the whole black-box suite that the original
+# passes (tests/test_git_recurse.sh), which is what keeps its many small behaviours identical.
 #
 # Every case runs in a clean `env -i` shell with a throwaway HOME and a PATH that holds nothing
 # but symlinks to the few tools the commands need plus the stub, so the developer's git settings
@@ -50,7 +52,7 @@ assert_rc() {
 # A PATH of symlinks to the tools the commands and Mini's startup use, and nothing else.
 tools="$case_dir/tools"
 mkdir -p "$tools"
-for tool in awk basename bash cat chmod cut dirname env getconf git grep head id mkdir nproc sed sort tr uname xargs; do
+for tool in awk basename bash cat chmod cut dirname env find getconf git grep head id ls mkdir mkfifo mktemp mv nproc rm sed sleep sort tail tr uname wc xargs; do
     found="$(command -v "$tool" 2>/dev/null || true)"
     [[ $found == /* ]] && ln -s "$found" "$tools/$tool"
 done
@@ -112,11 +114,12 @@ git_() {
 
 # make_remote OWNER/NAME [PATH ...]: a bare repository standing in for GitHub, with one commit that
 # holds .githooks/pre-commit and each PATH. Files under node_modules/.bin and .local/scripts are
-# fake programs that leave a marker file, so a test can see that the command ran them.
+# fake programs that leave a marker file, so a test can see that the command ran them. The default
+# branch is main; REMOTE_BRANCH=name makes it another one.
 make_remote() {
-    local nwo=$1 work file
+    local nwo=$1 work file branch=${REMOTE_BRANCH:-main}
     shift
-    git_ init -q --bare -b main "$stub/remotes/$nwo"
+    git_ init -q --bare -b "$branch" "$stub/remotes/$nwo"
     work="$(mktemp -d "$case_dir/work.XXXXXX")"
     git_ clone -q "$stub/remotes/$nwo" "$work" 2>/dev/null
     mkdir -p "$work/.githooks"
@@ -133,7 +136,23 @@ make_remote() {
     done
     git_ -C "$work" add -A
     git_ -C "$work" commit -qm one
-    git_ -C "$work" push -q origin main 2>/dev/null
+    git_ -C "$work" push -q origin "$branch" 2>/dev/null
+    rm -rf "$work"
+}
+
+# push_branch OWNER/NAME BRANCH COMMITS: a branch with COMMITS commits on top of the remote's default
+# branch (none: a branch that is already merged).
+push_branch() {
+    local nwo=$1 branch=$2 count=$3 work i
+    work="$(mktemp -d "$case_dir/work.XXXXXX")"
+    git_ clone -q "$stub/remotes/$nwo" "$work" 2>/dev/null
+    git_ -C "$work" checkout -q -b "$branch"
+    for ((i = 1; i <= count; i++)); do
+        printf '%s %s\n' "$branch" "$i" >>"$work/branch-$branch"
+        git_ -C "$work" add -A
+        git_ -C "$work" commit -qm "$branch $i"
+    done
+    git_ -C "$work" push -q origin "$branch" 2>/dev/null
     rm -rf "$work"
 }
 
@@ -647,6 +666,138 @@ assert_rc 0 'no teams'
 assert_contains "$err" 'You are not a member of any GitHub teams' 'no teams'
 
 # ==================================================================================================
+# git-recurse, git-ahead and the shortcuts that call them
+# ==================================================================================================
+
+# plain TEXT: TEXT without colour codes.
+plain() { printf '%s\n' "$1" | sed $'s/\033\\[[0-9;]*m//g'; }
+
+# A workspace with a clean repository, one with an edit, and one whose remote has a branch two
+# commits ahead of main. The PATH of run_mini has no ~/.local/scripts/bin, no tput and no timeout
+# command, which is the kind of machine Mini is for.
+make_remote rec/clean
+make_remote rec/dirty
+make_remote rec/ahead
+push_branch rec/ahead feature 2
+rec_ws="$(new_ws recurse)"
+for repo in clean dirty ahead; do
+    git clone -q "$stub/remotes/rec/$repo" "$rec_ws/$repo" 2>/dev/null
+done
+printf 'edit\n' >>"$rec_ws/dirty/file"
+
+# --- both are functions of Mini, and the shortcuts reach them -----------------------------------
+run_mini "$rec_ws" 'command -v tput timeout gtimeout git-recurse git-ahead; echo "rc=$?"'
+assert_eq "$out" 'git-recurse
+git-ahead
+rc=0' 'precondition: no tput, no timeout command and no copy of the scripts on the PATH'
+run_mini "$rec_ws" 'type -t git-recurse git-ahead gr gah status'
+assert_rc 0 'type'
+assert_eq "$out" 'function
+function
+alias
+alias
+function' 'git-recurse and git-ahead are functions of Mini, gr and gah aliases, status a function'
+
+# --- git-recurse runs a command in every repository and summarises what it found ----------------
+run_mini "$rec_ws" 'git-recurse git status'
+assert_rc 0 'git-recurse git status'
+assert_eq "$err" '' 'git-recurse git status writes nothing to stderr'
+assert_contains "$out" 'Launching "git status" in 3 repo(s) in parallel...' 'git-recurse says what it launches'
+assert_contains "$out" 'Done: 3 ok, 0 failed (of 3)' 'git-recurse counts the repositories'
+assert_contains "$out" 'Repositories with changes (1):' 'a git status run is summarised'
+assert_contains "$out" '  ./dirty/: 1 modified' 'the summary names the repository and what differs'
+assert_lacks "$out" $'\033' 'a machine without tput gets no colour codes'
+
+run_mini "$rec_ws" 'gr -s git status'
+assert_rc 0 'gr'
+assert_contains "$out" 'Done: 3 ok, 0 failed (of 3)' 'gr runs git-recurse'
+assert_lacks "$out" 'Launching' 'gr -s runs one repository at a time'
+run_mini "$rec_ws" 'status'
+assert_rc 0 'status'
+assert_contains "$out" '  ./dirty/: 1 modified' 'status summarises git status in every repository'
+
+# -k adds an ssh key on macOS in the script; the copy leaves it out and says so like any other option.
+run_mini "$rec_ws" 'git-recurse -k git status'
+assert_rc 1 'git-recurse -k'
+assert_contains "$err" 'illegal option -- k' 'git-recurse -k names the option it does not know'
+assert_contains "$out" 'Usage: git-recurse [options] <command> [args...]' 'git-recurse -k shows the usage'
+assert_lacks "$out" 'Launching' 'git-recurse -k starts nothing'
+
+# --- git-ahead lists the remote branches that are ahead of main ---------------------------------
+run_mini "$rec_ws" 'git-ahead'
+assert_rc 0 'git-ahead'
+assert_eq "$err" '' 'git-ahead writes nothing to stderr'
+assert_eq "$(plain "$out")" 'ahead (base: origin/main)
+    ↑   2  origin/feature' 'git-ahead names the repository, its base and the branch that is ahead'
+run_mini "$rec_ws" 'gah -n -v'
+assert_rc 0 'gah'
+assert_eq "$(plain "$out")" 'Scanning 3 repos...
+ahead (base: origin/main)
+    ↑   2  origin/feature
+✓ clean (base: origin/main, all remotes merged)
+✓ dirty (base: origin/main, all remotes merged)' 'gah is git-ahead; -v also lists the repositories that are merged'
+
+# --- nothing leaks into the interactive shell ---------------------------------------------------
+# Both bodies are subshells, so their variables, helper functions, options, traps and descriptors
+# stay out; a run that fails and a wrong option must clean up as well.
+run_mini "$rec_ws" '
+    # The bookkeeping names exist before the lists of names are taken, so they are not "new".
+    fd3_state() { if { : >&3; } 2>/dev/null; then echo open; else echo closed; fi; }
+    here=$PWD funcs= vars= flags= traps= fd3=
+    funcs=$(declare -F | sort)
+    flags=$(set +o; shopt -p)
+    traps=$(trap -p)
+    fd3=$(fd3_state)
+    vars=$(compgen -v | sort)
+    git-recurse git status >/dev/null 2>&1 || echo "git-recurse failed"
+    git-recurse -s git status >/dev/null 2>&1 || echo "git-recurse -s failed"
+    git-recurse -S git status >/dev/null 2>&1 || echo "git-recurse -S failed"
+    git-recurse git no-such-subcommand >/dev/null 2>&1
+    git-recurse -k git status >/dev/null 2>&1
+    git-ahead >/dev/null 2>&1 || echo "git-ahead failed"
+    git-ahead --bogus >/dev/null 2>&1
+    [ "$PWD" = "$here" ] || echo "cwd changed"
+    [ "$(declare -F | sort)" = "$funcs" ] || echo "functions leaked"
+    [ "$(compgen -v | sort)" = "$vars" ] || echo "variables leaked"
+    [ "$(set +o; shopt -p)" = "$flags" ] || echo "shell options changed"
+    [ "$(trap -p)" = "$traps" ] || echo "traps leaked"
+    [ "$(fd3_state)" = "$fd3" ] || echo "descriptor 3 changed"
+    [ -z "$(jobs -p)" ] || echo "background jobs left behind"
+    echo done
+'
+assert_eq "$out" 'done' 'git-recurse and git-ahead leave the shell as they found it'
+
+# They also leave no temporary files behind, however the run ended.
+mkdir -p "$case_dir/own-tmp"
+run_mini "$rec_ws" '
+    git-recurse git status >/dev/null 2>&1
+    git-recurse -s git status >/dev/null 2>&1
+    git-recurse git no-such-subcommand >/dev/null 2>&1
+    git-recurse -d 1 git status >/dev/null 2>&1
+    git-recurse --help >/dev/null 2>&1
+    git-ahead >/dev/null 2>&1
+    ls -A "$TMPDIR"
+    echo done
+' TMPDIR="$case_dir/own-tmp"
+assert_eq "$out" 'done' 'git-recurse and git-ahead remove their temporary files'
+
+# --- loading Mini again must not change what they do --------------------------------------------
+# Aliases from the first load (rm -vI, mv -iv, grep -i, ...) would be baked into the function
+# bodies parsed by the next one, which is why these functions call `command rm` and the like.
+run_mini "$rec_ws" '
+    first=$(git-recurse -s git status 2>&1; git-recurse -s git pull 2>&1; git-ahead -n -v 2>&1)
+    . "$MINI_RC" 2>/dev/null
+    . "$MINI_RC" 2>/dev/null
+    second=$(git-recurse -s git status 2>&1; git-recurse -s git pull 2>&1; git-ahead -n -v 2>&1)
+    [ "$first" = "$second" ] && echo same || { echo different; echo "$first"; echo "$second"; }
+    body=$(declare -f git-recurse git-ahead clone-all clone-team)
+    case $body in
+        *"rm -vI"* | *"mv -iv"* | *"cp -iv"* | *"--color=auto"*) echo "an alias was baked into a function" ;;
+    esac
+'
+assert_eq "$out" 'same' 'loading Mini a second and third time changes neither the output nor the function bodies'
+
+# ==================================================================================================
 # The copies agree with the originals
 # ==================================================================================================
 
@@ -657,7 +808,12 @@ if ((BASH_VERSINFO[0] >= 4)); then
     # in lower case (core.hookspath), so the match ignores case.
     settings() { git -C "$1" config --local --list | grep -iE '^(user\.|core\.hookspath)' | sort; }
     # markers DIR: which of the fake hooks (see make_remote) ran in a checkout.
-    markers() { (cd "$1" && ls -A | grep -E '^(lefthook|skip-worktree)-ran$' || true); }
+    markers() {
+        local name
+        for name in lefthook-ran skip-worktree-ran; do
+            [[ ! -e $1/$name ]] || printf '%s\n' "$name"
+        done
+    }
 
     # --- clone-all: a fresh run, a second run, and a run after one remote moved on ---------------
     # Two workspaces take the same three steps, one with the script and one with Mini's copy. Every
@@ -718,6 +874,205 @@ skip-worktree-ran" 'the script runs the repository lefthook and apply-skip-workt
     done
     assert_contains "$script_out" '  updated   acme/delta' 'clone-team of the script reports a pulled change as updated'
     assert_contains "$script_out" '  up-to-date   acme/gamma' 'clone-team of the script keeps an unchanged repository up-to-date'
+
+    # --- git-recurse: the whole suite of the script, through Mini's copy --------------------------
+    # tests/test_git_recurse.sh runs every test that goes through the command alone against
+    # whatever GIT_RECURSE_UNDER_TEST names. The wrapper starts an interactive Bash, loads Mini's
+    # .bashrc and runs the function, so the suite exercises the real thing: the exit status, the
+    # output (stdout and stderr stay apart) and the arguments are passed on untouched. It gets the
+    # normal PATH, so the copy meets a real timeout command here; the same suite also runs it
+    # without one (a PATH of its own).
+    wrapper="$case_dir/git-recurse-from-mini"
+    {
+        printf '#!%s\n' "$(command -v bash)"
+        printf 'export MINI_RC=%q HISTFILE=/dev/null\n' "$mini_rc"
+        printf 'exec 9>&2\n'
+        printf '%s\n' 'exec bash --noprofile --norc -i -c '\''args=("$@"); . "$MINI_RC" 2>/dev/null; git-recurse "${args[@]}" 2>&9'\'' _ "$@" 2>/dev/null'
+    } >"$wrapper"
+    chmod +x "$wrapper"
+    suite_rc=0
+    suite_out="$(env HOME="$case_dir/home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+        GIT_RECURSE_UNDER_TEST="$wrapper" bash "$repo_root/tests/test_git_recurse.sh" 2>&1)" || suite_rc=$?
+    [[ $suite_rc -eq 0 ]] || fail "the git-recurse suite fails through Mini's copy (exit $suite_rc): $suite_out"
+    assert_contains "$suite_out" 'tests through the command passed' 'the git-recurse suite ran to its end through Mini'
+
+    # --- git-recurse: help, and the words the two copies must keep in step ------------------------
+    for flag in -h --help; do
+        run_script "$rec_ws" git-recurse "$flag"
+        script_help=$out
+        run_mini "$rec_ws" "git-recurse $flag"
+        assert_rc 0 "git-recurse $flag"
+        assert_eq "$err" '' "git-recurse $flag writes nothing to stderr"
+        assert_eq "$out" "$(grep -v '^  -k ' <<<"$script_help")" "git-recurse $flag prints the help of the script, without its -k line"
+    done
+
+    # The patterns that decide what is retried and what a summary says are copied, not shared. Each
+    # must be in both files word for word, so a change to one shows up here until the other follows.
+    while IFS= read -r pattern; do
+        grep -qF -- "$pattern" "$repo_root/.local/scripts/bin/git-recurse" ||
+            fail "git-recurse no longer contains '$pattern': change Mini's copy and this test with it"
+        grep -qF -- "$pattern" "$mini_rc" || fail "Mini's git-recurse lacks '$pattern', which the script has"
+    done <<'EOF'
+gnutls|handshake failed|connection.*terminated|connection.*reset|connection.*refused|could not resolve|timed out|operation timed out|unable to access|index\.lock|\.lock|the remote end hung up unexpectedly|rpc failed|502 bad gateway|503 service|504 gateway|429 too many
+^[[:space:]]*[0-9]+ files? changed
+already up[- ]to[- ]date|current branch .* is up to date
+Updating [0-9a-f]+\.\.[0-9a-f]+|Fast-forward|Successfully rebased and updated|Merge made by
+^[[:space:]]*git[[:space:]]+status([[:space:]]|$)
+(^|[[:space:]])pull([[:space:]]|$)
+EOF
+
+    # --- git-ahead: every option, over repositories the command treats differently -----------------
+    # a-ahead: two branches ahead, and a third that the remote deleted after the checkout saw it
+    # (a fetch prunes it). b-merged: a branch that is merged. c-master: the default branch is
+    # master. d-nohead: origin/HEAD is gone, so origin/main is the base. e-nobase: the default
+    # branch is trunk and origin/HEAD is gone, so there is no base. f-badremote: a remote that
+    # cannot be fetched. sub/g-nested: one folder down. h-nohead-master: the default branch is
+    # master and origin/HEAD is gone, so origin/master is the base.
+    ahead_ws="$(new_ws parity-ahead)"
+    make_remote ah/a-ahead
+    push_branch ah/a-ahead feature 2
+    push_branch ah/a-ahead fix 1
+    push_branch ah/a-ahead gone 1
+    make_remote ah/b-merged
+    push_branch ah/b-merged finished 0
+    REMOTE_BRANCH=master make_remote ah/c-master
+    push_branch ah/c-master dev 1
+    make_remote ah/d-nohead
+    push_branch ah/d-nohead topic 3
+    REMOTE_BRANCH=trunk make_remote ah/e-nobase
+    make_remote ah/g-nested
+    push_branch ah/g-nested later 1
+    REMOTE_BRANCH=master make_remote ah/h-nohead-master
+    push_branch ah/h-nohead-master hotfix 1
+    for repo in a-ahead b-merged c-master d-nohead e-nobase h-nohead-master; do
+        git clone -q "$stub/remotes/ah/$repo" "$ahead_ws/$repo" 2>/dev/null
+    done
+    git -C "$stub/remotes/ah/a-ahead" branch -q -D gone
+    mkdir -p "$ahead_ws/sub"
+    git clone -q "$stub/remotes/ah/g-nested" "$ahead_ws/sub/g-nested" 2>/dev/null
+    git -C "$ahead_ws/d-nohead" remote set-head origin -d >/dev/null
+    git -C "$ahead_ws/e-nobase" remote set-head origin -d >/dev/null
+    git -C "$ahead_ws/h-nohead-master" remote set-head origin -d >/dev/null
+    git clone -q "$stub/remotes/ah/b-merged" "$ahead_ws/f-badremote" 2>/dev/null
+    git -C "$ahead_ws/f-badremote" remote set-url origin "$case_dir/does-not-exist.git"
+    ahead_empty="$(new_ws parity-ahead-empty)"
+
+    # compare_ahead DIR NAME ARGS...: git-ahead ARGS in DIR, by the script and by Mini. The status,
+    # the output with its colour codes and the error output must be the same. Leaves what the script
+    # said in ahead_rc, ahead_out and ahead_err.
+    compare_ahead() {
+        local dir=$1 name=$2
+        shift 2
+        run_script "$dir" git-ahead "$@"
+        ahead_rc=$rc ahead_out=$out ahead_err=$err
+        run_mini "$dir" "$(printf '%q ' git-ahead "$@")"
+        assert_rc "$ahead_rc" "git-ahead $name ends like the script"
+        assert_eq "$out" "$ahead_out" "git-ahead $name prints what the script prints"
+        assert_eq "$err" "$ahead_err" "git-ahead $name writes to stderr what the script writes"
+    }
+
+    # The cached refs first: a fetch gives origin/HEAD back to the repositories that lost it (git
+    # 2.48 and later), and the cases without a base are only reached without one.
+    compare_ahead "$ahead_ws" '-n -v' -n -v
+    ahead_view="$(plain "$ahead_out")"
+    assert_rc 0 'the script scans without fetching'
+    assert_eq "$ahead_err" '' 'the script scans without writing to stderr'
+    assert_eq "$ahead_view" "Scanning 8 repos...
+a-ahead (base: origin/main)
+    ↑   2  origin/feature
+    ↑   1  origin/fix
+    ↑   1  origin/gone
+✓ b-merged (base: origin/main, all remotes merged)
+c-master (base: origin/master)
+    ↑   1  origin/dev
+d-nohead (base: origin/main)
+    ↑   3  origin/topic
+• e-nobase (no origin/main or origin/master)
+✓ f-badremote (base: origin/main, all remotes merged)
+h-nohead-master (base: origin/master)
+    ↑   1  origin/hotfix
+sub/g-nested (base: origin/main)
+    ↑   1  origin/later" 'the script reports every kind of repository as expected'
+    compare_ahead "$ahead_ws" '-n' -n
+    assert_eq "$(plain "$ahead_out")" "a-ahead (base: origin/main)
+    ↑   2  origin/feature
+    ↑   1  origin/fix
+    ↑   1  origin/gone
+c-master (base: origin/master)
+    ↑   1  origin/dev
+d-nohead (base: origin/main)
+    ↑   3  origin/topic
+h-nohead-master (base: origin/master)
+    ↑   1  origin/hotfix
+sub/g-nested (base: origin/main)
+    ↑   1  origin/later" 'without -v only the repositories with something ahead are named'
+    cached_out=$ahead_out
+    compare_ahead "$ahead_ws" '--no-fetch' --no-fetch
+    assert_eq "$ahead_out" "$cached_out" '--no-fetch is -n'
+    compare_ahead "$ahead_ws" '--verbose -n' --verbose -n
+    assert_eq "$(plain "$ahead_out")" "$ahead_view" '--verbose is -v'
+    compare_ahead "$ahead_ws" '--depth 1 -n' --depth 1 -n
+    assert_eq "$ahead_out" 'No git repos found under . (depth 1).' 'a depth that finds nothing says so'
+    compare_ahead "$ahead_ws" '--depth 2 -n -v' --depth 2 -n -v
+    assert_contains "$ahead_out" 'Scanning 7 repos...' 'a depth of 2 stops above sub/g-nested'
+    assert_lacks "$ahead_out" 'g-nested' 'a depth of 2 stops above sub/g-nested'
+    compare_ahead "$ahead_ws" '--depth abc -n' --depth abc -n
+    assert_eq "$ahead_out" 'No git repos found under . (depth abc).' 'a depth that is not a number finds nothing'
+    compare_ahead "$ahead_ws" 'a relative folder' -n -v sub
+    assert_eq "$(plain "$ahead_out")" 'Scanning 1 repos...
+g-nested (base: origin/main)
+    ↑   1  origin/later' 'a folder given as an argument is scanned and its path is shortened'
+    compare_ahead "$ahead_empty" 'an empty folder' -n
+    assert_eq "$ahead_out" 'No git repos found under . (depth 4).' 'a folder without repositories says so'
+    compare_ahead "$ahead_ws" 'an absolute folder' -n -v "$ahead_ws/sub"
+    compare_ahead "$ahead_ws" 'the folder last' -n -v "$ahead_empty" "$ahead_ws/sub"
+
+    # Help, and the answers to what is not valid.
+    for flag in -h --help; do
+        compare_ahead "$ahead_ws" "$flag" "$flag"
+        assert_contains "$ahead_out" 'git-ahead [dir]' "git-ahead $flag shows the usage"
+    done
+    compare_ahead "$ahead_ws" '--bogus' --bogus
+    assert_eq "$ahead_rc" 2 'an unknown option ends with 2'
+    assert_eq "$ahead_err" 'Unknown option: --bogus' 'an unknown option is named'
+    compare_ahead "$ahead_ws" '-x -n' -x -n
+    assert_eq "$ahead_rc" 2 'an unknown short option ends with 2'
+    compare_ahead "$ahead_ws" 'a missing folder' -n "$case_dir/does-not-exist"
+    assert_eq "$ahead_rc" 1 'a folder that is not there ends with 1'
+    assert_eq "$ahead_err" "Not a directory: $case_dir/does-not-exist" 'a folder that is not there is named'
+    # --depth without a value stops on an unset $2; the two shells word that message differently.
+    run_script "$ahead_ws" git-ahead --depth
+    script_rc=$rc script_err=$err
+    run_mini "$ahead_ws" 'git-ahead --depth'
+    assert_rc "$script_rc" 'git-ahead --depth without a value ends like the script'
+    assert_contains "$err" 'unbound variable' 'git-ahead --depth without a value says why'
+    assert_contains "$script_err" 'unbound variable' 'the script says why as well'
+
+    # Then with fetching, which also brings origin/HEAD back to the repositories that lost it.
+    compare_ahead "$ahead_ws" 'with a fetch' -v
+    assert_contains "$(plain "$ahead_out")" '✗ f-badremote (fetch failed)' 'a remote that cannot be fetched is reported'
+    assert_contains "$(plain "$ahead_out")" '    ↑   2  origin/feature' 'a fetch keeps what the cached refs showed'
+    assert_lacks "$(plain "$ahead_out")" 'origin/gone' 'a fetch prunes a branch the remote deleted'
+    assert_lacks "$(plain "$ahead_out")" 'f-badremote (base' 'a repository that cannot be fetched is not scanned'
+    compare_ahead "$ahead_ws" 'a fetch without -v'
+    assert_lacks "$(plain "$ahead_out")" 'b-merged' 'a repository without anything ahead is not named without -v'
+
+    # A fetch prunes what the remote deleted. The shared checkouts above are pruned by the script's
+    # run before Mini's starts, so they cannot tell whether Mini prunes: each copy gets a checkout
+    # of its own that still has the stale ref.
+    make_remote ah/i-stale
+    push_branch ah/i-stale old 1
+    stale_script="$(new_ws parity-ahead-stale-script)"
+    stale_mini="$(new_ws parity-ahead-stale-mini)"
+    git clone -q "$stub/remotes/ah/i-stale" "$stale_script/i-stale" 2>/dev/null
+    git clone -q "$stub/remotes/ah/i-stale" "$stale_mini/i-stale" 2>/dev/null
+    git -C "$stub/remotes/ah/i-stale" branch -q -D old
+    run_script "$stale_script" git-ahead -v
+    stale_view="$(plain "$out")"
+    run_mini "$stale_mini" 'git-ahead -v'
+    assert_eq "$(plain "$out")" "$stale_view" 'git-ahead prunes for Mini as it does for the script'
+    assert_lacks "$out" 'origin/old' 'Mini prunes a branch the remote deleted'
+    assert_contains "$(plain "$out")" '✓ i-stale (base: origin/main, all remotes merged)' 'the pruned repository has nothing left ahead'
 fi
 
 # --- the shared helper: identity and hooks for every scope, organisation and override -----------
@@ -799,4 +1154,4 @@ same: tie/pair -> tie/pair
 same: mix/item -> item
 same: both/stuff -> both/stuff' 'the copy of resolve_repo_dir agrees with the original in every branch and tie'
 
-printf 'Mini .bashrc clone-all and clone-team tests passed.\n'
+printf 'Mini .bashrc clone-all, clone-team, git-recurse and git-ahead tests passed.\n'
