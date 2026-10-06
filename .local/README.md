@@ -406,6 +406,43 @@ Things to know before the first start:
   `ffmpeg -i clip.mp4 -c:v dnxhd -profile:v dnxhr_hq -pix_fmt yuv422p -c:a pcm_s16le clip.mov`.
 - If the window does not open on Wayland, start it through XWayland:
   `QT_QPA_PLATFORM=xcb /opt/resolve/bin/resolve`.
+- The interface looks tiny on a HiDPI panel until you set **UI Display Scale**
+  (Preferences, User, UI Settings; 100, 150, 200, or "follow system"). Resolve stores it as
+  `<DisplayScale>` in `~/.local/share/DaVinciResolve/configs/config.user.xml` and sets Qt's
+  scale from it at start-up, so `QT_SCALE_FACTOR` in the environment or in a launcher does
+  nothing (measured on 21.1.1: 1.33 and 2 both left `resolve_graphics_log.txt` at
+  `DPR=1.0`). Restart Resolve after changing it. On the G635LX under GNOME 50 the
+  `xwayland-native-scaling` feature of mutter is on, so an X11 program sees the 133% panel
+  as 3840x2400 (2x GNOME's 1920x1200), and 200% is the value that makes the interface the
+  size of the rest of the desktop (the log then reads `1920x1200, DPR=2.0`).
+- That file is tracked in this repository as
+  `.local/share/DaVinciResolve/configs/config.user.xml` and Stow links it, so the scale
+  follows the checkout to a new machine. It is the only file of
+  `~/.local/share/DaVinciResolve` under version control: `.gitignore` allows that one path
+  and nothing else, because the rest (projects, LUTs, Fusion data, logs) is tens of
+  megabytes that Resolve rewrites on every run. On a machine where the folder does not
+  exist yet, Stow would link the whole folder into the checkout (measured with the real
+  Stow), and Resolve would then write its Project Library inside the repository, where a
+  `git clean -fdx` deletes it. So `.local/scripts/stow-backup-conflicts`, which `make
+  install`, `make restow` and the bootstrap preflight run before Stow, first creates
+  `~/.local/share/DaVinciResolve/configs` as a real folder (`REAL_FOLDERS` in the script;
+  an existing folder is left alone and `--dry-run` creates nothing), and Stow then links
+  only the file. `make dry-run` simulates plain Stow, so on such a machine it still shows
+  the folder link that `make install` avoids. The value `200` suits a 133% panel: a
+  machine with a different screen or scale needs its own number, and it is one shared
+  setting, so change it in the repository copy and commit it deliberately. The file
+  changes rarely: it was untouched by at least five start-and-quit cycles after its first
+  run, while `UI.preset` and `user.data.xml` change on every run. Edit it only while
+  Resolve is closed, because a running Resolve holds its own copy and could write that
+  back over the edit when Preferences are saved (not tested). Whether Resolve writes
+  through the link or replaces it with a plain file when it saves Preferences is not
+  tested either: `make config-status` and `readlink` show which one happened, and a plain
+  file there is the usual Stow conflict, backed up by the next `make install`.
+- The Project Manager, the first window, has no title-bar buttons and stays on top of
+  other windows. Resolve asks for that itself: its X11 properties carry
+  `_MOTIF_WM_HINTS` with decorations off, `_NET_WM_STATE_MODAL`, and
+  `_NET_WM_WINDOW_TYPE_DIALOG` (read with `xprop -id WINDOW`, GNOME 50, Resolve 21.1.1),
+  so it is not the window manager and not a broken installation.
 - Blackmagic's installer is not under this repository's control. The tests run the
   script against a fake installer, so the first real run on a new Resolve release
   is the real test; the `ldd` report and the `not_used` folder show what happened.

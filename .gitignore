@@ -275,6 +275,14 @@ __pycache__/
 !.local/share/xfce4/**
 !.local/share/composer/
 !.local/share/composer/**
+# DaVinci Resolve keeps its projects, LUTs, Fusion data and logs here (tens of
+# megabytes it rewrites on every run). Track only the one preference file, so
+# Stow never folds the whole directory into the checkout on a fresh machine.
+!.local/share/DaVinciResolve/
+.local/share/DaVinciResolve/*
+!.local/share/DaVinciResolve/configs/
+.local/share/DaVinciResolve/configs/*
+!.local/share/DaVinciResolve/configs/config.user.xml
 !.local/share/man/
 !.local/share/man/**
 !.local/share/firefox_shortcuts.md

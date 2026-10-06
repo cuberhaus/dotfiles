@@ -153,6 +153,92 @@ test_dconf_directory_is_never_linked_into_the_repository() {
     teardown_case
 }
 
+# DaVinci Resolve keeps its Project Library, LUTs and logs next to the one preference file that is
+# tracked. Where ~/.local/share/DaVinciResolve is missing, Stow links the whole folder into the
+# checkout, so Resolve would then write the user's projects inside the repository.
+RESOLVE_CONFIG=.local/share/DaVinciResolve/configs/config.user.xml
+
+setup_resolve_case() {
+    setup_case
+    mkdir -p "$HOME/.local/share" "$PACKAGE/$(dirname "$RESOLVE_CONFIG")"
+    printf '<DisplayScale>200</DisplayScale>\n' > "$PACKAGE/$RESOLVE_CONFIG"
+}
+
+test_stow_folds_the_resolve_folder_without_the_backup_step() {
+    setup_resolve_case
+
+    run_stow || fail 'Stow must succeed on a machine without a Resolve folder'
+
+    # The control: this is the hazard the backup step removes, so if Stow ever stops folding,
+    # the test below would pass for the wrong reason.
+    [ -L "$HOME/.local/share/DaVinciResolve" ] \
+        || fail 'Expected Stow to fold the Resolve folder when it does not exist (control)'
+    teardown_case
+}
+
+test_resolve_folder_stays_real_so_its_data_stays_out_of_the_checkout() {
+    setup_resolve_case
+
+    run_backup
+    run_stow || fail 'Stow must succeed once the real folders exist'
+
+    { [ -d "$HOME/.local/share/DaVinciResolve" ] && [ ! -L "$HOME/.local/share/DaVinciResolve" ]; } \
+        || fail 'The Resolve folder must be a real folder, not a link into the checkout'
+    { [ -d "$HOME/.local/share/DaVinciResolve/configs" ] && [ ! -L "$HOME/.local/share/DaVinciResolve/configs" ]; } \
+        || fail 'The configs folder must be a real folder'
+    [ -L "$HOME/$RESOLVE_CONFIG" ] || fail 'The preference file must be a Stow link'
+    [ "$HOME/$RESOLVE_CONFIG" -ef "$PACKAGE/$RESOLVE_CONFIG" ] \
+        || fail 'The link must resolve to the repository file'
+
+    # What Resolve does on its first run: it fills its folder with data of its own.
+    mkdir -p "$HOME/.local/share/DaVinciResolve/Resolve Disk Database"
+    printf 'a project\n' > "$HOME/.local/share/DaVinciResolve/Resolve Disk Database/project.db"
+    printf 'a log\n' > "$HOME/.local/share/DaVinciResolve/configs/UI.preset"
+    [ ! -e "$PACKAGE/.local/share/DaVinciResolve/Resolve Disk Database" ] \
+        || fail 'Resolve data must not appear inside the checkout'
+    [ ! -e "$PACKAGE/.local/share/DaVinciResolve/configs/UI.preset" ] \
+        || fail 'Resolve files must not appear inside the checkout'
+
+    # Nothing is left to do, so the audit would report no drift.
+    stow -n -v -t "$HOME" -d "$CASE_DIR/cuberhaus" dotfiles > "$CASE_DIR/plan.out" 2>&1 \
+        || fail "A second Stow run still reports drift: $(cat "$CASE_DIR/plan.out")"
+    teardown_case
+}
+
+test_dry_run_creates_no_resolve_folder() {
+    setup_resolve_case
+
+    bash "$PACKAGE/$BACKUP_SCRIPT" --dry-run > "$CASE_DIR/backup.log" 2>&1 \
+        || { cat "$CASE_DIR/backup.log" >&2; fail "$BACKUP_SCRIPT --dry-run failed"; }
+
+    grep -Fq "Would create the real folder $HOME/.local/share/DaVinciResolve/configs" "$CASE_DIR/backup.log" \
+        || fail "The preview must name the folder it would create: $(cat "$CASE_DIR/backup.log")"
+    { [ ! -e "$HOME/.local/share/DaVinciResolve" ] && [ ! -L "$HOME/.local/share/DaVinciResolve" ]; } \
+        || fail '--dry-run must create nothing'
+    teardown_case
+}
+
+test_existing_resolve_folder_is_left_alone() {
+    setup_resolve_case
+    mkdir -p "$HOME/.local/share/DaVinciResolve/configs"
+    printf 'my own preferences\n' > "$HOME/.local/share/DaVinciResolve/configs/config.user.xml"
+    printf 'a project\n' > "$HOME/.local/share/DaVinciResolve/project.db"
+
+    run_backup
+    grep -Fq 'Created the real folder' "$CASE_DIR/backup.log" \
+        && fail 'An existing folder must not be created again'
+    [ "$(cat "$HOME/.local/share/DaVinciResolve/project.db")" = 'a project' ] \
+        || fail 'Existing Resolve data must keep its content'
+
+    # The live preference file is a plain conflict, backed up like any other.
+    run_stow || fail 'Stow must succeed once the live preference file has been backed up'
+    [ "$HOME/$RESOLVE_CONFIG" -ef "$PACKAGE/$RESOLVE_CONFIG" ] \
+        || fail 'The link must resolve to the repository file'
+    grep -Fq 'my own preferences' "$(find "$HOME/.dotfiles-backup" -type f -path "*/$RESOLVE_CONFIG" -print -quit)" \
+        || fail 'The replaced preference file must be kept in the backup folder'
+    teardown_case
+}
+
 # The Makefile passes TARGET so that a scratch target never moves anything out of the real home.
 test_backup_follows_stow_target_instead_of_home() {
     setup_case
@@ -212,6 +298,10 @@ if [ "$STOW_AVAILABLE" = true ]; then
     test_uninstall_restores_a_backed_up_link
     test_live_dconf_database_is_left_alone
     test_dconf_directory_is_never_linked_into_the_repository
+    test_stow_folds_the_resolve_folder_without_the_backup_step
+    test_resolve_folder_stays_real_so_its_data_stays_out_of_the_checkout
+    test_dry_run_creates_no_resolve_folder
+    test_existing_resolve_folder_is_left_alone
     test_backup_follows_stow_target_instead_of_home
 else
     printf 'SKIP: GNU Stow is not installed; the real-Stow scenarios were not run.\n'

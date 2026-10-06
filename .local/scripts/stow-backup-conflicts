@@ -5,7 +5,9 @@
 #
 # Runs a stow dry-run, parses conflicts, and moves each conflicting file or
 # symbolic link into a timestamped backup folder.  Exits 0 if there were no
-# conflicts or all conflicts were backed up successfully.
+# conflicts or all conflicts were backed up successfully.  Before that it creates the
+# few real folders listed in REAL_FOLDERS, so Stow does not fold an app's data folder
+# into the checkout (nothing is created with --dry-run).
 #
 # STOW_TARGET (default $HOME) names the directory stow links into.  The Makefile
 # passes its TARGET, so a scratch target never moves anything out of the real home
@@ -36,6 +38,34 @@ if [ "${1:-}" = "--dry-run" ]; then
     BACKUP_ROOT="${2:-$TARGET/.dotfiles-backup}"
     BACKUP_DIR="$BACKUP_ROOT/$(date '+%Y-%m-%d_%H%M%S')"
 fi
+
+# ---------------------------------------------------------------------------
+# Folders that must stay real folders
+# ---------------------------------------------------------------------------
+# Where the target has no folder, Stow links the whole folder into the checkout instead of
+# the files in it.  For a folder that an app fills with its own data, that puts the data
+# inside the checkout, where `git clean -fdx` would delete it.  Each folder below holds
+# only a tracked preference file, with the app's data beside it, so it is created as a real
+# folder first and Stow then links just that file.  A folder or link that exists is left
+# alone, and the repository must have the folder, so a copy of this script elsewhere does
+# nothing.  `--dry-run` creates nothing.
+REAL_FOLDERS=(
+    # DaVinci Resolve: Project Library, LUTs, Fusion data and logs sit beside config.user.xml.
+    ".local/share/DaVinciResolve/configs"
+)
+
+for rel in "${REAL_FOLDERS[@]}"; do
+    [ -d "$STOW_DIR/$rel" ] || continue
+    if [ -e "$TARGET/$rel" ] || [ -L "$TARGET/$rel" ]; then
+        continue
+    fi
+    if [ "$DRY_RUN" = true ]; then
+        info "Would create the real folder $TARGET/$rel so Stow links its files, not the folder"
+    else
+        mkdir -p "$TARGET/$rel"
+        info "Created the real folder $TARGET/$rel so Stow links its files, not the folder"
+    fi
+done
 
 # ---------------------------------------------------------------------------
 # Detect conflicts via stow dry-run
