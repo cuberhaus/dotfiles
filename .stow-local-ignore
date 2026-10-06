@@ -1,6 +1,7 @@
 ^/README.*
 ^/LICENSE.*
 ^/COPYING
+^/AGENTS\.md
 ^/\.editorconfig
 ^/\.markdownlint\.json
 ^/\.shellcheckrc
