@@ -51,6 +51,9 @@ jobs:
       - name: Run IDE apt source tests
         run: bash tests/test_ide_apt_sources.sh
 
+      - name: Run Caffeine autostart tests
+        run: bash tests/test_caffeine_autostart.sh
+
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-latest

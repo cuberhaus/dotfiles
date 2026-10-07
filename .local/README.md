@@ -160,7 +160,11 @@ file, and only after the signing key is installed and verified, so a failed key
 download never leaves a source that would break `apt-get update` for the whole
 machine. VS Code on `ubuntu` is a snap, and `arch` keeps the Cursor AppImage
 because Arch has no apt. `cursor_is_installed` accepts either form, so a machine
-that already has the AppImage does not get a second copy. Antigravity's package
+that already has the AppImage does not get a second copy. The Arch launcher names
+its icon by path: `cursor_appimage_icon_install` extracts the AppImage's own
+icon into `~/.local/share/icons/hicolor/512x512/apps/`, because a bare
+`Icon=cursor` resolves only inside the AppImage's temporary mount, never for GNOME
+Shell, which then shows the generic executable icon. Antigravity's package
 does not register its own repository (checked in 1.23.2), so the file the
 bootstrap writes is its only update path.
 

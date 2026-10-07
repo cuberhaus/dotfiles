@@ -637,6 +637,31 @@ cursor_appimage_download() {
     mv -f "$partial" "$destination"
 }
 
+# Extract the Cursor icon from the AppImage $1 into the user's icon theme and print
+# its path.  A launcher cannot say `Icon=cursor`: that icon exists only inside the
+# AppImage's temporary mount, which the AppImage adds to the XDG_DATA_DIRS of its own
+# children, so GNOME Shell never finds it and shows the generic executable icon.
+# $1 must be an absolute path to an executable AppImage.  Prints nothing and
+# returns 1 when the icon cannot be extracted.
+cursor_appimage_icon_install() {
+    local app_image="$1"
+    local member="usr/share/icons/hicolor/512x512/apps/cursor.png"
+    local icon_dir="${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor/512x512/apps"
+    local scratch
+
+    scratch=$(mktemp -d) || return 1
+    if (cd "$scratch" && "$app_image" --appimage-extract "$member" &>/dev/null) &&
+        [ -s "$scratch/squashfs-root/$member" ] &&
+        mkdir -p "$icon_dir" &&
+        install -m 0644 "$scratch/squashfs-root/$member" "$icon_dir/cursor.png"; then
+        rm -rf "$scratch"
+        printf '%s\n' "$icon_dir/cursor.png"
+        return 0
+    fi
+    rm -rf "$scratch"
+    return 1
+}
+
 # Run a command that changes the apt configuration, or only describe it when
 # APT_SOURCES_DRY_RUN=true (`make repair REPAIR=ide-repos DRY_RUN=true`).
 apt_sources_apply() {
@@ -814,6 +839,53 @@ ide_apt_sources_repair() {
         # part; a repair must not end without refreshing them.
         apt_sources_apply sudo apt-get update
     fi
+}
+
+###############################################################
+# => Caffeine indicator autostart
+###############################################################
+
+# Start the Caffeine tray indicator at every login.  The apt package `caffeine`
+# autostarts only its headless daemon (/etc/xdg/autostart/caffeine.desktop runs
+# /usr/bin/caffeine, which suspends the screensaver while a window is full screen).
+# The indicator that toggles it by hand is a separate program,
+# /usr/bin/caffeine-indicator, and the package gives it no autostart entry.
+#
+# The entry goes into the user's autostart folder instead of being tracked in the
+# checkout: that folder belongs to every app that starts at login, so Stow would
+# link the whole folder into the repository, and each of those apps would then write
+# its entry there.  TryExec makes the session skip the entry once the package is gone.
+# An entry that differs is kept as caffeine-indicator.desktop.bak before it is replaced.
+caffeine_indicator_autostart_install() {
+    local autostart_dir="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
+    local entry="$autostart_dir/caffeine-indicator.desktop"
+    local wanted
+
+    wanted=$(cat <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Caffeine Indicator
+Comment=Manually control activation of the screensaver/screen lock and sleep mode
+Exec=/usr/bin/caffeine-indicator
+TryExec=/usr/bin/caffeine-indicator
+Icon=caffeine
+Terminal=false
+StartupNotify=false
+X-GNOME-Autostart-enabled=true
+EOF
+)
+
+    mkdir -p "$autostart_dir" || return 1
+    if [ -f "$entry" ]; then
+        if [ "$(cat "$entry")" = "$wanted" ]; then
+            info "Caffeine indicator already starts at login, skipping."
+            return 0
+        fi
+        cp -f "$entry" "$entry.bak" || return 1
+        info "Replacing $entry (the previous one is kept as $entry.bak)..."
+    fi
+    printf '%s\n' "$wanted" > "$entry" || return 1
+    info "Caffeine indicator will start at login."
 }
 
 ###############################################################

@@ -113,6 +113,9 @@ gui_apps_uninstall() {
     rm -f "$HOME/Applications/cursor.AppImage"
     rm -f "$HOME/.local/share/applications/cursor.desktop"
 
+    # Caffeine indicator autostart entry (written by caffeine_indicator_autostart_install)
+    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/autostart/caffeine-indicator.desktop"
+
     # OpenCode removal
     rm -rf "$HOME/.opencode" 2>/dev/null || true
     rm -f "$HOME/.local/bin/opencode" 2>/dev/null || true

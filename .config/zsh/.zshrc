@@ -146,3 +146,6 @@ bindkey '^ ' autosuggest-accept
 # Activating numlock on startup
 # setleds -D +num
 #}}}
+
+# opencode
+export PATH=/home/pol/.opencode/bin:$PATH

@@ -98,6 +98,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_obsidian_bootstrap.sh
 	bash tests/test_bootstrap_work.sh
 	bash tests/test_ide_apt_sources.sh
+	bash tests/test_caffeine_autostart.sh
 	bash tests/test_nvidia_container_toolkit.sh
 	bash tests/test_openlogi_install.sh
 	bash tests/test_kondo_install.sh

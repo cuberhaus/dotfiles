@@ -114,10 +114,14 @@ new_case() {
     mkdir -p "$CASE/sources.d" "$CASE/keyrings" "$CASE/home"
     export APT_SOURCES_DIR="$CASE/sources.d"
     export HOME="$CASE/home"
+    # Pin the icon directory to the sandbox: an XDG_DATA_HOME inherited from the real
+    # session would send the icon helper's writes to the real home.
+    export XDG_DATA_HOME="$CASE/home/.local/share"
     CALLS="$CASE/calls.log"
     : > "$CALLS"
     unset APT_SOURCES_DRY_RUN FAKE_CURL_FAIL FAKE_GPG_FAIL FAKE_GPG_EMPTY \
-        FAKE_INSTALLED FAKE_API_REPLY FAKE_APPIMAGE_BYTES FAKE_FAIL_VENDOR
+        FAKE_INSTALLED FAKE_API_REPLY FAKE_APPIMAGE_BYTES FAKE_FAIL_VENDOR \
+        FAKE_APPIMAGE_NO_ICON
     APT_SOURCES_CHANGED=false
 }
 
@@ -447,6 +451,95 @@ test_cursor_appimage_rejects_a_truncated_download() {
 }
 
 ###############################################################
+# => cursor_appimage_icon_install
+###############################################################
+
+# An executable that answers `--appimage-extract MEMBER` the way an AppImage does: it
+# writes squashfs-root/MEMBER into the current directory.  FAKE_APPIMAGE_NO_ICON makes
+# it extract nothing, as an AppImage without that icon would.
+make_fake_appimage() {
+    local path="$1"
+
+    mkdir -p "$(dirname "$path")"
+    cat > "$path" <<'EOF'
+#!/usr/bin/env bash
+[ "${1:-}" = --appimage-extract ] || exit 2
+[ -z "${FAKE_APPIMAGE_NO_ICON:-}" ] || exit 0
+mkdir -p "squashfs-root/$(dirname "$2")"
+printf 'fake icon\n' > "squashfs-root/$2"
+EOF
+    chmod +x "$path"
+}
+
+# Directories `mktemp -d` made in the shared TMPDIR; other helpers leave entries there, so
+# a test compares the count before and after the call instead of expecting none.
+scratch_directories() {
+    find "$SCRATCH" -maxdepth 1 -type d -name 'tmp.*' | wc -l
+}
+
+test_cursor_icon_is_installed_into_the_user_icon_theme() {
+    new_case icon
+    local app_image="$CASE/home/Applications/cursor.AppImage" icon expected before
+    make_fake_appimage "$app_image"
+    expected="$XDG_DATA_HOME/icons/hicolor/512x512/apps/cursor.png"
+    before="$(scratch_directories)"
+
+    icon="$(cursor_appimage_icon_install "$app_image")" || fail 'the icon install failed'
+
+    assert_equals "$expected" "$icon" 'the printed icon path'
+    assert_equals 'fake icon' "$(cat "$expected")" 'the installed icon'
+    assert_equals "$before" "$(scratch_directories)" 'scratch directories left behind'
+}
+
+test_cursor_icon_install_can_be_repeated() {
+    new_case icon-repeat
+    local app_image="$CASE/home/Applications/cursor.AppImage" first second
+    make_fake_appimage "$app_image"
+
+    first="$(cursor_appimage_icon_install "$app_image")" || fail 'the first icon install failed'
+    second="$(cursor_appimage_icon_install "$app_image")" || fail 'the second icon install failed'
+
+    assert_equals "$first" "$second" 'the icon path on a second run'
+}
+
+test_cursor_icon_falls_back_to_the_home_icon_directory() {
+    new_case icon-no-xdg
+    local app_image="$CASE/home/Applications/cursor.AppImage" icon
+    make_fake_appimage "$app_image"
+    unset XDG_DATA_HOME
+
+    icon="$(cursor_appimage_icon_install "$app_image")" || fail 'the icon install failed'
+
+    assert_equals "$HOME/.local/share/icons/hicolor/512x512/apps/cursor.png" "$icon" 'the fallback icon path'
+}
+
+test_cursor_icon_install_fails_without_the_icon_in_the_appimage() {
+    new_case icon-missing
+    local app_image="$CASE/home/Applications/cursor.AppImage" output before status=0
+    make_fake_appimage "$app_image"
+    export FAKE_APPIMAGE_NO_ICON=1
+    before="$(scratch_directories)"
+
+    output="$(cursor_appimage_icon_install "$app_image" 2>&1)" || status=$?
+
+    [ "$status" -ne 0 ] || fail 'an AppImage without the icon must fail'
+    assert_equals '' "$output" 'output of a failed icon install'
+    [ ! -e "$XDG_DATA_HOME/icons" ] || fail 'a failed install must not create the icon directory'
+    assert_equals "$before" "$(scratch_directories)" 'scratch directories left behind'
+}
+
+test_cursor_icon_install_fails_for_a_missing_appimage() {
+    new_case icon-no-appimage
+    local before status=0
+    before="$(scratch_directories)"
+
+    cursor_appimage_icon_install "$CASE/home/Applications/cursor.AppImage" >/dev/null 2>&1 || status=$?
+
+    [ "$status" -ne 0 ] || fail 'a missing AppImage must fail'
+    assert_equals "$before" "$(scratch_directories)" 'scratch directories left behind'
+}
+
+###############################################################
 # => The bootstraps use the helpers instead of writing apt repositories by hand
 ###############################################################
 
@@ -462,6 +555,11 @@ test_bootstraps_use_the_shared_helpers() {
         fail 'ubuntu must configure the Cursor and Antigravity sources (VS Code is a snap there)'
     grep -Fq 'cursor_appimage_download' "$arch" ||
         fail 'arch must download the Cursor AppImage through the shared helper'
+    grep -Fq 'cursor_appimage_icon_install' "$arch" ||
+        fail 'arch must install the Cursor icon from the AppImage'
+    if grep -Eq '^Icon=cursor$' "$arch"; then
+        fail 'the Arch launcher must not name the icon "cursor": only the AppImage mount has it, so GNOME Shell shows a generic icon'
+    fi
 
     for file in "$work" "$ubuntu"; do
         if grep -Eq 'sources\.list\.d/(vscode|antigravity)\.list' "$file"; then
@@ -497,6 +595,11 @@ for test_name in \
     test_cursor_appimage_is_resolved_through_the_api_reply \
     test_cursor_appimage_rejects_an_api_reply_without_a_url \
     test_cursor_appimage_rejects_a_truncated_download \
+    test_cursor_icon_is_installed_into_the_user_icon_theme \
+    test_cursor_icon_install_can_be_repeated \
+    test_cursor_icon_falls_back_to_the_home_icon_directory \
+    test_cursor_icon_install_fails_without_the_icon_in_the_appimage \
+    test_cursor_icon_install_fails_for_a_missing_appimage \
     test_bootstraps_use_the_shared_helpers; do
     # A subshell keeps each test's stub overrides and exported variables to itself.
     ( "$test_name" ) || {

@@ -32,6 +32,9 @@ ubuntu_gui_uninstall() {
         transmission vlc caffeine dconf-editor r-base \
         wireguard-tools xdotool ydotool qrencode || true
 
+    # Caffeine indicator autostart entry (written by caffeine_indicator_autostart_install)
+    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/autostart/caffeine-indicator.desktop"
+
     # RStudio
     sudo dpkg -r rstudio 2>/dev/null || true
 

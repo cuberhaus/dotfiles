@@ -659,11 +659,18 @@ ai_tools_install() {
     # ── Set up downloaded AppImages ──────────────────────────────
     if [ -f "$HOME/Applications/cursor.AppImage" ]; then
         chmod +x "$HOME/Applications/cursor.AppImage"
+        # The icon is installed from the AppImage and named by path: a bare `Icon=cursor`
+        # resolves only inside the AppImage's own mount, never for GNOME Shell.
+        local cursor_icon
+        cursor_icon=$(cursor_appimage_icon_install "$HOME/Applications/cursor.AppImage") || {
+            warn "Could not extract the Cursor icon; the launcher will show a generic icon."
+            cursor_icon=cursor
+        }
         cat > "$HOME/.local/share/applications/cursor.desktop" <<EOF
 [Desktop Entry]
 Name=Cursor
 Exec=$HOME/Applications/cursor.AppImage --no-sandbox %U
-Icon=cursor
+Icon=$cursor_icon
 Type=Application
 Categories=Development;IDE;
 StartupWMClass=Cursor

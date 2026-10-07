@@ -38,6 +38,9 @@ chrome_install
 #i3_install # Installing i3 requires manual input
 snaps_install
 ubuntu_install
+# Only writes one file under ~/.config/autostart; the package itself comes from ubuntu_install.
+caffeine_indicator_autostart_install ||
+    warn "Caffeine indicator autostart failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; caffeine_indicator_autostart_install'"
 # OpenLogi comes from GitHub releases, so the network or a changed release layout can break it;
 # that must not abort provisioning.
 openlogi_install ||
