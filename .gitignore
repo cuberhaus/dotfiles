@@ -190,6 +190,8 @@
 !.config/systemd/
 !.config/systemd/**
 .config/systemd/user/*.wants/
+!.config/cuberhaus-automations/
+!.config/cuberhaus-automations/**
 !.config/ranger/
 !.config/ranger/**
 !.config/tmux/

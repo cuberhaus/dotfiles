@@ -1,33 +1,192 @@
 #!/usr/bin/env bash
+# Upgrade the system packages (apt or pacman). Linux only, and root only: systemd runs the copy that
+# `make install-automations` puts in /usr/local/libexec.
+#
+# Usage: system-maintenance [--notify]
+#
+#   --notify   show a desktop notification to whoever is logged in to a graphical session: a progress
+#              bar once the run has lasted ten seconds, and a summary when something was upgraded or
+#              went wrong. A run with nothing to upgrade stays silent. Off by default; the systemd
+#              service passes it.
 set -euo pipefail
+
+notify=false
+while (($# > 0)); do
+    case "$1" in
+        -h|--help)
+            awk 'NR > 1 { if (!/^#/) exit; sub(/^# ?/, ""); print }' "${BASH_SOURCE[0]}"
+            exit 0
+            ;;
+        --notify)
+            notify=true
+            shift
+            ;;
+        *)
+            printf 'Unknown argument: %s\n' "$1" >&2
+            exit 2
+            ;;
+    esac
+done
 
 if [[ "$(uname -s)" != "Linux" ]]; then
     printf 'System package maintenance is supported on Linux only.\n' >&2
     exit 1
 fi
-if [[ ${EUID} -ne 0 ]]; then
+# `id -u` rather than $EUID, which is read-only: the tests answer for a root they cannot be.
+if [[ $(id -u) -ne 0 ]]; then
     printf 'System package maintenance must run as root.\n' >&2
     exit 1
 fi
 
-lock_dir="/run/lock/cuberhaus-system-maintenance.lock"
+# The notification library is installed next to this script (root owns that folder; a library in a
+# user's home must never be sourced by root) or sits in ../lib in the repository. Without it the run
+# is the same, only silent.
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+progress_library=
+for candidate in "$script_dir/cuberhaus-progress.sh" "$script_dir/../lib/cuberhaus-progress.sh"; do
+    if [[ -r $candidate ]]; then
+        progress_library=$candidate
+        break
+    fi
+done
+if [[ -n $progress_library ]]; then
+    # shellcheck source=../lib/cuberhaus-progress.sh
+    source "$progress_library"
+else
+    progress_start() { :; }
+    progress_update() { :; }
+    progress_finish() { :; }
+    progress_abort() { :; }
+    [[ $notify == false ]] || printf 'Notification not shown: cuberhaus-progress.sh was not found.\n'
+fi
+
+lock_dir="${CUBERHAUS_LOCK_DIR:-/run/lock/cuberhaus-system-maintenance.lock}"
 if ! mkdir "$lock_dir" 2>/dev/null; then
     printf 'Another system package maintenance process is running.\n'
     exit 0
 fi
-trap 'rmdir "$lock_dir"' EXIT
+work_dir=$(mktemp -d "${TMPDIR:-/tmp}/cuberhaus-system-maintenance.XXXXXX")
+# A run that dies (a failed command, systemd's timeout) still ends its notification as a failure.
+cleanup() {
+    local status=$?
+    progress_abort "$status"
+    rm -rf -- "$work_dir"
+    rmdir "$lock_dir" 2>/dev/null || true
+}
+trap cleanup EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT
+
+if [[ $notify == true ]]; then
+    progress_start system-maintenance 'System package maintenance' Upgrading package 10
+fi
+
+# fail MESSAGE: end the run with a message the notification can show.
+fail() {
+    printf '%s\n' "$1" >&2
+    progress_finish failure --message "$1"
+    exit 1
+}
+
+# watch_apt_status: read apt's status feed (APT::Status-Fd) and move the bar. Lines are
+#   dlstatus:<n>:<percent>:<text>        while downloading
+#   pmstatus:<package>:<percent>:<text>  while dpkg unpacks and configures; percent is overall
+# After a download the install fills the last 60 % of the bar; with nothing to download it fills all of it.
+watch_apt_status() {
+    local line rest percent text base=0 span=100
+    while IFS= read -r line; do
+        case $line in
+            dlstatus:*)
+                rest=${line#dlstatus:}
+                rest=${rest#*:}
+                percent=${rest%%:*}
+                text=${rest#*:}
+                base=40
+                span=60
+                progress_update "current=$text (${percent%%.*} %)"
+                ;;
+            pmstatus:*)
+                rest=${line#pmstatus:}
+                rest=${rest#*:}
+                percent=${rest%%:*}
+                text=${rest#*:}
+                percent=${percent%%.*}
+                [[ $percent =~ ^[0-9]+$ ]] || continue
+                progress_update "percent=$((base + percent * span / 100))" "current=$text"
+                ;;
+        esac
+    done
+}
+
+# watch_pacman COUNT_FILE: pass pacman's output through unchanged. Its transaction lines read
+# "(3/12) upgrading <package>"; the last number seen goes to COUNT_FILE.
+watch_pacman() {
+    local count_file=$1 line count=0
+    local pattern='^\(([0-9]+)/([0-9]+)\) (upgrading|installing|reinstalling|downgrading|removing) ([^[:space:]]+)'
+    while IFS= read -r line; do
+        printf '%s\n' "$line"
+        if [[ $line =~ $pattern ]]; then
+            count=${BASH_REMATCH[1]}
+            progress_update "current=${BASH_REMATCH[3]^} ${BASH_REMATCH[4]}" "index=$count" \
+                "done=$((count - 1))" "total=${BASH_REMATCH[2]}"
+        fi
+    done
+    printf '%s\n' "$count" >"$count_file"
+}
 
 printf '[%s] Starting system package maintenance.\n' "$(date --iso-8601=seconds)"
 
+summary_line='System packages were upgraded.'
+quiet=false
+
 if command -v apt-get >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get full-upgrade -y
+    progress_update 'current=Refreshing package lists'
+    apt-get update || fail 'apt-get update failed.'
+
+    progress_update 'current=Upgrading packages'
+    mkfifo "$work_dir/apt-status"
+    watch_apt_status <"$work_dir/apt-status" &
+    watcher=$!
+    apt_status=0
+    # LC_ALL=C keeps the summary line below in English; the status feed is not translated.
+    LC_ALL=C apt-get full-upgrade -y -o APT::Status-Fd=3 3>"$work_dir/apt-status" |
+        tee "$work_dir/apt.out" || apt_status=$?
+    # The watcher ends when apt closes the feed. Waiting for it keeps a late bar from landing after the summary.
+    wait "$watcher" || true
+    ((apt_status == 0)) || fail 'apt-get full-upgrade failed.'
+
+    apt_summary=$(grep -E '^[0-9]+ upgraded, [0-9]+ newly installed, [0-9]+ to remove' "$work_dir/apt.out" | tail -n 1 || true)
+    pattern='^([0-9]+) upgraded, ([0-9]+) newly installed, ([0-9]+) to remove and ([0-9]+) not upgraded'
+    if [[ $apt_summary =~ $pattern ]]; then
+        summary_line="${BASH_REMATCH[1]} upgraded, ${BASH_REMATCH[2]} newly installed, ${BASH_REMATCH[3]} removed."
+        if ((BASH_REMATCH[1] + BASH_REMATCH[2] + BASH_REMATCH[3] == 0)); then
+            summary_line='Everything was already up to date.'
+            quiet=true
+        fi
+    fi
 elif command -v pacman >/dev/null 2>&1; then
-    pacman -Syu --noconfirm
+    progress_update 'current=Upgrading packages'
+    # --noprogressbar keeps each transaction step on one line, which is also kinder to the journal.
+    pacman -Syu --noconfirm --noprogressbar 2>&1 | tr '\r' '\n' | watch_pacman "$work_dir/pacman.count" ||
+        fail 'pacman -Syu failed.'
+    pacman_count=0
+    [[ ! -r $work_dir/pacman.count ]] || pacman_count=$(<"$work_dir/pacman.count")
+    if ((pacman_count == 0)); then
+        summary_line='Everything was already up to date.'
+        quiet=true
+    else
+        summary_line="Upgraded $pacman_count packages."
+        ((pacman_count != 1)) || summary_line='Upgraded 1 package.'
+    fi
 else
-    printf 'No supported system package manager found (apt-get or pacman).\n' >&2
-    exit 1
+    fail 'No supported system package manager found (apt-get or pacman).'
 fi
 
 printf '[%s] System package maintenance completed. A reboot was not requested.\n' "$(date --iso-8601=seconds)"
+
+if [[ $quiet == true ]]; then
+    progress_finish success --quiet "$summary_line"
+else
+    progress_finish success "$summary_line"
+fi

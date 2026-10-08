@@ -1,0 +1,429 @@
+#!/usr/bin/env bash
+# Move what piles up in drop folders (Downloads, Screenshots...) into the Desktop inbox.
+#
+# Usage: inbox-collector [--dry-run] [--undo] [--notify] [--add-source DIR] [options]
+#
+# Moves the stable items of each source folder into a folder named after the source (Downloads,
+# Screenshots...) inside the Desktop inbox ("0 Inbox"). Nothing is ever overwritten: an item whose
+# name is taken gets a " (2)" suffix. Hidden items, links, partial downloads (.crdownload, .part,
+# .tmp...) and anything changed less than --minimum-age-minutes ago stay where they are. So does a
+# folder that holds a link, a partial download or a recent change. Every move is logged and
+# journaled, so --undo can reverse the last run.
+#
+# The source folders are listed in ~/.config/cuberhaus-automations/inbox-collector-sources.txt, one
+# per line: a path, ~ or $HOME at the start, or xdg:NAME[/sub] for an XDG folder (xdg:DOWNLOAD,
+# xdg:PICTURES/Screenshots). Lines starting with # are comments.
+#
+#   --dry-run                  show what would move and move nothing
+#   --undo                     move the items of the last run back; an item whose original place has
+#                              been taken since is skipped, never overwritten
+#   --notify                   show a desktop notification: a progress bar once the run has lasted ten
+#                              seconds, and a summary when something moved or went wrong. A run with
+#                              nothing to collect stays silent. Off by default; the systemd service
+#                              passes it.
+#   --add-source DIR           add DIR to the source list and stop
+#   --desktop DIR              the Desktop folder that holds the inbox (default: XDG_DESKTOP_DIR)
+#   --source DIR               collect from DIR instead of the list (repeatable)
+#   --additional-source DIR    collect from DIR as well as from the list (repeatable)
+#   --inbox-name NAME          the inbox folder name (default: "0 Inbox"; an existing "0 - Inbox" is
+#                              used when the name is not given)
+#   --minimum-age-minutes N    leave alone anything changed in the last N minutes, 0 to 1440 (default 10)
+#   --source-list FILE         the source list (default: see above)
+#   --state-dir DIR            where the log and the undo journal live
+#                              (default: ~/.local/state/cuberhaus-automations)
+#   --log FILE                 the log file (default: <state-dir>/inbox-collector.log)
+set -euo pipefail
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus-automations"
+desktop=''
+inbox_name=''
+minimum_age=10
+log_file=''
+source_list="${XDG_CONFIG_HOME:-$HOME/.config}/cuberhaus-automations/inbox-collector-sources.txt"
+add_source=''
+dry_run=false
+undo=false
+notify=false
+explicit_sources=()
+additional_sources=()
+
+while (($# > 0)); do
+    case "$1" in
+        -h|--help)
+            awk 'NR > 1 { if (!/^#/) exit; sub(/^# ?/, ""); print }' "${BASH_SOURCE[0]}"
+            exit 0
+            ;;
+        --dry-run) dry_run=true; shift ;;
+        --undo) undo=true; shift ;;
+        --notify) notify=true; shift ;;
+        --add-source) add_source="${2:?missing folder for --add-source}"; shift 2 ;;
+        --desktop) desktop="${2:?missing path for --desktop}"; shift 2 ;;
+        --source) explicit_sources+=("${2:?missing folder for --source}"); shift 2 ;;
+        --additional-source) additional_sources+=("${2:?missing folder for --additional-source}"); shift 2 ;;
+        --inbox-name) inbox_name="${2:?missing name for --inbox-name}"; shift 2 ;;
+        --minimum-age-minutes) minimum_age="${2:?missing minutes for --minimum-age-minutes}"; shift 2 ;;
+        --source-list) source_list="${2:?missing file for --source-list}"; shift 2 ;;
+        --state-dir) state_dir="${2:?missing folder for --state-dir}"; shift 2 ;;
+        --log) log_file="${2:?missing file for --log}"; shift 2 ;;
+        *)
+            printf 'Unknown argument: %s\n' "$1" >&2
+            exit 2
+            ;;
+    esac
+done
+if [[ ! $minimum_age =~ ^[0-9]+$ ]] || ((minimum_age > 1440)); then
+    printf '%s\n' '--minimum-age-minutes must be a whole number from 0 to 1440.' >&2
+    exit 2
+fi
+[[ -n $log_file ]] || log_file="$state_dir/inbox-collector.log"
+journal="$state_dir/inbox-collector-last-run.journal"
+
+# Libraries sit next to the scripts (a deployed copy) or in ../lib (the repository).
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+find_library() {
+    local candidate
+    for candidate in "$script_dir/$1" "$script_dir/../lib/$1"; do
+        if [[ -r $candidate ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+# shellcheck source=../lib/xdg-dirs.sh
+source "$(find_library xdg-dirs.sh)"
+if progress_library=$(find_library cuberhaus-progress.sh); then
+    # shellcheck source=../lib/cuberhaus-progress.sh
+    source "$progress_library"
+else
+    progress_start() { :; }
+    progress_update() { :; }
+    progress_finish() { :; }
+    progress_abort() { :; }
+    [[ $notify == false ]] || printf 'Notification not shown: cuberhaus-progress.sh was not found.\n'
+fi
+
+# fail MESSAGE: end the run with a message the notification can show.
+fail() {
+    printf '%s\n' "$1" >&2
+    progress_finish failure --message "$1"
+    exit 1
+}
+
+# The source list holds the text ~ and $HOME, not their values.
+tilde=\~
+home_text=\$HOME
+
+# resolve_source ENTRY: the absolute folder a list line or option stands for, without a trailing slash.
+resolve_source() {
+    local entry=$1 name sub base fallback
+    case $entry in
+        xdg:*)
+            name=${entry#xdg:}
+            sub=''
+            if [[ $name == */* ]]; then
+                sub=${name#*/}
+                name=${name%%/*}
+            fi
+            case $name in
+                DESKTOP) fallback=Desktop ;;
+                DOWNLOAD) fallback=Downloads ;;
+                DOCUMENTS) fallback=Documents ;;
+                PICTURES) fallback=Pictures ;;
+                VIDEOS) fallback=Videos ;;
+                MUSIC) fallback=Music ;;
+                *) fallback=$name ;;
+            esac
+            base=$(xdg_user_dir "$name" "$HOME/$fallback")
+            entry=$base${sub:+/$sub}
+            ;;
+        "$tilde") entry=$HOME ;;
+        "$tilde/"*) entry=$HOME/${entry#"$tilde/"} ;;
+        "$home_text") entry=$HOME ;;
+        "$home_text/"*) entry=$HOME/${entry#"$home_text/"} ;;
+    esac
+    while [[ $entry == */ && $entry != / ]]; do
+        entry=${entry%/}
+    done
+    printf '%s\n' "$entry"
+}
+
+# configured_sources: the resolved folders of the source list, one per line.
+configured_sources() {
+    local line
+    [[ -r $source_list ]] || return 0
+    while IFS= read -r line || [[ -n $line ]]; do
+        line=${line#"${line%%[![:space:]]*}"}
+        line=${line%"${line##*[![:space:]]}"}
+        [[ -n $line && $line != '#'* ]] || continue
+        resolve_source "$line"
+    done <"$source_list"
+}
+
+write_log() {
+    mkdir -p -- "$(dirname -- "$log_file")"
+    printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$1" >>"$log_file"
+}
+
+###############################################################
+# => --add-source
+###############################################################
+
+if [[ -n $add_source ]]; then
+    [[ -d $add_source ]] || {
+        printf 'Inbox collector source directory does not exist: %s\n' "$add_source" >&2
+        exit 1
+    }
+    folder=$(cd -- "$add_source" && pwd)
+    while IFS= read -r known; do
+        if [[ $known == "$folder" ]]; then
+            printf 'Inbox collector source is already configured: %s\n' "$folder"
+            exit 0
+        fi
+    done < <(configured_sources)
+    stored=$folder
+    [[ $folder != "$HOME"/* ]] || stored="$tilde/${folder#"$HOME"/}"
+    mkdir -p -- "$(dirname -- "$source_list")"
+    printf '%s\n' "$stored" >>"$source_list"
+    printf 'Added inbox collector source: %s\n' "$folder"
+    exit 0
+fi
+
+###############################################################
+# => --undo
+###############################################################
+
+if [[ $undo == true ]]; then
+    if [[ ! -r $journal ]]; then
+        printf 'No inbox collector run is available to undo: %s\n' "$journal"
+        exit 0
+    fi
+    records_from=()
+    records_to=()
+    while IFS= read -r -d '' from && IFS= read -r -d '' to; do
+        records_from+=("$from")
+        records_to+=("$to")
+    done <"$journal"
+
+    restored=0
+    undo_skipped=0
+    undo_errors=0
+    kept_from=()
+    kept_to=()
+    for ((index = ${#records_from[@]} - 1; index >= 0; index--)); do
+        from=${records_from[index]}
+        to=${records_to[index]}
+        if [[ ! -e $to && ! -L $to ]]; then
+            write_log "[undo-skip] Collected item is missing: $to"
+            kept_from+=("$from"); kept_to+=("$to")
+            undo_skipped=$((undo_skipped + 1))
+        elif [[ -e $from || -L $from ]]; then
+            write_log "[undo-skip] Original path is occupied: $from"
+            kept_from+=("$from"); kept_to+=("$to")
+            undo_skipped=$((undo_skipped + 1))
+        elif mkdir -p -- "$(dirname -- "$from")" && mv -n -- "$to" "$from"; then
+            write_log "[undo] $to -> $from"
+            restored=$((restored + 1))
+        else
+            write_log "[undo-error] $to"
+            kept_from+=("$from"); kept_to+=("$to")
+            undo_errors=$((undo_errors + 1))
+        fi
+    done
+
+    if ((${#kept_from[@]} == 0)); then
+        rm -f -- "$journal"
+    else
+        : >"$journal"
+        # Kept in the order they were collected, which the loop above walked backwards.
+        for ((index = ${#kept_from[@]} - 1; index >= 0; index--)); do
+            printf '%s\0%s\0' "${kept_from[index]}" "${kept_to[index]}" >>"$journal"
+        done
+    fi
+
+    undo_summary="Restored $restored item(s); skipped $undo_skipped item(s); errors $undo_errors."
+    write_log "[undo-summary] $undo_summary"
+    printf '%s\n' "$undo_summary"
+    ((undo_errors == 0)) || exit 1
+    exit 0
+fi
+
+###############################################################
+# => Collect
+###############################################################
+
+# A run that dies still ends its notification as a failure.
+trap 'progress_abort $?' EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT
+
+if [[ $notify == true ]]; then
+    # A collection that takes a few seconds should not flash a bar, hence the delay.
+    progress_start inbox-collector 'Inbox collector' Collecting folder 10
+fi
+
+[[ -n $desktop ]] || desktop=$(xdg_user_dir DESKTOP "$HOME/Desktop")
+desktop=${desktop%/}
+[[ -d $desktop ]] || fail "Desktop directory does not exist: $desktop"
+
+if [[ -z $inbox_name ]]; then
+    inbox_name='0 Inbox'
+    if [[ ! -e "$desktop/$inbox_name" && -d "$desktop/0 - Inbox" ]]; then
+        inbox_name='0 - Inbox'
+    fi
+fi
+inbox="$desktop/$inbox_name"
+
+# The Desktop folders that are never collected, should the Desktop itself be a source.
+protected=("$desktop/$inbox_name" "$desktop/0 Inbox" "$desktop/0 - Inbox" "$desktop/1 Projects"
+    "$desktop/2 Areas" "$desktop/3 Resources" "$desktop/4 Archive" "$desktop/Shortcuts")
+
+source_candidates=()
+if ((${#explicit_sources[@]} > 0)); then
+    for entry in "${explicit_sources[@]}"; do
+        source_candidates+=("$(resolve_source "$entry")")
+    done
+else
+    while IFS= read -r entry; do
+        source_candidates+=("$entry")
+    done < <(configured_sources)
+fi
+if ((${#additional_sources[@]} > 0)); then
+    for entry in "${additional_sources[@]}"; do
+        source_candidates+=("$(resolve_source "$entry")")
+    done
+fi
+sources=()
+if ((${#source_candidates[@]} > 0)); then
+    while IFS= read -r -d '' entry; do
+        [[ $entry == "$inbox" ]] || sources+=("$entry")
+    done < <(printf '%s\0' "${source_candidates[@]}" | sort -zu)
+fi
+
+# is_protected PATH
+is_protected() {
+    local path
+    for path in "${protected[@]}"; do
+        [[ $1 == "$path" ]] && return 0
+    done
+    return 1
+}
+
+# What holds an item back: a link, a partial download, an editor lock file, and (when
+# --minimum-age-minutes is not 0) a change in the last that many minutes. find evaluates them as
+# one OR, so a folder is held back by anything inside it that matches.
+blockers=(-type l -o -iname '*.crdownload' -o -iname '*.download' -o -iname '*.part' -o -iname '*.partial'
+    -o -iname '*.tmp' -o -name '~$*')
+((minimum_age == 0)) || blockers+=(-o -mmin "-$minimum_age")
+
+# item_ready PATH: succeed when PATH is stable enough to move. A hidden item or a link stays. A
+# folder stays when anything inside it is a blocker, and when find cannot read it to the end.
+item_ready() {
+    local path=$1 name=${1##*/} hit
+    [[ $name != .* && ! -L $path ]] || return 1
+    if [[ -d $path ]]; then
+        hit=$(find "$path" \( "${blockers[@]}" \) -print -quit 2>/dev/null) || return 1
+    else
+        hit=$(find "$path" -maxdepth 0 \( "${blockers[@]}" \) -print 2>/dev/null) || return 1
+    fi
+    [[ -z $hit ]]
+}
+
+# available_destination ITEM DIR: DIR/NAME, or DIR/NAME (2).ext when the name is taken.
+available_destination() {
+    local item=$1 dir=$2 name base ext='' suffix=2 candidate
+    name=${item##*/}
+    candidate="$dir/$name"
+    if [[ ! -e $candidate && ! -L $candidate ]]; then
+        printf '%s\n' "$candidate"
+        return 0
+    fi
+    base=$name
+    if [[ ! -d $item && $name == ?*.* ]]; then
+        base=${name%.*}
+        ext=.${name##*.}
+    fi
+    while :; do
+        candidate="$dir/$base ($suffix)$ext"
+        if [[ ! -e $candidate && ! -L $candidate ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+        suffix=$((suffix + 1))
+    done
+}
+
+moved=0
+skipped=0
+errors=0
+verb=Moved
+[[ $dry_run == false ]] || verb='Would move'
+journal_started=false
+
+progress_update "total=${#sources[@]}"
+
+position=0
+for folder in ${sources[@]+"${sources[@]}"}; do
+    position=$((position + 1))
+    progress_update "current=Collecting from ${folder##*/}" "index=$position" "done=$((position - 1))"
+    if [[ ! -d $folder ]]; then
+        write_log "[skip] Source does not exist: $folder"
+        continue
+    fi
+    source_inbox="$inbox/${folder##*/}"
+
+    while IFS= read -r -d '' item; do
+        if is_protected "$item" || ! item_ready "$item"; then
+            skipped=$((skipped + 1))
+            continue
+        fi
+        destination=$(available_destination "$item" "$source_inbox")
+        if [[ $dry_run == true ]]; then
+            write_log "[dry-run] $item -> $destination"
+            moved=$((moved + 1))
+            continue
+        fi
+        if mkdir -p -- "$source_inbox" && mv -n -- "$item" "$destination"; then
+            write_log "[move] $item -> $destination"
+            mkdir -p -- "$state_dir"
+            if [[ $journal_started == false ]]; then
+                : >"$journal"
+                journal_started=true
+            fi
+            printf '%s\0%s\0' "$item" "$destination" >>"$journal"
+            moved=$((moved + 1))
+        else
+            write_log "[error] $item"
+            errors=$((errors + 1))
+        fi
+    done < <(find "$folder" -mindepth 1 -maxdepth 1 -print0 | sort -z)
+done
+
+summary="$verb $moved item(s); skipped $skipped item(s); errors $errors. Inbox: $inbox"
+write_log "[summary] $summary"
+printf '%s\n' "$summary"
+
+noun=items
+((moved != 1)) || noun=item
+if ((moved > 0)); then
+    headline="$verb $moved $noun into $inbox_name."
+else
+    headline='Nothing to collect.'
+fi
+left_line=''
+((skipped == 0)) || left_line="Left $skipped alone (too recent or protected)."
+
+if ((errors > 0)); then
+    progress_finish warning --message "$errors item(s) could not be moved; see the log." "$headline" "$left_line"
+    exit 1
+fi
+
+if [[ $dry_run == false ]]; then
+    mkdir -p -- "$state_dir"
+    date +%s > "$state_dir/inbox-collector.last-success"
+fi
+if ((moved == 0)); then
+    progress_finish success --quiet "$headline" "$left_line"
+else
+    progress_finish success "$headline" "$left_line"
+fi

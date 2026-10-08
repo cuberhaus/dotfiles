@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/libexec/cuberhaus-system-maintenance
+ExecStart=/usr/local/libexec/cuberhaus-system-maintenance --notify
 StandardOutput=journal
 StandardError=journal
 TimeoutStartSec=4h

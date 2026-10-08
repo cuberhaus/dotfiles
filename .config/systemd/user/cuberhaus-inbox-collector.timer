@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Cuberhaus inbox collector
+
+[Timer]
+OnCalendar=*-*-* 20:00:00
+Persistent=true
+AccuracySec=1m
+Unit=cuberhaus-inbox-collector.service
+
+[Install]
+WantedBy=timers.target

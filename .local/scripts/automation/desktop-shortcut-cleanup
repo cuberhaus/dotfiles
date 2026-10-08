@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# Move the launchers on the Desktop into a "Shortcuts" folder.
+#
+# Usage: desktop-shortcut-cleanup [--desktop DIR] [--dry-run] [--notify]
+#
+# Moves every .desktop and .url file of the Desktop into <Desktop>/Shortcuts, which is created when
+# needed. Installers and "add to desktop" menus keep dropping launchers there; this keeps the Desktop
+# for the 0 Inbox and the PARA folders. A file with the same name already in Shortcuts is replaced,
+# which is how a launcher an installer recreates every day stays one file. Hidden files stay.
+#
+#   --desktop DIR   the Desktop folder (default: XDG_DESKTOP_DIR of user-dirs.dirs, else ~/Desktop)
+#   --dry-run       list what would move and move nothing
+#   --notify        show a desktop notification when something moved or went wrong; a Desktop that
+#                   was already tidy stays silent. Off by default; the systemd service passes it.
+set -euo pipefail
+
+desktop=''
+dry_run=false
+notify=false
+while (($# > 0)); do
+    case "$1" in
+        -h|--help)
+            awk 'NR > 1 { if (!/^#/) exit; sub(/^# ?/, ""); print }' "${BASH_SOURCE[0]}"
+            exit 0
+            ;;
+        --desktop)
+            desktop="${2:?missing path for --desktop}"
+            shift 2
+            ;;
+        --dry-run)
+            dry_run=true
+            shift
+            ;;
+        --notify)
+            notify=true
+            shift
+            ;;
+        *)
+            printf 'Unknown argument: %s\n' "$1" >&2
+            exit 2
+            ;;
+    esac
+done
+
+# Libraries sit next to the scripts (a deployed copy) or in ../lib (the repository).
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+find_library() {
+    local candidate
+    for candidate in "$script_dir/$1" "$script_dir/../lib/$1"; do
+        if [[ -r $candidate ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+# shellcheck source=../lib/xdg-dirs.sh
+source "$(find_library xdg-dirs.sh)"
+if progress_library=$(find_library cuberhaus-progress.sh); then
+    # shellcheck source=../lib/cuberhaus-progress.sh
+    source "$progress_library"
+else
+    progress_start() { :; }
+    progress_update() { :; }
+    progress_finish() { :; }
+    progress_abort() { :; }
+    [[ $notify == false ]] || printf 'Notification not shown: cuberhaus-progress.sh was not found.\n'
+fi
+
+# A run that dies still ends its notification as a failure.
+trap 'progress_abort $?' EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT
+
+if [[ $notify == true ]]; then
+    progress_start desktop-shortcut-cleanup 'Desktop shortcut cleanup' Moving shortcut 0
+fi
+
+# fail MESSAGE: end the run with a message the notification can show.
+fail() {
+    printf '%s\n' "$1" >&2
+    progress_finish failure --message "$1"
+    exit 1
+}
+
+[[ -n $desktop ]] || desktop=$(xdg_user_dir DESKTOP "$HOME/Desktop")
+[[ -d $desktop ]] || fail "Desktop directory does not exist: $desktop"
+desktop=${desktop%/}
+destination="$desktop/Shortcuts"
+
+moved=0
+errors=0
+verb=Moved
+[[ $dry_run == false ]] || verb='Would move'
+
+while IFS= read -r -d '' launcher; do
+    if [[ $dry_run == true ]]; then
+        printf '[dry-run] %s -> %s/\n' "$launcher" "$destination"
+        moved=$((moved + 1))
+        continue
+    fi
+    if mkdir -p -- "$destination" && mv -f -- "$launcher" "$destination/"; then
+        moved=$((moved + 1))
+    else
+        printf 'Could not move %s\n' "$launcher" >&2
+        errors=$((errors + 1))
+    fi
+done < <(find "$desktop" -maxdepth 1 \( -type f -o -type l \) ! -name '.*' \
+    \( -iname '*.desktop' -o -iname '*.url' \) -print0 | sort -z)
+
+printf '%s %d Desktop launcher item(s) to %s.\n' "$verb" "$moved" "$destination"
+
+if ((errors > 0)); then
+    progress_finish warning --message "$errors shortcut(s) could not be moved." "$verb $moved to $destination."
+    exit 1
+fi
+
+if [[ $dry_run == false ]]; then
+    state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus-automations"
+    mkdir -p "$state_dir"
+    date +%s > "$state_dir/desktop-shortcut-cleanup.last-success"
+fi
+
+if ((moved == 0)); then
+    progress_finish success --quiet 'The Desktop was already tidy.'
+else
+    noun=shortcuts
+    ((moved != 1)) || noun=shortcut
+    progress_finish success "$verb $moved $noun to $destination."
+fi

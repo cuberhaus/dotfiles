@@ -172,7 +172,7 @@ PY
 
 ## Put a ZIP that holds the fake installer into the download folder.
 add_zip() {
-    local version="${1:-21.1.1}"
+    local version=21.1.1
     make_zip "$CASE/downloads/DaVinci_Resolve_${version}_Linux.zip" "$CASE/fake.run" "DaVinci_Resolve_${version}_Linux.run"
 }
 
@@ -943,6 +943,25 @@ test_uninstall_recognises_rules_by_content() {
         fail "Blackmagic's own rules must be removed"
 }
 
+test_uninstall_finds_the_shortcut_the_desktop_cleanup_moved() {
+    new_case moved-shortcut
+    install_ok
+    local shortcuts="$CASE/home/Desktop/Shortcuts"
+    # desktop-shortcut-cleanup moves the launchers of the Desktop into Desktop/Shortcuts.
+    mkdir -p "$shortcuts"
+    mv "$CASE/home/Desktop/com.blackmagicdesign.resolve.desktop" "$shortcuts/"
+    printf '[Desktop Entry]\nExec=/usr/bin/other\n' >"$shortcuts/other.desktop"
+
+    run_script --uninstall --dry-run
+    assert_status 0 'uninstall dry run with a moved shortcut'
+    assert_output "would remove $shortcuts/com.blackmagicdesign.resolve.desktop" 'a dry run lists the moved shortcut'
+
+    run_script --uninstall --unattended
+    assert_status 0 'uninstall with a moved shortcut'
+    [[ ! -e "$shortcuts/com.blackmagicdesign.resolve.desktop" ]] || fail 'the moved shortcut must be removed'
+    [[ -f "$shortcuts/other.desktop" ]] || fail 'the launcher of another app in Shortcuts must stay'
+}
+
 test_uninstall_removes_only_what_is_resolve() {
     new_case foreign-folder
     mkdir -p "$CASE/opt/resolve/keep"
@@ -1076,6 +1095,7 @@ test_root_is_refused
 test_free_space_is_checked
 test_uninstall
 test_uninstall_recognises_rules_by_content
+test_uninstall_finds_the_shortcut_the_desktop_cleanup_moved
 test_uninstall_removes_only_what_is_resolve
 test_bootstrap_and_repair_wiring
 test_video_apps_are_declared

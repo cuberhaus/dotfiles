@@ -593,6 +593,29 @@ class RemovalTests(RemovalCase):
 
         self.assertEqual(self.files("gpt4all"), (self.home / "gpt4all", second, launcher, shortcut))
 
+    def test_a_shortcut_the_desktop_cleanup_moved_goes_with_the_app(self) -> None:
+        # desktop-shortcut-cleanup moves the launchers of the desktop into Desktop/Shortcuts.
+        program, launcher = self.installed("gpt4all/bin/chat", "gpt4all")
+        self.uninstaller("gpt4all")
+        loose = self.shortcut("GPT4All.desktop", program)
+        moved = self.shortcut("GPT4All-moved.desktop", program, self.home / "Desktop" / "Shortcuts")
+        self.shortcut("Other.desktop", self.program("elsewhere/bin/other"), self.home / "Desktop" / "Shortcuts")
+
+        self.assertEqual(self.files("gpt4all"), (self.home / "gpt4all", launcher, loose, moved))
+
+    def test_the_shortcuts_folder_follows_the_desktop_folder(self) -> None:
+        program, _ = self.installed("gpt4all/bin/chat", "gpt4all")
+        self.uninstaller("gpt4all")
+        (self.home / ".config").mkdir()
+        (self.home / ".config" / "user-dirs.dirs").write_text('XDG_DESKTOP_DIR="$HOME/Escritorio"\n', encoding="utf-8")
+        not_the_desktop = self.shortcut("GPT4All.desktop", program, self.home / "Desktop" / "Shortcuts")
+        moved = self.shortcut("GPT4All.desktop", program, self.home / "Escritorio" / "Shortcuts")
+
+        files = self.files("gpt4all")
+
+        self.assertIn(moved, files)
+        self.assertNotIn(not_the_desktop, files)
+
     def test_the_desktop_folder_is_the_one_user_dirs_dirs_names(self) -> None:
         program, _ = self.installed("gpt4all/bin/chat", "gpt4all")
         self.uninstaller("gpt4all")

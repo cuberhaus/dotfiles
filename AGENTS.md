@@ -39,6 +39,7 @@ Each reference holds invariants and the reasons behind them; open it before the 
 - **A bootstrap file, an installer step or package, a vendor apt source, or profile detection** (`DOTFILES_PROFILE`): [docs/agents/bootstrap-installers.md](docs/agents/bootstrap-installers.md).
 - **`update`/`updateall`, `cleanup`, `git-recurse`, `.local/Mini/.bashrc`, antigen bundles, `ARGV0`, the Bash prompt**: [docs/agents/shell-tools.md](docs/agents/shell-tools.md).
 - **`logout-all`, Git credential storage, `vault-secret` and the age identity** (never `credential.helper store`; never print a secret value): [docs/agents/credentials.md](docs/agents/credentials.md).
+- **Scheduled automations and their desktop notifications** (`.local/scripts/automation/*`, `lib/cuberhaus-progress.sh`, `--notify`, `inbox-collector`, `desktop-shortcut-cleanup`; the root job must source its library only from its own root-owned directory): [docs/agents/automation-notifications.md](docs/agents/automation-notifications.md).
 
 ## Agent skills
 

@@ -5,7 +5,10 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 dotfiles_root=$(cd "$script_dir/../../.." && pwd)
 platform=$(uname -s)
 
-for required_script in system-maintenance user-package-maintenance workspace-pull; do
+for required_script in \
+    system-maintenance user-package-maintenance workspace-pull \
+    inbox-collector desktop-shortcut-cleanup \
+    ../lib/cuberhaus-progress.sh ../lib/xdg-dirs.sh; do
     if [[ ! -r "$script_dir/$required_script" ]]; then
         printf 'Required automation script is missing or unreadable: %s\n' "$script_dir/$required_script" >&2
         exit 1
@@ -25,10 +28,19 @@ install_linux() {
     for deployed_file in \
         "$HOME/.local/scripts/automation/user-package-maintenance" \
         "$HOME/.local/scripts/automation/workspace-pull" \
+        "$HOME/.local/scripts/automation/inbox-collector" \
+        "$HOME/.local/scripts/automation/desktop-shortcut-cleanup" \
+        "$HOME/.local/scripts/lib/cuberhaus-progress.sh" \
+        "$HOME/.local/scripts/lib/xdg-dirs.sh" \
+        "$HOME/.config/cuberhaus-automations/inbox-collector-sources.txt" \
         "$HOME/.config/systemd/user/cuberhaus-user-package-maintenance.service" \
         "$HOME/.config/systemd/user/cuberhaus-user-package-maintenance.timer" \
         "$HOME/.config/systemd/user/cuberhaus-workspace-pull.service" \
-        "$HOME/.config/systemd/user/cuberhaus-workspace-pull.timer"; do
+        "$HOME/.config/systemd/user/cuberhaus-workspace-pull.timer" \
+        "$HOME/.config/systemd/user/cuberhaus-inbox-collector.service" \
+        "$HOME/.config/systemd/user/cuberhaus-inbox-collector.timer" \
+        "$HOME/.config/systemd/user/cuberhaus-desktop-shortcut-cleanup.service" \
+        "$HOME/.config/systemd/user/cuberhaus-desktop-shortcut-cleanup.timer"; do
         if [[ ! -r "$deployed_file" ]]; then
             printf 'Required Stow deployment is missing: %s\nRun make restow first.\n' "$deployed_file" >&2
             exit 1
@@ -38,10 +50,15 @@ install_linux() {
     systemctl --user daemon-reload
     systemctl --user enable --now \
         cuberhaus-user-package-maintenance.timer \
-        cuberhaus-workspace-pull.timer
+        cuberhaus-workspace-pull.timer \
+        cuberhaus-inbox-collector.timer \
+        cuberhaus-desktop-shortcut-cleanup.timer
 
     sudo install -d -m 0755 /usr/local/libexec
     sudo install -m 0755 "$script_dir/system-maintenance" /usr/local/libexec/cuberhaus-system-maintenance
+    # The root job sources the notification library from its own root-owned directory,
+    # never from a user home, so a user cannot inject code into the root run.
+    sudo install -m 0644 "$script_dir/../lib/cuberhaus-progress.sh" /usr/local/libexec/cuberhaus-progress.sh
     sudo install -m 0644 \
         "$dotfiles_root/.local/share/cuberhaus-automations/systemd/cuberhaus-system-maintenance.service" \
         "$dotfiles_root/.local/share/cuberhaus-automations/systemd/cuberhaus-system-maintenance.timer" \
@@ -89,4 +106,4 @@ case "$platform" in
         ;;
 esac
 
-printf 'Cuberhaus package maintenance and workspace pull automations are installed.\n'
+printf 'Cuberhaus automation schedules are installed.\n'

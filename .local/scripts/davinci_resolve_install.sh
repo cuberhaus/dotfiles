@@ -605,12 +605,15 @@ list_if_marked() {
 }
 
 ## The files outside the prefix that belong to Resolve, one per line: the launchers whose Exec
-## line starts a program inside the prefix (also the one on the Desktop), its menu entries, and
-## the udev rules that Blackmagic's installer, or this script, wrote.
+## line starts a program inside the prefix (also the one on the Desktop, or in Desktop/Shortcuts
+## where the desktop-shortcut-cleanup automation moves it), its menu entries, and the udev rules
+## that Blackmagic's installer, or this script, wrote.
 system_files() {
     local file directory
     local rules="$ROOT_DIR/usr/lib/udev/rules.d" admin_rules="$ROOT_DIR/etc/udev/rules.d"
-    for file in "$ROOT_DIR"/usr/share/applications/*.desktop "$HOME/Desktop/com.blackmagicdesign.resolve.desktop"; do
+    for file in "$ROOT_DIR"/usr/share/applications/*.desktop \
+        "$HOME/Desktop/com.blackmagicdesign.resolve.desktop" \
+        "$HOME/Desktop/Shortcuts/com.blackmagicdesign.resolve.desktop"; do
         if [[ -f "$file" ]] && awk -v prefix="$PREFIX/" '/^Exec=/ && index($0, prefix) { found = 1 } END { exit !found }' "$file"; then
             printf '%s\n' "$file"
         fi

@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash %h/.local/scripts/automation/user-package-maintenance
+ExecStart=/bin/bash %h/.local/scripts/automation/user-package-maintenance --notify
 StandardOutput=journal
 StandardError=journal
 TimeoutStartSec=4h

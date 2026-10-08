@@ -40,12 +40,20 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── gentoo_functions   # Gentoo (Portage, OpenRC/systemd) helpers
 │   │   ├── gentoo.packages    # Gentoo package manifest: plain atoms in sections
 │   │   └── xterm-256color-italic.terminfo
-│   ├── automation/             # Scheduled package updates and workspace pulls
-│   ├── audit_installation.py   # Read-only installation alignment report
+│   ├── automation/             # Scheduled jobs (systemd on Linux, launchd on macOS)
 │   │   ├── install             # Installs systemd timers or launchd agents
+│   │   ├── uninstall           # Removes them (--dry-run previews)
+│   │   ├── observe             # status / logs / digest of the schedules
 │   │   ├── system-maintenance  # Root apt/pacman upgrades (Linux)
 │   │   ├── user-package-maintenance # Homebrew/yay upgrades
-│   │   └── workspace-pull      # Safe recursive pull of ~/cuberhaus
+│   │   ├── workspace-pull      # Safe recursive pull of ~/cuberhaus
+│   │   ├── inbox-collector     # Moves Downloads/Screenshots into the Desktop inbox (Linux)
+│   │   └── desktop-shortcut-cleanup # Moves loose Desktop launchers into Desktop/Shortcuts (Linux)
+│   ├── lib/                    # Sourced helpers, never run directly
+│   │   ├── cuberhaus-progress.sh # Desktop progress bar and summary notifications
+│   │   ├── xdg-dirs.sh         # xdg_user_dir: read user-dirs.dirs without xdg-user-dir
+│   │   └── git-repo-defaults.sh # Shared by clone-all and clone-team
+│   ├── audit_installation.py   # Read-only installation alignment report
 │   │
 │   ├── cinnamon_path/          # Scripts added to $PATH on Cinnamon DE
 │   │   ├── cinnamon_load_config
@@ -100,7 +108,10 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 - **`automation/`** contains shared jobs invoked by `systemd` on Linux and
   `launchd` on macOS. `make install-automations` installs or refreshes their
   native scheduler definitions; `make uninstall-automations-dry-run` previews
-  removal and `make uninstall-automations` disables/removes them.
+  removal and `make uninstall-automations` disables/removes them. On Linux the
+  jobs also show desktop notifications (a live progress bar, then a summary
+  when something changed or failed) through `lib/cuberhaus-progress.sh`; see
+  [docs/agents/automation-notifications.md](../docs/agents/automation-notifications.md).
 - **`audit_installation.py`** statically reads the selected bootstrap instead
   of sourcing it, then reports checkout, Stow, package, and scheduler drift via
   `make audit-installation`. Set `PROFILE=<name>` to override auto-detection,
@@ -125,8 +136,8 @@ Most bootstrap entrypoints follow this pattern:
 4. Call installer functions in dependency order, converging machine-specific
   state from hardware, service, and group checks.
 5. Switch default shell to zsh.
-6. Install package-maintenance and workspace-pull schedules through the root
-  Makefile target.
+6. Install the package-maintenance, workspace-pull, inbox-collector and
+  desktop-shortcut-cleanup schedules through the root Makefile target.
 
 The work bootstrap mirrors all terminal output to a persistent per-run log at
 `${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus/bootstrap/work-<UTC timestamp>-<PID>.log`.
@@ -454,7 +465,7 @@ Things to know before the first start:
 The uninstall checklists of `ubuntu` and `work` offer `davinci_uninstall`, which
 removes `/opt/resolve` (only when `bin/resolve` is there, so a mistyped prefix
 deletes nothing), the launchers whose `Exec=` line starts a program inside it
-(also `~/Desktop/com.blackmagicdesign.resolve.desktop`), Resolve's two menu files
+(also `~/Desktop/com.blackmagicdesign.resolve.desktop`, or the copy in `~/Desktop/Shortcuts/` after `desktop-shortcut-cleanup` moved it), Resolve's two menu files
 (`com.blackmagicdesign.resolve.directory` and `.menu`), and the udev rules files its
 installer writes (`75-davincipanel.rules`, `75-davincikb.rules`, `75-sdx.rules`) plus
 the override from step 5. A rules file goes only when it names Blackmagic's USB vendor

@@ -14,9 +14,15 @@ format_epoch() {
     fi
 }
 
+# The inbox collector and the Desktop shortcut cleanup are Linux-only (systemd) tasks.
+digest_names=(user-package-maintenance workspace-pull)
+if [[ $(uname -s) == Linux ]]; then
+    digest_names+=(inbox-collector desktop-shortcut-cleanup)
+fi
+
 digest() {
     local name state_file value
-    for name in user-package-maintenance workspace-pull; do
+    for name in "${digest_names[@]}"; do
         state_file="$state_dir/$name.last-success"
         if [[ -r "$state_file" ]]; then
             value="$(<"$state_file")"
@@ -42,7 +48,11 @@ linux_status() {
 
 linux_logs() {
     journalctl -n "$lines" --no-pager -u cuberhaus-system-maintenance.service
-    journalctl --user -n "$lines" --no-pager -u cuberhaus-user-package-maintenance.service -u cuberhaus-workspace-pull.service
+    journalctl --user -n "$lines" --no-pager \
+        -u cuberhaus-user-package-maintenance.service \
+        -u cuberhaus-workspace-pull.service \
+        -u cuberhaus-inbox-collector.service \
+        -u cuberhaus-desktop-shortcut-cleanup.service
 }
 
 macos_status() {

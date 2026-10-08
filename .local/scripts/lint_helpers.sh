@@ -16,6 +16,7 @@ LINT_PATTERNS=(
     '.config/i3-layout-manager/layouts/*.sh'
     '.config/i3/*.sh'
     '.config/xmobar/*.sh'
+    '.local/scripts/automation/*'
     '.local/scripts/bootstrap/*'
     '.local/scripts/bin/*'
     '.local/scripts/*.sh'

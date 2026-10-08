@@ -38,7 +38,11 @@ PROFILE_SOURCES = {
 LINUX_USER_TIMERS = (
     "cuberhaus-user-package-maintenance.timer",
     "cuberhaus-workspace-pull.timer",
+    "cuberhaus-inbox-collector.timer",
+    "cuberhaus-desktop-shortcut-cleanup.timer",
 )
+# The folder of the desktop that the desktop-shortcut-cleanup automation moves launchers into.
+DESKTOP_SHORTCUTS_FOLDER = "Shortcuts"
 LINUX_SYSTEM_TIMER = "cuberhaus-system-maintenance.timer"
 MACOS_AGENTS = (
     "com.cuberhaus.user-package-maintenance",
@@ -1432,8 +1436,9 @@ def app_files(program: pathlib.Path, home: pathlib.Path) -> tuple[pathlib.Path, 
     """What removing the app deletes: its file or folder, the links onto the PATH, then its launchers.
 
     Empty where app_location cannot tell what belongs to the app. A launcher is every desktop file
-    that starts a program inside what is deleted, in the folder of launchers and on the desktop (an
-    installer often leaves a shortcut there too); a link is a symbolic link in LINK_FOLDERS that
+    that starts a program inside what is deleted, in the folder of launchers, on the desktop (an
+    installer often leaves a shortcut there too) and in the desktop's Shortcuts folder, where the
+    desktop-shortcut-cleanup automation moves them; a link is a symbolic link in LINK_FOLDERS that
     leads there. A file that cannot be read, or leads nowhere near, is left alone.
     """
     location = app_location(program, home)
@@ -1447,7 +1452,8 @@ def app_files(program: pathlib.Path, home: pathlib.Path) -> tuple[pathlib.Path, 
                     files.append(link)
             except (OSError, RuntimeError):
                 continue
-    for directory in (user_applications_dir(), user_desktop_dir()):
+    desktop = user_desktop_dir()
+    for directory in (user_applications_dir(), desktop, desktop / DESKTOP_SHORTCUTS_FOLDER):
         for launcher in directory_entries(directory, "*.desktop"):
             if is_within(launcher_program(desktop_entry(launcher)), location):
                 files.append(launcher)

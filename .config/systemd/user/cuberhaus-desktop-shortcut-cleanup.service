@@ -1,0 +1,9 @@
+[Unit]
+Description=Cuberhaus Desktop shortcut cleanup
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash %h/.local/scripts/automation/desktop-shortcut-cleanup --notify
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=15min

@@ -1,0 +1,5 @@
+# Folders the inbox collector empties into the Desktop inbox, one per line.
+# A path, ~ or $HOME at the start, or xdg:NAME[/sub] for an XDG folder.
+# Lines starting with # are comments. `inbox-collector --add-source DIR` appends to this file.
+xdg:DOWNLOAD
+xdg:PICTURES/Screenshots

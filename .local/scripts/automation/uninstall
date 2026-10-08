@@ -25,21 +25,29 @@ uninstall_linux() {
         return
     fi
 
+    local user_timers=(
+        cuberhaus-user-package-maintenance.timer
+        cuberhaus-workspace-pull.timer
+        cuberhaus-inbox-collector.timer
+        cuberhaus-desktop-shortcut-cleanup.timer
+    )
+    local system_files=(
+        /etc/systemd/system/cuberhaus-system-maintenance.service
+        /etc/systemd/system/cuberhaus-system-maintenance.timer
+        /usr/local/libexec/cuberhaus-system-maintenance
+        /usr/local/libexec/cuberhaus-progress.sh
+    )
+
     if [[ $dry_run == true ]]; then
-        show systemctl --user disable --now cuberhaus-user-package-maintenance.timer cuberhaus-workspace-pull.timer
+        show systemctl --user disable --now "${user_timers[@]}"
         show sudo systemctl disable --now cuberhaus-system-maintenance.timer
-        show sudo rm -f /etc/systemd/system/cuberhaus-system-maintenance.service /etc/systemd/system/cuberhaus-system-maintenance.timer /usr/local/libexec/cuberhaus-system-maintenance
+        show sudo rm -f "${system_files[@]}"
         return
     fi
 
-    systemctl --user disable --now \
-        cuberhaus-user-package-maintenance.timer \
-        cuberhaus-workspace-pull.timer 2>/dev/null || true
+    systemctl --user disable --now "${user_timers[@]}" 2>/dev/null || true
     sudo systemctl disable --now cuberhaus-system-maintenance.timer 2>/dev/null || true
-    sudo rm -f \
-        /etc/systemd/system/cuberhaus-system-maintenance.service \
-        /etc/systemd/system/cuberhaus-system-maintenance.timer \
-        /usr/local/libexec/cuberhaus-system-maintenance
+    sudo rm -f "${system_files[@]}"
     systemctl --user daemon-reload
     sudo systemctl daemon-reload
 }

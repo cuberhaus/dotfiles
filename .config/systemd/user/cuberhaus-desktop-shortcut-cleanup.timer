@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Cuberhaus Desktop shortcut cleanup
+
+[Timer]
+OnCalendar=*-*-* 10:45:00
+Persistent=true
+AccuracySec=1m
+Unit=cuberhaus-desktop-shortcut-cleanup.service
+
+[Install]
+WantedBy=timers.target

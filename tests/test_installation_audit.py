@@ -295,6 +295,8 @@ class InstallationAuditContractTests(unittest.TestCase):
             (
                 "cuberhaus-user-package-maintenance.timer",
                 "cuberhaus-workspace-pull.timer",
+                "cuberhaus-inbox-collector.timer",
+                "cuberhaus-desktop-shortcut-cleanup.timer",
             ),
         )
         self.assertEqual(
@@ -303,6 +305,27 @@ class InstallationAuditContractTests(unittest.TestCase):
                 "com.cuberhaus.user-package-maintenance",
                 "com.cuberhaus.workspace-pull",
             ),
+        )
+
+    def test_every_audited_timer_ships_with_a_service_that_shows_notifications(self):
+        audit = load_audit_module()
+        units = REPO_ROOT / ".config" / "systemd" / "user"
+
+        for timer in audit.LINUX_USER_TIMERS:
+            with self.subTest(timer):
+                timer_text = (units / timer).read_text(encoding="utf-8")
+                service = timer.removesuffix(".timer") + ".service"
+                self.assertIn(f"Unit={service}", timer_text)
+                service_text = (units / service).read_text(encoding="utf-8")
+                exec_lines = [line for line in service_text.splitlines() if line.startswith("ExecStart=")]
+                self.assertEqual(len(exec_lines), 1)
+                self.assertTrue(exec_lines[0].endswith(" --notify"), exec_lines[0])
+
+        root_service = (
+            REPO_ROOT / ".local" / "share" / "cuberhaus-automations" / "systemd" / "cuberhaus-system-maintenance.service"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "ExecStart=/usr/local/libexec/cuberhaus-system-maintenance --notify", root_service.splitlines()
         )
 
     def test_apt_policy_parser_reads_versions_and_repository_presence(self):

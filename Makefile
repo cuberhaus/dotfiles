@@ -109,6 +109,11 @@ test: ## Run deterministic unit tests
 	bash tests/test_zsh_argv0.sh
 	bash tests/test_zshrc_bundles.sh
 	bash tests/test_updateall.sh
+	bash tests/test_progress_lib.sh
+	bash tests/test_automation_notifications.sh
+	bash tests/test_automation_install.sh
+	bash tests/test_inbox_collector.sh
+	bash tests/test_desktop_shortcut_cleanup.sh
 	bash tests/test_cleanup.sh
 	bash tests/test_logout_all.sh
 	bash tests/test_bashrc_prompt.sh
@@ -152,7 +157,7 @@ hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
 	chmod +x .git/hooks/pre-commit
 	@echo "Pre-commit hook installed."
 
-install-automations: ## Install native package-maintenance and workspace-pull schedules
+install-automations: ## Install native schedules (package maintenance, workspace pull, inbox collector, shortcut cleanup)
 	bash .local/scripts/automation/install
 
 uninstall-automations: ## Disable and remove native automation schedules

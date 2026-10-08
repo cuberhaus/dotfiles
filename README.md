@@ -366,6 +366,8 @@ The bootstrap installs these automations without requiring a separate command:
 | System packages | Sunday 10:00 via system `systemd` (`apt-get` or `pacman`) | Managed by macOS Software Update |
 | User packages | Sunday 10:30 via user `systemd` (Homebrew and/or `yay`) | Sunday 10:30 via `launchd` (Homebrew) |
 | `~/cuberhaus` pull | Daily 11:00 via user `systemd` | Daily 11:00 via `launchd` |
+| Inbox collector | Daily 20:00 via user `systemd` | Not installed |
+| Desktop shortcut cleanup | Daily 10:45 via user `systemd` | Not installed |
 
 The workspace pull matches the shell helper's depth-3 discovery but uses
 `git pull --ff-only --no-edit` with credential prompts disabled. Repositories
@@ -377,6 +379,29 @@ available. On macOS, the agents run at login as well as on schedule, with state
 guards preventing duplicate work: 20 hours for workspace pulls and seven days
 for user package updates. WSL deliberately installs no duplicate timers because
 Windows Task Scheduler owns the same automations.
+
+The inbox collector moves what piles up in the folders listed in
+`~/.config/cuberhaus-automations/inbox-collector-sources.txt` (by default
+Downloads and Pictures/Screenshots) into a folder named after each source in the
+Desktop `0 Inbox`. It never overwrites, leaves recent files, partial downloads,
+links and hidden files alone, and `inbox-collector --undo` reverses the last run.
+The shortcut cleanup moves loose `.desktop` and `.url` launchers from the Desktop
+into `Desktop/Shortcuts`. Both accept `--dry-run`.
+
+### Desktop notifications
+
+On Linux, the scheduled jobs report through the desktop notification service
+(`gdbus`, with `notify-send` as a fallback). A progress bar appears only once a
+run has lasted ten seconds, with one step per repository, package or folder.
+When the run ends, a summary appears if something changed or went wrong. A run
+that had nothing to do shows nothing and closes any bar it had opened, so a
+healthy day is silent. A failed run ends with a warning or error summary that
+names what failed; the journal keeps the details. The systemd services pass
+`--notify`; run a script by hand with
+`--notify` to see the same output. The root system-package job relays its
+notifications to the logged-in graphical session, and nothing is shown when
+nobody is logged in. macOS and WSL show no notifications. See
+[docs/agents/automation-notifications.md](docs/agents/automation-notifications.md).
 
 For an existing checkout, restow the new files and install the schedules:
 
@@ -404,6 +429,8 @@ systemctl --user list-timers 'cuberhaus-*'
 journalctl -u cuberhaus-system-maintenance.service
 journalctl --user -u cuberhaus-user-package-maintenance.service
 journalctl --user -u cuberhaus-workspace-pull.service
+journalctl --user -u cuberhaus-inbox-collector.service
+journalctl --user -u cuberhaus-desktop-shortcut-cleanup.service
 
 # macOS
 launchctl print "gui/$UID/com.cuberhaus.user-package-maintenance"
