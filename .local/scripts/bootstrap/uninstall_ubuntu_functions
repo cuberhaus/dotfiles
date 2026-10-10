@@ -42,6 +42,9 @@ ubuntu_gui_uninstall() {
     rm -rf "$HOME/.opencode" 2>/dev/null || true
     rm -f "$HOME/.local/bin/opencode" 2>/dev/null || true
 
+    # Cursor CLI
+    cursor_cli_uninstall
+
     # Pi
     npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true
     sudo npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true

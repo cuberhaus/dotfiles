@@ -102,6 +102,7 @@ test: ## Run deterministic unit tests
 	bash tests/test_nvidia_container_toolkit.sh
 	bash tests/test_openlogi_install.sh
 	bash tests/test_kondo_install.sh
+	bash tests/test_cursor_cli_install.sh
 	bash tests/test_davinci_resolve_install.sh
 	bash tests/test_ycm.sh
 	bash tests/test_bootstrap_gentoo.sh

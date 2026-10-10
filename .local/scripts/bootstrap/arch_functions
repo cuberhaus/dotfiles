@@ -723,6 +723,10 @@ EOF
         info "OpenCode already installed, skipping."
     fi
 
+    # Cursor CLI (`agent`; Cursor's own installer, because the AppImage does not include it)
+    cursor_cli_install ||
+        warn "Cursor CLI setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; cursor_cli_install'"
+
     # Pi (AI coding agent)
     if ! command -v pi &>/dev/null; then
         info "Installing Pi..."

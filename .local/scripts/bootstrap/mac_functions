@@ -124,6 +124,10 @@ ai_tools_install() {
     else
         info "Ollama already installed, skipping."
     fi
+
+    # Cursor CLI (`agent`; Cursor's own installer, because the cursor cask does not include it)
+    cursor_cli_install ||
+        warn "Cursor CLI setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; cursor_cli_install'"
 }
 
 optional () {

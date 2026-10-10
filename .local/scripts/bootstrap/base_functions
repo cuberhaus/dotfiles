@@ -662,6 +662,54 @@ cursor_appimage_icon_install() {
     return 1
 }
 
+# Install the Cursor CLI (`agent`, also linked as `cursor-agent`) for the current user.
+# Cursor ships it through its own installer only: neither the .deb nor the AppImage of
+# the IDE contains it, and there is no apt, pacman or brew package.  The installer puts
+# the program in ~/.local/share/cursor-agent and links it from ~/.local/bin.  The script
+# is downloaded in full before bash runs it, so a dropped connection cannot run half of
+# it, and an existing install is left alone (`agent update` updates it).  It does not
+# sign in: run `agent login`.  Call it as `cursor_cli_install ||`: the shell ignores
+# `set -e` there, so a failure warns and returns 1 instead of relying on it.
+cursor_cli_install() {
+    local installer
+
+    if command -v cursor-agent &>/dev/null || [ -x "$HOME/.local/bin/cursor-agent" ]; then
+        info "Cursor CLI already installed, skipping (update it with: agent update)."
+        return 0
+    fi
+
+    info "Installing Cursor CLI..."
+    if ! installer=$(curl -fsSL https://cursor.com/install); then
+        warn "Could not download the Cursor CLI installer"
+        return 1
+    fi
+    if ! NO_COLOR=1 bash -c "$installer" </dev/null; then
+        warn "The Cursor CLI installer failed"
+        return 1
+    fi
+    if [ ! -x "$HOME/.local/bin/cursor-agent" ]; then
+        warn "The Cursor CLI installer did not create $HOME/.local/bin/cursor-agent"
+        return 1
+    fi
+    info "Cursor CLI installed; sign in with: agent login"
+}
+
+# Remove what cursor_cli_install put in place: the program folder, and each of the two
+# links in ~/.local/bin only while it still points into that folder, so an `agent` that
+# something else put there stays.  The sign-in and settings in ~/.cursor are the user's
+# and stay too.
+cursor_cli_uninstall() {
+    local cli_home="$HOME/.local/share/cursor-agent"
+    local link
+
+    for link in "$HOME/.local/bin/agent" "$HOME/.local/bin/cursor-agent"; do
+        case "$(readlink "$link" 2>/dev/null)" in
+            "$cli_home"/*) rm -f "$link" ;;
+        esac
+    done
+    rm -rf "$cli_home"
+}
+
 # Run a command that changes the apt configuration, or only describe it when
 # APT_SOURCES_DRY_RUN=true (`make repair REPAIR=ide-repos DRY_RUN=true`).
 apt_sources_apply() {
