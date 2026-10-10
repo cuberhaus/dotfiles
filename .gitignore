@@ -135,6 +135,11 @@
 !.config/opencode/
 !.config/opencode/opencode.jsonc
 !.config/opencode/tui.json
+# Cursor agent CLI: only cli-config.json. auth.json, chats/ and statsig-cache.json stay ignored.
+# cli-config.json also holds authInfo (email, user/team IDs): scrub it before any push.
+!.config/cursor/
+.config/cursor/*
+!.config/cursor/cli-config.json
 !.config/Antigravity/
 .config/Antigravity/*
 !.config/Antigravity/User/
