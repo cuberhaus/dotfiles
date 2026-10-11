@@ -93,6 +93,7 @@ gui_apps_uninstall() {
     sudo snap remove obsidian || true
     sudo snap remove spotify || true
     sudo snap remove discord || true
+    sudo snap remove telegram-desktop || true
     sudo snap remove sublime-text || true
     sudo snap remove sublime-merge || true
     sudo snap remove openshot-qt || true

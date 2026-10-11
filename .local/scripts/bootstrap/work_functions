@@ -500,9 +500,10 @@ gui_apps_install() {
     # Sublime Merge — not needed right now
     # snap list sublime-merge &>/dev/null 2>&1 || sudo snap install sublime-merge --classic
 
-    # Spotify and Discord (snap)
+    # Spotify, Discord and Telegram (snap)
     snap list spotify &>/dev/null 2>&1 || sudo snap install spotify
     snap list discord &>/dev/null 2>&1 || sudo snap install discord
+    snap list telegram-desktop &>/dev/null 2>&1 || sudo snap install telegram-desktop
 
     # Video: the official OpenShot snap is newer than the Ubuntu archive and has no PPA
     # dependency stack; Blender's official classic snap is the upstream build (the archive

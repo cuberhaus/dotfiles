@@ -386,6 +386,7 @@ snaps_install() {
     snap list skype &>/dev/null                   || sudo snap install skype --classic
     snap list slack &>/dev/null                   || sudo snap install slack --classic
     snap list spotify &>/dev/null                 || sudo snap install spotify
+    snap list telegram-desktop &>/dev/null        || sudo snap install telegram-desktop
     # snap list sublime-merge &>/dev/null         || sudo snap install sublime-merge --classic # Not needed right now
     snap list sublime-text &>/dev/null            || sudo snap install sublime-text --classic
 }

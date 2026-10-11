@@ -232,6 +232,23 @@ class InstallationAuditContractTests(unittest.TestCase):
             self.assertTrue(blender.classic, f"{profile}: Blender's official snap needs --classic")
             self.assertFalse(openshot.classic, f"{profile}: the OpenShot snap is strictly confined")
 
+    def test_ubuntu_and_work_install_telegram_desktop_from_the_official_snap(self):
+        audit = load_audit_module()
+
+        for profile, uninstaller in (
+            ("ubuntu", "uninstall_ubuntu_functions"),
+            ("work", "uninstall_work_functions"),
+        ):
+            declared = audit.expected_packages(REPO_ROOT, profile)
+            telegram = next(
+                (package for package in declared if package == audit.Package("snap", "telegram-desktop")),
+                None,
+            )
+            self.assertIsNotNone(telegram, f"{profile}: the bootstrap must install the Telegram Desktop snap")
+            self.assertFalse(telegram.classic, f"{profile}: Telegram's official snap is strictly confined")
+            uninstall = (REPO_ROOT / ".local/scripts/bootstrap" / uninstaller).read_text(encoding="utf-8")
+            self.assertIn("snap remove telegram-desktop", uninstall, f"{profile}: the uninstaller must remove it")
+
     def test_davinci_resolve_prerequisites_follow_the_profiles_that_call_the_step(self):
         audit = load_audit_module()
         prerequisites = ("unzip", "libfuse2t64", "libapr1t64", "libaprutil1t64", "libglu1-mesa")

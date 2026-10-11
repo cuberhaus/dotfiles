@@ -109,6 +109,7 @@ snaps_uninstall() {
     sudo snap remove spotify 2>/dev/null || true
     sudo snap remove sublime-merge 2>/dev/null || true
     sudo snap remove sublime-text 2>/dev/null || true
+    sudo snap remove telegram-desktop 2>/dev/null || true
 }
 
 ###############################################################
