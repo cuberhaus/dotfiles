@@ -41,6 +41,10 @@ ubuntu_install
 # Only writes one file under ~/.config/autostart; the package itself comes from ubuntu_install.
 caffeine_indicator_autostart_install ||
     warn "Caffeine indicator autostart failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; caffeine_indicator_autostart_install'"
+# Only writes one entry under ~/.local/share/applications and one default in ~/.config/mimeapps.list;
+# Nautilus itself comes from the Ubuntu desktop, and a machine without it is skipped.
+smb_scheme_handler_install ||
+    warn "smb:// link handler failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; smb_scheme_handler_install'"
 # OpenLogi comes from GitHub releases, so the network or a changed release layout can break it;
 # that must not abort provisioning.
 openlogi_install ||

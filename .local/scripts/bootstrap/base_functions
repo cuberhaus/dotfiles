@@ -937,6 +937,108 @@ EOF
 }
 
 ###############################################################
+# => smb:// links open in GNOME Files
+###############################################################
+
+# Let a browser click on an smb:// link (the pol-server Service Launcher's Files tile)
+# open the share in GNOME Files.  A stock GNOME desktop lacks two things, and a default set
+# with `xdg-mime` alone fixes neither:
+#   - GNOME's "Open With" chooser lists only applications whose desktop entry names the
+#     scheme, and Nautilus's declares just inode/directory.  `gio mime x-scheme-handler/smb`
+#     then finds no registered application and the click ends in "No Apps Available", even
+#     with Nautilus set as the default.
+#   - A browser starts its handlers with GIO_USE_VFS=local in the environment, which makes GIO
+#     ignore GVFS, so a Nautilus started that way answers "smb locations are not supported".
+#     The entry's Exec clears the variable.
+# The entry goes into the user's applications folder instead of being tracked in the checkout,
+# for the reason given at caffeine_indicator_autostart_install: that folder belongs to every
+# app that installs a launcher, so Stow would link the whole folder into the repository.
+# An entry that differs is kept as smb-nautilus.desktop.bak, and the previous mimeapps.list as
+# mimeapps.list.bak, before they change.  A machine without Nautilus is skipped.
+smb_scheme_handler_install() {
+    local apps_dir="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+    local mime_config="${XDG_CONFIG_HOME:-$HOME/.config}/mimeapps.list"
+    local entry="$apps_dir/smb-nautilus.desktop"
+    local wanted changed=0
+
+    if ! command -v nautilus >/dev/null 2>&1; then
+        info "GNOME Files is not installed, skipping the smb:// link handler."
+        return 0
+    fi
+    if ! command -v update-desktop-database >/dev/null 2>&1 || ! command -v xdg-mime >/dev/null 2>&1; then
+        warn "The smb:// link handler needs update-desktop-database (desktop-file-utils) and xdg-mime (xdg-utils)."
+        return 1
+    fi
+
+    wanted=$(cat <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Files (SMB shares)
+Comment=Open smb:// links from the browser in GNOME Files
+Exec=env -u GIO_USE_VFS nautilus %U
+Icon=org.gnome.Nautilus
+Terminal=false
+NoDisplay=true
+MimeType=x-scheme-handler/smb;
+Categories=GTK;GNOME;Utility;
+EOF
+)
+
+    mkdir -p "$apps_dir" || return 1
+    if [ ! -f "$entry" ] || [ "$(cat "$entry")" != "$wanted" ]; then
+        if [ -f "$entry" ]; then
+            cp -f "$entry" "$entry.bak" || return 1
+            info "Replacing $entry (the previous one is kept as $entry.bak)..."
+        fi
+        printf '%s\n' "$wanted" > "$entry" || return 1
+        changed=1
+    fi
+    # GIO lists the applications for a scheme from this database, not from the entry itself.
+    if [ "$changed" = 1 ] || ! grep -Fxqs 'x-scheme-handler/smb=smb-nautilus.desktop;' "$apps_dir/mimeinfo.cache"; then
+        update-desktop-database "$apps_dir" || return 1
+        changed=1
+    fi
+    # Not `xdg-mime query default`: with no default set it already names the one registered
+    # handler, so it would hide a missing setting that registration order alone then decides.
+    if ! grep -Fxqs 'x-scheme-handler/smb=smb-nautilus.desktop' "$mime_config"; then
+        # xdg-mime does nothing, yet exits 0, when the folder is missing; so make the folder
+        # and read the result back instead of trusting its exit status.
+        mkdir -p "$(dirname "$mime_config")" || return 1
+        if [ -f "$mime_config" ]; then
+            cp -f "$mime_config" "$mime_config.bak" || return 1
+        fi
+        xdg-mime default smb-nautilus.desktop x-scheme-handler/smb || return 1
+        if ! grep -Fxqs 'x-scheme-handler/smb=smb-nautilus.desktop' "$mime_config"; then
+            warn "xdg-mime did not set the default application for smb:// links in $mime_config."
+            return 1
+        fi
+        changed=1
+    fi
+
+    if [ "$changed" = 1 ]; then
+        info "smb:// links now open in GNOME Files."
+    else
+        info "smb:// links already open in GNOME Files, skipping."
+    fi
+}
+
+# Undo smb_scheme_handler_install: the entry, its registration, and the default, but only when
+# the default is the one the install set.  Anything else in mimeapps.list stays.
+smb_scheme_handler_uninstall() {
+    local apps_dir="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+    local mime_config="${XDG_CONFIG_HOME:-$HOME/.config}/mimeapps.list"
+
+    rm -f "$apps_dir/smb-nautilus.desktop"
+    if [ -f "$mime_config" ] && grep -Fxq 'x-scheme-handler/smb=smb-nautilus.desktop' "$mime_config"; then
+        sed -i '/^x-scheme-handler\/smb=smb-nautilus\.desktop$/d' "$mime_config" || return 1
+    fi
+    if [ -f "$apps_dir/mimeinfo.cache" ] && command -v update-desktop-database >/dev/null 2>&1; then
+        update-desktop-database "$apps_dir" || return 1
+    fi
+    return 0
+}
+
+###############################################################
 # => Volatile file handling
 ###############################################################
 
