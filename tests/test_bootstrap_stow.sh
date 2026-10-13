@@ -57,7 +57,7 @@ root_through_stow_link() {
             line="$(grep -m1 "^$variable=" "$file")" || fail "$file has no $variable= line"
             printf '%s\n' "$line"
         done
-        printf 'printf "%%s\\n" "${%s}"\n' "$last"
+        printf 'printf "%%s\\n" "$%s"\n' "$last"
     } > "$CASE_DIR/checkout/.local/scripts/$folder/probe"
     bash "$CASE_DIR/home/.local/scripts/$folder/probe"
 }
