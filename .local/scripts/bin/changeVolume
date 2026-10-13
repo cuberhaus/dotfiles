@@ -5,7 +5,7 @@
 # Author: https://github.com/cuberhaus/dotfiles
 
 function Usage() {
-    echo "Usage: changeVolume [INT | +INT | -INT]"
+    echo "Usage: changeVolume [INT | +INT | -INT] [unmute]"
     echo "Set, raise or lower the volume and show it in a desktop notification."
     echo "Called without arguments it only shows the current volume"
     echo "Called with an INT it sets the volume to that percent"
@@ -35,7 +35,7 @@ if [ $# != 0 ]; then
     if [ "${2:-}" = "unmute" ]; then
         pactl set-sink-mute @DEFAULT_SINK@ 0
     fi
-    pactl set-sink-volume @DEFAULT_SINK@ "$1"% && pkill -SIGRTMIN+1 i3blocks
+    pactl -- set-sink-volume @DEFAULT_SINK@ "$1"% && { pkill -SIGRTMIN+1 i3blocks || true; }
 fi
 
 # Query PipeWire/PulseAudio (@DEFAULT_SINK@) for the current volume and mute state

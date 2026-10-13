@@ -42,10 +42,10 @@ MYPROG="${2:-${COMMAND%% *}}"
 
 echo "$COMMAND"
 
-if wmctrl -lx | awk '{print $3}' | grep -Fqi -- "$MYPROG"; then
+if wmctrl -lx | awk -v p="${MYPROG,,}" '{split(tolower($3), a, "."); if (a[1] == p || a[2] == p || tolower($3) == p) found = 1} END {exit !found}'; then
     wmctrl -xa "$MYPROG"
     exit 0
 else
-    eval "$COMMAND" &
+    sh -c "$COMMAND" &
     exit 0
 fi

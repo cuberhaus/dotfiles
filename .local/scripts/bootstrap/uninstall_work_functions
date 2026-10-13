@@ -18,7 +18,7 @@ nvidia_uninstall() {
 ###############################################################
 dev_tools_uninstall() {
     info "Uninstalling dev tools..."
-    $apt_remove build-essential cmake curl git jq tree wget zsh stow vim-gtk3 neovim \
+    $apt_remove age brightnessctl build-essential cmake curl ddcutil git jq tree wget zsh stow vim-gtk3 neovim \
         bat eza fzf htop ncdu ranger ripgrep fd-find silversearcher-ag w3m shellcheck \
         unzip unrar eog flameshot rclone sshfs net-tools nmap gh hardinfo cpu-x fastfetch neofetch \
         git-lfs ffmpeg wireguard-tools xdotool ydotool qrencode smartmontools || true

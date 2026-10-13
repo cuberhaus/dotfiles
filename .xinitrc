@@ -11,7 +11,7 @@
 # Repeat rate for keyboard
 xset r rate 660 25
 
-# Start i3 on arch
-if [[ "${DISTRO:-}" == "arch" ]]; then
+# Start i3 if available
+if command -v i3 >/dev/null 2>&1; then
     exec i3 # Starts i3
 fi

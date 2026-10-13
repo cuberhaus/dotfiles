@@ -3,10 +3,6 @@
 
 # PATHS
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-VIM_CONFIG="$HOME/.vim/vimrc"
-VIM_FOLDER="$HOME/.vim"
-TERMITE_CONFIG="$HOME/.config/termite/config"
-TERMITE_FOLDER="$HOME/.config/termite"
 GTK_CONFIG="$HOME/.gtkrc-2.0.mine"
 GTK3_CONFIG="$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
 
@@ -14,21 +10,8 @@ GTK3_CONFIG="$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
 # GTK
 LIGHT_GTK_THEME="Adwaita"
 DARK_GTK_THEME="Arc-Dark"
-# LIGHT_GTK_THEME="Matcha-sea"
-# DARK_GTK_THEME="Matcha-dark-sea"
-# ICON_THEME_LIGHT="Papirus-Adapta-Maia"
-# ICON_THEME_DARK="Papirus-Adapta-Nokto-Maia"
 ICON_THEME_LIGHT="Adwaita"
 ICON_THEME_DARK="Adwaita"
-# Vim
-VIM_COLORSCHEME_DARK="onedark"
-VIM_COLORSCHEME_LIGHT="one"
-# Termite
-TERMITE_THEME_DARK="onedark"
-TERMITE_THEME_LIGHT="onelight"
-
-# WALLPAPER_LIGHT=""
-# WALLPAPER_DARK=""
 
 function update_wallpaper {
     if ! command -v feh &>/dev/null; then return; fi
@@ -39,79 +22,38 @@ function update_wallpaper {
     fi
 }
 
-function update_vim {
-    if [ "$1" == "light" ]; then
-        # command sed -i "$@"
-        # sed -i "s/set background=dark/set background=light/" $VIM_CONFIG
-        # sed -i "s/colorscheme onedark/colorscheme solarized8/" $VIM_CONFIG
-        echo "colorscheme $VIM_COLORSCHEME_LIGHT
-set background=light" > "$VIM_FOLDER/theme"
-
-    elif [ "$1" == "dark" ]; then
-        echo "colorscheme $VIM_COLORSCHEME_DARK
-set background=dark" > "$VIM_FOLDER/theme"
-        # sed -i "s/set background=light/set background=dark/" $VIM_CONFIG
-        # sed -i "s/colorscheme solarized8/colorscheme onedark/" $VIM_CONFIG
-    fi
-}
-
-# Pre: There has to be a $GTK_CONFIG file with a gtk-theme-name="" sentence
+# Pre: $GTK_CONFIG and $GTK3_CONFIG exist with gtk-theme-name and gtk-icon-theme-name lines
 function update_gtk_theme {
+    local gtk_theme icon_theme
     if [ "$1" == "light" ]; then
-        # Commas around $LIGHT_GTK_THEME have to be escaped
-        # https://stackoverflow.com/questions/13799789/expansion-of-variables-inside-single-quotes-in-a-command-in-bash
-        # .* match any character till the end of line
-
-        # GTK 3
-        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$LIGHT_GTK_THEME/" "$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
-        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME_LIGHT/" "$GTK3_CONFIG"
-
-        # GTK 2
-        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$LIGHT_GTK_THEME\"/" "$GTK_CONFIG"
-        sed -i "s/gtk-icon-theme-name=\"[^\"]*\"/gtk-icon-theme-name=\"$ICON_THEME_LIGHT\"/" "$GTK_CONFIG"
-
+        gtk_theme="$LIGHT_GTK_THEME"
+        icon_theme="$ICON_THEME_LIGHT"
     elif [ "$1" == "dark" ]; then
-        # GTK 3
-        sed -i "s/gtk-theme-name=.*/gtk-theme-name=$DARK_GTK_THEME/" "$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
-
-        sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$ICON_THEME_DARK/" "$GTK3_CONFIG"
-
-        # GTK 2
-        sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$DARK_GTK_THEME\"/" "$GTK_CONFIG"
-
-        sed -i "s/gtk-icon-theme-name=\"[^\"]*\"/gtk-icon-theme-name=\"$ICON_THEME_DARK\"/" "$GTK_CONFIG"
-    fi
-}
-
-function update_termite {
-    local TERMITE_THEMES="$TERMITE_FOLDER/themes"
-    cp "$TERMITE_FOLDER/options" "$TERMITE_CONFIG"
-
-    if [ "$1" == "light" ]; then
-        cat "$TERMITE_THEMES/$TERMITE_THEME_LIGHT" >> "$TERMITE_CONFIG"
-    elif [ "$1" == "dark" ]; then
-        cat "$TERMITE_THEMES/$TERMITE_THEME_DARK" >> "$TERMITE_CONFIG"
+        gtk_theme="$DARK_GTK_THEME"
+        icon_theme="$ICON_THEME_DARK"
+    else
+        return
     fi
 
-    # killall -USR1 termite
+    # GTK 3
+    sed -i "s/gtk-theme-name=.*/gtk-theme-name=$gtk_theme/" "$GTK3_CONFIG"
+    sed -i "s/gtk-icon-theme-name=.*/gtk-icon-theme-name=$icon_theme/" "$GTK3_CONFIG"
+
+    # GTK 2
+    sed -i "s/gtk-theme-name=\"[^\"]*\"/gtk-theme-name=\"$gtk_theme\"/" "$GTK_CONFIG"
+    sed -i "s/gtk-icon-theme-name=\"[^\"]*\"/gtk-icon-theme-name=\"$icon_theme\"/" "$GTK_CONFIG"
 }
 
 function change_theme {
-    # [ -f "$VIM_CONFIG" ] && update_vim $1
-
-    if [ -f "$GTK_CONFIG" ]; then 
-        update_gtk_theme "$1"
-    else 
-        # Create the config file to satisfy pre condition
-        echo 'gtk-theme-name="" 
-        gtk-icon-theme-name="" ' > "$GTK_CONFIG"
-        update_gtk_theme "$1"
+    if [ ! -f "$GTK_CONFIG" ]; then
+        printf 'gtk-theme-name=""\ngtk-icon-theme-name=""\n' > "$GTK_CONFIG"
     fi
+    if [ ! -f "$GTK3_CONFIG" ]; then
+        mkdir -p "$(dirname "$GTK3_CONFIG")"
+        printf '[Settings]\ngtk-theme-name=\ngtk-icon-theme-name=\n' > "$GTK3_CONFIG"
+    fi
+    update_gtk_theme "$1"
     update_wallpaper "$1"
-
-    # if [ "$(uname)" == "Linux" ]; then
-    #     [ -d "$TERMITE_FOLDER" ] && update_termite $1
-    # fi
     wait
 }
 
@@ -140,5 +82,6 @@ case "$1" in
         ;;
     *)
         Usage
+        exit 1
         ;;
 esac

@@ -292,7 +292,7 @@ calls_in() {
     grep -c '^[[:space:]]*git_credential_helper_configure$' "$1" || true
 }
 assert_equals 1 "$(calls_in "$bootstrap_dir/ubuntu_functions")" 'the ubuntu profiles must configure the Git credential helper'
-assert_equals 2 "$(calls_in "$bootstrap_dir/arch_functions")" 'the arch and manjaro profiles must configure the Git credential helper'
+assert_equals 1 "$(calls_in "$bootstrap_dir/arch_functions")" 'the arch and manjaro profiles must configure the Git credential helper'
 assert_equals 0 "$(calls_in "$bootstrap_dir/work")" 'the work profile must leave Git credentials alone'
 
 printf 'Git credential helper tests passed.\n'

@@ -4,9 +4,9 @@
 echo "Do you want to install cinnamon applets? [y/n]"
 read -r install
 if [[ "$install" == y ]]; then
-    dest="$HOME/.local/share/cinnamon/applets"
-    mkdir -p "$dest"
-    cd "$dest" || exit
+    applets_dir="$HOME/.local/share/cinnamon/applets"
+    desklets_dir="$HOME/.local/share/cinnamon/desklets"
+    mkdir -p "$applets_dir" "$desklets_dir"
 
     urls=(
         "https://cinnamon-spices.linuxmint.com/files/applets/SpicesUpdate@claudiux.zip"
@@ -24,21 +24,26 @@ if [[ "$install" == y ]]; then
     echo "Downloading applets in parallel..."
     pids=()
     files=()
+    dests=()
     for url in "${urls[@]}"; do
-        file="${url##*/}"
+        dest="$applets_dir"
+        [[ "$url" == */files/desklets/* ]] && dest="$desklets_dir"
+        file="$dest/${url##*/}"
         wget -q "$url" -O "$file" &
         pids+=($!)
         files+=("$file")
+        dests+=("$dest")
     done
 
     failures=0
     for i in "${!pids[@]}"; do
         if wait "${pids[$i]}"; then
-            unzip -qo "${files[$i]}"
+            unzip -qo "${files[$i]}" -d "${dests[$i]}"
         else
-            echo "Failed to download ${files[$i]}"
+            echo "Failed to download ${files[$i]##*/}"
             ((failures++)) || true
         fi
+        rm -f "${files[$i]}"
     done
     if [ "$failures" -gt 0 ]; then
         echo "$failures download(s) failed"

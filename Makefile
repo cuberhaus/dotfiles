@@ -78,12 +78,12 @@ config-import: check-stow ## Preview home-to-repo import; pass APPLY=1 to adopt 
 lint: ## Run shellcheck on all shell scripts
 	bash .local/scripts/lint.sh
 
+TEST_JOBS ?= 8
+SHELL_TESTS := $(filter-out tests/test_platforms_in_containers.sh,$(sort $(wildcard tests/test_*.sh)))
+
 test: ## Run deterministic unit tests
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py'
-	@for test_file in $(filter-out tests/test_platforms_in_containers.sh,$(sort $(wildcard tests/test_*.sh))); do \
-		echo "bash $$test_file"; \
-		bash "$$test_file" || exit 1; \
-	done
+	@printf '%s\n' $(SHELL_TESTS) | xargs -P "$(TEST_JOBS)" -I {} bash -c 'out=$$(bash "{}" 2>&1) || { printf "bash {}\n%s\n" "$$out" >&2; exit 1; }; printf "bash {}\n%s\n" "$$out"'
 
 check: lint test ## Run tests and all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.
 	@echo ""

@@ -30,6 +30,7 @@ class SyncMiniTests(unittest.TestCase):
             ".local/scripts/bin/clone-all",
             ".local/scripts/bin/clone-team",
             ".local/scripts/bin/git-ahead",
+            ".local/scripts/bin/git-clean-branches",
             ".local/scripts/bin/git-recurse",
             ".local/Mini/.bashrc",
         ]

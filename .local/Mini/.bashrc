@@ -591,15 +591,16 @@ EOF
 )
 
 ###############################################################
-# => Git across repositories (git-recurse, git-ahead)
+# => Git across repositories (git-recurse, git-ahead, git-clean-branches)
 ###############################################################
 
-# Self-contained versions of the git-recurse and git-ahead scripts in .local/scripts/bin, for a
-# machine that has only this file: gr, gah and status below call them. Same options, environment
-# variables, output and exit codes as the scripts, except that git-recurse has no -k (it adds the
-# ssh key of one Mac). They stay above the aliases like the clone commands do, and put `command`
-# in front of grep, mv and rm, which the aliases below change (-i, -v, -I) and which Bash would
-# otherwise build into a function that is defined again when this file is sourced a second time.
+# Self-contained versions of the git-recurse, git-ahead and git-clean-branches scripts in
+# .local/scripts/bin, for a machine that has only this file: gr, gah, gclean and status below call
+# them. Same options, environment variables, output and exit codes as the scripts, except that
+# git-recurse has no -k (it adds the ssh key of one Mac). They stay above the aliases like the
+# clone commands do, and put `command` in front of grep, mv and rm, which the aliases below change
+# (-i, -v, -I) and which Bash would otherwise build into a function that is defined again when this
+# file is sourced a second time.
 # Bash 3.2 (macOS) is enough. tests/test_mini_bashrc.sh runs tests/test_git_recurse.sh against
 # git-recurse here and compares git-ahead with its script, so the copies cannot drift unnoticed.
 
@@ -746,6 +747,168 @@ EOF
         scan_repo "${repos[$i]}" "$fetch_ok"
         i=$((i + 1))
     done
+)
+
+git-clean-branches() (
+    set -uo pipefail
+
+    depth=4
+    fetch=1
+    dry_run=0
+    root="."
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -n|--dry-run)  dry_run=1; shift ;;
+            --no-fetch)    fetch=0; shift ;;
+            --depth)
+                if [ $# -lt 2 ]; then
+                    echo "--depth requires a numeric argument" >&2
+                    exit 2
+                fi
+                depth="$2"
+                shift 2
+                ;;
+            -h|--help)
+                cat <<'EOF'
+git-clean-branches: scan all git repos under a directory and delete local
+branches that have no remote tracking branch and no commits ahead of the
+default branch.
+
+Usage:
+  git-clean-branches [dir]           # clean stale branches (default: .)
+  git-clean-branches -n|--dry-run    # preview what would be deleted
+  git-clean-branches --no-fetch      # skip fetch (use cached refs)
+  git-clean-branches --depth N       # max search depth for repos (default: 4)
+
+Only uses `git branch -d` (safe delete) — refuses to delete unmerged work.
+EOF
+                exit 0
+                ;;
+            -*)
+                echo "Unknown option: $1" >&2
+                exit 2
+                ;;
+            *) root="$1"; shift ;;
+        esac
+    done
+
+    if [ ! -d "$root" ]; then
+        echo "Not a directory: $root" >&2
+        exit 1
+    fi
+
+    green=$'\033[32m'
+    yellow=$'\033[33m'
+    red=$'\033[31m'
+    dim=$'\033[2m'
+    bold=$'\033[1m'
+    cyan=$'\033[36m'
+    reset=$'\033[0m'
+
+    if [ "$dry_run" -eq 1 ]; then
+        mode="DRY RUN"
+    else
+        mode="CLEAN"
+    fi
+
+    # Pick the default branch for a repo.
+    detect_default() {
+        local default
+        default=$(git symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null) || true
+        if [ -n "$default" ]; then
+            echo "${default#refs/remotes/origin/}"
+            return
+        fi
+        if git rev-parse --verify --quiet origin/main >/dev/null 2>&1; then
+            echo "main"; return
+        fi
+        if git rev-parse --verify --quiet origin/master >/dev/null 2>&1; then
+            echo "master"; return
+        fi
+        echo ""
+    }
+
+    scan_repo() {
+        local repo="$1"
+        local rel="${repo#"$root"/}"
+        [ "$rel" = "$repo" ] && rel=$(basename "$repo")
+
+        if [ "$fetch" -eq 1 ]; then
+            git -C "$repo" fetch --all --prune --quiet 2>/dev/null || true
+        fi
+
+        local default
+        default=$(cd "$repo" && detect_default)
+        if [ -z "$default" ]; then
+            return
+        fi
+
+        local current
+        current=$(git -C "$repo" rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+        local printed_header=0
+        while IFS= read -r branch; do
+            [ -z "$branch" ] && continue
+            [ "$branch" = "$current" ] && continue
+            [ "$branch" = "$default" ] && continue
+
+            # Skip if remote tracking branch exists
+            if git -C "$repo" rev-parse --verify --quiet "origin/$branch" >/dev/null 2>&1; then
+                continue
+            fi
+
+            # Check commits ahead of default
+            local ahead
+            if ! ahead=$(git -C "$repo" rev-list --count "$default..$branch" 2>/dev/null); then
+                ahead=$(git -C "$repo" rev-list --count "origin/$default..$branch" 2>/dev/null) || continue
+            fi
+
+            if [ "$ahead" = "0" ]; then
+                if [ "$printed_header" -eq 0 ]; then
+                    printf "%s%s%s %s(default: %s, current: %s)%s\n" \
+                        "$bold" "$rel" "$reset" "$dim" "$default" "$current" "$reset"
+                    printed_header=1
+                fi
+                if [ "$dry_run" -eq 1 ]; then
+                    printf "    %swould delete: %s%s\n" "$yellow" "$branch" "$reset"
+                    ((total_deleted++)) || true
+                elif git -C "$repo" branch -d "$branch" >/dev/null 2>&1; then
+                    printf "    %sdeleted: %s%s\n" "$red" "$branch" "$reset"
+                    ((total_deleted++)) || true
+                else
+                    printf "    %sskipped (unmerged): %s%s\n" "$yellow" "$branch" "$reset"
+                fi
+            fi
+        done < <(git -C "$repo" for-each-ref --format='%(refname:short)' refs/heads/ 2>/dev/null)
+    }
+
+    repos=()
+    while IFS= read -r line; do
+        repos+=("$line")
+    done < <(
+        find "$root" -maxdepth "$depth" -type d -name .git -prune 2>/dev/null \
+            | sed 's|/\.git$||' | sort
+    )
+
+    if [ ${#repos[@]} -eq 0 ]; then
+        echo "No git repos found under $root (depth $depth)."
+        exit 0
+    fi
+
+    printf "%s[%s] Scanning %d repos...%s\n" "$dim" "$mode" "${#repos[@]}" "$reset"
+
+    total_deleted=0
+    for r in "${repos[@]}"; do
+        scan_repo "$r"
+    done
+
+    if [ "$total_deleted" -eq 0 ]; then
+        printf "%sNo stale branches found.%s\n" "$green" "$reset"
+    else
+        printf "\n%s%s: %d branch(es) across %d repos.%s\n" \
+            "$cyan" "$mode" "$total_deleted" "${#repos[@]}" "$reset"
+    fi
 )
 
 git-recurse() (
@@ -1451,86 +1614,9 @@ alias gitsync="git submodule sync; git submodule update --init --recursive"
 alias gsu="git submodule update --recursive --remote"
 alias gr="git-recurse"
 alias gah="git-ahead"
+alias gclean="git-clean-branches"
 ## Alternative (makes easier finding out which commits have no message)
 alias yolo='git add -A; git commit -m "This is a placeholder"; git push'
-
-# Recursively find and delete local branches with no remote and no commits ahead
-gclean() {
-    local dry_run=false
-    if [ "$1" = "--dry-run" ] || [ "$1" = "-n" ]; then
-        dry_run=true
-        shift
-    fi
-    local search_path="${1:-.}"
-    local total_deleted=0
-
-    if $dry_run; then
-        printf "\033[32m[DRY RUN] Scanning for stale local branches...\033[0m\n"
-    else
-        printf "\033[32m[CLEAN] Scanning for stale local branches...\033[0m\n"
-    fi
-
-    while IFS= read -r -d $'\0' dot_git; do
-        local dir
-        dir=$(dirname "$dot_git")
-        local repo_name
-        repo_name=$(basename "$dir")
-
-        git -C "$dir" fetch --all --prune --quiet 2>/dev/null
-
-        # Detect default branch
-        local default_branch
-        default_branch=$(git -C "$dir" symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|^refs/remotes/origin/||')
-        if [ -z "$default_branch" ]; then
-            if git -C "$dir" rev-parse --verify --quiet origin/main &>/dev/null; then
-                default_branch="main"
-            else
-                default_branch="master"
-            fi
-        fi
-
-        local current
-        current=$(git -C "$dir" rev-parse --abbrev-ref HEAD 2>/dev/null)
-
-        local printed_header=false
-        while IFS= read -r branch; do
-            [ -z "$branch" ] && continue
-            [ "$branch" = "$current" ] && continue
-            [ "$branch" = "$default_branch" ] && continue
-
-            # Skip if remote tracking branch exists
-            if git -C "$dir" rev-parse --verify --quiet "origin/$branch" &>/dev/null; then
-                continue
-            fi
-
-            # Check commits ahead of default
-            local ahead
-            if ! ahead=$(git -C "$dir" rev-list --count "$default_branch..$branch" 2>/dev/null); then
-                ahead=$(git -C "$dir" rev-list --count "origin/$default_branch..$branch" 2>/dev/null)
-            fi
-
-            if [ "$ahead" = "0" ]; then
-                if ! $printed_header; then
-                    printf "\033[37m%s\033[0m (default: %s, current: %s)\n" "$repo_name" "$default_branch" "$current"
-                    printed_header=true
-                fi
-                if $dry_run; then
-                    printf "    \033[33mwould delete: %s\033[0m\n" "$branch"
-                else
-                    git -C "$dir" branch -d "$branch" &>/dev/null
-                    printf "    \033[31mdeleted: %s\033[0m\n" "$branch"
-                fi
-                ((total_deleted++)) || true
-            fi
-        done < <(git -C "$dir" for-each-ref --format='%(refname:short)' refs/heads/ 2>/dev/null)
-    done < <(find "$search_path" -maxdepth 3 -type d -name .git -print0 2>/dev/null)
-
-    if [ "$total_deleted" -eq 0 ]; then
-        printf "\033[32mNo stale branches found.\033[0m\n"
-    else
-        printf "\n\033[36m%d branch(es) processed.\033[0m\n" "$total_deleted"
-    fi
-}
 
 # Git functions
 alias add-pat="add_pat"

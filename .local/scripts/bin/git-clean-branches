@@ -135,7 +135,10 @@ scan_repo() {
     done < <(git -C "$repo" for-each-ref --format='%(refname:short)' refs/heads/ 2>/dev/null)
 }
 
-mapfile -t repos < <(
+repos=()
+while IFS= read -r line; do
+    repos+=("$line")
+done < <(
     find "$root" -maxdepth "$depth" -type d -name .git -prune 2>/dev/null \
         | sed 's|/\.git$||' | sort
 )

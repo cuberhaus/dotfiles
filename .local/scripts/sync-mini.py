@@ -125,6 +125,7 @@ def build_generated_section(repo_root: Path) -> str:
     clone_all_raw = (repo_root / ".local/scripts/bin/clone-all").read_text(encoding="utf-8")
     clone_team_raw = (repo_root / ".local/scripts/bin/clone-team").read_text(encoding="utf-8")
     git_ahead_raw = (repo_root / ".local/scripts/bin/git-ahead").read_text(encoding="utf-8")
+    git_clean_branches_raw = (repo_root / ".local/scripts/bin/git-clean-branches").read_text(encoding="utf-8")
     git_recurse_raw = (repo_root / ".local/scripts/bin/git-recurse").read_text(encoding="utf-8")
 
     pull_fn = extract_function(aliases_text, "pull")
@@ -149,6 +150,10 @@ def build_generated_section(repo_root: Path) -> str:
     git_ahead_body = "\n".join(strip_script_header(git_ahead_raw.splitlines()))
     git_ahead_body = expand_sed_self_help(git_ahead_raw, git_ahead_body)
     git_ahead_fn = wrap_subshell_function("git-ahead", git_ahead_body)
+
+    git_clean_branches_body = "\n".join(strip_script_header(git_clean_branches_raw.splitlines()))
+    git_clean_branches_body = expand_sed_self_help(git_clean_branches_raw, git_clean_branches_body)
+    git_clean_branches_fn = wrap_subshell_function("git-clean-branches", git_clean_branches_body)
 
     git_recurse_fn = transform_git_recurse(git_recurse_raw)
 
@@ -182,19 +187,22 @@ def build_generated_section(repo_root: Path) -> str:
         clone_team_fn,
         "",
         "###############################################################",
-        "# => Git across repositories (git-recurse, git-ahead)",
+        "# => Git across repositories (git-recurse, git-ahead, git-clean-branches)",
         "###############################################################",
         "",
-        "# Self-contained versions of the git-recurse and git-ahead scripts in .local/scripts/bin, for a",
-        "# machine that has only this file: gr, gah and status below call them. Same options, environment",
-        "# variables, output and exit codes as the scripts, except that git-recurse has no -k (it adds the",
-        "# ssh key of one Mac). They stay above the aliases like the clone commands do, and put `command`",
-        "# in front of grep, mv and rm, which the aliases below change (-i, -v, -I) and which Bash would",
-        "# otherwise build into a function that is defined again when this file is sourced a second time.",
+        "# Self-contained versions of the git-recurse, git-ahead and git-clean-branches scripts in",
+        "# .local/scripts/bin, for a machine that has only this file: gr, gah, gclean and status below call",
+        "# them. Same options, environment variables, output and exit codes as the scripts, except that",
+        "# git-recurse has no -k (it adds the ssh key of one Mac). They stay above the aliases like the",
+        "# clone commands do, and put `command` in front of grep, mv and rm, which the aliases below change",
+        "# (-i, -v, -I) and which Bash would otherwise build into a function that is defined again when this",
+        "# file is sourced a second time.",
         "# Bash 3.2 (macOS) is enough. tests/test_mini_bashrc.sh runs tests/test_git_recurse.sh against",
         "# git-recurse here and compares git-ahead with its script, so the copies cannot drift unnoticed.",
         "",
         git_ahead_fn,
+        "",
+        git_clean_branches_fn,
         "",
         git_recurse_fn,
         END_MARKER,

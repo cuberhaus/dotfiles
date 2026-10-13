@@ -13,7 +13,7 @@
 # Function to create a transparent Wx1 px XPM icon
 create_xpm_icon () {
     timestamp=$(date)
-    pixels=$(for i in $(seq "$1"); do printf '.'; done)
+    pixels=$(printf '%*s' "$1" '' | tr ' ' '.')
 
     cat << EOF > "$2"
 /* XPM *
@@ -34,7 +34,10 @@ EOF
 }
 
 # Width of the trayer window
-width=$(xprop -name panel | grep 'program specified minimum size' | cut -d ' ' -f 5)
+width=$(xprop -name panel 2>/dev/null | grep 'program specified minimum size' | cut -d ' ' -f 5)
+case "${width:-}" in
+    ''|*[!0-9]*|0) exit 0 ;;
+esac
 
 # Icon file name
 iconfile="/tmp/trayer-padding-${width}px.xpm"

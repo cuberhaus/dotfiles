@@ -264,102 +264,21 @@ gui_apps_install() {
         obs-studio \
         caffeine                # Prevent screen from going to sleep
 
-    # ── Phase 1: parallel downloads ──────────────────────────────
-    # Download all .deb/.AppImage/.run files in parallel, then install sequentially
-    # (apt/dpkg needs exclusive lock so installs can't overlap).
-    local pids=() names=()
-    local tmp_dir
-    tmp_dir="$(mktemp -d)"
-    local chrome_deb="$tmp_dir/google-chrome-stable_current_amd64.deb"
-    # local warp_deb="$tmp_dir/warp-terminal.deb"   # Warp: not needed right now
-    # local lms_ver="0.4.4-1"                    # LM Studio: not needed right now
-    # local lms_deb="$tmp_dir/LM-Studio-${lms_ver}-x64.deb"
-    # local gpt4all_run="$tmp_dir/gpt4all-installer.run"   # GPT4All: not needed right now
-
-    # Google Chrome
+    # ── Google Chrome (.deb download) ────────────────────────────
     if ! command -v google-chrome-stable &>/dev/null; then
-        info "Downloading Google Chrome..."
-        wget -qO "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb &
-        pids+=($!); names+=("Chrome")
-    fi
-
-    # Warp (AI terminal) — not needed right now
-    # if ! command -v warp-terminal &>/dev/null; then
-    #     info "Downloading Warp terminal..."
-    #     wget -qO "$warp_deb" "https://app.warp.dev/download?package=deb" &
-    #     pids+=($!); names+=("Warp")
-    # fi
-
-    # LM Studio (local LLM runner — update version at https://lmstudio.ai/changelog) — not needed right now
-    # if ! dpkg -l lm-studio &>/dev/null 2>&1; then
-    #     info "Downloading LM Studio..."
-    #     wget -qO "$lms_deb" "https://installers.lmstudio.ai/linux/x64/${lms_ver}/LM-Studio-${lms_ver}-x64.deb" &
-    #     pids+=($!); names+=("LM Studio")
-    # fi
-
-    # GPT4All (local LLM chat) — not needed right now
-    # if command -v gpt4all &>/dev/null || [ -d "$HOME/gpt4all" ] || [ -d /opt/gpt4all ]; then
-    #     info "GPT4All already installed, skipping."
-    # else
-    #     info "Downloading GPT4All..."
-    #     (
-    #         local ver
-    #         ver=$(curl -sI https://github.com/nomic-ai/gpt4all/releases/latest | grep -i location | sed 's|.*/v||;s/\r//')
-    #         wget -qO "$gpt4all_run" "https://github.com/nomic-ai/gpt4all/releases/download/v${ver}/gpt4all-installer-linux-v${ver}.run"
-    #     ) &
-    #     pids+=($!); names+=("GPT4All")
-    # fi
-
-    # Wait for all downloads to finish
-    local failures=0
-    for i in "${!pids[@]}"; do
-        if ! wait "${pids[$i]}"; then
-            warn "Failed to download ${names[$i]}"
-            ((failures++)) || true
-        else
-            info "${names[$i]} download complete."
-        fi
-    done
-    if [ "$failures" -gt 0 ]; then
-        warn "$failures download(s) failed — some apps may not install."
-    fi
-
-    # ── Phase 2: install from downloaded files ───────────────────
-    if [ -f "$chrome_deb" ]; then
+        local tmp_dir
+        tmp_dir="$(mktemp -d)"
+        local chrome_deb="$tmp_dir/google-chrome-stable_current_amd64.deb"
         info "Installing Google Chrome..."
-        sudo apt-get install -y "$chrome_deb"
+        if wget -qO "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb; then
+            sudo apt-get install -y "$chrome_deb"
+        else
+            warn "Failed to download Google Chrome"
+        fi
+        rm -rf "$tmp_dir"
     fi
-    rm -rf "$tmp_dir"
 
-    # if [ -f "$warp_deb" ]; then
-    #     info "Installing Warp terminal..."
-    #     sudo apt-get install -y "$warp_deb"
-    #     rm -f "$warp_deb"
-    # fi
-
-    # if [ -f "$lms_deb" ]; then
-    #     info "Installing LM Studio..."
-    #     sudo apt-get install -y "$lms_deb"
-    #     rm -f "$lms_deb"
-    # fi
-
-    # if [ -f "$gpt4all_run" ] && ! command -v gpt4all &>/dev/null && [ ! -d "$HOME/gpt4all" ] && [ ! -d /opt/gpt4all ]; then
-    #     info "Installing GPT4All..."
-    #     chmod +x "$gpt4all_run"
-    #     "$gpt4all_run" --root "$HOME/gpt4all" --accept-licenses --default-answer --confirm-command install
-    #     rm -f "$gpt4all_run"
-    #     cat > "$HOME/.local/share/applications/gpt4all.desktop" <<EOF
-    # [Desktop Entry]
-    # Name=GPT4All
-    # Exec=$HOME/gpt4all/bin/chat
-    # Icon=$HOME/gpt4all/logo-48.png
-    # Type=Application
-    # Categories=Development;Science;
-    # Comment=Run LLMs locally
-    # EOF
-    # fi
-
-    # ── Phase 3: apt-repo-based installs ─────────────────────────
+    # ── Apt-repo-based installs ──────────────────────────────────
     # VS Code, Cursor and Antigravity install from their vendor apt repositories,
     # so the weekly full-upgrade keeps them current.  The sources are re-asserted
     # on every run because Ubuntu release upgrades disable them.
@@ -398,17 +317,9 @@ gui_apps_install() {
         info "Antigravity already installed, skipping."
     fi
 
-    # ── Phase 4: curl|sh installers ──────────────────────────────
+    # ── curl|sh installers ───────────────────────────────────────
     # Ollama (local LLM serving)
     ollama_install
-
-    # Zed (fast AI-powered editor) — not needed right now
-    # if ! command -v zed &>/dev/null; then
-    #     info "Installing Zed..."
-    #     curl -f https://zed.dev/install.sh | sh
-    # else
-    #     info "Zed already installed, skipping."
-    # fi
 
     # Claude Code (Anthropic CLI)
     if ! command -v claude &>/dev/null; then
@@ -442,9 +353,6 @@ gui_apps_install() {
     # Sublime Text
     snap list sublime-text &>/dev/null 2>&1 || sudo snap install sublime-text --classic
 
-    # Sublime Merge — not needed right now
-    # snap list sublime-merge &>/dev/null 2>&1 || sudo snap install sublime-merge --classic
-
     # Spotify, Discord and Telegram (snap)
     snap list spotify &>/dev/null 2>&1 || sudo snap install spotify
     snap list discord &>/dev/null 2>&1 || sudo snap install discord
@@ -455,21 +363,4 @@ gui_apps_install() {
     # one is a distro build).
     snap list openshot-qt &>/dev/null 2>&1 || sudo snap install openshot-qt
     snap list blender &>/dev/null 2>&1 || sudo snap install blender --classic
-}
-
-###############################################################
-# => High DPI screen tweaks (GNOME)
-###############################################################
-
-# This has some problems with some apps that are seen very tiny, it is definitely not the perfect solution
-high_dpi_screen() {
-    # To fix high dpi screens, two options, go to 200% scaling, or fractional scaling, fractional scaling causes blurry text, more power usage, lower speed.
-
-    # We instead increase text scaling
-    gsettings set org.gnome.desktop.interface text-scaling-factor 1.3
-
-    # Increase cursor size Settings-> Accesibility -> Cursor size -> Medium
-    gsettings set org.gnome.desktop.interface cursor-size 35
-    # Set icons to Large 'small' to set it smaller
-    gsettings set org.gnome.shell.extensions.ding icon-size 'large'
 }

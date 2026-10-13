@@ -355,6 +355,19 @@ resolve_high_dpi_choice() {
     export HIGH_DPI
 }
 
+# This has some problems with some apps that are seen very tiny, it is definitely not the perfect solution
+high_dpi_screen() {
+    # To fix high dpi screens, two options, go to 200% scaling, or fractional scaling, fractional scaling causes blurry text, more power usage, lower speed.
+
+    # We instead increase text scaling
+    gsettings set org.gnome.desktop.interface text-scaling-factor 1.3
+
+    # Increase cursor size Settings-> Accesibility -> Cursor size -> Medium
+    gsettings set org.gnome.desktop.interface cursor-size 35
+    # Set icons to Large 'small' to set it smaller
+    gsettings set org.gnome.shell.extensions.ding icon-size 'large'
+}
+
 is_wsl() {
     grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null ||
         grep -qi microsoft /proc/version 2>/dev/null

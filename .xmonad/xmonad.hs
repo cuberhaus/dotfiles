@@ -159,10 +159,10 @@ brightDown = "changeBrightness -5 && pkill -SIGRTMIN+2 i3blocks"
 
 -- Media
 volumeUp :: String
-volumeUp = "changeVolume +5 unmute && pkill -SIGRTMIN+1 i3blocks"
+volumeUp = "changeVolume +5 unmute"
 
 volumeDown :: String
-volumeDown = "changeVolume -5 unmute && pkill -SIGRTMIN+1 i3blocks"
+volumeDown = "changeVolume -5 unmute"
 
 audioMute :: String
 audioMute = "pactl set-sink-mute @DEFAULT_SINK@ toggle && changeVolume && pkill -SIGRTMIN+1 i3blocks"
