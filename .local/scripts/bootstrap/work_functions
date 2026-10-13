@@ -235,12 +235,14 @@ gcloud_install() {
         return
     fi
 
-    local tarball="/tmp/google-cloud-cli-linux-x86_64.tar.gz"
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    local tarball="$tmp_dir/google-cloud-cli-linux-x86_64.tar.gz"
     info "Downloading Google Cloud CLI..."
     curl -fsSL "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-x86_64.tar.gz" \
         -o "$tarball"
     tar -xf "$tarball" -C "$HOME"
-    rm -f "$tarball"
+    rm -rf "$tmp_dir"
     "$HOME/google-cloud-sdk/install.sh" --quiet
 
     info "Google Cloud SDK installed. Run 'gcloud init' to configure."
@@ -266,11 +268,13 @@ gui_apps_install() {
     # Download all .deb/.AppImage/.run files in parallel, then install sequentially
     # (apt/dpkg needs exclusive lock so installs can't overlap).
     local pids=() names=()
-    local chrome_deb="/tmp/google-chrome-stable_current_amd64.deb"
-    # local warp_deb="/tmp/warp-terminal.deb"   # Warp: not needed right now
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    local chrome_deb="$tmp_dir/google-chrome-stable_current_amd64.deb"
+    # local warp_deb="$tmp_dir/warp-terminal.deb"   # Warp: not needed right now
     # local lms_ver="0.4.4-1"                    # LM Studio: not needed right now
-    # local lms_deb="/tmp/LM-Studio-${lms_ver}-x64.deb"
-    # local gpt4all_run="/tmp/gpt4all-installer.run"   # GPT4All: not needed right now
+    # local lms_deb="$tmp_dir/LM-Studio-${lms_ver}-x64.deb"
+    # local gpt4all_run="$tmp_dir/gpt4all-installer.run"   # GPT4All: not needed right now
 
     # Google Chrome
     if ! command -v google-chrome-stable &>/dev/null; then
@@ -324,8 +328,8 @@ gui_apps_install() {
     if [ -f "$chrome_deb" ]; then
         info "Installing Google Chrome..."
         sudo apt-get install -y "$chrome_deb"
-        rm -f "$chrome_deb"
     fi
+    rm -rf "$tmp_dir"
 
     # if [ -f "$warp_deb" ]; then
     #     info "Installing Warp terminal..."
@@ -396,12 +400,7 @@ gui_apps_install() {
 
     # ── Phase 4: curl|sh installers ──────────────────────────────
     # Ollama (local LLM serving)
-    if ! command -v ollama &>/dev/null; then
-        info "Installing Ollama..."
-        curl -fsSL https://ollama.com/install.sh | sh
-    else
-        info "Ollama already installed, skipping."
-    fi
+    ollama_install
 
     # Zed (fast AI-powered editor) — not needed right now
     # if ! command -v zed &>/dev/null; then
@@ -422,69 +421,20 @@ gui_apps_install() {
     fi
 
     # OpenCode (AI coding agent)
-    if ! command -v opencode &>/dev/null; then
-        if [ -x "$HOME/.opencode/bin/opencode" ]; then
-            mkdir -p "$HOME/.local/bin"
-            ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
-        fi
-    fi
-    if ! command -v opencode &>/dev/null; then
-        info "Installing OpenCode..."
-        if curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path; then
-            mkdir -p "$HOME/.local/bin"
-            if [ -f "$HOME/.opencode/bin/opencode" ]; then
-                ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
-            fi
-        else
-            warn "Failed to install OpenCode"
-        fi
-    else
-        info "OpenCode already installed, skipping."
-    fi
+    opencode_install
 
     # Cursor CLI (`agent`; Cursor's own installer, because the IDE package does not include it)
     cursor_cli_install ||
         warn "Cursor CLI setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; cursor_cli_install'"
 
     # Pi (AI coding agent)
-    if ! command -v pi &>/dev/null; then
-        info "Installing Pi..."
-        if command -v npm &>/dev/null; then
-            npm install -g --ignore-scripts @earendil-works/pi-coding-agent 2>/dev/null ||
-                sudo npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-        else
-            curl -fsSL https://pi.dev/install.sh | bash
-        fi
-    else
-        info "Pi already installed, skipping."
-    fi
+    pi_cli_install
 
     # GitHub Copilot CLI (AI coding assistant)
-    if ! command -v copilot &>/dev/null; then
-        info "Installing GitHub Copilot CLI..."
-        if command -v npm &>/dev/null; then
-            npm install -g @github/copilot 2>/dev/null ||
-                sudo npm install -g @github/copilot
-        fi
-    else
-        info "GitHub Copilot CLI already installed, skipping."
-    fi
+    copilot_cli_install
 
     # Aider (AI pair programming)
-    if ! command -v aider &>/dev/null; then
-        info "Installing Aider..."
-        if command -v pipx &>/dev/null; then
-            if command -v python3.12 &>/dev/null; then
-                pipx install --python python3.12 aider-chat 2>/dev/null || pipx install aider-chat
-            else
-                pipx install aider-chat
-            fi
-        else
-            curl -LsSf https://aider.chat/install.sh | sh
-        fi
-    else
-        info "Aider already installed, skipping."
-    fi
+    aider_cli_install
 
     # GNOME advanced settings
     $apt dconf-editor

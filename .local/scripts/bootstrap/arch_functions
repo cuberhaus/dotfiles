@@ -197,31 +197,6 @@ base_install () {
     gsettings set org.cinnamon.desktop.default-applications.terminal exec "$myTerminal"
 }
 
-git_repos() {
-    info "Cloning repos in parallel..."
-    mkdir -p "$HOME/repos/"
-    cd "$HOME/repos/" || exit
-    local pids=() names=()
-    local repos=(WinDotfiles docs dev TFG fib)
-    for name in "${repos[@]}"; do
-        if [ ! -d "$name" ]; then
-            git clone "https://github.com/cuberhaus/${name}.git" &
-            pids+=($!)
-            names+=("$name")
-        fi
-    done
-    local failures=0
-    for i in "${!pids[@]}"; do
-        if ! wait "${pids[$i]}"; then
-            warn "Failed to clone ${names[$i]}"
-            ((failures++)) || true
-        fi
-    done
-    if [ "$failures" -gt 0 ]; then
-        warn "$failures repo(s) failed to clone"
-    fi
-}
-
 configure_arch_services() {
     sudo systemctl enable --now org.cups.cupsd.service
     sudo systemctl enable bluetooth.service
@@ -364,7 +339,7 @@ vim_install () {
     (
         $pip wheel
         $pip black
-        python3 -m "$pip" --upgrade pynvim
+        $pip --upgrade pynvim
     ) &
     local pid_pip=$!
 

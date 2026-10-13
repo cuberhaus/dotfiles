@@ -891,6 +891,24 @@ antigravity:
         self.assertNotIn('"credential.helper": "store"', source)
         self.assertNotRegex(mini, r"(?m)^\s*helper\s*=\s*store\b")
 
+    def test_conditional_packages_are_not_flagged_missing_when_their_bootstrap_step_skips_them(self):
+        audit = load_audit_module()
+        with mock.patch.object(audit.shutil, "which", side_effect=lambda cmd: "/usr/bin/openlogi-agent" if cmd == "openlogi-agent" else None):
+            self.assertTrue(audit.package_is_installed(audit.Package("apt", "minisign"), set()))
+        with mock.patch.object(audit.shutil, "which", return_value=None):
+            self.assertFalse(audit.package_is_installed(audit.Package("apt", "minisign"), set()))
+            self.assertTrue(audit.package_is_installed(audit.Package("pacman", "tlp"), set()))
+        with (
+            mock.patch.object(audit.shutil, "which", return_value="/usr/bin/laptop-detect"),
+            mock.patch.object(audit, "command_succeeds", return_value=False),
+        ):
+            self.assertTrue(audit.package_is_installed(audit.Package("pacman", "tlp"), set()))
+        with (
+            mock.patch.object(audit.shutil, "which", return_value="/usr/bin/laptop-detect"),
+            mock.patch.object(audit, "command_succeeds", return_value=True),
+        ):
+            self.assertFalse(audit.package_is_installed(audit.Package("pacman", "tlp"), set()))
+
 
 if __name__ == "__main__":
     unittest.main()

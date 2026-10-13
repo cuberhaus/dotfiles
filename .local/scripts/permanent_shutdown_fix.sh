@@ -10,6 +10,7 @@ readonly EXPECTED_PARAMETERS=(
     'acpi_osi=Linux'
 )
 readonly GRUB_DEFAULT_FILE="${GRUB_DEFAULT_FILE:-/etc/default/grub}"
+readonly GRUB_LINE_PATTERN='^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"[[:space:]]*$'
 readonly BOOTLOADER="${SHUTDOWN_FIX_BOOTLOADER:-auto}"
 
 print_parameters() {
@@ -55,11 +56,49 @@ apply_kernelstub_fix() {
     kernelstub -p
 }
 
-apply_grub_fix() {
-    local expected
-    expected="$(print_parameters)"
+grub_current_cmdline() {
+    local line value='' found=false
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ "$line" =~ $GRUB_LINE_PATTERN ]]; then
+            value="${BASH_REMATCH[1]}"
+            found=true
+        elif [[ "$line" == GRUB_CMDLINE_LINUX_DEFAULT=* ]]; then
+            found=false
+            break
+        fi
+    done <"$GRUB_DEFAULT_FILE"
+    if [[ "$found" != true ]]; then
+        echo "$GRUB_DEFAULT_FILE has no plain double-quoted GRUB_CMDLINE_LINUX_DEFAULT=\"...\" line." >&2
+        return 1
+    fi
+    printf '%s\n' "$value"
+}
 
-    if grep -qF "$expected" "$GRUB_DEFAULT_FILE"; then
+rewrite_grub_cmdline() {
+    local current="$1" token parameter
+    local -a words=() kept=()
+    read -r -a words <<<"$current"
+    for token in "${words[@]}"; do
+        case "$token" in
+            quiet | splash) continue ;;
+        esac
+        kept+=("$token")
+    done
+    for parameter in "${EXPECTED_PARAMETERS[@]}"; do
+        case " ${kept[*]} " in
+            *" $parameter "*) ;;
+            *) kept+=("$parameter") ;;
+        esac
+    done
+    printf '%s\n' "${kept[*]}"
+}
+
+apply_grub_fix() {
+    local current rewritten line number=0 last=0 tmp_file
+    current="$(grub_current_cmdline)"
+    rewritten="$(rewrite_grub_cmdline "$current")"
+
+    if [[ "$current" == "$rewritten" ]]; then
         echo "GRUB shutdown fix already applied, skipping."
         return
     fi
@@ -67,8 +106,28 @@ apply_grub_fix() {
     echo "Backing up $GRUB_DEFAULT_FILE to ${GRUB_DEFAULT_FILE}.bak..."
     cp --backup=numbered "$GRUB_DEFAULT_FILE" "${GRUB_DEFAULT_FILE}.bak"
     echo "Configuring GRUB parameters..."
-    echo "Setting GRUB_CMDLINE_LINUX_DEFAULT to '$expected'"
-    sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT=\"$expected\"/" "$GRUB_DEFAULT_FILE"
+    echo "Setting GRUB_CMDLINE_LINUX_DEFAULT to '$rewritten'"
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        number=$((number + 1))
+        if [[ "$line" =~ $GRUB_LINE_PATTERN ]]; then
+            last=$number
+        fi
+    done <"$GRUB_DEFAULT_FILE"
+
+    tmp_file="$(mktemp)"
+    number=0
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        number=$((number + 1))
+        if [[ "$number" -eq "$last" ]]; then
+            printf 'GRUB_CMDLINE_LINUX_DEFAULT="%s"\n' "$rewritten"
+        else
+            printf '%s\n' "$line"
+        fi
+    done <"$GRUB_DEFAULT_FILE" >"$tmp_file"
+    cat "$tmp_file" >"$GRUB_DEFAULT_FILE"
+    rm -f "$tmp_file"
+
     echo "Verification - Current GRUB line:"
     grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_DEFAULT_FILE"
     echo "Running update-grub to apply changes..."

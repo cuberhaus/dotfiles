@@ -64,9 +64,9 @@ vim_uninstall() {
 
     brew uninstall macvim 2>/dev/null || true
     brew uninstall neovim 2>/dev/null || true
+    brew uninstall pynvim 2>/dev/null || true
 
     sudo npm uninstall -g neovim 2>/dev/null || true
-    python3 -m pip uninstall -y pynvim 2>/dev/null || true
     sudo gem uninstall neovim 2>/dev/null || true
 }
 

@@ -33,25 +33,19 @@ if ! command -v wmctrl &>/dev/null; then
     exit 1
 fi
 
-COMMAND=$1
-MYPROG=$1
-# If theres two arguments second argument is taken as the command to run
-
-if [ "$#" -eq 2 ]; then
-    MYPROG=$2
+COMMAND="${1:-}"
+if [ -z "$COMMAND" ]; then
+    echo "Usage: program COMMAND [WINDOW_CLASS]" >&2
+    exit 1
 fi
+MYPROG="${2:-${COMMAND%% *}}"
 
 echo "$COMMAND"
 
-sleep 0.5
-
-if wmctrl -lx | awk '{print $3}' | grep -qi "$MYPROG"; then
-    sleep 1         
+if wmctrl -lx | awk '{print $3}' | grep -Fqi -- "$MYPROG"; then
     wmctrl -xa "$MYPROG"
-   #as an alternative try the line bellow
-   #wmctrl -a $MYPROG
-    exit 1
-else 
-    $COMMAND &
+    exit 0
+else
+    eval "$COMMAND" &
     exit 0
 fi

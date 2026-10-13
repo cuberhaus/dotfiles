@@ -387,6 +387,17 @@ class DeclaredTests(AppsCase):
 
         self.assertEqual([app.key for app in found], ["zzz-declared-nowhere"])
 
+    def test_the_ubuntu_and_work_bootstraps_accept_the_cursor_appimage_they_check_for(self) -> None:
+        # Both ubuntu_functions and work_functions call cursor_is_installed, which keeps an existing
+        # ~/Applications/cursor.AppImage instead of installing the apt package.
+        self.app("cursor", self.program("Applications/cursor.AppImage"))
+        self.app("zzz-declared-nowhere", self.program("Applications/zzz.AppImage"))
+
+        for profile in ("ubuntu", "work"):
+            with self.subTest(profile=profile):
+                found = self.find(profile, REPO_ROOT).found
+                self.assertEqual([app.key for app in found], ["zzz-declared-nowhere"])
+
 
 class AcceptedTests(AppsCase):
     def test_an_app_entry_in_the_keep_file_accepts_the_app_and_counts_it(self) -> None:

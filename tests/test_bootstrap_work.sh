@@ -19,7 +19,7 @@ grep -Fq "if [[ \"\${BASH_SOURCE[0]}\" == \"\$0\" ]]; then" "$WORK_BOOTSTRAP" ||
     fail 'work bootstrap must be sourceable without provisioning the machine'
 grep -Fq 'command -v codex &>/dev/null || sudo npm install -g @openai/codex' "$WORK_FUNCTIONS" ||
     fail 'work bootstrap must install the OpenAI Codex CLI'
-grep -Fq 'https://opencode.ai/install' "$WORK_FUNCTIONS" ||
+{ grep -Fq 'opencode_install' "$WORK_FUNCTIONS" && grep -Fq 'https://opencode.ai/install' "$REPO_ROOT/.local/scripts/bootstrap/base_functions"; } ||
     fail 'work bootstrap must install OpenCode'
 grep -Fq '@earendil-works/pi-coding-agent' "$WORK_FUNCTIONS" ||
     fail 'work bootstrap must install Pi'

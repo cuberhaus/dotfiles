@@ -43,6 +43,32 @@ fi
 grep -q 'This script must be run as root.' "$test_dir/non_root_error"
 grep -q "Re-run it with: sudo $SCRIPT" "$test_dir/non_root_error"
 
+cat >"$test_dir/bin/update-grub" <<EOF
+#!/usr/bin/env bash
+printf 'update-grub\n' >>'$test_dir/update-grub.log'
+EOF
+chmod +x "$test_dir/bin/update-grub"
+
+grub_file="$test_dir/grub"
+cat >"$grub_file" <<'EOF'
+GRUB_DEFAULT=0
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash cryptdevice=UUID=123:cryptroot acpi_backlight=native"
+GRUB_CMDLINE_LINUX=""
+EOF
+
+PATH="$test_dir/bin:$PATH" SHUTDOWN_FIX_BOOTLOADER=grub GRUB_DEFAULT_FILE="$grub_file" \
+    bash "$SCRIPT" >"$test_dir/grub_output"
+
+grep -qx 'GRUB_CMDLINE_LINUX_DEFAULT="cryptdevice=UUID=123:cryptroot acpi_backlight=native nvidia-drm.modeset=1 acpi=force pcie_port_pm=off acpi_osi=Linux"' "$grub_file"
+[[ -f "${grub_file}.bak" ]] || { echo "Expected GRUB backup file" >&2; exit 1; }
+grep -qx 'update-grub' "$test_dir/update-grub.log"
+
+: >"$test_dir/update-grub.log"
+PATH="$test_dir/bin:$PATH" SHUTDOWN_FIX_BOOTLOADER=grub GRUB_DEFAULT_FILE="$grub_file" \
+    bash "$SCRIPT" >"$test_dir/grub_idempotent_output"
+grep -q 'GRUB shutdown fix already applied, skipping.' "$test_dir/grub_idempotent_output"
+[[ ! -s "$test_dir/update-grub.log" ]] || { echo "Expected idempotent GRUB run not to call update-grub" >&2; exit 1; }
+
 source "$SCRIPT_DIR/bootstrap/work_functions"
 sudo() {
     printf '%s\n' "$*" >"$test_dir/sudo.log"

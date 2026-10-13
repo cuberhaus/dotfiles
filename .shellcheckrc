@@ -4,9 +4,6 @@
 # Follow sourced files (resolve `source` / `.` commands)
 external-sources=true
 
-# Default shell dialect (most scripts are bash)
-shell=bash
-
 # Disabled warnings:
 # SC1091 — "Not following: file not found" — sourced files may not exist at lint time
 # SC2034 — "variable appears unused" — many variables are used by sourced scripts

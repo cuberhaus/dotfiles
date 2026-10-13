@@ -2,7 +2,7 @@
 # shellcheck disable=SC2317
 set -euo pipefail
 
-script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.local/scripts/bootstrap" && pwd)"
 source "$script_dir/base_functions"
 
 fail() {
@@ -85,7 +85,11 @@ run_entrypoint_contract_case() {
             fail "$entrypoint does not parse bootstrap arguments"
         parse_line="$(grep -nF 'parse_bootstrap_args "$@"' "$script_dir/$entrypoint" | cut -d: -f1)"
         configure_line="$(grep -nF 'configure_dual_boot_utc_rtc' "$script_dir/$entrypoint" | cut -d: -f1)"
-        update_line="$(grep -nF 'info "Updating system..."' "$script_dir/$entrypoint" | cut -d: -f1)"
+        if [[ "$entrypoint" == "work" ]]; then
+            update_line="$(grep -nE '^[[:space:]]*work_update_system$' "$script_dir/$entrypoint" | cut -d: -f1)"
+        else
+            update_line="$(grep -nF 'info "Updating system..."' "$script_dir/$entrypoint" | cut -d: -f1)"
+        fi
         if (( parse_line >= configure_line || configure_line >= update_line )); then
             fail "$entrypoint must parse and configure UTC RTC before package updates"
         fi

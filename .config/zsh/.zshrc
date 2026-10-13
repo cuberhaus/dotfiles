@@ -1,3 +1,13 @@
+# Powerlevel10k Instant Prompt {{{
+# Don't show message
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+# }}}
+
 # Theme {{{
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Base16 Shell
@@ -68,11 +78,6 @@ ZSH_ALIAS_FINDER_AUTOMATIC=true
 
 # Powerlevel10k {{{
 
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.config/.p10k.zsh ]] || source ~/.config/.p10k.zsh
 #}}}
@@ -110,9 +115,6 @@ mkdir -p "$(dirname "$HISTFILE")" 2>/dev/null
 # History substring search
 bindkey -M vicmd 'k' history-substring-search-up
 bindkey -M vicmd 'j' history-substring-search-down
-
-#Don't show message
-typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 #}}}
 
 # Vim / Has to be at the end of file {{{

@@ -20,7 +20,7 @@ CUBERHAUS_WORKSPACE_DIR ?= ../cuberhaus-workspace
 CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 RESTORE_WORKSPACE_SKILLS ?= 1
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix test-platforms install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work bootstrap-gentoo bootstrap-gentoo-dry-run uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix sync-mini doctor audit-installation repair hooks test-shutdown-fix test-platforms install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work bootstrap-gentoo bootstrap-gentoo-dry-run uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -105,6 +105,9 @@ test-platforms: ## Run the Java and LanguageTool steps on real Arch and under ba
 
 fix: ## Auto-fix markdown issues (markdownlint --fix)
 	bash .local/scripts/check-formatting.sh --fix
+
+sync-mini: ## Regenerate .local/Mini/.bashrc shared functions from canonical scripts
+	$(PYTHON) .local/scripts/sync-mini.py
 
 doctor: ## Check tools, symlinks, configuration, packages, environment, and automations
 	@bash .local/scripts/doctor.sh "$(PROFILE)"

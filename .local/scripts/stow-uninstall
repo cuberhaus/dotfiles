@@ -52,7 +52,7 @@ if (( ${#conflicts[@]} > 0 )); then
     for rel in "${conflicts[@]}"; do
         src="$TARGET/$rel"
         tmp="$TMP_DIR/$rel"
-        if [ -e "$src" ]; then
+        if [ -e "$src" ] || [ -L "$src" ]; then
             mkdir -p "$(dirname "$tmp")"
             mv "$src" "$tmp"
         fi
@@ -73,7 +73,7 @@ if (( ${#conflicts[@]} > 0 )); then
     for rel in "${conflicts[@]}"; do
         tmp="$TMP_DIR/$rel"
         dest="$TARGET/$rel"
-        if [ -e "$tmp" ]; then
+        if [ -e "$tmp" ] || [ -L "$tmp" ]; then
             mkdir -p "$(dirname "$dest")"
             mv -v "$tmp" "$dest"
         fi
@@ -88,7 +88,7 @@ if [ ! -d "$BACKUP_ROOT" ]; then
     exit 0
 fi
 
-LATEST="$(find "$BACKUP_ROOT" -mindepth 1 -maxdepth 1 -type d | sort | tail -1)"
+LATEST="$(find "$BACKUP_ROOT" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z | tr '\0' '\n' | tail -1)"
 
 if [ -z "$LATEST" ]; then
     ok "Uninstall complete. Backup directory is empty."
@@ -97,7 +97,7 @@ fi
 
 restored=0
 
-while IFS= read -r file; do
+while IFS= read -r -d '' file; do
     rel="${file#"$LATEST"/}"
     dest="$TARGET/$rel"
 
@@ -112,7 +112,7 @@ while IFS= read -r file; do
     mkdir -p "$(dirname "$dest")"
     mv -v "$file" "$dest"
     (( restored++ )) || true
-done < <(find "$LATEST" \( -type f -o -type l \))
+done < <(find "$LATEST" \( -type f -o -type l \) -print0)
 
 # ---------------------------------------------------------------------------
 # Step 6 — Clean up empty backup

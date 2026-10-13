@@ -264,7 +264,6 @@ def distro_file_setting(name: str) -> str | None:
 def detect_profile() -> str:
     # A profile a bootstrap recorded beats everything inferred below. DISTRO cannot say "work": the
     # shell config branches on DISTRO=ubuntu, so bootstrap/work records the profile separately.
-    # repair-installation has its own copy of this lookup; keep the two in step.
     recorded = distro_file_setting("DOTFILES_PROFILE")
     if recorded is not None:
         if recorded not in PROFILE_SOURCES:
@@ -602,8 +601,22 @@ def cursor_installed_outside_apt() -> bool:
         return False
 
 
-# Packages a bootstrap also accepts from another install method, on purpose.
-ALTERNATIVE_INSTALLS = {Package("apt", "cursor"): cursor_installed_outside_apt}
+def openlogi_already_installed() -> bool:
+    """Mirror openlogi_install in ubuntu_functions: minisign is skipped when openlogi-agent is present."""
+    return shutil.which("openlogi-agent") is not None
+
+
+def tlp_not_needed_on_desktop() -> bool:
+    """Mirror laptop_install in arch_functions: tlp is only installed when laptop-detect succeeds."""
+    return not shutil.which("laptop-detect") or not command_succeeds(["laptop-detect"])
+
+
+# Packages a bootstrap also accepts from another install method or skips by design on this machine.
+ALTERNATIVE_INSTALLS = {
+    Package("apt", "cursor"): cursor_installed_outside_apt,
+    Package("apt", "minisign"): openlogi_already_installed,
+    Package("pacman", "tlp"): tlp_not_needed_on_desktop,
+}
 
 
 def package_is_installed(package: Package, installed: set[str]) -> bool:
@@ -619,6 +632,7 @@ def package_is_installed(package: Package, installed: set[str]) -> bool:
 
 def audit_packages(packages: set[Package], reporter: Reporter, profile: str | None = None) -> None:
     print("\nActive bootstrap package declarations")
+    installed_by_command: dict[str, set[str]] = {}
     for manager in sorted({package.manager for package in packages}):
         declared = {package.name: package for package in packages if package.manager == manager}
         manager_packages = sorted(declared)
@@ -630,7 +644,9 @@ def audit_packages(packages: set[Package], reporter: Reporter, profile: str | No
                 bootstrap_command(profile),
             )
             continue
-        installed = installed_package_names(manager)
+        if command not in installed_by_command:
+            installed_by_command[command] = installed_package_names(manager)
+        installed = installed_by_command[command]
         missing = [name for name in manager_packages if not package_is_installed(declared[name], installed)]
         if missing:
             reporter.result(
@@ -1373,22 +1389,13 @@ def names_file(code: str, file_name: str) -> bool:
 def user_desktop_dir() -> pathlib.Path:
     """The folder the desktop shows shortcuts from: XDG_DESKTOP_DIR of user-dirs.dirs, ~/Desktop by default."""
     home = pathlib.Path.home()
-    config_home = os.environ.get("XDG_CONFIG_HOME") or str(home / ".config")
-    try:
-        text = (pathlib.Path(config_home) / "user-dirs.dirs").read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        text = ""
-    match = re.search(r'^XDG_DESKTOP_DIR="([^"]*)"', text, re.MULTILINE)
-    if match:
-        value = match.group(1)
-        # Like GLib, which the desktop reads the file with, expand a leading $HOME/ and nothing else.
-        if value.startswith("$HOME/"):
-            value = str(home) + value[len("$HOME"):]
-        folder = pathlib.Path(value)
-        # The user-dirs specification switches a folder off by pointing it at the home folder.
-        if folder.is_absolute() and folder != home:
-            return folder
-    return home / "Desktop"
+    xdg_lib = pathlib.Path(__file__).resolve().parent / "lib" / "xdg-dirs.sh"
+    out = subprocess.check_output(
+        ["bash", "-c", '. "$1" && xdg_user_dir DESKTOP "$HOME/Desktop"', "xdg-dirs", str(xdg_lib)],
+        env={**os.environ, "HOME": str(home)},
+        text=True,
+    )
+    return pathlib.Path(out.rstrip("\n"))
 
 
 def app_location(program: pathlib.Path, home: pathlib.Path) -> pathlib.Path | None:
@@ -1507,6 +1514,12 @@ def find_self_installed_apps(repo_root: pathlib.Path, profile: str) -> SelfInsta
             continue
         if names_file(declared, launcher.name):
             continue
+        if (
+            launcher.name == "cursor.desktop"
+            and program == home / "Applications" / "cursor.AppImage"
+            and names_file(declared, "cursor_is_installed")
+        ):
+            continue
         key = launcher.stem
         if (APP_KEY, key) in entries or (None, key) in entries:
             apps.acknowledged += 1
@@ -1605,6 +1618,7 @@ def audit_automations(profile: str, reporter: Reporter) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", choices=("auto", *PROFILE_SOURCES), default="auto")
+    parser.add_argument("--detect-profile", action="store_true", help="print the detected profile and exit")
     parser.add_argument("--list-expected", action="store_true", help="print expected packages without inspecting the host")
     parser.add_argument(
         "--list-extra",
@@ -1619,6 +1633,9 @@ def main() -> int:
     repo_root = pathlib.Path(__file__).resolve().parents[2]
     try:
         profile = detect_profile() if args.profile == "auto" else args.profile
+        if args.detect_profile:
+            print(profile)
+            return 0
         packages = expected_packages(repo_root, profile)
     except (OSError, RuntimeError, ValueError) as error:
         print(f"[ERROR] {error}", file=sys.stderr)

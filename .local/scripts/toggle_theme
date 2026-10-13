@@ -1,7 +1,8 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # Author: https://github.com/cuberhaus
 
 # PATHS
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 VIM_CONFIG="$HOME/.vim/vimrc"
 VIM_FOLDER="$HOME/.vim"
 TERMITE_CONFIG="$HOME/.config/termite/config"
@@ -31,9 +32,9 @@ TERMITE_THEME_LIGHT="onelight"
 
 function update_wallpaper {
     if ! command -v feh &>/dev/null; then return; fi
-    if [ "$1" == "light" ]; then
+    if [ "$1" == "light" ] && [ -n "${WALLPAPER_LIGHT:-}" ]; then
         feh --bg-scale "$WALLPAPER_LIGHT" &
-    elif [ "$1" == "dark" ]; then
+    elif [ "$1" == "dark" ] && [ -n "${WALLPAPER_DARK:-}" ]; then
         feh --bg-scale "$WALLPAPER_DARK" &
     fi
 }
@@ -119,9 +120,14 @@ function Usage {
     echo "Options: light | dark"
 }
 
-if [[ "$#" -ne 1 || $1 == "-h" ]]; then
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
     Usage
-    exit
+    exit 0
+fi
+
+if [[ "$#" -ne 1 ]]; then
+    Usage
+    exit 1
 fi
 
 # Switch

@@ -67,15 +67,13 @@ detect_base() {
 }
 
 scan_repo() {
-    local repo="$1"
+    local repo="$1" fetch_ok="$2"
     local rel="${repo#"$root"/}"
     [ "$rel" = "$repo" ] && rel="$repo"
 
-    if [ "$fetch" -eq 1 ]; then
-        if ! git -C "$repo" fetch --all --prune --quiet 2>/dev/null; then
-            printf "%s✗%s %s %s(fetch failed)%s\n" "$red" "$reset" "$rel" "$dim" "$reset"
-            return
-        fi
+    if [ "$fetch_ok" -eq 0 ]; then
+        printf "%s✗%s %s %s(fetch failed)%s\n" "$red" "$reset" "$rel" "$dim" "$reset"
+        return
     fi
 
     local base
@@ -113,7 +111,10 @@ scan_repo() {
 
 # Find every git repo under root, capped at $depth, skipping nested .git dirs
 # inside other repos (find prunes by not descending into already-found .git dirs).
-mapfile -t repos < <(
+repos=()
+while IFS= read -r line; do
+    repos+=("$line")
+done < <(
     find "$root" -maxdepth "$depth" -type d -name .git -prune 2>/dev/null \
         | sed 's|/\.git$||' | sort
 )
@@ -125,6 +126,20 @@ fi
 
 [ "$verbose" -eq 1 ] && echo "Scanning ${#repos[@]} repos..."
 
-for r in "${repos[@]}"; do
-    scan_repo "$r"
+pids=()
+if [ "$fetch" -eq 1 ]; then
+    for r in "${repos[@]}"; do
+        git -C "$r" fetch --all --prune --quiet 2>/dev/null &
+        pids+=($!)
+    done
+fi
+
+i=0
+while [ "$i" -lt ${#repos[@]} ]; do
+    fetch_ok=1
+    if [ "$fetch" -eq 1 ]; then
+        wait "${pids[$i]}" || fetch_ok=0
+    fi
+    scan_repo "${repos[$i]}" "$fetch_ok"
+    i=$((i + 1))
 done

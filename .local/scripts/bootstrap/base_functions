@@ -1330,3 +1330,87 @@ nvidia_ctk_uninstall() {
         "$keyring"
 }
 
+###############################################################
+# => Shared AI CLI tools (Ollama, OpenCode, Pi, Copilot CLI, Aider)
+###############################################################
+
+## Install Ollama (local LLM serving) when not already on PATH.
+ollama_install() {
+    if ! command -v ollama &>/dev/null; then
+        info "Installing Ollama..."
+        curl -fsSL https://ollama.com/install.sh | sh
+    else
+        info "Ollama already installed, skipping."
+    fi
+}
+
+## Install OpenCode (AI coding agent) and link it into ~/.local/bin.
+opencode_install() {
+    if ! command -v opencode &>/dev/null; then
+        if [ -x "$HOME/.opencode/bin/opencode" ]; then
+            mkdir -p "$HOME/.local/bin"
+            ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
+        fi
+    fi
+    if ! command -v opencode &>/dev/null; then
+        info "Installing OpenCode..."
+        if curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path; then
+            mkdir -p "$HOME/.local/bin"
+            if [ -f "$HOME/.opencode/bin/opencode" ]; then
+                ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
+            fi
+        else
+            warn "Failed to install OpenCode"
+        fi
+    else
+        info "OpenCode already installed, skipping."
+    fi
+}
+
+## Install Pi (AI coding agent) via npm when available, falling back to pi.dev's installer.
+pi_cli_install() {
+    if ! command -v pi &>/dev/null; then
+        info "Installing Pi..."
+        if command -v npm &>/dev/null; then
+            npm install -g --ignore-scripts @earendil-works/pi-coding-agent 2>/dev/null ||
+                sudo npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+        else
+            curl -fsSL https://pi.dev/install.sh | bash
+        fi
+    else
+        info "Pi already installed, skipping."
+    fi
+}
+
+## Install GitHub Copilot CLI via npm when not already on PATH.
+copilot_cli_install() {
+    if ! command -v copilot &>/dev/null; then
+        info "Installing GitHub Copilot CLI..."
+        if command -v npm &>/dev/null; then
+            npm install -g @github/copilot 2>/dev/null ||
+                sudo npm install -g @github/copilot
+        fi
+    else
+        info "GitHub Copilot CLI already installed, skipping."
+    fi
+}
+
+## Install Aider (AI pair programming) via pipx when available, falling back to aider.chat's installer.
+aider_cli_install() {
+    if ! command -v aider &>/dev/null; then
+        info "Installing Aider..."
+        if command -v pipx &>/dev/null; then
+            if command -v python3.12 &>/dev/null; then
+                pipx install --python python3.12 aider-chat 2>/dev/null || pipx install aider-chat
+            else
+                pipx install aider-chat
+            fi
+        else
+            curl -LsSf https://aider.chat/install.sh | sh
+        fi
+    else
+        info "Aider already installed, skipping."
+    fi
+}
+
+

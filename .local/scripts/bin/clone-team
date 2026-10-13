@@ -3,7 +3,7 @@
 # Group: Git across repositories
 # clone-team: clone every repository a GitHub team you belong to can access.
 #
-# Usage:
+# Usage: clone-team [ORG/TEAM [DEST]]
 #   clone-team                       # pick a team interactively, clone into .
 #   clone-team org/team-slug         # clone that team's repos into .
 #   clone-team org/team-slug ~/src   # clone into ~/src
@@ -19,17 +19,6 @@
 #                 (defaults: Pol Casacuberta Gil / pcasacubertagil@deloitte.es)
 # Per-org overrides: CLONE_GIT_IDENTITY_<ORG>_NAME and _EMAIL (ORG uppercased).
 
-set -uo pipefail
-
-if ! command -v gh >/dev/null 2>&1; then
-    echo "error: gh (GitHub CLI) is not installed. See https://cli.github.com/" >&2
-    exit 1
-fi
-
-_clone_script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# shellcheck source=../lib/git-repo-defaults.sh
-. "$_clone_script_dir/../lib/git-repo-defaults.sh"
-
 team=""
 dest="."
 while [ $# -gt 0 ]; do
@@ -39,7 +28,7 @@ while [ $# -gt 0 ]; do
             exit 0
             ;;
         -*)
-            echo "Unknown option: $1" >&2
+            printf 'clone-team: unknown option: %s (try clone-team --help)\n' "$1" >&2
             exit 2
             ;;
         *)
@@ -48,6 +37,16 @@ while [ $# -gt 0 ]; do
             ;;
     esac
 done
+
+if ! command -v gh >/dev/null 2>&1; then
+    echo "error: gh (GitHub CLI) is not installed. See https://cli.github.com/" >&2
+    exit 1
+fi
+set -uo pipefail
+
+_clone_script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=../lib/git-repo-defaults.sh
+. "$_clone_script_dir/../lib/git-repo-defaults.sh"
 
 if [ -t 1 ]; then
     green=$'\033[32m'; yellow=$'\033[33m'; red=$'\033[31m'; cyan=$'\033[36m'; dim=$'\033[2m'; reset=$'\033[0m'
@@ -66,7 +65,10 @@ if [ -n "$team" ]; then
     slug="${team#*/}"
 else
     echo "${cyan}Fetching your GitHub teams...${reset}"
-    mapfile -t teams < <(gh api --paginate /user/teams \
+    teams=()
+    while IFS= read -r line; do
+        teams+=("$line")
+    done < <(gh api --paginate /user/teams \
         --jq '.[] | "\(.organization.login)/\(.slug)"' 2>/dev/null)
     if [ "${#teams[@]}" -eq 0 ]; then
         echo "${yellow}You are not a member of any GitHub teams (or gh is not authed with read:org).${reset}" >&2
@@ -85,7 +87,7 @@ else
             exit 1
             ;;
     esac
-    idx=$((choice - 1))
+    idx=$((10#$choice - 1))
     if [ "$idx" -lt 0 ] || [ "$idx" -ge "${#teams[@]}" ]; then
         echo "${red}error:${reset} invalid selection." >&2
         exit 1
@@ -95,7 +97,10 @@ else
 fi
 
 echo "${cyan}Fetching repositories for $org/$slug...${reset}"
-mapfile -t repos < <(gh api --paginate "/orgs/$org/teams/$slug/repos" \
+repos=()
+while IFS= read -r line; do
+    repos+=("$line")
+done < <(gh api --paginate "/orgs/$org/teams/$slug/repos" \
     --jq '.[].full_name' 2>/dev/null)
 if [ "${#repos[@]}" -eq 0 ]; then
     echo "${yellow}No repositories found for $org/$slug (or you lack access).${reset}" >&2

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 ###############################################################
 # => Theme
 ###############################################################
@@ -31,21 +32,23 @@ export INSTALLER_NO_MODIFY_PATH=1
 
 export HISTCONTROL=ignoredups:erasedups   # no duplicate entries
 
-# Enable vim mode
-set -o vi
+if [[ $- == *i* ]]; then
+    # Enable vim mode
+    set -o vi
 
-# If there are multiple matches for completion, Tab should cycle through them
-bind 'TAB':menu-complete
+    # If there are multiple matches for completion, Tab should cycle through them
+    bind 'TAB':menu-complete
 
-# Display a list of the matching files
-bind "set show-all-if-ambiguous on"
+    # Display a list of the matching files
+    bind "set show-all-if-ambiguous on"
 
-# Perform partial completion on the first Tab press,
-# only start cycling full results on the second Tab press
-bind "set menu-complete-display-prefix on"
+    # Perform partial completion on the first Tab press,
+    # only start cycling full results on the second Tab press
+    bind "set menu-complete-display-prefix on"
 
-# Complete backwards
-bind '"\e[Z":menu-complete-backward'
+    # Complete backwards
+    bind '"\e[Z":menu-complete-backward'
+fi
 
 # append to the history file, don't overwrite it
 shopt -s histappend

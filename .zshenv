@@ -144,8 +144,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 
     export TERMINAL="kitty"
     export QT_QPA_PLATFORMTHEME="qt5ct"
-    source "$HOME/.config/distro"    # DISTRO variable
-    if command -v laptop-detect &>/dev/null && laptop-detect ; then
+    [ -r "$HOME/.config/distro" ] && source "$HOME/.config/distro"    # DISTRO variable
+    if [ -n "${DISPLAY:-}" ] && command -v laptop-detect &>/dev/null && command -v setxkbmap &>/dev/null && laptop-detect ; then
         setxkbmap es
     fi
     if [ -d "$HOME/fib/LI/picosat-965/bin" ] ; then
@@ -182,12 +182,12 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     fi
     export PYTHONPATH
     # Add the most recent Python user bin to PATH
-    if command -v python3 &> /dev/null; then
-        _pyver=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-        if [ -d "$HOME/Library/Python/$_pyver/bin" ] ; then
-            export PATH="$HOME/Library/Python/$_pyver/bin:$PATH"
+    if [ -d "$HOME/Library/Python" ]; then
+        _pydir=$(find "$HOME/Library/Python" -maxdepth 2 -mindepth 2 -type d -name bin 2>/dev/null | sort -V | tail -1)
+        if [ -n "$_pydir" ]; then
+            export PATH="$_pydir:$PATH"
         fi
-        unset _pyver
+        unset _pydir
     fi
 fi
 

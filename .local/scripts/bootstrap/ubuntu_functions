@@ -39,6 +39,7 @@ base_install () {
         python3
         python3-dev             # Python.h, to build ycm
         python3-pip
+        python3-pynvim          # Python provider Neovim needs to load YouCompleteMe
         ranger w3m              # Ranger and previews
         rclone
         ruby-dev
@@ -117,11 +118,13 @@ ubuntu_install() {
     $apt "${packages[@]}"
 
     # Parallel: download RStudio + gnome-terminal theme at the same time
-    local rstudio_deb="/tmp/rstudio-latest-amd64.deb"
-    local theme_script="/tmp/one-dark-gnome.sh"
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    local rstudio_deb="$tmp_dir/rstudio-latest-amd64.deb"
+    local theme_script="$tmp_dir/one-dark-gnome.sh"
 
     if ! command -v rstudio &>/dev/null; then
-        wget -qO "$rstudio_deb" https://rstudio.org/download/latest/daily/desktop/jammy/rstudio-latest-amd64.deb &
+        wget -qO "$rstudio_deb" https://rstudio.org/download/latest/stable/desktop/noble/rstudio-latest-amd64.deb &
         local pid_rstudio=$!
     fi
 
@@ -133,8 +136,7 @@ ubuntu_install() {
 
     if [ -n "${pid_rstudio:-}" ]; then
         if wait "$pid_rstudio"; then
-            sudo dpkg -i "$rstudio_deb"
-            rm -f "$rstudio_deb"
+            sudo apt-get install -y "$rstudio_deb"
         else
             warn "Failed to download RStudio"
         fi
@@ -144,10 +146,10 @@ ubuntu_install() {
 
     if wait "$pid_theme" && [ -f "$theme_script" ]; then
         bash "$theme_script"
-        rm -f "$theme_script"
     else
         warn "Failed to download gnome-terminal theme"
     fi
+    rm -rf "$tmp_dir"
 
     ensure_virtualization_groups
 }
@@ -170,10 +172,12 @@ chrome_install () {
         info "Google Chrome already installed, skipping."
         return
     fi
-    local chrome_deb="/tmp/google-chrome-stable_current_amd64.deb"
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    local chrome_deb="$tmp_dir/google-chrome-stable_current_amd64.deb"
     wget -O "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
     sudo apt install -y "$chrome_deb"
-    rm -f "$chrome_deb"
+    rm -rf "$tmp_dir"
 }
 
 # OpenLogi (Logitech Options+ alternative for Bolt and Unifying receivers) has no apt repository:
@@ -466,77 +470,23 @@ ai_tools_install() {
     # fi
 
     # Ollama (local LLM serving)
-    if ! command -v ollama &>/dev/null; then
-        info "Installing Ollama..."
-        curl -fsSL https://ollama.com/install.sh | sh
-    else
-        info "Ollama already installed, skipping."
-    fi
+    ollama_install
 
     # OpenCode (AI coding agent)
-    if ! command -v opencode &>/dev/null; then
-        if [ -x "$HOME/.opencode/bin/opencode" ]; then
-            mkdir -p "$HOME/.local/bin"
-            ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
-        fi
-    fi
-    if ! command -v opencode &>/dev/null; then
-        info "Installing OpenCode..."
-        if curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path; then
-            mkdir -p "$HOME/.local/bin"
-            if [ -f "$HOME/.opencode/bin/opencode" ]; then
-                ln -sf "$HOME/.opencode/bin/opencode" "$HOME/.local/bin/opencode"
-            fi
-        else
-            warn "Failed to install OpenCode"
-        fi
-    else
-        info "OpenCode already installed, skipping."
-    fi
+    opencode_install
 
     # Cursor CLI (`agent`; Cursor's own installer, because the IDE package does not include it)
     cursor_cli_install ||
         warn "Cursor CLI setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; cursor_cli_install'"
 
     # Pi (AI coding agent)
-    if ! command -v pi &>/dev/null; then
-        info "Installing Pi..."
-        if command -v npm &>/dev/null; then
-            npm install -g --ignore-scripts @earendil-works/pi-coding-agent 2>/dev/null ||
-                sudo npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-        else
-            curl -fsSL https://pi.dev/install.sh | bash
-        fi
-    else
-        info "Pi already installed, skipping."
-    fi
+    pi_cli_install
 
     # GitHub Copilot CLI (AI coding assistant)
-    if ! command -v copilot &>/dev/null; then
-        info "Installing GitHub Copilot CLI..."
-        if command -v npm &>/dev/null; then
-            npm install -g @github/copilot 2>/dev/null ||
-                sudo npm install -g @github/copilot
-        fi
-    else
-        info "GitHub Copilot CLI already installed, skipping."
-    fi
+    copilot_cli_install
 
     # Aider (AI pair programming)
-    if ! command -v aider &>/dev/null; then
-        info "Installing Aider..."
-        if command -v pipx &>/dev/null; then
-            if command -v python3.12 &>/dev/null; then
-                pipx install --python python3.12 aider-chat 2>/dev/null || pipx install aider-chat
-            else
-                pipx install aider-chat
-            fi
-        else
-            curl -LsSf https://aider.chat/install.sh | sh
-        fi
-    else
-        info "Aider already installed, skipping."
-    fi
+    aider_cli_install
 }
 
 vim_install () {
@@ -546,18 +496,14 @@ vim_install () {
     # A failed build must not skip the language providers below; rerun ycm.sh later.
     bash "$ycm" || warn "YouCompleteMe setup failed; rerun it with: bash $ycm"
 
-    # Parallel language provider installs (npm, pip, gem are independent)
+    # Parallel language provider installs (npm and gem are independent; python3-pynvim is installed by apt)
     sudo npm install -g neovim &
     local pid_npm=$!
-
-    python3 -m pip install --user --upgrade pynvim &
-    local pid_pip=$!
 
     sudo gem install neovim &
     local pid_gem=$!
 
     wait "$pid_npm" || warn "npm neovim install had errors"
-    wait "$pid_pip" || warn "pip pynvim install had errors"
     wait "$pid_gem" || warn "gem neovim install had errors"
 }
 

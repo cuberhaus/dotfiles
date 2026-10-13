@@ -29,7 +29,7 @@ function is_transient_error() {
         return 0
     fi
 
-    grep -qiE "gnutls|handshake failed|connection.*terminated|connection.*reset|connection.*refused|could not resolve|timed out|operation timed out|unable to access|index\.lock|\.lock|the remote end hung up unexpectedly|rpc failed|502 bad gateway|503 service|504 gateway|429 too many" "$file" 2>/dev/null
+    command grep -qiE "gnutls|handshake failed|connection.*terminated|connection.*reset|connection.*refused|could not resolve|timed out|operation timed out|unable to access|index\.lock|\.lock|the remote end hung up unexpectedly|rpc failed|502 bad gateway|503 service|504 gateway|429 too many" "$file" 2>/dev/null
 }
 
 function run_repo_with_retry() {
@@ -78,9 +78,9 @@ function run_repo_with_retry() {
                 printf "[retry %d/%d succeeded]\n" "$((attempt - 1))" "$max_retries" > "$outfile"
                 cat "$temp_attempt" >> "$outfile"
             else
-                mv "$temp_attempt" "$outfile"
+                command mv "$temp_attempt" "$outfile"
             fi
-            rm -f "$temp_attempt"
+            command rm -f "$temp_attempt"
             if [[ "$summary_mode" == status ]]; then
                 # Without its state this repository would be silently missing
                 # from the summary and could be reported as clean, so a failure
@@ -103,14 +103,14 @@ function run_repo_with_retry() {
                 printf "[failed after %d retries]\n" "$((attempt - 1))" > "$outfile"
                 cat "$temp_attempt" >> "$outfile"
             else
-                mv "$temp_attempt" "$outfile"
+                command mv "$temp_attempt" "$outfile"
             fi
-            rm -f "$temp_attempt"
+            command rm -f "$temp_attempt"
             return "$status"
         fi
 
         sleep "$attempt"
-        rm -f "$temp_attempt"
+        command rm -f "$temp_attempt"
     done
 }
 
@@ -120,7 +120,7 @@ function extract_pull_summary() {
     local head_file="${outfile}.head"
     local summary=""
 
-    summary=$(grep -E '^[[:space:]]*[0-9]+ files? changed' "$outfile" 2>/dev/null | tail -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    summary=$(command grep -E '^[[:space:]]*[0-9]+ files? changed' "$outfile" 2>/dev/null | tail -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
     if [[ -n "$summary" ]]; then
         printf "%s\n" "$summary"
         return 0
@@ -141,12 +141,12 @@ function extract_pull_summary() {
         fi
     fi
 
-    if grep -qiE 'already up[- ]to[- ]date|current branch .* is up to date' "$outfile" 2>/dev/null; then
+    if command grep -qiE 'already up[- ]to[- ]date|current branch .* is up to date' "$outfile" 2>/dev/null; then
         return 1
     fi
 
     local update_line
-    update_line=$(grep -E 'Updating [0-9a-f]+\.\.[0-9a-f]+|Fast-forward|Successfully rebased and updated|Merge made by' "$outfile" 2>/dev/null | head -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    update_line=$(command grep -E 'Updating [0-9a-f]+\.\.[0-9a-f]+|Fast-forward|Successfully rebased and updated|Merge made by' "$outfile" 2>/dev/null | head -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
     if [[ -n "$update_line" ]]; then
         printf "%s\n" "$update_line"
         return 0
@@ -276,13 +276,15 @@ function git_recursive() {
     local timeout_sec="${6:-$DEFAULT_TIMEOUT}"
     local summary_mode="${7:-none}"
 
-    local blue green yellow red normal dim
-    blue=$(tput setaf 4)
-    green=$(tput setaf 2)
-    yellow=$(tput setaf 3)
-    red=$(tput setaf 1)
-    normal=$(tput sgr0)
-    dim=$(tput dim 2>/dev/null || true)
+    local blue="" green="" yellow="" red="" normal="" dim=""
+    if command -v tput >/dev/null 2>&1; then
+        blue=$(tput setaf 4 2>/dev/null || true)
+        green=$(tput setaf 2 2>/dev/null || true)
+        yellow=$(tput setaf 3 2>/dev/null || true)
+        red=$(tput setaf 1 2>/dev/null || true)
+        normal=$(tput sgr0 2>/dev/null || true)
+        dim=$(tput dim 2>/dev/null || true)
+    fi
 
     echo "${blue}depth: $depth ${normal}"
     if [[ $depth -eq 1 ]]; then
@@ -292,7 +294,7 @@ function git_recursive() {
     fi
 
     local dirs=()
-    while IFS= read -r -d $'\0' dir; do
+    while IFS= read -r -d '' dir; do
         dirs+=("${dir%.git}")
     done < <(find . -maxdepth "$depth" -type d -name .git -print0 2>/dev/null)
 
@@ -317,12 +319,12 @@ function git_recursive() {
         local pipe="$tmpdir/completion.fifo"
         mkfifo "$pipe"
         exec 3<>"$pipe"
-        rm -f "$pipe"
+        command rm -f "$pipe"
 
         cleanup() {
             exec 3>&- 2>/dev/null
             exec 3<&- 2>/dev/null
-            rm -rf "$tmpdir" 2>/dev/null
+            command rm -rf "$tmpdir" 2>/dev/null
             local pids
             pids=$(jobs -p 2>/dev/null)
             if [[ -n "$pids" ]]; then
@@ -431,7 +433,7 @@ function git_recursive() {
             fi
         done
 
-        rm -rf "$tmpdir"
+        command rm -rf "$tmpdir"
         trap - EXIT INT TERM
     else
         local completed=0
@@ -463,7 +465,7 @@ function git_recursive() {
             else
                 printf "    %s(no output)%s\n" "$dim" "$normal"
             fi
-            rm -f "$tmp_out" "${tmp_out}.head" "${tmp_out}.porcelain" "${tmp_out}.summary"
+            command rm -f "$tmp_out" "${tmp_out}.head" "${tmp_out}.porcelain" "${tmp_out}.summary"
         done
     fi
 
@@ -551,7 +553,8 @@ if [[ "${1:-}" == "--help" ]]; then
     exit 0
 fi
 
-while getopts "hpksj:r:d:t:S" options; do
+OPTIND=1
+while getopts ":hpksj:r:d:t:S" options; do
     case "${options}" in
     h)
         usage
@@ -586,6 +589,7 @@ while getopts "hpksj:r:d:t:S" options; do
         exit_abnormal
         ;;
     *)
+        printf 'git-recurse: illegal option -- %s\n' "${OPTARG}" >&2
         exit_abnormal
         ;;
     esac

@@ -451,7 +451,7 @@ alias ycminstall='python3 $HOME/.vim/plugged/YouCompleteMe/install.py'
 ##@ Edit config files
 
 ## Edit the zsh aliases (this file).
-alias aliases='nvim $ZDOTDIR/aliases'
+alias aliases='nvim "${ZDOTDIR:-$HOME/.config/zsh}/aliases"'
 ## Edit the Arch bootstrap functions (packages and setup).
 alias arch='nvim $scripts/bootstrap/arch_functions'
 ## Edit ~/.bashrc.
@@ -477,11 +477,11 @@ alias xmonad.hs='nvim $HOME/.xmonad/xmonad.hs'
 ## Edit ~/.xprofile, which display managers read at login.
 alias xprofile='nvim $HOME/.xprofile'
 ## Edit the zsh login profile.
-alias zprofile='nvim $ZDOTDIR/.zprofile'
+alias zprofile='nvim "${ZDOTDIR:-$HOME/.config/zsh}/.zprofile"'
 ## Edit ~/.zshenv, which every zsh reads.
 alias zshenv='nvim $HOME/.zshenv'
 ## Edit the interactive zsh config.
-alias zshrc='nvim $ZDOTDIR/.zshrc'
+alias zshrc='nvim "${ZDOTDIR:-$HOME/.config/zsh}/.zshrc"'
 #alias vconfgrub="sudo vim /boot/grub/grub.cfg"
 #alias vgrub="sudo vim /etc/default/grub"
 #alias vlightdm="sudo vim /etc/lightdm/lightdm.conf"

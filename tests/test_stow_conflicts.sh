@@ -117,6 +117,25 @@ test_uninstall_restores_a_backed_up_link() {
     teardown_case
 }
 
+# If a Stow link is replaced after install by a dangling foreign symlink, stow-uninstall must
+# still move it aside for stow -D and restore it afterwards.
+test_uninstall_handles_a_dangling_foreign_link() {
+    setup_case
+    cp "$REPO_ROOT/.local/scripts/stow-uninstall" "$PACKAGE/.local/scripts/stow-uninstall"
+    mkdir -p "$HOME/.config/app"
+
+    run_stow || fail 'Stow must succeed on a clean target'
+    ln -sf "$CASE_DIR/nonexistent-target" "$HOME/.config/app/settings.json"
+
+    bash "$PACKAGE/.local/scripts/stow-uninstall" > "$CASE_DIR/uninstall.log" 2>&1 \
+        || { cat "$CASE_DIR/uninstall.log" >&2; fail 'stow-uninstall failed on a dangling foreign link'; }
+
+    [ -L "$HOME/.config/app/settings.json" ] || fail 'Uninstalling must preserve the foreign dangling link'
+    [ "$(readlink "$HOME/.config/app/settings.json")" = "$CASE_DIR/nonexistent-target" ] \
+        || fail 'The preserved dangling link must keep its target'
+    teardown_case
+}
+
 # dconf rewrites its database and gnome-shell keeps it mapped, so Stow can never own it, and the
 # backup step would otherwise move the user's real desktop settings aside for a stale placeholder.
 test_live_dconf_database_is_left_alone() {
@@ -296,6 +315,7 @@ if [ "$STOW_AVAILABLE" = true ]; then
     test_absolute_link_to_the_repository_file_is_replaced_by_a_stow_link
     test_plain_file_in_the_way_is_backed_up
     test_uninstall_restores_a_backed_up_link
+    test_uninstall_handles_a_dangling_foreign_link
     test_live_dconf_database_is_left_alone
     test_dconf_directory_is_never_linked_into_the_repository
     test_stow_folds_the_resolve_folder_without_the_backup_step

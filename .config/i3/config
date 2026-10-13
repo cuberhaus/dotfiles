@@ -157,11 +157,11 @@ bindsym XF86PowerOff exec --no-startup-id $poweroff
 # Applications
 bindsym XF86Calculator exec $calculator
 bindsym XF86WWW exec $browser
-bindsym XF86MyComputer $filemanager
-bindsym XF86Mail $mail
+bindsym XF86MyComputer exec $filemanager
+bindsym XF86Mail exec $mail
 
 # Touchpad controls
-bindsym XF86TouchpadToggle exec ./toggletouchpad.sh # toggle touchpad
+# bindsym XF86TouchpadToggle exec ./toggletouchpad.sh # toggle touchpad
 
 # Media player controls
 bindsym XF86AudioRaiseVolume exec --no-startup-id $VolumeUp
@@ -376,8 +376,8 @@ set $musicClass "Spotify"
 set $gptClass "Chat-gpt"
 set $calculatorClass "SpeedCrunch"
 
-bindsym Mod1+e exec program $emacs  EmacsScratch, [title="EmacsScratch"] scratchpad show
-bindsym $mod+d exec program $discord , [class=$discordClass] scratchpad show
+bindsym Mod1+e exec program "$emacs" EmacsScratch, [title="EmacsScratch"] scratchpad show
+bindsym $mod+d exec program "$discord" $discordClass, [class=$discordClass] scratchpad show
 bindsym $mod+m exec program $mail, [class=$mailClass] scratchpad show
 bindsym $mod+g exec program $gpt , [class=$gptClass] scratchpad show
 bindsym $mod+s exec program $music, [class=$musicClass] scratchpad show

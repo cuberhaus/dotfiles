@@ -103,6 +103,9 @@ class ProfileDetectionTests(unittest.TestCase):
             (scripts / "repair-installation").write_text(
                 REPAIR_PATH.read_text(encoding="utf-8"), encoding="utf-8"
             )
+            (scripts / "audit_installation.py").write_text(
+                AUDIT_PATH.read_text(encoding="utf-8"), encoding="utf-8"
+            )
             (bootstrap / "base_functions").write_text("", encoding="utf-8")
             for name in ("arch_functions", "ubuntu_functions", "mac_functions", "work_functions"):
                 (bootstrap / name).write_text(f"vim_install() {{ echo {name}; }}\n", encoding="utf-8")

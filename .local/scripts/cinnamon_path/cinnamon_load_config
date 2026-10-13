@@ -58,11 +58,11 @@ if $flag1 && $flag2; then
 fi
 
 if $flag1; then
-    echo "Dumping light mode..."
+    echo "Loading light mode..."
     light
 fi
 
 if $flag2; then
-    echo "Dumping dark mode..."
+    echo "Loading dark mode..."
     dark
 fi

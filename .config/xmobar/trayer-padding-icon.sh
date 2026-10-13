@@ -13,7 +13,7 @@
 # Function to create a transparent Wx1 px XPM icon
 create_xpm_icon () {
     timestamp=$(date)
-    pixels=$(for i in $(seq "$1"); do echo -n "."; done)
+    pixels=$(for i in $(seq "$1"); do printf '.'; done)
 
     cat << EOF > "$2"
 /* XPM *

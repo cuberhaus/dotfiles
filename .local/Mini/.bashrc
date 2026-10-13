@@ -1,34 +1,37 @@
+# shellcheck shell=bash
 ###############################################################
 # => Configuration
 ###############################################################
-
-# Enable Readline not waiting for additional input when a key is pressed.
-set keyseq-timeout 50
 
 export HISTCONTROL=ignoredups:erasedups   # no duplicate entries
 export EDITOR=vim
 export VISUAL=vim
 export LESSHISTFILE="-"
 
-# Enable vim mode
-set -o vi
+if [[ $- == *i* ]]; then
+    # Enable Readline not waiting for additional input when a key is pressed.
+    bind 'set keyseq-timeout 50'
 
-# Ctrl+L to clear screen in vi mode
-bind -m vi-command 'Control-l: clear-screen'
-bind -m vi-insert 'Control-l: clear-screen'
+    # Enable vim mode
+    set -o vi
 
-# If there are multiple matches for completion, Tab should cycle through them
-bind 'TAB':menu-complete
+    # Ctrl+L to clear screen in vi mode
+    bind -m vi-command 'Control-l: clear-screen'
+    bind -m vi-insert 'Control-l: clear-screen'
 
-# Display a list of the matching files
-bind "set show-all-if-ambiguous on"
+    # If there are multiple matches for completion, Tab should cycle through them
+    bind 'TAB':menu-complete
 
-# Perform partial completion on the first Tab press,
-# only start cycling full results on the second Tab press
-bind "set menu-complete-display-prefix on"
+    # Display a list of the matching files
+    bind "set show-all-if-ambiguous on"
 
-# Complete backwards
-bind '"\e[Z":menu-complete-backward'
+    # Perform partial completion on the first Tab press,
+    # only start cycling full results on the second Tab press
+    bind "set menu-complete-display-prefix on"
+
+    # Complete backwards
+    bind '"\e[Z":menu-complete-backward'
+fi
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -125,81 +128,54 @@ o() {
     fi
 }
 
+# BEGIN GENERATED MINI FUNCTIONS (do not edit by hand; run: make sync-mini)
 # Pull current repo or recursively pull child repos (parallel)
 pull() {
-    if [ -d .git ]; then
-        git pull "$@"
-    else
-        local tmpdir pids=() repos=() failures=0
-        printf "\033[34mdepth: 2 \033[0m\n"
-        tmpdir=$(mktemp -d)
-        set +m  # disable job control notifications
-        
-        while IFS= read -r -d $'\0' dot_git; do
-            local dir
-            dir=$(dirname "$dot_git")
-            repos+=("$dir")
-            printf "\033[34mDownloading %s...\033[0m\n" "$dir"
-            (
-                git -C "$dir" pull > "$tmpdir/$(echo "$dir" | tr '/' '_').out" 2>&1
-            ) &
-            pids+=($!)
-        done < <(find . -maxdepth 2 -type d -name .git -print0 2>/dev/null)
-        
-        local updated_repos=()
-        local updated_summaries=()
-        for i in "${!pids[@]}"; do
-            local pid="${pids[$i]}" repo="${repos[$i]}"
-            local outfile
-            outfile="$tmpdir/$(echo "$repo" | tr '/' '_').out"
-            if wait "$pid"; then
-                printf "\033[32m✓ %s\033[0m\n" "$repo"
-                local summary
-                summary=$(grep -E '^[[:space:]]*[0-9]+ files? changed' "$outfile" 2>/dev/null | tail -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-                if [ -n "$summary" ]; then
-                    updated_repos+=("$repo")
-                    updated_summaries+=("$summary")
-                fi
-            else
-                printf "\033[31m✗ %s\033[0m\n" "$repo"
-                ((failures++)) || true
-            fi
-            cat "$outfile" 2>/dev/null
-        done
-        set -m  # re-enable job control
-        rm -rf "$tmpdir"
-        if [ "${#updated_repos[@]}" -gt 0 ]; then
-            printf "\n\033[32mUpdated repositories (%d):\033[0m\n" "${#updated_repos[@]}"
-            for (( j=0; j < ${#updated_repos[@]}; j++ )); do
-                printf "  \033[32m%s\033[0m: %s\n" "${updated_repos[j]}" "${updated_summaries[j]}"
-            done
-        fi
-        if ((failures > 0)); then
-            printf "\n\033[31m%d repo(s) failed\033[0m\n" "$failures"
-            return 1
-        fi
-    fi
+    case ${1:-} in
+        -h|--help)
+            printf 'Usage: pull [git-recurse options]\n\n'
+            printf 'Run git pull in every Git repository below the current directory, in parallel,\n'
+            printf 'and list the repositories it updated. The options are those of git-recurse, for\n'
+            printf 'example pull -j 6 (see git-recurse --help).\n'
+            return 0
+            ;;
+    esac
+    git-recurse "$@" git pull
 }
 
 # Recursively add a GitHub PAT token to all repositories
 add_pat() {
-    local pat="$1"
+    local pat="${1:-}"
+    # A token never starts with a hyphen, so an option-like word is a mistake and must not be
+    # written into every remote as if it were the token.
+    case $pat in
+        -h|--help)
+            printf 'Usage: add_pat TOKEN\n\n'
+            printf 'Rewrite the HTTPS GitHub remote (origin) of every repository up to two levels below\n'
+            printf 'the current directory so that it carries TOKEN as a personal access token. The token\n'
+            printf 'is stored in plain text in each .git/config; logout-all --audit lists such remotes.\n'
+            return 0
+            ;;
+        -*)
+            printf 'add_pat: unknown option: %s (try add_pat --help)\n' "$pat" >&2
+            return 2
+            ;;
+    esac
     if [ -z "$pat" ]; then
         echo "Usage: add_pat <token>"
         echo "Recursively changes all https://github.com/... remotes to use the defined PAT."
         return 1
     fi
     printf "\033[34mdepth: 2 \033[0m\n"
-    while IFS= read -r -d $'\0' dot_git; do
+    while IFS= read -r -d '' dot_git; do
         local dir
         dir=$(dirname "$dot_git")
         local remote_url
         remote_url=$(git -C "$dir" remote get-url origin 2>/dev/null)
         if [ -n "$remote_url" ]; then
-            if [[ "$remote_url" == *"github.com"* && "$remote_url" == https://* ]]; then
+            if [[ "$remote_url" =~ ^https://([^@]+@)?github\.com(/|$) ]]; then
                 # Remove any existing credentials and insert new formatting
-                local new_url
-                new_url=$(echo "$remote_url" | sed -E "s|https://([^@]+@)?github\\.com|https://$pat@github.com|")
+                local new_url="https://${pat}@github.com${remote_url#*github.com}"
                 if [ "$remote_url" != "$new_url" ]; then
                     git -C "$dir" remote set-url origin "$new_url"
                     printf "\033[32m✓ %s\033[0m (remote updated)\n" "$dir"
@@ -223,31 +199,34 @@ add_pat() {
 # They stay above the aliases on purpose: Bash builds the aliases that exist when a function is
 # defined into its body, so a later alias for grep, rm, ... cannot change what runs here.
 
-# Print where a repository lives: an existing checkout wins, flat (./cv) or nested
-# (./cuberhaus/cv); with none, the flat name.
 _clone_repo_dir() {
-    local nwo="$1" name="${1##*/}"
-    if [ -d "$nwo/.git" ]; then
-        printf '%s\n' "$nwo"
-    elif [ -d "$name/.git" ]; then
-        printf '%s\n' "$name"
-    elif [ -e "$nwo" ]; then
-        printf '%s\n' "$nwo"
+    local nameWithOwner="$1"
+    local repoName="${nameWithOwner##*/}"
+
+    if [ -d "$nameWithOwner/.git" ]; then
+        printf '%s\n' "$nameWithOwner"
+    elif [ -d "$repoName/.git" ]; then
+        printf '%s\n' "$repoName"
+    elif [ -e "$nameWithOwner" ]; then
+        printf '%s\n' "$nameWithOwner"
+    elif [ -e "$repoName" ]; then
+        printf '%s\n' "$repoName"
     else
-        printf '%s\n' "$name"
+        printf '%s\n' "$repoName"
     fi
 }
 
-# Prepare a checkout after a clone or pull: git hooks, lefthook, skip-worktree masks and the
-# commit identity. SCOPE is "personal" (clone-all: only cuberhaus/* gets an identity) or "team"
-# (clone-team: cuberhaus/* is personal, every other organisation gets the work identity from
-# CLONE_TEAM_WORK_GIT_NAME and CLONE_TEAM_WORK_GIT_EMAIL). CLONE_GIT_IDENTITY_<ORG>_NAME and
-# _EMAIL (ORG upper-cased) override the identity of any organisation.
+# identity_scope:
+#   personal — cuberhaus/* only (clone-all)
+#   team     — cuberhaus/* personal; other orgs work identity (clone-team)
 _clone_configure_repo() {
-    local nwo="$1" dir="$2" scope="${3:-personal}"
-    local org="${nwo%%/*}" git_name="" git_email="" org_key var_name var_email
+    local nameWithOwner="$1"
+    local dir="$2"
+    local identity_scope="${3:-personal}"
 
-    [ -d "$dir/.git" ] || return 0
+    if [ ! -d "$dir/.git" ]; then
+        return 0
+    fi
 
     if [ -d "$dir/.githooks" ]; then
         git -C "$dir" config core.hooksPath .githooks
@@ -256,6 +235,9 @@ _clone_configure_repo() {
     fi
 
     if [ -f "$dir/lefthook.yml" ] || [ -f "$dir/.lefthook.yml" ]; then
+        # DIR is usually relative (clone-all and clone-team pass "cv"), so look for the program
+        # after the cd, not through DIR: "$dir/node_modules/.bin/lefthook" would then be searched
+        # for inside DIR itself. Say nothing: clone-all runs many of these at once.
         (
             cd "$dir" || exit 0
             if [ -x ./node_modules/.bin/lefthook ]; then
@@ -272,7 +254,10 @@ _clone_configure_repo() {
         "$dir/.local/scripts/apply-skip-worktree" "$dir"
     fi
 
-    case "$scope" in
+    local org="${nameWithOwner%%/*}"
+    local git_name="" git_email=""
+
+    case "$identity_scope" in
         team)
             if [ "$org" = "cuberhaus" ]; then
                 git_name="cuberhaus"
@@ -282,8 +267,8 @@ _clone_configure_repo() {
                 git_email="${CLONE_TEAM_WORK_GIT_EMAIL:-pcasacubertagil@deloitte.es}"
             fi
             ;;
-        *)
-            if [[ "$nwo" == cuberhaus/* ]]; then
+        personal|*)
+            if [[ "$nameWithOwner" == cuberhaus/* ]]; then
                 git_name="cuberhaus"
                 git_email="polcg10@gmail.com"
             fi
@@ -291,25 +276,30 @@ _clone_configure_repo() {
     esac
 
     if [ -n "$org" ]; then
+        local org_key
         org_key=$(printf '%s' "$org" | tr '[:lower:]' '[:upper:]' | tr -c 'A-Z0-9' '_')
-        var_name="CLONE_GIT_IDENTITY_${org_key}_NAME"
-        var_email="CLONE_GIT_IDENTITY_${org_key}_EMAIL"
+        local var_name="CLONE_GIT_IDENTITY_${org_key}_NAME"
+        local var_email="CLONE_GIT_IDENTITY_${org_key}_EMAIL"
+        # shellcheck disable=SC2154,SC2295
         if [ -n "${!var_name:-}" ]; then git_name="${!var_name}"; fi
+        # shellcheck disable=SC2154,SC2295
         if [ -n "${!var_email:-}" ]; then git_email="${!var_email}"; fi
     fi
 
-    if [ -n "$git_name" ]; then git -C "$dir" config user.name "$git_name"; fi
-    if [ -n "$git_email" ]; then git -C "$dir" config user.email "$git_email"; fi
-    return 0
+    if [ -n "$git_name" ]; then
+        git -C "$dir" config user.name "$git_name"
+    fi
+    if [ -n "$git_email" ]; then
+        git -C "$dir" config user.email "$git_email"
+    fi
 }
 
 # Clone every repository of a GitHub owner, or fast-forward the ones already present, with one
 # status line per repository (in parallel). Run it from the directory that holds the checkouts.
 # The body is a subshell, so its variables, helper functions and options never reach the shell.
 clone-all() (
-    case ${1:-} in
-        -h | --help)
-            cat <<'EOF'
+    usage() {
+        cat <<'EOF'
 Usage: clone-all [OWNER]
 
 Clone every repository of a GitHub owner, or fast-forward the ones already present,
@@ -324,6 +314,13 @@ Environment:
   CLONE_ALL_JOBS     parallel jobs (default: CPU count, at least 4, at most 32)
   CLONE_ALL_RETRIES  attempts per repository (default: 3)
 EOF
+    }
+
+    # A GitHub owner never starts with a hyphen, so a leading one is a mistyped option and
+    # must not reach gh as if it were the owner.
+    case ${1:-} in
+        -h | --help)
+            usage
             exit 0
             ;;
         -*)
@@ -332,47 +329,55 @@ EOF
             ;;
     esac
 
-    if ! command -v gh >/dev/null 2>&1; then
+    # Cloning/pulling is network + disk bound, not CPU bound, so parallelism
+    # well above core count is fine. Default: detected cores (min 4, cap 32).
+    # Override with CLONE_ALL_JOBS=N.
+    detect_jobs() {
+        local n
+        n=$(nproc 2>/dev/null) \
+            || n=$(getconf _NPROCESSORS_ONLN 2>/dev/null) \
+            || n=$(sysctl -n hw.ncpu 2>/dev/null) \
+            || n=4
+        [ "$n" -lt 4 ] && n=4
+        [ "$n" -gt 32 ] && n=32
+        echo "$n"
+    }
+    max_jobs=${CLONE_ALL_JOBS:-$(detect_jobs)}
+    clone_retries=${CLONE_ALL_RETRIES:-3}
+
+    if ! command -v gh &>/dev/null; then
         echo "error: gh (GitHub CLI) is not installed" >&2
         exit 1
     fi
     set -o pipefail
 
-    # Cloning and pulling wait on the network and the disk, not on the CPU, so far more jobs than
-    # cores is fine: the detected cores, at least 4 and at most 32.
-    max_jobs=${CLONE_ALL_JOBS:-}
-    if [ -z "$max_jobs" ]; then
-        max_jobs=$(nproc 2>/dev/null) ||
-            max_jobs=$(getconf _NPROCESSORS_ONLN 2>/dev/null) ||
-            max_jobs=$(sysctl -n hw.ncpu 2>/dev/null) ||
-            max_jobs=4
-        if [ "$max_jobs" -lt 4 ]; then max_jobs=4; fi
-        if [ "$max_jobs" -gt 32 ]; then max_jobs=32; fi
-    fi
-    clone_retries=${CLONE_ALL_RETRIES:-3}
 
-    # Owner to clone: the argument, then CLONE_ALL_OWNER, then the account gh is signed in as.
-    owner=${1:-${CLONE_ALL_OWNER:-}}
-    if [ -z "$owner" ]; then
-        owner=$(gh api user --jq '.login' 2>/dev/null)
-        if [ -z "$owner" ]; then
+    # Owner to clone: explicit arg > CLONE_ALL_OWNER env > the active gh account.
+    orgname="${1:-${CLONE_ALL_OWNER:-}}"
+    if [ -z "$orgname" ]; then
+        orgname=$(gh api user --jq '.login' 2>/dev/null)
+        if [ -z "$orgname" ]; then
             echo "error: could not determine the active gh user (run 'gh auth login' or pass an owner)" >&2
             exit 1
         fi
     fi
 
     if [ -t 1 ]; then
-        C_RESET=$'\033[0m' C_GREEN=$'\033[32m' C_BLUE=$'\033[34m'
-        C_YELLOW=$'\033[33m' C_RED=$'\033[31m' C_DIM=$'\033[2m'
+        C_RESET=$'\033[0m'
+        C_GREEN=$'\033[32m'
+        C_BLUE=$'\033[34m'
+        C_YELLOW=$'\033[33m'
+        C_RED=$'\033[31m'
+        C_DIM=$'\033[2m'
     else
-        C_RESET='' C_GREEN='' C_BLUE='' C_YELLOW='' C_RED='' C_DIM=''
+        C_RESET=''; C_GREEN=''; C_BLUE=''; C_YELLOW=''; C_RED=''; C_DIM=''
     fi
 
-    # One repository: clone it, or fast-forward it when it is already there. It runs in its own
-    # Bash (xargs below), so it and the helpers it calls are exported.
     process_repo() {
-        local nwo="$1" dir attempt output status label before after
-        dir=$(_clone_repo_dir "$nwo")
+        local nameWithOwner="$1"
+        local dir
+        dir="$(_clone_repo_dir "$nameWithOwner")"
+        local attempt output status label before after
 
         if [ -d "$dir/.git" ]; then
             # A quiet pull prints nothing even when it moves HEAD, so compare HEAD instead.
@@ -397,12 +402,12 @@ EOF
             attempt=1
             status=1
             while [ "$attempt" -le "$clone_retries" ]; do
-                if output=$(gh repo clone "$nwo" "$dir" -- --quiet 2>&1); then
+                if output=$(gh repo clone "$nameWithOwner" "$dir" -- --quiet 2>&1); then
                     status=0
                     break
                 fi
                 if [ "$attempt" -lt "$clone_retries" ]; then
-                    printf 'retrying clone (%s/%s) %s\n' "$attempt" "$clone_retries" "$nwo" >&2
+                    printf 'retrying clone (%s/%s) %s\n' "$attempt" "$clone_retries" "$nameWithOwner" >&2
                 fi
                 attempt=$((attempt + 1))
             done
@@ -415,45 +420,52 @@ EOF
         fi
 
         if [ "$status" -eq 0 ]; then
-            _clone_configure_repo "$nwo" "$dir" personal
+            _clone_configure_repo "$nameWithOwner" "$dir" personal
         fi
 
-        printf '%-22b %s\n' "$label" "$nwo"
+        printf '%-22b %s\n' "$label" "$nameWithOwner"
         if [ -n "$output" ] && [ "$status" -ne 0 ]; then
             printf '%s\n' "$output" | sed 's/^/    /'
         fi
         return "$status"
     }
+    # Each repository runs in its own bash (xargs below), which sees only exported functions:
+    # process_repo calls the other two.
     export -f _clone_repo_dir _clone_configure_repo process_repo
     export C_RESET C_GREEN C_BLUE C_YELLOW C_RED C_DIM clone_retries
 
-    gh repo list "$owner" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' |
-        xargs -P "$max_jobs" -I {} bash -c 'process_repo "$@"' _ {}
+    gh repo list "$orgname" --limit 1000 --json nameWithOwner -q '.[].nameWithOwner' \
+        | xargs -P "$max_jobs" -I {} bash -c 'process_repo "$@"' _ {}
 )
 
 # Clone every repository that a GitHub team you belong to can access, or fast-forward the ones
 # already present. With no team it lists yours and asks for a number.
 clone-team() (
-    team="" dest="."
+    team=""
+    dest="."
     while [ $# -gt 0 ]; do
         case "$1" in
-            -h | --help)
+            -h|--help)
                 cat <<'EOF'
+clone-team: clone every repository a GitHub team you belong to can access.
+
 Usage: clone-team [ORG/TEAM [DEST]]
+  clone-team                       # pick a team interactively, clone into .
+  clone-team org/team-slug         # clone that team's repos into .
+  clone-team org/team-slug ~/src   # clone into ~/src
 
-Clone every repository that a GitHub team you belong to can access, or fast-forward the ones
-already present. Without a team it lists yours and asks for a number.
+Mirrors the PowerShell Clone-GitHubTeamRepos (WinDotfiles my_git.psm1).
+Existing git checkouts are fast-forward updated; others are cloned. Requires
+the GitHub CLI (gh) authenticated with the read:org scope.
 
-  clone-team                       pick a team interactively, clone into .
-  clone-team org/team-slug         clone that team's repos into .
-  clone-team org/team-slug ~/src   clone into ~/src
+After each successful clone or pull, configures core.hooksPath when .githooks/
+exists and sets repo-local commit identity:
+  cuberhaus/*  -> cuberhaus / polcg10@gmail.com
+  other orgs   -> CLONE_TEAM_WORK_GIT_NAME / CLONE_TEAM_WORK_GIT_EMAIL
+                (defaults: Pol Casacuberta Gil / pcasacubertagil@deloitte.es)
+Per-org overrides: CLONE_GIT_IDENTITY_<ORG>_NAME and _EMAIL (ORG uppercased).
 
-Needs the GitHub CLI (gh) signed in with the read:org scope. After each clone or pull it sets
-core.hooksPath when the repository has a .githooks folder, and a repository-local commit identity:
-  cuberhaus/*  ->  cuberhaus <polcg10@gmail.com>
-  other orgs   ->  $CLONE_TEAM_WORK_GIT_NAME <$CLONE_TEAM_WORK_GIT_EMAIL>
-                   (default: Pol Casacuberta Gil <pcasacubertagil@deloitte.es>)
-CLONE_GIT_IDENTITY_<ORG>_NAME and _EMAIL (ORG upper-cased) override either one.
+team=""
 EOF
                 exit 0
                 ;;
@@ -474,14 +486,15 @@ EOF
     fi
     set -uo pipefail
 
+
     if [ -t 1 ]; then
-        green=$'\033[32m' yellow=$'\033[33m' red=$'\033[31m'
-        cyan=$'\033[36m' dim=$'\033[2m' reset=$'\033[0m'
+        green=$'\033[32m'; yellow=$'\033[33m'; red=$'\033[31m'; cyan=$'\033[36m'; dim=$'\033[2m'; reset=$'\033[0m'
     else
-        green='' yellow='' red='' cyan='' dim='' reset=''
+        green=''; yellow=''; red=''; cyan=''; dim=''; reset=''
     fi
 
-    org="" slug=""
+    org=""
+    slug=""
     if [ -n "$team" ]; then
         if [[ "$team" != */* || "$team" == */*/* ]]; then
             echo "${red}error:${reset} team must be in 'org/team-slug' form, e.g. myorg/backend." >&2
@@ -507,7 +520,7 @@ EOF
         echo
         read -rp "Select a team by number (or 'q' to quit): " choice
         case "$choice" in
-            q | Q | "") exit 0 ;;
+            q|Q|"") exit 0 ;;
             *[!0-9]*)
                 echo "${red}error:${reset} invalid selection." >&2
                 exit 1
@@ -526,24 +539,24 @@ EOF
     repos=()
     while IFS= read -r line; do
         repos+=("$line")
-    done < <(gh api --paginate "/orgs/$org/teams/$slug/repos" --jq '.[].full_name' 2>/dev/null)
+    done < <(gh api --paginate "/orgs/$org/teams/$slug/repos" \
+        --jq '.[].full_name' 2>/dev/null)
     if [ "${#repos[@]}" -eq 0 ]; then
         echo "${yellow}No repositories found for $org/$slug (or you lack access).${reset}" >&2
         exit 0
     fi
 
-    mkdir -p "$dest" || {
-        echo "${red}error:${reset} could not create $dest" >&2
-        exit 1
-    }
+    mkdir -p "$dest" || { echo "${red}error:${reset} could not create $dest" >&2; exit 1; }
     target=$(cd "$dest" && pwd) || exit 1
 
     echo "${cyan}Syncing ${#repos[@]} repo(s) into $target${reset}"
     cd "$target" || exit 1
     for full in "${repos[@]}"; do
-        dir=$(_clone_repo_dir "$full")
+        name="${full##*/}"
+        dir="$(_clone_repo_dir "$full")"
 
         if [ -d "$dir/.git" ]; then
+            output=""
             # A quiet pull prints nothing even when it moves HEAD, so compare HEAD instead.
             before=$(git -C "$dir" rev-parse HEAD 2>/dev/null)
             if output=$(git -C "$dir" pull --ff-only --quiet 2>&1); then
@@ -590,27 +603,20 @@ EOF
 # Bash 3.2 (macOS) is enough. tests/test_mini_bashrc.sh runs tests/test_git_recurse.sh against
 # git-recurse here and compares git-ahead with its script, so the copies cannot drift unnoticed.
 
-# Report, in every Git repository below a directory, the remote branches that have commits
-# ahead of origin's main (or master). The body is a subshell, so nothing leaks into the shell.
 git-ahead() (
     set -uo pipefail
-    depth=4 fetch=1 verbose=0 root="."
+
+    depth=4
+    fetch=1
+    verbose=0
+    root="."
 
     while [ $# -gt 0 ]; do
         case "$1" in
-            -n | --no-fetch)
-                fetch=0
-                shift
-                ;;
-            --depth)
-                depth="$2"
-                shift 2
-                ;;
-            -v | --verbose)
-                verbose=1
-                shift
-                ;;
-            -h | --help)
+            -n|--no-fetch) fetch=0; shift ;;
+            --depth)       depth="$2"; shift 2 ;;
+            -v|--verbose)  verbose=1; shift ;;
+            -h|--help)
                 cat <<'EOF'
 git-ahead: scan all git repos under a directory, fetch all remotes, and
 report any remote branch that has commits ahead of remote main/master.
@@ -629,10 +635,7 @@ EOF
                 echo "Unknown option: $1" >&2
                 exit 2
                 ;;
-            *)
-                root="$1"
-                shift
-                ;;
+            *) root="$1"; shift ;;
         esac
     done
 
@@ -641,10 +644,15 @@ EOF
         exit 1
     fi
 
-    green=$'\033[32m' yellow=$'\033[33m' red=$'\033[31m'
-    dim=$'\033[2m' bold=$'\033[1m' reset=$'\033[0m'
+    green=$'\033[32m'
+    yellow=$'\033[33m'
+    red=$'\033[31m'
+    dim=$'\033[2m'
+    bold=$'\033[1m'
+    reset=$'\033[0m'
 
-    # The ref to compare branches against: origin/HEAD, then origin/main, then origin/master.
+    # Pick the "main" ref to compare branches against.
+    # Prefers symbolic origin/HEAD, then origin/main, then origin/master, else "".
     detect_base() {
         local base
         base=$(git symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null) || true
@@ -653,27 +661,25 @@ EOF
             return
         fi
         if git rev-parse --verify --quiet origin/main >/dev/null; then
-            echo "origin/main"
-            return
+            echo "origin/main"; return
         fi
         if git rev-parse --verify --quiet origin/master >/dev/null; then
-            echo "origin/master"
-            return
+            echo "origin/master"; return
         fi
         echo ""
     }
 
     scan_repo() {
-        local repo="$1" rel base report="" ref ahead
-        rel="${repo#"$root"/}"
+        local repo="$1" fetch_ok="$2"
+        local rel="${repo#"$root"/}"
+        [ "$rel" = "$repo" ] && rel="$repo"
 
-        if [ "$fetch" -eq 1 ]; then
-            if ! git -C "$repo" fetch --all --prune --quiet 2>/dev/null; then
-                printf "%s✗%s %s %s(fetch failed)%s\n" "$red" "$reset" "$rel" "$dim" "$reset"
-                return
-            fi
+        if [ "$fetch_ok" -eq 0 ]; then
+            printf "%s✗%s %s %s(fetch failed)%s\n" "$red" "$reset" "$rel" "$dim" "$reset"
+            return
         fi
 
+        local base
         base=$(cd "$repo" && detect_base)
         if [ -z "$base" ]; then
             if [ "$verbose" -eq 1 ]; then
@@ -683,11 +689,13 @@ EOF
             return
         fi
 
-        # Every remote branch except the base itself, with the commits it has ahead of it.
+        # Iterate every remote branch except the base itself, count commits ahead.
+        local report=""
         while IFS= read -r ref; do
             [ "$ref" = "$base" ] && continue
             # Skip remote HEAD pointers like origin/HEAD
             case "$ref" in */HEAD) continue ;; esac
+            local ahead
             ahead=$(git -C "$repo" rev-list --count "$base..$ref" 2>/dev/null) || continue
             if [ "$ahead" -gt 0 ]; then
                 report+=$(printf "    %s↑ %3d%s  %s\n" "$yellow" "$ahead" "$reset" "$ref")
@@ -704,12 +712,15 @@ EOF
         fi
     }
 
-    # Every Git repository under root, down to the depth (find does not enter a .git it found).
+    # Find every git repo under root, capped at $depth, skipping nested .git dirs
+    # inside other repos (find prunes by not descending into already-found .git dirs).
     repos=()
     while IFS= read -r line; do
         repos+=("$line")
-    done < <(find "$root" -maxdepth "$depth" -type d -name .git -prune 2>/dev/null |
-        sed 's|/\.git$||' | sort)
+    done < <(
+        find "$root" -maxdepth "$depth" -type d -name .git -prune 2>/dev/null \
+            | sed 's|/\.git$||' | sort
+    )
 
     if [ ${#repos[@]} -eq 0 ]; then
         echo "No git repos found under $root (depth $depth)."
@@ -718,276 +729,613 @@ EOF
 
     [ "$verbose" -eq 1 ] && echo "Scanning ${#repos[@]} repos..."
 
-    for r in "${repos[@]}"; do
-        scan_repo "$r"
+    pids=()
+    if [ "$fetch" -eq 1 ]; then
+        for r in "${repos[@]}"; do
+            git -C "$r" fetch --all --prune --quiet 2>/dev/null &
+            pids+=($!)
+        done
+    fi
+
+    i=0
+    while [ "$i" -lt ${#repos[@]} ]; do
+        fetch_ok=1
+        if [ "$fetch" -eq 1 ]; then
+            wait "${pids[$i]}" || fetch_ok=0
+        fi
+        scan_repo "${repos[$i]}" "$fetch_ok"
+        i=$((i + 1))
     done
 )
 
-# Run a command in every Git repository below the current directory, in parallel by default,
-# retrying network failures, with a time limit per repository. After a pull it lists the
-# repositories that changed; after `git status`, the ones with changes. The body is a subshell.
 git-recurse() (
-    DEFAULT_DEPTH=3 DEFAULT_JOBS=0 DEFAULT_RETRIES=2 DEFAULT_TIMEOUT=12
+    DEFAULT_DEPTH=3
+    DEFAULT_JOBS=0
+    DEFAULT_RETRIES=2
+    DEFAULT_TIMEOUT=12
 
-    timeout_bin=""
+    TIMEOUT_BIN=""
     if command -v timeout >/dev/null 2>&1; then
-        timeout_bin="timeout"
+        TIMEOUT_BIN="timeout"
     elif command -v gtimeout >/dev/null 2>&1; then
-        timeout_bin="gtimeout"
+        TIMEOUT_BIN="gtimeout"
     fi
 
-    usage() {
-        cat <<EOF
-git-recurse - Run a git command in all repositories under the current directory
 
-Usage: git-recurse [options] <command> [args...]
+    function is_transient_error() {
+        local file="$1"
+        local status="${2:-0}"
 
-The command and its args are passed as positional arguments. Examples:
-  git-recurse git status
-  git-recurse git pull
-  git-recurse -j 6 git fetch
-  git-recurse -s git status
-
-Options:
-  -h, --help      Show this help
-  -p              Run in parallel (default)
-  -s              Run sequentially
-  -j <jobs>       Max concurrent jobs in parallel mode (0 = all at once, default: $DEFAULT_JOBS, env: GIT_RECURSE_JOBS)
-  -r <retries>    Max retries on transient network/TLS failures (default: $DEFAULT_RETRIES, env: GIT_RECURSE_RETRIES)
-  -t <seconds>    Timeout per repository in seconds (0 = disabled, default: $DEFAULT_TIMEOUT, env: GIT_RECURSE_TIMEOUT)
-  -d <depth>      Max depth to search for .git dirs (default: $DEFAULT_DEPTH)
-  -S              Show a summary: the repositories a pull updated, or the ones with changes
-                  for git status (automatic for both; env: GIT_RECURSE_SUMMARY=0 turns it off,
-                  =1 turns it on for any command)
-EOF
-    }
-
-    # Whether a failure is worth another attempt: the network or the server, not the command.
-    is_transient_error() {
-        if [ "$2" -eq 124 ] || [ "$2" -eq 137 ]; then
-            return 0
-        fi
-        command grep -qiE "gnutls|handshake failed|connection.*terminated|connection.*reset|connection.*refused|could not resolve|timed out|operation timed out|unable to access|index\.lock|\.lock|the remote end hung up unexpectedly|rpc failed|502 bad gateway|503 service|504 gateway|429 too many" "$1" 2>/dev/null
-    }
-
-    # Describe what differs in a repository from its `git status --porcelain --branch`, for
-    # example "2 modified, 1 untracked, ahead 1". A path both staged and modified counts in each.
-    # Print nothing and return 1 when the working tree is clean and the branch is neither ahead
-    # of nor behind its upstream, and 2 when the file cannot be read: a missing probe must not
-    # look like a clean repository. Plain shell on purpose: every repository runs at once, so a
-    # program started per repository lengthens the whole run.
-    describe_status() {
-        local probe_file="$1" line x y part description=""
-        local conflicted=0 staged=0 modified=0 untracked=0 ahead=0 behind=0
-        local ahead_re='ahead ([0-9]+)' behind_re='behind ([0-9]+)'
-        local parts=()
-
-        [ -r "$probe_file" ] || return 2
-
-        while IFS= read -r line || [ -n "$line" ]; do
-            case "$line" in
-                '## '*)
-                    [[ "$line" =~ $ahead_re ]] && ahead="${BASH_REMATCH[1]}"
-                    [[ "$line" =~ $behind_re ]] && behind="${BASH_REMATCH[1]}"
-                    ;;
-                '?? '*)
-                    untracked=$((untracked + 1))
-                    ;;
-                '!! '*) ;;
-                ???*)
-                    x="${line:0:1}"
-                    y="${line:1:1}"
-                    if [ "$x" = U ] || [ "$y" = U ] || [ "$x$y" = AA ] || [ "$x$y" = DD ]; then
-                        conflicted=$((conflicted + 1))
-                    else
-                        [ "$x" != " " ] && staged=$((staged + 1))
-                        [ "$y" != " " ] && modified=$((modified + 1))
-                    fi
-                    ;;
-            esac
-        done <"$probe_file"
-
-        [ "$conflicted" -gt 0 ] && parts+=("$conflicted conflicted")
-        [ "$staged" -gt 0 ] && parts+=("$staged staged")
-        [ "$modified" -gt 0 ] && parts+=("$modified modified")
-        [ "$untracked" -gt 0 ] && parts+=("$untracked untracked")
-        [ "$ahead" -gt 0 ] && parts+=("ahead $ahead")
-        [ "$behind" -gt 0 ] && parts+=("behind $behind")
-
-        [ ${#parts[@]} -gt 0 ] || return 1
-        for part in "${parts[@]}"; do
-            description="$description${description:+, }$part"
-        done
-        printf '%s\n' "$description"
-    }
-
-    # What a successful pull changed, as one line (the diffstat of the pull, else of HEAD before
-    # and after, else git's own "Updating"/"Fast-forward" line); return 1 when nothing changed.
-    pull_summary() {
-        local dir="$1" out="$2" before="$3" after="$4" summary shortstat update_line
-        summary=$(command grep -E '^[[:space:]]*[0-9]+ files? changed' "$out" 2>/dev/null | tail -n 1 |
-            sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-        if [ -n "$summary" ]; then
-            printf '%s\n' "$summary"
+        if [[ "$status" -eq 124 || "$status" -eq 137 ]]; then
             return 0
         fi
 
-        if [ -n "$before" ] && [ -n "$after" ] && [ "$before" != "$after" ]; then
-            shortstat=$(git -C "$dir" diff --shortstat "$before" "$after" 2>/dev/null |
-                sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-            if [ -n "$shortstat" ]; then
-                printf '%s\n' "$shortstat"
-            else
-                printf 'updated (%s..%s)\n' "${before:0:7}" "${after:0:7}"
-            fi
-            return 0
-        fi
-
-        if command grep -qiE 'already up[- ]to[- ]date|current branch .* is up to date' "$out" 2>/dev/null; then
-            return 1
-        fi
-
-        update_line=$(command grep -E 'Updating [0-9a-f]+\.\.[0-9a-f]+|Fast-forward|Successfully rebased and updated|Merge made by' "$out" 2>/dev/null |
-            head -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-        if [ -n "$update_line" ]; then
-            printf '%s\n' "$update_line"
-            return 0
-        fi
-        return 1
+        command grep -qiE "gnutls|handshake failed|connection.*terminated|connection.*reset|connection.*refused|could not resolve|timed out|operation timed out|unable to access|index\.lock|\.lock|the remote end hung up unexpectedly|rpc failed|502 bad gateway|503 service|504 gateway|429 too many" "$file" 2>/dev/null
     }
 
-    # The status summary of one repository, written to "$out.updated" when it differs. The text
-    # of the user's own command cannot be summarised (it is localized and may be --short), while
-    # the porcelain format is stable, so this asks git again. GIT_OPTIONAL_LOCKS=0 keeps the
-    # read-only probe from taking the index lock another git process may hold. Returns non-zero
-    # when the state cannot be read: describe_status answers 1 for "clean", so any other failure
-    # is real and must not be taken for a clean repository.
-    summarize_status() {
-        local dir="$1" out="$2" description rc=0
-        if [ -n "$timeout_bin" ] && [ "$timeout_sec" -gt 0 ]; then
-            GIT_OPTIONAL_LOCKS=0 "$timeout_bin" -k 3s "${timeout_sec}s" \
-                git -C "$dir" status --porcelain --branch >"$out.porcelain" 2>/dev/null || rc=$?
-        else
-            GIT_OPTIONAL_LOCKS=0 git -C "$dir" status --porcelain --branch >"$out.porcelain" 2>/dev/null || rc=$?
-        fi
-        [ "$rc" -eq 0 ] || return "$rc"
-        description=$(describe_status "$out.porcelain") || rc=$?
-        case "$rc" in
-            0) printf '%s\n' "$description" >"$out.updated" ;;
-            1) rc=0 ;;
-        esac
-        return "$rc"
-    }
+    function run_repo_with_retry() {
+        local dir="$1"
+        local outfile="$2"
+        local cmd="$3"
+        local max_retries="$4"
+        local timeout_sec="$5"
+        # none | pull (record HEAD around the command) | status (capture a porcelain probe)
+        local summary_mode="${6:-none}"
+        local attempt=0
+        local status=0
+        local head_before=""
+        local head_after=""
 
-    # Run the command in one repository, retrying transient failures, and leave its output in
-    # "$out" (plus "$out.updated" when there is something for the summary). Returns its status.
-    run_repo() {
-        local dir="$1" out="$2" try="$2.attempt" attempt=0 status=0 before="" after="" summary
-        if [ "$summary_mode" = pull ]; then
-            before=$(git -C "$dir" rev-parse HEAD 2>/dev/null || true)
+        if [[ "$summary_mode" == pull ]]; then
+            head_before=$(git -C "$dir" rev-parse HEAD 2>/dev/null || true)
         fi
 
         while true; do
-            attempt=$((attempt + 1))
-            (
-                cd "$dir" 2>/dev/null || exit 1
-                if [ -n "$timeout_bin" ] && [ "$timeout_sec" -gt 0 ]; then
-                    "$timeout_bin" -k 3s "${timeout_sec}s" bash -c "$cmd"
-                else
+            ((attempt++))
+            local temp_attempt="${outfile}.attempt"
+
+            if [[ -n "$TIMEOUT_BIN" && "$timeout_sec" -gt 0 ]]; then
+                (
+                    cd "$dir" 2>/dev/null || exit 1
+                    "$TIMEOUT_BIN" -k 3s "${timeout_sec}s" bash -c "$cmd"
+                ) > "$temp_attempt" 2>&1
+                status=$?
+            else
+                (
+                    cd "$dir" 2>/dev/null || exit 1
                     bash -c "$cmd"
-                fi
-            ) >"$try" 2>&1
-            status=$?
+                ) > "$temp_attempt" 2>&1
+                status=$?
+            fi
 
-            if [ "$status" -eq 0 ]; then
-                if [ "$attempt" -gt 1 ]; then
-                    printf '[retry %d/%d succeeded]\n' "$((attempt - 1))" "$max_retries" >"$out"
-                    cat "$try" >>"$out"
+            if [[ $status -eq 0 ]]; then
+                if [[ "$summary_mode" == pull && -n "$head_before" ]]; then
+                    head_after=$(git -C "$dir" rev-parse HEAD 2>/dev/null || true)
+                    if [[ -n "$head_after" && "$head_before" != "$head_after" ]]; then
+                        printf "%s\n%s\n" "$head_before" "$head_after" > "${outfile}.head"
+                    fi
+                fi
+                if (( attempt > 1 )); then
+                    printf "[retry %d/%d succeeded]\n" "$((attempt - 1))" "$max_retries" > "$outfile"
+                    cat "$temp_attempt" >> "$outfile"
                 else
-                    command mv "$try" "$out"
+                    command mv "$temp_attempt" "$outfile"
                 fi
-                command rm -f "$try"
-
-                if [ "$summary_mode" = status ]; then
-                    # Without its state this repository would be left out of the summary and
-                    # reported as clean, so a failure here fails the repository.
-                    summarize_status "$dir" "$out" || {
+                command rm -f "$temp_attempt"
+                if [[ "$summary_mode" == status ]]; then
+                    # Without its state this repository would be silently missing
+                    # from the summary and could be reported as clean, so a failure
+                    # here fails the repository, with the reason in its output.
+                    summarize_repo_status "$dir" "$outfile" "$timeout_sec" || {
                         status=$?
-                        printf 'git-recurse: could not read the repository state for the summary (exit %d)\n' "$status" >>"$out"
+                        printf 'git-recurse: could not read the repository state for the summary (exit %d)\n' "$status" >> "$outfile"
                         return "$status"
                     }
-                elif [ "$summary_mode" = pull ]; then
-                    after=$(git -C "$dir" rev-parse HEAD 2>/dev/null || true)
-                    if summary=$(pull_summary "$dir" "$out" "$before" "$after"); then
-                        printf '%s\n' "$summary" >"$out.updated"
-                    fi
                 fi
                 return 0
             fi
 
-            if [ "$status" -eq 124 ] || [ "$status" -eq 137 ]; then
-                printf 'Operation timed out after %ds (stalled connection killed)\n' "$timeout_sec" >>"$try"
+            if [[ $status -eq 124 || $status -eq 137 ]]; then
+                printf "Operation timed out after %ds (stalled connection killed)\n" "$timeout_sec" >> "$temp_attempt"
             fi
 
-            if [ "$attempt" -gt "$max_retries" ] || ! is_transient_error "$try" "$status"; then
-                if [ "$attempt" -gt 1 ]; then
-                    printf '[failed after %d retries]\n' "$((attempt - 1))" >"$out"
-                    cat "$try" >>"$out"
+            if (( attempt > max_retries )) || ! is_transient_error "$temp_attempt" "$status"; then
+                if (( attempt > 1 )); then
+                    printf "[failed after %d retries]\n" "$((attempt - 1))" > "$outfile"
+                    cat "$temp_attempt" >> "$outfile"
                 else
-                    command mv "$try" "$out"
+                    command mv "$temp_attempt" "$outfile"
                 fi
-                command rm -f "$try"
+                command rm -f "$temp_attempt"
                 return "$status"
             fi
 
             sleep "$attempt"
-            command rm -f "$try"
+            command rm -f "$temp_attempt"
         done
     }
 
-    parallel=true summary_flag=false
+    function extract_pull_summary() {
+        local dir="$1"
+        local outfile="$2"
+        local head_file="${outfile}.head"
+        local summary=""
+
+        summary=$(command grep -E '^[[:space:]]*[0-9]+ files? changed' "$outfile" 2>/dev/null | tail -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        if [[ -n "$summary" ]]; then
+            printf "%s\n" "$summary"
+            return 0
+        fi
+
+        if [[ -f "$head_file" ]]; then
+            local hb ha shortstat
+            hb=$(sed -n '1p' "$head_file")
+            ha=$(sed -n '2p' "$head_file")
+            if [[ -n "$hb" && -n "$ha" && "$hb" != "$ha" ]]; then
+                shortstat=$(git -C "$dir" diff --shortstat "$hb" "$ha" 2>/dev/null | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+                if [[ -n "$shortstat" ]]; then
+                    printf "%s\n" "$shortstat"
+                else
+                    printf "updated (%s..%s)\n" "${hb:0:7}" "${ha:0:7}"
+                fi
+                return 0
+            fi
+        fi
+
+        if command grep -qiE 'already up[- ]to[- ]date|current branch .* is up to date' "$outfile" 2>/dev/null; then
+            return 1
+        fi
+
+        local update_line
+        update_line=$(command grep -E 'Updating [0-9a-f]+\.\.[0-9a-f]+|Fast-forward|Successfully rebased and updated|Merge made by' "$outfile" 2>/dev/null | head -n 1 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        if [[ -n "$update_line" ]]; then
+            printf "%s\n" "$update_line"
+            return 0
+        fi
+
+        return 1
+    }
+
+    # Capture `git status --porcelain --branch` for the status summary. The text of
+    # the user's own command cannot be summarised reliably (it is localized and may
+    # be --short), while the porcelain format is stable across git versions, locales
+    # and status.* settings. GIT_OPTIONAL_LOCKS=0 keeps this read-only probe from
+    # taking the index lock, which another git process may be holding.
+    function capture_status_probe() {
+        local dir="$1"
+        local probe_file="$2"
+        local timeout_sec="$3"
+
+        if [[ -n "$TIMEOUT_BIN" && "$timeout_sec" -gt 0 ]]; then
+            GIT_OPTIONAL_LOCKS=0 "$TIMEOUT_BIN" -k 3s "${timeout_sec}s" \
+                git -C "$dir" status --porcelain --branch > "$probe_file" 2>/dev/null
+        else
+            GIT_OPTIONAL_LOCKS=0 git -C "$dir" status --porcelain --branch > "$probe_file" 2>/dev/null
+        fi
+    }
+
+    # Describe what differs in a repository from its porcelain probe, for example
+    # "2 modified, 1 untracked, ahead 1". A path that is both staged and modified
+    # counts in each of those. Print nothing and return 1 when the working tree is
+    # clean and the branch is neither ahead of nor behind its upstream.
+    function describe_status() {
+        local probe_file="$1"
+        local line x y part description=""
+        local conflicted=0 staged=0 modified=0 untracked=0 ahead=0 behind=0
+        local ahead_re='ahead ([0-9]+)' behind_re='behind ([0-9]+)'
+        local parts=()
+
+        # A redirect that fails in front of the loop below would look like an empty
+        # (clean) probe, so a file that cannot be read is its own failure (2).
+        [[ -r "$probe_file" ]] || return 2
+
+        # Plain shell on purpose: every repository runs at once, so a program
+        # started per repository (awk, grep) measurably lengthens the whole run.
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            case "$line" in
+            '## '*)
+                [[ "$line" =~ $ahead_re ]] && ahead="${BASH_REMATCH[1]}"
+                [[ "$line" =~ $behind_re ]] && behind="${BASH_REMATCH[1]}"
+                ;;
+            '?? '*)
+                ((untracked++))
+                ;;
+            '!! '*) ;;
+            ???*)
+                x="${line:0:1}"
+                y="${line:1:1}"
+                if [[ "$x" == U || "$y" == U || "$x$y" == AA || "$x$y" == DD ]]; then
+                    ((conflicted++))
+                else
+                    [[ "$x" != " " ]] && ((staged++))
+                    [[ "$y" != " " ]] && ((modified++))
+                fi
+                ;;
+            esac
+        done < "$probe_file"
+
+        (( conflicted > 0 )) && parts+=("$conflicted conflicted")
+        (( staged > 0 )) && parts+=("$staged staged")
+        (( modified > 0 )) && parts+=("$modified modified")
+        (( untracked > 0 )) && parts+=("$untracked untracked")
+        (( ahead > 0 )) && parts+=("ahead $ahead")
+        (( behind > 0 )) && parts+=("behind $behind")
+
+        (( ${#parts[@]} > 0 )) || return 1
+        for part in "${parts[@]}"; do
+            description+="${description:+, }$part"
+        done
+        printf '%s\n' "$description"
+    }
+
+    # Probe a repository and write its description to "<outfile>.summary" (empty
+    # when it is clean). This runs inside the per-repository job, so the work is
+    # parallel instead of a step of the main loop. Returns non-zero when the state
+    # could not be read or parsed: describe_status uses 1 for "clean", so any other
+    # failure is a real one and must not be taken for a clean repository.
+    function summarize_repo_status() {
+        local dir="$1"
+        local outfile="$2"
+        local timeout_sec="$3"
+        local rc=0
+
+        capture_status_probe "$dir" "${outfile}.porcelain" "$timeout_sec" || rc=$?
+        if (( rc == 0 )); then
+            describe_status "${outfile}.porcelain" > "${outfile}.summary" || rc=$?
+            if (( rc == 1 )); then
+                rc=0
+            fi
+        fi
+        return "$rc"
+    }
+
+    # Print the one-line summary of a finished repository for the given summary mode
+    # (pull or status), or return 1 when it has nothing to report.
+    function extract_repo_summary() {
+        local mode="$1"
+        local dir="$2"
+        local outfile="$3"
+        local line
+
+        case "$mode" in
+        pull) extract_pull_summary "$dir" "$outfile" ;;
+        status)
+            # Already worked out by summarize_repo_status; an empty file means clean.
+            IFS= read -r line < "${outfile}.summary" || return 1
+            printf '%s\n' "$line"
+            ;;
+        *) return 1 ;;
+        esac
+    }
+
+    function git_recursive() {
+        local cmd="$1"
+        local depth="${2:-$DEFAULT_DEPTH}"
+        local parallel="${3:-true}"
+        local max_jobs="${4:-$DEFAULT_JOBS}"
+        local max_retries="${5:-$DEFAULT_RETRIES}"
+        local timeout_sec="${6:-$DEFAULT_TIMEOUT}"
+        local summary_mode="${7:-none}"
+
+        local blue="" green="" yellow="" red="" normal="" dim=""
+        if command -v tput >/dev/null 2>&1; then
+            blue=$(tput setaf 4 2>/dev/null || true)
+            green=$(tput setaf 2 2>/dev/null || true)
+            yellow=$(tput setaf 3 2>/dev/null || true)
+            red=$(tput setaf 1 2>/dev/null || true)
+            normal=$(tput sgr0 2>/dev/null || true)
+            dim=$(tput dim 2>/dev/null || true)
+        fi
+
+        echo "${blue}depth: $depth ${normal}"
+        if [[ $depth -eq 1 ]]; then
+            printf "${blue}Executing \"%s\" in %s ${normal}\n" "$cmd" "$(pwd)"
+            bash -c "$cmd"
+            return
+        fi
+
+        local dirs=()
+        while IFS= read -r -d '' dir; do
+            dirs+=("${dir%.git}")
+        done < <(find . -maxdepth "$depth" -type d -name .git -print0 2>/dev/null)
+
+        if [[ ${#dirs[@]} -eq 0 ]]; then
+            echo "${red}No git repositories found${normal}"
+            return
+        fi
+
+        local total=${#dirs[@]}
+        local width=${#total}
+        local failures=0
+        # Repositories the summary lists (updated by a pull, or with changes for
+        # status) and what to say about each.
+        local summary_repos=()
+        local summary_details=()
+        local failed_repos=()
+        local failed_statuses=()
+
+        if [[ "$parallel" == true ]]; then
+            local tmpdir
+            tmpdir=$(mktemp -d)
+            local pipe="$tmpdir/completion.fifo"
+            mkfifo "$pipe"
+            exec 3<>"$pipe"
+            command rm -f "$pipe"
+
+            cleanup() {
+                exec 3>&- 2>/dev/null
+                exec 3<&- 2>/dev/null
+                command rm -rf "$tmpdir" 2>/dev/null
+                local pids
+                pids=$(jobs -p 2>/dev/null)
+                if [[ -n "$pids" ]]; then
+                    local pid_list=()
+                    read -r -a pid_list <<< "$pids"
+                    kill "${pid_list[@]}" 2>/dev/null
+                fi
+            }
+            trap cleanup EXIT INT TERM
+
+            local jobs=$max_jobs
+            if (( jobs <= 0 || jobs > total )); then
+                jobs=$total
+                printf "${blue}Launching \"%s\" in %d repo(s) in parallel...${normal}\n" "$cmd" "$total"
+            else
+                printf "${blue}Launching \"%s\" in %d repo(s) in parallel (concurrency: %d)...${normal}\n" "$cmd" "$total" "$jobs"
+            fi
+
+            launch_job() {
+                local i="$1"
+                local dir="${dirs[$i]}"
+                local outfile="$tmpdir/$i.out"
+                local statusfile="$tmpdir/$i.status"
+
+                (
+                    trap 'echo "$i" >&3 2>/dev/null' EXIT
+                    run_repo_with_retry "$dir" "$outfile" "$cmd" "$max_retries" "$timeout_sec" "$summary_mode"
+                    echo $? > "$statusfile"
+                ) &
+            }
+
+            local next_to_launch=0
+            local running=0
+            local completed=0
+
+            while (( next_to_launch < total && running < jobs )); do
+                launch_job "$next_to_launch"
+                ((next_to_launch++))
+                ((running++))
+            done
+
+            while (( completed < total )); do
+                local idx
+                if ! read -r idx <&3; then
+                    break
+                fi
+                ((completed++))
+                ((running--))
+
+                local dir="${dirs[$idx]}"
+                local outfile="$tmpdir/$idx.out"
+                local statusfile="$tmpdir/$idx.status"
+                local status=1
+
+                if [[ -f "$statusfile" ]]; then
+                    status=$(cat "$statusfile")
+                fi
+
+                if [[ $status -eq 0 ]]; then
+                    printf "[%*d/%d] ${green}✓ %s${normal}\n" "$width" "$completed" "$total" "$dir"
+                    if [[ "$summary_mode" != none ]]; then
+                        local summary
+                        if summary=$(extract_repo_summary "$summary_mode" "$dir" "$outfile"); then
+                            printf "%s\n" "$summary" > "$tmpdir/$idx.updated"
+                        fi
+                    fi
+                else
+                    printf "[%*d/%d] ${red}✗ %s (exit %d)${normal}\n" "$width" "$completed" "$total" "$dir" "$status"
+                    ((failures++)) || true
+                fi
+
+                # Print captured logs indented under the status line so
+                # output is grouped per-repo instead of arriving asynchronously.
+                if [[ -s "$outfile" ]]; then
+                    sed 's/^/    /' "$outfile"
+                else
+                    printf "    %s(no output)%s\n" "$dim" "$normal"
+                fi
+
+                if (( next_to_launch < total )); then
+                    launch_job "$next_to_launch"
+                    ((next_to_launch++))
+                    ((running++))
+                fi
+            done
+
+            wait
+            exec 3>&- 2>/dev/null
+            exec 3<&- 2>/dev/null
+
+            local i
+            for (( i=0; i < total; i++ )); do
+                local r_dir="${dirs[$i]}"
+                local r_statusfile="$tmpdir/$i.status"
+                local r_updatedfile="$tmpdir/$i.updated"
+                local r_status=0
+                [[ -f "$r_statusfile" ]] && r_status=$(cat "$r_statusfile")
+
+                if [[ -f "$r_updatedfile" ]]; then
+                    summary_repos+=("$r_dir")
+                    summary_details+=("$(cat "$r_updatedfile")")
+                fi
+                if [[ "$r_status" -ne 0 ]]; then
+                    failed_repos+=("$r_dir")
+                    failed_statuses+=("$r_status")
+                fi
+            done
+
+            command rm -rf "$tmpdir"
+            trap - EXIT INT TERM
+        else
+            local completed=0
+            for dir in "${dirs[@]}"; do
+                ((completed++))
+                local tmp_out
+                tmp_out=$(mktemp)
+                run_repo_with_retry "$dir" "$tmp_out" "$cmd" "$max_retries" "$timeout_sec" "$summary_mode"
+                local seq_status=$?
+
+                if [[ $seq_status -eq 0 ]]; then
+                    printf "[%*d/%d] ${green}✓ %s${normal}\n" "$width" "$completed" "$total" "$dir"
+                    if [[ "$summary_mode" != none ]]; then
+                        local summary
+                        if summary=$(extract_repo_summary "$summary_mode" "$dir" "$tmp_out"); then
+                            summary_repos+=("$dir")
+                            summary_details+=("$summary")
+                        fi
+                    fi
+                else
+                    printf "[%*d/%d] ${red}✗ %s (exit %d)${normal}\n" "$width" "$completed" "$total" "$dir" "$seq_status"
+                    ((failures++)) || true
+                    failed_repos+=("$dir")
+                    failed_statuses+=("$seq_status")
+                fi
+
+                if [[ -s "$tmp_out" ]]; then
+                    sed 's/^/    /' "$tmp_out"
+                else
+                    printf "    %s(no output)%s\n" "$dim" "$normal"
+                fi
+                command rm -f "$tmp_out" "${tmp_out}.head" "${tmp_out}.porcelain" "${tmp_out}.summary"
+            done
+        fi
+
+        printf "\n${blue}Done: %d ok, %d failed (of %d)${normal}\n" \
+            "$(( total - failures ))" "$failures" "$total"
+
+        if [[ "$summary_mode" != none ]]; then
+            local heading found_color all_quiet none_found
+            if [[ "$summary_mode" == status ]]; then
+                heading="Repositories with changes"
+                found_color="$yellow"
+                all_quiet="All repositories clean."
+                none_found="No repositories with changes."
+            else
+                heading="Updated repositories"
+                found_color="$green"
+                all_quiet="All repositories up to date."
+                none_found="No repositories updated."
+            fi
+
+            if (( ${#summary_repos[@]} > 0 )); then
+                printf "\n%s%s (%d):%s\n" "$found_color" "$heading" "${#summary_repos[@]}" "$normal"
+                local j
+                for (( j=0; j < ${#summary_repos[@]}; j++ )); do
+                    printf "  %s%s%s: %s\n" "$found_color" "${summary_repos[j]}" "$normal" "${summary_details[j]}"
+                done
+            elif (( failures == 0 )); then
+                printf '\n%s%s%s\n' "$dim" "$all_quiet" "$normal"
+            else
+                printf '\n%s%s%s\n' "$dim" "$none_found" "$normal"
+            fi
+        fi
+
+        if (( failures > 0 )); then
+            printf "\n${red}Failed repositories (%d):${normal}\n" "$failures"
+            local k
+            for (( k=0; k < ${#failed_repos[@]}; k++ )); do
+                printf "  ${red}%s${normal} (exit %d)\n" "${failed_repos[k]}" "${failed_statuses[k]}"
+            done
+            return 1
+        fi
+    }
+
+    usage() {
+        echo "git-recurse - Run a git command in all repositories under the current directory"
+        echo ""
+        echo "Usage: git-recurse [options] <command> [args...]"
+        echo ""
+        echo "The command and its args are passed as positional arguments. Examples:"
+        echo "  git-recurse git status"
+        echo "  git-recurse git pull"
+        echo "  git-recurse -j 6 git fetch"
+        echo "  git-recurse -s git status"
+        echo ""
+        echo "Options:"
+        echo "  -h, --help      Show this help"
+        echo "  -p              Run in parallel (default)"
+        echo "  -s              Run sequentially"
+        echo "  -j <jobs>       Max concurrent jobs in parallel mode (0 = all at once, default: $DEFAULT_JOBS, env: GIT_RECURSE_JOBS)"
+        echo "  -r <retries>    Max retries on transient network/TLS failures (default: $DEFAULT_RETRIES, env: GIT_RECURSE_RETRIES)"
+        echo "  -t <seconds>    Timeout per repository in seconds (0 = disabled, default: $DEFAULT_TIMEOUT, env: GIT_RECURSE_TIMEOUT)"
+        echo "  -d <depth>      Max depth to search for .git dirs (default: $DEFAULT_DEPTH)"
+        echo "  -S              Show a summary: the repositories a pull updated, or the ones with changes"
+        echo "                  for git status (automatic for both; env: GIT_RECURSE_SUMMARY=0 turns it off,"
+        echo "                  =1 turns it on for any command)"
+    }
+
+    function exit_abnormal() {
+        usage
+        exit 1
+    }
+
+    flag_parallel=true
+    flag_summary=""
     depth=$DEFAULT_DEPTH
     max_jobs="${GIT_RECURSE_JOBS:-$DEFAULT_JOBS}"
     max_retries="${GIT_RECURSE_RETRIES:-$DEFAULT_RETRIES}"
     timeout_sec="${GIT_RECURSE_TIMEOUT:-$DEFAULT_TIMEOUT}"
 
     # getopts reads only one-letter options, so it would reject --help as an illegal option.
-    if [ "${1:-}" = "--help" ]; then
+    if [[ "${1:-}" == "--help" ]]; then
         usage
         exit 0
     fi
 
-    # A leading colon makes getopts silent, so the messages below name this command.
     OPTIND=1
-    while getopts ":hpsj:r:d:t:S" option; do
-        case "$option" in
-            h)
-                usage
-                exit 0
-                ;;
-            p) parallel=true ;;
-            s) parallel=false ;;
-            S) summary_flag=true ;;
-            j) max_jobs="$OPTARG" ;;
-            r) max_retries="$OPTARG" ;;
-            d) depth="$OPTARG" ;;
-            t) timeout_sec="$OPTARG" ;;
-            :)
-                printf 'git-recurse: option requires an argument -- %s\n' "$OPTARG" >&2
-                usage
-                exit 1
-                ;;
-            *)
-                printf 'git-recurse: illegal option -- %s\n' "$OPTARG" >&2
-                usage
-                exit 1
-                ;;
+    while getopts ":hpsj:r:d:t:S" options; do
+        case "${options}" in
+        h)
+            usage
+            exit 0
+            ;;
+        p)
+            flag_parallel=true
+            ;;
+        s)
+            flag_parallel=false
+            ;;
+        S)
+            flag_summary=true
+            ;;
+        j)
+            max_jobs="${OPTARG}"
+            ;;
+        r)
+            max_retries="${OPTARG}"
+            ;;
+        d)
+            depth="${OPTARG}"
+            ;;
+        t)
+            timeout_sec="${OPTARG}"
+            ;;
+        :)
+            echo "Error: -${OPTARG} requires an argument."
+            exit_abnormal
+            ;;
+        *)
+            printf 'git-recurse: illegal option -- %s\n' "${OPTARG}" >&2
+            exit_abnormal
+            ;;
         esac
     done
-    shift $((OPTIND - 1))
+
+    shift $((OPTIND - 1)) || true
     cmd="$*"
 
-    if [ -z "${cmd// }" ]; then
+
+    if [[ -z "${cmd// }" ]]; then
         echo "Error: missing command. Pass a command after the options, e.g. git status"
         echo ""
         usage
@@ -998,219 +1346,50 @@ EOF
         echo "Error: -j requires a non-negative integer (0 for unlimited)."
         exit 1
     fi
+
     if ! [[ "$max_retries" =~ ^[0-9]+$ ]]; then
         echo "Error: -r requires a non-negative integer."
         exit 1
     fi
+
     if ! [[ "$timeout_sec" =~ ^[0-9]+$ ]]; then
         echo "Error: -t requires a non-negative integer (0 for disabled)."
         exit 1
     fi
+
     if ! [[ "$depth" =~ ^[1-9][0-9]*$ ]]; then
         echo "Error: -d requires a positive integer."
         exit 1
     fi
 
-    # A git status command gets the "repositories with changes" summary; any other command gets
-    # the "updated repositories" one, which only a pull has data for.
-    status_re='^[[:space:]]*git[[:space:]]+status([[:space:]]|$)'
-    pull_re='(^|[[:space:]])pull([[:space:]]|$)'
+    # A git status command gets the "repositories with changes" summary; any other
+    # command gets the "updated repositories" one, which only a pull has data for.
     is_status_cmd=false
-    if [[ "$cmd" =~ $status_re ]]; then
+    if [[ "$cmd" =~ ^[[:space:]]*git[[:space:]]+status([[:space:]]|$) ]]; then
         is_status_cmd=true
     fi
+
     want_summary=false
-    if [ "$summary_flag" = true ]; then
+    if [[ "$flag_summary" == true ]]; then
         want_summary=true
-    elif [ "${GIT_RECURSE_SUMMARY:-auto}" != "0" ]; then
-        if [ "$is_status_cmd" = true ] || [[ "$cmd" =~ $pull_re ]] || [ "${GIT_RECURSE_SUMMARY:-auto}" = "1" ]; then
+    elif [[ "${GIT_RECURSE_SUMMARY:-auto}" != "0" ]]; then
+        if [[ "$is_status_cmd" == true || "$cmd" =~ (^|[[:space:]])pull([[:space:]]|$) || "${GIT_RECURSE_SUMMARY:-auto}" == "1" ]]; then
             want_summary=true
         fi
     fi
+
     summary_mode=none
-    if [ "$want_summary" = true ]; then
-        if [ "$is_status_cmd" = true ]; then
+    if [[ "$want_summary" == true ]]; then
+        if [[ "$is_status_cmd" == true ]]; then
             summary_mode=status
         else
             summary_mode=pull
         fi
     fi
 
-    # Whatever colours tput knows for this terminal; none for a dumb one or without tput.
-    blue=$(tput setaf 4 2>/dev/null)
-    green=$(tput setaf 2 2>/dev/null)
-    yellow=$(tput setaf 3 2>/dev/null)
-    red=$(tput setaf 1 2>/dev/null)
-    normal=$(tput sgr0 2>/dev/null)
-    dim=$(tput dim 2>/dev/null)
-
-    echo "${blue}depth: $depth ${normal}"
-    if [ "$depth" -eq 1 ]; then
-        printf '%sExecuting "%s" in %s %s\n' "$blue" "$cmd" "$(pwd)" "$normal"
-        bash -c "$cmd"
-        exit $?
-    fi
-
-    dirs=()
-    while IFS= read -r -d '' dir; do
-        dirs+=("${dir%.git}")
-    done < <(find . -maxdepth "$depth" -type d -name .git -print0 2>/dev/null)
-
-    if [ ${#dirs[@]} -eq 0 ]; then
-        echo "${red}No git repositories found${normal}"
-        exit 0
-    fi
-
-    total=${#dirs[@]}
-    width=${#total}
-    failures=0
-
-    # Sequential is one slot; in parallel, 0 or more than there are repositories means all at once.
-    slots=$max_jobs
-    if [ "$parallel" = true ]; then
-        if [ "$slots" -le 0 ] || [ "$slots" -gt "$total" ]; then
-            slots=$total
-            printf '%sLaunching "%s" in %d repo(s) in parallel...%s\n' "$blue" "$cmd" "$total" "$normal"
-        else
-            printf '%sLaunching "%s" in %d repo(s) in parallel (concurrency: %d)...%s\n' "$blue" "$cmd" "$total" "$slots" "$normal"
-        fi
-    else
-        slots=1
-    fi
-
-    # Each job reports on a FIFO when it ends, so the next one can start and its output is
-    # printed in one piece. Both the FIFO and the files below live in a folder removed at the end.
-    tmpdir=$(mktemp -d)
-    pipe="$tmpdir/completion.fifo"
-    mkfifo "$pipe"
-    exec 3<>"$pipe"
-    command rm -f "$pipe"
-
-    cleanup() {
-        exec 3>&-
-        command rm -rf "$tmpdir" 2>/dev/null
-        local pids pid_list=()
-        pids=$(jobs -p 2>/dev/null)
-        if [ -n "$pids" ]; then
-            read -r -a pid_list <<<"$pids"
-            kill "${pid_list[@]}" 2>/dev/null
-        fi
-    }
-    trap cleanup EXIT INT TERM
-
-    launch_job() {
-        local i="$1"
-        (
-            trap 'echo "$i" >&3 2>/dev/null' EXIT
-            run_repo "${dirs[$i]}" "$tmpdir/$i.out"
-            echo $? >"$tmpdir/$i.status"
-        ) &
-    }
-
-    next_to_launch=0 running=0 completed=0
-    while [ "$next_to_launch" -lt "$total" ] && [ "$running" -lt "$slots" ]; do
-        launch_job "$next_to_launch"
-        next_to_launch=$((next_to_launch + 1))
-        running=$((running + 1))
-    done
-
-    while [ "$completed" -lt "$total" ]; do
-        read -r idx <&3 || break
-        completed=$((completed + 1))
-        running=$((running - 1))
-
-        dir="${dirs[$idx]}"
-        status=1
-        if [ -f "$tmpdir/$idx.status" ]; then
-            status=$(cat "$tmpdir/$idx.status")
-        fi
-
-        if [ "$status" -eq 0 ]; then
-            printf '[%*d/%d] %s✓ %s%s\n' "$width" "$completed" "$total" "$green" "$dir" "$normal"
-        else
-            printf '[%*d/%d] %s✗ %s (exit %d)%s\n' "$width" "$completed" "$total" "$red" "$dir" "$status" "$normal"
-            failures=$((failures + 1))
-        fi
-
-        # The captured output goes under its status line, so it is grouped per repository
-        # instead of arriving as the jobs happen to write it.
-        if [ -s "$tmpdir/$idx.out" ]; then
-            sed 's/^/    /' "$tmpdir/$idx.out"
-        else
-            printf '    %s(no output)%s\n' "$dim" "$normal"
-        fi
-
-        if [ "$next_to_launch" -lt "$total" ]; then
-            launch_job "$next_to_launch"
-            next_to_launch=$((next_to_launch + 1))
-            running=$((running + 1))
-        fi
-    done
-
-    wait
-    exec 3>&-
-
-    # What the summary lists, and the failures, in the order the repositories were found.
-    summary_repos=() summary_details=() failed_repos=() failed_statuses=()
-    i=0
-    while [ "$i" -lt "$total" ]; do
-        status=1
-        if [ -f "$tmpdir/$i.status" ]; then
-            status=$(cat "$tmpdir/$i.status")
-        fi
-        if [ -f "$tmpdir/$i.out.updated" ]; then
-            summary_repos+=("${dirs[$i]}")
-            summary_details+=("$(cat "$tmpdir/$i.out.updated")")
-        fi
-        if [ "$status" -ne 0 ]; then
-            failed_repos+=("${dirs[$i]}")
-            failed_statuses+=("$status")
-        fi
-        i=$((i + 1))
-    done
-
-    command rm -rf "$tmpdir"
-    trap - EXIT INT TERM
-
-    printf '\n%sDone: %d ok, %d failed (of %d)%s\n' "$blue" "$((total - failures))" "$failures" "$total" "$normal"
-
-    if [ "$summary_mode" != none ]; then
-        if [ "$summary_mode" = status ]; then
-            heading="Repositories with changes"
-            found_color="$yellow"
-            all_quiet="All repositories clean."
-            none_found="No repositories with changes."
-        else
-            heading="Updated repositories"
-            found_color="$green"
-            all_quiet="All repositories up to date."
-            none_found="No repositories updated."
-        fi
-
-        if [ ${#summary_repos[@]} -gt 0 ]; then
-            printf '\n%s%s (%d):%s\n' "$found_color" "$heading" "${#summary_repos[@]}" "$normal"
-            i=0
-            while [ "$i" -lt ${#summary_repos[@]} ]; do
-                printf '  %s%s%s: %s\n' "$found_color" "${summary_repos[$i]}" "$normal" "${summary_details[$i]}"
-                i=$((i + 1))
-            done
-        elif [ "$failures" -eq 0 ]; then
-            printf '\n%s%s%s\n' "$dim" "$all_quiet" "$normal"
-        else
-            printf '\n%s%s%s\n' "$dim" "$none_found" "$normal"
-        fi
-    fi
-
-    if [ "$failures" -gt 0 ]; then
-        printf '\n%sFailed repositories (%d):%s\n' "$red" "$failures" "$normal"
-        i=0
-        while [ "$i" -lt ${#failed_repos[@]} ]; do
-            printf '  %s%s%s (exit %d)\n' "$red" "${failed_repos[$i]}" "$normal" "${failed_statuses[$i]}"
-            i=$((i + 1))
-        done
-        exit 1
-    fi
+    git_recursive "$cmd" "${depth}" "$flag_parallel" "${max_jobs}" "${max_retries}" "${timeout_sec}" "$summary_mode"
 )
+# END GENERATED MINI FUNCTIONS
 
 ###############################################################
 # => Colored man pages
@@ -1354,36 +1533,7 @@ gclean() {
 }
 
 # Git functions
-add-pat() {
-    local pat="$1"
-    if [ -z "$pat" ]; then
-        echo "Usage: add-pat <token>"
-        echo "Recursively changes all https://github.com/... remotes to use the defined PAT."
-        return 1
-    fi
-    printf "\033[34mdepth: 2 \033[0m\n"
-    while IFS= read -r -d $'\0' dot_git; do
-        local dir
-        dir=$(dirname "$dot_git")
-        local remote_url
-        remote_url=$(git -C "$dir" remote get-url origin 2>/dev/null)
-        if [ -n "$remote_url" ]; then
-            if [[ "$remote_url" == *"github.com"* && "$remote_url" == https://* ]]; then
-                local new_url
-                new_url=$(echo "$remote_url" | sed -E "s|https://([^@]+@)?github\\.com|https://$pat@github.com|")
-                if [ "$remote_url" != "$new_url" ]; then
-                    git -C "$dir" remote set-url origin "$new_url"
-                    printf "\033[32m✓ %s\033[0m (remote updated)\n" "$dir"
-                else
-                    printf "\033[34m- %s\033[0m (already using this token)\n" "$dir"
-                fi
-            else
-                printf "\033[33m! %s\033[0m (ignored: not an HTTPS GitHub remote)\n" "$dir"
-            fi
-        fi
-    done < <(find . -maxdepth 2 -type d -name .git -print0 2>/dev/null)
-}
-alias add-pat="add-pat"
+alias add-pat="add_pat"
 status() { git-recurse "$@" git status; }
 
 # System maintenance
@@ -1463,7 +1613,7 @@ if [ "$(uname -s)" = 'Linux' ]; then
     command -v pipes.sh &>/dev/null && LockScreens+=("pipes.sh")
     command -v cmatrix &>/dev/null && LockScreens+=("cmatrix")
     if [ ${#LockScreens[@]} -gt 0 ]; then
-        lock() { ${LockScreens[$((RANDOM % ${#LockScreens[@]}))]]}; }
+        lock() { ${LockScreens[$((RANDOM % ${#LockScreens[@]}))]}; }
         export -f lock
     fi
     

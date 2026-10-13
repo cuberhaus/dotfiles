@@ -109,6 +109,9 @@ INSTALLER_VERSION=''
 RUN_FILE=''
 WORK_DIR=''
 
+# shellcheck source=bootstrap/base_functions
+source "$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)/bootstrap/base_functions"
+
 info() { printf '\033[34m[INFO]\033[0m %s\n' "$*"; }
 success() { printf '\033[32m[OK]\033[0m %s\n' "$*"; }
 warn() { printf '\033[33m[WARN]\033[0m %s\n' "$*" >&2; }
@@ -202,23 +205,6 @@ as_root() {
 
 resolve_installed() {
     [[ -x "$PREFIX/bin/resolve" ]]
-}
-
-## True when the machine has an NVIDIA display controller (vendor 0x10de, class 0x03xxxx), which
-## sysfs shows before the driver loads and which leaves out the card's HDMI audio function.
-nvidia_gpu_present() {
-    local device vendor class
-    for device in "$PCI_DEVICES_DIR"/*; do
-        if [[ ! -r "$device/vendor" || ! -r "$device/class" ]]; then
-            continue
-        fi
-        vendor="$(<"$device/vendor")"
-        class="$(<"$device/class")"
-        if [[ "$vendor" == 0x10de && "$class" == 0x03* ]]; then
-            return 0
-        fi
-    done
-    return 1
 }
 
 ## The folders searched for the installer, one per line.

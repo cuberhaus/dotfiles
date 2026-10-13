@@ -29,11 +29,7 @@ LINT_PATTERNS=(
     '.local/scripts/stow-uninstall'
     '.config/i3blocks/scripts/backlight/backlight'
     '.local/scripts/applets'
-    '.local/scripts/desklets'
     '.local/scripts/toggle_theme'
-    '.local/scripts/spot'
-    '.local/scripts/spoti'
-    '.local/scripts/volume-change-output'
     '.local/scripts/cinnamon_path/*'
     '.local/Mini/.bashrc'
 )
