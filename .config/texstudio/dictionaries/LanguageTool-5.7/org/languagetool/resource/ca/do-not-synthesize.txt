@@ -1,2 +1,0 @@
-#separatorRegExp=[\t;]
-meso;meso;NCMS000
