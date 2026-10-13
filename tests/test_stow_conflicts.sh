@@ -270,10 +270,10 @@ test_make_restow_backs_up_conflicts_before_stowing() {
 
 test_make_passes_its_target_to_the_backup_step() {
     local goal plan
-    for goal in install restow dry-run; do
+    for goal in install uninstall restow dry-run; do
         plan="$(make --no-print-directory -n -C "$REPO_ROOT" "$goal" TARGET=/scratch/target)"
         grep -q -F 'STOW_TARGET="/scratch/target"' <<< "$plan" \
-            || fail "make $goal must hand its TARGET to $BACKUP_SCRIPT"
+            || fail "make $goal must hand its TARGET to the Stow helper"
     done
 }
 

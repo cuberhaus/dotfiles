@@ -1,13 +1,14 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
+set -euo pipefail
 
 ### VARIABLES
 bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_ROOT="$(cd -P "$bootstrap_dir/../../.." && pwd)"
 export DOTFILES_ROOT
 # Include functions
-source "$bootstrap_dir/ubuntu_functions"
 source "$bootstrap_dir/base_functions"
+source "$bootstrap_dir/ubuntu_functions"
 parse_bootstrap_args "$@"
 configure_dual_boot_utc_rtc
 
@@ -36,5 +37,7 @@ windows_install
 #steam_install
 #ubuntu_install
 
-chsh -s "$(which zsh)"                          # Change default shell to zsh
+if [ "$(basename "$SHELL")" != "zsh" ]; then
+    chsh -s "$(which zsh)"                      # Change default shell to zsh
+fi
 apply_skip_worktree

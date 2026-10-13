@@ -2,7 +2,7 @@
 set -euo pipefail
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-dotfiles_root=$(cd "$script_dir/../../.." && pwd)
+dotfiles_root=$(cd -P "$script_dir/../../.." && pwd)
 platform=$(uname -s)
 
 for required_script in \

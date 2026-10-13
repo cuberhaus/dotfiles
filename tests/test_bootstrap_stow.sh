@@ -306,7 +306,7 @@ test_scripts_that_default_their_root_resolve_through_the_stow_link() {
     local spec script variable resolved
     setup_case
     make_stow_layout
-    for spec in doctor.sh:repo_root repair-installation:repo_root apply-skip-worktree:dotfiles_root; do
+    for spec in doctor.sh:repo_root repair-installation:repo_root apply-skip-worktree:dotfiles_root stow-backup-conflicts:STOW_DIR stow-uninstall:STOW_DIR lint.sh:REPO_ROOT; do
         script="${spec%%:*}"
         variable="${spec##*:}"
         resolved="$(root_through_stow_link "$REPO_ROOT/.local/scripts/$script" . "$variable")"

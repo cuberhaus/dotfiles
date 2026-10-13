@@ -24,7 +24,7 @@ ok()    { printf '\033[1;32m[OK]\033[0m    %s\n' "$*"; }
 # ---------------------------------------------------------------------------
 # Paths — same logic the Makefile uses
 # ---------------------------------------------------------------------------
-STOW_DIR="$(cd "$(dirname "$0")/../.." && pwd)"          # repo root (dotfiles)
+STOW_DIR="$(cd -P "$(dirname "$0")/../.." && pwd)"          # repo root (dotfiles)
 PARENT_DIR="$(dirname "$STOW_DIR")"                      # parent of repo
 PKG_NAME="$(basename "$STOW_DIR")"                       # e.g. "dotfiles"
 TARGET="${STOW_TARGET:-$HOME}"

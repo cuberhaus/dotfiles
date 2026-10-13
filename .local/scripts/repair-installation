@@ -67,6 +67,7 @@ restow_config() {
     }
     bash "$repo_root/.local/scripts/stow-backup-conflicts"
     stow -v -R -t "$HOME" -d "$(dirname "$repo_root")" "$(basename "$repo_root")"
+    bash "$repo_root/.local/scripts/apply-skip-worktree"
 }
 
 repair_vim() {

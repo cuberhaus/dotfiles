@@ -44,8 +44,6 @@ xmonad_install
 #optional
 #plasma_install
 #virtualbox_install
-apps_AUR_install
-cava_install
 dwall
 laptop_install
 activate_reisub

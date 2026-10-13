@@ -4,7 +4,8 @@
 set -euo pipefail
 
 ### VARIABLES
-scripts="$HOME/.local/scripts"
+bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+scripts="$(cd -P "$bootstrap_dir/.." && pwd)"
 source "$scripts/bootstrap/base_functions"
 source "$scripts/bootstrap/uninstall_tui"
 source "$scripts/bootstrap/uninstall_mac_functions"

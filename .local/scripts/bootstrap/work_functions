@@ -486,12 +486,6 @@ gui_apps_install() {
         info "Aider already installed, skipping."
     fi
 
-    # LibreOffice (full office suite)
-    $apt libreoffice
-
-    # Caffeine (prevent screen from going to sleep)
-    $apt caffeine
-
     # GNOME advanced settings
     $apt dconf-editor
 

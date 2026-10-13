@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/../.."
+cd -P "$(dirname "$0")/../.."
 # shellcheck source=lint_helpers.sh
 source .local/scripts/lint_helpers.sh
 mapfile -t markdown_files < <(lint_get_markdown)

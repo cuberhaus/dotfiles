@@ -3,7 +3,7 @@
 # Usage: bash .local/scripts/lint.sh
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+REPO_ROOT="$(cd -P "$(dirname "$0")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 if ! command -v shellcheck &>/dev/null; then

@@ -31,8 +31,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Run installation audit tests
-        run: python tests/test_installation_audit.py
+      - name: Run Python unit tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
 
   shell-tests:
     name: Shell unit tests
@@ -42,17 +42,15 @@ jobs:
         with:
           submodules: false
 
-      - name: Run bootstrap Stow tests
-        run: bash tests/test_bootstrap_stow.sh
+      - name: Install shell test dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends stow zsh
 
-      - name: Run Gentoo bootstrap tests
-        run: bash tests/test_bootstrap_gentoo.sh
-
-      - name: Run IDE apt source tests
-        run: bash tests/test_ide_apt_sources.sh
-
-      - name: Run Caffeine autostart tests
-        run: bash tests/test_caffeine_autostart.sh
+      - name: Run shell unit tests
+        run: |
+          for test_file in tests/test_*.sh; do
+            [ "$test_file" = "tests/test_platforms_in_containers.sh" ] && continue
+            bash "$test_file"
+          done
 
   shellcheck:
     name: ShellCheck
@@ -78,29 +76,11 @@ jobs:
           submodules: false
 
       - name: Scan for /home/<user>/ and /Users/<user>/ in tracked files
+        shell: bash
         run: |
-          # Fail on any tracked file containing an absolute /home/<user>/ or
-          # /Users/<user>/ path. Excludes:
-          #  - documentation (*.md, SECURITY.md, .gitignore) where examples are fine
-          #  - configs that are intentionally per-user runtime state and would
-          #    otherwise need to be re-removed from git on every machine
-          #  - /home/linuxbrew/ which is standard Homebrew on Linux
-          matches=$(git grep -InE '(/home/[a-z][a-z0-9_-]*/|/Users/[a-z][a-z0-9_-]*/)' \
-              -- ':!*.md' \
-                 ':!.gitignore' \
-                 ':!SECURITY.md' \
-                 ':!.config/warp-terminal/user_preferences.json' \
-                 ':!.config/birdtray-config.json' \
-                 ':!.config/texstudio/texstudio.ini' \
-                 ':!.config/texstudio/cache/' \
-                 ':!.cinnamon/backgrounds/user-folders.lst' \
-                 ':!.config/cinnamon/dark/gnome.dconf' \
-                 ':!.config/cinnamon/light/gnome.dconf' \
-                 ':!.config/.p10k.zsh' \
-                 ':!.config/zsh/.p10k.zsh' \
-                 ':!.config/vlc/vlc-qt-interface.conf' \
-                 ':!.vim/.netrwhist' \
-                 ':!.local/scripts/bootstrap/arch_functions' | grep -v '/home/linuxbrew/' || true)
+          source .local/scripts/lint_helpers.sh
+          matches=$(git grep -InE "$HARDCODED_PATHS_REGEX" \
+              -- "${HARDCODED_PATHS_EXCLUDES[@]}" | grep -v '/home/linuxbrew/' || true)
           if [ -n "$matches" ]; then
             echo "$matches"
             echo ""

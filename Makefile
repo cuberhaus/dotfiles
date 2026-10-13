@@ -52,7 +52,7 @@ install: check-stow ## Symlink dotfiles into $HOME via stow (backs up conflicts 
 	@bash .local/scripts/apply-skip-worktree
 
 uninstall: check-stow uninstall-automations ## Disable automations, remove symlinks, and restore backed-up files
-	@bash .local/scripts/stow-uninstall
+	@STOW_TARGET="$(TARGET)" bash .local/scripts/stow-uninstall
 
 restow: check-stow ## Re-stow (backs up conflicts first, then unlinks and relinks — cleans stale links)
 	@STOW_TARGET="$(TARGET)" bash .local/scripts/stow-backup-conflicts

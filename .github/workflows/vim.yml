@@ -2,10 +2,10 @@ name: Vim
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths: ['.vim/vimrc']
   pull_request:
-    branches: [master]
+    branches: [main]
     paths: ['.vim/vimrc']
 
 concurrency:
@@ -34,7 +34,7 @@ jobs:
           touch ~/.vim/theme
 
       - name: Lint vimrc with vint
-        run: ~/.local/bin/vint --style-problem --color .vim/vimrc || true
+        run: ~/.local/bin/vint --style-problem --color .vim/vimrc
 
       - name: Verify vimrc loads without errors
         run: |
