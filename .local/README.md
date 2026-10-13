@@ -308,6 +308,48 @@ run the command that its warning prints.
 
 Run the hermetic test with `bash tests/test_kondo_install.sh`.
 
+## LanguageTool: a large download outside the history
+
+LanguageTool (the grammar checker that Emacs's `flycheck-languagetool` and
+TeXstudio run) was a 359 MB folder in every clone. It is no longer tracked:
+`languagetool_install` downloads the pinned zip from `languagetool.org`, checks
+its SHA-256, and unpacks it to
+`~/.config/texstudio/dictionaries/LanguageTool-6.6/`, a folder `.gitignore`
+excludes. The small `.oxt` dictionaries next to it stay tracked. Every profile
+runs the step; a failure only warns, because the file comes from the network. To
+repeat it:
+
+```sh
+bash -c 'source ~/.local/scripts/bootstrap/base_functions; languagetool_install'
+```
+
+LanguageTool 6.6 needs Java 17 or newer, so every profile installs a runtime
+(Arch and Manjaro `jre-openjdk-headless`, Ubuntu and `work`
+`default-jre-headless`, macOS the `temurin` cask, Gentoo `virtual/jre`), and the
+step checks the version it finds with `java -version`, installed or not. With
+Java missing or older than 17 it still leaves LanguageTool in place but returns
+1 and says which version it found, so the profile warns. On Ubuntu 22.04
+`default-jre-headless` is Java 11; install `openjdk-17-jre-headless` there. The
+uninstallers keep Java, which other programs use.
+
+The pin is 6.6 because `languagetool.org` keeps only recent releases (5.x is
+gone). To update it, change `version` and `digest` in `languagetool_install`
+together, with the copies in `tests/test_languagetool_install.sh` and the path
+in `.config/emacs.org` and `.config/my_emacs/init.el`. The `ubuntu`, `arch`,
+`manjaro`, `mac` and `work` uninstall checklists offer `langtool_uninstall`,
+which removes every `LanguageTool-*` folder.
+
+Run the hermetic test with `bash tests/test_languagetool_install.sh`. `make test-platforms`
+runs the same steps for real in Docker, on an Arch userland and under bash 3.2 (the
+shell macOS ships); it downloads LanguageTool in each container, so it is not part
+of `make test`.
+
+The wallpapers in `.local/xdg/wallpapers` (about 313 MB) are ordinary Git
+objects, on purpose. They were briefly Git LFS files, and that was dropped:
+GitHub's free LFS quota is 1 GiB of bandwidth a month, which a few full clones
+or bootstraps would use up. Do not convert them back without a plan for the
+quota.
+
 ## Video editing: OpenShot, Blender, and DaVinci Resolve
 
 Three editors for three jobs: OpenShot for quick cuts, Blender for 3D (and its

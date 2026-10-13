@@ -19,7 +19,8 @@ run_selected_uninstalls "Arch Uninstaller" \
     laptop_uninstall    "Laptop packages (TLP)"                                OFF \
     dwall_uninstall     "Dynamic wallpapers"                                   OFF \
     papirus_uninstall   "Papirus folder icons"                                 OFF \
-    emacs_uninstall     "Emacs & Doom Emacs"                                   OFF
+    emacs_uninstall     "Emacs & Doom Emacs"                                   OFF \
+    langtool_uninstall "LanguageTool (grammar checker; keeps the .oxt dictionaries)" OFF
 
 if [ "$(basename "$SHELL")" == "zsh" ]; then
     info "Currently using zsh. To revert to bash, run: chsh -s \$(which bash)"

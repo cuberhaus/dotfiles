@@ -35,12 +35,14 @@ base_install () {
         gdb                     # Debugging C++
         git
         github-cli              # GitHub CLI
+        jre-openjdk-headless    # Java runtime (LanguageTool needs 17 or newer)
         npm
         python
         python-pipenv
         python3
         ruby
         svn                     # Subversion
+        unzip                   # Unpacks the LanguageTool download
         yarn
 
         # Themes & appearance

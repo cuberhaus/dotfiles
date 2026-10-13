@@ -382,6 +382,9 @@ __pycache__/
 # cache/ holds per-document JSON also with absolute paths
 .config/texstudio/cache/
 .config/texstudio/texstudio.ini
+# LanguageTool is a 240 MB download that bootstrap installs (base_functions: languagetool_install);
+# the small .oxt dictionaries next to it stay tracked.
+.config/texstudio/dictionaries/LanguageTool-*
 
 # LibreOffice runtime
 .config/libreoffice/4/user/GraphicsRenderTests.log

@@ -40,7 +40,6 @@ LINT_PATTERNS=(
 
 # Substrings to exclude (vendored / submodule paths)
 LINT_EXCLUDES=(
-    'texstudio/dictionaries'
     'BigBagKbdTrixXKB'
     'base16-shell'
     'i3blocks-contrib'
@@ -90,7 +89,6 @@ HARDCODED_PATHS_EXCLUDES=(
     ':!.config/birdtray-config.json'
     ':!.config/texstudio/texstudio.ini'
     ':!.config/texstudio/cache/'
-    ':!.config/texstudio/dictionaries/'
     ':!.cinnamon/backgrounds/user-folders.lst'
     ':!.config/cinnamon/dark/gnome.dconf'
     ':!.config/cinnamon/light/gnome.dconf'

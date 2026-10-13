@@ -280,6 +280,7 @@ asusctl_lighting() { record 'asusctl-lighting'; }
 nvidia_install() { record 'nvidia-install'; }
 nvidia_display_config() { record 'nvidia-display'; }
 dev_tools_install() { record 'dev-tools'; }
+languagetool_install() { record 'languagetool'; }
 sops_install() { record 'sops'; }
 work_configure_default_shell() { record 'default-shell'; }
 node_install() { record 'node'; }
@@ -307,7 +308,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\ncaffeine-autostart\ndavinci-resolve\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\ncaffeine-autostart\ndavinci-resolve\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"
@@ -343,6 +344,21 @@ grep -Fqx 'nvidia-install' "$EVENT_LOG" ||
     fail 'a failing asusctl step must not stop the stages that follow it'
 grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
     fail 'a failing asusctl step must not abort the rest of the work bootstrap'
+
+# LanguageTool needs the network: when it fails, provisioning must warn with the command that
+# repeats the step and carry on.
+languagetool_install() { record 'languagetool-failed'; return 1; }
+warn() { record "warning:$*"; }
+: > "$EVENT_LOG"
+work_main --unattended --no-stow --high-dpi=no </dev/null
+grep -Fqx 'languagetool-failed' "$EVENT_LOG" || fail 'the failing LanguageTool step did not run'
+grep -Fq "warning:LanguageTool setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; languagetool_install'" "$EVENT_LOG" ||
+    fail 'a failing LanguageTool step must be reported with the command that repeats it'
+grep -Fqx 'sops' "$EVENT_LOG" ||
+    fail 'a failing LanguageTool step must not stop the stages that follow it'
+grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
+    fail 'a failing LanguageTool step must not abort the rest of the work bootstrap'
+languagetool_install() { record 'languagetool'; }
 asusctl_install() { record 'asusctl'; }
 
 # The keyboard lighting is cosmetic: when it fails, provisioning must warn with the

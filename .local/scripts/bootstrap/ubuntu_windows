@@ -3,7 +3,7 @@
 
 ### VARIABLES
 bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
+DOTFILES_ROOT="$(cd -P "$bootstrap_dir/../../.." && pwd)"
 export DOTFILES_ROOT
 # Include functions
 source "$bootstrap_dir/ubuntu_functions"
@@ -20,6 +20,9 @@ export DISTRO=ubuntu_windows" > "$HOME/.config/distro"
 
 ### ONLY CHANGE FROM HERE ON
 base_install
+# LanguageTool (grammar checker for Emacs and TeXstudio) is a 240 MB download, so a failure must not abort provisioning.
+languagetool_install ||
+    warn "LanguageTool setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; languagetool_install'"
 sops_install
 vim_install
 windows_install
@@ -34,3 +37,4 @@ windows_install
 #ubuntu_install
 
 chsh -s "$(which zsh)"                          # Change default shell to zsh
+apply_skip_worktree

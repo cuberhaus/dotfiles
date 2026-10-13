@@ -19,6 +19,7 @@ run_selected_uninstalls "Work Machine Uninstaller" \
     nvidia_ctk_uninstall    "NVIDIA Container Toolkit (+ apt source)"         OFF \
     asusctl_uninstall       "asusctl & asusd (ASUS laptops; keeps /etc/asusd)" OFF \
     davinci_uninstall       "DaVinci Resolve (keeps projects and settings)"    OFF \
+    langtool_uninstall  "LanguageTool (grammar checker; keeps the .oxt dictionaries)" OFF \
     gui_apps_uninstall      "GUI apps (Chrome, VS Code, Cursor, Spotify, ...)" OFF
 
 if [ "$(basename "$SHELL")" == "zsh" ]; then

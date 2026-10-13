@@ -29,6 +29,8 @@ dev-vcs/git-lfs
 dev-util/github-cli
 net-misc/curl
 net-misc/wget
+app-arch/unzip                  # unpacks the LanguageTool download (languagetool_install)
+virtual/jre                     # Java runtime (LanguageTool needs 17 or newer)
 app-crypt/age                   # encryption backend for SOPS (see vault-secret)
 app-misc/jq
 sys-apps/ripgrep

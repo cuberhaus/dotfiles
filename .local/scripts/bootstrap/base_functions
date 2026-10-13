@@ -82,7 +82,7 @@ bootstrap_repository_root() {
         return 0
     fi
 
-    cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd
+    cd -P "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd
 }
 
 ## Report whether this bootstrap invocation can obtain a confirmation response.
@@ -710,6 +710,108 @@ cursor_cli_uninstall() {
     rm -rf "$cli_home"
 }
 
+###############################################################
+# => LanguageTool (grammar checker for Emacs and TeXstudio)
+###############################################################
+
+# LanguageTool 6.x is built for Java 17.  Succeeds when the `java` on PATH is that version or
+# newer; otherwise it warns what the machine has and how to get a runtime, and returns 1.  The
+# version is read from the output of `java -version` (which goes to stderr, may follow a
+# "Picked up _JAVA_OPTIONS" line, and reads 1.8 for Java 8), not from the command's status:
+# /usr/bin/java on a Mac without a JDK exists but exits with an error.
+languagetool_java_check() {
+    local minimum=17 output="" major="" found="no working Java"
+    local pattern='version "([0-9]+)(\.([0-9]+))?'
+
+    if command -v java &>/dev/null; then
+        output="$(java -version 2>&1)" || true
+        if [[ $output =~ $pattern ]]; then
+            major="${BASH_REMATCH[1]}"
+            if [ "$major" = 1 ]; then
+                major="${BASH_REMATCH[3]}"
+            fi
+        fi
+    fi
+    if [ -n "$major" ]; then
+        found="Java $major"
+        if [ "$major" -ge "$minimum" ]; then
+            return 0
+        fi
+    fi
+    warn "LanguageTool needs Java $minimum or newer, but this machine has $found. Install a runtime: Arch jre-openjdk-headless, Ubuntu default-jre-headless (openjdk-17-jre-headless on 22.04), macOS brew install --cask temurin."
+    return 1
+}
+
+# Emacs (flycheck-languagetool, see .config/emacs.org) and TeXstudio run LanguageTool's server jar.
+# The distribution is a 240 MB zip, so git does not track it: this downloads it into
+# ~/.config/texstudio/dictionaries/LanguageTool-<version>/ (the folder .gitignore keeps out of git).
+# languagetool.org keeps only its recent releases, so the version is one it still hosts, and the
+# SHA-256 below was checked against the Internet Archive's copies of the same file.  Change the
+# version and the digest together, with the copies in tests/test_languagetool_install.sh and the
+# path in .config/emacs.org and .config/my_emacs/init.el.  It needs Java 17 or newer: every
+# profile installs a runtime in its package stage, and languagetool_java_check below makes the
+# step fail, with the reason, when the machine still has none that is new enough.
+# Call it as `languagetool_install ||`: the shell ignores `set -e` there, so every step is chained
+# and a failure warns and returns 1.
+languagetool_install() {
+    local version="6.6"
+    local digest="53600506b399bb5ffe1e4c8dec794fd378212f14aaf38ccef9b6f89314d11631"
+    local asset="LanguageTool-${version}.zip"
+    local dest="$HOME/.config/texstudio/dictionaries/LanguageTool-${version}"
+    local -a fetch=(curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --location
+        --silent --show-error --retry 3 --retry-connrefused)
+    local -a sha256=(sha256sum)
+    local work tool
+
+    if [ -f "$dest/languagetool-server.jar" ]; then
+        info "LanguageTool ${version} already installed, skipping."
+        languagetool_java_check
+        return
+    fi
+    for tool in curl unzip; do
+        if ! command -v "$tool" &>/dev/null; then
+            warn "LanguageTool needs $tool to install; install it and rerun."
+            return 1
+        fi
+    done
+    # macOS has no sha256sum.
+    command -v sha256sum &>/dev/null || sha256=(shasum -a 256)
+
+    # The work folder sits next to the destination so the final move is a rename, and a run that
+    # was killed halfway leaves only a LanguageTool-*.partial folder, which the next run removes.
+    work="${dest}.partial"
+    rm -rf "$work"
+    info "Installing LanguageTool ${version} (240 MB)..."
+    if mkdir -p "$work" &&
+        "${fetch[@]}" --output "$work/$asset" "https://languagetool.org/download/$asset" &&
+        printf '%s  %s\n' "$digest" "$asset" > "$work/$asset.sha256" &&
+        (cd "$work" && "${sha256[@]}" --check "$asset.sha256") &&
+        unzip -q "$work/$asset" -d "$work/unpacked" &&
+        [ -f "$work/unpacked/LanguageTool-${version}/languagetool-server.jar" ] &&
+        rm -rf "$dest" &&
+        mv "$work/unpacked/LanguageTool-${version}" "$dest"; then
+        rm -rf "$work"
+    else
+        rm -rf "$work"
+        warn "LanguageTool ${version} was not installed: the download, its checksum, or the unpacking failed."
+        return 1
+    fi
+    info "LanguageTool ${version} installed in $dest"
+    languagetool_java_check
+}
+
+# Remove every LanguageTool version languagetool_install put in place.  The dictionaries tracked
+# in git (the .oxt files) and the rest of ~/.config/texstudio stay.
+langtool_uninstall() {
+    local dictionaries="$HOME/.config/texstudio/dictionaries"
+    local folder
+
+    for folder in "$dictionaries"/LanguageTool-*; do
+        [ -d "$folder" ] && rm -rf "$folder"
+    done
+    return 0
+}
+
 # Run a command that changes the apt configuration, or only describe it when
 # APT_SOURCES_DRY_RUN=true (`make repair REPAIR=ide-repos DRY_RUN=true`).
 apt_sources_apply() {
@@ -1107,13 +1209,20 @@ EOF
     info "NVIDIA display config written to $xorg_conf (takes effect after reboot/re-login)."
 }
 
+# This file is <checkout>/.local/scripts/bootstrap/base_functions, so the checkout is three levels
+# up.  `cd -P` resolves the Stow link first: sourced as ~/.local/scripts/bootstrap/base_functions
+# (the uninstallers do), a plain `..` walks up the link's own path and ends in $HOME.  A script
+# that is not there is reported, because a silent skip is how a wrong path went unnoticed.
 apply_skip_worktree() {
-    local dotfiles_root
-    dotfiles_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+    local dotfiles_root script
+    dotfiles_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+    script="$dotfiles_root/.local/scripts/apply-skip-worktree"
 
     info "Applying skip-worktree to volatile config files..."
-    if [ -x "$dotfiles_root/.local/scripts/apply-skip-worktree" ]; then
-        "$dotfiles_root/.local/scripts/apply-skip-worktree" --verbose "$dotfiles_root"
+    if [ -x "$script" ]; then
+        "$script" --verbose "$dotfiles_root"
+    else
+        warn "apply-skip-worktree not found at $script; the volatile config files are not masked."
     fi
 }
 

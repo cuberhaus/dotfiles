@@ -913,6 +913,7 @@ record_stages() {
     gentoo_write_distro_marker() { record 'distro-marker'; }
     configure_inotify_watches() { record 'inotify'; }
     gentoo_install_packages() { record "packages:$2"; }
+    languagetool_install() { record 'languagetool'; }
     sops_install() { record 'sops'; }
     gentoo_enable_services() { record "services:$1"; }
     configure_brightness_access() { record 'brightness'; }
@@ -930,9 +931,9 @@ test_main_runs_the_stages_in_order() {
         record_stages
         gentoo_main --unattended --no-stow
     ) || fail 'a normal run must succeed'
-    assert_equals $'logging\ndetect:dry=false\nprivileges\nstow:gentoo:true\nuser-environment\ndistro-marker\ninotify\npackages:openrc\nsops\nservices:openrc\nbrightness\ndefault-shell\nvim-plugins\nvault\nskip-worktree' \
+    assert_equals $'logging\ndetect:dry=false\nprivileges\nstow:gentoo:true\nuser-environment\ndistro-marker\ninotify\npackages:openrc\nlanguagetool\nsops\nservices:openrc\nbrightness\ndefault-shell\nvim-plugins\nvault\nskip-worktree' \
         "$(cat "$EVENT_LOG")" \
-        'stages must run: validate target, elevate, link dotfiles, prepare, install packages, services, shell, editor plugins'
+        'stages must run: validate target, elevate, link dotfiles, prepare, install packages, LanguageTool, services, shell, editor plugins'
 
     : > "$EVENT_LOG"
     (
@@ -982,6 +983,23 @@ test_a_failing_vim_step_does_not_abort_the_bootstrap() {
         'a failing Vim plugin step must be reported with the way to retry it'
     assert_contains "$(cat "$EVENT_LOG")" $'vault\nskip-worktree' \
         'the stages after a failing Vim plugin step must still run'
+    teardown_case
+}
+
+# LanguageTool needs the network: when it fails, the bootstrap must warn with the way to
+# repeat the step and still run the stages after it.
+test_a_failing_languagetool_step_does_not_abort_the_bootstrap() {
+    setup_case
+    (
+        record_stages
+        languagetool_install() { record 'languagetool-failed'; return 1; }
+        warn() { record "warning:$*"; }
+        gentoo_main --unattended --no-stow
+    ) || fail 'a failing LanguageTool step must not fail the bootstrap'
+    assert_contains "$(cat "$EVENT_LOG")" 'warning:LanguageTool setup failed; rerun it with: bash -c ' \
+        'a failing LanguageTool step must be reported with the way to repeat it'
+    assert_contains "$(cat "$EVENT_LOG")" $'sops\nservices:openrc' \
+        'the stages after a failing LanguageTool step must still run'
     teardown_case
 }
 
@@ -1133,6 +1151,10 @@ EOF
 #!/usr/bin/env bash
 printf 'sysctl %s\n' "$*" >> "$EVENT_LOG"
 EOF
+    # LanguageTool is a 240 MB download, so the simulated machine already has it, as it
+    # already has sops below.
+    mkdir -p "$HOME/.config/texstudio/dictionaries/LanguageTool-6.6"
+    : > "$HOME/.config/texstudio/dictionaries/LanguageTool-6.6/languagetool-server.jar"
     stub_command sops <<'EOF'
 #!/usr/bin/env bash
 printf 'sops 3.13.2\n'
@@ -1241,6 +1263,7 @@ test_dry_run_leaves_the_simulated_machine_untouched() {
         'gentoo_prepare_user_environment' \
         'gentoo_write_distro_marker' \
         'configure_inotify_watches' \
+        'languagetool_install' \
         'sops_install' \
         'sudo rc-update add elogind boot' \
         'sudo rc-update add dbus default' \
@@ -1277,6 +1300,7 @@ test_a_second_run_finds_every_step_already_satisfied() {
     assert_contains "$events" "chsh -s $CASE_DIR/bin/zsh tester" 'the first run must switch the login shell'
     assert_contains "$events" 'nvim --headless +PlugInstall --sync +qa!' 'the first run must install the Vim plugins'
     assert_contains "$first" 'YouCompleteMe is already built' 'the first run must verify YouCompleteMe'
+    assert_contains "$first" 'LanguageTool 6.6 already installed' 'the first run must find LanguageTool'
     assert_equals "$expected_atoms" "$(tr '\n' ' ' < "$GENTOO_SYSROOT/var/lib/portage/world" | sed 's/ $//')" \
         'every merged package must be recorded in @world'
     case "$events" in
@@ -1422,6 +1446,7 @@ test_main_runs_the_stages_in_order
 test_tree_sync_and_world_update_are_opt_in
 test_dry_run_changes_nothing
 test_a_failing_vim_step_does_not_abort_the_bootstrap
+test_a_failing_languagetool_step_does_not_abort_the_bootstrap
 test_unsupported_options_are_refused_before_any_change
 test_help_prints_usage_without_doing_anything
 test_dry_run_leaves_the_simulated_machine_untouched

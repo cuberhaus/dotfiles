@@ -5,7 +5,7 @@ set -euo pipefail
 
 ### VARIABLES
 bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
+DOTFILES_ROOT="$(cd -P "$bootstrap_dir/../../.." && pwd)"
 export DOTFILES_ROOT
 source "$bootstrap_dir/base_functions"
 source "$bootstrap_dir/gentoo_functions"
@@ -77,6 +77,9 @@ gentoo_main() {
     gentoo_apply configure_inotify_watches
 
     gentoo_install_packages "$manifest" "$GENTOO_INIT"
+    # LanguageTool (grammar checker for Emacs and TeXstudio) is a 240 MB download, so a failure must not abort the bootstrap.
+    gentoo_apply languagetool_install ||
+        warn "LanguageTool setup failed; rerun it with: bash -c 'source $DOTFILES_ROOT/.local/scripts/bootstrap/base_functions; languagetool_install'"
     gentoo_apply sops_install # app-admin/sops is not in the main Gentoo tree
     gentoo_enable_services "$GENTOO_INIT"
     gentoo_apply configure_brightness_access

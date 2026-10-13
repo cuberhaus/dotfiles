@@ -83,6 +83,7 @@ mac_install () {
         rectangle               # Tiler
         spotify                 # Music player
         sublime-text            # Fastest editor
+        temurin                 # Java runtime (LanguageTool needs 17 or newer)
         texstudio               # LaTeX editor
         the-unarchiver          # Archiver
         tomighty                # Pomodoro timer

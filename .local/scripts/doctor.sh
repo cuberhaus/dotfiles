@@ -2,7 +2,7 @@
 # doctor: report missing tools and broken symlinks. Runs from `make doctor`.
 set -uo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 profile="${1:-auto}"
 
 GREEN=$'\033[32m'

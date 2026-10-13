@@ -33,6 +33,35 @@ EOF
     chmod +x "$FAKE_BIN/stow"
 }
 
+# A checkout with a Stow-style home beside it: $CASE_DIR/home/.local/scripts links to the
+# checkout's .local/scripts, as `make install` makes it.  Sets PHYSICAL_ROOT, the checkout as
+# `cd -P` prints it.
+make_stow_layout() {
+    mkdir -p "$CASE_DIR/checkout/.local/scripts/bootstrap" "$CASE_DIR/home/.local"
+    ln -s "$CASE_DIR/checkout/.local/scripts" "$CASE_DIR/home/.local/scripts"
+    PHYSICAL_ROOT="$(cd -P "$CASE_DIR/checkout" && pwd)"
+}
+
+# root_through_stow_link FILE FOLDER VARIABLE...: copy FILE's `VARIABLE=` lines into a probe
+# script in FOLDER (under .local/scripts), run the probe by way of the link, and print what the
+# last variable resolves to.  A plain `..` from the linked path walks up the link's own path
+# into the home directory instead of the checkout.
+root_through_stow_link() {
+    local file="$1" folder="$2" variable line last
+    shift 2
+    last="${*: -1}"
+    mkdir -p "$CASE_DIR/checkout/.local/scripts/$folder"
+    {
+        printf 'target_dir=""\n'
+        for variable in "$@"; do
+            line="$(grep -m1 "^$variable=" "$file")" || fail "$file has no $variable= line"
+            printf '%s\n' "$line"
+        done
+        printf 'printf "%%s\\n" "${%s}"\n' "$last"
+    } > "$CASE_DIR/checkout/.local/scripts/$folder/probe"
+    bash "$CASE_DIR/home/.local/scripts/$folder/probe"
+}
+
 setup_case() {
     CASE_DIR="$(mktemp -d)"
     unset SKIP_STOW STOW_TARGET TEST_CONFIRM UNATTENDED
@@ -246,6 +275,47 @@ test_entrypoints_use_checkout_relative_paths() {
     assert_file_contains "$REPO_ROOT/.local/scripts/bootstrap/work" 'bootstrap_enable_logging work'
 }
 
+test_entrypoints_resolve_the_checkout_through_the_stow_link() {
+    local entrypoint resolved
+    setup_case
+    make_stow_layout
+    for entrypoint in arch manjaro ubuntu ubuntu_windows mac work gentoo; do
+        resolved="$(root_through_stow_link "$REPO_ROOT/.local/scripts/bootstrap/$entrypoint" bootstrap bootstrap_dir DOTFILES_ROOT)"
+        [ "$resolved" = "$PHYSICAL_ROOT" ] ||
+            fail "$entrypoint run through ~/.local/scripts resolves DOTFILES_ROOT to $resolved, not $PHYSICAL_ROOT"
+    done
+    teardown_case
+}
+
+test_repository_root_fallback_resolves_through_the_stow_link() {
+    local resolved
+    setup_case
+    make_stow_layout
+    cp "$BASE_FUNCTIONS" "$CASE_DIR/checkout/.local/scripts/bootstrap/base_functions"
+    resolved="$(
+        unset DOTFILES_ROOT
+        source "$CASE_DIR/home/.local/scripts/bootstrap/base_functions"
+        bootstrap_repository_root
+    )"
+    [ "$resolved" = "$PHYSICAL_ROOT" ] ||
+        fail "bootstrap_repository_root resolves to $resolved, not $PHYSICAL_ROOT"
+    teardown_case
+}
+
+test_scripts_that_default_their_root_resolve_through_the_stow_link() {
+    local spec script variable resolved
+    setup_case
+    make_stow_layout
+    for spec in doctor.sh:repo_root repair-installation:repo_root apply-skip-worktree:dotfiles_root; do
+        script="${spec%%:*}"
+        variable="${spec##*:}"
+        resolved="$(root_through_stow_link "$REPO_ROOT/.local/scripts/$script" . "$variable")"
+        [ "$resolved" = "$PHYSICAL_ROOT" ] ||
+            fail "$script run through ~/.local/scripts resolves its root to $resolved, not $PHYSICAL_ROOT"
+    done
+    teardown_case
+}
+
 test_bootstrap_logging_mirrors_output
 test_logged_output_retains_interactive_state
 test_clean_install_applies_previewed_links
@@ -260,5 +330,8 @@ test_no_stow_argument_sets_skip_flag
 test_missing_stow_uses_selected_platform_installer
 test_noninteractive_input_never_applies_stow
 test_entrypoints_use_checkout_relative_paths
+test_entrypoints_resolve_the_checkout_through_the_stow_link
+test_repository_root_fallback_resolves_through_the_stow_link
+test_scripts_that_default_their_root_resolve_through_the_stow_link
 
 printf 'Bootstrap Stow tests passed.\n'

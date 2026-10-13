@@ -55,6 +55,7 @@ dev_tools_install() {
         cmake
         curl
         ddcutil                 # External monitor DDC brightness control
+        default-jre-headless    # Java runtime (LanguageTool needs 17 or newer)
         git
         git-lfs                 # Large file storage for Git
         jq

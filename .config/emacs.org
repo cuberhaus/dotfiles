@@ -127,7 +127,7 @@ https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
     (setq metrics-dir (concat org-dir "/Metrics.org"))
     (setq habits-dir (concat org-dir "/Habits.org"))
     (setq birthday-dir (concat org-dir "/birthday.org"))
-    (setq languagetool-server-dir (concat cache-dir "/texstudio/dictionaries/LanguageTool-5.7/languagetool-server.jar"))
+    (setq languagetool-server-dir (concat config-dir "/texstudio/dictionaries/LanguageTool-6.6/languagetool-server.jar")) ;; installed by bootstrap: languagetool_install
     (setq spell-fu-dir (concat config-dir "/spell_fu"))
     (setq ispell-personal-dir (concat config-dir "/spell_fu/.pws"))
     (setq url-history-dir (expand-file-name "url/history" user-emacs-dir))

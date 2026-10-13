@@ -16,6 +16,7 @@ Personal Linux/Unix dotfiles for Arch, Manjaro, Ubuntu, and macOS — shell, edi
 - `make install` / `make uninstall` / `make restow` — stow lifecycle (install and restow back up conflicts first via `.local/scripts/stow-backup-conflicts`).
 - `make dry-run` — simulate stow, report conflicts and what install/restow would back up, no changes.
 - `make lint` (shellcheck), `make test` (unit tests), and `make check` (tests + shellcheck + markdownlint + vint).
+- `make test-platforms` — opt-in (Docker, the network, 240 MB per container): the Java and LanguageTool steps on a real Arch userland and under bash 3.2, the shell macOS ships. It is not part of `make test` or `make check`.
 - `make audit-installation` — read-only comparison of the checkout, Stow-managed files, active bootstrap package declarations, and native automations. Set `PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work` to override auto-detection. Every `[MISSING]` or `[DRIFT]` finding carries a `Fix:` line with the exact command (the manager's install line, one `snap install … --classic` per snap, `make bootstrap-<profile>` only when nothing narrower exists); a new check must print one, never a bare "run the bootstrap". An apt name with no install candidate gets `sudo apt-get update && …` plus a `#` note, because the plain install would fail.
 - `make bootstrap-{arch,manjaro,ubuntu,mac,work}` — full OS provisioning; **read the script first**, it installs hundreds of packages.
 - `make bootstrap-gentoo-dry-run` / `make bootstrap-gentoo` — experimental Gentoo profile that has never run on a real machine. Always dry-run first; it is excluded from `make audit-installation` and profile detection on purpose. See `docs/GENTOO-BOOTSTRAP.md`.
@@ -67,6 +68,7 @@ This is a single-context repository. Read the root `CONTEXT.md` when present and
 - **Do not run `sudo apt install`, `pacman -S`, `brew install`, `emerge`, or edit `/etc/`** without asking the user. Bootstrap scripts are opt-in.
 - Keep platform-specific config separate (WSL vs native Linux vs macOS); don't merge Arch and Ubuntu package lists.
 - Destructive helpers must support a dry-run mode and print clear usage.
+- **Large files stay out of the history**: LanguageTool is downloaded by `languagetool_install` into an ignored `LanguageTool-*` folder, not tracked (re-adding it puts 359 MB back); read the LanguageTool bullet in [docs/agents/bootstrap-installers.md](docs/agents/bootstrap-installers.md) before changing it. The wallpaper pictures under `.local/xdg/wallpapers` (about 313 MB) are ordinary Git objects on purpose: Git LFS was tried and dropped because GitHub's free quota (1 GiB of bandwidth a month) would be spent by about three full clones or bootstraps. Do not convert them to LFS.
 
 ## Workspace integration (cuberhaus multi-root)
 

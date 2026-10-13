@@ -20,7 +20,7 @@ CUBERHAUS_WORKSPACE_DIR ?= ../cuberhaus-workspace
 CUBERHAUS_WORKSPACE_REPO ?= cuberhaus/cuberhaus-workspace
 RESTORE_WORKSPACE_SKILLS ?= 1
 
-.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work bootstrap-gentoo bootstrap-gentoo-dry-run uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
+.PHONY: help check-stow install uninstall restow dry-run config-status config-diff config-import lint test check fix doctor audit-installation repair hooks test-shutdown-fix test-platforms install-automations uninstall-automations uninstall-automations-dry-run maintenance-status maintenance-logs maintenance-digest restore-app restore-apps update submodules antigen-update workspace bootstrap-workspace dual-boot-utc bootstrap-unattended bootstrap-arch bootstrap-manjaro bootstrap-ubuntu bootstrap-ubuntu-windows bootstrap-mac bootstrap-work bootstrap-gentoo bootstrap-gentoo-dry-run uninstall-arch uninstall-manjaro uninstall-ubuntu uninstall-mac uninstall-work skills-list skills-update skills-restore
 
 .DEFAULT_GOAL := help
 
@@ -104,6 +104,8 @@ test: ## Run deterministic unit tests
 	bash tests/test_openlogi_install.sh
 	bash tests/test_kondo_install.sh
 	bash tests/test_cursor_cli_install.sh
+	bash tests/test_languagetool_install.sh
+	bash tests/test_apply_skip_worktree.sh
 	bash tests/test_davinci_resolve_install.sh
 	bash tests/test_ycm.sh
 	bash tests/test_bootstrap_gentoo.sh
@@ -139,6 +141,9 @@ endif
 
 test-shutdown-fix: ## Test the permanent shutdown-fix kernelstub path
 	bash .local/scripts/test_permanent_shutdown_fix.sh
+
+test-platforms: ## Run the Java and LanguageTool steps on real Arch and under bash 3.2 in Docker (needs Docker, network, 2 x 240 MB)
+	bash tests/test_platforms_in_containers.sh
 
 fix: ## Auto-fix markdown issues (markdownlint --fix)
 	bash .local/scripts/check-formatting.sh --fix

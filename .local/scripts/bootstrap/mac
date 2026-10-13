@@ -4,7 +4,7 @@ set -euo pipefail
 
 ### VARIABLES
 bootstrap_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_ROOT="$(cd "$bootstrap_dir/../../.." && pwd)"
+DOTFILES_ROOT="$(cd -P "$bootstrap_dir/../../.." && pwd)"
 export DOTFILES_ROOT
 source "$bootstrap_dir/base_functions"
 source "$bootstrap_dir/mac_functions"
@@ -17,6 +17,9 @@ bootstrap_stow_checkout mac
 install_preparation
 #app_store_install
 mac_install
+# LanguageTool (grammar checker for Emacs and TeXstudio) is a 240 MB download, so a failure must not abort provisioning.
+languagetool_install ||
+    warn "LanguageTool setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; languagetool_install'"
 obsidian_vault_install
 ai_tools_install
 vim_install

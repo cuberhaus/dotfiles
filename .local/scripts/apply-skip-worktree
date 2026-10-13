@@ -16,7 +16,7 @@ for arg in "$@"; do
     esac
 done
 
-dotfiles_root="${target_dir:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+dotfiles_root="${target_dir:-$(cd -P "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 
 files=(
     .config/warp-terminal/user_preferences.json

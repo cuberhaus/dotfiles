@@ -15,6 +15,7 @@ run_selected_uninstalls "macOS Uninstaller" \
     fonts_uninstall     "Nerd Fonts (Fira Code, Iosevka, Meslo, ...)"      OFF \
     gui_apps_uninstall  "GUI applications (Chrome, Spotify, VS Code, ...)" OFF \
     vim_uninstall       "Vim / Neovim (macvim, neovim, plugins)"           OFF \
+    langtool_uninstall "LanguageTool (grammar checker; keeps the .oxt dictionaries)" OFF \
     brew_cleanup        "Run brew cleanup"                                  OFF
 
 info "Uninstallation complete."

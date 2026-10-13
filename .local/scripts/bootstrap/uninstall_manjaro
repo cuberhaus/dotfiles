@@ -20,6 +20,7 @@ run_selected_uninstalls "Manjaro Uninstaller" \
     xmonad_uninstall            "xmonad window manager (xmobar, trayer, dmenu)"         OFF \
     vim_uninstall               "Vim / Neovim extras (ctags, formatters, ...)"          OFF \
     emacs_uninstall             "Emacs & Doom Emacs"                                    OFF \
+    langtool_uninstall      "LanguageTool (grammar checker; keeps the .oxt dictionaries)" OFF \
     laptop_uninstall            "Laptop packages (TLP)"                                 OFF
 
 if [ "$(basename "$SHELL")" == "zsh" ]; then

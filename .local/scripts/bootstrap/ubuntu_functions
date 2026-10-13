@@ -16,6 +16,7 @@ base_install () {
         cmake                   # To install ycm
         curl
         ddcutil                 # External monitor DDC brightness control
+        default-jre-headless    # Java runtime (LanguageTool needs 17 or newer)
         eza                     # ls on steroids (exa replacement)
         ffmpeg
         file
@@ -48,6 +49,7 @@ base_install () {
         stow
         subversion              # To download repos
         tmux                    # Terminal multiplexer
+        unzip                   # Unpacks the LanguageTool download
         vim-gtk                 # Vim with full functionality
         yarn
         zsh
