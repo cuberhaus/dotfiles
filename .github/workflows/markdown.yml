@@ -3,10 +3,10 @@ name: Markdown
 on:
   push:
     branches: [main]
-    paths: ['*.md', '.local/README.md', '.local/xdg/wallpapers/README.md']
+    paths: ['**.md', '.markdownlint.json', '.local/scripts/lint_helpers.sh']
   pull_request:
     branches: [main]
-    paths: ['*.md', '.local/README.md', '.local/xdg/wallpapers/README.md']
+    paths: ['**.md', '.markdownlint.json', '.local/scripts/lint_helpers.sh']
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,10 +22,18 @@ jobs:
         with:
           submodules: false
 
+      - name: List Markdown files to lint
+        id: files
+        # Same list as `make check`: every tracked file except vendored text.
+        run: |
+          source .local/scripts/lint_helpers.sh
+          {
+            echo 'globs<<EOF'
+            lint_get_markdown
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
       - name: Lint own Markdown files
         uses: DavidAnson/markdownlint-cli2-action@v24
         with:
-          globs: |
-            README.md
-            .local/README.md
-            .local/xdg/wallpapers/README.md
+          globs: ${{ steps.files.outputs.globs }}

@@ -1,6 +1,9 @@
 # Tmux
-## Plugin manager:
+
+## Plugin manager
+
 ### Tmux and Tpm, with spotify setup
+
 ```
 sudo apt install tmux
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
@@ -9,19 +12,22 @@ git clone https://github.com/polthelost/tmux-spotify
 ```
 
 ## Plugins
-### Layout and theme:
+
+### Layout and theme
+
 - tmux-battery
 - tmux-spotify
 - tmux-prefix-highlight
 
-### Commands/Shortcuts:
+### Commands/Shortcuts
+
 - tmux-pain-control
 
 ### Session
+
 - tmux-resurrect
 - tmux-continuum
 
-### Etc.
+### Etc
+
 - tmux-sensible
-
-

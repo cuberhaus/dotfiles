@@ -1,6 +1,7 @@
 # Neofetch
 
-## Config:
+## Config
+
 - OS
 - Host
 - Packages

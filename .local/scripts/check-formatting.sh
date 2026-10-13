@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-markdown_files=(README.md .local/README.md .local/xdg/wallpapers/README.md)
+cd "$(dirname "$0")/../.."
+# shellcheck source=lint_helpers.sh
+source .local/scripts/lint_helpers.sh
+mapfile -t markdown_files < <(lint_get_markdown)
 
 if [[ -d "$HOME/.local/bin" ]]; then
     export PATH="$HOME/.local/bin:$PATH"
@@ -40,7 +43,7 @@ case "${1:-}" in
             printf 'vint not found (pip install vim-vint or run make doctor).\n' >&2
             exit 127
         }
-        vint --style-problem .vim/vimrc || true
+        vint --style-problem .vim/vimrc
         ;;
     *)
         printf 'Usage: %s [--fix]\n' "$0" >&2

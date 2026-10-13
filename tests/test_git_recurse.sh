@@ -547,6 +547,18 @@ assert_same 'Test 18: -d 1 returns the status of the command' "$cap_rc" 1
 run_git_recurse -d 1 true
 assert_same 'Test 18: -d 1 returns the status of the command (success)' "$cap_rc" 0
 
+# The command runs in a bash of its own, so no variable the script holds reaches it:
+# `cmd` is a local of the function that runs it. `eval` would expose it, and `dir`
+# of the per-repository runner too, on the paths without a timeout (`-t 0`) and at depth 1.
+# shellcheck disable=SC2016 # the command must reach git-recurse unexpanded
+run_git_recurse -d 1 'echo "[${cmd-unset}]"'
+assert_has 'Test 18: -d 1 gives the command a shell of its own' "$cap_out" '[unset]'
+cd "$clean_ws"
+# shellcheck disable=SC2016 # the command must reach git-recurse unexpanded
+run_git_recurse -t 0 -d 2 'echo "[${dir-unset}]"'
+assert_has 'Test 18: -t 0 gives the command a shell of its own' "$cap_out" '[unset]'
+cd "$clean_ws/ok1"
+
 deep_ws="$tmpdir/deep-ws"
 mkdir -p "$deep_ws/x"
 new_repo "$deep_ws" top

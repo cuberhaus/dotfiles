@@ -1,7 +1,11 @@
 # i3
-### Config:
+
+## Config
+
 - Vim Mode: Keys changed from jkl, to hjkl
-### Edit:
+
+## Edit
+
 vim /usr/share/X11/xorg.conf.d/40-libinput.conf
 
 ```

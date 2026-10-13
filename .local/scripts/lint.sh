@@ -27,6 +27,14 @@ if [[ ${#scripts[@]} -eq 0 ]]; then
     exit 0
 fi
 
+mapfile -t unlisted < <(lint_get_unlisted_scripts)
+if [[ ${#unlisted[@]} -gt 0 ]]; then
+    echo "Shell scripts that LINT_PATTERNS in lint_helpers.sh does not cover:"
+    printf '  %s\n' "${unlisted[@]}"
+    echo "Add each to LINT_PATTERNS, or to LINT_EXCLUDES when it is vendored."
+    exit 1
+fi
+
 echo "Linting ${#scripts[@]} shell scripts..."
 echo "---"
 

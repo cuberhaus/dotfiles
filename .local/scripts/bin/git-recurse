@@ -62,7 +62,7 @@ function run_repo_with_retry() {
         else
             (
                 cd "$dir" 2>/dev/null || exit 1
-                eval "$cmd"
+                bash -c "$cmd"
             ) > "$temp_attempt" 2>&1
             status=$?
         fi
@@ -287,7 +287,7 @@ function git_recursive() {
     echo "${blue}depth: $depth ${normal}"
     if [[ $depth -eq 1 ]]; then
         printf "${blue}Executing \"%s\" in %s ${normal}\n" "$cmd" "$(pwd)"
-        eval "$cmd"
+        bash -c "$cmd"
         return
     fi
 
