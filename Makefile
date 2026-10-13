@@ -79,53 +79,11 @@ lint: ## Run shellcheck on all shell scripts
 	bash .local/scripts/lint.sh
 
 test: ## Run deterministic unit tests
-	$(PYTHON) tests/test_installation_audit.py
-	$(PYTHON) tests/test_profile_detection.py
-	$(PYTHON) tests/test_audit_extra_packages.py
-	$(PYTHON) tests/test_audit_self_installed_apps.py
-	$(PYTHON) tests/test_anime_gif_check.py
-	$(PYTHON) tests/test_match_monitor_scales.py
-	bash tests/test_brightness.sh
-	bash tests/test_brightness_fix.sh
-	bash tests/test_asusctl_install.sh
-	bash tests/test_asusctl_lighting.sh
-	bash tests/test_anime_toggle.sh
-	bash tests/test_commands.sh
-	bash tests/test_command_help.sh
-	bash tests/test_bootstrap_stow.sh
-	bash tests/test_stow_conflicts.sh
-	bash tests/test_bootstrap_machine_state.sh
-	bash tests/test_obsidian_bootstrap.sh
-	bash tests/test_bootstrap_work.sh
-	bash tests/test_ide_apt_sources.sh
-	bash tests/test_caffeine_autostart.sh
-	bash tests/test_smb_scheme_handler.sh
-	bash tests/test_nvidia_container_toolkit.sh
-	bash tests/test_openlogi_install.sh
-	bash tests/test_kondo_install.sh
-	bash tests/test_cursor_cli_install.sh
-	bash tests/test_languagetool_install.sh
-	bash tests/test_apply_skip_worktree.sh
-	bash tests/test_davinci_resolve_install.sh
-	bash tests/test_ycm.sh
-	bash tests/test_bootstrap_gentoo.sh
-	bash tests/test_shell_path.sh
-	bash tests/test_zsh_argv0.sh
-	bash tests/test_zshrc_bundles.sh
-	bash tests/test_updateall.sh
-	bash tests/test_progress_lib.sh
-	bash tests/test_automation_notifications.sh
-	bash tests/test_automation_install.sh
-	bash tests/test_inbox_collector.sh
-	bash tests/test_desktop_shortcut_cleanup.sh
-	bash tests/test_cleanup.sh
-	bash tests/test_logout_all.sh
-	bash tests/test_bashrc_prompt.sh
-	bash tests/test_git_repo_defaults.sh
-	bash tests/test_mini_bashrc.sh
-	bash tests/test_git_recurse.sh
-	bash tests/test_git_credential_helper.sh
-	bash tests/test_vault_secret.sh
+	$(PYTHON) -m unittest discover -s tests -p 'test_*.py'
+	@for test_file in $(filter-out tests/test_platforms_in_containers.sh,$(sort $(wildcard tests/test_*.sh))); do \
+		echo "bash $$test_file"; \
+		bash "$$test_file" || exit 1; \
+	done
 
 check: lint test ## Run tests and all linters (shellcheck + markdownlint + vint). Fails if any tool is missing.
 	@echo ""
@@ -140,7 +98,7 @@ endif
 	@echo "==> All checks complete."
 
 test-shutdown-fix: ## Test the permanent shutdown-fix kernelstub path
-	bash .local/scripts/test_permanent_shutdown_fix.sh
+	bash tests/test_permanent_shutdown_fix.sh
 
 test-platforms: ## Run the Java and LanguageTool steps on real Arch and under bash 3.2 in Docker (needs Docker, network, 2 x 240 MB)
 	bash tests/test_platforms_in_containers.sh

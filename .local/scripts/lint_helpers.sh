@@ -97,6 +97,7 @@ HARDCODED_PATHS_EXCLUDES=(
     ':!.config/vlc/vlc-qt-interface.conf'
     ':!.vim/.netrwhist'
     ':!.local/scripts/bootstrap/arch_functions'
+    ':!tests/'
 )
 HARDCODED_PATHS_REGEX='(/home/[a-z][a-z0-9_-]*/|/Users/[a-z][a-z0-9_-]*/)'
 

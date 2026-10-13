@@ -539,7 +539,7 @@ reboot.
 
 Use `SHUTDOWN_FIX_BOOTLOADER=kernelstub` or `SHUTDOWN_FIX_BOOTLOADER=grub` to
 select a supported bootloader explicitly. Run the hermetic regression test
-with `bash .local/scripts/test_permanent_shutdown_fix.sh`.
+with `bash tests/test_permanent_shutdown_fix.sh`.
 
 ## Brightness fix
 

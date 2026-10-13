@@ -53,8 +53,8 @@ fi
 # TO CHECK IF PATH FOR APPS WORK OPEN OKULAR OR QT5 SETTINGS
 # fi
 
-if [ -d "$HOME/.npm-global/bin" ] ; then
-    PATH="$HOME/.npm-global/bin:$PATH"
+if [ -d "$HOME/.opencode/bin" ] ; then
+    PATH="$HOME/.opencode/bin:$PATH"
 fi
 
 if [ -d "$HOME/.local/scripts/bin" ] ; then

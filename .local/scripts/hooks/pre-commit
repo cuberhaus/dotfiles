@@ -41,19 +41,16 @@ fi
 
 # ── hardcoded user paths ─────────────────────────────────────
 # Scan only the staged subset, applying the same excludes as CI.
-staged_zlist=$(git diff --cached --name-only -z --diff-filter=ACM)
-if [ -n "$staged_zlist" ]; then
-    # shellcheck disable=SC2016
-    hits=$(printf '%s' "$staged_zlist" \
-        | xargs -0 -I{} git grep -InE "$HARDCODED_PATHS_REGEX" -- {} "${HARDCODED_PATHS_EXCLUDES[@]}" 2>/dev/null \
-        || true)
-    if [ -n "$hits" ]; then
-        echo ""
-        echo "Hardcoded user paths in staged files:"
-        echo "$hits"
-        echo "Use \$HOME, ~/, or XDG variables instead."
-        fail=1
-    fi
+hits=$(git diff --cached --name-only -z --diff-filter=ACM \
+    | xargs -0 git grep -InE "$HARDCODED_PATHS_REGEX" -- "${HARDCODED_PATHS_EXCLUDES[@]}" 2>/dev/null \
+    | grep -v '/home/linuxbrew/' \
+    || true)
+if [ -n "$hits" ]; then
+    echo ""
+    echo "Hardcoded user paths in staged files:"
+    echo "$hits"
+    echo "Use \$HOME, ~/, or XDG variables instead."
+    fail=1
 fi
 
 # ── markdownlint ─────────────────────────────────────────────

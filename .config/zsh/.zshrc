@@ -147,5 +147,3 @@ bindkey '^ ' autosuggest-accept
 # setleds -D +num
 #}}}
 
-# opencode
-export PATH=/home/pol/.opencode/bin:$PATH

@@ -46,3 +46,13 @@ else
     echo "Some scripts had warnings."
     exit 1
 fi
+
+matches=$(git grep -InE "$HARDCODED_PATHS_REGEX" \
+    -- "${HARDCODED_PATHS_EXCLUDES[@]}" | grep -v '/home/linuxbrew/' || true)
+if [[ -n "$matches" ]]; then
+    echo "$matches"
+    echo ""
+    echo "ERROR: hardcoded user paths found in tracked files (see above)."
+    echo "Use \$HOME, ~/, or XDG variables instead."
+    exit 1
+fi

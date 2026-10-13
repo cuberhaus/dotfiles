@@ -25,7 +25,14 @@ while [ $# -gt 0 ]; do
     case "$1" in
         -n|--dry-run)  dry_run=1; shift ;;
         --no-fetch)    fetch=0; shift ;;
-        --depth)       depth="$2"; shift 2 ;;
+        --depth)
+            if [ $# -lt 2 ]; then
+                echo "--depth requires a numeric argument" >&2
+                exit 2
+            fi
+            depth="$2"
+            shift 2
+            ;;
         -h|--help)
             sed -n '4,14p' "$0" | sed 's/^# \?//'
             exit 0
@@ -93,7 +100,6 @@ scan_repo() {
     current=$(git -C "$repo" rev-parse --abbrev-ref HEAD 2>/dev/null)
 
     local printed_header=0
-    local count=0
     while IFS= read -r branch; do
         [ -z "$branch" ] && continue
         [ "$branch" = "$current" ] && continue
@@ -107,7 +113,7 @@ scan_repo() {
         # Check commits ahead of default
         local ahead
         if ! ahead=$(git -C "$repo" rev-list --count "$default..$branch" 2>/dev/null); then
-            ahead=$(git -C "$repo" rev-list --count "origin/$default..$branch" 2>/dev/null)
+            ahead=$(git -C "$repo" rev-list --count "origin/$default..$branch" 2>/dev/null) || continue
         fi
 
         if [ "$ahead" = "0" ]; then
@@ -118,15 +124,15 @@ scan_repo() {
             fi
             if [ "$dry_run" -eq 1 ]; then
                 printf "    %swould delete: %s%s\n" "$yellow" "$branch" "$reset"
-            else
-                git -C "$repo" branch -d "$branch" >/dev/null 2>&1
+                ((total_deleted++)) || true
+            elif git -C "$repo" branch -d "$branch" >/dev/null 2>&1; then
                 printf "    %sdeleted: %s%s\n" "$red" "$branch" "$reset"
+                ((total_deleted++)) || true
+            else
+                printf "    %sskipped (unmerged): %s%s\n" "$yellow" "$branch" "$reset"
             fi
-            ((count++)) || true
         fi
     done < <(git -C "$repo" for-each-ref --format='%(refname:short)' refs/heads/ 2>/dev/null)
-
-    echo "$count"
 }
 
 mapfile -t repos < <(
@@ -143,10 +149,7 @@ printf "%s[%s] Scanning %d repos...%s\n" "$dim" "$mode" "${#repos[@]}" "$reset"
 
 total_deleted=0
 for r in "${repos[@]}"; do
-    result=$(scan_repo "$r")
-    if [ -n "$result" ]; then
-        ((total_deleted += result)) || true
-    fi
+    scan_repo "$r"
 done
 
 if [ "$total_deleted" -eq 0 ]; then

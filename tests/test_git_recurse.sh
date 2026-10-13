@@ -1033,4 +1033,23 @@ if [[ -n "$timeout_bin" ]]; then
     fi
 fi
 
+# Test 32: git-clean-branches previews and deletes merged local branches without remotes
+CLEAN_BRANCHES="$ROOT/.local/scripts/bin/git-clean-branches"
+git -C "$tmpdir/workspace/r1" branch stale-merged main
+dry_clean=$("$CLEAN_BRANCHES" --dry-run --no-fetch "$tmpdir/workspace")
+if ! grep -q "would delete: stale-merged" <<< "$dry_clean" || ! grep -q "DRY RUN: 1 branch(es)" <<< "$dry_clean"; then
+    fail "git-clean-branches --dry-run should report stale-merged and the total count" "$dry_clean"
+fi
+real_clean=$("$CLEAN_BRANCHES" --no-fetch "$tmpdir/workspace")
+if ! grep -q "deleted: stale-merged" <<< "$real_clean" || ! grep -q "CLEAN: 1 branch(es)" <<< "$real_clean"; then
+    fail "git-clean-branches should delete stale-merged and report the total count" "$real_clean"
+fi
+if git -C "$tmpdir/workspace/r1" show-ref --verify --quiet refs/heads/stale-merged; then
+    fail "stale-merged should have been deleted"
+fi
+rc=0; "$CLEAN_BRANCHES" --depth >/dev/null 2>&1 || rc=$?
+if [[ $rc -ne 2 ]]; then
+    fail "git-clean-branches --depth without a value should exit 2, got $rc"
+fi
+
 printf 'OK: git-recurse pull and status summary tests passed\n'

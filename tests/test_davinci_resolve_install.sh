@@ -1039,7 +1039,7 @@ test_bootstrap_and_repair_wiring() {
             fail "the $file bootstrap must not install DaVinci Resolve"
         fi
     done
-    grep -Fq 'bash tests/test_davinci_resolve_install.sh' "$REPO_ROOT/Makefile" || fail 'make test must run this suite'
+    make -n -C "$REPO_ROOT" test | grep -Fq 'tests/test_davinci_resolve_install.sh' || fail 'make test must run this suite'
 }
 
 test_video_apps_are_declared() {

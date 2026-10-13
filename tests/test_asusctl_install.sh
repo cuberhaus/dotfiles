@@ -868,7 +868,7 @@ test_bootstrap_and_repair_wiring() {
         fail 'the work uninstaller must offer asusctl'
     grep -Fq 'asusctl_uninstall' "$REPO_ROOT/.local/scripts/bootstrap/uninstall_ubuntu" ||
         fail 'the ubuntu uninstaller must offer asusctl'
-    grep -Fq 'bash tests/test_asusctl_install.sh' "$REPO_ROOT/Makefile" ||
+    make -n -C "$REPO_ROOT" test | grep -Fq 'tests/test_asusctl_install.sh' ||
         fail 'make test must run this suite'
 }
 

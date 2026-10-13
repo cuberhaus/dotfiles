@@ -519,7 +519,7 @@ test_bootstrap_and_repair_wiring() {
         grep -Fq 'make repair REPAIR=asusctl-lighting' "$file" ||
             fail "the $profile bootstrap must name the repair command"
     done
-    grep -Fq 'bash tests/test_asusctl_lighting.sh' "$REPO_ROOT/Makefile" ||
+    make -n -C "$REPO_ROOT" test | grep -Fq 'tests/test_asusctl_lighting.sh' ||
         fail 'make test must run this suite'
 }
 
