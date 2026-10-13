@@ -335,7 +335,9 @@ uninstallers keep Java, which other programs use.
 The pin is 6.6 because `languagetool.org` keeps only recent releases (5.x is
 gone). To update it, change `version` and `digest` in `languagetool_install`
 together, with the copies in `tests/test_languagetool_install.sh` and the path
-in `.config/emacs.org` and `.config/my_emacs/init.el`. The `ubuntu`, `arch`,
+in `.config/emacs.org` and `.config/my_emacs/init.el`. The sibling WinDotfiles
+repository has its own `languagetool_install` (PowerShell, personal profile) that
+pins the same version and digest; change it there too. The `ubuntu`, `arch`,
 `manjaro`, `mac` and `work` uninstall checklists offer `langtool_uninstall`,
 which removes every `LanguageTool-*` folder.
 
