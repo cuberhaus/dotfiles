@@ -74,14 +74,44 @@ test_adds_super_shift_s_to_default_print_binding() {
         'show-screenshot-ui after install'
 }
 
-test_adds_print_and_super_shift_s_when_empty() {
+test_adds_only_super_shift_s_when_empty() {
     new_case empty
     printf '@as []\n' > "$STATE_FILE"
 
     gnome_screenshot_shortcut_install >/dev/null || fail 'the install failed'
-
-    assert_equals "['Print', '<Super><Shift>s']" "$(cat "$STATE_FILE")" \
+    assert_equals "['<Super><Shift>s']" "$(cat "$STATE_FILE")" \
         'show-screenshot-ui when starting from @as []'
+
+    gnome_screenshot_shortcut_uninstall >/dev/null || fail 'the uninstall failed'
+    assert_equals '@as []' "$(cat "$STATE_FILE")" \
+        'show-screenshot-ui restored to @as [] after uninstall'
+}
+
+test_recognizes_gnome_settings_shift_super_order() {
+    new_case shift-super
+    local output
+    printf "['Print', '<Shift><Super>s']\n" > "$STATE_FILE"
+
+    output="$(gnome_screenshot_shortcut_install)" || fail 'install with <Shift><Super>s failed'
+    assert_contains "$output" 'already set' 'message when <Shift><Super>s is present'
+    if grep -Fq 'set org.gnome.shell.keybindings' "$CALLS_FILE"; then
+        fail 'must not duplicate binding when <Shift><Super>s is already present'
+    fi
+
+    gnome_screenshot_shortcut_uninstall >/dev/null || fail 'uninstall of <Shift><Super>s failed'
+    assert_equals "['Print']" "$(cat "$STATE_FILE")" \
+        'show-screenshot-ui after removing <Shift><Super>s'
+}
+
+test_rejects_unexpected_gsettings_format() {
+    new_case malformed
+    local status=0
+    printf 'not-an-array\n' > "$STATE_FILE"
+
+    gnome_screenshot_shortcut_install >/dev/null 2>&1 || status=$?
+    [ "$status" -ne 0 ] || fail 'must fail on unexpected gsettings format'
+    assert_equals 'not-an-array' "$(cat "$STATE_FILE")" \
+        'unexpected format must not be overwritten'
 }
 
 test_preserves_custom_bindings() {
@@ -157,7 +187,9 @@ test_profiles_and_uninstallers_use_it() {
 
 for test_name in \
     test_adds_super_shift_s_to_default_print_binding \
-    test_adds_print_and_super_shift_s_when_empty \
+    test_adds_only_super_shift_s_when_empty \
+    test_recognizes_gnome_settings_shift_super_order \
+    test_rejects_unexpected_gsettings_format \
     test_preserves_custom_bindings \
     test_second_run_is_idempotent \
     test_fails_when_gsettings_does_not_persist_write \

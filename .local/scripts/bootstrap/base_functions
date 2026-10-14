@@ -1168,62 +1168,53 @@ gnome_screenshot_shortcut_install() {
     local schema="org.gnome.shell.keybindings"
     local key="show-screenshot-ui"
     local shortcut="'<Super><Shift>s'"
+    local pattern="'(<Super><Shift>|<Shift><Super>)[sS]'"
     local current wanted updated
 
-    if ! command -v gsettings >/dev/null 2>&1; then
-        info "gsettings is not installed, skipping the GNOME screenshot shortcut."
-        return 0
-    fi
     if ! current="$(gsettings get "$schema" "$key" 2>/dev/null)"; then
         info "GNOME Shell keybindings schema is not available, skipping the screenshot shortcut."
         return 0
     fi
 
-    if [[ "$current" == *"$shortcut"* ]]; then
+    if [[ "$current" =~ $pattern ]]; then
         info "GNOME screenshot shortcut (<Super><Shift>s) is already set, skipping."
         return 0
     fi
 
     if [[ "$current" == "@as []" || "$current" == "[]" ]]; then
-        wanted="['Print', $shortcut]"
+        wanted="[$shortcut]"
     elif [[ "$current" == \[*\] ]]; then
         wanted="${current%]*}, $shortcut]"
     else
-        wanted="['Print', $shortcut]"
+        warn "Unexpected $schema $key value: $current"
+        return 1
     fi
 
     gsettings set "$schema" "$key" "$wanted" || return 1
     updated="$(gsettings get "$schema" "$key" 2>/dev/null)" || return 1
-    if [[ "$updated" != *"$shortcut"* ]]; then
+    if ! [[ "$updated" =~ $pattern ]]; then
         warn "gsettings did not persist $shortcut for $schema $key (run from a graphical GNOME session)."
         return 1
     fi
     info "GNOME screenshot shortcut set to $updated."
 }
 
-# Undo gnome_screenshot_shortcut_install: remove '<Super><Shift>s' from show-screenshot-ui
-# while keeping any other bindings in the array.
+# Undo gnome_screenshot_shortcut_install: remove '<Super><Shift>s' (or '<Shift><Super>s')
+# from show-screenshot-ui while keeping any other bindings in the array.
 gnome_screenshot_shortcut_uninstall() {
     local schema="org.gnome.shell.keybindings"
     local key="show-screenshot-ui"
+    local pattern="'(<Super><Shift>|<Shift><Super>)[sS]'"
     local current updated
 
-    if ! command -v gsettings >/dev/null 2>&1; then
-        return 0
-    fi
-    if ! current="$(gsettings get "$schema" "$key" 2>/dev/null)"; then
-        return 0
-    fi
-    if [[ "$current" != *"'<Super><Shift>s'"* ]]; then
-        return 0
-    fi
+    current="$(gsettings get "$schema" "$key" 2>/dev/null)" || return 0
+    [[ "$current" =~ $pattern ]] || return 0
 
-    updated="$(printf '%s\n' "$current" | sed -E "s/, *'<Super><Shift>s'//g; s/'<Super><Shift>s', *//g; s/'<Super><Shift>s'//g")"
+    updated="$(printf '%s\n' "$current" | sed -E "s/, *${pattern}//g; s/${pattern}, *//g; s/${pattern}//g")"
     if [[ "$updated" == "[]" ]]; then
         updated="@as []"
     fi
     gsettings set "$schema" "$key" "$updated" || return 1
-    return 0
 }
 
 ###############################################################
