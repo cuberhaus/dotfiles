@@ -108,6 +108,9 @@ work_main() {
     # Nautilus itself comes from the Ubuntu desktop, and a machine without it is skipped.
     smb_scheme_handler_install ||
         warn "smb:// link handler failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; smb_scheme_handler_install'"
+    # Adds <Super><Shift>s to GNOME Shell's interactive screenshot shortcut for keyboards without Print.
+    gnome_screenshot_shortcut_install ||
+        warn "GNOME screenshot shortcut failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; gnome_screenshot_shortcut_install'"
     # The free DaVinci Resolve needs a ZIP that only you can download (Blackmagic asks for a
     # registration), and its installer asks questions, so a missing ZIP or an unattended
     # run must not abort provisioning.

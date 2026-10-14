@@ -1154,6 +1154,79 @@ smb_scheme_handler_uninstall() {
 }
 
 ###############################################################
+# => GNOME screenshot shortcut (<Super><Shift>s)
+###############################################################
+
+# Bind <Super><Shift>s alongside Print for GNOME Shell's interactive screenshot UI
+# (org.gnome.shell.keybindings show-screenshot-ui), so 75% and compact keyboards without
+# a dedicated Print Screen key (such as the Keychron V1 Max) can open it directly.
+# Existing bindings in the array are kept.  After `gsettings set`, the value is read back
+# in a fresh process: without a session D-Bus bus, gsettings falls back to its in-memory
+# backend and exits 0 without persisting anything.  Machines without gsettings or without
+# the GNOME Shell keybindings schema are skipped.
+gnome_screenshot_shortcut_install() {
+    local schema="org.gnome.shell.keybindings"
+    local key="show-screenshot-ui"
+    local shortcut="'<Super><Shift>s'"
+    local current wanted updated
+
+    if ! command -v gsettings >/dev/null 2>&1; then
+        info "gsettings is not installed, skipping the GNOME screenshot shortcut."
+        return 0
+    fi
+    if ! current="$(gsettings get "$schema" "$key" 2>/dev/null)"; then
+        info "GNOME Shell keybindings schema is not available, skipping the screenshot shortcut."
+        return 0
+    fi
+
+    if [[ "$current" == *"$shortcut"* ]]; then
+        info "GNOME screenshot shortcut (<Super><Shift>s) is already set, skipping."
+        return 0
+    fi
+
+    if [[ "$current" == "@as []" || "$current" == "[]" ]]; then
+        wanted="['Print', $shortcut]"
+    elif [[ "$current" == \[*\] ]]; then
+        wanted="${current%]*}, $shortcut]"
+    else
+        wanted="['Print', $shortcut]"
+    fi
+
+    gsettings set "$schema" "$key" "$wanted" || return 1
+    updated="$(gsettings get "$schema" "$key" 2>/dev/null)" || return 1
+    if [[ "$updated" != *"$shortcut"* ]]; then
+        warn "gsettings did not persist $shortcut for $schema $key (run from a graphical GNOME session)."
+        return 1
+    fi
+    info "GNOME screenshot shortcut set to $updated."
+}
+
+# Undo gnome_screenshot_shortcut_install: remove '<Super><Shift>s' from show-screenshot-ui
+# while keeping any other bindings in the array.
+gnome_screenshot_shortcut_uninstall() {
+    local schema="org.gnome.shell.keybindings"
+    local key="show-screenshot-ui"
+    local current updated
+
+    if ! command -v gsettings >/dev/null 2>&1; then
+        return 0
+    fi
+    if ! current="$(gsettings get "$schema" "$key" 2>/dev/null)"; then
+        return 0
+    fi
+    if [[ "$current" != *"'<Super><Shift>s'"* ]]; then
+        return 0
+    fi
+
+    updated="$(printf '%s\n' "$current" | sed -E "s/, *'<Super><Shift>s'//g; s/'<Super><Shift>s', *//g; s/'<Super><Shift>s'//g")"
+    if [[ "$updated" == "[]" ]]; then
+        updated="@as []"
+    fi
+    gsettings set "$schema" "$key" "$updated" || return 1
+    return 0
+}
+
+###############################################################
 # => Volatile file handling
 ###############################################################
 

@@ -39,6 +39,9 @@ ubuntu_gui_uninstall() {
     # smb:// link handler entry and default (written by smb_scheme_handler_install)
     smb_scheme_handler_uninstall || true
 
+    # GNOME screenshot shortcut (<Super><Shift>s added by gnome_screenshot_shortcut_install)
+    gnome_screenshot_shortcut_uninstall || true
+
     # RStudio
     sudo dpkg -r rstudio 2>/dev/null || true
 
