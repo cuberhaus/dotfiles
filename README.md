@@ -382,7 +382,7 @@ Windows Task Scheduler owns the same automations.
 
 The inbox collector moves what piles up in the folders listed in
 `~/.config/cuberhaus-automations/inbox-collector-sources.txt` (by default
-Downloads and Pictures/Screenshots) into a folder named after each source in the
+Downloads) into a folder named after each source in the
 Desktop `0 Inbox`. It never overwrites, leaves recent files, partial downloads,
 links and hidden files alone, and `inbox-collector --undo` reverses the last run.
 The shortcut cleanup moves loose `.desktop` and `.url` launchers from the Desktop
