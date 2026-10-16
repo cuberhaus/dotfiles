@@ -344,7 +344,7 @@ assert_equals 1 "$status" 'a diverged repository must still fail the job when th
 failures_file="$state/cuberhaus-automations/workspace-pull.last-failures"
 assert_equals "$workspace/beta" "$(<"$failures_file")" 'the click needs the failed repository paths saved'
 assert_contains "$calls" 'systemd-run' 'a clickable failure must leave a waiter behind'
-assert_contains "$calls" '[fix=Fix in terminal]' 'the failure summary must offer the fix in a terminal'
+assert_contains "$calls" '[button=Fix in terminal]' 'the failure summary must offer the fix in a terminal'
 assert_contains "$calls" '--fix-failed' 'the click must run workspace-pull in fix mode'
 assert_contains "$calls" "/bin/bash $automation/workspace-pull --fix-failed" 'the click must run the script through /bin/bash, as the service does, since it is not executable'
 assert_equals 0 "$(count_of "$(notifications)" 'Notify')" 'the clickable summary replaces the plain one'
@@ -467,6 +467,18 @@ assert_equals 1 "$status" 'a failing brew upgrade must fail the job'
 assert_contains "$calls" "['User package maintenance failed']" 'a failure must show'
 assert_contains "$calls" 'brew upgrade failed.' 'the failure must say which step'
 assert_absent "$(last_success user-package-maintenance)" 'a failed run must not count as a success'
+
+# With a terminal launcher the failure summary is clickable and opens the journal.
+reset_world
+case_tools+=(brew notify-send systemd-run xdg-terminal-exec)
+printf 'wget\n' >"$data/brew.outdated"
+: >"$data/brew.upgrade.fail"
+run_job user-package-maintenance --notify
+assert_equals 1 "$status" 'a failing brew upgrade must still fail the job when the summary is clickable'
+assert_contains "$calls" 'systemd-run' 'a clickable failure must leave a waiter behind'
+assert_contains "$calls" '[button=View log in terminal]' 'the failure summary must offer the log in a terminal'
+assert_contains "$calls" 'cuberhaus-user-package-maintenance.service' 'the click must open the service journal'
+assert_equals 0 "$(count_of "$(notifications)" 'Notify')" 'the clickable failure replaces the plain one'
 
 reset_world
 case_tools+=(brew)

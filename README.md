@@ -397,9 +397,11 @@ When the run ends, a summary appears if something changed or went wrong. A run
 that had nothing to do shows nothing and closes any bar it had opened, so a
 healthy day is silent. A failed run ends with a warning or error summary that
 names what failed; the journal keeps the details. Where the desktop supports
-notification actions, a failed workspace pull's summary is clickable: clicking
-it (or its "Fix in terminal" button) opens a terminal in the first failed
-repository, with `git status` showing why the pull failed. The systemd services pass
+notification actions, the summaries are clickable: a failed workspace pull
+opens a terminal in the first failed repository with `git status` showing why
+the pull failed; the inbox collector opens the inbox (with an "Undo last run"
+button); the shortcut cleanup opens the Shortcuts folder; and a failed user
+package run opens its journal in a terminal. The systemd services pass
 `--notify`; run a script by hand with
 `--notify` to see the same output. The root system-package job relays its
 notifications to the logged-in graphical session, and nothing is shown when

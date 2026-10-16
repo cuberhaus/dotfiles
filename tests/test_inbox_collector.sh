@@ -75,7 +75,34 @@ case \$1 in
 *) exec "$real_id" "\$@" ;;
 esac
 EOF
-chmod +x "$stubs/gdbus" "$stubs/id"
+cat >"$stubs/notify-send" <<'EOF'
+#!/usr/bin/env bash
+case ${1:-} in
+--help*) printf '%s\n' '-A, --action=[NAME=]Text'; exit 0 ;;
+esac
+printf 'notify-send' >> "$STUB_LOG"
+printf ' [%s]' "$@" >> "$STUB_LOG"
+printf '\n' >> "$STUB_LOG"
+exit 0
+EOF
+cat >"$stubs/systemd-run" <<'EOF'
+#!/usr/bin/env bash
+printf 'systemd-run' >> "$STUB_LOG"
+printf ' [%s]' "$@" >> "$STUB_LOG"
+printf '\n' >> "$STUB_LOG"
+exit 0
+EOF
+cat >"$stubs/xdg-open" <<'EOF'
+#!/usr/bin/env bash
+printf 'xdg-open %s\n' "$*" >> "$STUB_LOG"
+exit 0
+EOF
+# No Python libnotify in the test world: the waiter falls back to notify-send.
+cat >"$stubs/python3" <<'EOF'
+#!/usr/bin/env bash
+exit 1
+EOF
+chmod +x "$stubs/gdbus" "$stubs/id" "$stubs/notify-send" "$stubs/systemd-run" "$stubs/xdg-open" "$stubs/python3"
 
 # A mv that fails on a file named FAIL, for the error path.
 cat >"$case_dir/mv-that-fails" <<EOF
@@ -379,10 +406,23 @@ printf 'b' >"$downloads/notes.txt"
 printf 'c' >"$downloads/fresh.txt"
 old "$downloads/report.pdf" "$downloads/notes.txt"
 run_collector --source "$downloads" --notify
-assert_equals 1 "$(printf '%s\n' "$calls" | grep -cF 'Notify')" 'a run that moved something must send one summary'
-assert_contains "$calls" "['Inbox collector finished']" 'the summary must carry the title'
-assert_contains "$calls" 'Moved 2 items into 0 Inbox.\nLeft 1 alone (too recent or protected).' \
-    'the summary must say what moved and what was left'
+assert_contains "$calls" 'systemd-run' 'a run that moved something must leave a click waiter'
+assert_contains "$calls" 'Inbox collector finished' 'the summary must carry the title'
+assert_contains "$calls" 'Moved 2 items into 0 Inbox.' 'the summary must say what moved'
+assert_contains "$calls" 'Left 1 alone (too recent or protected).' 'the summary must say what was left'
+assert_contains "$calls" '[default=Open inbox]' 'clicking the summary must open the inbox'
+assert_contains "$calls" '[button=Undo last run]' 'the button must offer to undo the run'
+assert_contains "$calls" '--undo' 'the undo button must run the collector undo'
+assert_contains "$calls" '--state-dir' 'the undo button must target this run'\''s state, not the default one'
+assert_equals 0 "$(printf '%s\n' "$calls" | grep -cF 'Notify')" 'the clickable summary replaces the plain one'
+
+# ...and the button's command, run with --notify, puts everything back and says so.
+run_collector --undo --notify
+assert_equals 0 "$status" 'an undo must succeed'
+assert_exists "$downloads/report.pdf" 'the undo must put the collected files back'
+assert_exists "$downloads/notes.txt" 'the undo must put the collected files back'
+assert_contains "$calls" "['Inbox collector finished']" 'the undo must show its own summary'
+assert_contains "$calls" 'Restored 2 item(s)' 'the undo summary must say what it restored'
 
 reset_world
 run_collector --source "$downloads" --notify
@@ -414,8 +454,10 @@ mkdir -p "$case_dir/failing-bin"
 cp "$case_dir/mv-that-fails" "$case_dir/failing-bin/mv"
 run_collector --source "$downloads" --notify
 assert_equals 1 "$status" 'a move that fails must fail the run'
-assert_contains "$calls" "['Inbox collector finished with problems']" 'an error must show, quiet or not'
+assert_contains "$calls" 'Inbox collector finished with problems' 'an error must show, quiet or not'
 assert_contains "$calls" '1 item(s) could not be moved; see the log.' 'the warning must point at the log'
+assert_contains "$calls" '[default=Open log]' 'clicking the warning must open the log'
+assert_not_contains "$calls" 'Undo last run' 'a run that moved nothing must offer no undo'
 assert_exists "$downloads/FAIL.txt" 'a failed move must leave the item where it was'
 
 # A missing Desktop is a failure the notification explains.

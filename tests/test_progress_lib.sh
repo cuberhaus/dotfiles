@@ -416,19 +416,30 @@ assert_equals 'done' "$output" 'a clickable summary must not make the job wait o
 assert_equals 1 "$(count_of "$calls" 'systemd-run')" 'the click waiter must be a transient service of its own'
 assert_contains "$calls" '[--setenv=CUBERHAUS_ACTION_COMMAND=fixcmd --fix-failed]' 'the waiter must carry the action command'
 assert_contains "$calls" '[default=Fix in terminal]' 'clicking the body must run the action'
-assert_contains "$calls" '[fix=Fix in terminal]' 'the button must run the same action'
+assert_contains "$calls" '[button=Fix in terminal]' 'the button must run the same action'
 assert_contains "$calls" 'Workspace pull finished with problems' 'the clickable summary must carry the title'
 assert_equals 0 "$(count_of "$calls" 'gdbus')" 'a clickable summary replaces the plain gdbus one'
 
 # Without systemd-run the waiter is a plain background process, and the click still lands.
 set_case notify-send systemd-run
-case_env+=(STUB_SYSTEMD_RUN_FAIL=1 STUB_NOTIFY_ACTION=fix)
+case_env+=(STUB_SYSTEMD_RUN_FAIL=1 STUB_NOTIFY_ACTION=default)
 run_case 'progress_start pull "Workspace pull" Pulling repository 10
 progress_finish warning --action-label "Fix in terminal" --action-command "printf clicked > $HOME/clicked"
 sleep 1
 echo done'
 assert_equals 'done' "$output" 'the background waiter must not hold the job back'
 [[ -e $home/clicked ]] || fail 'the clicked action must run its command'
+
+# A button with its own command runs that one, never the body's: an undo must not fire on a
+# stray click on the notification itself.
+set_case notify-send systemd-run
+case_env+=(STUB_SYSTEMD_RUN_FAIL=1 STUB_NOTIFY_ACTION=button)
+run_case 'progress_start pull "Workspace pull" Pulling repository 10
+progress_finish warning --action-label "Open" --action-command "printf body > $HOME/clicked-body" --button-label "Undo" --button-command "printf button > $HOME/clicked-button"
+sleep 1
+echo done'
+[[ -e $home/clicked-button ]] || fail 'the button must run its own command'
+[[ ! -e $home/clicked-body ]] || fail 'the button must not run the body command'
 
 # A notify-send without --action gets the plain summary, and no waiter.
 set_case gdbus notify-send systemd-run
@@ -448,7 +459,7 @@ assert_equals 'done' "$output" 'the Python waiter must not hold the job back eit
 assert_equals 1 "$(count_of "$calls" 'systemd-run')" 'the Python waiter must be a transient service of its own'
 assert_contains "$calls" '_progress_action_waiter_main' 'the waiter must run the library waiter main'
 assert_contains "$calls" '[Fix in terminal]' 'the waiter must carry the action label'
-assert_not_contains "$calls" '[fix=' 'the Python waiter must not go through notify-send actions'
+assert_not_contains "$calls" '[button=' 'the Python waiter must not go through notify-send actions'
 
 # The waiter main feeds Python a libnotify program that runs the command on a click.
 set_case python3

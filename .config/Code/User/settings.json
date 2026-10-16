@@ -370,5 +370,6 @@
 		"approve": true,
 		"matchCommandLine": true
 	}
-}
+},
+"network.meteredConnection": "off"
 }

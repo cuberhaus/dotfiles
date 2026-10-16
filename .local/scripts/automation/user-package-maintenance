@@ -7,7 +7,9 @@
 #   --notify             show a desktop notification: a progress bar once the run has lasted ten
 #                        seconds, and a summary when something was upgraded or went wrong. A run
 #                        with nothing to upgrade stays silent. Off by default, so a run from a
-#                        terminal is silent; the systemd service passes it.
+#                        terminal is silent; the systemd service passes it. Where the desktop
+#                        supports it, clicking a failure summary opens the run's journal in a
+#                        terminal.
 set -euo pipefail
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/home/linuxbrew/.linuxbrew/bin:$HOME/.linuxbrew/bin:$PATH"
@@ -88,10 +90,20 @@ if [[ $notify == true ]]; then
     progress_start user-package-maintenance 'User package maintenance' Upgrading package 10
 fi
 
-# fail MESSAGE: end the run with a message the notification can show.
+# fail MESSAGE: end the run with a message the notification can show. Clicking the failure
+# summary opens the service journal in a terminal, which is where the reason went.
 fail() {
     printf '%s\n' "$1" >&2
-    progress_finish failure --message "$1"
+    if [[ $notify == true ]] && command -v xdg-terminal-exec >/dev/null 2>&1; then
+        # Single-quoted on purpose: SHELL expands in the terminal the click opens, not here.
+        # shellcheck disable=SC2016
+        printf -v log_command '%q %q %q %q' "$(command -v xdg-terminal-exec)" /bin/bash -c \
+            'journalctl --user -u cuberhaus-user-package-maintenance.service -n 100 --no-pager; exec "${SHELL:-/bin/bash}"'
+        progress_finish failure --message "$1" \
+            --action-label 'View log in terminal' --action-command "$log_command"
+    else
+        progress_finish failure --message "$1"
+    fi
     exit 1
 }
 

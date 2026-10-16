@@ -20,7 +20,10 @@
 #   --notify                   show a desktop notification: a progress bar once the run has lasted ten
 #                              seconds, and a summary when something moved or went wrong. A run with
 #                              nothing to collect stays silent. Off by default; the systemd service
-#                              passes it.
+#                              passes it. Where the desktop supports it, the summary is clickable:
+#                              the body opens the inbox (or the log, when items could not be moved)
+#                              and an "Undo last run" button moves what the run collected back;
+#                              with --undo it also makes the undo result show as a summary.
 #   --add-source DIR           add DIR to the source list and stop
 #   --desktop DIR              the Desktop folder that holds the inbox (default: XDG_DESKTOP_DIR)
 #   --source DIR               collect from DIR instead of the list (repeatable)
@@ -80,6 +83,7 @@ journal="$state_dir/inbox-collector-last-run.journal"
 
 # Libraries sit next to the scripts (a deployed copy) or in ../lib (the repository).
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+self_path="$script_dir/${BASH_SOURCE[0]##*/}"
 find_library() {
     local candidate
     for candidate in "$script_dir/$1" "$script_dir/../lib/$1"; do
@@ -244,6 +248,15 @@ if [[ $undo == true ]]; then
     undo_summary="Restored $restored item(s); skipped $undo_skipped item(s); errors $undo_errors."
     write_log "[undo-summary] $undo_summary"
     printf '%s\n' "$undo_summary"
+    if [[ $notify == true ]]; then
+        # The "Undo last run" button runs --undo --notify, so its result shows too.
+        progress_start inbox-collector 'Inbox collector' Undoing folder 10
+        if ((undo_errors > 0)); then
+            progress_finish warning --message "$undo_summary"
+        else
+            progress_finish success "$undo_summary"
+        fi
+    fi
     ((undo_errors == 0)) || exit 1
     exit 0
 fi
@@ -413,8 +426,32 @@ fi
 left_line=''
 ((skipped == 0)) || left_line="Left $skipped alone (too recent or protected)."
 
+# A clickable summary where the desktop supports it: the body opens the inbox (the log when
+# items failed), and the button undoes this run. A preview moved nothing, so it gets neither.
+action_args=()
+if [[ $notify == true && $dry_run == false ]] && command -v xdg-open >/dev/null 2>&1; then
+    if ((errors > 0)); then
+        printf -v click_command '%q %q' "$(command -v xdg-open)" "$log_file"
+        action_args=(--action-label 'Open log' --action-command "$click_command")
+    else
+        printf -v click_command '%q %q' "$(command -v xdg-open)" "$inbox"
+        action_args=(--action-label 'Open inbox' --action-command "$click_command")
+    fi
+    if ((moved > 0)); then
+        # The undo must read this run's journal and log, so it carries the run's own state
+        # options: a bare --undo would undo the default state directory's last run instead.
+        printf -v undo_command '%q %q %q %q %q %q %q %q' /bin/bash "$self_path" '--undo' '--notify' \
+            '--state-dir' "$state_dir" '--log' "$log_file"
+        action_args+=(--button-label 'Undo last run' --button-command "$undo_command")
+    fi
+fi
+
 if ((errors > 0)); then
-    progress_finish warning --message "$errors item(s) could not be moved; see the log." "$headline" "$left_line"
+    if ((${#action_args[@]} > 0)); then
+        progress_finish warning --message "$errors item(s) could not be moved; see the log." "${action_args[@]}" "$headline" "$left_line"
+    else
+        progress_finish warning --message "$errors item(s) could not be moved; see the log." "$headline" "$left_line"
+    fi
     exit 1
 fi
 
@@ -424,6 +461,8 @@ if [[ $dry_run == false ]]; then
 fi
 if ((moved == 0)); then
     progress_finish success --quiet "$headline" "$left_line"
+elif ((${#action_args[@]} > 0)); then
+    progress_finish success "${action_args[@]}" "$headline" "$left_line"
 else
     progress_finish success "$headline" "$left_line"
 fi

@@ -61,7 +61,34 @@ case \$1 in
 *) exec "$real_id" "\$@" ;;
 esac
 EOF
-chmod +x "$stubs/gdbus" "$stubs/id"
+cat >"$stubs/notify-send" <<'EOF'
+#!/usr/bin/env bash
+case ${1:-} in
+--help*) printf '%s\n' '-A, --action=[NAME=]Text'; exit 0 ;;
+esac
+printf 'notify-send' >> "$STUB_LOG"
+printf ' [%s]' "$@" >> "$STUB_LOG"
+printf '\n' >> "$STUB_LOG"
+exit 0
+EOF
+cat >"$stubs/systemd-run" <<'EOF'
+#!/usr/bin/env bash
+printf 'systemd-run' >> "$STUB_LOG"
+printf ' [%s]' "$@" >> "$STUB_LOG"
+printf '\n' >> "$STUB_LOG"
+exit 0
+EOF
+cat >"$stubs/xdg-open" <<'EOF'
+#!/usr/bin/env bash
+printf 'xdg-open %s\n' "$*" >> "$STUB_LOG"
+exit 0
+EOF
+# No Python libnotify in the test world: the waiter falls back to notify-send.
+cat >"$stubs/python3" <<'EOF'
+#!/usr/bin/env bash
+exit 1
+EOF
+chmod +x "$stubs/gdbus" "$stubs/id" "$stubs/notify-send" "$stubs/systemd-run" "$stubs/xdg-open" "$stubs/python3"
 
 desktop="$home/Desktop"
 
@@ -166,9 +193,11 @@ reset_world
 printf 'a' >"$desktop/A.desktop"
 printf 'b' >"$desktop/B.desktop"
 run_cleanup --desktop "$desktop" --notify
-assert_equals 1 "$(printf '%s\n' "$calls" | grep -cF 'Notify')" 'a run that moved something must send one summary'
-assert_contains "$calls" "['Desktop shortcut cleanup finished']" 'the summary must carry the title'
+assert_contains "$calls" 'systemd-run' 'a run that moved something must leave a click waiter'
+assert_contains "$calls" 'Desktop shortcut cleanup finished' 'the summary must carry the title'
 assert_contains "$calls" "Moved 2 shortcuts to $desktop/Shortcuts." 'the summary must say what moved'
+assert_contains "$calls" '[default=Open Shortcuts]' 'clicking the summary must open the Shortcuts folder'
+assert_equals 0 "$(printf '%s\n' "$calls" | grep -cF 'Notify')" 'the clickable summary replaces the plain one'
 
 : >"$calls_log"
 run_cleanup --desktop "$desktop" --notify

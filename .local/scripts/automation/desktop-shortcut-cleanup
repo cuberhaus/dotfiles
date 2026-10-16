@@ -12,6 +12,7 @@
 #   --dry-run       list what would move and move nothing
 #   --notify        show a desktop notification when something moved or went wrong; a Desktop that
 #                   was already tidy stays silent. Off by default; the systemd service passes it.
+#                   Where the desktop supports it, clicking the summary opens the Shortcuts folder.
 set -euo pipefail
 
 desktop=''
@@ -110,8 +111,20 @@ done < <(find "$desktop" -maxdepth 1 \( -type f -o -type l \) ! -name '.*' \
 
 printf '%s %d Desktop launcher item(s) to %s.\n' "$verb" "$moved" "$destination"
 
+# Clicking the summary opens Shortcuts, which is also how a launcher is dragged back. A preview
+# created and moved nothing, so it gets no click.
+action_args=()
+if [[ $notify == true && $dry_run == false && -d $destination ]] && command -v xdg-open >/dev/null 2>&1; then
+    printf -v open_command '%q %q' "$(command -v xdg-open)" "$destination"
+    action_args=(--action-label 'Open Shortcuts' --action-command "$open_command")
+fi
+
 if ((errors > 0)); then
-    progress_finish warning --message "$errors shortcut(s) could not be moved." "$verb $moved to $destination."
+    if ((${#action_args[@]} > 0)); then
+        progress_finish warning --message "$errors shortcut(s) could not be moved." "${action_args[@]}" "$verb $moved to $destination."
+    else
+        progress_finish warning --message "$errors shortcut(s) could not be moved." "$verb $moved to $destination."
+    fi
     exit 1
 fi
 
@@ -123,6 +136,10 @@ fi
 
 if ((moved == 0)); then
     progress_finish success --quiet 'The Desktop was already tidy.'
+elif ((${#action_args[@]} > 0)); then
+    noun=shortcuts
+    ((moved != 1)) || noun=shortcut
+    progress_finish success "${action_args[@]}" "$verb $moved $noun to $destination."
 else
     noun=shortcuts
     ((moved != 1)) || noun=shortcut

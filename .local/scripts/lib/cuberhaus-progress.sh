@@ -8,12 +8,15 @@
 #   progress_update [current=TEXT] [index=N] [done=N] [total=N] [percent=N]
 #       Change what the bar says. The bar is done/total, or percent when that is given.
 #   progress_finish success|warning|failure [--quiet] [--message TEXT]
-#                   [--action-label TEXT --action-command COMMAND] [SUMMARY_LINE...]
+#                   [--action-label TEXT --action-command COMMAND]
+#                   [--button-label TEXT --button-command COMMAND] [SUMMARY_LINE...]
 #       End the run with one summary notification, which replaces the bar. --quiet applies to
 #       success only: nothing is shown and a bar already on screen is closed, so a run with
 #       nothing to do stays out of the way. Warnings and failures always show.
 #       With an action label and command, the summary is also clickable: the body (the "default"
-#       action) and a button with the label both run COMMAND through a shell. That needs someone
+#       action) and a button with the label both run COMMAND through a shell. A button label and
+#       command give the button its own command instead, for things a stray body click must
+#       never do (an undo, say); the body still runs COMMAND. That needs someone
 #       alive on the same D-Bus connection to hear the click, so a detached waiter is left
 #       behind (a transient user service capped at 30 minutes, or a background process where
 #       systemd-run is unavailable); the job itself never waits. The waiter holds the
@@ -231,11 +234,12 @@ _progress_python_notify() {
         >/dev/null 2>&1
 }
 
-# _progress_action_waiter_main TITLE BODY ICON LABEL: run in the detached waiter, never in a job.
-# It shows the clickable summary and stays on its D-Bus connection until the summary is clicked
-# or closed (30 minutes at most). The command to run comes from CUBERHAUS_ACTION_COMMAND.
+# _progress_action_waiter_main TITLE BODY ICON LABEL [BUTTON_LABEL]: run in the detached waiter,
+# never in a job. It shows the clickable summary and stays on its D-Bus connection until the
+# summary is clicked or closed (30 minutes at most). The commands to run come from
+# CUBERHAUS_ACTION_COMMAND (body and button) and CUBERHAUS_BUTTON_COMMAND (button only).
 _progress_action_waiter_main() {
-    exec python3 - "$1" "$2" "$3" "$4" <<'PYEOF'
+    exec python3 - "$1" "$2" "$3" "$4" "${5:-}" <<'PYEOF'
 import os
 import shutil
 import subprocess
@@ -247,21 +251,25 @@ gi.require_version("Notify", "0.7")
 from gi.repository import GLib, Notify
 
 title, body, icon, label = sys.argv[1:5]
+button_label = sys.argv[5] if len(sys.argv) > 5 else ""
 command = os.environ.get("CUBERHAUS_ACTION_COMMAND", "")
+button_command = os.environ.get("CUBERHAUS_BUTTON_COMMAND", "")
 if not Notify.init("Cuberhaus"):
     sys.exit(0)
 loop = GLib.MainLoop()
 
 
-def on_action(_notification, _action):
-    if command:
+def on_action(_notification, action):
+    chosen = button_command if action == "button" else ""
+    chosen = chosen or command
+    if chosen:
         # Its own transient service: a child of this waiter would share its control group
         # and be killed with it when the waiter exits after the click.
         if shutil.which("systemd-run"):
             launcher = ["systemd-run", "--user", "--collect", "--quiet",
-                        "/bin/bash", "-c", command]
+                        "/bin/bash", "-c", chosen]
         else:
-            launcher = ["/bin/bash", "-c", command]
+            launcher = ["/bin/bash", "-c", chosen]
         subprocess.Popen(launcher,
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     loop.quit()
@@ -273,7 +281,7 @@ def on_closed(_notification):
 
 notification = Notify.Notification.new(title, body, icon)
 notification.add_action("default", label, on_action)
-notification.add_action("fix", label, on_action)
+notification.add_action("button", button_label or label, on_action)
 notification.connect("closed", on_closed)
 try:
     notification.show()
@@ -284,47 +292,53 @@ loop.run()
 PYEOF
 }
 
-# _progress_deliver_action TITLE BODY ICON LABEL COMMAND: show a summary whose click runs COMMAND.
+# _progress_deliver_action TITLE BODY ICON LABEL COMMAND [BUTTON_LABEL BUTTON_COMMAND]: show a
+# summary whose click runs COMMAND, or BUTTON_COMMAND from its button when one is given.
 # Returns non-zero when no clickable summary can be offered, so the caller falls back to the
 # plain one. The waiter outlives the job: systemd-run puts it in its own transient service,
 # outside the job's control group, which systemd would otherwise kill when the job exits.
 _progress_deliver_action() {
-    local title=$1 body=$2 icon=$3 label=$4 command=$5
+    local title=$1 body=$2 icon=$3 label=$4 command=$5 button_label=${6:-} button_command=${7:-}
     [[ $(id -u) != 0 ]] || return 1
     title=$(_progress_markup "$title")
     body=$(_progress_markup "$body")
     label=$(_progress_markup "$label")
+    [[ -z $button_label ]] || button_label=$(_progress_markup "$button_label")
     local waiter_argv
     if _progress_python_notify; then
         # The waiter re-sources this library (BASH_SOURCE is its path) and runs the waiter main.
         # The -c script is single-quoted on purpose: it expands in the waiter's shell, not here.
         # shellcheck disable=SC2016
         waiter_argv=(/bin/bash -c 'source "$1"; shift; _progress_action_waiter_main "$@"' \
-            cuberhaus-action "${BASH_SOURCE[0]}" "$title" "$body" "$icon" "$label")
+            cuberhaus-action "${BASH_SOURCE[0]}" "$title" "$body" "$icon" "$label" "$button_label")
     elif _progress_supports_actions; then
         # The waiter script is single-quoted on purpose: it expands in the waiter's shell, not here.
         # shellcheck disable=SC2016
         local waiter_script='chosen=$(notify-send --app-name=Cuberhaus --urgency=normal "$@" 2>/dev/null) || exit 0
 case $chosen in
-default | fix) exec /bin/bash -c "$CUBERHAUS_ACTION_COMMAND" ;;
+default) exec /bin/bash -c "$CUBERHAUS_ACTION_COMMAND" ;;
+button) exec /bin/bash -c "${CUBERHAUS_BUTTON_COMMAND:-$CUBERHAUS_ACTION_COMMAND}" ;;
 esac
 exit 0'
         waiter_argv=(/bin/sh -c "$waiter_script" cuberhaus-action \
-            --icon="$icon" -A "default=$label" -A "fix=$label" -- "$title" "$body")
+            --icon="$icon" -A "default=$label" -A "button=${button_label:-$label}" -- "$title" "$body")
     else
         return 1
     fi
     _progress_close
+    local runner=(systemd-run --user --collect --quiet -p RuntimeMaxSec=30min \
+        "--setenv=CUBERHAUS_ACTION_COMMAND=$command")
+    [[ -z $button_command ]] || runner+=("--setenv=CUBERHAUS_BUTTON_COMMAND=$button_command")
+    runner+=("${waiter_argv[@]}")
     if command -v systemd-run >/dev/null 2>&1 &&
-        systemd-run --user --collect --quiet -p RuntimeMaxSec=30min \
-            "--setenv=CUBERHAUS_ACTION_COMMAND=$command" \
-            "${waiter_argv[@]}" >/dev/null 2>&1; then
+        "${runner[@]}" >/dev/null 2>&1; then
         return 0
     fi
     # shortcut: no user systemd, so only the waiter's own 30 minute cap applies (the notify-send
     # waiter has none and lives until the notification is closed). Upgrade when a machine
     # without systemd-run actually runs these jobs.
-    (CUBERHAUS_ACTION_COMMAND="$command" "${waiter_argv[@]}" >/dev/null 2>&1 </dev/null &)
+    (CUBERHAUS_ACTION_COMMAND="$command" CUBERHAUS_BUTTON_COMMAND="$button_command" \
+        "${waiter_argv[@]}" >/dev/null 2>&1 </dev/null &)
     return 0
 }
 
@@ -424,7 +438,7 @@ _progress_show_running() {
 progress_finish() {
     ((_PROGRESS_ACTIVE == 1 && _PROGRESS_FINISHED == 0)) || return 0
     _PROGRESS_FINISHED=1
-    local outcome=${1:-success} quiet=0 message='' action_label='' action_command='' title icon body='' line
+    local outcome=${1:-success} quiet=0 message='' action_label='' action_command='' button_label='' button_command='' title icon body='' line
     shift || true
     while (($# > 0)); do
         case $1 in
@@ -439,6 +453,14 @@ progress_finish() {
             ;;
         --action-command)
             action_command=${2:-}
+            shift
+            ;;
+        --button-label)
+            button_label=${2:-}
+            shift
+            ;;
+        --button-command)
+            button_command=${2:-}
             shift
             ;;
         *) break ;;
@@ -473,7 +495,8 @@ progress_finish() {
     done
     body+="${body:+$'\n'}Took $(_progress_duration $(($(_progress_now) - _PROGRESS_START)))."
     if [[ -n $action_label && -n $action_command ]] &&
-        _progress_deliver_action "$title" "$body" "$icon" "$action_label" "$action_command"; then
+        _progress_deliver_action "$title" "$body" "$icon" "$action_label" "$action_command" \
+            "$button_label" "$button_command"; then
         _progress_cleanup
         return 0
     fi
