@@ -91,6 +91,34 @@ printf '\n' >> "$STUB_LOG"
 exit 0
 EOF
 
+write_stub notify-send <<'EOF'
+case ${1:-} in
+--help*) printf '%s\n' '-A, --action=[NAME=]Text'; exit 0 ;;
+esac
+printf 'notify-send' >> "$STUB_LOG"
+printf ' [%s]' "$@" >> "$STUB_LOG"
+printf '\n' >> "$STUB_LOG"
+exit 0
+EOF
+
+write_stub systemd-run <<'EOF'
+printf 'systemd-run' >> "$STUB_LOG"
+printf ' [%s]' "$@" >> "$STUB_LOG"
+printf '\n' >> "$STUB_LOG"
+exit 0
+EOF
+
+write_stub xdg-terminal-exec <<'EOF'
+printf 'xdg-terminal-exec %s\n' "$*" >> "$STUB_LOG"
+exit 0
+EOF
+
+# The shell --fix-failed opens at the end: it only reports where it landed.
+write_stub fix-shell <<'EOF'
+printf 'fix-shell [%s]\n' "$PWD" >> "$STUB_LOG"
+exit 0
+EOF
+
 # The uid the case pretends to be: 1000 by default, root with STUB_UID=0.
 write_stub id <<'EOF'
 case $1 in
@@ -296,6 +324,46 @@ assert_contains "$output" '[FAIL]' 'the failure must still be logged'
 assert_contains "$calls" "['Workspace pull finished with problems']" 'a failure must show'
 assert_contains "$calls" 'Failed: beta.' 'the notification must name the repository'
 assert_absent "$(last_success workspace-pull)" 'a failed run must not count as a success'
+
+# With a terminal launcher the same failure is clickable, saves the failed paths for the click,
+# and a clean run afterwards clears them again.
+make_workspace
+printf '%s\n' local >"$workspace/beta/local-only"
+git_quiet "$workspace/beta" add local-only
+git_quiet "$workspace/beta" -c user.name=T -c user.email=t@e.invalid commit -m local
+git clone -q "$case_dir/remotes/beta.git" "$case_dir/pusher2" 2>/dev/null
+printf '%s\n' upstream >"$case_dir/pusher2/upstream-only"
+git_quiet "$case_dir/pusher2" add upstream-only
+git_quiet "$case_dir/pusher2" -c user.name=T -c user.email=t@e.invalid commit -m upstream
+git_quiet "$case_dir/pusher2" push origin main
+rm -rf "$case_dir/pusher2" "$state"
+mkdir -p "$state"
+case_tools+=(notify-send systemd-run xdg-terminal-exec)
+run_job workspace-pull --root "$workspace" --notify
+assert_equals 1 "$status" 'a diverged repository must still fail the job when the summary is clickable'
+failures_file="$state/cuberhaus-automations/workspace-pull.last-failures"
+assert_equals "$workspace/beta" "$(<"$failures_file")" 'the click needs the failed repository paths saved'
+assert_contains "$calls" 'systemd-run' 'a clickable failure must leave a waiter behind'
+assert_contains "$calls" '[fix=Fix in terminal]' 'the failure summary must offer the fix in a terminal'
+assert_contains "$calls" '--fix-failed' 'the click must run workspace-pull in fix mode'
+assert_contains "$calls" "/bin/bash $automation/workspace-pull --fix-failed" 'the click must run the script through /bin/bash, as the service does, since it is not executable'
+assert_equals 0 "$(count_of "$(notifications)" 'Notify')" 'the clickable summary replaces the plain one'
+
+# The click itself: a terminal shell in the failed repository, with its status explained.
+case_env+=("CUBERHAUS_FIX_SHELL=$stubs/fix-shell")
+run_job workspace-pull --fix-failed
+assert_equals 0 "$status" 'fix mode must open its shell'
+assert_contains "$output" 'could not be pulled' 'fix mode must list the failed repositories'
+assert_contains "$output" 'ahead 1' 'fix mode must show why the pull failed'
+assert_contains "$output" 'git pull --ff-only' 'fix mode must say how to retry'
+assert_contains "$calls" "fix-shell [$workspace/beta]" 'fix mode must land the shell in the failed repository'
+
+make_workspace
+case_tools=(id gdbus uname)
+case_env=(STUB_RUN=1)
+run_job workspace-pull --root "$workspace" --notify
+assert_equals 0 "$status" 'the clean run after a failure must succeed'
+assert_absent "$failures_file" 'a clean run must clear the saved failures'
 
 # A missing workspace is a failure with a message.
 reset_world

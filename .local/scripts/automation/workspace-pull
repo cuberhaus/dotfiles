@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fast-forward every git repository under the workspace (default ~/cuberhaus).
 #
-# Usage: workspace-pull [--root DIR] [--depth N] [--if-due-seconds N] [--notify]
+# Usage: workspace-pull [--root DIR] [--depth N] [--if-due-seconds N] [--notify] [--fix-failed]
 #
 #   --root DIR           the workspace folder (default: ~/cuberhaus)
 #   --depth N            how deep to look for repositories (default: 3)
@@ -9,13 +9,18 @@
 #   --notify             show a desktop notification: a progress bar once the run has lasted ten
 #                        seconds, and a summary when something was updated or went wrong. A run with
 #                        nothing to update stays silent. Off by default, so a run from a terminal
-#                        is silent; the systemd service passes it.
+#                        is silent; the systemd service passes it. When repositories failed, the
+#                        summary is clickable ("Fix in terminal") where the desktop supports it.
+#   --fix-failed         for running inside a terminal: list the repositories the last run could
+#                        not pull, show git status in the first one and open a shell there. This
+#                        is what clicking "Fix in terminal" on the failure summary runs.
 set -euo pipefail
 
 root="${HOME}/cuberhaus"
 depth=3
 minimum_age_seconds=0
 notify=false
+fix_failed=false
 
 while (($# > 0)); do
     case "$1" in
@@ -37,6 +42,10 @@ while (($# > 0)); do
             ;;
         --notify)
             notify=true
+            shift
+            ;;
+        --fix-failed)
+            fix_failed=true
             shift
             ;;
         *)
@@ -67,9 +76,49 @@ else
     [[ $notify == false ]] || printf 'Notification not shown: cuberhaus-progress.sh was not found.\n'
 fi
 
+self_path="$script_dir/${BASH_SOURCE[0]##*/}"
+
 state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus-automations"
 state_file="$state_dir/workspace-pull.last-success"
+failures_file="$state_dir/workspace-pull.last-failures"
 mkdir -p "$state_dir"
+
+# fix_failed_repositories: the terminal half of the failure notification's click. It reads the
+# paths the last run saved (one per line; shortcut: a path containing a newline cannot be saved,
+# upgrade to NUL separation if a repository ever gets one), shows why the first one would not
+# pull, and leaves an interactive shell in it.
+fix_failed_repositories() {
+    local failed=() repository first=''
+    if [[ -r $failures_file ]]; then
+        while IFS= read -r repository || [[ -n $repository ]]; do
+            [[ -n $repository ]] && failed+=("$repository")
+        done <"$failures_file"
+    fi
+    if ((${#failed[@]} == 0)); then
+        printf 'No failed repositories from the last workspace pull.\n'
+    else
+        printf 'These repositories could not be pulled:\n'
+        printf '  %s\n' "${failed[@]}"
+        first=${failed[0]}
+        if [[ -d $first ]]; then
+            cd "$first" || printf 'Could not enter %s\n' "$first"
+            printf '\n%s\n' "$first"
+            if command -v git >/dev/null 2>&1; then
+                git status --short --branch || true
+            fi
+            printf '\nFix the problem above, then retry with: git pull --ff-only\n'
+        else
+            printf '\n%s no longer exists.\n' "$first"
+        fi
+    fi
+    # CUBERHAUS_FIX_SHELL is a test seam; normally the user's own shell opens in the repository.
+    exec "${CUBERHAUS_FIX_SHELL:-${SHELL:-/bin/bash}}"
+}
+
+if [[ $fix_failed == true ]]; then
+    fix_failed_repositories
+    exit $?
+fi
 
 if [[ -f "$state_file" && $minimum_age_seconds -gt 0 ]]; then
     last_success=$(<"$state_file")
@@ -127,6 +176,7 @@ up_to_date=0
 skipped=0
 failures=0
 failed_names=
+failed_paths=()
 progress_update 'current=Pulling repositories' "total=$repositories"
 
 for ((index = 0; index < repositories; index++)); do
@@ -155,6 +205,7 @@ for ((index = 0; index < repositories; index++)); do
         printf '[FAIL] %s\n' "$repository" >&2
         failures=$((failures + 1))
         failed_names+="${failed_names:+, }$name"
+        failed_paths+=("$repository")
     fi
 done
 
@@ -167,9 +218,20 @@ if ((skipped > 0)); then
 fi
 
 if ((failures > 0)); then
-    progress_finish warning --message "Failed: $failed_names." "$summary" "$skipped_line"
+    # The click on the failure summary reopens these in a terminal (--fix-failed), so it needs
+    # the paths, not just the names the summary shows.
+    printf '%s\n' "${failed_paths[@]}" >"$failures_file"
+    if [[ $notify == true ]] && command -v xdg-terminal-exec >/dev/null 2>&1; then
+        # Through /bin/bash, as the service runs it: the script itself is not executable.
+        printf -v fix_command '%q %q %q %q' "$(command -v xdg-terminal-exec)" /bin/bash "$self_path" '--fix-failed'
+        progress_finish warning --message "Failed: $failed_names." \
+            --action-label 'Fix in terminal' --action-command "$fix_command" "$summary" "$skipped_line"
+    else
+        progress_finish warning --message "Failed: $failed_names." "$summary" "$skipped_line"
+    fi
     exit 1
 fi
+rm -f "$failures_file"
 
 date +%s > "$state_file"
 if ((updated == 0)); then

@@ -7,10 +7,21 @@
 #       only produces its summary. VERB ("Upgrading") and UNIT ("package") word the status line.
 #   progress_update [current=TEXT] [index=N] [done=N] [total=N] [percent=N]
 #       Change what the bar says. The bar is done/total, or percent when that is given.
-#   progress_finish success|warning|failure [--quiet] [--message TEXT] [SUMMARY_LINE...]
+#   progress_finish success|warning|failure [--quiet] [--message TEXT]
+#                   [--action-label TEXT --action-command COMMAND] [SUMMARY_LINE...]
 #       End the run with one summary notification, which replaces the bar. --quiet applies to
 #       success only: nothing is shown and a bar already on screen is closed, so a run with
 #       nothing to do stays out of the way. Warnings and failures always show.
+#       With an action label and command, the summary is also clickable: the body (the "default"
+#       action) and a button with the label both run COMMAND through a shell. That needs someone
+#       alive on the same D-Bus connection to hear the click, so a detached waiter is left
+#       behind (a transient user service capped at 30 minutes, or a background process where
+#       systemd-run is unavailable); the job itself never waits. The waiter holds the
+#       connection with Python's libnotify bindings when they are installed, else with
+#       notify-send --action: Ubuntu's AppArmor profile for /usr/bin/notify-send allows only
+#       GetServerInformation and Notify, so there it can never hear a click. Root jobs and
+#       machines with neither get the plain summary instead. COMMAND comes from the calling
+#       job, never from outside data; quote paths in it (printf %q).
 #   progress_abort STATUS
 #       For an EXIT trap: a run that is still open when the script dies ends as a failure.
 #
@@ -205,6 +216,118 @@ _progress_deliver() {
     return 0
 }
 
+# _progress_supports_actions: notify-send can offer a clickable action (libnotify 0.8 and later).
+_progress_supports_actions() {
+    command -v notify-send >/dev/null 2>&1 || return 1
+    local help
+    help=$(notify-send --help-all 2>&1) || return 1
+    [[ $help == *--action* ]]
+}
+
+# _progress_python_notify: Python can hold a notification connection and hear its click.
+_progress_python_notify() {
+    command -v python3 >/dev/null 2>&1 || return 1
+    python3 -c 'import gi; gi.require_version("Notify", "0.7"); from gi.repository import Notify' \
+        >/dev/null 2>&1
+}
+
+# _progress_action_waiter_main TITLE BODY ICON LABEL: run in the detached waiter, never in a job.
+# It shows the clickable summary and stays on its D-Bus connection until the summary is clicked
+# or closed (30 minutes at most). The command to run comes from CUBERHAUS_ACTION_COMMAND.
+_progress_action_waiter_main() {
+    exec python3 - "$1" "$2" "$3" "$4" <<'PYEOF'
+import os
+import shutil
+import subprocess
+import sys
+
+import gi
+
+gi.require_version("Notify", "0.7")
+from gi.repository import GLib, Notify
+
+title, body, icon, label = sys.argv[1:5]
+command = os.environ.get("CUBERHAUS_ACTION_COMMAND", "")
+if not Notify.init("Cuberhaus"):
+    sys.exit(0)
+loop = GLib.MainLoop()
+
+
+def on_action(_notification, _action):
+    if command:
+        # Its own transient service: a child of this waiter would share its control group
+        # and be killed with it when the waiter exits after the click.
+        if shutil.which("systemd-run"):
+            launcher = ["systemd-run", "--user", "--collect", "--quiet",
+                        "/bin/bash", "-c", command]
+        else:
+            launcher = ["/bin/bash", "-c", command]
+        subprocess.Popen(launcher,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    loop.quit()
+
+
+def on_closed(_notification):
+    loop.quit()
+
+
+notification = Notify.Notification.new(title, body, icon)
+notification.add_action("default", label, on_action)
+notification.add_action("fix", label, on_action)
+notification.connect("closed", on_closed)
+try:
+    notification.show()
+except GLib.Error:
+    sys.exit(0)
+GLib.timeout_add_seconds(1800, loop.quit)
+loop.run()
+PYEOF
+}
+
+# _progress_deliver_action TITLE BODY ICON LABEL COMMAND: show a summary whose click runs COMMAND.
+# Returns non-zero when no clickable summary can be offered, so the caller falls back to the
+# plain one. The waiter outlives the job: systemd-run puts it in its own transient service,
+# outside the job's control group, which systemd would otherwise kill when the job exits.
+_progress_deliver_action() {
+    local title=$1 body=$2 icon=$3 label=$4 command=$5
+    [[ $(id -u) != 0 ]] || return 1
+    title=$(_progress_markup "$title")
+    body=$(_progress_markup "$body")
+    label=$(_progress_markup "$label")
+    local waiter_argv
+    if _progress_python_notify; then
+        # The waiter re-sources this library (BASH_SOURCE is its path) and runs the waiter main.
+        # The -c script is single-quoted on purpose: it expands in the waiter's shell, not here.
+        # shellcheck disable=SC2016
+        waiter_argv=(/bin/bash -c 'source "$1"; shift; _progress_action_waiter_main "$@"' \
+            cuberhaus-action "${BASH_SOURCE[0]}" "$title" "$body" "$icon" "$label")
+    elif _progress_supports_actions; then
+        # The waiter script is single-quoted on purpose: it expands in the waiter's shell, not here.
+        # shellcheck disable=SC2016
+        local waiter_script='chosen=$(notify-send --app-name=Cuberhaus --urgency=normal "$@" 2>/dev/null) || exit 0
+case $chosen in
+default | fix) exec /bin/bash -c "$CUBERHAUS_ACTION_COMMAND" ;;
+esac
+exit 0'
+        waiter_argv=(/bin/sh -c "$waiter_script" cuberhaus-action \
+            --icon="$icon" -A "default=$label" -A "fix=$label" -- "$title" "$body")
+    else
+        return 1
+    fi
+    _progress_close
+    if command -v systemd-run >/dev/null 2>&1 &&
+        systemd-run --user --collect --quiet -p RuntimeMaxSec=30min \
+            "--setenv=CUBERHAUS_ACTION_COMMAND=$command" \
+            "${waiter_argv[@]}" >/dev/null 2>&1; then
+        return 0
+    fi
+    # shortcut: no user systemd, so only the waiter's own 30 minute cap applies (the notify-send
+    # waiter has none and lives until the notification is closed). Upgrade when a machine
+    # without systemd-run actually runs these jobs.
+    (CUBERHAUS_ACTION_COMMAND="$command" "${waiter_argv[@]}" >/dev/null 2>&1 </dev/null &)
+    return 0
+}
+
 # _progress_close: take the bar off the screen (gdbus only; notify-send cannot close one).
 _progress_close() {
     [[ $(_progress_backend) == gdbus ]] || return 0
@@ -301,13 +424,21 @@ _progress_show_running() {
 progress_finish() {
     ((_PROGRESS_ACTIVE == 1 && _PROGRESS_FINISHED == 0)) || return 0
     _PROGRESS_FINISHED=1
-    local outcome=${1:-success} quiet=0 message='' title icon body='' line
+    local outcome=${1:-success} quiet=0 message='' action_label='' action_command='' title icon body='' line
     shift || true
     while (($# > 0)); do
         case $1 in
         --quiet) quiet=1 ;;
         --message)
             message=${2:-}
+            shift
+            ;;
+        --action-label)
+            action_label=${2:-}
+            shift
+            ;;
+        --action-command)
+            action_command=${2:-}
             shift
             ;;
         *) break ;;
@@ -341,6 +472,11 @@ progress_finish() {
         body+="${body:+$'\n'}$line"
     done
     body+="${body:+$'\n'}Took $(_progress_duration $(($(_progress_now) - _PROGRESS_START)))."
+    if [[ -n $action_label && -n $action_command ]] &&
+        _progress_deliver_action "$title" "$body" "$icon" "$action_label" "$action_command"; then
+        _progress_cleanup
+        return 0
+    fi
     _progress_deliver "$title" "$body" -1 "$icon"
     _progress_cleanup
     return 0

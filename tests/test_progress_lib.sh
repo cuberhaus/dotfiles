@@ -85,9 +85,37 @@ exit 0
 EOF
 
 write_stub notify-send <<'EOF'
+case ${1:-} in
+--help*)
+    [[ -n ${STUB_NOTIFY_NO_ACTION:-} ]] || printf '%s\n' '-A, --action=[NAME=]Text'
+    exit 0
+    ;;
+esac
 printf 'notify-send' >> "$STUB_LOG"
 printf ' [%s]' "$@" >> "$STUB_LOG"
 printf '\n' >> "$STUB_LOG"
+[[ -n ${STUB_NOTIFY_ACTION:-} ]] && printf '%s\n' "$STUB_NOTIFY_ACTION"
+exit 0
+EOF
+
+write_stub systemd-run <<'EOF'
+printf 'systemd-run' >> "$STUB_LOG"
+printf ' [%s]' "$@" >> "$STUB_LOG"
+printf '\n' >> "$STUB_LOG"
+[[ -n ${STUB_SYSTEMD_RUN_FAIL:-} ]] && exit 1
+exit 0
+EOF
+
+# python3 answers the import probe (-c) and otherwise logs its arguments and standard input,
+# which is the libnotify program the waiter feeds it.
+write_stub python3 <<'EOF'
+case ${1:-} in
+-c) exit 0 ;;
+esac
+printf 'python3' >> "$STUB_LOG"
+printf ' [%s]' "$@" >> "$STUB_LOG"
+printf '\n' >> "$STUB_LOG"
+cat >> "$STUB_LOG"
 exit 0
 EOF
 
@@ -130,7 +158,7 @@ run_case() {
     local tool
     rm -rf "$bin"
     mkdir -p "$bin"
-    for tool in date mktemp rm cat grep tail env; do
+    for tool in date mktemp rm cat grep tail env sleep; do
         ln -s "$(command -v "$tool")" "$bin/$tool"
     done
     for tool in "${case_tools[@]}"; do
@@ -374,6 +402,73 @@ set_case gdbus notify-send
 case_env+=(CUBERHAUS_NOTIFY_BACKEND=none)
 run_case 'progress_start p T V U 0; progress_finish success x'
 assert_equals '' "$calls" 'CUBERHAUS_NOTIFY_BACKEND=none must send nothing'
+
+###############################################################
+# => Clickable summaries: a waiter hears the click, the job does not wait
+###############################################################
+
+set_case gdbus notify-send systemd-run
+run_case 'progress_start pull "Workspace pull" Pulling repository 10
+progress_finish warning --message "Failed: beta." --action-label "Fix in terminal" --action-command "fixcmd --fix-failed" "1 updated."
+echo done'
+assert_equals 0 "$status" 'a clickable summary must not fail the job'
+assert_equals 'done' "$output" 'a clickable summary must not make the job wait or print'
+assert_equals 1 "$(count_of "$calls" 'systemd-run')" 'the click waiter must be a transient service of its own'
+assert_contains "$calls" '[--setenv=CUBERHAUS_ACTION_COMMAND=fixcmd --fix-failed]' 'the waiter must carry the action command'
+assert_contains "$calls" '[default=Fix in terminal]' 'clicking the body must run the action'
+assert_contains "$calls" '[fix=Fix in terminal]' 'the button must run the same action'
+assert_contains "$calls" 'Workspace pull finished with problems' 'the clickable summary must carry the title'
+assert_equals 0 "$(count_of "$calls" 'gdbus')" 'a clickable summary replaces the plain gdbus one'
+
+# Without systemd-run the waiter is a plain background process, and the click still lands.
+set_case notify-send systemd-run
+case_env+=(STUB_SYSTEMD_RUN_FAIL=1 STUB_NOTIFY_ACTION=fix)
+run_case 'progress_start pull "Workspace pull" Pulling repository 10
+progress_finish warning --action-label "Fix in terminal" --action-command "printf clicked > $HOME/clicked"
+sleep 1
+echo done'
+assert_equals 'done' "$output" 'the background waiter must not hold the job back'
+[[ -e $home/clicked ]] || fail 'the clicked action must run its command'
+
+# A notify-send without --action gets the plain summary, and no waiter.
+set_case gdbus notify-send systemd-run
+case_env+=(STUB_NOTIFY_NO_ACTION=1)
+run_case 'progress_start pull "Workspace pull" Pulling repository 10
+progress_finish warning --action-label "Fix in terminal" --action-command "fixcmd" "it broke"'
+assert_equals 1 "$(count_of "$calls" 'Notify')" 'without action support the plain summary must show'
+assert_equals 0 "$(count_of "$calls" 'systemd-run')" 'without action support no waiter may be left'
+
+# With Python's libnotify bindings the waiter holds the connection itself (Ubuntu's notify-send
+# cannot: its AppArmor profile lets it send but never hear a click).
+set_case gdbus python3 systemd-run
+run_case 'progress_start pull "Workspace pull" Pulling repository 10
+progress_finish warning --message "Failed: beta." --action-label "Fix in terminal" --action-command "fixcmd --fix-failed" "1 updated."
+echo done'
+assert_equals 'done' "$output" 'the Python waiter must not hold the job back either'
+assert_equals 1 "$(count_of "$calls" 'systemd-run')" 'the Python waiter must be a transient service of its own'
+assert_contains "$calls" '_progress_action_waiter_main' 'the waiter must run the library waiter main'
+assert_contains "$calls" '[Fix in terminal]' 'the waiter must carry the action label'
+assert_not_contains "$calls" '[fix=' 'the Python waiter must not go through notify-send actions'
+
+# The waiter main feeds Python a libnotify program that runs the command on a click.
+set_case python3
+case_env+=('CUBERHAUS_ACTION_COMMAND=fixcmd')
+run_case '_progress_action_waiter_main "Title here" "Body" dialog-warning "Fix in terminal"'
+assert_equals 0 "$status" 'the waiter main must hand over to Python'
+assert_contains "$calls" '[Title here]' 'the waiter main must pass the title to Python'
+assert_contains "$calls" 'add_action' 'the Python program must offer the click actions'
+assert_contains "$calls" 'CUBERHAUS_ACTION_COMMAND' 'the Python program must read the action command'
+
+# Root never gets a click: it notifies other people's sessions, so the plain summary stands.
+set_case gdbus notify-send systemd-run loginctl runuser
+case_env+=(STUB_UID=0 STUB_USER=root 'STUB_SESSIONS=c1 1000 alice' 'STUB_SESSION_c1=Type=wayland
+State=active
+Name=alice
+User=1000')
+run_case 'progress_start sys "System" Working package 10
+progress_finish warning --action-label "Fix in terminal" --action-command "fixcmd" "it broke"'
+assert_equals 0 "$(count_of "$calls" 'systemd-run')" 'a root job must not leave a click waiter'
+assert_equals 1 "$(count_of "$calls" 'Notify')" 'a root job must still show the plain summary'
 
 ###############################################################
 # => Abort: a run that dies is reported
