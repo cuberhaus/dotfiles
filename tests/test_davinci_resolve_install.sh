@@ -369,11 +369,27 @@ test_existing_installation_is_left_alone() {
     mkdir -p "$CASE/opt/resolve/bin"
     printf '#!/bin/sh\n' >"$CASE/opt/resolve/bin/resolve"
     chmod 755 "$CASE/opt/resolve/bin/resolve"
+    run_script --dry-run
+    assert_status 0 'Resolve already installed dry run'
+    assert_output 'already installed' 'Resolve already installed dry run'
+    assert_output "would write $CASE/home/.local/share/applications/com.blackmagicdesign.resolve.desktop" 'dry run plans the window decoration launcher'
+    [[ ! -e "$CASE/home/.local/share/applications/com.blackmagicdesign.resolve.desktop" ]] ||
+        fail 'a dry run must not write the user desktop launcher'
+
     run_script
     assert_status 0 'Resolve already installed'
     assert_output 'already installed' 'Resolve already installed'
     assert_log_lines sudo 0 'an existing installation needs no sudo'
     assert_log_lines installer 0 'an existing installation is not reinstalled'
+    [[ -f "$CASE/home/.local/share/applications/com.blackmagicdesign.resolve.desktop" ]] ||
+        fail 'an existing installation must still converge the user desktop launcher for window decorations'
+    grep -Fq "davinci_resolve_run.sh $CASE/opt/resolve/bin/resolve %u" \
+        "$CASE/home/.local/share/applications/com.blackmagicdesign.resolve.desktop" ||
+        fail 'the user desktop launcher must wrap Resolve with davinci_resolve_run.sh'
+
+    run_script --dry-run
+    assert_status 0 'Resolve already installed dry run after convergence'
+    assert_output 'already enables native X11 window decorations' 'converged launcher is recognised in dry run'
 
     run_script --force
     assert_status 0 '--force over an existing installation'
@@ -522,6 +538,15 @@ test_full_installation() {
     [[ -e "$CASE/opt/resolve/libs/libQt5Core.so.5" ]] || fail 'other bundled libraries must stay'
     [[ -e "$CASE/opt/resolve/libs/libglibmm-2.4.so.1" ]] || fail 'a library that only starts like a glib one must stay'
     assert_output 'Moved 5 bundled glib file(s)' 'install'
+
+    # Both the user launcher override and the Desktop shortcut wrap Resolve in davinci_resolve_run.sh.
+    local launcher
+    for launcher in "$CASE/home/.local/share/applications/com.blackmagicdesign.resolve.desktop" \
+        "$CASE/home/Desktop/com.blackmagicdesign.resolve.desktop"; do
+        [[ -f "$launcher" ]] || fail "$launcher must exist after installation"
+        grep -Fq "davinci_resolve_run.sh $CASE/opt/resolve/bin/resolve %u" "$launcher" ||
+            fail "$launcher must run Resolve through davinci_resolve_run.sh"
+    done
 
     # Both the program and the Qt platform plugin were checked for missing libraries.
     assert_log_lines ldd 2 'install'
@@ -855,6 +880,7 @@ test_uninstall() {
     # the udev rules files.
     local -a resolve_files=(
         "$CASE/root/usr/share/applications/com.blackmagicdesign.resolve.desktop"
+        "$CASE/home/.local/share/applications/com.blackmagicdesign.resolve.desktop"
         "$CASE/home/Desktop/com.blackmagicdesign.resolve.desktop"
         "$CASE/root/usr/share/desktop-directories/com.blackmagicdesign.resolve.directory"
         "$CASE/root/etc/xdg/menus/applications-merged/com.blackmagicdesign.resolve.menu"
@@ -1071,6 +1097,81 @@ test_video_apps_are_declared() {
     grep -Eq 'blender openshot-video-editor' "$BOOTSTRAP_DIR/uninstall_mac_functions" || fail 'the mac uninstaller must remove both casks'
 }
 
+test_window_decorations_runner() {
+    local runner="$REPO_ROOT/.local/scripts/davinci_resolve_run.sh"
+    local dir="$TEST_ROOT/runner"
+    mkdir -p "$dir/bin"
+
+    local help_out
+    help_out="$(bash "$runner" --help 2>"$dir/stderr")" || fail 'davinci_resolve_run.sh --help must exit 0'
+    [[ "$help_out" == *'Usage: davinci_resolve_run.sh'* ]] || fail 'davinci_resolve_run.sh --help must print Usage' "$help_out"
+    [[ ! -s "$dir/stderr" ]] || fail 'davinci_resolve_run.sh --help must write nothing to stderr' "$(cat "$dir/stderr")"
+
+    cat >"$dir/bin/xwininfo" <<'EOF'
+#!/usr/bin/env bash
+cat <<'TREE'
+     0x1e00004 "resolve": ("resolve" "resolve")  10x10+10+10  +10+10
+     0x1e00007 "Qt Selection Owner for resolve": ("resolve" "resolve")  3x3+0+0  +0+0
+     0x1e00009 "resolve": ("resolve" "resolve")  765x470+0+0  +0+0
+     0x1e0000e "Project Manager": ("resolve" "resolve")  1140x710+0+0  +0+0
+     0x1e000ca "DaVinci Resolve - Studio": ("resolve" "resolve")  2560x1400+0+0  +0+0
+     0x1e000ff "Already Decorated": ("resolve" "resolve")  800x600+0+0  +0+0
+TREE
+EOF
+    cat >"$dir/bin/xprop" <<'EOF'
+#!/usr/bin/env bash
+if [[ "${1:-}" == '-root' && "${2:-}" == '-spy' ]]; then
+    printf '_NET_CLIENT_LIST(WINDOW): window id # 0x1e0000e, 0x1e000ca\n'
+    exit 0
+fi
+if [[ "${1:-}" == '-id' && "${3:-}" == '-f' ]]; then
+    printf '%s\n' "$*" >>"$XPROP_SET_LOG"
+    exit 0
+fi
+case "${2:-}" in
+0x1e0000e)
+    cat <<'PROP'
+_MOTIF_WM_HINTS(_MOTIF_WM_HINTS) = 0x2, 0x1, 0x0, 0x0, 0x0
+_NET_WM_WINDOW_TYPE(ATOM) = _KDE_NET_WM_WINDOW_TYPE_OVERRIDE, _NET_WM_WINDOW_TYPE_DIALOG
+PROP
+    ;;
+0x1e000ca)
+    cat <<'PROP'
+_MOTIF_WM_HINTS(_MOTIF_WM_HINTS) = 0x2, 0x1, 0x0, 0x0, 0x0
+_NET_WM_WINDOW_TYPE(ATOM) = _KDE_NET_WM_WINDOW_TYPE_OVERRIDE, _NET_WM_WINDOW_TYPE_NORMAL
+PROP
+    ;;
+0x1e000ff)
+    cat <<'PROP'
+_MOTIF_WM_HINTS(_MOTIF_WM_HINTS) = 0x2, 0x0, 0x1, 0x0, 0x0
+_NET_WM_WINDOW_TYPE(ATOM) = _KDE_NET_WM_WINDOW_TYPE_OVERRIDE, _NET_WM_WINDOW_TYPE_NORMAL
+PROP
+    ;;
+esac
+EOF
+    cat >"$dir/fake-resolve" <<'EOF'
+#!/usr/bin/env bash
+printf 'resolve-args=%s\n' "$*" >"$RESOLVE_ARGS_LOG"
+sleep 0.2
+EOF
+    chmod 755 "$dir/bin/xwininfo" "$dir/bin/xprop" "$dir/fake-resolve"
+
+    : >"$dir/xprop.log"
+    PATH="$dir/bin:$PATH" DISPLAY=:0 XPROP_SET_LOG="$dir/xprop.log" \
+        bash "$runner" --decorate-only
+    [[ "$(cat "$dir/xprop.log")" == $'-id 0x1e0000e -f _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS 0x2, 0x0, 0x1, 0x0, 0x0\n-id 0x1e000ca -f _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS 0x2, 0x0, 0x1, 0x0, 0x0' ]] ||
+        fail 'davinci_resolve_run.sh --decorate-only must decorate only frameless normal/dialog Resolve windows' "$(cat "$dir/xprop.log")"
+
+    : >"$dir/xprop.log"
+    : >"$dir/resolve.log"
+    PATH="$dir/bin:$PATH" DISPLAY=:0 XPROP_SET_LOG="$dir/xprop.log" RESOLVE_ARGS_LOG="$dir/resolve.log" \
+        bash "$runner" "$dir/fake-resolve" --project test.drp
+    [[ "$(cat "$dir/resolve.log")" == 'resolve-args=--project test.drp' ]] ||
+        fail 'davinci_resolve_run.sh must exec the Resolve binary with its arguments' "$(cat "$dir/resolve.log")"
+    grep -Fq -- '-id 0x1e000ca -f _MOTIF_WM_HINTS 32c -set _MOTIF_WM_HINTS 0x2, 0x0, 0x1, 0x0, 0x0' "$dir/xprop.log" ||
+        fail 'davinci_resolve_run.sh watcher must decorate Resolve windows while Resolve runs' "$(cat "$dir/xprop.log")"
+}
+
 test_help_and_usage_errors
 test_other_machines_are_skipped
 test_not_debian_is_refused
@@ -1099,5 +1200,6 @@ test_uninstall_finds_the_shortcut_the_desktop_cleanup_moved
 test_uninstall_removes_only_what_is_resolve
 test_bootstrap_and_repair_wiring
 test_video_apps_are_declared
+test_window_decorations_runner
 
 printf 'PASS: davinci_resolve_install gates, finds the download, installs reversibly, and the video editors are declared in every profile\n'

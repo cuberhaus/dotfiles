@@ -520,6 +520,11 @@ colemak
 rclonepull_calibre
 rclonepull_thunderbird
 rclonepull_anki
+rclonepull_everything
+rclonepush_everything
+rclone_sync_push_thunderbird
+rclone_sync_push_anki
+rclone_sync_push_calibre
 rstudio
 rs
 erag-tunnel

@@ -17,6 +17,7 @@ run_selected_uninstalls "Ubuntu Uninstaller" \
     chrome_uninstall    "Google Chrome"                                     OFF \
     openlogi_uninstall  "OpenLogi (Logitech Options+ alternative)"          OFF \
     kondo_uninstall     "kondo (project build-folder cleaner)"              OFF \
+    anki_uninstall      "Anki (spaced-repetition flashcards; keeps decks)"  OFF \
     langtool_uninstall "LanguageTool (grammar checker; keeps the .oxt dictionaries)" OFF \
     snaps_uninstall     "Snap packages (VS Code, Discord, IDEs, ...)"      OFF \
     emacs_uninstall     "Emacs & Doom Emacs"                               OFF \

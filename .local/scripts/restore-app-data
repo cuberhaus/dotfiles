@@ -23,11 +23,11 @@ case "$app" in
     calibre)
         command_name=calibre
         process_pattern='[/ ](calibre|ebook-viewer)([ .]|$)'
-        remote='drive:3 Resources/rcloneBackups/Calibre/Calibre Library'
+        remote='drive:3 Resources/rcloneBackups/Calibre Library'
         destination="$HOME/Calibre Library"
         snap_destination=""
         mac_app='/Applications/calibre.app'
-        filter_file=""
+        filter_file="${XDG_CONFIG_HOME:-$HOME/.config}/rclone/calibre-filters.txt"
         ;;
     anki)
         command_name=anki

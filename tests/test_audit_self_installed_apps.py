@@ -398,6 +398,19 @@ class DeclaredTests(AppsCase):
                 found = self.find(profile, REPO_ROOT).found
                 self.assertEqual([app.key for app in found], ["zzz-declared-nowhere"])
 
+    def test_the_ubuntu_and_work_bootstraps_declare_the_anki_bundle_they_install(self) -> None:
+        # Both ubuntu and work call anki_install, which installs ~/.local/share/anki/anki and
+        # writes ~/.local/share/applications/anki.desktop.
+        self.app("anki", self.program(".local/share/anki/anki"))
+        self.app("zzz-declared-nowhere", self.program("Applications/zzz.AppImage"))
+
+        for profile in ("ubuntu", "work"):
+            with self.subTest(profile=profile):
+                found = self.find(profile, REPO_ROOT).found
+                self.assertEqual([app.key for app in found], ["zzz-declared-nowhere"])
+        found_on_arch = self.find("arch", REPO_ROOT).found
+        self.assertEqual([app.key for app in found_on_arch], ["anki", "zzz-declared-nowhere"])
+
 
 class AcceptedTests(AppsCase):
     def test_an_app_entry_in_the_keep_file_accepts_the_app_and_counts_it(self) -> None:

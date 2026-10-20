@@ -1,0 +1,13 @@
+# =============================================================================
+# Calibre Library rclone filter rules
+# Excludes Calibre's internal trash bin, pre-conversion/polish backup files
+# (*.original_*), and OS metadata files.
+# =============================================================================
+
+- /.caltrash/**
+- *.original_*
+- .DS_Store
+- **/.DS_Store
+- Thumbs.db
+- **/Thumbs.db
++ **

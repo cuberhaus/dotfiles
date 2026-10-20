@@ -25,6 +25,9 @@ readonly MIN_FREE_MB="${DAVINCI_RESOLVE_MIN_FREE_MB:-12288}"
 readonly REQUIRE_TERMINAL="${DAVINCI_RESOLVE_REQUIRE_TERMINAL:-true}"
 readonly SUPPORT_URL='https://www.blackmagicdesign.com/support/family/davinci-resolve-and-fusion'
 readonly TAB=$'\t'
+SCRIPT_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
+readonly RUNNER_SCRIPT="$SCRIPT_DIR/davinci_resolve_run.sh"
 
 # The libraries Blackmagic's installer requires on Ubuntu (check_ubuntu_package_deps in the
 # AppRun of DaVinci Resolve 21.1.1), under the package names of Ubuntu 24.04 and later: the t64
@@ -347,6 +350,7 @@ plan_install() {
     plan_panel_udev_rule
     plan "would run: sudo env SKIP_PACKAGE_CHECK=1 $run_description -i"
     plan "would move the glib libraries that Resolve bundles to $PREFIX/libs/not_used"
+    plan "would write $(user_desktop_launcher) so Resolve windows get native X11 title bars"
     plan 'nothing was changed'
 }
 
@@ -536,6 +540,80 @@ report_missing_libraries() {
     warn 'Find the package that ships one with: apt-file search <library>  (sudo apt install apt-file && sudo apt-file update)'
 }
 
+user_desktop_launcher() {
+    printf '%s\n' "$HOME/.local/share/applications/com.blackmagicdesign.resolve.desktop"
+}
+
+resolve_runner_path() {
+    if [[ -f "$HOME/.local/scripts/davinci_resolve_run.sh" ]]; then
+        printf '%s\n' "$HOME/.local/scripts/davinci_resolve_run.sh"
+    else
+        printf '%s\n' "$RUNNER_SCRIPT"
+    fi
+}
+
+desktop_launcher_content() {
+    local runner
+    runner="$(resolve_runner_path)"
+    cat <<EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=DaVinci Resolve
+GenericName=DaVinci Resolve
+Comment=Revolutionary new tools for editing, visual effects, color correction and professional audio post production, all in a single application!
+Path=$PREFIX/
+TryExec=$PREFIX/bin/resolve
+Exec=/bin/bash $runner $PREFIX/bin/resolve %u
+Terminal=false
+MimeType=application/x-resolveproj;
+Icon=$PREFIX/graphics/DV_Resolve.png
+StartupNotify=true
+Name[en_US]=DaVinci Resolve
+EOF
+}
+
+plan_window_decorations() {
+    local launcher content
+    launcher="$(user_desktop_launcher)"
+    content="$(desktop_launcher_content)"
+    if [[ -f "$launcher" && "$(cat -- "$launcher")" == "$content" ]]; then
+        plan "$launcher already enables native X11 window decorations"
+    else
+        plan "would write $launcher so Resolve windows get native X11 title bars"
+    fi
+    plan 'nothing was changed'
+}
+
+## Write a user-level .desktop override (and update any Desktop shortcut) that launches Resolve
+## through davinci_resolve_run.sh, and decorate any Resolve windows that are already open.
+install_window_decorations() {
+    local launcher shortcut content updated=false
+    launcher="$(user_desktop_launcher)"
+    content="$(desktop_launcher_content)"
+    if [[ ! -f "$launcher" || "$(cat -- "$launcher")" != "$content" ]]; then
+        mkdir -p -- "$(dirname -- "$launcher")"
+        printf '%s\n' "$content" >"$launcher"
+        updated=true
+    fi
+    for shortcut in "$HOME/Desktop/com.blackmagicdesign.resolve.desktop" \
+        "$HOME/Desktop/Shortcuts/com.blackmagicdesign.resolve.desktop"; do
+        if [[ -f "$shortcut" ]] &&
+            awk -v prefix="$PREFIX/" '/^Exec=/ && index($0, prefix) { found = 1 } END { exit !found }' "$shortcut" &&
+            [[ "$(cat -- "$shortcut")" != "$content" ]]; then
+            printf '%s\n' "$content" >"$shortcut"
+            chmod 755 -- "$shortcut" 2>/dev/null || true
+            updated=true
+        fi
+    done
+    if [[ -f "$RUNNER_SCRIPT" ]]; then
+        DAVINCI_RESOLVE_PREFIX="$PREFIX" bash "$RUNNER_SCRIPT" --decorate-only || true
+    fi
+    if [[ "$updated" == true ]]; then
+        info "Configured the desktop launcher for native X11 window decorations: $launcher"
+    fi
+}
+
 next_steps() {
     info "Start Resolve from the application menu, or run: $PREFIX/bin/resolve"
     info "If its window does not open on Wayland, start it through XWayland: QT_QPA_PLATFORM=xcb $PREFIX/bin/resolve"
@@ -555,6 +633,11 @@ apply() {
         fi
         if resolve_installed; then
             info "DaVinci Resolve is already installed in $PREFIX (--force installs it again)."
+            if [[ "$DRY_RUN" == true ]]; then
+                plan_window_decorations
+            else
+                install_window_decorations
+            fi
             return 0
         fi
     fi
@@ -576,6 +659,7 @@ apply() {
     scope_panel_udev_rule || return 1
     run_installer || return 1
     park_bundled_glib
+    install_window_decorations
     report_missing_libraries
     report_world_writable_hidraw
     success "DaVinci Resolve${INSTALLER_VERSION:+ $INSTALLER_VERSION} is installed in $PREFIX."
@@ -591,13 +675,15 @@ list_if_marked() {
 }
 
 ## The files outside the prefix that belong to Resolve, one per line: the launchers whose Exec
-## line starts a program inside the prefix (also the one on the Desktop, or in Desktop/Shortcuts
-## where the desktop-shortcut-cleanup automation moves it), its menu entries, and the udev rules
+## line starts a program inside the prefix (also the user override in ~/.local/share/applications
+## and the shortcut on the Desktop, or in Desktop/Shortcuts where the desktop-shortcut-cleanup
+## automation moves it), its menu entries, and the udev rules
 ## that Blackmagic's installer, or this script, wrote.
 system_files() {
     local file directory
     local rules="$ROOT_DIR/usr/lib/udev/rules.d" admin_rules="$ROOT_DIR/etc/udev/rules.d"
     for file in "$ROOT_DIR"/usr/share/applications/*.desktop \
+        "$HOME/.local/share/applications/com.blackmagicdesign.resolve.desktop" \
         "$HOME/Desktop/com.blackmagicdesign.resolve.desktop" \
         "$HOME/Desktop/Shortcuts/com.blackmagicdesign.resolve.desktop"; do
         if [[ -f "$file" ]] && awk -v prefix="$PREFIX/" '/^Exec=/ && index($0, prefix) { found = 1 } END { exit !found }' "$file"; then

@@ -1520,6 +1520,12 @@ def find_self_installed_apps(repo_root: pathlib.Path, profile: str) -> SelfInsta
             and names_file(declared, "cursor_is_installed")
         ):
             continue
+        if (
+            launcher.name == "anki.desktop"
+            and program == directory.parent.resolve() / "anki" / "anki"
+            and names_file(declared, "anki_install")
+        ):
+            continue
         key = launcher.stem
         if (APP_KEY, key) in entries or (None, key) in entries:
             apps.acknowledged += 1
