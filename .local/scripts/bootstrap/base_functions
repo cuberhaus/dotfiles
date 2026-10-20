@@ -1586,4 +1586,87 @@ aider_cli_install() {
     fi
 }
 
+###############################################################
+# => Google Drive rclone FUSE mount
+###############################################################
+
+# Enable the user-systemd Google Drive rclone FUSE mount (`cuberhaus-drive-mount.service`),
+# which mounts `drive:` at `$HOME/Google Drive` (`DRIVE_ROOT`).  When the `drive:` remote is
+# not configured yet and the session is interactive (or invoked via `make repair REPAIR=drive-mount`),
+# it creates the `drive:` remote via browser OAuth, reusing the OAuth client credentials from
+# `~/.cursor/gmail-oauth-client.json` when present.
+rclone_drive_mount_install() {
+    local service="cuberhaus-drive-mount.service"
+    local unit_path="$HOME/.config/systemd/user/$service"
+    local mount_dir="${DRIVE_ROOT:-$HOME/Google Drive}"
+    local oauth_client="$HOME/.cursor/gmail-oauth-client.json"
+    local client_id="" client_secret=""
+    local -a create_args=(config create drive drive scope=drive)
+
+    [ "$(uname -s)" = Linux ] || return 0
+    if is_wsl; then
+        info "WSL detected; skipping the Linux Google Drive FUSE mount."
+        return 0
+    fi
+    if ! command -v rclone &>/dev/null || ! command -v systemctl &>/dev/null; then
+        info "rclone or systemctl not found; skipping Google Drive mount setup."
+        return 0
+    fi
+    if [ ! -f "$unit_path" ]; then
+        warn "Missing $unit_path; run 'make restow' first."
+        return 1
+    fi
+
+    if ! rclone listremotes 2>/dev/null | grep -Fxq 'drive:'; then
+        if [ "${UNATTENDED:-false}" = true ] || ! bootstrap_stdin_is_interactive; then
+            info "rclone remote 'drive:' is not configured yet; run 'make repair REPAIR=drive-mount' to complete browser OAuth and enable the Google Drive mount."
+            return 0
+        fi
+        info "Configuring rclone 'drive:' remote via browser OAuth..."
+        if [ -r "$oauth_client" ] && command -v jq &>/dev/null; then
+            client_id="$(jq -r '.installed.client_id // .web.client_id // empty' "$oauth_client" 2>/dev/null || true)"
+            client_secret="$(jq -r '.installed.client_secret // .web.client_secret // empty' "$oauth_client" 2>/dev/null || true)"
+            if [ -n "$client_id" ] && [ -n "$client_secret" ]; then
+                create_args+=("client_id=$client_id" "client_secret=$client_secret")
+            fi
+        fi
+        if ! rclone "${create_args[@]}"; then
+            warn "Failed to configure rclone 'drive:' remote."
+            return 1
+        fi
+        chmod 600 "$HOME/.config/rclone/rclone.conf" 2>/dev/null || true
+    fi
+
+    mkdir -p "$mount_dir"
+    if ! systemctl --user daemon-reload; then
+        warn "systemctl --user daemon-reload failed."
+        return 1
+    fi
+    if ! systemctl --user enable --now "$service"; then
+        warn "Failed to enable and start $service."
+        return 1
+    fi
+    info "Google Drive rclone mount ($service) enabled at $mount_dir."
+}
+
+# Disable and stop the user-systemd Google Drive rclone FUSE mount (`cuberhaus-drive-mount.service`),
+# leaving `~/.config/rclone/rclone.conf` and `$HOME/Google Drive` intact.
+rclone_drive_mount_uninstall() {
+    local service="cuberhaus-drive-mount.service"
+    local mount_dir="${DRIVE_ROOT:-$HOME/Google Drive}"
+
+    [ "$(uname -s)" = Linux ] || return 0
+    is_wsl && return 0
+    command -v systemctl &>/dev/null || return 0
+
+    systemctl --user disable --now "$service" 2>/dev/null || true
+    if command -v fusermount3 &>/dev/null; then
+        fusermount3 -uz "$mount_dir" 2>/dev/null || true
+    elif command -v fusermount &>/dev/null; then
+        fusermount -uz "$mount_dir" 2>/dev/null || true
+    fi
+    info "Disabled Google Drive rclone mount ($service)."
+}
+
+
 

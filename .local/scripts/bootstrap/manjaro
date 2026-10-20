@@ -34,6 +34,8 @@ base_install
 languagetool_install ||
     warn "LanguageTool setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; languagetool_install'"
 obsidian_vault_install
+rclone_drive_mount_install ||
+    warn "Google Drive mount setup failed; rerun it with: make repair REPAIR=drive-mount"
 arch_and_manjaro
 nvidia_display_config
 manjaro_install

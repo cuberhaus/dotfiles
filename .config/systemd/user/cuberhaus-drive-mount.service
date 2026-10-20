@@ -1,0 +1,14 @@
+[Unit]
+Description=Cuberhaus Google Drive rclone FUSE mount
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre=/bin/mkdir -p "%h/Google Drive"
+ExecStart=/usr/bin/env rclone mount drive: "%h/Google Drive" --vfs-cache-mode writes
+ExecStop=/bin/sh -c 'fusermount3 -uz "%h/Google Drive" 2>/dev/null || fusermount -uz "%h/Google Drive" 2>/dev/null || umount -l "%h/Google Drive" 2>/dev/null || true'
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

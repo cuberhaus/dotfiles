@@ -63,6 +63,8 @@ openlogi_install ||
 kondo_install ||
     warn "kondo setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; source ~/.local/scripts/bootstrap/ubuntu_functions; kondo_install'"
 obsidian_vault_install
+rclone_drive_mount_install ||
+    warn "Google Drive mount setup failed; rerun it with: make repair REPAIR=drive-mount"
 nvidia_display_config
 # The installer skips machines that are not supported ASUS laptops. It needs the
 # network and a few minutes of compiling, so a failure must not abort provisioning.

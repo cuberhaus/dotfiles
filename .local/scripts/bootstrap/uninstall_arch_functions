@@ -11,6 +11,8 @@ yay_remove="yay -Rns --noconfirm"
 base_uninstall() {
     info "Uninstalling base packages..."
 
+    rclone_drive_mount_uninstall || true
+
     $pac_remove cmake opencl-headers bazel cudnn cuda conky \
         adapta-gtk-theme arc-gtk-theme arc-icon-theme \
         bat biber bleachbit blender breeze calibre cron dconf-editor dex discord dnsutils github-cli \

@@ -11,6 +11,8 @@ apt_autoremove="sudo apt-get autoremove -y"
 base_uninstall() {
     info "Uninstalling base packages..."
 
+    rclone_drive_mount_uninstall || true
+
     $apt_remove age autoconf automake bat brightnessctl build-essential cmake curl ddcutil \
         eza ffmpeg file fonts-powerline fzf git git-lfs gh htop inkscape laptop-detect \
         libgtk-3-dev ncdu neovim net-tools nmap nodejs npm optipng pkg-config \
