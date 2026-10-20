@@ -1753,3 +1753,133 @@ calibre_restore() {
     info "Restoring Calibre library from Google Drive..."
     bash "$script" calibre --apply
 }
+
+###############################################################
+# => Anki desktop (official Linux release bundle)
+###############################################################
+
+# Debian and Ubuntu dropped the `anki` package from their archives because upstream bundles its
+# own Python, Qt6/PyQt6, and Rust core, and the `anki-desktop` snap on Snapcraft is unofficial
+# and redirects XDG_DATA_HOME into ~/snap/anki-desktop/current/.local/share/Anki2 (breaking
+# `restore-app-data anki`, `rclonepull_anki`, and `rclonepush_anki`). This installs the official
+# Linux `.tar.zst` bundle from https://github.com/ankitects/anki/releases into ~/.local/share/anki
+# with a symlink at ~/.local/bin/anki and a desktop launcher in ~/.local/share/applications/anki.desktop,
+# so no root privileges are needed and user decks stay in ~/.local/share/Anki2.
+# Note: ~/.local/share/icons and ~/.local/share/man are whole-directory Stow symlinks into the
+# dotfiles checkout, so `anki.desktop` sets `Icon=` directly to `$dest/anki.png` rather than
+# writing into those directories.
+# Upstream publishes no checksum file, so the SHA-256 of each Linux build is pinned below
+# (`gh api repos/ankitects/anki/releases/tags/<version> --jq '.assets[] | {name, digest}'`).
+# Change `version` and both digests together, and the copies in tests/test_anki_install.sh with them.
+# Callers run this as `anki_install ||`, where the shell ignores `set -e`, so every step is
+# chained and a failure warns and returns 1.
+anki_install() {
+    local data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
+    local dest="$data_home/anki"
+    local bin_link="$HOME/.local/bin/anki"
+
+    if command -v anki &>/dev/null || [ -x "$bin_link" ]; then
+        info "Anki already installed, skipping."
+        return 0
+    fi
+
+    local version="26.09.3"
+    local releases="https://github.com/ankitects/anki/releases/download/${version}"
+    local -a fetch=(curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --location
+        --silent --show-error --retry 3 --retry-connrefused)
+    local arch target digest asset work tool
+
+    arch="$(dpkg --print-architecture)"
+    case "$arch" in
+        amd64)
+            target="x86_64"
+            digest="d70e01971a7aa190b189927573ee643f2525ff840eafaecc7a8f8cde505650b3"
+            ;;
+        arm64)
+            target="aarch64"
+            digest="0b586efdb0e3582bee3b9d08b9fa57df681fb97a8066d76a6743e1bc3fc331eb"
+            ;;
+        *)
+            warn "Anki publishes amd64 and arm64 Linux builds, not $arch."
+            return 1
+            ;;
+    esac
+
+    for tool in curl tar zstd sha256sum; do
+        if ! command -v "$tool" &>/dev/null; then
+            warn "Anki needs $tool to install; install it and rerun."
+            return 1
+        fi
+    done
+
+    asset="anki-${version}-linux-${target}.tar.zst"
+    work="${dest}.partial"
+    rm -rf "$work"
+    info "Installing Anki ${version}..."
+    if mkdir -p "$work/unpacked" &&
+        "${fetch[@]}" --output "$work/$asset" "$releases/$asset" &&
+        printf '%s  %s\n' "$digest" "$asset" > "$work/$asset.sha256" &&
+        (cd "$work" && sha256sum --check --strict "$asset.sha256") &&
+        tar --zstd -xf "$work/$asset" -C "$work/unpacked" --strip-components=1 &&
+        [ -x "$work/unpacked/anki" ] &&
+        [ -f "$work/unpacked/anki.desktop" ] &&
+        rm -rf "$dest" &&
+        mv "$work/unpacked" "$dest" &&
+        mkdir -p "$HOME/.local/bin" "$data_home/applications" &&
+        ln -sf "$dest/anki" "$bin_link" &&
+        BIN_LINK="$bin_link" ICON_PATH="$dest/anki.png" awk '
+            /^Exec=anki / { print "Exec=" ENVIRON["BIN_LINK"] substr($0, 10); next }
+            /^TryExec=anki$/ { print "TryExec=" ENVIRON["BIN_LINK"]; next }
+            /^Icon=anki$/ { print "Icon=" ENVIRON["ICON_PATH"]; next }
+            { print }
+        ' "$dest/anki.desktop" > "$data_home/applications/anki.desktop"; then
+        rm -rf "$work"
+    else
+        rm -rf "$work"
+        warn "Anki ${version} was not installed: the download, its checksum, or the unpacking failed."
+        return 1
+    fi
+
+    if command -v xdg-mime &>/dev/null && [ -f "$dest/anki.xml" ]; then
+        xdg-mime install "$dest/anki.xml" --novendor 2>/dev/null || true
+        xdg-mime default anki.desktop application/x-colpkg application/x-apkg application/x-ankiaddon 2>/dev/null || true
+    fi
+    if command -v update-desktop-database &>/dev/null; then
+        update-desktop-database "$data_home/applications" 2>/dev/null || true
+    fi
+
+    info "Anki ${version} installed in $dest"
+}
+
+# Remove the Anki program folder, its ~/.local/bin/anki symlink (only while it still points into
+# that folder), and its desktop launcher and MIME package registration.
+# User decks and add-ons in ~/.local/share/Anki2 stay untouched.
+anki_uninstall() {
+    local data_home="${XDG_DATA_HOME:-$HOME/.local/share}"
+    local dest="$data_home/anki"
+    local bin_link="$HOME/.local/bin/anki"
+
+    if command -v xdg-mime &>/dev/null && [ -f "$dest/anki.xml" ]; then
+        xdg-mime uninstall "$dest/anki.xml" 2>/dev/null || true
+    fi
+
+    if [ -L "$bin_link" ]; then
+        case "$(readlink "$bin_link")" in
+            "$dest"/*) rm -f "$bin_link" ;;
+        esac
+    fi
+
+    rm -rf "$dest" "${dest}.partial"
+    rm -f "$data_home/applications/anki.desktop" \
+        "$data_home/pixmaps/anki.png" \
+        "$data_home/pixmaps/anki.xpm"
+
+    if command -v update-desktop-database &>/dev/null && [ -d "$data_home/applications" ]; then
+        update-desktop-database "$data_home/applications" 2>/dev/null || true
+    fi
+    return 0
+}
+
+
+
+

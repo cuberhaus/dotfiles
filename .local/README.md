@@ -71,6 +71,8 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   ├── asusctl_install.sh      # Builds and installs the pinned asusctl/asusd release on supported ASUS laptops
 │   ├── asusctl_lighting.sh     # Sets the keyboard backlight to a rainbow through asusctl when the keyboard supports it
 │   ├── brightness_fix.sh       # Selects the native NVIDIA backlight on ASUS ROG laptops via kernelstub or GRUB
+│   ├── davinci_resolve_install.sh # Installs DaVinci Resolve on Ubuntu/Debian and configures its desktop launcher
+│   ├── davinci_resolve_run.sh  # Launches DaVinci Resolve and enables native X11 title bars on its windows
 │   ├── lint.sh                 # Lint all tracked shell scripts with shellcheck
 │   ├── match_monitor_scales.py # Python module behind match-monitor-scales: plans and applies equal monitor scales through mutter and gdctl
 │   ├── permanent_shutdown_fix.sh # Applies shutdown kernel parameters via kernelstub or GRUB
@@ -308,6 +310,39 @@ run the command that its warning prints.
 
 Run the hermetic test with `bash tests/test_kondo_install.sh`.
 
+## Anki
+
+[Anki](https://apps.ankiweb.net) is installed from the `anki` Homebrew cask on
+macOS (`bootstrap/mac_functions`). Debian and Ubuntu dropped the `anki` package
+from their archives, and the `anki-desktop` snap on Snapcraft is unofficial and
+redirects `XDG_DATA_HOME` into `~/snap/anki-desktop/current/.local/share/Anki2`
+(which breaks `restore-app-data anki`, `rclonepull_anki`, and `rclonepush_anki`).
+
+On the `ubuntu` and `work` profiles, `anki_install` (in
+`bootstrap/base_functions`) downloads the pinned official Linux `.tar.zst`
+release bundle (`amd64` or `arm64`) from `ankitects/anki` on GitHub, verifies
+its SHA-256 digest, and unpacks it to `~/.local/share/anki` with a symlink at
+`~/.local/bin/anki` and a desktop launcher in
+`~/.local/share/applications/anki.desktop` (`Icon=` points directly to
+`~/.local/share/anki/anki.png` because `~/.local/share/icons` and
+`~/.local/share/man` are Stow-managed directory symlinks). Installing into
+`~/.local` requires no `sudo` and keeps user decks and add-ons in
+`~/.local/share/Anki2`.
+
+To update Anki, inspect the upstream release digests with:
+
+```sh
+gh api repos/ankitects/anki/releases/tags/X.Y.Z --jq '.assets[] | {name, digest}'
+```
+
+Change `version` and both digests in `anki_install` together, and the copies in
+`tests/test_anki_install.sh` with them. Both `uninstall_ubuntu` and
+`uninstall_work` offer `anki_uninstall`, which removes `~/.local/share/anki`,
+`~/.local/bin/anki`, and the desktop launcher/icons while leaving
+`~/.local/share/Anki2` untouched.
+
+Run the hermetic test with `bash tests/test_anki_install.sh`.
+
 ## LanguageTool: a large download outside the history
 
 LanguageTool (the grammar checker that Emacs's `flycheck-languagetool` and
@@ -497,11 +532,18 @@ Things to know before the first start:
   through the link or replaces it with a plain file when it saves Preferences is not
   tested either: `make config-status` and `readlink` show which one happened, and a plain
   file there is the usual Stow conflict, backed up by the next `make install`.
-- The Project Manager, the first window, has no title-bar buttons and stays on top of
-  other windows. Resolve asks for that itself: its X11 properties carry
-  `_MOTIF_WM_HINTS` with decorations off, `_NET_WM_STATE_MODAL`, and
-  `_NET_WM_WINDOW_TYPE_DIALOG` (read with `xprop -id WINDOW`, GNOME 50, Resolve 21.1.1),
-  so it is not the window manager and not a broken installation.
+- Resolve on Linux creates its top-level windows and dialogs with `Qt::FramelessWindowHint`,
+  which sets `_MOTIF_WM_HINTS` with decorations off (`0x2, 0x1, 0x0, 0x0, 0x0`) and
+  `_KDE_NET_WM_WINDOW_TYPE_OVERRIDE` so windows have no native title bar and cannot be
+  dragged normally. `.local/scripts/davinci_resolve_install.sh` writes a user-level
+  desktop override at `~/.local/share/applications/com.blackmagicdesign.resolve.desktop`
+  (and updates any Desktop shortcut) that launches Resolve through
+  `.local/scripts/davinci_resolve_run.sh`, which watches X11 client-list events and flips
+  `_MOTIF_WM_HINTS` to `'0x2, 0x0, 0x1, 0x0, 0x0'` on Resolve's normal and dialog windows
+  so Mutter (`mutter-x11-frames`) attaches a native title bar (`--decorate-only` fixes
+  already-open windows immediately). When Resolve is already installed in `/opt/resolve`,
+  rerunning the installer or `make repair REPAIR=davinci-resolve` converges the launcher
+  without `sudo`.
 - Blackmagic's installer is not under this repository's control. The tests run the
   script against a fake installer, so the first real run on a new Resolve release
   is the real test; the `ldd` report and the `not_used` folder show what happened.

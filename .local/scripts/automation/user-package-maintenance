@@ -12,7 +12,9 @@
 #                        terminal.
 set -euo pipefail
 
-export PATH="/opt/homebrew/bin:/usr/local/bin:/home/linuxbrew/.linuxbrew/bin:$HOME/.linuxbrew/bin:$PATH"
+if [[ -z ${STUB_RUN:-} ]]; then
+    export PATH="/opt/homebrew/bin:/usr/local/bin:/home/linuxbrew/.linuxbrew/bin:$HOME/.linuxbrew/bin:$PATH"
+fi
 
 minimum_age_seconds=0
 notify=false

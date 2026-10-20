@@ -62,6 +62,10 @@ openlogi_install ||
 # that must not abort provisioning.
 kondo_install ||
     warn "kondo setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; source ~/.local/scripts/bootstrap/ubuntu_functions; kondo_install'"
+# Anki comes from an official GitHub release bundle (.tar.zst), so the network or a
+# changed release layout can break it; that must not abort provisioning.
+anki_install ||
+    warn "Anki setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; anki_install'"
 obsidian_vault_install
 rclone_drive_mount_install ||
     warn "Google Drive mount setup failed; rerun it with: make repair REPAIR=drive-mount"
