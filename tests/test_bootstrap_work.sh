@@ -45,6 +45,10 @@ grep -Fq 'python3-dev' "$WORK_UNINSTALL_FUNCTIONS" ||
     fail 'work bootstrap uninstall must remove the Python headers it installed'
 grep -Fq 'python3-pynvim' "$WORK_UNINSTALL_FUNCTIONS" ||
     fail 'work bootstrap uninstall must remove the Neovim Python provider it installed'
+grep -Fq 'thunderbird' "$WORK_FUNCTIONS" ||
+    fail 'work bootstrap must install Thunderbird'
+grep -Fq 'thunderbird' "$WORK_UNINSTALL_FUNCTIONS" ||
+    fail 'work bootstrap uninstall must remove Thunderbird'
 export HOME="$CASE_DIR/home"
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_STATE_HOME="$HOME/.local/state"
@@ -296,6 +300,7 @@ gnome_keyboard_layout_install() { record 'gnome-keyboard-layout'; }
 davinci_resolve_install() { record 'davinci-resolve'; }
 obsidian_vault_install() { record 'obsidian-vault'; }
 rclone_drive_mount_install() { record 'rclone-drive-mount'; }
+thunderbird_restore() { record 'thunderbird-restore'; }
 resolve_high_dpi_choice() {
     record "high-dpi-choice:$HIGH_DPI_CHOICE"
     HIGH_DPI=false
@@ -311,7 +316,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\ncaffeine-autostart\ngnome-screenshot-shortcut\ngnome-keyboard-layout\ndavinci-resolve\nobsidian-vault\nrclone-drive-mount\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\ncaffeine-autostart\ngnome-screenshot-shortcut\ngnome-keyboard-layout\ndavinci-resolve\nobsidian-vault\nrclone-drive-mount\nthunderbird-restore\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"

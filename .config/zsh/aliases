@@ -566,9 +566,11 @@ rclonepull_thunderbird() { _rclonepull rclonepull_thunderbird thunderbird 'the T
 ## Restore Anki's data from Google Drive (close Anki first; nothing is deleted).
 rclonepull_anki() { _rclonepull rclonepull_anki anki "Anki's data" "$@"; }
 ## Copy the Calibre library to Google Drive (copy, so nothing is deleted there).
-alias rclonepush_calibre="rclone -P copy ~/Calibre\ Library drive:Calibre/Calibre\ Library"
-## Copy the Thunderbird profile to Google Drive (copy, so nothing is deleted there).
-alias rclonepush_thunderbird="rclone -P copy ~/.thunderbird drive:Thunderbird"
+alias rclonepush_calibre="rclone -P copy ~/Calibre\ Library 'drive:3 Resources/rcloneBackups/Calibre/Calibre Library'"
+## Copy the Thunderbird profile configuration to Google Drive (filtered: excludes IMAP caches, search indexes, and transient state).
+alias rclonepush_thunderbird="rclone -P copy --filter-from ~/.config/rclone/thunderbird-filters.txt ~/.thunderbird 'drive:3 Resources/rcloneBackups/Thunderbird'"
+## Copy Anki's data to Google Drive (filtered: excludes rolling .colpkg backups, duplicate add-on theme caches, and transient state).
+alias rclonepush_anki="rclone -P copy --filter-from ~/.config/rclone/anki-filters.txt \"\${XDG_DATA_HOME:-\$HOME/.local/share}/Anki2\" 'drive:3 Resources/rcloneBackups/Anki'"
 
 ##@ Files & navigation
 

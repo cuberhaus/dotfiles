@@ -258,6 +258,7 @@ gui_apps_install() {
     info "Installing GUI applications..."
 
     $apt firefox \
+        thunderbird \
         vlc \
         libfuse2 \
         libreoffice \

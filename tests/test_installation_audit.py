@@ -101,8 +101,12 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertEqual(makefile.count("restore-apps\n"), 6)
         for app in ("thunderbird", "calibre", "anki"):
             self.assertIn(f"{app})", restore)
-        for guard in ("rclone listremotes", "command -v pgrep", "rclone lsf", "--dry-run"):
+        for guard in ("rclone listremotes", "command -v pgrep", "rclone lsf", "--dry-run", "--filter-from"):
             self.assertIn(guard, restore)
+        self.assertIn("drive:3 Resources/rcloneBackups/Thunderbird", restore)
+        self.assertIn("drive:3 Resources/rcloneBackups/Anki", restore)
+        self.assertTrue((REPO_ROOT / ".config" / "rclone" / "thunderbird-filters.txt").is_file())
+        self.assertTrue((REPO_ROOT / ".config" / "rclone" / "anki-filters.txt").is_file())
 
     def test_make_exposes_allowlisted_repair_target(self):
         makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")

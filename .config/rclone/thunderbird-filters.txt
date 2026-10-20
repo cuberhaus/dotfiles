@@ -1,0 +1,47 @@
+# Rclone filter rules for Thunderbird profile backup & restore.
+# Keeps accounts, identities, message filters, saved logins/keys, address books,
+# calendars, virtual folders, UI layout, and extensions (~28 MiB) while
+# excluding offline IMAP mail caches, global search indexes, and transient state.
+
+# Keep message filter rules inside ImapMail and Mail, exclude all offline mail caches & indexes
++ **/ImapMail/**/msgFilterRules.dat
+- **/ImapMail/**
++ **/Mail/**/msgFilterRules.dat
+- **/Mail/**
+
+# Exclude empty default-esr skeleton profile
+- /lrz8z4j2.default-esr/**
+
+# Exclude global search index, transient WAL/SHM, caches, telemetry & crashes
+- **/global-messages-db.sqlite*
+- **/*.sqlite-wal
+- **/*.sqlite-shm
+- **/local.sqlite-wal.txt
+- **/cache.sqlite*
+- **/calendar-data/cache.sqlite*
+- **/calendar-data/backup/**
+- **/places.sqlite*
+- **/favicons.sqlite*
+- **/cookies.sqlite*
+- **/webappsstore.sqlite*
+- **/bounce-tracking-protection.sqlite*
+- **/formhistory.sqlite*
+- **/content-prefs.sqlite*
+- **/storage/**
+- **/shader-cache/**
+- **/startupCache/**
+- **/security_state/**
+- **/datareporting/**
+- **/saved-telemetry-pings/**
+- **/crashes/**
+- **/minidumps/**
+- /Crash Reports/**
+- /Pending Pings/**
+- **/parent.lock
+- **/.parentlock
+- **/lock
+- **/Telemetry.*.txt
+- **/*.mab.bak
+- **/*.mab-*.bak
+- **/*.v2.sqlite
+- **/*.v3.sqlite
