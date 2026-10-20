@@ -111,6 +111,9 @@ work_main() {
     # Adds <Super><Shift>s to GNOME Shell's interactive screenshot shortcut for keyboards without Print.
     gnome_screenshot_shortcut_install ||
         warn "GNOME screenshot shortcut failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; gnome_screenshot_shortcut_install'"
+    # Configures Spanish ('es') layout and caps:swapescape in GNOME and XWayland.
+    gnome_keyboard_layout_install ||
+        warn "GNOME keyboard layout failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; gnome_keyboard_layout_install'"
     # The free DaVinci Resolve needs a ZIP that only you can download (Blackmagic asks for a
     # registration), and its installer asks questions, so a missing ZIP or an unattended
     # run must not abort provisioning.

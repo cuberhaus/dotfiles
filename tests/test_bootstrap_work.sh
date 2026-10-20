@@ -292,6 +292,7 @@ gcloud_install() { record 'gcloud'; }
 gui_apps_install() { record 'gui-apps'; }
 caffeine_indicator_autostart_install() { record 'caffeine-autostart'; }
 gnome_screenshot_shortcut_install() { record 'gnome-screenshot-shortcut'; }
+gnome_keyboard_layout_install() { record 'gnome-keyboard-layout'; }
 davinci_resolve_install() { record 'davinci-resolve'; }
 obsidian_vault_install() { record 'obsidian-vault'; }
 resolve_high_dpi_choice() {
@@ -309,7 +310,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\ncaffeine-autostart\ngnome-screenshot-shortcut\ndavinci-resolve\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\ncaffeine-autostart\ngnome-screenshot-shortcut\ngnome-keyboard-layout\ndavinci-resolve\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"

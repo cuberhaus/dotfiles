@@ -114,6 +114,9 @@ gui_apps_uninstall() {
     # GNOME screenshot shortcut (<Super><Shift>s added by gnome_screenshot_shortcut_install)
     gnome_screenshot_shortcut_uninstall || true
 
+    # GNOME keyboard options (caps:swapescape added by gnome_keyboard_layout_install)
+    gnome_keyboard_layout_uninstall || true
+
     # OpenCode removal
     rm -rf "$HOME/.opencode" 2>/dev/null || true
     rm -f "$HOME/.local/bin/opencode" 2>/dev/null || true

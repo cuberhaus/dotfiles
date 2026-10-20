@@ -146,7 +146,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     export QT_QPA_PLATFORMTHEME="qt5ct"
     [ -r "$HOME/.config/distro" ] && source "$HOME/.config/distro"    # DISTRO variable
     if [ -n "${DISPLAY:-}" ] && command -v laptop-detect &>/dev/null && command -v setxkbmap &>/dev/null && laptop-detect ; then
-        setxkbmap es
+        setxkbmap -layout es -option caps:swapescape >/dev/null 2>&1
     fi
     if [ -d "$HOME/fib/LI/picosat-965/bin" ] ; then
         export PATH="$HOME/fib/LI/picosat-965/bin:$PATH"

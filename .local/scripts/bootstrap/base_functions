@@ -1218,6 +1218,102 @@ gnome_screenshot_shortcut_uninstall() {
 }
 
 ###############################################################
+# => GNOME and XWayland keyboard layout (es + caps:swapescape)
+###############################################################
+
+# Set the Spanish ('es') keyboard layout and Caps Lock <-> Escape ('caps:swapescape') in
+# GNOME (org.gnome.desktop.input-sources) and in the active X11/XWayland server.  On GNOME
+# Wayland, Xwayland initializes _XKB_RULES_NAMES on the root window to 'us' even when Mutter
+# uses 'es', so a bare `setxkbmap -option ...` without `-layout es` overwrites the XWayland
+# keymap with 'us'.  Setting both gsettings and `setxkbmap -layout es -option caps:swapescape`
+# keeps native Wayland and XWayland apps aligned.
+gnome_keyboard_layout_install() {
+    local schema="org.gnome.desktop.input-sources"
+    local source_tuple="('xkb', 'es')"
+    local option="'caps:swapescape'"
+    local sources options stripped wanted_sources wanted_options updated_sources updated_options
+    local changed=0
+
+    if sources="$(gsettings get "$schema" sources 2>/dev/null)" &&
+        options="$(gsettings get "$schema" xkb-options 2>/dev/null)"; then
+        if [[ "$sources" == "[$source_tuple"* ]]; then
+            wanted_sources="$sources"
+        elif [[ "$sources" == "@a(ss) []" || "$sources" == "[]" ]]; then
+            wanted_sources="[$source_tuple]"
+        elif [[ "$sources" == *"$source_tuple"* && "$sources" == \[*\] ]]; then
+            stripped="$(printf '%s\n' "$sources" | sed -E "s/, *\\('xkb', 'es'\\)//g; s/\\('xkb', 'es'\\), *//g")"
+            wanted_sources="[$source_tuple, ${stripped#[}"
+        elif [[ "$sources" == \[*\] ]]; then
+            wanted_sources="[$source_tuple, ${sources#[}"
+        else
+            warn "Unexpected $schema sources value: $sources"
+            return 1
+        fi
+
+        if [[ "$wanted_sources" != "$sources" ]]; then
+            gsettings set "$schema" sources "$wanted_sources" || return 1
+            updated_sources="$(gsettings get "$schema" sources 2>/dev/null)" || return 1
+            if [[ "$updated_sources" != "[$source_tuple"* ]]; then
+                warn "gsettings did not persist $source_tuple for $schema sources (run from a graphical GNOME session)."
+                return 1
+            fi
+            changed=1
+        fi
+
+        if [[ "$options" == *"$option"* ]]; then
+            wanted_options="$options"
+        elif [[ "$options" == "@as []" || "$options" == "[]" ]]; then
+            wanted_options="[$option]"
+        elif [[ "$options" == \[*\] ]]; then
+            wanted_options="${options%]*}, $option]"
+        else
+            warn "Unexpected $schema xkb-options value: $options"
+            return 1
+        fi
+
+        if [[ "$wanted_options" != "$options" ]]; then
+            gsettings set "$schema" xkb-options "$wanted_options" || return 1
+            updated_options="$(gsettings get "$schema" xkb-options 2>/dev/null)" || return 1
+            if [[ "$updated_options" != *"$option"* ]]; then
+                warn "gsettings did not persist $option for $schema xkb-options (run from a graphical GNOME session)."
+                return 1
+            fi
+            changed=1
+        fi
+    else
+        info "GNOME input-sources schema is not available, skipping the GNOME keyboard settings."
+    fi
+
+    if [ -n "${DISPLAY:-}" ] && command -v setxkbmap >/dev/null 2>&1; then
+        setxkbmap -layout es -option caps:swapescape >/dev/null 2>&1 || return 1
+        changed=1
+    fi
+
+    if [ "$changed" -eq 1 ]; then
+        info "Keyboard layout set to Spanish (es) with caps:swapescape."
+    else
+        info "Keyboard layout (es, caps:swapescape) is already set, skipping."
+    fi
+}
+
+# Undo the xkb-options part of gnome_keyboard_layout_install: remove 'caps:swapescape'
+# while keeping any other options and leaving the user's input-sources layout untouched.
+gnome_keyboard_layout_uninstall() {
+    local schema="org.gnome.desktop.input-sources"
+    local option="'caps:swapescape'"
+    local current updated
+
+    current="$(gsettings get "$schema" xkb-options 2>/dev/null)" || return 0
+    [[ "$current" == *"$option"* ]] || return 0
+
+    updated="$(printf '%s\n' "$current" | sed -E "s/, *'caps:swapescape'//g; s/'caps:swapescape', *//g; s/'caps:swapescape'//g")"
+    if [[ "$updated" == "[]" ]]; then
+        updated="@as []"
+    fi
+    gsettings set "$schema" xkb-options "$updated" || return 1
+}
+
+###############################################################
 # => Volatile file handling
 ###############################################################
 

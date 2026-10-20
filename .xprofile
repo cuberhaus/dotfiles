@@ -7,7 +7,7 @@
 #     # This runs before i3
 # fi
 
-setxkbmap -option caps:swapescape > /dev/null 2>&1
+setxkbmap -layout es -option caps:swapescape > /dev/null 2>&1
 
 if [[ "$DESKTOP_SESSION" == "cinnamon" ]]; then
     # xss-lock displays betterlockscreen when lid is closed

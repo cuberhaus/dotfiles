@@ -141,10 +141,13 @@ case "$step" in
         ;;
     keyboard)
         restow_config
+        # shellcheck source=/dev/null
+        source "$repo_root/.local/scripts/bootstrap/base_functions"
+        gnome_keyboard_layout_install || true
         if command -v xmodmap >/dev/null 2>&1 && [[ -n "${DISPLAY:-}" && -f "$HOME/.Xmodmap" ]]; then
             xmodmap "$HOME/.Xmodmap"
-        else
-            printf 'Keyboard files deployed; no active X11 session found, so xmodmap was not run.\n'
+        elif [[ -z "${DISPLAY:-}" ]]; then
+            printf 'Keyboard files deployed; no active X11 session found, so setxkbmap/xmodmap was not run.\n'
         fi
         ;;
     *)

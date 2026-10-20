@@ -42,6 +42,9 @@ ubuntu_gui_uninstall() {
     # GNOME screenshot shortcut (<Super><Shift>s added by gnome_screenshot_shortcut_install)
     gnome_screenshot_shortcut_uninstall || true
 
+    # GNOME keyboard options (caps:swapescape added by gnome_keyboard_layout_install)
+    gnome_keyboard_layout_uninstall || true
+
     # RStudio
     sudo dpkg -r rstudio 2>/dev/null || true
 

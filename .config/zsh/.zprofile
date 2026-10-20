@@ -6,12 +6,10 @@
 # # Activating numlock on startup
 # setleds -D +num
 
-if [[ "$DISTRO" == "ubuntu" ]]; then
-    setxkbmap -option caps:swapescape
-fi
-
-if [[ "$DISTRO" == "ubuntu_windows" ]]; then
-    setxkbmap -option caps:swapescape
+if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "ubuntu_windows" ]]; then
+        if [ -n "${DISPLAY:-}" ] && command -v setxkbmap >/dev/null 2>&1; then
+            setxkbmap -layout es -option caps:swapescape >/dev/null 2>&1
+        fi
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
