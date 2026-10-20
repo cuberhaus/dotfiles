@@ -672,10 +672,10 @@ link_real_files() {
 }
 
 # Stub programs that make the optional branches of the aliases file run: eza for the file
-# listing, a lock screen, nvim, and the ASUS tools for anime-toggle.
+# listing, a lock screen, nvim, fastfetch, and the ASUS tools for anime-toggle.
 real_stubs="$case_dir/real_stubs"
 mkdir -p "$real_stubs"
-for stub in eza pipes.sh cmatrix nvim asusctl busctl; do
+for stub in eza pipes.sh cmatrix nvim fastfetch asusctl busctl; do
     printf '#!/bin/sh\nexit 0\n' > "$real_stubs/$stub"
     chmod +x "$real_stubs/$stub"
 done

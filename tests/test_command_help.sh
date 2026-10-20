@@ -138,7 +138,7 @@ done
 # nothing happens. Several also decide which optional aliases and functions exist (nvim, eza,
 # asusctl and busctl), so a tripwire is how those branches get defined.
 for tool in apt apt-get asusctl brew busctl chsh cmatrix curl discord dpkg dunstify emacs \
-    emacsclient eza gcloud gh ghc-pkg git google-chrome journalctl killall light brightnessctl \
+    emacsclient eza fastfetch gcloud gh ghc-pkg git google-chrome journalctl killall light brightnessctl \
     amixer notify-send npm nvim open pacman pacman-mirrors pactl pip pip3 pipes.sh pkill \
     reflector rclone rstudio-bin scp setxkbmap snap ssh sudo systemctl vim wget wmctrl xdg-open \
     xdotool xrdb yay docker; do

@@ -490,6 +490,8 @@ alias zshrc='nvim "${ZDOTDIR:-$HOME/.config/zsh}/.zshrc"'
 
 ##@ System info & power
 
+## Show system info with fastfetch whenever you type neofetch, when fastfetch is installed.
+command -v fastfetch &>/dev/null && alias neofetch="fastfetch"
 ## Show disk space with human-readable sizes.
 alias df="df -h"          # human-readable sizes
 ## Show memory use in megabytes.
