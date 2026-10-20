@@ -1669,7 +1669,7 @@ rclone_drive_mount_uninstall() {
 }
 
 ###############################################################
-# => Thunderbird profile configuration restore (rclone)
+# => Application data restore from Google Drive (rclone)
 ###############################################################
 
 # Restore the Thunderbird profile configuration (accounts, filters, calendars,
@@ -1698,4 +1698,58 @@ thunderbird_restore() {
     fi
     info "Restoring Thunderbird profile configuration from Google Drive..."
     bash "$script" thunderbird --apply
+}
+
+# Restore Anki's collection, media, and add-ons from `drive:3 Resources/rcloneBackups/Anki`
+# using `.local/scripts/restore-app-data anki --apply`.
+# Self-skips cleanly when rclone or Anki is not installed, when the `drive:`
+# remote is not configured yet, or when Anki is running.
+anki_restore() {
+    local script="${DOTFILES_ROOT:-$HOME}/.local/scripts/restore-app-data"
+
+    if ! command -v rclone &>/dev/null; then
+        info "rclone not found; skipping Anki data restore."
+        return 0
+    fi
+    if ! command -v anki &>/dev/null && [ ! -d /Applications/Anki.app ]; then
+        info "Anki not installed; skipping Anki data restore."
+        return 0
+    fi
+    if ! rclone listremotes 2>/dev/null | grep -Fxq 'drive:'; then
+        info "rclone remote 'drive:' is not configured yet; run 'rclonepull_anki' after configuring rclone."
+        return 0
+    fi
+    if command -v pgrep &>/dev/null && pgrep -f '[/ ]([Aa]nki)([ .]|$)' &>/dev/null; then
+        warn "Anki is running; close it and run 'rclonepull_anki' to restore its data."
+        return 0
+    fi
+    info "Restoring Anki data from Google Drive..."
+    bash "$script" anki --apply
+}
+
+# Restore the Calibre library from `drive:3 Resources/rcloneBackups/Calibre Library`
+# using `.local/scripts/restore-app-data calibre --apply`.
+# Self-skips cleanly when rclone or Calibre is not installed, when the `drive:`
+# remote is not configured yet, or when Calibre is running.
+calibre_restore() {
+    local script="${DOTFILES_ROOT:-$HOME}/.local/scripts/restore-app-data"
+
+    if ! command -v rclone &>/dev/null; then
+        info "rclone not found; skipping Calibre library restore."
+        return 0
+    fi
+    if ! command -v calibre &>/dev/null && [ ! -d /Applications/calibre.app ]; then
+        info "Calibre not installed; skipping Calibre library restore."
+        return 0
+    fi
+    if ! rclone listremotes 2>/dev/null | grep -Fxq 'drive:'; then
+        info "rclone remote 'drive:' is not configured yet; run 'rclonepull_calibre' after configuring rclone."
+        return 0
+    fi
+    if command -v pgrep &>/dev/null && pgrep -f '[/ ](calibre|ebook-viewer)([ .]|$)' &>/dev/null; then
+        warn "Calibre is running; close it and run 'rclonepull_calibre' to restore its library."
+        return 0
+    fi
+    info "Restoring Calibre library from Google Drive..."
+    bash "$script" calibre --apply
 }

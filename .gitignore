@@ -202,6 +202,7 @@
 .config/rclone/*
 !.config/rclone/thunderbird-filters.txt
 !.config/rclone/anki-filters.txt
+!.config/rclone/calibre-filters.txt
 !.config/ranger/
 !.config/ranger/**
 !.config/tmux/

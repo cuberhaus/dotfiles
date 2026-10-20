@@ -67,6 +67,10 @@ rclone_drive_mount_install ||
     warn "Google Drive mount setup failed; rerun it with: make repair REPAIR=drive-mount"
 thunderbird_restore ||
     warn "Thunderbird profile restore failed; rerun it with: rclonepull_thunderbird"
+anki_restore ||
+    warn "Anki data restore failed; rerun it with: rclonepull_anki"
+calibre_restore ||
+    warn "Calibre library restore failed; rerun it with: rclonepull_calibre"
 nvidia_display_config
 # The installer skips machines that are not supported ASUS laptops. It needs the
 # network and a few minutes of compiling, so a failure must not abort provisioning.

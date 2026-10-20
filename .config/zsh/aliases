@@ -538,7 +538,7 @@ colemak() {
 # restore-app-data only previews a restore unless it is given --apply, and it ignores every
 # argument after that. So the rclonepull_* commands always pass --apply and refuse any other
 # argument: as aliases, a stray -h reached it after --apply and restored the files.
-unalias rclonepull_calibre rclonepull_thunderbird rclonepull_anki 2>/dev/null
+unalias rclonepull_calibre rclonepull_thunderbird rclonepull_anki rclonepull_everything rclonepush_everything rclone_sync_push_thunderbird rclone_sync_push_anki rclone_sync_push_calibre 2>/dev/null
 ## Restore one app's data from Google Drive with restore-app-data (helper of the rclonepull_* commands).
 _rclonepull() {
     local name=$1 app=$2 what=$3
@@ -565,12 +565,137 @@ rclonepull_calibre() { _rclonepull rclonepull_calibre calibre 'the Calibre libra
 rclonepull_thunderbird() { _rclonepull rclonepull_thunderbird thunderbird 'the Thunderbird profile' "$@"; }
 ## Restore Anki's data from Google Drive (close Anki first; nothing is deleted).
 rclonepull_anki() { _rclonepull rclonepull_anki anki "Anki's data" "$@"; }
-## Copy the Calibre library to Google Drive (copy, so nothing is deleted there).
-alias rclonepush_calibre="rclone -P copy ~/Calibre\ Library 'drive:3 Resources/rcloneBackups/Calibre/Calibre Library'"
+## Restore Anki, Thunderbird, and the Calibre library from Google Drive for each installed app.
+rclonepull_everything() {
+    local app
+    case ${1:-} in
+        '') ;;
+        -h|--help)
+            printf 'Usage: rclonepull_everything\n\n'
+            printf 'Restore Anki, the Thunderbird profile, and the Calibre library from Google Drive\n'
+            printf '(restore-app-data <app> --apply) for each app installed on this machine.\n'
+            return 0
+            ;;
+        *)
+            printf 'rclonepull_everything: unexpected argument: %s (try rclonepull_everything --help)\n' "$1" >&2
+            return 2
+            ;;
+    esac
+    for app in anki thunderbird calibre; do
+        if command -v "$app" >/dev/null 2>&1; then
+            "$HOME/.local/scripts/restore-app-data" "$app" --apply
+        fi
+    done
+}
+## Copy the Calibre library to Google Drive (filtered: excludes .caltrash and *.original_* backups).
+alias rclonepush_calibre="rclone -P copy --filter-from ~/.config/rclone/calibre-filters.txt ~/Calibre\ Library 'drive:3 Resources/rcloneBackups/Calibre Library'"
 ## Copy the Thunderbird profile configuration to Google Drive (filtered: excludes IMAP caches, search indexes, and transient state).
 alias rclonepush_thunderbird="rclone -P copy --filter-from ~/.config/rclone/thunderbird-filters.txt ~/.thunderbird 'drive:3 Resources/rcloneBackups/Thunderbird'"
 ## Copy Anki's data to Google Drive (filtered: excludes rolling .colpkg backups, duplicate add-on theme caches, and transient state).
 alias rclonepush_anki="rclone -P copy --filter-from ~/.config/rclone/anki-filters.txt \"\${XDG_DATA_HOME:-\$HOME/.local/share}/Anki2\" 'drive:3 Resources/rcloneBackups/Anki'"
+## Sync one app's filtered data to Google Drive with --backup-dir archiving (helper of the rclone_sync_push_* commands).
+_rclone_sync_push() {
+    local name=$1 label=$2 process_pattern=$3 source_dir=$4 remote=$5 filter_file=$6
+    shift 6
+    local arg dry_run=false backup_dir
+    local -a dry_args=()
+    for arg in "$@"; do
+        case $arg in
+            -n|--dry-run)
+                dry_run=true
+                dry_args=(--dry-run)
+                ;;
+            -h|--help)
+                printf 'Usage: %s [-n|--dry-run]\n\n' "$name"
+                printf 'Sync %s from %s to %s using rclone sync.\n' "$label" "$source_dir" "$remote"
+                printf 'Remote files deleted by the sync are archived under drive:3 Resources/rcloneBackups/_archive/<timestamp>/%s.\n' "$label"
+                printf '  -n, --dry-run  preview planned transfers and deletions without modifying Google Drive\n'
+                printf '  -h, --help     show this help\n'
+                return 0
+                ;;
+            *)
+                printf '%s: unknown option: %s (try %s --help)\n' "$name" "$arg" "$name" >&2
+                return 2
+                ;;
+        esac
+    done
+    if command -v pgrep >/dev/null 2>&1 && pgrep -f "$process_pattern" >/dev/null 2>&1; then
+        printf '%s is running. Close it before pushing to Google Drive.\n' "$label" >&2
+        return 1
+    fi
+    if [[ ! -d $source_dir ]] || [[ -z $(find "$source_dir" -mindepth 1 -maxdepth 2 -type f 2>/dev/null | head -n 1) ]]; then
+        printf '%s source directory is missing or empty: %s. Refusing to sync.\n' "$label" "$source_dir" >&2
+        return 1
+    fi
+    backup_dir="drive:3 Resources/rcloneBackups/_archive/$(date '+%Y%m%d-%H%M%S')/$label"
+    rclone sync -P --create-empty-src-dirs --filter-from "$filter_file" --backup-dir "$backup_dir" \
+        ${dry_args[@]+"${dry_args[@]}"} "$source_dir" "$remote"
+}
+## Sync the Thunderbird profile configuration to Google Drive (archives deleted remote files under _archive/; -n previews).
+rclone_sync_push_thunderbird() {
+    _rclone_sync_push rclone_sync_push_thunderbird Thunderbird '[/ ]thunderbird([ .]|$)' \
+        "$HOME/.thunderbird" 'drive:3 Resources/rcloneBackups/Thunderbird' \
+        "${XDG_CONFIG_HOME:-$HOME/.config}/rclone/thunderbird-filters.txt" "$@"
+}
+## Sync Anki's data to Google Drive (archives deleted remote files under _archive/; -n previews).
+rclone_sync_push_anki() {
+    _rclone_sync_push rclone_sync_push_anki Anki '[/ ]([Aa]nki)([ .]|$)' \
+        "${XDG_DATA_HOME:-$HOME/.local/share}/Anki2" 'drive:3 Resources/rcloneBackups/Anki' \
+        "${XDG_CONFIG_HOME:-$HOME/.config}/rclone/anki-filters.txt" "$@"
+}
+## Sync the Calibre library to Google Drive (archives deleted remote files under _archive/; -n previews).
+rclone_sync_push_calibre() {
+    _rclone_sync_push rclone_sync_push_calibre Calibre '[/ ](calibre|ebook-viewer)([ .]|$)' \
+        "$HOME/Calibre Library" 'drive:3 Resources/rcloneBackups/Calibre Library' \
+        "${XDG_CONFIG_HOME:-$HOME/.config}/rclone/calibre-filters.txt" "$@"
+}
+## Back up Anki, Thunderbird (sync with _archive/ backup), and the Calibre library (copy) to Google Drive; -n previews.
+rclonepush_everything() {
+    local arg dry_run=false assume_yes=false answer=''
+    local -a sync_args=() copy_args=()
+    for arg in "$@"; do
+        case $arg in
+            -n|--dry-run)
+                dry_run=true
+                sync_args=(--dry-run)
+                copy_args=(--dry-run)
+                ;;
+            -y|--yes)
+                assume_yes=true
+                ;;
+            -h|--help)
+                printf 'Usage: rclonepush_everything [-n|--dry-run] [-y|--yes]\n\n'
+                printf 'Back up Anki, Thunderbird, and the Calibre library to Google Drive.\n'
+                printf 'Anki and Thunderbird are synced (archiving deleted remote files under _archive/);\n'
+                printf 'Calibre is copied. Only apps with non-empty local directories are pushed.\n'
+                printf '  -n, --dry-run  preview planned transfers without modifying Google Drive\n'
+                printf '  -y, --yes      skip the interactive confirmation prompt\n'
+                printf '  -h, --help     show this help\n'
+                return 0
+                ;;
+            *)
+                printf 'rclonepush_everything: unknown option: %s (try rclonepush_everything --help)\n' "$arg" >&2
+                return 2
+                ;;
+        esac
+    done
+    if [[ $dry_run == false && $assume_yes == false ]]; then
+        printf 'Are you sure you want to push Anki, Thunderbird, and Calibre to Google Drive? [y/N] '
+        read -r answer
+        [[ $answer =~ ^([yY][eE][sS]|[yY])$ ]] || return 0
+    fi
+    if [[ -d "${XDG_DATA_HOME:-$HOME/.local/share}/Anki2" ]]; then
+        rclone_sync_push_anki ${sync_args[@]+"${sync_args[@]}"}
+    fi
+    if [[ -d "$HOME/.thunderbird" ]]; then
+        rclone_sync_push_thunderbird ${sync_args[@]+"${sync_args[@]}"}
+    fi
+    if [[ -d "$HOME/Calibre Library" ]]; then
+        rclone copy -P --create-empty-src-dirs \
+            --filter-from "${XDG_CONFIG_HOME:-$HOME/.config}/rclone/calibre-filters.txt" \
+            ${copy_args[@]+"${copy_args[@]}"} "$HOME/Calibre Library" 'drive:3 Resources/rcloneBackups/Calibre Library'
+    fi
+}
 
 ##@ Files & navigation
 
