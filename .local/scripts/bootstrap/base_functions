@@ -1649,7 +1649,7 @@ rclone_drive_mount_install() {
     info "Google Drive rclone mount ($service) enabled at $mount_dir."
 }
 
-# Disable and stop the user-systemd Google Drive rclone FUSE mount (`cuberhaus-drive-mount.service`),
+# Stop and disable the user-systemd Google Drive rclone FUSE mount (`cuberhaus-drive-mount.service`),
 # leaving `~/.config/rclone/rclone.conf` and `$HOME/Google Drive` intact.
 rclone_drive_mount_uninstall() {
     local service="cuberhaus-drive-mount.service"
@@ -1668,5 +1668,34 @@ rclone_drive_mount_uninstall() {
     info "Disabled Google Drive rclone mount ($service)."
 }
 
+###############################################################
+# => Thunderbird profile configuration restore (rclone)
+###############################################################
 
+# Restore the Thunderbird profile configuration (accounts, filters, calendars,
+# contacts, extensions) from `drive:3 Resources/rcloneBackups/Thunderbird` using
+# `.local/scripts/restore-app-data thunderbird --apply`.
+# Self-skips cleanly when rclone or Thunderbird is not installed, when the
+# `drive:` remote is not configured yet, or when Thunderbird is running.
+thunderbird_restore() {
+    local script="${DOTFILES_ROOT:-$HOME}/.local/scripts/restore-app-data"
 
+    if ! command -v rclone &>/dev/null; then
+        info "rclone not found; skipping Thunderbird profile restore."
+        return 0
+    fi
+    if ! command -v thunderbird &>/dev/null && [ ! -d /Applications/Thunderbird.app ]; then
+        info "Thunderbird not installed; skipping Thunderbird profile restore."
+        return 0
+    fi
+    if ! rclone listremotes 2>/dev/null | grep -Fxq 'drive:'; then
+        info "rclone remote 'drive:' is not configured yet; run 'rclonepull_thunderbird' after configuring rclone."
+        return 0
+    fi
+    if command -v pgrep &>/dev/null && pgrep -f '[/ ]thunderbird([ .]|$)' &>/dev/null; then
+        warn "Thunderbird is running; close it and run 'rclonepull_thunderbird' to restore its profile."
+        return 0
+    fi
+    info "Restoring Thunderbird profile configuration from Google Drive..."
+    bash "$script" thunderbird --apply
+}

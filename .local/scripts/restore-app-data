@@ -14,27 +14,33 @@ case "$app" in
     thunderbird)
         command_name=thunderbird
         process_pattern='[/ ]thunderbird([ .]|$)'
-        remote='drive:Thunderbird'
+        remote='drive:3 Resources/rcloneBackups/Thunderbird'
         destination="$HOME/.thunderbird"
+        snap_destination="$HOME/snap/thunderbird/common/.thunderbird"
         mac_app='/Applications/Thunderbird.app'
+        filter_file="${XDG_CONFIG_HOME:-$HOME/.config}/rclone/thunderbird-filters.txt"
         ;;
     calibre)
         command_name=calibre
         process_pattern='[/ ](calibre|ebook-viewer)([ .]|$)'
-        remote='drive:Calibre/Calibre Library'
+        remote='drive:3 Resources/rcloneBackups/Calibre/Calibre Library'
         destination="$HOME/Calibre Library"
+        snap_destination=""
         mac_app='/Applications/calibre.app'
+        filter_file=""
         ;;
     anki)
         command_name=anki
         process_pattern='[/ ]([Aa]nki)([ .]|$)'
-        remote='drive:Anki'
+        remote='drive:3 Resources/rcloneBackups/Anki'
         if [[ "$(uname -s)" == Darwin ]]; then
             destination="$HOME/Library/Application Support/Anki2"
         else
             destination="${XDG_DATA_HOME:-$HOME/.local/share}/Anki2"
         fi
+        snap_destination=""
         mac_app='/Applications/Anki.app'
+        filter_file="${XDG_CONFIG_HOME:-$HOME/.config}/rclone/anki-filters.txt"
         ;;
     *)
         printf 'Usage: %s thunderbird|calibre|anki [--apply]\n' "$0" >&2
@@ -64,10 +70,22 @@ if ! rclone lsf "$remote" --max-depth 1 >/dev/null; then
 fi
 
 mkdir -p "$destination"
+filter_args=()
+if [[ -n "$filter_file" && -f "$filter_file" ]]; then
+    filter_args=(--filter-from "$filter_file")
+fi
 if [[ "$apply" == true ]]; then
     printf 'Restoring %s from %s to %s\n' "$app" "$remote" "$destination"
-    rclone copy "$remote" "$destination" --progress
+    rclone copy "$remote" "$destination" "${filter_args[@]}" --progress
+    # Ubuntu 22.04+ packages Thunderbird as a snap wrapper (/snap/bin/thunderbird) that
+    # reads ~/snap/thunderbird/common/.thunderbird instead of ~/.thunderbird. Point that
+    # path at ~/.thunderbird when not already present so both snap and native installs
+    # share the same restored profile and rclonepush_thunderbird source.
+    if [[ -n "$snap_destination" && "$(uname -s)" == Linux && ! -e "$snap_destination" && ! -L "$snap_destination" ]]; then
+        mkdir -p "$(dirname "$snap_destination")"
+        ln -s "$destination" "$snap_destination"
+    fi
 else
     printf 'Previewing %s restore. Re-run with APPLY=1 to copy files.\n' "$app"
-    rclone copy "$remote" "$destination" --dry-run --progress
+    rclone copy "$remote" "$destination" "${filter_args[@]}" --dry-run --progress
 fi

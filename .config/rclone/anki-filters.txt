@@ -1,0 +1,25 @@
+# rclone filter rules for Anki configuration & collection backup/restore.
+# Keeps active profile collection (collection.anki2, collection.media, prefs21.db)
+# and installed add-ons while excluding rolling .colpkg backups and duplicate add-on caches.
+
+# Rolling local automatic .colpkg snapshots (37+ copies of collection.anki2)
+- **/backups/**
+
+# Add-on 231569866 (Audiovisual Feedback) copies default/themes -> user_files/themes on first run
+- /addons21/231569866/user_files/themes/**
+
+# Python bytecode & logs
+- **/__pycache__/**
+- /anki.log
+- **/deleted.txt
+
+# Transient SQLite WAL/SHM journal files
+- **/*.anki2-wal
+- **/*.anki2-shm
+- **/*.db2-wal
+- **/*.db2-shm
+- **/*.sqlite-wal
+- **/*.sqlite-shm
+
+# Include everything else
++ **

@@ -197,6 +197,11 @@
 .config/systemd/user/*.wants/
 !.config/cuberhaus-automations/
 !.config/cuberhaus-automations/**
+# rclone: track only the filter rules, never rclone.conf (which holds OAuth tokens).
+!.config/rclone/
+.config/rclone/*
+!.config/rclone/thunderbird-filters.txt
+!.config/rclone/anki-filters.txt
 !.config/ranger/
 !.config/ranger/**
 !.config/tmux/

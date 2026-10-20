@@ -78,7 +78,7 @@ gui_apps_uninstall() {
     info "Uninstalling GUI applications..."
     
     # apt packages
-    $apt_remove firefox vlc google-chrome-stable code cursor antigravity warp-terminal \
+    $apt_remove firefox thunderbird vlc google-chrome-stable code cursor antigravity warp-terminal \
         libreoffice obs-studio caffeine dconf-editor libfuse2 || true
     
     # Snaps
