@@ -14,3 +14,5 @@ if [[ -n "${APPIMAGE:-}" ]]; then
     unset ARGV0
 fi
 # --- end AppImage ARGV0 guard ---
+
+export DRIVE_ROOT="${DRIVE_ROOT:-$HOME/Google Drive}"

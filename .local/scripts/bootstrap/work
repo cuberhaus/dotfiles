@@ -120,6 +120,8 @@ work_main() {
     davinci_resolve_install ||
         warn "DaVinci Resolve setup failed; rerun it with: make repair REPAIR=davinci-resolve"
     obsidian_vault_install
+    rclone_drive_mount_install ||
+        warn "Google Drive mount setup failed; rerun it with: make repair REPAIR=drive-mount"
 
     local current_scale
     current_scale=$(gsettings get org.gnome.desktop.interface text-scaling-factor 2>/dev/null || echo "1.0")

@@ -6,7 +6,7 @@ step="${1:-}"
 profile="${2:-auto}"
 
 usage() {
-    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting|nvidia-container-toolkit|davinci-resolve [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos, asusctl, asusctl-lighting, nvidia-container-toolkit, and davinci-resolve only)]\n' >&2
+    printf 'Usage: make repair REPAIR=config|aliases|environment|vim|automations|keyboard|ide-repos|asusctl|asusctl-lighting|nvidia-container-toolkit|davinci-resolve|drive-mount [PROFILE=auto|arch|manjaro|ubuntu|ubuntu-windows|mac|work] [DRY_RUN=true (ide-repos, asusctl, asusctl-lighting, nvidia-container-toolkit, davinci-resolve, and drive-mount only)]\n' >&2
 }
 
 detect_profile() {
@@ -114,6 +114,20 @@ repair_davinci_resolve() {
     bash "$repo_root/.local/scripts/davinci_resolve_install.sh" ${arguments[@]+"${arguments[@]}"}
 }
 
+# Configure the rclone `drive:` remote (if missing) via browser OAuth and enable the
+# user-systemd Google Drive FUSE mount (`cuberhaus-drive-mount.service`) at `$HOME/Google Drive`.
+repair_drive_mount() {
+    case "${DRY_RUN:-false}" in
+        true|1)
+            printf "[dry-run] bash -c 'source %s/.local/scripts/bootstrap/base_functions; rclone_drive_mount_install'\n" "$repo_root"
+            return 0
+            ;;
+    esac
+    # shellcheck source=/dev/null
+    source "$repo_root/.local/scripts/bootstrap/base_functions"
+    rclone_drive_mount_install
+}
+
 case "$step" in
     config|aliases|environment)
         restow_config
@@ -135,6 +149,9 @@ case "$step" in
         ;;
     davinci-resolve)
         repair_davinci_resolve
+        ;;
+    drive-mount)
+        repair_drive_mount
         ;;
     automations)
         bash "$repo_root/.local/scripts/automation/install"

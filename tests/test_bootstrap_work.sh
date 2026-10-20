@@ -295,6 +295,7 @@ gnome_screenshot_shortcut_install() { record 'gnome-screenshot-shortcut'; }
 gnome_keyboard_layout_install() { record 'gnome-keyboard-layout'; }
 davinci_resolve_install() { record 'davinci-resolve'; }
 obsidian_vault_install() { record 'obsidian-vault'; }
+rclone_drive_mount_install() { record 'rclone-drive-mount'; }
 resolve_high_dpi_choice() {
     record "high-dpi-choice:$HIGH_DPI_CHOICE"
     HIGH_DPI=false
@@ -310,7 +311,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\ncaffeine-autostart\ngnome-screenshot-shortcut\ngnome-keyboard-layout\ndavinci-resolve\nobsidian-vault\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\ncaffeine-autostart\ngnome-screenshot-shortcut\ngnome-keyboard-layout\ndavinci-resolve\nobsidian-vault\nrclone-drive-mount\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"
@@ -430,5 +431,19 @@ grep -Fqx 'obsidian-vault' "$EVENT_LOG" ||
 grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
     fail 'a failing DaVinci Resolve step must not abort the rest of the work bootstrap'
 davinci_resolve_install() { record 'davinci-resolve'; }
+
+# Google Drive rclone mount setup may fail if the user systemd bus is unavailable or OAuth
+# fails: provisioning must warn with the repair command and carry on.
+rclone_drive_mount_install() { record 'rclone-drive-mount-failed'; return 1; }
+warn() { record "drive-warning:$*"; }
+: > "$EVENT_LOG"
+work_main --unattended --no-stow --high-dpi=no </dev/null
+grep -Fqx 'rclone-drive-mount-failed' "$EVENT_LOG" ||
+    fail 'the failing Google Drive mount step did not run'
+grep -Fqx 'drive-warning:Google Drive mount setup failed; rerun it with: make repair REPAIR=drive-mount' "$EVENT_LOG" ||
+    fail 'a failing Google Drive mount step must be reported with the command that repairs it'
+grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
+    fail 'a failing Google Drive mount step must not abort the rest of the work bootstrap'
+rclone_drive_mount_install() { record 'rclone-drive-mount'; }
 
 printf 'Work bootstrap orchestration tests passed.\n'
