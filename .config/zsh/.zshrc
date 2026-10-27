@@ -149,3 +149,12 @@ bindkey '^ ' autosuggest-accept
 # setleds -D +num
 #}}}
 
+
+# bun completions
+if [[ -z "${_BUN_COMPLETIONS_LOADED:-}" ]]; then
+    _bun_completion_file="${BUN_INSTALL:-$HOME/.bun}/_bun"
+    if [[ -s "$_bun_completion_file" ]]; then
+        source "$_bun_completion_file" && typeset -g _BUN_COMPLETIONS_LOADED=1
+    fi
+    unset _bun_completion_file
+fi

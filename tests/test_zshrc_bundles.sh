@@ -25,10 +25,13 @@ if ! command -v zsh > /dev/null 2>&1; then
 fi
 
 home="$case_dir/home"
-mkdir -p "$home/.config/antigen"
+mkdir -p "$home/.config/antigen" "$home/.bun"
 : > "$home/.config/distro" # keeps the "distro guard" warning in .zshrc quiet
 cat > "$home/.config/antigen/antigen.zsh" <<'EOF'
 antigen() { print -r -- "$*" >> "$ANTIGEN_LOG"; }
+EOF
+cat > "$home/.bun/_bun" <<'EOF'
+print -r -- loaded >> "$BUN_COMPLETIONS_LOG"
 EOF
 
 # Run the real .zshrc as DISTRO=$1 (empty: no distro, as on macOS) and print the antigen calls
@@ -76,4 +79,16 @@ for distro in ubuntu ubuntu_windows gentoo ''; do
         fail "DISTRO='$distro' must still load every other bundle, in order"
 done
 
-printf 'Zsh bundle tests passed.\n'
+bun_log="$case_dir/bun-completions.log"
+: > "$bun_log"
+# Keep $1 for the child zsh to expand.
+# shellcheck disable=SC2016
+env -i HOME="$home" BUN_INSTALL="$home/.bun" BUN_COMPLETIONS_LOG="$bun_log" \
+    ANTIGEN_LOG="$case_dir/antigen-bun.log" DISTRO=ubuntu ZDOTDIR="$home/.config/zsh" \
+    PATH="/usr/bin:/bin" zsh -f -c 'source "$1"; source "$1"' zsh "$zshrc" \
+    > /dev/null 2>&1 || true
+bun_loads="$(grep -Fxc 'loaded' "$bun_log" || true)"
+[[ "$bun_loads" == 1 ]] ||
+    fail "expected Bun completions to load once after sourcing .zshrc twice, got $bun_loads"
+
+printf 'Zsh startup tests passed.\n'
