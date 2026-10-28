@@ -38,7 +38,6 @@ PROFILE_SOURCES = {
 LINUX_USER_TIMERS = (
     "cuberhaus-user-package-maintenance.timer",
     "cuberhaus-workspace-pull.timer",
-    "cuberhaus-inbox-collector.timer",
     "cuberhaus-desktop-shortcut-cleanup.timer",
 )
 # The folder of the desktop that the desktop-shortcut-cleanup automation moves launchers into.

@@ -7,7 +7,7 @@ platform=$(uname -s)
 
 for required_script in \
     system-maintenance user-package-maintenance workspace-pull \
-    inbox-collector desktop-shortcut-cleanup \
+    desktop-shortcut-cleanup \
     ../lib/cuberhaus-progress.sh ../lib/xdg-dirs.sh; do
     if [[ ! -r "$script_dir/$required_script" ]]; then
         printf 'Required automation script is missing or unreadable: %s\n' "$script_dir/$required_script" >&2
@@ -28,17 +28,13 @@ install_linux() {
     for deployed_file in \
         "$HOME/.local/scripts/automation/user-package-maintenance" \
         "$HOME/.local/scripts/automation/workspace-pull" \
-        "$HOME/.local/scripts/automation/inbox-collector" \
         "$HOME/.local/scripts/automation/desktop-shortcut-cleanup" \
         "$HOME/.local/scripts/lib/cuberhaus-progress.sh" \
         "$HOME/.local/scripts/lib/xdg-dirs.sh" \
-        "$HOME/.config/cuberhaus-automations/inbox-collector-sources.txt" \
         "$HOME/.config/systemd/user/cuberhaus-user-package-maintenance.service" \
         "$HOME/.config/systemd/user/cuberhaus-user-package-maintenance.timer" \
         "$HOME/.config/systemd/user/cuberhaus-workspace-pull.service" \
         "$HOME/.config/systemd/user/cuberhaus-workspace-pull.timer" \
-        "$HOME/.config/systemd/user/cuberhaus-inbox-collector.service" \
-        "$HOME/.config/systemd/user/cuberhaus-inbox-collector.timer" \
         "$HOME/.config/systemd/user/cuberhaus-desktop-shortcut-cleanup.service" \
         "$HOME/.config/systemd/user/cuberhaus-desktop-shortcut-cleanup.timer"; do
         if [[ ! -r "$deployed_file" ]]; then
@@ -51,7 +47,6 @@ install_linux() {
     systemctl --user enable --now \
         cuberhaus-user-package-maintenance.timer \
         cuberhaus-workspace-pull.timer \
-        cuberhaus-inbox-collector.timer \
         cuberhaus-desktop-shortcut-cleanup.timer
 
     sudo install -d -m 0755 /usr/local/libexec

@@ -318,7 +318,6 @@ class InstallationAuditContractTests(unittest.TestCase):
             (
                 "cuberhaus-user-package-maintenance.timer",
                 "cuberhaus-workspace-pull.timer",
-                "cuberhaus-inbox-collector.timer",
                 "cuberhaus-desktop-shortcut-cleanup.timer",
             ),
         )

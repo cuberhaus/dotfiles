@@ -125,7 +125,7 @@ hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
 	chmod +x .git/hooks/pre-commit
 	@echo "Pre-commit hook installed."
 
-install-automations: ## Install native schedules (package maintenance, workspace pull, inbox collector, shortcut cleanup)
+install-automations: ## Install native schedules (package maintenance, workspace pull, shortcut cleanup)
 	bash .local/scripts/automation/install
 
 uninstall-automations: ## Disable and remove native automation schedules

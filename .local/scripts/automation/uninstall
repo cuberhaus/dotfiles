@@ -28,7 +28,6 @@ uninstall_linux() {
     local user_timers=(
         cuberhaus-user-package-maintenance.timer
         cuberhaus-workspace-pull.timer
-        cuberhaus-inbox-collector.timer
         cuberhaus-desktop-shortcut-cleanup.timer
     )
     local system_files=(

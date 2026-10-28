@@ -82,7 +82,6 @@ deploy() {
     mkdir -p "$home/.local/scripts" "$home/.config/systemd"
     cp -R "$repo_root/.local/scripts/automation" "$repo_root/.local/scripts/lib" "$home/.local/scripts/"
     cp -R "$repo_root/.config/systemd/user" "$home/.config/systemd/user"
-    cp -R "$repo_root/.config/cuberhaus-automations" "$home/.config/cuberhaus-automations"
 }
 
 # run SCRIPT [ARGS...]: sets $status and $output (stdout and stderr), and records the stub calls.
@@ -95,7 +94,7 @@ run() {
         bash "$automation/$script" "$@" 2>&1) || status=$?
 }
 
-user_timers='cuberhaus-user-package-maintenance.timer cuberhaus-workspace-pull.timer cuberhaus-inbox-collector.timer cuberhaus-desktop-shortcut-cleanup.timer'
+user_timers='cuberhaus-user-package-maintenance.timer cuberhaus-workspace-pull.timer cuberhaus-desktop-shortcut-cleanup.timer'
 root_files='/etc/systemd/system/cuberhaus-system-maintenance.service /etc/systemd/system/cuberhaus-system-maintenance.timer /usr/local/libexec/cuberhaus-system-maintenance /usr/local/libexec/cuberhaus-progress.sh'
 
 ###############################################################
@@ -107,7 +106,7 @@ run install
 assert_status 0 'install'
 assert_output 'automation schedules are installed' 'install says it finished'
 assert_logged 'systemctl --user daemon-reload' 'install reloads the user manager'
-assert_logged "systemctl --user enable --now $user_timers" 'install enables all four user timers'
+assert_logged "systemctl --user enable --now $user_timers" 'install enables all three user timers'
 assert_logged 'sudo install -d -m 0755 /usr/local/libexec' 'install makes the root-owned folder'
 assert_logged "sudo install -m 0755 $automation/system-maintenance /usr/local/libexec/cuberhaus-system-maintenance" \
     'install copies the root job'
@@ -120,10 +119,9 @@ assert_logged 'sudo systemctl enable --now cuberhaus-system-maintenance.timer' '
 
 # A file that Stow has not linked yet stops the install before anything is enabled or copied as root.
 for missing in \
-    .config/cuberhaus-automations/inbox-collector-sources.txt \
     .config/systemd/user/cuberhaus-desktop-shortcut-cleanup.timer \
     .local/scripts/lib/cuberhaus-progress.sh \
-    .local/scripts/automation/inbox-collector; do
+    .local/scripts/automation/desktop-shortcut-cleanup; do
     deploy
     rm "$home/$missing"
     run install
@@ -148,14 +146,14 @@ extra_env=(STUB_UNAME=Linux)
 deploy
 run uninstall --dry-run
 assert_status 0 'uninstall --dry-run'
-assert_output "[dry-run] systemctl --user disable --now $user_timers" 'the dry run lists the four user timers'
+assert_output "[dry-run] systemctl --user disable --now $user_timers" 'the dry run lists the three user timers'
 assert_output '[dry-run] sudo systemctl disable --now cuberhaus-system-maintenance.timer' 'the dry run lists the root timer'
 assert_output "[dry-run] sudo rm -f $root_files" 'the dry run lists the root files, library included'
 assert_nothing_logged 'uninstall --dry-run'
 
 run uninstall
 assert_status 0 'uninstall'
-assert_logged "systemctl --user disable --now $user_timers" 'uninstall disables the four user timers'
+assert_logged "systemctl --user disable --now $user_timers" 'uninstall disables the three user timers'
 assert_logged 'sudo systemctl disable --now cuberhaus-system-maintenance.timer' 'uninstall disables the root timer'
 assert_logged "sudo rm -f $root_files" 'uninstall removes the root job and its library'
 assert_output 'Logs and state were preserved' 'uninstall keeps logs and state'
@@ -166,30 +164,29 @@ assert_output 'Logs and state were preserved' 'uninstall keeps logs and state'
 
 state="$home/.local/state/cuberhaus-automations"
 mkdir -p "$state"
-printf '%s\n' 1700000000 >"$state/inbox-collector.last-success"
+printf '%s\n' 1700000000 >"$state/workspace-pull.last-success"
 run observe digest
 assert_status 0 'observe digest'
-for name in user-package-maintenance workspace-pull inbox-collector desktop-shortcut-cleanup; do
+for name in user-package-maintenance workspace-pull desktop-shortcut-cleanup; do
     assert_output "$name" "the Linux digest lists $name"
 done
 never_ran='(^|'$'\n'')desktop-shortcut-cleanup +never recorded('$'\n''|$)'
 [[ $output =~ $never_ran ]] || fail "a task that never ran says so: $output"
 # 1700000000 is 2023-11-14 22:13 UTC, the 14th or the 15th depending on the time zone.
-recorded='(^|'$'\n'')inbox-collector +2023-11-1[45] '
+recorded='(^|'$'\n'')workspace-pull +2023-11-1[45] '
 [[ $output =~ $recorded ]] || fail "a recorded run shows its time: $output"
 
 extra_env=(STUB_UNAME=Darwin)
 run observe digest
 assert_status 0 'observe digest on macOS'
 assert_output 'workspace-pull' 'the macOS digest lists workspace-pull'
-refute_output 'inbox-collector' 'the Linux-only tasks are not listed on macOS'
-refute_output 'desktop-shortcut-cleanup' 'the Linux-only tasks are not listed on macOS'
+refute_output 'desktop-shortcut-cleanup' 'the Linux-only task is not listed on macOS'
 extra_env=(STUB_UNAME=Linux)
 
 run observe logs
 assert_status 0 'observe logs'
 assert_logged 'journalctl -n 100 --no-pager -u cuberhaus-system-maintenance.service' 'the root journal'
-assert_logged 'journalctl --user -n 100 --no-pager -u cuberhaus-user-package-maintenance.service -u cuberhaus-workspace-pull.service -u cuberhaus-inbox-collector.service -u cuberhaus-desktop-shortcut-cleanup.service' \
-    'the user journals of all four jobs'
+assert_logged 'journalctl --user -n 100 --no-pager -u cuberhaus-user-package-maintenance.service -u cuberhaus-workspace-pull.service -u cuberhaus-desktop-shortcut-cleanup.service' \
+    'the user journals of all three jobs'
 
 printf 'automation install tests passed.\n'

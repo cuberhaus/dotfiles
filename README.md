@@ -366,7 +366,6 @@ The bootstrap installs these automations without requiring a separate command:
 | System packages | Sunday 10:00 via system `systemd` (`apt-get` or `pacman`) | Managed by macOS Software Update |
 | User packages | Sunday 10:30 via user `systemd` (Homebrew and/or `yay`) | Sunday 10:30 via `launchd` (Homebrew) |
 | `~/cuberhaus` pull | Daily 11:00 via user `systemd` | Daily 11:00 via `launchd` |
-| Inbox collector | Daily 20:00 via user `systemd` | Not installed |
 | Desktop shortcut cleanup | Daily 10:45 via user `systemd` | Not installed |
 
 The workspace pull matches the shell helper's depth-3 discovery but uses
@@ -380,13 +379,8 @@ guards preventing duplicate work: 20 hours for workspace pulls and seven days
 for user package updates. WSL deliberately installs no duplicate timers because
 Windows Task Scheduler owns the same automations.
 
-The inbox collector moves what piles up in the folders listed in
-`~/.config/cuberhaus-automations/inbox-collector-sources.txt` (by default
-Downloads) into a folder named after each source in the
-Desktop `0 Inbox`. It never overwrites, leaves recent files, partial downloads,
-links and hidden files alone, and `inbox-collector --undo` reverses the last run.
 The shortcut cleanup moves loose `.desktop` and `.url` launchers from the Desktop
-into `Desktop/Shortcuts`. Both accept `--dry-run`.
+into `Desktop/Shortcuts`. It accepts `--dry-run`.
 
 ### Desktop notifications
 
@@ -399,8 +393,7 @@ healthy day is silent. A failed run ends with a warning or error summary that
 names what failed; the journal keeps the details. Where the desktop supports
 notification actions, the summaries are clickable: a failed workspace pull
 opens a terminal in the first failed repository with `git status` showing why
-the pull failed; the inbox collector opens the inbox (with an "Undo last run"
-button); the shortcut cleanup opens the Shortcuts folder; and a failed user
+the pull failed; the shortcut cleanup opens the Shortcuts folder; and a failed user
 package run opens its journal in a terminal. The systemd services pass
 `--notify`; run a script by hand with
 `--notify` to see the same output. The root system-package job relays its
@@ -434,7 +427,6 @@ systemctl --user list-timers 'cuberhaus-*'
 journalctl -u cuberhaus-system-maintenance.service
 journalctl --user -u cuberhaus-user-package-maintenance.service
 journalctl --user -u cuberhaus-workspace-pull.service
-journalctl --user -u cuberhaus-inbox-collector.service
 journalctl --user -u cuberhaus-desktop-shortcut-cleanup.service
 
 # macOS

@@ -47,7 +47,6 @@ convention and is symlinked into `$HOME/.local/` by GNU Stow.
 │   │   ├── system-maintenance  # Root apt/pacman upgrades (Linux)
 │   │   ├── user-package-maintenance # Homebrew/yay upgrades
 │   │   ├── workspace-pull      # Safe recursive pull of ~/cuberhaus
-│   │   ├── inbox-collector     # Moves Downloads/Screenshots into the Desktop inbox (Linux)
 │   │   └── desktop-shortcut-cleanup # Moves loose Desktop launchers into Desktop/Shortcuts (Linux)
 │   ├── lib/                    # Sourced helpers, never run directly
 │   │   ├── cuberhaus-progress.sh # Desktop progress bar and summary notifications
@@ -138,8 +137,8 @@ Most bootstrap entrypoints follow this pattern:
 4. Call installer functions in dependency order, converging machine-specific
   state from hardware, service, and group checks.
 5. Switch default shell to zsh.
-6. Install the package-maintenance, workspace-pull, inbox-collector and
-  desktop-shortcut-cleanup schedules through the root Makefile target.
+6. Install the package-maintenance, workspace-pull and desktop-shortcut-cleanup
+  schedules through the root Makefile target.
 
 The work bootstrap mirrors all terminal output to a persistent per-run log at
 `${XDG_STATE_HOME:-$HOME/.local/state}/cuberhaus/bootstrap/work-<UTC timestamp>-<PID>.log`.
