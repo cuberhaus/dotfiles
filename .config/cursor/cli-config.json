@@ -22,10 +22,10 @@
   "steering": true,
   "rewind": true,
   "model": {
-    "modelId": "claude-sonnet-5-5",
-    "displayModelId": "claude-sonnet-5-5",
-    "displayName": "Claude Sonnet 5.5 300K Extra High",
-    "displayNameShort": "Claude Sonnet 5.5 300K Extra High",
+    "modelId": "muse-wonder-1.0",
+    "displayModelId": "muse-wonder-1.0",
+    "displayName": "Muse Wonder 300K Max",
+    "displayNameShort": "Muse Wonder 300K Max",
     "aliases": [],
     "maxMode": false
   },
@@ -48,10 +48,20 @@
         "id": "reasoning_effort",
         "value": "xhigh"
       }
+    ],
+    "muse-wonder-1.0": [
+      {
+        "id": "context",
+        "value": "300k"
+      },
+      {
+        "id": "reasoning_effort",
+        "value": "max"
+      }
     ]
   },
   "selectedModel": {
-    "modelId": "claude-sonnet-5-5",
+    "modelId": "muse-wonder-1.0",
     "parameters": [
       {
         "id": "context",
@@ -59,11 +69,12 @@
       },
       {
         "id": "reasoning_effort",
-        "value": "xhigh"
+        "value": "max"
       }
     ]
   },
   "modelSelectionHistory": [
+    "muse-wonder-1.0",
     "claude-sonnet-5-5",
     "auto-smart"
   ],
@@ -71,7 +82,7 @@
   "privacyCache": {
     "ghostMode": true,
     "privacyMode": 2,
-    "updatedAt": 1791654399403
+    "updatedAt": 1793210476450
   },
   "autoReviewAvailabilityCache": {
     "backendUrl": "https://api2.cursor.sh",
@@ -90,7 +101,7 @@
     },
     "cliSandboxDefaultEnabled": false,
     "serverHttp2Config": 0,
-    "updatedAt": 1791654028819
+    "updatedAt": 1793210547092
   },
   "authInfo": {
     "email": "pcasacubertagil@deloitte.es",
@@ -104,15 +115,16 @@
   "network": {
     "useHttp1ForAgent": false
   },
-  "approvalMode": "allowlist",
+  "approvalMode": "unrestricted",
   "autoAcceptWebSearch": false,
   "sandbox": {
     "mode": "disabled",
     "networkAccess": "user_config_with_defaults"
   },
-  "runEverythingSettingsPromptStreak": 1,
+  "runEverythingSettingsPromptStreak": 0,
   "attribution": {
     "attributeCommitsToAgent": true,
     "attributePRsToAgent": true
-  }
+  },
+  "showSandboxIntro": false
 }
