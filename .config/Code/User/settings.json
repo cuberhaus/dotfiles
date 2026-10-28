@@ -165,7 +165,7 @@
     "ms-settings"
   ],
   "chat.agent.maxRequests": 4000,
-  "chat.agentHost.claudeAgent.enabled": false,
+  "chat.agentHost.claudeAgent.enabled": true,
   "explorer.confirmDragAndDrop": false,
   "gitlens.ai.model": "vscode",
   "gitlens.ai.vscode.model": "copilot:gpt-4.1",
