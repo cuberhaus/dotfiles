@@ -128,6 +128,10 @@ work_main() {
         warn "Google Drive mount setup failed; rerun it with: make repair REPAIR=drive-mount"
     thunderbird_restore ||
         warn "Thunderbird profile restore failed; rerun it with: rclonepull_thunderbird"
+    # Only writes the curated preferences (calendar week starts on Monday) to the restored
+    # profile's user.js; the profile itself stays on Google Drive, not in Git.
+    thunderbird_user_js_install ||
+        warn "Thunderbird preference setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; thunderbird_user_js_install'"
     anki_restore ||
         warn "Anki data restore failed; rerun it with: rclonepull_anki"
 

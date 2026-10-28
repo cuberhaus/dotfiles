@@ -302,6 +302,7 @@ davinci_resolve_install() { record 'davinci-resolve'; }
 obsidian_vault_install() { record 'obsidian-vault'; }
 rclone_drive_mount_install() { record 'rclone-drive-mount'; }
 thunderbird_restore() { record 'thunderbird-restore'; }
+thunderbird_user_js_install() { record 'thunderbird-user-js'; }
 anki_restore() { record 'anki-restore'; }
 resolve_high_dpi_choice() {
     record "high-dpi-choice:$HIGH_DPI_CHOICE"
@@ -318,7 +319,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\nanki\ncaffeine-autostart\ngnome-screenshot-shortcut\ngnome-keyboard-layout\ndavinci-resolve\nobsidian-vault\nrclone-drive-mount\nthunderbird-restore\nanki-restore\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\nanki\ncaffeine-autostart\ngnome-screenshot-shortcut\ngnome-keyboard-layout\ndavinci-resolve\nobsidian-vault\nrclone-drive-mount\nthunderbird-restore\nthunderbird-user-js\nanki-restore\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"

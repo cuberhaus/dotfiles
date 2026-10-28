@@ -1700,6 +1700,104 @@ thunderbird_restore() {
     bash "$script" thunderbird --apply
 }
 
+# Apply the preferences chosen in Git to the active Thunderbird profile's user.js.
+#
+# The profile itself stays out of Git and on Google Drive (`rclonepush_thunderbird`):
+# it is gigabytes of volatile, app-rewritten state (prefs.js alone carries timestamps,
+# telemetry and calendar sync state, and the folder holds logins, keys and sqlite
+# databases), which would dirty the checkout on every run and cannot be merged across
+# machines.  Only the human-chosen preferences are declared here; user.js is the input
+# Thunderbird reads at startup and never rewrites, while prefs.js is its generated
+# output.  The Drive backup keeps carrying the resulting user.js and prefs.js, so a
+# restore also brings the preferences back.
+#
+# The profile is the one profiles.ini marks Default=1, falling back to the first
+# Install section's Default and then to any profile.  A preference already present
+# with another value is replaced (the previous user.js is kept as user.js.bak); any
+# other preference in user.js is left alone.  Self-skips when Thunderbird has no
+# profile yet (never launched, and the Drive restore brought none).
+thunderbird_user_js_install() {
+    local tb_dir="$HOME/.thunderbird"
+    local ini="$tb_dir/profiles.ini"
+    local resolved profile_kind profile_path is_relative profile_dir user_js
+    local wanted='user_pref("calendar.week.start", 1);'
+
+    if [ ! -f "$ini" ]; then
+        info "No Thunderbird profile found; skipping Thunderbird preferences (launch Thunderbird once or run 'rclonepull_thunderbird' first)."
+        return 0
+    fi
+    resolved=$(awk '
+        /^\[/ { section = $0; next }
+        {
+            line = $0
+            sub(/\r$/, "", line)
+            eq = index(line, "=")
+            if (eq == 0) next
+            key = substr(line, 1, eq - 1)
+            value = substr(line, eq + 1)
+            if (section ~ /^\[Profile[0-9]+\]$/) {
+                if (key == "Path") path[section] = value
+                else if (key == "IsRelative") relative[section] = value
+                else if (key == "Default") isdefault[section] = value
+            } else if (section ~ /^\[Install/ && key == "Default" && value != "" && install == "") {
+                install = value
+            }
+        }
+        END {
+            for (section in path) {
+                if (isdefault[section] == "1") {
+                    rel = ((section in relative) ? relative[section] : "1")
+                    print "default\t" path[section] "\t" rel
+                    exit
+                }
+            }
+            if (install != "") {
+                print "install\t" install "\t1"
+                exit
+            }
+            for (section in path) {
+                rel = ((section in relative) ? relative[section] : "1")
+                print "profile\t" path[section] "\t" rel
+                exit
+            }
+        }
+    ' "$ini") || return 1
+    if [ -z "$resolved" ]; then
+        info "No Thunderbird profile found in $ini; skipping Thunderbird preferences."
+        return 0
+    fi
+    IFS=$(printf '\t') read -r profile_kind profile_path is_relative <<<"$resolved"
+    case $is_relative in
+        0) profile_dir="$profile_path" ;;
+        *) profile_dir="$tb_dir/$profile_path" ;;
+    esac
+    if [ ! -d "$profile_dir" ]; then
+        info "Thunderbird profile $profile_kind folder $profile_dir is missing; skipping Thunderbird preferences."
+        return 0
+    fi
+    user_js="$profile_dir/user.js"
+
+    if [ -f "$user_js" ] && grep -Fxq "$wanted" "$user_js"; then
+        info "Thunderbird calendar week already starts on Monday, skipping."
+        return 0
+    fi
+    if [ -f "$user_js" ] && grep -q '^user_pref("calendar\.week\.start",' "$user_js"; then
+        cp -f "$user_js" "$user_js.bak" || return 1
+        awk -v wanted="$wanted" '
+            /^user_pref\("calendar\.week\.start",/ { if (!done) { print wanted; done = 1 } next }
+            { print }
+        ' "$user_js" >"$user_js.tmp" || return 1
+        mv "$user_js.tmp" "$user_js" || return 1
+        info "Thunderbird calendar week now starts on Monday (the previous $user_js is kept as $user_js.bak)."
+    elif [ -f "$user_js" ]; then
+        printf '%s\n' "$wanted" >>"$user_js" || return 1
+        info "Thunderbird calendar week now starts on Monday ($user_js)."
+    else
+        printf '%s\n%s\n' '// Curated preferences applied by thunderbird_user_js_install (dotfiles bootstrap).' "$wanted" >"$user_js" || return 1
+        info "Thunderbird calendar week now starts on Monday ($user_js)."
+    fi
+}
+
 # Restore Anki's collection, media, and add-ons from `drive:3 Resources/rcloneBackups/Anki`
 # using `.local/scripts/restore-app-data anki --apply`.
 # Self-skips cleanly when rclone or Anki is not installed, when the `drive:`
