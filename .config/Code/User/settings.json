@@ -165,6 +165,9 @@
     "ms-settings"
   ],
   "chat.agent.maxRequests": 4000,
+  "chat.requestQueuing.defaultAction": "steer",
+  "chat.notifyWindowOnConfirmation": "windowNotFocused",
+  "chat.notifyWindowOnResponseReceived": "windowNotFocused",
   "chat.agentHost.claudeAgent.enabled": true,
   "explorer.confirmDragAndDrop": false,
   "gitlens.ai.model": "vscode",
