@@ -9,7 +9,15 @@
   // Subagents without a "model" inherit the calling agent's model.
   "agent": {
     // Read-only search, runs often and in parallel: a cheap model is enough.
-    "explore": { "model": "github-copilot/gpt-6-luna" }
+    "explore": { "model": "github-copilot/gpt-6-luna" },
+    // Cheap tier of "general": the main agent picks it by description for
+    // mechanical work, so it effectively chooses the model per task.
+    // No prompt set, so it behaves like "general", just on a cheaper model.
+    "general-fast": {
+      "mode": "subagent",
+      "model": "github-copilot/gpt-6-luna",
+      "description": "Cheap, fast agent for simple, well-specified, mechanical subtasks: renames across files, boilerplate, applying a known fix in several places, straightforward lookups. Use general instead for debugging, design decisions, or anything ambiguous."
+    }
     // "general" is deliberately unpinned: it edits and does multi-step work,
     // so it inherits the main model's quality and follows model switches.
     // To cut cost, pin it, e.g. { "model": "github-copilot/gpt-6.1-sol" }.
