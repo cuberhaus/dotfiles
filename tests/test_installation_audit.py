@@ -316,18 +316,55 @@ class InstallationAuditContractTests(unittest.TestCase):
         self.assertEqual(
             audit.LINUX_USER_TIMERS,
             (
-                "cuberhaus-user-package-maintenance.timer",
                 "cuberhaus-workspace-pull.timer",
                 "cuberhaus-desktop-shortcut-cleanup.timer",
             ),
         )
-        self.assertEqual(
-            audit.MACOS_AGENTS,
-            (
-                "com.cuberhaus.user-package-maintenance",
-                "com.cuberhaus.workspace-pull",
-            ),
-        )
+        self.assertEqual(audit.MACOS_AGENTS, ("com.cuberhaus.workspace-pull",))
+
+    def run_automation_audit(self, audit, profile, succeeds):
+        """Run the automation audit with every systemctl or launchctl query answered by succeeds."""
+        reporter = audit.Reporter()
+        output = io.StringIO()
+        with (
+            mock.patch.object(audit.shutil, "which", return_value="/usr/bin/tool"),
+            mock.patch.object(audit, "command_succeeds", side_effect=succeeds),
+            contextlib.redirect_stdout(output),
+        ):
+            audit.audit_automations(profile, reporter)
+        return reporter, output.getvalue()
+
+    def test_automation_audit_flags_a_package_upgrade_job_left_by_an_older_install(self):
+        audit = load_audit_module()
+
+        def only_current_timers(command):
+            return command[-1] in audit.LINUX_USER_TIMERS
+
+        reporter, output = self.run_automation_audit(audit, "ubuntu", only_current_timers)
+        self.assertEqual(reporter.issues, 0, output)
+        self.assertIn("All expected systemd timers are enabled and active.", output)
+
+        for timer in audit.RETIRED_LINUX_TIMERS:
+            with self.subTest(timer):
+                reporter, output = self.run_automation_audit(
+                    audit, "ubuntu", lambda command, timer=timer: only_current_timers(command) or command[-1] == timer
+                )
+                self.assertEqual(reporter.issues, 1, output)
+                self.assertIn(f"[DRIFT] {timer} still upgrades packages weekly", output)
+                self.assertIn("make install-automations", output)
+
+        with tempfile.TemporaryDirectory() as home:
+            agents = pathlib.Path(home) / "Library" / "LaunchAgents"
+            agents.mkdir(parents=True)
+            for label in audit.MACOS_AGENTS:
+                (agents / f"{label}.plist").touch()
+            with mock.patch.object(audit.pathlib.Path, "home", return_value=pathlib.Path(home)):
+                reporter, output = self.run_automation_audit(audit, "mac", lambda command: True)
+                self.assertEqual(reporter.issues, 0, output)
+                (agents / f"{audit.RETIRED_MACOS_AGENT}.plist").touch()
+                reporter, output = self.run_automation_audit(audit, "mac", lambda command: True)
+            self.assertEqual(reporter.issues, 1, output)
+            self.assertIn(f"[DRIFT] {audit.RETIRED_MACOS_AGENT} still upgrades packages weekly", output)
 
     def test_every_audited_timer_ships_with_a_service_that_shows_notifications(self):
         audit = load_audit_module()
@@ -342,13 +379,6 @@ class InstallationAuditContractTests(unittest.TestCase):
                 exec_lines = [line for line in service_text.splitlines() if line.startswith("ExecStart=")]
                 self.assertEqual(len(exec_lines), 1)
                 self.assertTrue(exec_lines[0].endswith(" --notify"), exec_lines[0])
-
-        root_service = (
-            REPO_ROOT / ".local" / "share" / "cuberhaus-automations" / "systemd" / "cuberhaus-system-maintenance.service"
-        ).read_text(encoding="utf-8")
-        self.assertIn(
-            "ExecStart=/usr/local/libexec/cuberhaus-system-maintenance --notify", root_service.splitlines()
-        )
 
     def test_apt_policy_parser_reads_versions_and_repository_presence(self):
         audit = load_audit_module()

@@ -15,7 +15,7 @@ format_epoch() {
 }
 
 # The Desktop shortcut cleanup is a Linux-only (systemd) task.
-digest_names=(user-package-maintenance workspace-pull)
+digest_names=(workspace-pull)
 if [[ $(uname -s) == Linux ]]; then
     digest_names+=(desktop-shortcut-cleanup)
 fi
@@ -39,7 +39,7 @@ digest() {
 
 linux_status() {
     if grep -qi microsoft /proc/version 2>/dev/null; then
-        printf 'WSL detected: Windows Task Scheduler owns maintenance schedules.\n'
+        printf 'WSL detected: Windows Task Scheduler owns automation schedules.\n'
         return
     fi
     systemctl list-timers --all 'cuberhaus-*'
@@ -47,23 +47,18 @@ linux_status() {
 }
 
 linux_logs() {
-    journalctl -n "$lines" --no-pager -u cuberhaus-system-maintenance.service
     journalctl --user -n "$lines" --no-pager \
-        -u cuberhaus-user-package-maintenance.service \
         -u cuberhaus-workspace-pull.service \
         -u cuberhaus-desktop-shortcut-cleanup.service
 }
 
 macos_status() {
-    local label
-    for label in com.cuberhaus.user-package-maintenance com.cuberhaus.workspace-pull; do
-        launchctl print "gui/$(id -u)/$label" || true
-    done
+    launchctl print "gui/$(id -u)/com.cuberhaus.workspace-pull" || true
 }
 
 macos_logs() {
     local log_dir="$HOME/Library/Logs/Cuberhaus"
-    tail -n "$lines" "$log_dir/user-package-maintenance.log" "$log_dir/workspace-pull.log"
+    tail -n "$lines" "$log_dir/workspace-pull.log"
 }
 
 case "$action" in

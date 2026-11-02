@@ -26,46 +26,31 @@ uninstall_linux() {
     fi
 
     local user_timers=(
-        cuberhaus-user-package-maintenance.timer
         cuberhaus-workspace-pull.timer
         cuberhaus-desktop-shortcut-cleanup.timer
-    )
-    local system_files=(
-        /etc/systemd/system/cuberhaus-system-maintenance.service
-        /etc/systemd/system/cuberhaus-system-maintenance.timer
-        /usr/local/libexec/cuberhaus-system-maintenance
-        /usr/local/libexec/cuberhaus-progress.sh
     )
 
     if [[ $dry_run == true ]]; then
         show systemctl --user disable --now "${user_timers[@]}"
-        show sudo systemctl disable --now cuberhaus-system-maintenance.timer
-        show sudo rm -f "${system_files[@]}"
         return
     fi
 
     systemctl --user disable --now "${user_timers[@]}" 2>/dev/null || true
-    sudo systemctl disable --now cuberhaus-system-maintenance.timer 2>/dev/null || true
-    sudo rm -f "${system_files[@]}"
     systemctl --user daemon-reload
-    sudo systemctl daemon-reload
 }
 
 uninstall_macos() {
-    local target_dir uid
-    target_dir="$HOME/Library/LaunchAgents"
+    local label=com.cuberhaus.workspace-pull target uid
+    target="$HOME/Library/LaunchAgents/$label.plist"
     uid=$(id -u)
 
-    for label in com.cuberhaus.user-package-maintenance com.cuberhaus.workspace-pull; do
-        target="$target_dir/$label.plist"
-        if [[ $dry_run == true ]]; then
-            show launchctl bootout "gui/$uid/$label"
-            show rm -f "$target"
-            continue
-        fi
-        launchctl bootout "gui/$uid/$label" 2>/dev/null || true
-        rm -f "$target"
-    done
+    if [[ $dry_run == true ]]; then
+        show launchctl bootout "gui/$uid/$label"
+        show rm -f "$target"
+        return
+    fi
+    launchctl bootout "gui/$uid/$label" 2>/dev/null || true
+    rm -f "$target"
 }
 
 case "$(uname -s)" in

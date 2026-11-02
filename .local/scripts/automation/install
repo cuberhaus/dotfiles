@@ -6,14 +6,29 @@ dotfiles_root=$(cd -P "$script_dir/../../.." && pwd)
 platform=$(uname -s)
 
 for required_script in \
-    system-maintenance user-package-maintenance workspace-pull \
-    desktop-shortcut-cleanup \
+    workspace-pull desktop-shortcut-cleanup \
     ../lib/cuberhaus-progress.sh ../lib/xdg-dirs.sh; do
     if [[ ! -r "$script_dir/$required_script" ]]; then
         printf 'Required automation script is missing or unreadable: %s\n' "$script_dir/$required_script" >&2
         exit 1
     fi
 done
+
+# Package upgrades are run by hand. Older versions of this script installed weekly jobs that ran
+# them (a root timer for apt or pacman, a user timer for Homebrew or yay); remove what is left.
+retire_package_maintenance_linux() {
+    systemctl --user stop cuberhaus-user-package-maintenance.timer 2>/dev/null || true
+    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user/timers.target.wants/cuberhaus-user-package-maintenance.timer"
+    if systemctl list-unit-files --no-legend cuberhaus-system-maintenance.timer >/dev/null 2>&1; then
+        sudo systemctl disable --now cuberhaus-system-maintenance.timer
+        sudo rm -f \
+            /etc/systemd/system/cuberhaus-system-maintenance.service \
+            /etc/systemd/system/cuberhaus-system-maintenance.timer \
+            /usr/local/libexec/cuberhaus-system-maintenance \
+            /usr/local/libexec/cuberhaus-progress.sh
+        sudo systemctl daemon-reload
+    fi
+}
 
 install_linux() {
     if grep -qi microsoft /proc/version 2>/dev/null; then
@@ -26,13 +41,10 @@ install_linux() {
     fi
 
     for deployed_file in \
-        "$HOME/.local/scripts/automation/user-package-maintenance" \
         "$HOME/.local/scripts/automation/workspace-pull" \
         "$HOME/.local/scripts/automation/desktop-shortcut-cleanup" \
         "$HOME/.local/scripts/lib/cuberhaus-progress.sh" \
         "$HOME/.local/scripts/lib/xdg-dirs.sh" \
-        "$HOME/.config/systemd/user/cuberhaus-user-package-maintenance.service" \
-        "$HOME/.config/systemd/user/cuberhaus-user-package-maintenance.timer" \
         "$HOME/.config/systemd/user/cuberhaus-workspace-pull.service" \
         "$HOME/.config/systemd/user/cuberhaus-workspace-pull.timer" \
         "$HOME/.config/systemd/user/cuberhaus-desktop-shortcut-cleanup.service" \
@@ -43,23 +55,11 @@ install_linux() {
         fi
     done
 
+    retire_package_maintenance_linux
     systemctl --user daemon-reload
     systemctl --user enable --now \
-        cuberhaus-user-package-maintenance.timer \
         cuberhaus-workspace-pull.timer \
         cuberhaus-desktop-shortcut-cleanup.timer
-
-    sudo install -d -m 0755 /usr/local/libexec
-    sudo install -m 0755 "$script_dir/system-maintenance" /usr/local/libexec/cuberhaus-system-maintenance
-    # The root job sources the notification library from its own root-owned directory,
-    # never from a user home, so a user cannot inject code into the root run.
-    sudo install -m 0644 "$script_dir/../lib/cuberhaus-progress.sh" /usr/local/libexec/cuberhaus-progress.sh
-    sudo install -m 0644 \
-        "$dotfiles_root/.local/share/cuberhaus-automations/systemd/cuberhaus-system-maintenance.service" \
-        "$dotfiles_root/.local/share/cuberhaus-automations/systemd/cuberhaus-system-maintenance.timer" \
-        /etc/systemd/system/
-    sudo systemctl daemon-reload
-    sudo systemctl enable --now cuberhaus-system-maintenance.timer
 }
 
 install_macos() {
@@ -71,17 +71,16 @@ install_macos() {
     uid=$(id -u)
     now=$(date +%s)
 
-    for deployed_script in \
-        "$HOME/.local/scripts/automation/user-package-maintenance" \
-        "$HOME/.local/scripts/automation/workspace-pull"; do
-        if [[ ! -r "$deployed_script" ]]; then
-            printf 'Required Stow deployment is missing: %s\nRun make restow first.\n' "$deployed_script" >&2
-            exit 1
-        fi
-    done
+    if [[ ! -r "$HOME/.local/scripts/automation/workspace-pull" ]]; then
+        printf 'Required Stow deployment is missing: %s\nRun make restow first.\n' "$HOME/.local/scripts/automation/workspace-pull" >&2
+        exit 1
+    fi
+
+    # Package upgrades are run by hand: remove the weekly Homebrew agent older versions installed.
+    launchctl bootout "gui/$uid/com.cuberhaus.user-package-maintenance" 2>/dev/null || true
+    rm -f "$target_dir/com.cuberhaus.user-package-maintenance.plist"
 
     mkdir -p "$target_dir" "$log_dir" "$state_dir"
-    [[ -f "$state_dir/user-package-maintenance.last-success" ]] || printf '%s\n' "$now" > "$state_dir/user-package-maintenance.last-success"
     [[ -f "$state_dir/workspace-pull.last-success" ]] || printf '%s\n' "$now" > "$state_dir/workspace-pull.last-success"
     for source in "$source_dir"/*.plist; do
         target="$target_dir/$(basename "$source")"

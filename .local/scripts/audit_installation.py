@@ -36,17 +36,19 @@ PROFILE_SOURCES = {
     "work": ("work", "work_functions"),
 }
 LINUX_USER_TIMERS = (
-    "cuberhaus-user-package-maintenance.timer",
     "cuberhaus-workspace-pull.timer",
     "cuberhaus-desktop-shortcut-cleanup.timer",
 )
 # The folder of the desktop that the desktop-shortcut-cleanup automation moves launchers into.
 DESKTOP_SHORTCUTS_FOLDER = "Shortcuts"
-LINUX_SYSTEM_TIMER = "cuberhaus-system-maintenance.timer"
-MACOS_AGENTS = (
-    "com.cuberhaus.user-package-maintenance",
-    "com.cuberhaus.workspace-pull",
-)
+MACOS_AGENTS = ("com.cuberhaus.workspace-pull",)
+# Package upgrades are run by hand. Older installs scheduled them weekly with these jobs (the
+# systemctl command that sees each timer, then the macOS agent); make install-automations retires them.
+RETIRED_LINUX_TIMERS = {
+    "cuberhaus-system-maintenance.timer": ("systemctl",),
+    "cuberhaus-user-package-maintenance.timer": ("systemctl", "--user"),
+}
+RETIRED_MACOS_AGENT = "com.cuberhaus.user-package-maintenance"
 MANAGER_VARIABLES = {"apt": "apt", "pac": "pacman", "yay": "yay"}
 # Host files profile detection reads; module-level so tests can point them at fakes.
 PROC_VERSION = pathlib.Path("/proc/version")
@@ -747,7 +749,7 @@ def audit_ide_update_channels(reporter: Reporter) -> None:
             reporter.result(
                 "WARN",
                 f"{name} {current} can be upgraded to {candidate}.",
-                "sudo apt-get update && sudo apt-get full-upgrade (the weekly maintenance timer also does this)",
+                "sudo apt-get update && sudo apt-get full-upgrade",
             )
         else:
             reporter.result("OK", f"{name} {current} is the newest version its apt source offers.")
@@ -1594,8 +1596,13 @@ def audit_automations(profile: str, reporter: Reporter) -> None:
             reporter.result("MISSING", "launchctl is unavailable.")
             return
         missing = []
+        agents = pathlib.Path.home() / "Library" / "LaunchAgents"
+        if (agents / f"{RETIRED_MACOS_AGENT}.plist").exists():
+            reporter.result(
+                "DRIFT", f"{RETIRED_MACOS_AGENT} still upgrades packages weekly; upgrades are run by hand.", "make install-automations"
+            )
         for label in MACOS_AGENTS:
-            plist = pathlib.Path.home() / "Library" / "LaunchAgents" / f"{label}.plist"
+            plist = agents / f"{label}.plist"
             if not plist.is_file() or not command_succeeds(["launchctl", "print", f"gui/{getattr(__import__('os'), 'getuid')()}/{label}"]):
                 missing.append(label)
         if missing:
@@ -1612,8 +1619,9 @@ def audit_automations(profile: str, reporter: Reporter) -> None:
         if not command_succeeds(["systemctl", "--user", "is-enabled", "--quiet", timer])
         or not command_succeeds(["systemctl", "--user", "is-active", "--quiet", timer])
     ]
-    if not command_succeeds(["systemctl", "is-enabled", "--quiet", LINUX_SYSTEM_TIMER]) or not command_succeeds(["systemctl", "is-active", "--quiet", LINUX_SYSTEM_TIMER]):
-        missing.append(LINUX_SYSTEM_TIMER)
+    for timer, systemctl in RETIRED_LINUX_TIMERS.items():
+        if any(command_succeeds([*systemctl, check, "--quiet", timer]) for check in ("is-enabled", "is-active")):
+            reporter.result("DRIFT", f"{timer} still upgrades packages weekly; upgrades are run by hand.", "make install-automations")
     if missing:
         reporter.result("MISSING", f"Enabled and active timer(s): {', '.join(missing)}", "make install-automations")
     else:

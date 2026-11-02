@@ -604,8 +604,8 @@ davinci_uninstall() {
 
 # VS Code, Cursor and Antigravity ship as .deb packages and only receive updates
 # while their vendor apt source is enabled.  Ubuntu release upgrades disable
-# third-party sources, and the weekly `apt-get full-upgrade`
-# (cuberhaus-system-maintenance) then skips those packages without any error.
+# third-party sources, and `apt-get full-upgrade` then skips those packages
+# without any error.
 # So the sources are re-asserted on every bootstrap run and by
 # `make repair REPAIR=ide-repos`, not written once behind a `command -v` guard.
 

@@ -125,7 +125,7 @@ hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
 	chmod +x .git/hooks/pre-commit
 	@echo "Pre-commit hook installed."
 
-install-automations: ## Install native schedules (package maintenance, workspace pull, shortcut cleanup)
+install-automations: ## Install native schedules (workspace pull, shortcut cleanup)
 	bash .local/scripts/automation/install
 
 uninstall-automations: ## Disable and remove native automation schedules
@@ -134,13 +134,13 @@ uninstall-automations: ## Disable and remove native automation schedules
 uninstall-automations-dry-run: ## Preview removal of native automation schedules
 	bash .local/scripts/automation/uninstall --dry-run
 
-maintenance-status: ## Show native maintenance schedule status
+maintenance-status: ## Show native automation schedule status
 	bash .local/scripts/automation/observe status
 
-maintenance-logs: ## Show recent maintenance logs (LINES=100)
+maintenance-logs: ## Show recent automation logs (LINES=100)
 	bash .local/scripts/automation/observe logs "$(or $(LINES),100)"
 
-maintenance-digest: ## Summarize last successful maintenance runs
+maintenance-digest: ## Summarize last successful automation runs
 	bash .local/scripts/automation/observe digest
 
 restore-app: ## Preview app-data restore (APP=thunderbird|calibre|anki; APPLY=1 to copy)

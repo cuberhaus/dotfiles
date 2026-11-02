@@ -326,7 +326,7 @@ Each bootstrap entrypoint follows the same pattern:
 4. Calls installer functions in dependency order (base packages, WM-specific, optional apps).
 5. Converges service, group, and hardware-specific state where applicable.
 6. Switches the default shell to zsh.
-7. Installs the native maintenance schedules shown below.
+7. Installs the native automation schedules shown below.
 
 ### inotify watch limit
 
@@ -363,21 +363,25 @@ The bootstrap installs these automations without requiring a separate command:
 
 | Automation | Linux | macOS |
 | --- | --- | --- |
-| System packages | Sunday 10:00 via system `systemd` (`apt-get` or `pacman`) | Managed by macOS Software Update |
-| User packages | Sunday 10:30 via user `systemd` (Homebrew and/or `yay`) | Sunday 10:30 via `launchd` (Homebrew) |
 | `~/cuberhaus` pull | Daily 11:00 via user `systemd` | Daily 11:00 via `launchd` |
 | Desktop shortcut cleanup | Daily 10:45 via user `systemd` | Not installed |
+
+Package upgrades are deliberately not scheduled, because an unattended upgrade
+can break the machine. Run them by hand with `update` (the operating system's
+packages) or `updateall` (also npm, pip, Emacs and the shell and editor
+plugins); `-n` previews either one. `make install-automations` removes the
+weekly package jobs that older versions installed, and `make audit-installation`
+reports one that is still enabled.
 
 The workspace pull matches the shell helper's depth-3 discovery but uses
 `git pull --ff-only --no-edit` with credential prompts disabled. Repositories
 without upstreams are skipped; diverged or unauthenticated repositories are
-left unchanged and reported. None of the maintenance jobs requests a reboot.
+left unchanged and reported.
 
 On Linux, `Persistent=true` runs a missed timer when the machine becomes
-available. On macOS, the agents run at login as well as on schedule, with state
-guards preventing duplicate work: 20 hours for workspace pulls and seven days
-for user package updates. WSL deliberately installs no duplicate timers because
-Windows Task Scheduler owns the same automations.
+available. On macOS, the agent runs at login as well as on schedule, with a
+20-hour state guard preventing duplicate pulls. WSL deliberately installs no
+duplicate timers because Windows Task Scheduler owns the same automations.
 
 The shortcut cleanup moves loose `.desktop` and `.url` launchers from the Desktop
 into `Desktop/Shortcuts`. It accepts `--dry-run`.
@@ -386,19 +390,16 @@ into `Desktop/Shortcuts`. It accepts `--dry-run`.
 
 On Linux, the scheduled jobs report through the desktop notification service
 (`gdbus`, with `notify-send` as a fallback). A progress bar appears only once a
-run has lasted ten seconds, with one step per repository, package or folder.
+run has lasted ten seconds, with one step per repository or folder.
 When the run ends, a summary appears if something changed or went wrong. A run
 that had nothing to do shows nothing and closes any bar it had opened, so a
 healthy day is silent. A failed run ends with a warning or error summary that
 names what failed; the journal keeps the details. Where the desktop supports
 notification actions, the summaries are clickable: a failed workspace pull
 opens a terminal in the first failed repository with `git status` showing why
-the pull failed; the shortcut cleanup opens the Shortcuts folder; and a failed user
-package run opens its journal in a terminal. The systemd services pass
-`--notify`; run a script by hand with
-`--notify` to see the same output. The root system-package job relays its
-notifications to the logged-in graphical session, and nothing is shown when
-nobody is logged in. macOS and WSL show no notifications. See
+the pull failed, and the shortcut cleanup opens the Shortcuts folder. The
+systemd services pass `--notify`; run a script by hand with `--notify` to see
+the same output. macOS and WSL show no notifications. See
 [docs/agents/automation-notifications.md](docs/agents/automation-notifications.md).
 
 For an existing checkout, restow the new files and install the schedules:
@@ -422,17 +423,12 @@ Inspect the schedules and logs:
 
 ```bash
 # Linux
-systemctl list-timers 'cuberhaus-*'
 systemctl --user list-timers 'cuberhaus-*'
-journalctl -u cuberhaus-system-maintenance.service
-journalctl --user -u cuberhaus-user-package-maintenance.service
 journalctl --user -u cuberhaus-workspace-pull.service
 journalctl --user -u cuberhaus-desktop-shortcut-cleanup.service
 
 # macOS
-launchctl print "gui/$UID/com.cuberhaus.user-package-maintenance"
 launchctl print "gui/$UID/com.cuberhaus.workspace-pull"
-tail -f "$HOME/Library/Logs/Cuberhaus/user-package-maintenance.log"
 tail -f "$HOME/Library/Logs/Cuberhaus/workspace-pull.log"
 ```
 
