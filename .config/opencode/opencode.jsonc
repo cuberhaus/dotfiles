@@ -6,9 +6,12 @@
   "compaction": { "prune": true },
   // Lightweight tasks (session titles, summaries)
   "small_model": "github-copilot/gpt-6-luna",
-  // Subagents otherwise inherit the caller's model; run them on cheaper ones
+  // Subagents without a "model" inherit the calling agent's model.
   "agent": {
-    "explore": { "model": "github-copilot/gpt-6-luna" },
-    "general": { "model": "github-copilot/gpt-6.1-sol" }
+    // Read-only search, runs often and in parallel: a cheap model is enough.
+    "explore": { "model": "github-copilot/gpt-6-luna" }
+    // "general" is deliberately unpinned: it edits and does multi-step work,
+    // so it inherits the main model's quality and follows model switches.
+    // To cut cost, pin it, e.g. { "model": "github-copilot/gpt-6.1-sol" }.
   }
 }
