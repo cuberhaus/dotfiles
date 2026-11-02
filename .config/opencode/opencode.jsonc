@@ -2,6 +2,8 @@
   "$schema": "https://opencode.ai/config.json",
   "lsp": true,
   "formatter": true,
+  // Drop old tool outputs from long sessions to save context
+  "compaction": { "prune": true },
   // Lightweight tasks (session titles, summaries)
   "small_model": "github-copilot/gpt-6-luna",
   // Subagents otherwise inherit the caller's model; run them on cheaper ones
