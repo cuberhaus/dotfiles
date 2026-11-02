@@ -6,6 +6,6 @@
   // Subagents otherwise inherit the caller's model; run them on cheaper ones
   "agent": {
     "explore": { "model": "github-copilot/gpt-6-luna" },
-    "general": { "model": "github-copilot/gpt-6-luna" }
+    "general": { "model": "github-copilot/gpt-6.1-sol" }
   }
 }
