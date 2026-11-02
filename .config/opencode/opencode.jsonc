@@ -6,6 +6,17 @@
   "compaction": { "prune": true },
   // Lightweight tasks (session titles, summaries)
   "small_model": "github-copilot/gpt-6-luna",
+  // Luna defaults to maximum reasoning, including subagents and small-model jobs.
+  // An explicitly selected variant can override this default.
+  "provider": {
+    "github-copilot": {
+      "models": {
+        "gpt-6-luna": {
+          "options": { "reasoningEffort": "max" }
+        }
+      }
+    }
+  },
   // Subagents without a "model" inherit the calling agent's model.
   "agent": {
     // Read-only search, runs often and in parallel: a cheap model is enough.
