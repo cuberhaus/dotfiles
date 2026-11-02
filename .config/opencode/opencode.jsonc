@@ -5,7 +5,7 @@
   "small_model": "github-copilot/claude-haiku-5.5",
   // Subagents otherwise inherit the caller's model; run them on cheaper ones
   "agent": {
-    "explore": { "model": "github-copilot/claude-haiku-5.5" },
-    "general": { "model": "github-copilot/claude-sonnet-5.5" }
+    "explore": { "model": "github-copilot/gpt-6-luna" },
+    "general": { "model": "github-copilot/gpt-6-luna" }
   }
 }
