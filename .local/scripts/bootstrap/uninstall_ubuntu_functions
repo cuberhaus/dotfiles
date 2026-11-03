@@ -57,6 +57,10 @@ ubuntu_gui_uninstall() {
     # Cursor CLI
     cursor_cli_uninstall
 
+    # Oh My Pi (preserve settings, credentials, and sessions)
+    omp_cli_uninstall
+    omo_cli_uninstall
+
     # Pi
     npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true
     sudo npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true

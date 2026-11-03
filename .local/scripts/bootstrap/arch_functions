@@ -698,6 +698,10 @@ EOF
         info "Pi already installed, skipping."
     fi
 
+    # Oh My Pi (pinned standalone harness; keeps Pi and OpenCode installed)
+    omp_cli_install || warn "Oh My Pi setup failed; rerun make install-omp."
+    omo_cli_install || warn "OmO Native setup failed; rerun make install-omo."
+
     # GitHub Copilot CLI (AI coding assistant)
     if ! command -v copilot &>/dev/null; then
         info "Installing GitHub Copilot CLI..."

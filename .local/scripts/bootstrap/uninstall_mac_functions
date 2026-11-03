@@ -8,6 +8,9 @@
 cli_uninstall() {
     info "Uninstalling CLI tools..."
 
+    omp_cli_uninstall || true
+    omo_cli_uninstall || true
+
     local formulae=(
         ack aider astyle bat bison cmake eza flex fzf gh git go gpg htop kondo llvm mono
         ncdu neofetch opencode p7zip pi-coding-agent pinentry-mac pkg-config ranger w3m rclone

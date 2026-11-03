@@ -127,6 +127,8 @@ make restow            # Back up conflicts, then re-stow (cleans stale links)
 make dry-run           # Preview Stow and the conflict backup, change nothing
 make lint              # Run shellcheck on all scripts
 make test              # Run deterministic unit tests
+make install-omp       # Install pinned Oh My Pi only (keeps OpenCode/Pi)
+make install-omo       # Install pinned OmO Native too (no OpenCode plugin)
 make check             # Run tests, Gitleaks, and all linters
 make audit-installation # Report installation drift without changing the machine
 make doctor            # Check tools, links, config, environment, packages, and schedules

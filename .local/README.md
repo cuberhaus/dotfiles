@@ -162,6 +162,66 @@ privileges, recovery steps, and unsupported choices are in
 
 See the root [README](../README.md) for quick-start instructions.
 
+## Oh My Pi standalone harness
+
+The `ubuntu`, `arch`, `mac`, and `work` AI-tools stages install
+[Oh My Pi](https://github.com/can1357/oh-my-pi) alongside OpenCode and Pi. To
+install only this CLI, without running a full bootstrap:
+
+```bash
+make install-omp DRY_RUN=true
+make install-omp
+omp --version
+```
+
+The shared `omp_cli_install` helper pins the release and the tagged upstream
+installer's SHA-256. It downloads the entire script before executing it, forces
+the native-binary route (no Bun or sudo), and lets upstream verify the selected
+platform binary's SHA-256. A staged version check runs before the binary moves
+into `~/.local/share/omp/bin/omp`; `~/.local/bin/omp` points there. Reruns skip
+the pinned version, repair a missing link, and leave unmanaged installations
+untouched. Linux and macOS architectures are selected by upstream's installer.
+
+Run `omp`, use `/login`, and select GitHub Copilot to authenticate. Credentials,
+settings, and sessions remain app-owned under `~/.omp`, outside the Stow package
+and Git. Existing `AGENTS.md` and `.github/skills/` are read in place; for example,
+invoke a vault lookup with `/skill:obsidian-ask`. No provider settings or tokens
+are imported from OpenCode.
+
+`make uninstall-omp DRY_RUN=true` previews removal; `make uninstall-omp` removes
+only the managed program and link while preserving application state. These
+steps also run from the matching profile uninstallers. To upgrade the bootstrap
+pin, change the version and installer digest together in `base_functions` and
+the fixture in `tests/test_omp_cli_install.sh`, then rerun `make install-omp`.
+An upstream self-update can diverge from that pin; the bootstrap restores it on
+the next install run.
+
+## OmO Native (oh-my-openagent)
+
+The same four AI-tools profiles also install standalone
+[OmO](https://github.com/code-yeongyu/oh-my-openagent), alongside `omp` and
+OpenCode. `make install-omo DRY_RUN=true` previews it; `make install-omo`
+installs only this CLI. The `omo_cli_install` helper pins the release and the
+tagged installer's SHA-256, and upstream verifies the platform binary against
+its release checksums. Installation uses a temporary HOME so the vendor's
+staging receipt cannot overwrite live `~/.omo/install.json`. The binary is
+version-checked before moving into `~/.local/share/omo/bin/omo`, linked from
+`~/.local/bin/omo`; reruns repair missing links without another download.
+
+Run `omo`, then `/login github-copilot` to sign in. Bootstrap does not run
+`omo setup`, import credentials, register an OpenCode plugin, or change shell
+profiles. Runtime settings, credentials, sessions, and memory remain app-owned
+under `~/.omo`, outside Git/Stow. The first regular OmO session can migrate
+legacy `oh-my-openagent.json` / `oh-my-opencode.json` files if present; review
+the upstream migration guide before launching alongside a legacy plugin.
+Telemetry and automatic memory are enabled by default; use `DO_NOT_TRACK=1 omo`
+to opt out of telemetry, and review memory settings before using private notes.
+
+`make uninstall-omo` removes only the managed binary/link and preserves state;
+`DRY_RUN=true` previews removal. To change the pin, update the version and
+installer digest together in `base_functions` and `tests/test_omo_cli_install.sh`.
+Use `make install-omo` to restore that pin rather than an upstream self-update.
+
 ## IDE update channels
 
 On the `ubuntu` and `work` profiles, Cursor and Antigravity (and VS Code on

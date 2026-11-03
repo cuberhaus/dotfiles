@@ -24,6 +24,8 @@ RESTORE_WORKSPACE_SKILLS ?= 1
 
 .DEFAULT_GOAL := help
 
+.PHONY: install-omp uninstall-omp install-omo uninstall-omo
+
 ##@ General
 
 help: ## Show this help
@@ -119,6 +121,18 @@ repair: ## Re-run one idempotent setup step (REPAIR=config|aliases|environment|v
 	bash .local/scripts/repair-installation "$(REPAIR)" "$(PROFILE)"
 
 ##@ Setup
+
+install-omp: ## Install pinned Oh My Pi only (no sudo/Bun; DRY_RUN=true previews)
+	bash -c 'source .local/scripts/bootstrap/base_functions; omp_cli_install'
+
+uninstall-omp: ## Remove managed Oh My Pi CLI, keeping auth/settings/sessions (DRY_RUN=true previews)
+	bash -c 'source .local/scripts/bootstrap/base_functions; omp_cli_uninstall'
+
+install-omo: ## Install pinned OmO Native only (no sudo/plugin/migration; DRY_RUN=true previews)
+	bash -c 'source .local/scripts/bootstrap/base_functions; omo_cli_install'
+
+uninstall-omo: ## Remove managed OmO CLI, keeping auth/settings/memory/sessions (DRY_RUN=true previews)
+	bash -c 'source .local/scripts/bootstrap/base_functions; omo_cli_uninstall'
 
 hooks: ## Install git pre-commit hook (runs shellcheck on staged files)
 	cp .local/scripts/hooks/pre-commit .git/hooks/pre-commit

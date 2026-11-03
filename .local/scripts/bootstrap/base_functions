@@ -1504,7 +1504,7 @@ nvidia_ctk_uninstall() {
 }
 
 ###############################################################
-# => Shared AI CLI tools (Ollama, OpenCode, Pi, Copilot CLI, Aider)
+# => Shared AI CLI tools (Ollama, OpenCode, Pi, OMP, OmO, Copilot CLI, Aider)
 ###############################################################
 
 ## Install Ollama (local LLM serving) when not already on PATH.
@@ -1553,6 +1553,186 @@ pi_cli_install() {
     else
         info "Pi already installed, skipping."
     fi
+}
+
+## Install the pinned Oh My Pi native CLI without Bun, sudo, or credential migration.
+omp_cli_install() {
+    case "${1:-}" in
+        -h|--help)
+            printf 'Usage: omp_cli_install [--dry-run]\nInstall the pinned Oh My Pi CLI; sign in separately with omp /login.\n'
+            return 0 ;;
+        ""|--dry-run) ;;
+        *) error "Unknown omp_cli_install argument: $1"; return 2 ;;
+    esac
+    [ "$#" -le 1 ] || { error "omp_cli_install takes at most one argument"; return 2; }
+
+    # Bump the version and tagged installer's digest together, with the test fixture.
+    local version="18.16.0"
+    local digest="cd8f77920da58c6f56b5851c841b61d5e30b4ba8f4cab683afba1f8274b56a06"
+    local install_dir="$HOME/.local/share/omp/bin"
+    local binary="$install_dir/omp" link="$HOME/.local/bin/omp"
+    local existing
+
+    if [ "${DRY_RUN:-false}" = true ] || [ "${1:-}" = --dry-run ]; then
+        info "Would install Oh My Pi $version in $install_dir and link $link; no login or config migration."
+        return 0
+    fi
+    existing="$(command -v omp 2>/dev/null || true)"
+    if { [ -n "$existing" ] && [ "$existing" != "$link" ]; } ||
+        { { [ -e "$link" ] || [ -L "$link" ]; } &&
+          { [ ! -L "$link" ] || [ "$(readlink "$link")" != "$binary" ]; }; }; then
+        warn "An unmanaged omp already exists; leaving it untouched. Remove that installation before running make install-omp."
+        return 1
+    fi
+    if [ -x "$binary" ] && [ "$("$binary" --version 2>/dev/null)" = "omp/$version" ]; then
+        mkdir -p "$HOME/.local/bin" && ln -sfn "$binary" "$link" || return 1
+        info "Oh My Pi $version already installed; run omp, then /login to sign in."
+        return 0
+    fi
+
+    mkdir -p "$install_dir" "$HOME/.local/bin" || return 1
+    (
+        local stage checksum
+        stage="$(mktemp -d "$install_dir/.install.XXXXXX")" || exit 1
+        trap 'rm -rf "$stage"' EXIT
+        info "Installing Oh My Pi $version..."
+        curl -fsSL --connect-timeout 10 --max-time 60 \
+            "https://raw.githubusercontent.com/can1357/oh-my-pi/v$version/scripts/install.sh" \
+            -o "$stage/installer.sh" || { warn "Could not download the OMP installer"; exit 1; }
+        if command -v sha256sum >/dev/null 2>&1; then
+            checksum="$(sha256sum "$stage/installer.sh")" || exit 1
+        else
+            checksum="$(shasum -a 256 "$stage/installer.sh")" || exit 1
+        fi
+        [ "${checksum%% *}" = "$digest" ] || { warn "OMP installer checksum mismatch"; exit 1; }
+        # The vendor verifies the platform binary's SHA-256. Stage it so even a
+        # smoke-test failure cannot replace a working installed command.
+        PI_INSTALL_DIR="$stage" PI_BUILD_URL=https://build.stencil.so \
+            bash "$stage/installer.sh" --binary --ref "v$version" || { warn "OMP installer failed"; exit 1; }
+        [ -x "$stage/omp" ] && [ "$("$stage/omp" --version)" = "omp/$version" ] ||
+            { warn "OMP did not produce a working $version binary"; exit 1; }
+        mv -f "$stage/omp" "$binary" && ln -sfn "$binary" "$link" || exit 1
+        info "Oh My Pi $version installed. Run omp, then /login and select GitHub Copilot; credentials stay outside Git."
+    )
+}
+
+## Remove only the bootstrap-managed Oh My Pi binary/link; preserve ~/.omp state.
+omp_cli_uninstall() {
+    case "${1:-}" in
+        -h|--help)
+            printf 'Usage: omp_cli_uninstall [--dry-run]\nRemove the managed OMP CLI; keep settings, credentials, and sessions.\n'
+            return 0 ;;
+        ""|--dry-run) ;;
+        *) error "Unknown omp_cli_uninstall argument: $1"; return 2 ;;
+    esac
+    [ "$#" -le 1 ] || { error "omp_cli_uninstall takes at most one argument"; return 2; }
+    local install_dir="$HOME/.local/share/omp/bin" link="$HOME/.local/bin/omp"
+    if [ "${DRY_RUN:-false}" = true ] || [ "${1:-}" = --dry-run ]; then
+        info "Would remove the managed OMP binary/link; preserve $HOME/.omp."
+        return 0
+    fi
+    if [ -L "$link" ] && [ "$(readlink "$link")" = "$install_dir/omp" ]; then
+        rm -f "$link" || return 1
+    fi
+    rm -f "$install_dir/omp" || return 1
+    rmdir "$install_dir" "$HOME/.local/share/omp" 2>/dev/null || true
+    info "Managed Oh My Pi CLI removed; settings, credentials, and sessions preserved."
+}
+
+## Install pinned OmO Native alongside OpenCode/OMP, without importing their state.
+omo_cli_install() {
+    case "${1:-}" in
+        -h|--help)
+            printf 'Usage: omo_cli_install [--dry-run]\nInstall pinned OmO Native; sign in separately inside omo.\n'
+            return 0 ;;
+        ""|--dry-run) ;;
+        *) error "Unknown omo_cli_install argument: $1"; return 2 ;;
+    esac
+    [ "$#" -le 1 ] || { error "omo_cli_install takes at most one argument"; return 2; }
+
+    # Bump the version and tagged installer's digest together, with the test fixture.
+    local version="5.1.58"
+    local digest="a0aabc454243cd03cf8a817a57225cb3c1b66feb9a1f44b4b0c1b464d689d32b"
+    local install_dir="$HOME/.local/share/omo/bin"
+    local binary="$install_dir/omo" link="$HOME/.local/bin/omo"
+    local existing output=""
+
+    if [ "${DRY_RUN:-false}" = true ] || [ "${1:-}" = --dry-run ]; then
+        info "Would install OmO Native $version in $install_dir and link $link; no plugin, login, or migration."
+        return 0
+    fi
+    existing="$(command -v omo 2>/dev/null || true)"
+    if { [ -n "$existing" ] && [ "$existing" != "$link" ]; } ||
+        { { [ -e "$link" ] || [ -L "$link" ]; } &&
+          { [ ! -L "$link" ] || [ "$(readlink "$link")" != "$binary" ]; }; }; then
+        warn "An unmanaged omo already exists; leaving it untouched. Remove that installation before running make install-omo."
+        return 1
+    fi
+    if [ -x "$binary" ]; then
+        output="$("$binary" --version 2>/dev/null)" || output=""
+    fi
+    case "$output" in
+        "omo $version"|"omo $version "*)
+            mkdir -p "$HOME/.local/bin" && ln -sfn "$binary" "$link" || return 1
+            info "OmO Native $version already installed; run omo and /login to sign in."
+            return 0 ;;
+    esac
+
+    mkdir -p "$install_dir" "$HOME/.local/bin" || return 1
+    (
+        local stage checksum
+        stage="$(mktemp -d "$install_dir/.install.XXXXXX")" || exit 1
+        trap 'rm -rf "$stage"' EXIT
+        info "Installing OmO Native $version..."
+        curl -fsSL --connect-timeout 10 --max-time 60 \
+            "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/v$version/packages/get-worker/scripts/install.sh" \
+            -o "$stage/installer.sh" || { warn "Could not download the OmO installer"; exit 1; }
+        if command -v sha256sum >/dev/null 2>&1; then
+            checksum="$(sha256sum "$stage/installer.sh")" || exit 1
+        else
+            checksum="$(shasum -a 256 "$stage/installer.sh")" || exit 1
+        fi
+        [ "${checksum%% *}" = "$digest" ] || { warn "OmO installer checksum mismatch"; exit 1; }
+        mkdir -p "$stage/home" || exit 1
+        # Isolate the vendor's install receipt as well as its binary. A staging
+        # receipt must not become ~/.omo/install.json with a soon-deleted binPath.
+        HOME="$stage/home" TMPDIR="$stage" GITHUB_PATH="" \
+            OMO_INSTALL_DIR="$stage" OMO_NO_MODIFY_PATH=1 OMO_INSTALL_BASE_URL=https://get.omo.dev \
+            bash "$stage/installer.sh" "$version" </dev/null || { warn "OmO installer failed"; exit 1; }
+        if [ ! -x "$stage/omo" ] || ! output="$("$stage/omo" --version 2>/dev/null)"; then
+            warn "OmO did not produce a working binary"
+            exit 1
+        fi
+        case "$output" in
+            "omo $version"|"omo $version "*) ;;
+            *) warn "OmO did not produce the pinned $version binary"; exit 1 ;;
+        esac
+        mv -f "$stage/omo" "$binary" && ln -sfn "$binary" "$link" || exit 1
+        info "OmO Native $version installed. Run omo and /login github-copilot; omo setup is not run automatically."
+    )
+}
+
+## Remove the bootstrap-managed OmO binary/link while preserving ~/.omo state.
+omo_cli_uninstall() {
+    case "${1:-}" in
+        -h|--help)
+            printf 'Usage: omo_cli_uninstall [--dry-run]\nRemove the managed OmO CLI; preserve settings, credentials, memory, and sessions.\n'
+            return 0 ;;
+        ""|--dry-run) ;;
+        *) error "Unknown omo_cli_uninstall argument: $1"; return 2 ;;
+    esac
+    [ "$#" -le 1 ] || { error "omo_cli_uninstall takes at most one argument"; return 2; }
+    local install_dir="$HOME/.local/share/omo/bin" link="$HOME/.local/bin/omo"
+    if [ "${DRY_RUN:-false}" = true ] || [ "${1:-}" = --dry-run ]; then
+        info "Would remove the managed OmO binary/link; preserve $HOME/.omo."
+        return 0
+    fi
+    if [ -L "$link" ] && [ "$(readlink "$link")" = "$install_dir/omo" ]; then
+        rm -f "$link" || return 1
+    fi
+    rm -f "$install_dir/omo" || return 1
+    rmdir "$install_dir" "$HOME/.local/share/omo" 2>/dev/null || true
+    info "Managed OmO CLI removed; settings, credentials, memory, and sessions preserved."
 }
 
 ## Install GitHub Copilot CLI via npm when not already on PATH.
@@ -1977,7 +2157,3 @@ anki_uninstall() {
     fi
     return 0
 }
-
-
-
-

@@ -342,6 +342,10 @@ gui_apps_install() {
     # Pi (AI coding agent)
     pi_cli_install
 
+    # Oh My Pi (pinned standalone harness; keeps Pi and OpenCode installed)
+    omp_cli_install || warn "Oh My Pi setup failed; rerun make install-omp."
+    omo_cli_install || warn "OmO Native setup failed; rerun make install-omo."
+
     # GitHub Copilot CLI (AI coding assistant)
     copilot_cli_install
 

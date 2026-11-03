@@ -13,6 +13,9 @@ base_uninstall() {
 
     rclone_drive_mount_uninstall || true
 
+    omp_cli_uninstall || true
+    omo_cli_uninstall || true
+
     $pac_remove cmake opencl-headers bazel cudnn cuda conky \
         adapta-gtk-theme arc-gtk-theme arc-icon-theme \
         bat biber bleachbit blender breeze calibre cron dconf-editor dex discord dnsutils github-cli \
