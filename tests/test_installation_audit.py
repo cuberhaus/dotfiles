@@ -463,6 +463,9 @@ antigravity:
         self.assertIn("[WARN] cursor 3.19.19-1 can be upgraded to 3.22.12-1.", output)
         self.assertIn("[DRIFT] antigravity 1.23.2-1 has no enabled apt source, so it never updates.", output)
         self.assertIn("Fix: make repair REPAIR=ide-repos", output)
+        # The warning names one package, so the command upgrades that package, not the whole system.
+        self.assertIn("Fix: sudo apt-get update && sudo apt-get install --only-upgrade cursor\n", output)
+        self.assertNotIn("full-upgrade", output)
         self.assertEqual((reporter.issues, reporter.warnings), (1, 1))
 
     def test_ide_update_channel_audit_only_covers_installed_ide_packages(self):
@@ -544,6 +547,26 @@ antigravity:
         ):
             audit.audit_packages(packages, reporter, profile)
         return reporter, output.getvalue()
+
+    def test_missing_package_names_are_red_and_the_rest_of_the_line_is_not(self):
+        audit = load_audit_module()
+        red, cyan, reset = "\033[31m", "\033[36m", "\033[0m"
+
+        with mock.patch.object(audit, "color_enabled", return_value=True):
+            _, output = self.audit_declared_packages(audit, ["tree", "fd", "jq"], {"jq"})
+
+        self.assertIn(f"[MISSING] 2 expected apt package(s): {red}fd{reset}, {red}tree{reset}\n", output)
+        # The command under it stays the command colour: a package name is never mistaken for one.
+        self.assertIn(f"Fix: {cyan}sudo apt-get install -y fd tree{reset}\n", output)
+
+    def test_missing_package_names_are_plain_text_when_color_is_off(self):
+        audit = load_audit_module()
+
+        with mock.patch.object(audit, "color_enabled", return_value=False):
+            _, output = self.audit_declared_packages(audit, ["tree", "fd"], set())
+
+        self.assertNotIn("\033", output)
+        self.assertIn("[MISSING] 2 expected apt package(s): fd, tree\n", output)
 
     def test_alternative_install_satisfies_a_declared_package(self):
         audit = load_audit_module()
@@ -757,6 +780,107 @@ antigravity:
                 )
                 self.assertIn(f"[MISSING] GNU Stow is not installed.\n         Fix: {command}\n", output)
                 self.assertEqual(reporter.issues, 1)
+
+    def test_color_is_only_for_a_terminal_and_never_with_no_color_or_a_dumb_terminal(self):
+        audit = load_audit_module()
+        terminal = mock.Mock()
+        terminal.isatty.return_value = True
+        cases = (
+            ({"TERM": "xterm-256color"}, True),
+            ({"TERM": "xterm-256color", "NO_COLOR": "1"}, False),
+            ({"TERM": "dumb"}, False),
+            # An empty NO_COLOR counts as unset (no-color.org).
+            ({"TERM": "xterm-256color", "NO_COLOR": ""}, True),
+        )
+
+        for environment, expected in cases:
+            with (
+                self.subTest(environment=environment),
+                mock.patch.object(audit.sys, "stdout", terminal),
+                mock.patch.dict(audit.os.environ, environment, clear=True),
+            ):
+                self.assertIs(audit.color_enabled(), expected)
+        # Captured by a test, piped, or redirected to a file: plain text whatever the environment says.
+        with (
+            mock.patch.object(audit.sys, "stdout", io.StringIO()),
+            mock.patch.dict(audit.os.environ, {"TERM": "xterm-256color"}, clear=True),
+        ):
+            self.assertIs(audit.color_enabled(), False)
+
+    def test_fix_lines_color_the_command_and_gray_the_note_but_leave_prose_alone(self):
+        audit = load_audit_module()
+        cyan, gray, reset = "\033[36m", "\033[90m", "\033[0m"
+
+        with mock.patch.object(audit, "color_enabled", return_value=True):
+            _, output = self.capture_audit(
+                audit,
+                lambda reporter: (
+                    reporter.result("DRIFT", "stale", ["make dry-run", "make restow", "# the first only previews"]),
+                    reporter.result("DRIFT", "PATH", audit.Prose("Start a new login shell")),
+                ),
+            )
+
+        self.assertEqual(
+            output,
+            "  [DRIFT] stale\n"
+            f"         Fix: {cyan}make dry-run{reset}\n"
+            f"              {cyan}make restow{reset}\n"
+            f"              {gray}# the first only previews{reset}\n"
+            "  [DRIFT] PATH\n"
+            "         Fix: Start a new login shell\n",
+        )
+
+    def test_fix_lines_are_plain_text_when_color_is_off(self):
+        audit = load_audit_module()
+
+        with mock.patch.object(audit, "color_enabled", return_value=False):
+            _, output = self.capture_audit(
+                audit, lambda reporter: reporter.result("DRIFT", "stale", ["make restow", "# a note"])
+            )
+
+        self.assertNotIn("\033", output)
+        self.assertEqual(output, "  [DRIFT] stale\n         Fix: make restow\n              # a note\n")
+
+    def test_the_prose_fixes_are_marked_so_they_are_not_colored_as_commands(self):
+        audit = load_audit_module()
+        printed = []
+        reporter = audit.Reporter()
+        with (
+            mock.patch.object(reporter, "result", side_effect=lambda status, message, remedy="": printed.append(remedy)),
+            mock.patch.dict(audit.os.environ, {"EDITOR": "mycustomeditor", "VISUAL": "vim", "PATH": "/usr/bin"}, clear=True),
+            mock.patch.object(audit.shutil, "which", side_effect=lambda name: "/usr/bin/vim" if name == "vim" else None),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            audit.audit_environment(REPO_ROOT, reporter, "work")
+
+        prose = [remedy for remedy in printed if remedy and not isinstance(remedy, list)]
+        self.assertTrue(prose)
+        for remedy in prose:
+            if "install mycustomeditor" in remedy or "Start a new login shell" in remedy:
+                self.assertIsInstance(remedy, audit.Prose, remedy)
+
+    def test_stow_drift_fix_is_two_pasteable_commands_then_a_note(self):
+        audit = load_audit_module()
+        pending = "LINK: .pytest_cache => cuberhaus/dotfiles/.pytest_cache\nWARNING! stowing dotfiles would cause conflicts:\n"
+        stow = subprocess.CompletedProcess(["stow"], 1, stdout=pending, stderr="")
+
+        with (
+            mock.patch.object(audit.shutil, "which", return_value="/usr/bin/stow"),
+            mock.patch.object(audit, "run", return_value=stow),
+            mock.patch.object(audit, "output_width", return_value=80),
+        ):
+            reporter, output = self.capture_audit(audit, lambda reporter: audit.audit_stow(REPO_ROOT, reporter, "work"))
+
+        self.assertIn(
+            "  [DRIFT] Stow reports 2 pending action/conflict line(s).\n"
+            "         Fix: make dry-run\n"
+            "              make restow\n"
+            "              # dry-run only previews. restow first moves each conflicting file\n"
+            "              # to ~/.dotfiles-backup/<timestamp>/, then relinks; restart open\n"
+            "              # shells afterward.\n",
+            output,
+        )
+        self.assertEqual(reporter.issues, 1)
 
     def test_missing_editor_and_font_name_the_install_command_for_the_profile(self):
         audit = load_audit_module()

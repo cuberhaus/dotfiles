@@ -152,6 +152,14 @@ use `make audit-installation PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work
 to override detection. Package expectations are parsed only from functions the
 selected bootstrap actually calls, so commented optional bundles are excluded.
 
+On a terminal the report uses colour so that what to do stands out: the command
+under each `Fix:` is cyan and the `#` note under it gray (advice that is not a
+command, such as "Start a new login shell", stays plain); an expected package
+that is not installed is red, and a package that is installed but declared
+nowhere in the bootstrap is yellow. There is no colour when the output is piped
+or redirected, when `NO_COLOR` is set, or when `TERM` is `dumb`, and
+`--list-extra` never uses it.
+
 The audit also looks the other way. A package that is installed by hand but
 that the selected bootstrap does not declare is reported as a `[NOTICE]`, which
 never changes the exit code, with a `Fix:` command that removes it

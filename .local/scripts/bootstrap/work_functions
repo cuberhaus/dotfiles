@@ -263,6 +263,7 @@ gui_apps_install() {
         libfuse2 \
         libreoffice \
         obs-studio \
+        bleachbit \
         caffeine                # Prevent screen from going to sleep
 
     # ── Google Chrome (.deb download) ────────────────────────────

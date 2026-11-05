@@ -868,6 +868,8 @@ Packages installed outside the bootstrap
   [NOTICE] 2 apt package(s) are not declared by the work bootstrap:
              ffmpeg, git-lfs
          Fix: sudo apt-get remove ffmpeg git-lfs
+              # This removes every package listed above; delete a name from the
+              # command to keep it.
   [NOTICE] 2 more apt package(s) are not declared either. No removal command is
            suggested, because they are kernel, boot loader, firmware or driver
            packages, or the apt log shows no request from you to install them:
@@ -882,6 +884,32 @@ Packages installed outside the bootstrap
 """,
         )
         self.assertEqual((reporter.notices, reporter.warnings, reporter.issues), (2, 0, 0))
+
+    def test_color_paints_each_undeclared_name_in_both_notices_and_moves_no_line_break(self) -> None:
+        yellow, red, reset = "\033[33m", "\033[31m", "\033[0m"
+        chosen = [f"chosen-package-with-a-long-name-{number:02d}" for number in range(30)]
+        os_names = [f"linux-image-{number:02d}" for number in range(30)]
+        extras = self.extras({"apt": sorted(chosen + os_names)}, {"apt": set(os_names)})
+        for width in (60, 80, 100):
+            self.width = width
+            with self.subTest(width=width):
+                _, plain = self.report(extras)
+                with mock.patch.object(self.audit, "color_enabled", return_value=True):
+                    _, colored = self.report(extras)
+
+                # Painting comes after wrapping: without the escape codes, the text is the plain report.
+                self.assertEqual(re.sub(r"\033\[[0-9;]*m", "", colored), plain)
+                for name in chosen + os_names:
+                    self.assertIn(f"{yellow}{name}{reset}", colored)
+                # Only the names are painted: not the headline, the commas or the indent.
+                self.assertNotIn(f"{yellow}package(s)", colored)
+                self.assertNotIn(red, colored)
+
+    def test_one_package_gets_no_note_because_the_command_cannot_remove_more_than_that_one(self) -> None:
+        _, output = self.report(self.extras({"apt": ["ffmpeg"]}))
+
+        self.assertIn("         Fix: sudo apt-get remove ffmpeg\n", output)
+        self.assertNotIn("# This removes every package", output)
 
     def test_no_line_is_longer_than_the_width_and_no_name_is_printed_twice_by_one_notice(self) -> None:
         # Zero-padded so that no name is a prefix of another and a count of one name is exact.

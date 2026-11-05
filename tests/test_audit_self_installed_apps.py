@@ -17,6 +17,7 @@ import importlib.util
 import io
 import os
 import pathlib
+import re
 import shlex
 import subprocess
 import sys
@@ -1044,6 +1045,22 @@ Apps installed outside the bootstrap
 """,
         )
         self.assertEqual((reporter.notices, reporter.warnings, reporter.issues), (1, 0, 0))
+
+    def test_color_paints_the_removal_command_of_an_app_and_moves_no_line_break(self) -> None:
+        cyan, reset = "\033[36m", "\033[0m"
+        self.three_apps()
+        _, plain = self.report()
+
+        with mock.patch.object(self.audit, "color_enabled", return_value=True):
+            _, colored = self.report()
+
+        self.assertEqual(re.sub(r"\033\[[0-9;]*m", "", colored), plain)
+        # Each line of the command is painted on its own: the alignment under `Fix:` stays plain, and the
+        # two spaces that continue the command on its next line go inside the paint, where they do not show.
+        self.assertIn(f"               Fix: {cyan}rm -rI -- ~/Applications/cursor.AppImage \\{reset}\n", colored)
+        self.assertIn(f"{' ' * 20}{cyan}  ~/.local/share/applications/cursor.desktop{reset}\n", colored)
+        # GPT4All has no command here, so nothing under it is painted.
+        self.assertEqual(colored.count(cyan), 4)
 
     def test_the_layout_of_an_app_with_a_shortcut_at_80_columns(self) -> None:
         program = self.program("gpt4all/bin/chat")

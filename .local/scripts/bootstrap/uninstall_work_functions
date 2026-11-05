@@ -79,7 +79,7 @@ gui_apps_uninstall() {
     
     # apt packages
     $apt_remove firefox thunderbird vlc google-chrome-stable code cursor antigravity warp-terminal \
-        libreoffice obs-studio caffeine dconf-editor libfuse2 || true
+        libreoffice obs-studio bleachbit caffeine dconf-editor libfuse2 || true
     
     # Snaps
     sudo snap remove obsidian || true

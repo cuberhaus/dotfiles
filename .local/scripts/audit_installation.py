@@ -80,6 +80,48 @@ FONT_PACKAGES = {
     "brew": Package("brew-cask", "font-meslo-lg-nerd-font"),
 }
 FIX_PREFIX = "         Fix: "
+# What a Fix: line looks like on a terminal: the command to paste stands out (cyan), a `# note` under it
+# recedes (gray), and advice that is not a command (`Prose`) keeps the terminal's own colour.
+COMMAND_COLOR = "\033[36m"
+NOTE_COLOR = "\033[90m"
+# The package names themselves: red for an expected package that is not installed, yellow for one that is
+# installed but declared nowhere in the bootstrap. Neither is the cyan of a command.
+MISSING_PACKAGE_COLOR = "\033[31m"
+UNDECLARED_PACKAGE_COLOR = "\033[33m"
+COLOR_RESET = "\033[0m"
+
+
+class Prose(str):
+    """A Fix: line that tells the reader what to do but is not a command, so it is never coloured as one."""
+
+
+def color_enabled() -> bool:
+    """Colour only a terminal, and never when NO_COLOR is set (no-color.org) or the terminal is dumb.
+
+    Read at print time, so a pipe, a file or a test that captures stdout always gets plain text.
+    """
+    return sys.stdout.isatty() and not os.environ.get("NO_COLOR") and os.environ.get("TERM") != "dumb"
+
+
+def paint(text: str, color: str) -> str:
+    """The text in the colour, reset afterwards; the text itself when colour is off or there is none."""
+    return f"{color}{text}{COLOR_RESET}" if text and color_enabled() else text
+
+
+def paint_names(text: str, color: str) -> str:
+    """Paint each name in text that is already wrapped; the commas and spaces keep the terminal's colour.
+
+    Painting comes after wrapping, because an escape code has no width on the screen but counts as
+    characters to `textwrap`. A package name holds no space and no comma.
+    """
+    return re.sub(r"[^\s,]+", lambda name: paint(name.group(), color), text)
+
+
+def style_remedy(line: str) -> str:
+    """One line of a remedy as it is printed: a command in cyan, a `#` note in gray, prose as it is."""
+    if isinstance(line, Prose):
+        return str(line)
+    return paint(line, NOTE_COLOR if line.startswith("#") else COMMAND_COLOR)
 
 
 def uncomment(line: str) -> str:
@@ -348,7 +390,7 @@ class Reporter:
         print(prefix + message.replace("\n", "\n" + " " * len(prefix)))
         lines = [remedy] if isinstance(remedy, str) else list(remedy)
         for index, line in enumerate(line for line in lines if line):
-            print(f"{FIX_PREFIX}{line}" if index == 0 else f"{' ' * len(FIX_PREFIX)}{line}")
+            print((FIX_PREFIX if index == 0 else " " * len(FIX_PREFIX)) + style_remedy(line))
         if status in {"DRIFT", "MISSING"}:
             self.issues += 1
         elif status == "WARN":
@@ -405,7 +447,18 @@ def audit_stow(repo_root: pathlib.Path, reporter: Reporter, profile: str | None 
         if line.strip() and "simulation mode" not in line.lower()
     ]
     if result.returncode or output:
-        reporter.result("DRIFT", f"Stow reports {len(output)} pending action/conflict line(s).", "make dry-run, then make restow; restart open shells afterward")
+        reporter.result(
+            "DRIFT",
+            f"Stow reports {len(output)} pending action/conflict line(s).",
+            [
+                "make dry-run",
+                "make restow",
+                *note_lines(
+                    "dry-run only previews. restow first moves each conflicting file to"
+                    " ~/.dotfiles-backup/<timestamp>/, then relinks; restart open shells afterward."
+                ),
+            ],
+        )
         for line in output[:20]:
             print(f"         {line}")
     else:
@@ -424,7 +477,7 @@ def audit_environment(repo_root: pathlib.Path, reporter: Reporter, profile: str 
         if not expected.is_dir():
             reporter.result("MISSING", f"Expected user executable directory: {expected}", "make restow")
         elif expected not in path_entries:
-            reporter.result("DRIFT", f"PATH does not include {expected}.", "Start a new login shell or source ~/.zshenv")
+            reporter.result("DRIFT", f"PATH does not include {expected}.", Prose("Start a new login shell or source ~/.zshenv"))
         else:
             reporter.result("OK", f"PATH includes {expected}.")
 
@@ -432,7 +485,7 @@ def audit_environment(repo_root: pathlib.Path, reporter: Reporter, profile: str 
     if dotfiles and pathlib.Path(dotfiles).expanduser().resolve() == repo_root.resolve():
         reporter.result("OK", "DOTFILES resolves to this checkout.")
     elif dotfiles:
-        reporter.result("DRIFT", f"DOTFILES points to {dotfiles}, not this checkout.", "Start a new login shell after make restow")
+        reporter.result("DRIFT", f"DOTFILES points to {dotfiles}, not this checkout.", Prose("Start a new login shell after make restow"))
     else:
         reporter.result("WARN", "DOTFILES is not set in this process; login-shell initialization could not be verified.")
 
@@ -448,7 +501,7 @@ def audit_environment(repo_root: pathlib.Path, reporter: Reporter, profile: str 
             fix = (
                 install_hint(profile, package)
                 if package
-                else f"install {command}, or point {variable} at an installed editor in ~/.zshenv"
+                else Prose(f"install {command}, or point {variable} at an installed editor in ~/.zshenv")
             )
             reporter.result("MISSING", f"{variable} points to unavailable command: {value}", fix)
 
@@ -652,7 +705,8 @@ def audit_packages(packages: set[Package], reporter: Reporter, profile: str | No
         if missing:
             reporter.result(
                 "MISSING",
-                f"{len(missing)} expected {manager} package(s): {', '.join(missing)}",
+                f"{len(missing)} expected {manager} package(s): "
+                + ", ".join(paint(name, MISSING_PACKAGE_COLOR) for name in missing),
                 package_fix_lines([declared[name] for name in missing], profile),
             )
         else:
@@ -743,13 +797,13 @@ def audit_ide_update_channels(reporter: Reporter) -> None:
             reporter.result(
                 "DRIFT",
                 f"{name} {current} has no enabled apt source, so it never updates.",
-                "make repair REPAIR=ide-repos (DRY_RUN=true previews it)",
+                ["make repair REPAIR=ide-repos", *note_lines("Add DRY_RUN=true to preview what it changes.")],
             )
         elif candidate != current:
             reporter.result(
                 "WARN",
                 f"{name} {current} can be upgraded to {candidate}.",
-                "sudo apt-get update && sudo apt-get full-upgrade",
+                f"sudo apt-get update && sudo apt-get install --only-upgrade {shlex.quote(name)}",
             )
         else:
             reporter.result("OK", f"{name} {current} is the newest version its apt source offers.")
@@ -1199,10 +1253,19 @@ def command_lines(words: Sequence[str], width: int, quote: Callable[[str], str] 
     return lines
 
 
-def notice_text(headline: str, names: Sequence[str]) -> str:
-    """The text of one NOTICE: a wrapped headline, then the names as an indented, wrapped list."""
+def note_lines(text: str) -> list[str]:
+    """A note for the end of a `Fix:` command, wrapped to the report's width; each line starts with `# `."""
+    return wrap(text, output_width() - len(FIX_PREFIX), "# ")
+
+
+def notice_text(headline: str, names: Sequence[str], color: str = "") -> str:
+    """The text of one NOTICE: a wrapped headline, then the names as an indented, wrapped list.
+
+    With a colour, each name is painted once the list is wrapped (the headline stays plain).
+    """
     width = output_width() - len("  [NOTICE] ")
-    return "\n".join([*wrap(headline, width), *wrap(", ".join(names), width, "  ")])
+    listed = wrap(", ".join(names), width, "  ")
+    return "\n".join([*wrap(headline, width), *(paint_names(line, color) for line in listed)])
 
 
 def audit_extra_packages(
@@ -1229,9 +1292,11 @@ def audit_extra_packages(
         if removable:
             headline = f"{len(removable)} {label} package(s) are not declared by the {profile} bootstrap:"
             command = [*REMOVE_COMMANDS[label].split(), *removable]
-            reporter.result(
-                "NOTICE", notice_text(headline, removable), command_lines(command, output_width() - len(FIX_PREFIX))
-            )
+            fix = command_lines(command, output_width() - len(FIX_PREFIX))
+            if len(removable) > 1:
+                # One command for the whole list: say so, because a pasted line removes every name in it.
+                fix += note_lines("This removes every package listed above; delete a name from the command to keep it.")
+            reporter.result("NOTICE", notice_text(headline, removable, UNDECLARED_PACKAGE_COLOR), fix)
         if left_out:
             subject = (
                 f"{len(left_out)} more {label} package(s) are not declared either."
@@ -1240,7 +1305,10 @@ def audit_extra_packages(
             )
             reason = LEFT_OUT_REASONS.get(MANAGER_GROUPS[label], "they look like part of the OS")
             reporter.result(
-                "NOTICE", notice_text(f"{subject} No removal command is suggested, because {reason}:", left_out)
+                "NOTICE",
+                notice_text(
+                    f"{subject} No removal command is suggested, because {reason}:", left_out, UNDECLARED_PACKAGE_COLOR
+                ),
             )
     keep_file = display_path(known_extra_packages_path())
     width = output_width()
@@ -1568,8 +1636,8 @@ def audit_self_installed_apps(repo_root: pathlib.Path, profile: str, reporter: R
             if app.files:
                 # The command comes under the app it removes; its words are already shell-ready.
                 fix = command_lines(removal_words(app.files), text_width - len(APP_FIX_PREFIX), quote=str)
-                lines.append(APP_FIX_PREFIX + fix[0])
-                lines.extend(" " * len(APP_FIX_PREFIX) + line for line in fix[1:])
+                lines.append(APP_FIX_PREFIX + style_remedy(fix[0]))
+                lines.extend(" " * len(APP_FIX_PREFIX) + style_remedy(line) for line in fix[1:])
         reporter.result("NOTICE", "\n".join(lines))
         print("  Nothing was changed. For each app you can:")
         for option in (
