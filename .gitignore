@@ -44,6 +44,15 @@
 !.ssh/config
 
 # =============================================================================
+# .gemini/ — only agy CLI settings (runtime data, history, DBs stay ignored)
+# =============================================================================
+!.gemini/
+.gemini/*
+!.gemini/antigravity-cli/
+.gemini/antigravity-cli/*
+!.gemini/antigravity-cli/settings.json
+
+# =============================================================================
 # Top-level directories (fully tracked)
 # =============================================================================
 !.pi/

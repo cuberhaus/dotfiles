@@ -1,0 +1,18 @@
+{
+  "agentMode": "",
+  "model": "Gemini 4 Hydrogen (XHigh)",
+  "permissions": {
+    "allow": [
+      "command(ls -la \u0026\u0026 find . -maxdepth 3 -name \".git\" -exec dirname {} \\;)"
+    ]
+  },
+  "toolPermission": "always-proceed",
+  "trustedWorkspaces": [
+    "/home/pol/cuberhaus/dotfiles",
+    "/home/pol",
+    "/home/pol/cuberhaus/cuberhaus-workspace",
+    "/home/pol/cuberhaus/pol-server",
+    "/home/pol/cuberhaus/obsidian_vault",
+    "/home/pol/cuberhaus"
+  ]
+}

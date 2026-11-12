@@ -92,6 +92,7 @@ HARDCODED_PATHS_EXCLUDES=(
     ':!.config/zsh/.p10k.zsh'
     ':!.config/vlc/vlc-qt-interface.conf'
     ':!.vim/.netrwhist'
+    ':!.gemini/antigravity-cli/settings.json'
     ':!.local/scripts/bootstrap/arch_functions'
     ':!tests/'
 )

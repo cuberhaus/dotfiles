@@ -172,51 +172,60 @@ test_dconf_directory_is_never_linked_into_the_repository() {
     teardown_case
 }
 
-# DaVinci Resolve keeps its Project Library, LUTs and logs next to the one preference file that is
-# tracked. Where ~/.local/share/DaVinciResolve is missing, Stow links the whole folder into the
-# checkout, so Resolve would then write the user's projects inside the repository.
+# DaVinci Resolve and Antigravity CLI keep app data (projects, LUTs, conversation DBs, logs)
+# next to the one settings file that is tracked. Where the parent folder is missing on a fresh
+# machine, Stow links the whole folder into the checkout, so the app would write user data
+# inside the repository.
 RESOLVE_CONFIG=.local/share/DaVinciResolve/configs/config.user.xml
+AGY_CONFIG=.gemini/antigravity-cli/settings.json
 
-setup_resolve_case() {
+setup_real_folder_case() {
+    local config_rel="$1" content="$2" home_parent_rel="${3:-}"
     setup_case
-    mkdir -p "$HOME/.local/share" "$PACKAGE/$(dirname "$RESOLVE_CONFIG")"
-    printf '<DisplayScale>200</DisplayScale>\n' > "$PACKAGE/$RESOLVE_CONFIG"
+    if [ -n "$home_parent_rel" ]; then
+        mkdir -p "$HOME/$home_parent_rel"
+    fi
+    mkdir -p "$PACKAGE/$(dirname "$config_rel")"
+    printf '%s\n' "$content" > "$PACKAGE/$config_rel"
 }
 
-test_stow_folds_the_resolve_folder_without_the_backup_step() {
-    setup_resolve_case
+assert_stow_folds_without_backup() {
+    local config_rel="$1" content="$2" home_parent_rel="$3" folded_rel="$4"
+    setup_real_folder_case "$config_rel" "$content" "$home_parent_rel"
 
-    run_stow || fail 'Stow must succeed on a machine without a Resolve folder'
+    run_stow || fail "Stow must succeed on a machine without $folded_rel"
 
     # The control: this is the hazard the backup step removes, so if Stow ever stops folding,
     # the test below would pass for the wrong reason.
-    [ -L "$HOME/.local/share/DaVinciResolve" ] \
-        || fail 'Expected Stow to fold the Resolve folder when it does not exist (control)'
+    [ -L "$HOME/$folded_rel" ] \
+        || fail "Expected Stow to fold $folded_rel when it does not exist (control)"
     teardown_case
 }
 
-test_resolve_folder_stays_real_so_its_data_stays_out_of_the_checkout() {
-    setup_resolve_case
+assert_real_folder_stays_real() {
+    local config_rel="$1" content="$2" home_parent_rel="$3"
+    local top_dir_rel="$4" leaf_dir_rel="$5" runtime_a_rel="$6" runtime_b_rel="$7"
+    setup_real_folder_case "$config_rel" "$content" "$home_parent_rel"
 
     run_backup
-    run_stow || fail 'Stow must succeed once the real folders exist'
+    run_stow || fail "Stow must succeed once the real folders for $config_rel exist"
 
-    { [ -d "$HOME/.local/share/DaVinciResolve" ] && [ ! -L "$HOME/.local/share/DaVinciResolve" ]; } \
-        || fail 'The Resolve folder must be a real folder, not a link into the checkout'
-    { [ -d "$HOME/.local/share/DaVinciResolve/configs" ] && [ ! -L "$HOME/.local/share/DaVinciResolve/configs" ]; } \
-        || fail 'The configs folder must be a real folder'
-    [ -L "$HOME/$RESOLVE_CONFIG" ] || fail 'The preference file must be a Stow link'
-    [ "$HOME/$RESOLVE_CONFIG" -ef "$PACKAGE/$RESOLVE_CONFIG" ] \
-        || fail 'The link must resolve to the repository file'
+    { [ -d "$HOME/$top_dir_rel" ] && [ ! -L "$HOME/$top_dir_rel" ]; } \
+        || fail "$top_dir_rel must be a real folder, not a link into the checkout"
+    { [ -d "$HOME/$leaf_dir_rel" ] && [ ! -L "$HOME/$leaf_dir_rel" ]; } \
+        || fail "$leaf_dir_rel must be a real folder"
+    [ -L "$HOME/$config_rel" ] || fail "$config_rel must be a Stow link"
+    [ "$HOME/$config_rel" -ef "$PACKAGE/$config_rel" ] \
+        || fail "The link for $config_rel must resolve to the repository file"
 
-    # What Resolve does on its first run: it fills its folder with data of its own.
-    mkdir -p "$HOME/.local/share/DaVinciResolve/Resolve Disk Database"
-    printf 'a project\n' > "$HOME/.local/share/DaVinciResolve/Resolve Disk Database/project.db"
-    printf 'a log\n' > "$HOME/.local/share/DaVinciResolve/configs/UI.preset"
-    [ ! -e "$PACKAGE/.local/share/DaVinciResolve/Resolve Disk Database" ] \
-        || fail 'Resolve data must not appear inside the checkout'
-    [ ! -e "$PACKAGE/.local/share/DaVinciResolve/configs/UI.preset" ] \
-        || fail 'Resolve files must not appear inside the checkout'
+    # What the app does on its first run: it fills its folder with data of its own.
+    mkdir -p "$HOME/$(dirname "$runtime_a_rel")" "$HOME/$(dirname "$runtime_b_rel")"
+    printf 'app data a\n' > "$HOME/$runtime_a_rel"
+    printf 'app data b\n' > "$HOME/$runtime_b_rel"
+    [ ! -e "$PACKAGE/$runtime_a_rel" ] \
+        || fail "$runtime_a_rel must not appear inside the checkout"
+    [ ! -e "$PACKAGE/$runtime_b_rel" ] \
+        || fail "$runtime_b_rel must not appear inside the checkout"
 
     # Nothing is left to do, so the audit would report no drift.
     stow -n -v -t "$HOME" -d "$CASE_DIR/cuberhaus" dotfiles > "$CASE_DIR/plan.out" 2>&1 \
@@ -224,38 +233,88 @@ test_resolve_folder_stays_real_so_its_data_stays_out_of_the_checkout() {
     teardown_case
 }
 
-test_dry_run_creates_no_resolve_folder() {
-    setup_resolve_case
+assert_dry_run_creates_no_real_folder() {
+    local config_rel="$1" content="$2" home_parent_rel="$3" top_dir_rel="$4"
+    local leaf_dir_rel
+    leaf_dir_rel="$(dirname "$config_rel")"
+    setup_real_folder_case "$config_rel" "$content" "$home_parent_rel"
 
     bash "$PACKAGE/$BACKUP_SCRIPT" --dry-run > "$CASE_DIR/backup.log" 2>&1 \
         || { cat "$CASE_DIR/backup.log" >&2; fail "$BACKUP_SCRIPT --dry-run failed"; }
 
-    grep -Fq "Would create the real folder $HOME/.local/share/DaVinciResolve/configs" "$CASE_DIR/backup.log" \
+    grep -Fq "Would create the real folder $HOME/$leaf_dir_rel" "$CASE_DIR/backup.log" \
         || fail "The preview must name the folder it would create: $(cat "$CASE_DIR/backup.log")"
-    { [ ! -e "$HOME/.local/share/DaVinciResolve" ] && [ ! -L "$HOME/.local/share/DaVinciResolve" ]; } \
+    { [ ! -e "$HOME/$top_dir_rel" ] && [ ! -L "$HOME/$top_dir_rel" ]; } \
         || fail '--dry-run must create nothing'
     teardown_case
 }
 
-test_existing_resolve_folder_is_left_alone() {
-    setup_resolve_case
-    mkdir -p "$HOME/.local/share/DaVinciResolve/configs"
-    printf 'my own preferences\n' > "$HOME/.local/share/DaVinciResolve/configs/config.user.xml"
-    printf 'a project\n' > "$HOME/.local/share/DaVinciResolve/project.db"
+assert_existing_real_folder_is_left_alone() {
+    local config_rel="$1" content="$2" live_content="$3" extra_data_rel="$4"
+    local leaf_dir_rel
+    leaf_dir_rel="$(dirname "$config_rel")"
+    setup_real_folder_case "$config_rel" "$content" ''
+    mkdir -p "$HOME/$leaf_dir_rel" "$HOME/$(dirname "$extra_data_rel")"
+    printf '%s\n' "$live_content" > "$HOME/$config_rel"
+    printf 'existing app data\n' > "$HOME/$extra_data_rel"
 
     run_backup
     grep -Fq 'Created the real folder' "$CASE_DIR/backup.log" \
         && fail 'An existing folder must not be created again'
-    [ "$(cat "$HOME/.local/share/DaVinciResolve/project.db")" = 'a project' ] \
-        || fail 'Existing Resolve data must keep its content'
+    [ "$(cat "$HOME/$extra_data_rel")" = 'existing app data' ] \
+        || fail "Existing data in $extra_data_rel must keep its content"
 
     # The live preference file is a plain conflict, backed up like any other.
     run_stow || fail 'Stow must succeed once the live preference file has been backed up'
-    [ "$HOME/$RESOLVE_CONFIG" -ef "$PACKAGE/$RESOLVE_CONFIG" ] \
+    [ "$HOME/$config_rel" -ef "$PACKAGE/$config_rel" ] \
         || fail 'The link must resolve to the repository file'
-    grep -Fq 'my own preferences' "$(find "$HOME/.dotfiles-backup" -type f -path "*/$RESOLVE_CONFIG" -print -quit)" \
+    grep -Fq "$live_content" "$(find "$HOME/.dotfiles-backup" -type f -path "*/$config_rel" -print -quit)" \
         || fail 'The replaced preference file must be kept in the backup folder'
     teardown_case
+}
+
+test_stow_folds_the_resolve_folder_without_the_backup_step() {
+    assert_stow_folds_without_backup "$RESOLVE_CONFIG" '<DisplayScale>200</DisplayScale>' .local/share .local/share/DaVinciResolve
+}
+
+test_resolve_folder_stays_real_so_its_data_stays_out_of_the_checkout() {
+    assert_real_folder_stays_real \
+        "$RESOLVE_CONFIG" '<DisplayScale>200</DisplayScale>' .local/share \
+        .local/share/DaVinciResolve .local/share/DaVinciResolve/configs \
+        '.local/share/DaVinciResolve/Resolve Disk Database/project.db' \
+        '.local/share/DaVinciResolve/configs/UI.preset'
+}
+
+test_dry_run_creates_no_resolve_folder() {
+    assert_dry_run_creates_no_real_folder "$RESOLVE_CONFIG" '<DisplayScale>200</DisplayScale>' .local/share .local/share/DaVinciResolve
+}
+
+test_existing_resolve_folder_is_left_alone() {
+    assert_existing_real_folder_is_left_alone \
+        "$RESOLVE_CONFIG" '<DisplayScale>200</DisplayScale>' 'my own preferences' \
+        .local/share/DaVinciResolve/project.db
+}
+
+test_stow_folds_the_gemini_folder_without_the_backup_step() {
+    assert_stow_folds_without_backup "$AGY_CONFIG" '{"model":"Gemini"}' '' .gemini
+}
+
+test_agy_folder_stays_real_so_its_data_stays_out_of_the_checkout() {
+    assert_real_folder_stays_real \
+        "$AGY_CONFIG" '{"model":"Gemini"}' '' \
+        .gemini .gemini/antigravity-cli \
+        .gemini/antigravity/antigravity_state.pbtxt \
+        .gemini/antigravity-cli/history.jsonl
+}
+
+test_dry_run_creates_no_agy_folder() {
+    assert_dry_run_creates_no_real_folder "$AGY_CONFIG" '{"model":"Gemini"}' '' .gemini
+}
+
+test_existing_agy_folder_is_left_alone() {
+    assert_existing_real_folder_is_left_alone \
+        "$AGY_CONFIG" '{"model":"Gemini"}' '{"model":"local"}' \
+        .gemini/antigravity-cli/history.jsonl
 }
 
 # The Makefile passes TARGET so that a scratch target never moves anything out of the real home.
@@ -322,6 +381,10 @@ if [ "$STOW_AVAILABLE" = true ]; then
     test_resolve_folder_stays_real_so_its_data_stays_out_of_the_checkout
     test_dry_run_creates_no_resolve_folder
     test_existing_resolve_folder_is_left_alone
+    test_stow_folds_the_gemini_folder_without_the_backup_step
+    test_agy_folder_stays_real_so_its_data_stays_out_of_the_checkout
+    test_dry_run_creates_no_agy_folder
+    test_existing_agy_folder_is_left_alone
     test_backup_follows_stow_target_instead_of_home
 else
     printf 'SKIP: GNU Stow is not installed; the real-Stow scenarios were not run.\n'

@@ -52,6 +52,8 @@ fi
 REAL_FOLDERS=(
     # DaVinci Resolve: Project Library, LUTs, Fusion data and logs sit beside config.user.xml.
     ".local/share/DaVinciResolve/configs"
+    # Antigravity CLI (agy): conversation DBs, brain, logs and history sit beside settings.json.
+    ".gemini/antigravity-cli"
 )
 
 for rel in "${REAL_FOLDERS[@]}"; do
