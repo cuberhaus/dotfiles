@@ -5,7 +5,7 @@
 #
 # Moves every .desktop and .url file of the Desktop into <Desktop>/Shortcuts, which is created when
 # needed. Installers and "add to desktop" menus keep dropping launchers there; this keeps the Desktop
-# for the 0 Inbox and the PARA folders. A file with the same name already in Shortcuts is replaced,
+# for 00 Inbox and the Numbered groups. A file with the same name already in Shortcuts is replaced,
 # which is how a launcher an installer recreates every day stays one file. Hidden files stay.
 #
 #   --desktop DIR   the Desktop folder (default: XDG_DESKTOP_DIR of user-dirs.dirs, else ~/Desktop)

@@ -14,7 +14,7 @@ case "$app" in
     thunderbird)
         command_name=thunderbird
         process_pattern='[/ ]thunderbird([ .]|$)'
-        remote='drive:3 Resources/rcloneBackups/Thunderbird'
+        remote='drive:05 Sistema/rcloneBackups/Thunderbird'
         destination="$HOME/.thunderbird"
         snap_destination="$HOME/snap/thunderbird/common/.thunderbird"
         mac_app='/Applications/Thunderbird.app'
@@ -23,7 +23,7 @@ case "$app" in
     calibre)
         command_name=calibre
         process_pattern='[/ ](calibre|ebook-viewer)([ .]|$)'
-        remote='drive:3 Resources/rcloneBackups/Calibre Library'
+        remote='drive:05 Sistema/rcloneBackups/Calibre Library'
         destination="$HOME/Calibre Library"
         snap_destination=""
         mac_app='/Applications/calibre.app'
@@ -32,7 +32,7 @@ case "$app" in
     anki)
         command_name=anki
         process_pattern='[/ ]([Aa]nki)([ .]|$)'
-        remote='drive:3 Resources/rcloneBackups/Anki'
+        remote='drive:05 Sistema/rcloneBackups/Anki'
         if [[ "$(uname -s)" == Darwin ]]; then
             destination="$HOME/Library/Application Support/Anki2"
         else

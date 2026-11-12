@@ -103,9 +103,9 @@ class InstallationAuditContractTests(unittest.TestCase):
             self.assertIn(f"{app})", restore)
         for guard in ("rclone listremotes", "command -v pgrep", "rclone lsf", "--dry-run", "--filter-from"):
             self.assertIn(guard, restore)
-        self.assertIn("drive:3 Resources/rcloneBackups/Thunderbird", restore)
-        self.assertIn("drive:3 Resources/rcloneBackups/Anki", restore)
-        self.assertIn("drive:3 Resources/rcloneBackups/Calibre Library", restore)
+        self.assertIn("drive:05 Sistema/rcloneBackups/Thunderbird", restore)
+        self.assertIn("drive:05 Sistema/rcloneBackups/Anki", restore)
+        self.assertIn("drive:05 Sistema/rcloneBackups/Calibre Library", restore)
         self.assertTrue((REPO_ROOT / ".config" / "rclone" / "thunderbird-filters.txt").is_file())
         self.assertTrue((REPO_ROOT / ".config" / "rclone" / "anki-filters.txt").is_file())
         self.assertTrue((REPO_ROOT / ".config" / "rclone" / "calibre-filters.txt").is_file())

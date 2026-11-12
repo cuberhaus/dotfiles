@@ -1853,7 +1853,7 @@ rclone_drive_mount_uninstall() {
 ###############################################################
 
 # Restore the Thunderbird profile configuration (accounts, filters, calendars,
-# contacts, extensions) from `drive:3 Resources/rcloneBackups/Thunderbird` using
+# contacts, extensions) from `drive:05 Sistema/rcloneBackups/Thunderbird` using
 # `.local/scripts/restore-app-data thunderbird --apply`.
 # Self-skips cleanly when rclone or Thunderbird is not installed, when the
 # `drive:` remote is not configured yet, or when Thunderbird is running.
@@ -1978,7 +1978,7 @@ thunderbird_user_js_install() {
     fi
 }
 
-# Restore Anki's collection, media, and add-ons from `drive:3 Resources/rcloneBackups/Anki`
+# Restore Anki's collection, media, and add-ons from `drive:05 Sistema/rcloneBackups/Anki`
 # using `.local/scripts/restore-app-data anki --apply`.
 # Self-skips cleanly when rclone or Anki is not installed, when the `drive:`
 # remote is not configured yet, or when Anki is running.
@@ -2005,7 +2005,7 @@ anki_restore() {
     bash "$script" anki --apply
 }
 
-# Restore the Calibre library from `drive:3 Resources/rcloneBackups/Calibre Library`
+# Restore the Calibre library from `drive:05 Sistema/rcloneBackups/Calibre Library`
 # using `.local/scripts/restore-app-data calibre --apply`.
 # Self-skips cleanly when rclone or Calibre is not installed, when the `drive:`
 # remote is not configured yet, or when Calibre is running.
