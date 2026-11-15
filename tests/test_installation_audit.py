@@ -240,6 +240,7 @@ class InstallationAuditContractTests(unittest.TestCase):
 
     def test_ubuntu_and_work_install_telegram_desktop_from_the_official_snap(self):
         audit = load_audit_module()
+        base_functions = (REPO_ROOT / ".local/scripts/bootstrap/base_functions").read_text(encoding="utf-8")
 
         for profile, uninstaller in (
             ("ubuntu", "uninstall_ubuntu_functions"),
@@ -253,7 +254,76 @@ class InstallationAuditContractTests(unittest.TestCase):
             self.assertIsNotNone(telegram, f"{profile}: the bootstrap must install the Telegram Desktop snap")
             self.assertFalse(telegram.classic, f"{profile}: Telegram's official snap is strictly confined")
             uninstall = (REPO_ROOT / ".local/scripts/bootstrap" / uninstaller).read_text(encoding="utf-8")
-            self.assertIn("snap remove telegram-desktop", uninstall, f"{profile}: the uninstaller must remove it")
+            self.assertTrue(
+                "snap remove telegram-desktop" in uninstall
+                or ("common_snaps_uninstall" in uninstall and "snap remove telegram-desktop" in base_functions),
+                f"{profile}: the uninstaller must remove it",
+            )
+
+    def test_ubuntu_and_work_share_common_bootstrap_helpers(self):
+        audit = load_audit_module()
+        bootstrap_dir = REPO_ROOT / ".local" / "scripts" / "bootstrap"
+        ubuntu = (bootstrap_dir / "ubuntu").read_text(encoding="utf-8")
+        ubuntu_funcs = (bootstrap_dir / "ubuntu_functions").read_text(encoding="utf-8")
+        ubuntu_wsl = (bootstrap_dir / "ubuntu_windows").read_text(encoding="utf-8")
+        work = (bootstrap_dir / "work").read_text(encoding="utf-8")
+        work_funcs = (bootstrap_dir / "work_functions").read_text(encoding="utf-8")
+        uninstall_ubuntu = (bootstrap_dir / "uninstall_ubuntu").read_text(encoding="utf-8")
+        uninstall_ubuntu_funcs = (bootstrap_dir / "uninstall_ubuntu_functions").read_text(encoding="utf-8")
+        uninstall_work = (bootstrap_dir / "uninstall_work").read_text(encoding="utf-8")
+        uninstall_work_funcs = (bootstrap_dir / "uninstall_work_functions").read_text(encoding="utf-8")
+        arch_funcs = (bootstrap_dir / "arch_functions").read_text(encoding="utf-8")
+        mac_funcs = (bootstrap_dir / "mac_functions").read_text(encoding="utf-8")
+
+        for helper in (
+            "ubuntu_prepare_environment",
+            "ubuntu_apt_update_and_upgrade",
+        ):
+            self.assertIn(helper, ubuntu)
+            self.assertIn(helper, work)
+            self.assertIn(helper, ubuntu_wsl)
+        for desktop_script in (ubuntu, work):
+            self.assertIn("apply_high_dpi_if_requested", desktop_script)
+            self.assertIn("ubuntu_gnome_desktop_install", desktop_script)
+        self.assertIn("bootstrap_enable_logging ubuntu", ubuntu)
+        self.assertIn("bootstrap_enable_logging ubuntu-windows", ubuntu_wsl)
+        self.assertIn("bootstrap_enable_logging work", work)
+        self.assertIn("configure_default_shell", ubuntu_funcs)
+        self.assertIn("configure_default_shell", work)
+
+        for shared_pkg_fn in audit.SHARED_PACKAGE_FUNCTIONS:
+            self.assertIn(shared_pkg_fn, ubuntu + "\n" + ubuntu_funcs)
+            self.assertIn(shared_pkg_fn, work + "\n" + work_funcs)
+
+        for shared_uninstall_fn in (
+            "ubuntu_cli_base_uninstall",
+            "ubuntu_python_uninstall",
+            "ubuntu_desktop_base_uninstall",
+            "ubuntu_gnome_desktop_uninstall",
+            "ide_apt_sources_uninstall",
+            "chrome_uninstall",
+            "common_snaps_uninstall",
+            "common_ai_tools_uninstall",
+        ):
+            self.assertIn(shared_uninstall_fn, uninstall_ubuntu + "\n" + uninstall_ubuntu_funcs)
+            self.assertIn(shared_uninstall_fn, uninstall_work + "\n" + uninstall_work_funcs)
+
+        self.assertNotIn("neofetch", uninstall_work_funcs)
+        self.assertNotIn("credential.helper", uninstall_work_funcs)
+        self.assertNotIn("pip uninstall -y vim-vint", uninstall_work_funcs)
+        for obsolete in ("albert_install", "i3_install", "optional", "anaconda", "touchpad_speed"):
+            self.assertNotRegex(ubuntu_funcs, rf"(?m)^\s*{obsolete}\s*\(")
+        self.assertIn("ollama_install", arch_funcs)
+        self.assertIn("ollama_install", mac_funcs)
+
+        ubuntu_pkgs = {pkg.name for pkg in audit.expected_packages(REPO_ROOT, "ubuntu")}
+        work_pkgs = {pkg.name for pkg in audit.expected_packages(REPO_ROOT, "work")}
+        wsl_pkgs = {pkg.name for pkg in audit.expected_packages(REPO_ROOT, "ubuntu-windows")}
+        for common_cli in ("jq", "tmux", "tree", "vim-gtk3", "ripgrep", "fd-find", "fastfetch", "pipx"):
+            self.assertIn(common_cli, ubuntu_pkgs)
+            self.assertIn(common_cli, work_pkgs)
+        for desktop_only in ("thunderbird", "bleachbit", "cursor", "antigravity", "blender", "openshot-qt"):
+            self.assertNotIn(desktop_only, wsl_pkgs)
 
     def test_davinci_resolve_prerequisites_follow_the_profiles_that_call_the_step(self):
         audit = load_audit_module()

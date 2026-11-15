@@ -8,19 +8,22 @@ DOTFILES_ROOT="$(cd -P "$bootstrap_dir/../../.." && pwd)"
 export DOTFILES_ROOT
 source "$bootstrap_dir/base_functions"
 source "$bootstrap_dir/ubuntu_functions"
+bootstrap_enable_logging ubuntu
 parse_bootstrap_args "$@"
+ubuntu_prepare_environment
 configure_dual_boot_utc_rtc
 
 ### INSTALLATION
 info "Updating system..."
-sudo apt-get update && sudo apt-get full-upgrade -y
+ubuntu_apt_update_and_upgrade
 
 bootstrap_stow_checkout ubuntu
 
 install_preparation
 
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}"
 echo "#! /bin/sh
-export DISTRO=ubuntu" > "$HOME/.config/distro"
+export DISTRO=ubuntu" > "${XDG_CONFIG_HOME:-$HOME/.config}/distro"
 
 configure_inotify_watches
 
@@ -31,33 +34,18 @@ languagetool_install ||
     warn "LanguageTool setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; languagetool_install'"
 sops_install
 
-#albert_install
 #bloat_install
 emacs_install
-#steam_install
 
 clone_repos
 chrome_install
-#i3_install # Installing i3 requires manual input
 snaps_install
 ubuntu_install
-# Only writes one file under ~/.config/autostart; the package itself comes from ubuntu_install.
-caffeine_indicator_autostart_install ||
-    warn "Caffeine indicator autostart failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; caffeine_indicator_autostart_install'"
-# Only writes one entry under ~/.local/share/applications and one default in ~/.config/mimeapps.list;
-# Nautilus itself comes from the Ubuntu desktop, and a machine without it is skipped.
-smb_scheme_handler_install ||
-    warn "smb:// link handler failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; smb_scheme_handler_install'"
-# Adds <Super><Shift>s to GNOME Shell's interactive screenshot shortcut for keyboards without Print.
-gnome_screenshot_shortcut_install ||
-    warn "GNOME screenshot shortcut failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; gnome_screenshot_shortcut_install'"
-# Configures Spanish ('es') layout and caps:swapescape in GNOME and XWayland.
-gnome_keyboard_layout_install ||
-    warn "GNOME keyboard layout failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; gnome_keyboard_layout_install'"
+ubuntu_gnome_desktop_install
 # OpenLogi comes from GitHub releases, so the network or a changed release layout can break it;
 # that must not abort provisioning.
 openlogi_install ||
-    warn "OpenLogi setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; source ~/.local/scripts/bootstrap/ubuntu_functions; openlogi_install'"
+    warn "OpenLogi setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; openlogi_install'"
 # kondo comes from a GitHub release, so the network or a changed release layout can break it;
 # that must not abort provisioning.
 kondo_install ||
@@ -94,9 +82,8 @@ davinci_resolve_install ||
     warn "DaVinci Resolve setup failed; rerun it with: make repair REPAIR=davinci-resolve"
 ai_tools_install
 vim_install
-if [ "$(basename "$SHELL")" != "zsh" ]; then
-    chsh -s "$(which zsh)"                  # Change default shell to zsh
-fi
+
+apply_high_dpi_if_requested
 
 apply_skip_worktree
 info "Bootstrap complete!"

@@ -1,84 +1,47 @@
 #! /usr/bin/env bash
 # Author: https://github.com/cuberhaus
-flags="-y"
-apt="sudo apt-get $flags install"
-ycm="${DOTFILES_ROOT:-$HOME}/.local/scripts/ycm.sh" # make sure it's there
-scripts="$HOME/.local/scripts"
+apt="sudo apt-get -y install"
 
 base_install () {
+    ubuntu_cli_base_install
+
     local packages=(
-        age                     # Encryption backend for SOPS
         autoconf
         automake
-        bat                     # Better cat
-        build-essential
-        brightnessctl           # Laptop backlight control
-        cmake                   # To install ycm
-        curl
-        ddcutil                 # External monitor DDC brightness control
-        default-jre-headless    # Java runtime (LanguageTool needs 17 or newer)
-        eza                     # ls on steroids (exa replacement)
-        ffmpeg
         file
         fonts-powerline
-        fzf                     # Fuzzy finder
-        gh                      # GitHub CLI
-        git
-        git-lfs
         gnome-shell
-        htop                    # Show system resources
         inkscape
         laptop-detect
         libgtk-3-dev
-        ncdu                    # Manage storage
-        neovim
         nodejs
         npm
         optipng
         pkg-config
-        python3
-        python3-dev             # Python.h, to build ycm
-        python3-pip
-        python3-pynvim          # Python provider Neovim needs to load YouCompleteMe
-        ranger w3m              # Ranger and previews
-        rclone
         ruby-dev
         samba-common-bin
         sassc
-        silversearcher-ag       # Better and faster ack (and grep)
-        smartmontools           # Disk SMART health and self-tests
-        stow
         subversion              # To download repos
-        tmux                    # Terminal multiplexer
-        unzip                   # Unpacks the LanguageTool download
-        vim-gtk                 # Vim with full functionality
         yarn
-        zsh
-        eog                     # Image viewer
-        sshfs                   # Mount remote filesystems over SSH
-        net-tools               # Network utilities (ifconfig, netstat, etc.)
-        nmap                    # Network exploration and security auditing
     )
     $apt "${packages[@]}"
 
-    configure_brightness_access
-
-    chsh -s "$(which zsh)"
+    configure_default_shell
     git_credential_helper_configure
 }
 
 windows_install() {
-    # wslc emacs (to create a shortcut to windows desktop to open emacs directly
+    # wslc emacs (to create a shortcut to windows desktop to open emacs directly)
     # https://wslutiliti.es/wslu/
-    sudo add-apt-repository ppa:wslutilities/wslu
-    sudo apt update
-    sudo apt install wslu
+    sudo add-apt-repository -y ppa:wslutilities/wslu
+    sudo env DEBIAN_FRONTEND=noninteractive apt-get update
+    $apt wslu
     # wslc emacs # create shortcut from windows to ubuntu app
 }
 
 bloat_install () {
     brew install pipes-sh
-    $apt cmatrix cowsay fortune fastfetch  # A cow, random quotes, system info (neofetch left Ubuntu 26.04)
+    $apt cmatrix cowsay fortune  # A cow and random quotes
 }
 
 ensure_virtualization_groups() {
@@ -92,34 +55,27 @@ ensure_virtualization_groups() {
 }
 
 ubuntu_install() {
+    ubuntu_desktop_base_install
+
     local packages=(
         lxappearance            # Theme
         arc-theme
         audacity
-        bleachbit               # Junk and cache cleaner (open source)
         calibre
         cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
         gnome-screensaver       # Screensaver
         gparted                 # Manage partitions
         pavucontrol             # Audio
-        thunderbird             # Email
         timeshift               # Backups
         transmission            # A simpler Torrent client
-        vlc                     # Media player
-        caffeine                # Prevent screen from going to sleep
-        dconf-editor            # Advanced configs
-        obs-studio              # Video recording
         r-base
-        wireguard-tools         # WireGuard VPN (wg, wg-quick)
-        xdotool                 # X11 keyboard and mouse automation
-        ydotool                 # Keyboard and mouse automation through /dev/uinput (needs ydotoold)
-        qrencode                # Generate QR codes from the terminal
     )
     $apt "${packages[@]}"
 
     # Parallel: download RStudio + gnome-terminal theme at the same time
     local tmp_dir
-    tmp_dir="$(mktemp -d)"
+    tmp_dir="$(mktemp -d)" || return 1
+    chmod 755 "$tmp_dir"        # apt reads the file as its unprivileged _apt user
     local rstudio_deb="$tmp_dir/rstudio-latest-amd64.deb"
     local theme_script="$tmp_dir/one-dark-gnome.sh"
 
@@ -136,7 +92,9 @@ ubuntu_install() {
 
     if [ -n "${pid_rstudio:-}" ]; then
         if wait "$pid_rstudio"; then
-            sudo apt-get install -y "$rstudio_deb"
+            chmod 644 "$rstudio_deb"
+            sudo apt-get install -y "$rstudio_deb" ||
+                warn "Failed to install RStudio"
         else
             warn "Failed to download RStudio"
         fi
@@ -154,105 +112,6 @@ ubuntu_install() {
     ensure_virtualization_groups
 }
 
-albert_install () {
-    if ! command -v albert 2>/dev/null; then
-        # Import the signing key into a dedicated keyring (apt-key is deprecated)
-        curl -fsSL https://build.opensuse.org/projects/home:manuelschneid3r/public_key \
-            | gpg --dearmor \
-            | sudo tee /etc/apt/trusted.gpg.d/home-manuelschneid3r.gpg > /dev/null
-        echo 'deb [signed-by=/etc/apt/trusted.gpg.d/home-manuelschneid3r.gpg] http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_20.04/ /' \
-            | sudo tee /etc/apt/sources.list.d/home-manuelschneid3r.list
-        sudo apt-get update
-        sudo apt-get install -y albert
-    fi
-}
-
-chrome_install () {
-    if command -v google-chrome-stable &>/dev/null; then
-        info "Google Chrome already installed, skipping."
-        return
-    fi
-    local tmp_dir
-    tmp_dir="$(mktemp -d)"
-    local chrome_deb="$tmp_dir/google-chrome-stable_current_amd64.deb"
-    wget -O "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    sudo apt install -y "$chrome_deb"
-    rm -rf "$tmp_dir"
-}
-
-# OpenLogi (Logitech Options+ alternative for Bolt and Unifying receivers) has no apt repository:
-# it ships as .deb files on GitHub releases, each signed with minisign. The file must verify
-# against the vendor key below before sudo opens it. The key is the trust anchor in
-# packaging/linux/install.sh of https://github.com/AprilNEA/OpenLogi; check it there before
-# changing it. Installs the latest stable release, or OPENLOGI_VERSION (for example 0.8.11).
-# Callers run this as `openlogi_install ||`, where the shell ignores `set -e`, so every step is
-# chained and a failure warns and returns 1.
-openlogi_install () {
-    if command -v openlogi-agent &>/dev/null; then
-        info "OpenLogi already installed, skipping."
-        return
-    fi
-
-    local releases="https://github.com/AprilNEA/OpenLogi/releases"
-    local minisign_key="RWRRkFtw+rqkvTlCTGKUszSE5dX9CK1teaQD45jO4P9rYlWLO4/nHVUF" # gitleaks:allow (public key)
-    local tag_pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$'
-    local -a fetch=(curl --proto '=https' --proto-redir '=https' --tlsv1.2 --fail --location
-        --silent --show-error --retry 3 --retry-connrefused)
-    local arch tag latest_url work package
-
-    arch="$(dpkg --print-architecture)"
-    case "$arch" in
-        amd64|arm64) ;;
-        *)
-            warn "OpenLogi publishes amd64 and arm64 packages, not $arch."
-            return 1
-            ;;
-    esac
-
-    if [ -n "${OPENLOGI_VERSION:-}" ]; then
-        tag="v${OPENLOGI_VERSION#v}"
-    else
-        latest_url="$("${fetch[@]}" --output /dev/null --write-out '%{url_effective}' "$releases/latest")" || {
-            warn "Could not resolve the latest OpenLogi release."
-            return 1
-        }
-        tag="${latest_url#"$releases/tag/"}"
-    fi
-    if ! [[ "$tag" =~ $tag_pattern ]]; then
-        warn "Refusing the OpenLogi release tag [$tag]."
-        return 1
-    fi
-
-    $apt minisign               # Verifies the release signature
-    if ! command -v minisign &>/dev/null; then
-        warn "minisign could not be installed, so the OpenLogi package cannot be verified."
-        return 1
-    fi
-
-    package="openlogi-${tag}-linux-${arch}.deb"
-    work="$(mktemp -d)" || return 1
-    chmod 755 "$work"           # apt reads the file as its unprivileged _apt user
-    local openlogi_deb="$work/$package"
-    info "Installing OpenLogi $tag..."
-    if "${fetch[@]}" --output "$openlogi_deb" "$releases/download/$tag/$package" &&
-        "${fetch[@]}" --output "$openlogi_deb.minisig" "$releases/download/$tag/$package.minisig" &&
-        minisign -V -P "$minisign_key" -m "$openlogi_deb" -x "$openlogi_deb.minisig" &&
-        sudo apt-get install -y "$openlogi_deb"; then
-        rm -rf "$work"
-    else
-        rm -rf "$work"
-        warn "OpenLogi $tag was not installed: the download, its signature check, or apt failed."
-        return 1
-    fi
-
-    # The package ships a systemd user unit for the agent that owns the receiver.
-    if systemctl --user enable --now openlogi-agent.service; then
-        info "OpenLogi agent started."
-    else
-        warn "Start the OpenLogi agent from a graphical session: systemctl --user enable --now openlogi-agent.service"
-    fi
-    info "Replug the Logitech receiver so the new udev rules apply, then open OpenLogi."
-}
 
 # kondo removes rebuildable folders (node_modules, target, build, ...) from project directories.
 # Ubuntu does not package it and its releases carry no checksum file, so the SHA-256 of each
@@ -308,10 +167,8 @@ kondo_install () {
 
 emacs_install () {
     $apt emacs-gtk              # Emacs
-    # Doom
-    $apt git ripgrep            # required dependencies
-    $apt tar fd-find clang      # optional dependencies
-    $apt libtool                # vterm-module compilation
+    # Doom optional dependencies (git, ripgrep, fd-find come from ubuntu_cli_base_install)
+    $apt tar clang libtool      # libtool is needed for vterm-module compilation
 
     # Chemacs installation to manage doom and personal
     if [ ! -d ~/.emacs.d ] || [ ! -f ~/.emacs.d/chemacs.el ]; then
@@ -322,7 +179,8 @@ emacs_install () {
         info "Chemacs2 already installed, skipping."
     fi
 
-    echo "default" | tee "$HOME/.config/chemacs/profile"
+    mkdir -p "$HOME/.config/chemacs"
+    printf 'default\n' > "$HOME/.config/chemacs/profile"
 
     # systemctl --user enable emacs # this enables emacs as a daemon
 
@@ -332,39 +190,6 @@ emacs_install () {
     else
         info "Doom Emacs already installed, skipping."
     fi
-}
-
-i3_install () {
-    sudo add-apt-repository -y ppa:kgilmer/speed-ricer
-    sudo apt-get update
-
-    local packages=(
-        i3-gaps
-        alsa-utils
-        compton
-        conky
-        feh
-        flameshot
-        i3blocks
-        kitty
-        picom
-        player-ctl
-        pulseaudio
-        pulseaudio-equalizer
-        python-dbus
-        rofi
-        udiskie
-        brightnessctl
-        ddcutil
-        xdotool
-        xfce4-clipman
-        xss-lock
-        yad
-        zenity
-    )
-    $apt "${packages[@]}"
-
-    configure_brightness_access
 }
 
 snaps_install_optional() {
@@ -377,25 +202,14 @@ snaps_install_optional() {
 }
 
 snaps_install() {
+    common_snaps_install
     snap list code &>/dev/null                    || sudo snap install code --classic
-    snap list discord &>/dev/null                 || sudo snap install discord
-    # snap list intellij-idea-professional &>/dev/null || sudo snap install intellij-idea-professional --classic # Not in use right now
-    snap list obsidian &>/dev/null                || sudo snap install obsidian --classic
-    # Video: the official OpenShot snap is newer than the Ubuntu archive and has no PPA
-    # dependency stack; Blender's official classic snap is the upstream build (the archive
-    # one is a distro build).
-    snap list openshot-qt &>/dev/null             || sudo snap install openshot-qt
-    snap list blender &>/dev/null                 || sudo snap install blender --classic
     snap list skype &>/dev/null                   || sudo snap install skype --classic
     snap list slack &>/dev/null                   || sudo snap install slack --classic
-    snap list spotify &>/dev/null                 || sudo snap install spotify
-    snap list telegram-desktop &>/dev/null        || sudo snap install telegram-desktop
-    snap list sublime-text &>/dev/null            || sudo snap install sublime-text --classic
 }
 
 ai_tools_install() {
     info "Installing AI tools..."
-    $apt libfuse2
 
     # ── Apt-repo-based installs ──────────────────────────────────
     # Cursor and Antigravity install from their vendor apt repositories, so the
@@ -405,53 +219,14 @@ ai_tools_install() {
     ide_apt_sources_ensure cursor antigravity ||
         warn "Some IDE apt sources are not configured; fix the cause, then run 'make repair REPAIR=ide-repos'."
 
-    # Cursor (AI IDE — apt repo; an existing AppImage install is kept as is)
-    if ! cursor_is_installed; then
-        info "Installing Cursor..."
-        $apt cursor
-    else
-        info "Cursor already installed, skipping."
-    fi
-
-    # Antigravity (Google AI IDE — apt repo)
-    if ! command -v antigravity &>/dev/null; then
-        info "Installing Antigravity..."
-        $apt antigravity
-    else
-        info "Antigravity already installed, skipping."
-    fi
-
-    # ── curl|sh installers ───────────────────────────────────────
-    # Ollama (local LLM serving)
-    ollama_install
-
-    # OpenCode (AI coding agent)
-    opencode_install
-
-    # Cursor CLI (`agent`; Cursor's own installer, because the IDE package does not include it)
-    cursor_cli_install ||
-        warn "Cursor CLI setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; cursor_cli_install'"
-
-    # Pi (AI coding agent)
-    pi_cli_install
-
-    # Oh My Pi (pinned standalone harness; keeps Pi and OpenCode installed)
-    omp_cli_install || warn "Oh My Pi setup failed; rerun make install-omp."
-    omo_cli_install || warn "OmO Native setup failed; rerun make install-omo."
-
-    # GitHub Copilot CLI (AI coding assistant)
-    copilot_cli_install
-
-    # Aider (AI pair programming)
-    aider_cli_install
+    common_ai_tools_install
 }
 
-vim_install () {
+vim_install() {
     info "Installing vim/neovim plugins..."
-    cd "$HOME" || exit
-    vim +PlugInstall +qall
-    # A failed build must not skip the language providers below; rerun ycm.sh later.
-    bash "$ycm" || warn "YouCompleteMe setup failed; rerun it with: bash $ycm"
+    # A failed build must not skip the language providers below; rerun make repair REPAIR=vim later.
+    vim_plugins_install ||
+        warn "Vim/Neovim plugin setup failed; rerun it with: make repair REPAIR=vim PROFILE=ubuntu"
 
     # Parallel language provider installs (npm and gem are independent; python3-pynvim is installed by apt)
     sudo npm install -g neovim &
@@ -462,19 +237,6 @@ vim_install () {
 
     wait "$pid_npm" || warn "npm neovim install had errors"
     wait "$pid_gem" || warn "gem neovim install had errors"
-}
-
-optional() {
-    $apt texlive-full doxygen   # Doxygen
-    $apt virtualbox-qt          # Virtual machines
-    $apt mangohud               # FPS overlay for games
-    # Qt G
-    $apt build-essential libgl1-mesa-dev libglu1-mesa-dev
-    $apt mesa-common-dev
-    $apt qt-creator
-    $apt qt5-default
-    $apt qttools5-dev
-    $apt qttools5-dev-tools
 }
 
 clone_repos() {
@@ -507,20 +269,4 @@ clone_repos() {
     if [ "$failures" -gt 0 ]; then
         warn "$failures repo(s) failed to clone"
     fi
-}
-
-anaconda () {
-    # Pre-requisites
-    apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6
-
-    # Install anaconda
-    curl -O https://repo.anaconda.com/archive/Anaconda3-2023.09-0-Linux-x86_64.sh
-}
-
-# This has no solution in wayland yet, unfortunately
-touchpad_speed() {
-    $apt xinput
-    # xinput list (find device id)
-    # xinput list-props [device id]
-    # xinput set-prop [device id] [property id] [value]
 }

@@ -175,13 +175,17 @@ test_profiles_and_uninstallers_use_it() {
     local uninstall_functions=("$BOOTSTRAP_DIR/uninstall_ubuntu_functions" "$BOOTSTRAP_DIR/uninstall_work_functions")
     local file
 
+    declare -f ubuntu_gnome_desktop_install | grep -Eq 'gnome_screenshot_shortcut_install \|\|' ||
+        fail 'ubuntu_gnome_desktop_install must run gnome_screenshot_shortcut_install without aborting on failure'
+    declare -f ubuntu_gnome_desktop_uninstall | grep -Eq 'gnome_screenshot_shortcut_uninstall( \|\| true)?' ||
+        fail 'ubuntu_gnome_desktop_uninstall must undo what gnome_screenshot_shortcut_install set'
     for file in "${entry_scripts[@]}"; do
-        grep -Eq '^[[:space:]]*gnome_screenshot_shortcut_install \|\|$' "$file" ||
-            fail "$file must run gnome_screenshot_shortcut_install without aborting on failure"
+        grep -Eq '^[[:space:]]*ubuntu_gnome_desktop_install$' "$file" ||
+            fail "$file must call ubuntu_gnome_desktop_install"
     done
     for file in "${uninstall_functions[@]}"; do
-        grep -Eq '^[[:space:]]*gnome_screenshot_shortcut_uninstall( \|\| true)?$' "$file" ||
-            fail "$file must undo what gnome_screenshot_shortcut_install set"
+        grep -Eq '^[[:space:]]*ubuntu_gnome_desktop_uninstall$' "$file" ||
+            fail "$file must call ubuntu_gnome_desktop_uninstall"
     done
 }
 

@@ -47,66 +47,14 @@ nvidia_install() {
 dev_tools_install() {
     info "Installing dev tools..."
 
+    ubuntu_cli_base_install
+
     local packages=(
-        # Essentials
-        age                     # Encryption backend for SOPS
-        build-essential
-        brightnessctl           # Laptop backlight control
-        cmake
-        curl
-        ddcutil                 # External monitor DDC brightness control
-        default-jre-headless    # Java runtime (LanguageTool needs 17 or newer)
-        git
-        git-lfs                 # Large file storage for Git
-        jq
-        tree
-        wget
-
-        # Shell & terminal
-        zsh
-        stow
-
-        # Editors
-        vim-gtk3
-        neovim
-
-        # Modern CLI tools
-        bat                     # Better cat
-        eza                     # Better ls (exa replacement)
-        fzf                     # Fuzzy finder
-        gh                      # GitHub CLI
-        htop                    # System monitor
-        ncdu                    # Disk usage analyzer
-        ranger                  # File manager
-        ripgrep                 # Better grep
-        fd-find                 # Better find
-        silversearcher-ag       # ag (another grep alternative)
-        w3m                     # Terminal browser (ranger image previews)
-        shellcheck              # Shell script linter
-        unzip
-        unrar
-
-        # Utilities
-        eog                     # Image viewer
         flameshot               # Screenshot tool
-        rclone                  # Sync files to/from cloud storage
-        sshfs                   # Mount remote filesystems over SSH
-        net-tools               # Network utilities (ifconfig, netstat, etc.)
-        nmap                    # Network exploration and security auditing
-        ffmpeg                  # Audio/video converter and toolkit
-        wireguard-tools         # WireGuard VPN (wg, wg-quick)
-        xdotool                 # X11 keyboard and mouse automation
-        ydotool                 # Keyboard and mouse automation through /dev/uinput (needs ydotoold)
-        qrencode                # Generate QR codes from the terminal
-
-        # Hardware info
         hardinfo                # GUI hardware info & benchmarks
         cpu-x                   # CPU-Z style hardware viewer
-        fastfetch               # Terminal system info summary (neofetch left Ubuntu 26.04)
-        smartmontools           # Disk SMART health and self-tests
     )
     $apt "${packages[@]}"
-    configure_brightness_access
 }
 
 ###############################################################
@@ -127,9 +75,7 @@ node_install() {
     info "Installing global npm packages..."
     command -v cline &>/dev/null || sudo npm install -g cline
     command -v markdownlint-cli2 &>/dev/null || sudo npm install -g markdownlint-cli2
-    command -v copilot &>/dev/null || sudo npm install -g @github/copilot
     command -v codex &>/dev/null || sudo npm install -g @openai/codex
-    command -v pi &>/dev/null || sudo npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
     # Add more global npm packages below as needed:
     # sudo npm install -g <package>
@@ -139,25 +85,14 @@ node_install() {
 # => Python
 ###############################################################
 
+## Install pipx tools that complement the shared Python base in ubuntu_cli_base_install.
 python_install() {
-    info "Installing Python..."
-
-    # python3-dev provides Python.h, which YouCompleteMe's ycm_core build needs;
-    # python3-pynvim is the Python provider Neovim needs to load YouCompleteMe.
-    $apt python3 \
-        python3-dev \
-        python3-pip \
-        python3-pynvim \
-        python3-venv \
-        pipx
+    info "Installing Python CLI tools..."
 
     # Linter for vimrc
     command -v vint &>/dev/null || pipx install vim-vint
     # vim-vint imports pkg_resources without declaring setuptools.
     vint --version &>/dev/null || pipx inject --force vim-vint 'setuptools<81'
-
-    # Aider (AI pair programming)
-    command -v aider &>/dev/null || pipx install aider-chat
 
     # Add pip/pipx packages below as needed:
     # pipx install <package>
@@ -257,28 +192,11 @@ gcloud_install() {
 gui_apps_install() {
     info "Installing GUI applications..."
 
+    ubuntu_desktop_base_install
     $apt firefox \
-        thunderbird \
-        vlc \
-        libfuse2 \
-        libreoffice \
-        obs-studio \
-        bleachbit \
-        caffeine                # Prevent screen from going to sleep
+        libreoffice
 
-    # ── Google Chrome (.deb download) ────────────────────────────
-    if ! command -v google-chrome-stable &>/dev/null; then
-        local tmp_dir
-        tmp_dir="$(mktemp -d)"
-        local chrome_deb="$tmp_dir/google-chrome-stable_current_amd64.deb"
-        info "Installing Google Chrome..."
-        if wget -qO "$chrome_deb" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb; then
-            sudo apt-get install -y "$chrome_deb"
-        else
-            warn "Failed to download Google Chrome"
-        fi
-        rm -rf "$tmp_dir"
-    fi
+    chrome_install
 
     # ── Apt-repo-based installs ──────────────────────────────────
     # VS Code, Cursor and Antigravity install from their vendor apt repositories,
@@ -295,35 +213,7 @@ gui_apps_install() {
         info "VS Code already installed, skipping."
     fi
 
-    # Obsidian
-    if ! command -v obsidian &>/dev/null; then
-        info "Installing Obsidian..."
-        sudo snap install obsidian --classic
-    else
-        info "Obsidian already installed, skipping."
-    fi
-
-    # Cursor (AI IDE — apt repo; an existing AppImage install is kept as is)
-    if ! cursor_is_installed; then
-        info "Installing Cursor..."
-        $apt cursor
-    else
-        info "Cursor already installed, skipping."
-    fi
-
-    # Antigravity (Google AI IDE — apt repo)
-    if ! command -v antigravity &>/dev/null; then
-        info "Installing Antigravity..."
-        $apt antigravity
-    else
-        info "Antigravity already installed, skipping."
-    fi
-
-    # ── curl|sh installers ───────────────────────────────────────
-    # Ollama (local LLM serving)
-    ollama_install
-
-    # Claude Code (Anthropic CLI)
+    # Claude Code (Anthropic CLI — work profile)
     if ! command -v claude &>/dev/null; then
         info "Installing Claude Code..."
         local claude_installer
@@ -333,40 +223,7 @@ gui_apps_install() {
         info "Claude Code already installed, skipping."
     fi
 
-    # OpenCode (AI coding agent)
-    opencode_install
+    common_ai_tools_install
 
-    # Cursor CLI (`agent`; Cursor's own installer, because the IDE package does not include it)
-    cursor_cli_install ||
-        warn "Cursor CLI setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; cursor_cli_install'"
-
-    # Pi (AI coding agent)
-    pi_cli_install
-
-    # Oh My Pi (pinned standalone harness; keeps Pi and OpenCode installed)
-    omp_cli_install || warn "Oh My Pi setup failed; rerun make install-omp."
-    omo_cli_install || warn "OmO Native setup failed; rerun make install-omo."
-
-    # GitHub Copilot CLI (AI coding assistant)
-    copilot_cli_install
-
-    # Aider (AI pair programming)
-    aider_cli_install
-
-    # GNOME advanced settings
-    $apt dconf-editor
-
-    # Sublime Text
-    snap list sublime-text &>/dev/null 2>&1 || sudo snap install sublime-text --classic
-
-    # Spotify, Discord and Telegram (snap)
-    snap list spotify &>/dev/null 2>&1 || sudo snap install spotify
-    snap list discord &>/dev/null 2>&1 || sudo snap install discord
-    snap list telegram-desktop &>/dev/null 2>&1 || sudo snap install telegram-desktop
-
-    # Video: the official OpenShot snap is newer than the Ubuntu archive and has no PPA
-    # dependency stack; Blender's official classic snap is the upstream build (the archive
-    # one is a distro build).
-    snap list openshot-qt &>/dev/null 2>&1 || sudo snap install openshot-qt
-    snap list blender &>/dev/null 2>&1 || sudo snap install blender --classic
+    common_snaps_install
 }

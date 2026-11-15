@@ -254,20 +254,28 @@ function_text() {
 
 test_the_installing_profiles_call_the_step_without_aborting() {
     local file function_name body
-    for pair in ubuntu_functions:ai_tools_install arch_functions:ai_tools_install \
-        mac_functions:ai_tools_install work_functions:gui_apps_install; do
+    for pair in arch_functions:ai_tools_install mac_functions:ai_tools_install \
+        base_functions:common_ai_tools_install; do
         file=${pair%%:*}
         function_name=${pair##*:}
         body=$(function_text "$file" "$function_name")
         assert_contains "$body" "cursor_cli_install ||" "$file $function_name runs the step as a non-fatal command"
         assert_contains "$body" "warn \"Cursor CLI setup failed; rerun it with:" "$file $function_name tells how to rerun it"
     done
+    for pair in ubuntu_functions:ai_tools_install work_functions:gui_apps_install; do
+        file=${pair%%:*}
+        function_name=${pair##*:}
+        body=$(function_text "$file" "$function_name")
+        assert_contains "$body" "common_ai_tools_install" "$file $function_name delegates to common_ai_tools_install"
+    done
 }
 
 test_the_uninstallers_remove_the_step() {
-    assert_contains "$(function_text uninstall_ubuntu_functions ubuntu_gui_uninstall)" "cursor_cli_uninstall" \
+    assert_contains "$(function_text base_functions common_ai_tools_uninstall)" "cursor_cli_uninstall" \
+        "the shared AI tools uninstaller removes Cursor CLI"
+    assert_contains "$(function_text uninstall_ubuntu_functions ubuntu_gui_uninstall)" "common_ai_tools_uninstall" \
         "the Ubuntu uninstaller offers the step"
-    assert_contains "$(function_text uninstall_work_functions gui_apps_uninstall)" "cursor_cli_uninstall" \
+    assert_contains "$(function_text uninstall_work_functions gui_apps_uninstall)" "common_ai_tools_uninstall" \
         "the work uninstaller offers the step"
 }
 

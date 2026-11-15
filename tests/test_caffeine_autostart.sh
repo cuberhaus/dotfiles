@@ -135,13 +135,17 @@ test_the_profiles_with_the_apt_package_use_it_and_undo_it() {
     local uninstall_functions=("$BOOTSTRAP_DIR/uninstall_ubuntu_functions" "$BOOTSTRAP_DIR/uninstall_work_functions")
     local file
 
+    declare -f ubuntu_gnome_desktop_install | grep -Eq 'caffeine_indicator_autostart_install \|\|' ||
+        fail 'ubuntu_gnome_desktop_install must run caffeine_indicator_autostart_install without aborting on failure'
+    declare -f ubuntu_gnome_desktop_uninstall | grep -Fq 'autostart/caffeine-indicator.desktop' ||
+        fail 'ubuntu_gnome_desktop_uninstall must remove the autostart entry'
     for file in "${entry_scripts[@]}"; do
-        grep -Eq '^[[:space:]]*caffeine_indicator_autostart_install \|\|$' "$file" ||
-            fail "$file must run caffeine_indicator_autostart_install without aborting on failure"
+        grep -Eq '^[[:space:]]*ubuntu_gnome_desktop_install$' "$file" ||
+            fail "$file must call ubuntu_gnome_desktop_install"
     done
     for file in "${uninstall_functions[@]}"; do
-        grep -Fq 'autostart/caffeine-indicator.desktop' "$file" ||
-            fail "$file must remove the autostart entry it uninstalls the package for"
+        grep -Eq '^[[:space:]]*ubuntu_gnome_desktop_uninstall$' "$file" ||
+            fail "$file must call ubuntu_gnome_desktop_uninstall"
     done
 }
 

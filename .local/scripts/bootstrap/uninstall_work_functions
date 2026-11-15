@@ -19,13 +19,8 @@ nvidia_uninstall() {
 dev_tools_uninstall() {
     info "Uninstalling dev tools..."
     rclone_drive_mount_uninstall || true
-    $apt_remove age brightnessctl build-essential cmake curl ddcutil git jq tree wget zsh stow vim-gtk3 neovim \
-        bat eza fzf htop ncdu ranger ripgrep fd-find silversearcher-ag w3m shellcheck \
-        unzip unrar eog flameshot rclone sshfs net-tools nmap gh hardinfo cpu-x fastfetch neofetch \
-        git-lfs ffmpeg wireguard-tools xdotool ydotool qrencode smartmontools || true
-
-    # Unset global git config
-    git config --global --unset credential.helper || true
+    ubuntu_cli_base_uninstall
+    $apt_remove flameshot hardinfo cpu-x || true
 }
 
 ###############################################################
@@ -33,7 +28,7 @@ dev_tools_uninstall() {
 ###############################################################
 node_uninstall() {
     info "Uninstalling Node.js and global packages..."
-    sudo npm uninstall -g cline markdownlint-cli2 @openai/codex @earendil-works/pi-coding-agent @github/copilot || true
+    sudo npm uninstall -g cline markdownlint-cli2 @openai/codex || true
     $apt_remove nodejs || true
     
     # Remove NodeSource repo
@@ -47,13 +42,12 @@ node_uninstall() {
 python_uninstall() {
     info "Uninstalling Python and pipx packages..."
 
-    # Uninstall vim-vint and pipx packages before removing pip and pipx
-    python3 -m pip uninstall -y vim-vint || true
+    # Uninstall pipx packages (including vim-vint) before removing pip and pipx
     if command -v pipx &>/dev/null; then
         pipx uninstall-all || true
     fi
 
-    $apt_remove python3-dev python3-pip python3-pynvim python3-venv pipx || true
+    ubuntu_python_uninstall
 }
 
 ###############################################################
@@ -78,71 +72,20 @@ gui_apps_uninstall() {
     info "Uninstalling GUI applications..."
     
     # apt packages
-    $apt_remove firefox thunderbird vlc google-chrome-stable code cursor antigravity warp-terminal \
-        libreoffice obs-studio bleachbit caffeine dconf-editor libfuse2 || true
+    ubuntu_desktop_base_uninstall
+    $apt_remove firefox code cursor antigravity warp-terminal libreoffice || true
+    chrome_uninstall
     
     # Snaps
-    sudo snap remove obsidian || true
-    sudo snap remove spotify || true
-    sudo snap remove discord || true
-    sudo snap remove telegram-desktop || true
-    sudo snap remove sublime-text || true
+    common_snaps_uninstall
     sudo snap remove sublime-merge || true
-    sudo snap remove openshot-qt || true
-    sudo snap remove blender || true
     
-    # Remove the IDE apt sources and signing keys (VS Code, Cursor, Antigravity),
-    # including the legacy one-line files and keyring paths older bootstraps wrote
-    local ide
-    for ide in vscode cursor antigravity; do
-        sudo rm -f "/etc/apt/sources.list.d/$ide.sources" \
-            "/etc/apt/sources.list.d/$ide.list" \
-            "/etc/apt/sources.list.d/$ide.list.bak"
-    done
-    sudo rm -f /usr/share/keyrings/microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg \
-        /usr/share/keyrings/anysphere.gpg /etc/apt/keyrings/antigravity-repo-key.gpg
-    
-    # Cursor AppImage removal
-    rm -f "$HOME/Applications/cursor.AppImage"
-    rm -f "$HOME/.local/share/applications/cursor.desktop"
+    # Remove the IDE apt sources, signing keys, and Cursor AppImage artifacts
+    ide_apt_sources_uninstall vscode cursor antigravity
 
-    # Caffeine indicator autostart entry (written by caffeine_indicator_autostart_install)
-    rm -f "${XDG_CONFIG_HOME:-$HOME/.config}/autostart/caffeine-indicator.desktop"
+    ubuntu_gnome_desktop_uninstall
 
-    # smb:// link handler entry and default (written by smb_scheme_handler_install)
-    smb_scheme_handler_uninstall || true
-
-    # GNOME screenshot shortcut (<Super><Shift>s added by gnome_screenshot_shortcut_install)
-    gnome_screenshot_shortcut_uninstall || true
-
-    # GNOME keyboard options (caps:swapescape added by gnome_keyboard_layout_install)
-    gnome_keyboard_layout_uninstall || true
-
-    # OpenCode removal
-    rm -rf "$HOME/.opencode" 2>/dev/null || true
-    rm -f "$HOME/.local/bin/opencode" 2>/dev/null || true
-
-    # Cursor CLI removal
-    cursor_cli_uninstall
-
-    # Oh My Pi (preserve settings, credentials, and sessions)
-    omp_cli_uninstall
-    omo_cli_uninstall
-
-    # Pi removal
-    npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true
-    sudo npm uninstall -g @earendil-works/pi-coding-agent 2>/dev/null || true
-    rm -f "$HOME/.local/bin/pi" 2>/dev/null || true
-
-    # GitHub Copilot CLI removal
-    npm uninstall -g @github/copilot 2>/dev/null || true
-    sudo npm uninstall -g @github/copilot 2>/dev/null || true
-
-    # Aider removal
-    if command -v pipx &>/dev/null; then
-        pipx uninstall aider-chat 2>/dev/null || true
-    fi
-    rm -f "$HOME/.local/bin/aider" 2>/dev/null || true
+    common_ai_tools_uninstall
     
     # Clean up apt caches
     sudo apt-get update

@@ -122,11 +122,18 @@ test_help_dry_run_and_arguments() {
     [ ! -s "$CALLS" ] || fail 'help/dry-run downloaded'
 }
 test_wiring_and_pin() {
-    grep -Fq "local version=\"$VERSION\"" "$ROOT/.local/scripts/bootstrap/base_functions" || fail 'version drift'
-    grep -Fq "local digest=\"$DIGEST\"" "$ROOT/.local/scripts/bootstrap/base_functions" || fail 'digest drift'
-    for profile in arch mac ubuntu work; do
+    local base="$ROOT/.local/scripts/bootstrap/base_functions"
+    grep -Fq "local version=\"$VERSION\"" "$base" || fail 'version drift'
+    grep -Fq "local digest=\"$DIGEST\"" "$base" || fail 'digest drift'
+    grep -Fq 'omo_cli_install || warn' "$base" || fail 'common_ai_tools_install missing install'
+    grep -Fq 'omo_cli_uninstall' "$base" || fail 'common_ai_tools_uninstall missing uninstall'
+    for profile in arch mac; do
         grep -Fq 'omo_cli_install || warn' "$ROOT/.local/scripts/bootstrap/${profile}_functions" || fail "$profile install missing"
         grep -Fq 'omo_cli_uninstall' "$ROOT/.local/scripts/bootstrap/uninstall_${profile}_functions" || fail "$profile uninstall missing"
+    done
+    for profile in ubuntu work; do
+        grep -Fq 'common_ai_tools_install' "$ROOT/.local/scripts/bootstrap/${profile}_functions" || fail "$profile missing common AI tools install"
+        grep -Fq 'common_ai_tools_uninstall' "$ROOT/.local/scripts/bootstrap/uninstall_${profile}_functions" || fail "$profile missing common AI tools uninstall"
     done
     grep -Fq 'install-omo:' "$ROOT/Makefile" || fail 'install target missing'
 }

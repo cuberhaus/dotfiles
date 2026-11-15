@@ -118,12 +118,7 @@ ai_tools_install() {
     # Antigravity: install manually from https://antigravity.dev if needed
 
     # Ollama (local LLM serving)
-    if ! command -v ollama &>/dev/null; then
-        info "Installing Ollama..."
-        curl -fsSL https://ollama.com/install.sh | sh
-    else
-        info "Ollama already installed, skipping."
-    fi
+    ollama_install
 
     # Cursor CLI (`agent`; Cursor's own installer, because the cursor cask does not include it)
     cursor_cli_install ||

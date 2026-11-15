@@ -293,11 +293,11 @@ Run the hermetic test with `bash tests/test_nvidia_container_toolkit.sh`.
 
 ## OpenLogi
 
-On the `ubuntu` profile, `openlogi_install` (in `bootstrap/ubuntu_functions`)
-installs [OpenLogi](https://github.com/AprilNEA/OpenLogi), a Linux replacement
-for Logitech Options+ that pairs and configures Bolt and Unifying receivers (it
-cannot pair Lightspeed ones). It runs after `ubuntu_install`, and a failure only
-warns, because the package comes from the network.
+On the `ubuntu` and `work` profiles, `openlogi_install` (in
+`bootstrap/base_functions`) installs [OpenLogi](https://github.com/AprilNEA/OpenLogi),
+a Linux replacement for Logitech Options+ that pairs and configures Bolt and
+Unifying receivers (it cannot pair Lightspeed ones). It runs non-fatally during
+provisioning, and a failure only warns, because the package comes from the network.
 
 OpenLogi has no apt repository. It ships `.deb` files on GitHub releases, each
 signed with minisign. The step resolves the latest stable release (or
@@ -309,7 +309,7 @@ installs nothing and removes the directory. `minisign` comes from Ubuntu's
 universe repository (24.04 and later). 22.04 does not package it, and there the
 step stops with a warning before it downloads anything.
 
-The key is pinned in `ubuntu_functions`. It is the trust anchor in the vendor's
+The key is pinned in `base_functions`. It is the trust anchor in the vendor's
 `packaging/linux/install.sh`, so check it there before changing it;
 `tests/test_openlogi_install.sh` holds a second copy so that a change is
 deliberate.
@@ -322,9 +322,9 @@ install so the udev rule applies. Only one program can own a receiver, so stop
 Solaar first if you used it. OpenLogi's per-application profiles work on X11
 and XWayland only.
 
-The uninstall checklist of `ubuntu` offers `openlogi_uninstall`, which stops the
-agent and purges the package. apt leaves your own settings in your home folder
-alone, and `minisign` stays. `make audit-installation` declares `minisign`
+The uninstall checklists of `ubuntu` and `work` offer `openlogi_uninstall`, which
+stops the agent and purges the package. apt leaves your own settings in your home
+folder alone, and `minisign` stays. `make audit-installation` declares `minisign`
 through the profile and `openlogi` through `DEB_FILE_PACKAGES`. There is no
 `make repair` step: to repeat the step, run the command that its warning prints.
 
@@ -452,8 +452,9 @@ video sequencer), and DaVinci Resolve for colour work and heavier editing.
 
 ### OpenShot and Blender
 
-On `ubuntu` and `work` both are snaps, one line each in `snaps_install`
-(`bootstrap/ubuntu_functions`) and `gui_apps_install` (`bootstrap/work_functions`):
+On `ubuntu` and `work` both are snaps, declared in `common_snaps_install`
+(`bootstrap/base_functions`, called from `snaps_install` in
+`bootstrap/ubuntu_functions` and `gui_apps_install` in `bootstrap/work_functions`):
 `openshot-qt` (strictly confined) and `blender --classic`. `arch` and `manjaro`
 install `openshot` and `blender` with pacman, and `mac` installs the
 `openshot-video-editor` and `blender` casks. The WSL profile has no desktop to

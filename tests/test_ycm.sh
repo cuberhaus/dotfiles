@@ -490,14 +490,17 @@ test_the_script_leaves_nothing_of_the_old_design_behind() {
 
 test_older_profiles_survive_a_failed_build() {
     local file
-    for file in ubuntu_functions arch_functions mac_functions; do
+    grep -Eq 'vim_plugins_install *\|\|' "$BOOTSTRAP_DIR/ubuntu_functions" ||
+        fail 'ubuntu_functions must warn, not abort, when the YouCompleteMe build fails'
+    for file in arch_functions mac_functions; do
         grep -Eq '(bash "[$]ycm"|ycm\.sh") *\|\|' "$BOOTSTRAP_DIR/$file" ||
             fail "$file must warn, not abort, when the YouCompleteMe build fails"
     done
     if grep -Fq 'plugged/YouCompleteMe/install.py' "$BOOTSTRAP_DIR/ubuntu_functions"; then
         fail 'ubuntu must not run install.py itself after ycm.sh has verified the build'
     fi
-    grep -Fq 'python3-dev' "$BOOTSTRAP_DIR/ubuntu_functions" ||
+    { grep -Fq 'ubuntu_cli_base_install' "$BOOTSTRAP_DIR/ubuntu_functions" &&
+        grep -Fq 'python3-dev' "$BOOTSTRAP_DIR/base_functions"; } ||
         fail 'ubuntu must install the Python headers that ycm.sh no longer installs'
 }
 

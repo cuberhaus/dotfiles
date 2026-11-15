@@ -22,6 +22,7 @@ run_selected_uninstalls "Work Machine Uninstaller" \
     davinci_uninstall       "DaVinci Resolve (keeps projects and settings)"    OFF \
     anki_uninstall          "Anki (spaced-repetition flashcards; keeps decks)" OFF \
     langtool_uninstall  "LanguageTool (grammar checker; keeps the .oxt dictionaries)" OFF \
+    openlogi_uninstall      "OpenLogi (Logitech receiver tool; keeps your settings)"  OFF \
     gui_apps_uninstall      "GUI apps (Chrome, VS Code, Cursor, Spotify, ...)" OFF
 
 if [ "$(basename "$SHELL")" == "zsh" ]; then

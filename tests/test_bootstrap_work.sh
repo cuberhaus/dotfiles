@@ -15,39 +15,40 @@ fail() {
     exit 1
 }
 
+BASE_FUNCTIONS="$REPO_ROOT/.local/scripts/bootstrap/base_functions"
 grep -Fq "if [[ \"\${BASH_SOURCE[0]}\" == \"\$0\" ]]; then" "$WORK_BOOTSTRAP" ||
     fail 'work bootstrap must be sourceable without provisioning the machine'
 grep -Fq 'command -v codex &>/dev/null || sudo npm install -g @openai/codex' "$WORK_FUNCTIONS" ||
     fail 'work bootstrap must install the OpenAI Codex CLI'
-{ grep -Fq 'opencode_install' "$WORK_FUNCTIONS" && grep -Fq 'https://opencode.ai/install' "$REPO_ROOT/.local/scripts/bootstrap/base_functions"; } ||
+{ grep -Fq 'common_ai_tools_install' "$WORK_FUNCTIONS" && grep -Fq 'opencode_install' "$BASE_FUNCTIONS" && grep -Fq 'https://opencode.ai/install' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap must install OpenCode'
-grep -Fq '@earendil-works/pi-coding-agent' "$WORK_FUNCTIONS" ||
+{ grep -Fq 'common_ai_tools_install' "$WORK_FUNCTIONS" && grep -Fq 'pi_cli_install' "$BASE_FUNCTIONS" && grep -Fq '@earendil-works/pi-coding-agent' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap must install Pi'
-grep -Fq 'command -v copilot &>/dev/null || sudo npm install -g @github/copilot' "$WORK_FUNCTIONS" ||
+{ grep -Fq 'common_ai_tools_install' "$WORK_FUNCTIONS" && grep -Fq 'copilot_cli_install' "$BASE_FUNCTIONS" && grep -Fq '@github/copilot' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap must install GitHub Copilot CLI'
-grep -Fq 'aider-chat' "$WORK_FUNCTIONS" ||
+{ grep -Fq 'common_ai_tools_install' "$WORK_FUNCTIONS" && grep -Fq 'aider_cli_install' "$BASE_FUNCTIONS" && grep -Fq 'aider-chat' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap must install Aider'
 grep -Fq 'sudo npm uninstall -g cline markdownlint-cli2 @openai/codex' "$WORK_UNINSTALL_FUNCTIONS" ||
     fail 'work bootstrap uninstall must remove the OpenAI Codex CLI'
-grep -Fq '.opencode' "$WORK_UNINSTALL_FUNCTIONS" ||
+{ grep -Fq 'common_ai_tools_uninstall' "$WORK_UNINSTALL_FUNCTIONS" && grep -Fq '.opencode' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap uninstall must clean up OpenCode'
-grep -Fq '@earendil-works/pi-coding-agent' "$WORK_UNINSTALL_FUNCTIONS" ||
+{ grep -Fq 'common_ai_tools_uninstall' "$WORK_UNINSTALL_FUNCTIONS" && grep -Fq '@earendil-works/pi-coding-agent' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap uninstall must clean up Pi'
-grep -Fq '@github/copilot' "$WORK_UNINSTALL_FUNCTIONS" ||
+{ grep -Fq 'common_ai_tools_uninstall' "$WORK_UNINSTALL_FUNCTIONS" && grep -Fq '@github/copilot' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap uninstall must clean up GitHub Copilot CLI'
-grep -Fq 'aider' "$WORK_UNINSTALL_FUNCTIONS" ||
+{ grep -Fq 'common_ai_tools_uninstall' "$WORK_UNINSTALL_FUNCTIONS" && grep -Fq 'aider' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap uninstall must clean up Aider'
-grep -Fq 'python3-dev' "$WORK_FUNCTIONS" ||
+{ grep -Fq 'ubuntu_cli_base_install' "$WORK_FUNCTIONS" && grep -Fq 'python3-dev' "$BASE_FUNCTIONS"; } ||
     fail "work bootstrap must install the Python headers YouCompleteMe's build needs"
-grep -Fq 'python3-pynvim' "$WORK_FUNCTIONS" ||
+{ grep -Fq 'ubuntu_cli_base_install' "$WORK_FUNCTIONS" && grep -Fq 'python3-pynvim' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap must install the Python provider Neovim needs to load YouCompleteMe'
-grep -Fq 'python3-dev' "$WORK_UNINSTALL_FUNCTIONS" ||
+{ grep -Fq 'ubuntu_python_uninstall' "$WORK_UNINSTALL_FUNCTIONS" && grep -Fq 'python3-dev' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap uninstall must remove the Python headers it installed'
-grep -Fq 'python3-pynvim' "$WORK_UNINSTALL_FUNCTIONS" ||
+{ grep -Fq 'ubuntu_python_uninstall' "$WORK_UNINSTALL_FUNCTIONS" && grep -Fq 'python3-pynvim' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap uninstall must remove the Neovim Python provider it installed'
-grep -Fq 'thunderbird' "$WORK_FUNCTIONS" ||
+{ grep -Fq 'ubuntu_desktop_base_install' "$WORK_FUNCTIONS" && grep -Fq 'thunderbird' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap must install Thunderbird'
-grep -Fq 'thunderbird' "$WORK_UNINSTALL_FUNCTIONS" ||
+{ grep -Fq 'ubuntu_desktop_base_uninstall' "$WORK_UNINSTALL_FUNCTIONS" && grep -Fq 'thunderbird' "$BASE_FUNCTIONS"; } ||
     fail 'work bootstrap uninstall must remove Thunderbird'
 export HOME="$CASE_DIR/home"
 export XDG_CONFIG_HOME="$HOME/.config"
@@ -160,7 +161,8 @@ test_cursor_install_detection() {
     cursor_is_installed || fail 'the installed Cursor command was not detected'
 
     export PATH="$original_path"
-    grep -Fq 'if ! cursor_is_installed; then' "$WORK_FUNCTIONS" ||
+    { grep -Fq 'common_ai_tools_install' "$WORK_FUNCTIONS" &&
+        grep -Fq 'if ! cursor_is_installed; then' "$BASE_FUNCTIONS"; } ||
         fail 'the Cursor installer must use the shared installed check'
 }
 
@@ -295,9 +297,8 @@ nvidia_container_toolkit_install() { record 'nvidia-container-toolkit'; }
 gcloud_install() { record 'gcloud'; }
 gui_apps_install() { record 'gui-apps'; }
 anki_install() { record 'anki'; }
-caffeine_indicator_autostart_install() { record 'caffeine-autostart'; }
-gnome_screenshot_shortcut_install() { record 'gnome-screenshot-shortcut'; }
-gnome_keyboard_layout_install() { record 'gnome-keyboard-layout'; }
+ubuntu_gnome_desktop_install() { record 'gnome-desktop'; }
+openlogi_install() { record 'openlogi'; }
 davinci_resolve_install() { record 'davinci-resolve'; }
 obsidian_vault_install() { record 'obsidian-vault'; }
 rclone_drive_mount_install() { record 'rclone-drive-mount'; }
@@ -319,7 +320,7 @@ work_main --unattended --no-stow --high-dpi=no </dev/null
 [ "$SKIP_STOW" = true ] || fail '--no-stow was not parsed'
 [ "$HIGH_DPI_CHOICE" = no ] || fail '--high-dpi was not parsed'
 
-expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\nanki\ncaffeine-autostart\ngnome-screenshot-shortcut\ngnome-keyboard-layout\ndavinci-resolve\nobsidian-vault\nrclone-drive-mount\nthunderbird-restore\nthunderbird-user-js\nanki-restore\nhigh-dpi-choice:no\nskip-worktree'
+expected_events=$'logging\nprepare-environment\ndual-boot\nsystem-update\nstow:work:true\npreparation\ninotify\nshutdown-fix\nbrightness-fix\nasusctl\nasusctl-lighting\nnvidia-install\nnvidia-display\ndev-tools\nlanguagetool\nsops\ndefault-shell\nnode\npython\nvim\ndocker\nnvidia-container-toolkit\ngcloud\ngui-apps\nanki\ngnome-desktop\nopenlogi\ndavinci-resolve\nobsidian-vault\nrclone-drive-mount\nthunderbird-restore\nthunderbird-user-js\nanki-restore\nhigh-dpi-choice:no\nskip-worktree'
 actual_events="$(cat "$EVENT_LOG")"
 [ "$actual_events" = "$expected_events" ] ||
     fail "unexpected work bootstrap stages:\n$actual_events"
@@ -464,10 +465,26 @@ grep -Fqx 'anki-failed' "$EVENT_LOG" ||
     fail 'the failing Anki step did not run'
 grep -Fq "anki-warning:Anki setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; anki_install'" "$EVENT_LOG" ||
     fail 'a failing Anki step must be reported with the command that repeats it'
-grep -Fqx 'caffeine-autostart' "$EVENT_LOG" ||
+grep -Fqx 'gnome-desktop' "$EVENT_LOG" ||
     fail 'a failing Anki step must not stop the stages that follow it'
 grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
     fail 'a failing Anki step must not abort the rest of the work bootstrap'
 anki_install() { record 'anki'; }
+
+# OpenLogi comes from GitHub releases, so the network or a changed release layout can break it:
+# when it fails, provisioning must warn with the rerun command and carry on.
+openlogi_install() { record 'openlogi-failed'; return 1; }
+warn() { record "openlogi-warning:$*"; }
+: > "$EVENT_LOG"
+work_main --unattended --no-stow --high-dpi=no </dev/null
+grep -Fqx 'openlogi-failed' "$EVENT_LOG" ||
+    fail 'the failing OpenLogi step did not run'
+grep -Fq "openlogi-warning:OpenLogi setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; openlogi_install'" "$EVENT_LOG" ||
+    fail 'a failing OpenLogi step must be reported with the command that repeats it'
+grep -Fqx 'davinci-resolve' "$EVENT_LOG" ||
+    fail 'a failing OpenLogi step must not stop the stages that follow it'
+grep -Fqx 'skip-worktree' "$EVENT_LOG" ||
+    fail 'a failing OpenLogi step must not abort the rest of the work bootstrap'
+openlogi_install() { record 'openlogi'; }
 
 printf 'Work bootstrap orchestration tests passed.\n'

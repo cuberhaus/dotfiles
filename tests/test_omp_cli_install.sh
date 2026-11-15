@@ -132,11 +132,18 @@ test_help_dry_run_and_argument_validation() {
 }
 
 test_profile_wiring_and_pin() {
-    grep -Fq "local version=\"$VERSION\"" "$ROOT/.local/scripts/bootstrap/base_functions" || fail 'version fixture drift'
-    grep -Fq "local digest=\"$DIGEST\"" "$ROOT/.local/scripts/bootstrap/base_functions" || fail 'digest fixture drift'
-    for profile in arch mac ubuntu work; do
+    local base="$ROOT/.local/scripts/bootstrap/base_functions"
+    grep -Fq "local version=\"$VERSION\"" "$base" || fail 'version fixture drift'
+    grep -Fq "local digest=\"$DIGEST\"" "$base" || fail 'digest fixture drift'
+    grep -Fq 'omp_cli_install || warn' "$base" || fail 'common_ai_tools_install missing nonfatal install'
+    grep -Fq 'omp_cli_uninstall' "$base" || fail 'common_ai_tools_uninstall missing uninstall'
+    for profile in arch mac; do
         grep -Fq 'omp_cli_install || warn' "$ROOT/.local/scripts/bootstrap/${profile}_functions" || fail "$profile missing nonfatal install"
         grep -Fq 'omp_cli_uninstall' "$ROOT/.local/scripts/bootstrap/uninstall_${profile}_functions" || fail "$profile missing uninstall"
+    done
+    for profile in ubuntu work; do
+        grep -Fq 'common_ai_tools_install' "$ROOT/.local/scripts/bootstrap/${profile}_functions" || fail "$profile missing common AI tools install"
+        grep -Fq 'common_ai_tools_uninstall' "$ROOT/.local/scripts/bootstrap/uninstall_${profile}_functions" || fail "$profile missing common AI tools uninstall"
     done
     grep -Fq 'install-omp:' "$ROOT/Makefile" || fail 'missing narrow install target'
 }

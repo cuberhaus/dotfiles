@@ -397,19 +397,21 @@ test_every_profile_declares_a_java_runtime_and_unzip() {
     # ubuntu_windows installs with ubuntu_functions and manjaro with arch_functions.
     grep -Eq '^[[:space:]]+jre-openjdk-headless([[:space:]]|$)' "$BOOTSTRAP_DIR/arch_functions" ||
         fail 'arch_functions must install jre-openjdk-headless'
-    for file in ubuntu_functions work_functions; do
-        grep -Eq '^[[:space:]]+default-jre-headless([[:space:]]|$)' "$BOOTSTRAP_DIR/$file" ||
-            fail "$file must install default-jre-headless"
-    done
+    grep -Eq '^[[:space:]]+default-jre-headless([[:space:]]|$)' "$BOOTSTRAP_DIR/base_functions" ||
+        fail 'base_functions must install default-jre-headless'
     grep -Eq '^[[:space:]]+temurin([[:space:]]|$)' "$BOOTSTRAP_DIR/mac_functions" ||
         fail 'mac_functions must install the temurin cask'
     grep -Eq '^virtual/jre([[:space:]]|$)' "$BOOTSTRAP_DIR/gentoo.packages" ||
         fail 'gentoo.packages must install virtual/jre'
 
     # macOS ships unzip.
-    for file in arch_functions ubuntu_functions work_functions; do
-        grep -Eq '^[[:space:]]+unzip([[:space:]]|$)' "$BOOTSTRAP_DIR/$file" ||
-            fail "$file must install unzip for languagetool_install"
+    grep -Eq '^[[:space:]]+unzip([[:space:]]|$)' "$BOOTSTRAP_DIR/arch_functions" ||
+        fail 'arch_functions must install unzip for languagetool_install'
+    grep -Eq '^[[:space:]]+unzip([[:space:]]|$)' "$BOOTSTRAP_DIR/base_functions" ||
+        fail 'base_functions must install unzip for languagetool_install'
+    for file in ubuntu_functions work_functions; do
+        grep -Eq '^[[:space:]]*ubuntu_cli_base_install$' "$BOOTSTRAP_DIR/$file" ||
+            fail "$file must call ubuntu_cli_base_install"
     done
     grep -Eq '^app-arch/unzip([[:space:]]|$)' "$BOOTSTRAP_DIR/gentoo.packages" ||
         fail 'gentoo.packages must install app-arch/unzip'

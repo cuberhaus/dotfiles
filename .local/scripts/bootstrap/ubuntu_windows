@@ -9,15 +9,19 @@ export DOTFILES_ROOT
 # Include functions
 source "$bootstrap_dir/base_functions"
 source "$bootstrap_dir/ubuntu_functions"
+bootstrap_enable_logging ubuntu-windows
 parse_bootstrap_args "$@"
+ubuntu_prepare_environment
 configure_dual_boot_utc_rtc
 
 ### INSTALLATION
-sudo apt-get update; sudo apt-get full-upgrade  # Update
+info "Updating system..."
+ubuntu_apt_update_and_upgrade
 bootstrap_stow_checkout ubuntu-windows
 install_preparation
+mkdir -p "$XDG_CONFIG_HOME"
 echo "#! /bin/sh
-export DISTRO=ubuntu_windows" > "$HOME/.config/distro"
+export DISTRO=ubuntu_windows" > "$XDG_CONFIG_HOME/distro"
 
 ### ONLY CHANGE FROM HERE ON
 base_install
@@ -29,15 +33,7 @@ vim_install
 windows_install
 
 # emacs_install # This is not needed since emacs is installed natively through windows
-#albert_install
 #bloat_install
-#chrome_install
-#i3_install
-#snap_install
-#steam_install
-#ubuntu_install
 
-if [ "$(basename "$SHELL")" != "zsh" ]; then
-    chsh -s "$(which zsh)"                      # Change default shell to zsh
-fi
 apply_skip_worktree
+info "Bootstrap complete!"

@@ -269,13 +269,17 @@ test_the_profiles_with_nautilus_use_it_and_undo_it() {
     local uninstall_functions=("$BOOTSTRAP_DIR/uninstall_ubuntu_functions" "$BOOTSTRAP_DIR/uninstall_work_functions")
     local file
 
+    declare -f ubuntu_gnome_desktop_install | grep -Eq 'smb_scheme_handler_install \|\|' ||
+        fail 'ubuntu_gnome_desktop_install must run smb_scheme_handler_install without aborting on failure'
+    declare -f ubuntu_gnome_desktop_uninstall | grep -Eq 'smb_scheme_handler_uninstall( \|\| true)?' ||
+        fail 'ubuntu_gnome_desktop_uninstall must undo what smb_scheme_handler_install wrote'
     for file in "${entry_scripts[@]}"; do
-        grep -Eq '^[[:space:]]*smb_scheme_handler_install \|\|$' "$file" ||
-            fail "$file must run smb_scheme_handler_install without aborting on failure"
+        grep -Eq '^[[:space:]]*ubuntu_gnome_desktop_install$' "$file" ||
+            fail "$file must call ubuntu_gnome_desktop_install"
     done
     for file in "${uninstall_functions[@]}"; do
-        grep -Eq '^[[:space:]]*smb_scheme_handler_uninstall( \|\| true)?$' "$file" ||
-            fail "$file must undo what smb_scheme_handler_install wrote"
+        grep -Eq '^[[:space:]]*ubuntu_gnome_desktop_uninstall$' "$file" ||
+            fail "$file must call ubuntu_gnome_desktop_uninstall"
     done
 }
 

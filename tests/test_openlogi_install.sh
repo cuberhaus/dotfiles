@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Hermetic tests for the OpenLogi step in bootstrap/ubuntu_functions: the release lookup, the
+# Hermetic tests for the OpenLogi step in bootstrap/base_functions: the release lookup, the
 # signature check that must pass before apt sees the package, the failure paths, the uninstall
 # function, and how the Ubuntu profile uses them.  Nothing here touches the network, /etc, or
 # the real apt: curl, minisign, dpkg, systemctl, sudo and apt-get are replaced by functions that
@@ -17,7 +17,7 @@ trap '"$RM_COMMAND" -rf "$SCRATCH"' EXIT
 RELEASES=https://github.com/AprilNEA/OpenLogi/releases
 LATEST_URL="$RELEASES/tag/v1.2.3"
 # The vendor's trust anchor (packaging/linux/install.sh in AprilNEA/OpenLogi).  This second copy
-# makes changing the key in ubuntu_functions a deliberate act that fails this test until both agree.
+# makes changing the key in base_functions a deliberate act that fails this test until both agree.
 VENDOR_KEY='RWRRkFtw+rqkvTlCTGKUszSE5dX9CK1teaQD45jO4P9rYlWLO4/nHVUF' # gitleaks:allow (public key)
 
 fail() {
@@ -392,20 +392,22 @@ test_uninstall_goes_on_when_the_agent_or_apt_fail() {
 # => How the Ubuntu profile uses the step
 ###############################################################
 
-test_ubuntu_runs_the_step_without_aborting_provisioning() {
-    local file="$BOOTSTRAP_DIR/ubuntu"
-
-    grep -Eq '^[[:space:]]*openlogi_install \|\|$' "$file" ||
-        fail "$file must call openlogi_install and not abort when it fails"
-    grep -Fq "openlogi_install'" "$file" ||
-        fail "$file must tell the user how to rerun the step"
+test_profiles_run_the_step_without_aborting_provisioning() {
+    local file
+    for file in "$BOOTSTRAP_DIR/ubuntu" "$BOOTSTRAP_DIR/work"; do
+        grep -Eq '^[[:space:]]*openlogi_install \|\|$' "$file" ||
+            fail "$file must call openlogi_install and not abort when it fails"
+        grep -Fq "openlogi_install'" "$file" ||
+            fail "$file must tell the user how to rerun the step"
+    done
 }
 
-test_the_ubuntu_uninstaller_offers_the_step() {
-    local file="$BOOTSTRAP_DIR/uninstall_ubuntu"
-
-    grep -Eq '^[[:space:]]*openlogi_uninstall[[:space:]]' "$file" ||
-        fail "$file must offer openlogi_uninstall"
+test_uninstallers_offer_the_step() {
+    local file
+    for file in "$BOOTSTRAP_DIR/uninstall_ubuntu" "$BOOTSTRAP_DIR/uninstall_work"; do
+        grep -Eq '^[[:space:]]*openlogi_uninstall[[:space:]]' "$file" ||
+            fail "$file must offer openlogi_uninstall"
+    done
 }
 
 test_the_audit_maps_the_deb_variable_to_its_package() {
@@ -429,8 +431,8 @@ for test_name in \
     test_a_failed_agent_start_does_not_fail_the_install \
     test_uninstall_stops_the_agent_and_purges_the_package \
     test_uninstall_goes_on_when_the_agent_or_apt_fail \
-    test_ubuntu_runs_the_step_without_aborting_provisioning \
-    test_the_ubuntu_uninstaller_offers_the_step \
+    test_profiles_run_the_step_without_aborting_provisioning \
+    test_uninstallers_offer_the_step \
     test_the_audit_maps_the_deb_variable_to_its_package; do
     # A subshell keeps each test's stub overrides and exported variables to itself.
     ( "$test_name" ) || {

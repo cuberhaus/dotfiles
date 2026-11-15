@@ -176,13 +176,17 @@ test_profiles_uninstallers_and_shell_files_keep_spanish_layout() {
     local shell_files=("$REPO_ROOT/.config/zsh/.zprofile" "$REPO_ROOT/.xprofile" "$REPO_ROOT/.zshenv")
     local file
 
+    declare -f ubuntu_gnome_desktop_install | grep -Eq 'gnome_keyboard_layout_install \|\|' ||
+        fail 'ubuntu_gnome_desktop_install must run gnome_keyboard_layout_install without aborting on failure'
+    declare -f ubuntu_gnome_desktop_uninstall | grep -Eq 'gnome_keyboard_layout_uninstall( \|\| true)?' ||
+        fail 'ubuntu_gnome_desktop_uninstall must undo what gnome_keyboard_layout_install set'
     for file in "${entry_scripts[@]}"; do
-        grep -Eq '^[[:space:]]*gnome_keyboard_layout_install \|\|$' "$file" ||
-            fail "$file must run gnome_keyboard_layout_install without aborting on failure"
+        grep -Eq '^[[:space:]]*ubuntu_gnome_desktop_install$' "$file" ||
+            fail "$file must call ubuntu_gnome_desktop_install"
     done
     for file in "${uninstall_functions[@]}"; do
-        grep -Eq '^[[:space:]]*gnome_keyboard_layout_uninstall( \|\| true)?$' "$file" ||
-            fail "$file must undo what gnome_keyboard_layout_install set"
+        grep -Eq '^[[:space:]]*ubuntu_gnome_desktop_uninstall$' "$file" ||
+            fail "$file must call ubuntu_gnome_desktop_uninstall"
     done
     grep -Fq 'gnome_keyboard_layout_install' "$REPO_ROOT/.local/scripts/repair-installation" ||
         fail 'repair-installation keyboard step must run gnome_keyboard_layout_install'

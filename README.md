@@ -218,13 +218,13 @@ repeats the step, which also re-enables its apt source after a release upgrade,
 and `DRY_RUN=true` previews its `sudo` commands. See
 [NVIDIA Container Toolkit](.local/README.md#nvidia-container-toolkit).
 
-The `ubuntu` bootstrap also installs [OpenLogi](https://github.com/AprilNEA/OpenLogi),
-a Linux alternative to Logitech Options+ for Bolt and Unifying receivers. It has no
-apt repository, so the step downloads the signed `.deb` from GitHub and checks its
-signature before `sudo` lets apt open it; a failure only warns. Replug the receiver
-after the first install, and stop Solaar first if you used it, because only one
-program can own a receiver. `OPENLOGI_VERSION=0.8.11` pins a release. See
-[OpenLogi](.local/README.md#openlogi).
+The `ubuntu` and `work` bootstraps also install
+[OpenLogi](https://github.com/AprilNEA/OpenLogi), a Linux alternative to Logitech
+Options+ for Bolt and Unifying receivers. It has no apt repository, so the step
+downloads the signed `.deb` from GitHub and checks its signature before `sudo`
+lets apt open it; a failure only warns. Replug the receiver after the first install,
+and stop Solaar first if you used it, because only one program can own a receiver.
+`OPENLOGI_VERSION=0.8.11` pins a release. See [OpenLogi](.local/README.md#openlogi).
 
 The `ubuntu` and `work` bootstraps install the video editors OpenShot (the official
 snap, which is newer than Ubuntu's package and avoids the PPA's dependency stack) and

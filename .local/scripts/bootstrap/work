@@ -11,41 +11,16 @@ source "$bootstrap_dir/base_functions"
 source "$bootstrap_dir/work_functions"
 
 work_prepare_environment() {
-    [ "${UNATTENDED:-false}" = true ] || return 0
-
-    export DEBIAN_FRONTEND=noninteractive
-    SUDO_COMMAND="${SUDO_COMMAND:-sudo}"
-    export SUDO_COMMAND
-    if ! command "$SUDO_COMMAND" -n true; then
-        error "Unattended mode requires cached sudo credentials. Run 'sudo -v' in this terminal, then retry."
-        return 1
-    fi
-
-    sudo() {
-        command "$SUDO_COMMAND" -n "$@"
-    }
+    ubuntu_prepare_environment
 }
 
 work_update_system() {
     info "Updating system..."
-    sudo env DEBIAN_FRONTEND=noninteractive apt-get update
-    sudo env DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
+    ubuntu_apt_update_and_upgrade
 }
 
 work_configure_default_shell() {
-    local zsh_path
-
-    [ "$(basename "${SHELL:-}")" = zsh ] && return 0
-    if ! zsh_path=$(command -v zsh); then
-        error "Cannot set the default shell because zsh is not available."
-        return 1
-    fi
-
-    if [ "${UNATTENDED:-false}" = true ]; then
-        sudo chsh -s "$zsh_path" "$USER"
-    else
-        chsh -s "$zsh_path"
-    fi
+    configure_default_shell
 }
 
 work_main() {
@@ -105,19 +80,11 @@ work_main() {
     # changed release layout can break it; that must not abort provisioning.
     anki_install ||
         warn "Anki setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; anki_install'"
-    # Only writes one file under ~/.config/autostart; the package itself comes from gui_apps_install.
-    caffeine_indicator_autostart_install ||
-        warn "Caffeine indicator autostart failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; caffeine_indicator_autostart_install'"
-    # Only writes one entry under ~/.local/share/applications and one default in ~/.config/mimeapps.list;
-    # Nautilus itself comes from the Ubuntu desktop, and a machine without it is skipped.
-    smb_scheme_handler_install ||
-        warn "smb:// link handler failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; smb_scheme_handler_install'"
-    # Adds <Super><Shift>s to GNOME Shell's interactive screenshot shortcut for keyboards without Print.
-    gnome_screenshot_shortcut_install ||
-        warn "GNOME screenshot shortcut failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; gnome_screenshot_shortcut_install'"
-    # Configures Spanish ('es') layout and caps:swapescape in GNOME and XWayland.
-    gnome_keyboard_layout_install ||
-        warn "GNOME keyboard layout failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; gnome_keyboard_layout_install'"
+    ubuntu_gnome_desktop_install
+    # OpenLogi comes from GitHub releases, so the network or a changed release layout can break it;
+    # that must not abort provisioning.
+    openlogi_install ||
+        warn "OpenLogi setup failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; openlogi_install'"
     # The free DaVinci Resolve needs a ZIP that only you can download (Blackmagic asks for a
     # registration), and its installer asks questions, so a missing ZIP or an unattended
     # run must not abort provisioning.
@@ -135,14 +102,7 @@ work_main() {
     anki_restore ||
         warn "Anki data restore failed; rerun it with: rclonepull_anki"
 
-    local current_scale
-    current_scale=$(gsettings get org.gnome.desktop.interface text-scaling-factor 2>/dev/null || echo "1.0")
-    if [[ "$current_scale" != "1.3" ]]; then
-        resolve_high_dpi_choice
-        if [[ "$HIGH_DPI" == true ]]; then
-            high_dpi_screen
-        fi
-    fi
+    apply_high_dpi_if_requested
 
     apply_skip_worktree
     info "Bootstrap complete! Reboot to load NVIDIA drivers."

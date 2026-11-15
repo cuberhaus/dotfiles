@@ -264,13 +264,34 @@ def packages_in_function(body: str) -> set[Package]:
     return packages
 
 
-def expected_packages(repo_root: pathlib.Path, profile: str) -> set[Package]:
+SHARED_PACKAGE_FUNCTIONS = (
+    "chrome_install",
+    "common_ai_tools_install",
+    "common_snaps_install",
+    "openlogi_install",
+    "ubuntu_cli_base_install",
+    "ubuntu_desktop_base_install",
+)
+
+
+def profile_bootstrap_sources(repo_root: pathlib.Path, profile: str) -> tuple[str, dict[str, str]]:
+    """Return a profile's bootstrap text and package-declaring functions, including shared ones."""
     bootstrap_name, functions_name = PROFILE_SOURCES[profile]
     bootstrap_dir = repo_root / ".local" / "scripts" / "bootstrap"
     bootstrap = (bootstrap_dir / bootstrap_name).read_text(encoding="utf-8")
-    functions = function_bodies(
-        (bootstrap_dir / functions_name).read_text(encoding="utf-8")
-    )
+    functions: dict[str, str] = {}
+    base_path = bootstrap_dir / "base_functions"
+    if base_path.exists():
+        base_functions = function_bodies(base_path.read_text(encoding="utf-8"))
+        for name in SHARED_PACKAGE_FUNCTIONS:
+            if name in base_functions:
+                functions[name] = base_functions[name]
+    functions.update(function_bodies((bootstrap_dir / functions_name).read_text(encoding="utf-8")))
+    return bootstrap, functions
+
+
+def expected_packages(repo_root: pathlib.Path, profile: str) -> set[Package]:
+    bootstrap, functions = profile_bootstrap_sources(repo_root, profile)
     active = active_function_names(bootstrap, functions)
     packages: set[Package] = set()
     for name in active:
@@ -656,7 +677,7 @@ def cursor_installed_outside_apt() -> bool:
 
 
 def openlogi_already_installed() -> bool:
-    """Mirror openlogi_install in ubuntu_functions: minisign is skipped when openlogi-agent is present."""
+    """Mirror openlogi_install in base_functions: minisign is skipped when openlogi-agent is present."""
     return shutil.which("openlogi-agent") is not None
 
 
@@ -1155,10 +1176,7 @@ def bootstrap_installed_packages(repo_root: pathlib.Path, profile: str) -> set[P
     packages of each standalone installer (STANDALONE_INSTALLERS) the bootstrap calls. A line that
     is commented out installs nothing, so it names nothing.
     """
-    bootstrap_name, functions_name = PROFILE_SOURCES[profile]
-    bootstrap_dir = repo_root / ".local" / "scripts" / "bootstrap"
-    bootstrap = (bootstrap_dir / bootstrap_name).read_text(encoding="utf-8")
-    functions = function_bodies((bootstrap_dir / functions_name).read_text(encoding="utf-8"))
+    bootstrap, functions = profile_bootstrap_sources(repo_root, profile)
     packages: set[Package] = set()
     for function in active_function_names(bootstrap, functions):
         for line in logical_lines(functions[function]):
@@ -1166,10 +1184,11 @@ def bootstrap_installed_packages(repo_root: pathlib.Path, profile: str) -> set[P
                 for variable in re.findall(r"\$\{?([A-Za-z_][A-Za-z0-9_]*)", line):
                     if variable in DEB_FILE_PACKAGES:
                         packages.add(Package("apt", DEB_FILE_PACKAGES[variable]))
+    scripts_dir = repo_root / ".local" / "scripts"
     for function, script, array in STANDALONE_INSTALLERS:
         if called_functions(bootstrap, {function}):
             packages.update(
-                Package("apt", name) for name in script_array(bootstrap_dir.parent / script, array)
+                Package("apt", name) for name in script_array(scripts_dir / script, array)
             )
     return packages
 
@@ -1440,10 +1459,7 @@ def active_bootstrap_code(repo_root: pathlib.Path, profile: str) -> str:
     This is the code the package check reads. A function that nothing calls and a block that is
     commented out run nothing, so they declare nothing.
     """
-    bootstrap_name, functions_name = PROFILE_SOURCES[profile]
-    bootstrap_dir = repo_root / ".local" / "scripts" / "bootstrap"
-    bootstrap = (bootstrap_dir / bootstrap_name).read_text(encoding="utf-8")
-    functions = function_bodies((bootstrap_dir / functions_name).read_text(encoding="utf-8"))
+    bootstrap, functions = profile_bootstrap_sources(repo_root, profile)
     lines = list(logical_lines(bootstrap))
     for name in sorted(active_function_names(bootstrap, functions)):
         lines.extend(logical_lines(functions[name]))

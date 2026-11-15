@@ -1070,11 +1070,11 @@ test_bootstrap_and_repair_wiring() {
 
 test_video_apps_are_declared() {
     local file
-    for file in ubuntu_functions work_functions; do
-        grep -Eq 'snap install openshot-qt( |$)' "$BOOTSTRAP_DIR/$file" ||
-            fail "$file must install the official OpenShot snap"
-        grep -Eq 'snap install blender --classic' "$BOOTSTRAP_DIR/$file" ||
-            fail "$file must install the official Blender snap with --classic"
+    grep -Eq 'snap install openshot-qt( |$)' "$BOOTSTRAP_DIR/base_functions" ||
+        fail 'base_functions must install the official OpenShot snap'
+    grep -Eq 'snap install blender --classic' "$BOOTSTRAP_DIR/base_functions" ||
+        fail 'base_functions must install the official Blender snap with --classic'
+    for file in ubuntu_functions work_functions base_functions; do
         # The PPA is not the choice (70 packages, release upgrades disable it) and neither is the
         # archive build (two releases behind).
         # shellcheck disable=SC2016 # grep reads \$apt as text, the shell must not expand it
@@ -1082,15 +1082,21 @@ test_video_apps_are_declared() {
             fail "$file must not install OpenShot from the PPA or the Ubuntu archive"
         fi
     done
+    for file in ubuntu_functions work_functions; do
+        grep -Eq '^[[:space:]]*common_snaps_install$' "$BOOTSTRAP_DIR/$file" ||
+            fail "$file must install the shared Ubuntu snaps"
+    done
     grep -Eq '^[[:space:]]+blender[[:space:]]+#' "$BOOTSTRAP_DIR/arch_functions" || fail 'the Arch profile must install blender'
     grep -Eq '^[[:space:]]+openshot[[:space:]]+#' "$BOOTSTRAP_DIR/arch_functions" || fail 'the Arch profile must install openshot'
     grep -Eq '^[[:space:]]+blender[[:space:]]+#' "$BOOTSTRAP_DIR/mac_functions" || fail 'the mac profile must install the blender cask'
     grep -Eq '^[[:space:]]+openshot-video-editor[[:space:]]+#' "$BOOTSTRAP_DIR/mac_functions" ||
         fail 'the mac profile must install the openshot-video-editor cask'
 
+    grep -Fq 'snap remove openshot-qt' "$BOOTSTRAP_DIR/base_functions" || fail 'base_functions must remove the OpenShot snap'
+    grep -Fq 'snap remove blender' "$BOOTSTRAP_DIR/base_functions" || fail 'base_functions must remove the Blender snap'
     for file in uninstall_ubuntu_functions uninstall_work_functions; do
-        grep -Fq 'snap remove openshot-qt' "$BOOTSTRAP_DIR/$file" || fail "$file must remove the OpenShot snap"
-        grep -Fq 'snap remove blender' "$BOOTSTRAP_DIR/$file" || fail "$file must remove the Blender snap"
+        grep -Eq '^[[:space:]]*common_snaps_uninstall$' "$BOOTSTRAP_DIR/$file" ||
+            fail "$file must remove the shared Ubuntu snaps"
     done
     grep -Eq '(^|[[:space:]])blender([[:space:]]|$)' "$BOOTSTRAP_DIR/uninstall_arch_functions" || fail 'the Arch uninstaller must remove blender'
     grep -Eq '(^|[[:space:]])openshot([[:space:]]|$)' "$BOOTSTRAP_DIR/uninstall_arch_functions" || fail 'the Arch uninstaller must remove openshot'
