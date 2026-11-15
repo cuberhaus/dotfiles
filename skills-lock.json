@@ -1,17 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "bash-defensive-patterns": {
       "source": "wshobson/agents",
       "sourceType": "github",
       "skillPath": "plugins/shell-scripting/skills/bash-defensive-patterns/SKILL.md",
-      "computedHash": "9c63659b9130b214b75f84ec11ac715b647250ca8e0cde2357f4c578d43cfc24"
+      "computedHash": "ef4e019e1278e21bf28219ebc715082eb42c2e019bd45d205591f2f76318f3d5"
     },
     "shellcheck-configuration": {
       "source": "wshobson/agents",
       "sourceType": "github",
       "skillPath": "plugins/shell-scripting/skills/shellcheck-configuration/SKILL.md",
-      "computedHash": "cb87c1d9fc44443a3ebe53432cf4077ae1e9daa46dfe73d140ae777b853f8592"
+      "computedHash": "e4a65482cd932438bf6d98cc404814ad3cb8e21b13ad3589215489db1bd9df63"
     }
   }
 }
