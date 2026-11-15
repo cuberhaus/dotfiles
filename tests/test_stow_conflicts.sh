@@ -178,6 +178,7 @@ test_dconf_directory_is_never_linked_into_the_repository() {
 # inside the repository.
 RESOLVE_CONFIG=.local/share/DaVinciResolve/configs/config.user.xml
 AGY_CONFIG=.gemini/antigravity-cli/settings.json
+OPENLOGI_CONFIG=.config/openlogi/config.toml
 
 setup_real_folder_case() {
     local config_rel="$1" content="$2" home_parent_rel="${3:-}"
@@ -317,6 +318,28 @@ test_existing_agy_folder_is_left_alone() {
         .gemini/antigravity-cli/history.jsonl
 }
 
+test_stow_folds_the_openlogi_folder_without_the_backup_step() {
+    assert_stow_folds_without_backup "$OPENLOGI_CONFIG" 'schema_version = 11' .config .config/openlogi
+}
+
+test_openlogi_folder_stays_real_so_its_data_stays_out_of_the_checkout() {
+    assert_real_folder_stays_real \
+        "$OPENLOGI_CONFIG" 'schema_version = 11' .config \
+        .config/openlogi .config/openlogi \
+        .config/openlogi/agent.lock \
+        .config/openlogi/config.toml.lock
+}
+
+test_dry_run_creates_no_openlogi_folder() {
+    assert_dry_run_creates_no_real_folder "$OPENLOGI_CONFIG" 'schema_version = 11' .config .config/openlogi
+}
+
+test_existing_openlogi_folder_is_left_alone() {
+    assert_existing_real_folder_is_left_alone \
+        "$OPENLOGI_CONFIG" 'schema_version = 11' 'schema_version = 10' \
+        .config/openlogi/agent.lock
+}
+
 # The Makefile passes TARGET so that a scratch target never moves anything out of the real home.
 test_backup_follows_stow_target_instead_of_home() {
     setup_case
@@ -385,6 +408,10 @@ if [ "$STOW_AVAILABLE" = true ]; then
     test_agy_folder_stays_real_so_its_data_stays_out_of_the_checkout
     test_dry_run_creates_no_agy_folder
     test_existing_agy_folder_is_left_alone
+    test_stow_folds_the_openlogi_folder_without_the_backup_step
+    test_openlogi_folder_stays_real_so_its_data_stays_out_of_the_checkout
+    test_dry_run_creates_no_openlogi_folder
+    test_existing_openlogi_folder_is_left_alone
     test_backup_follows_stow_target_instead_of_home
 else
     printf 'SKIP: GNU Stow is not installed; the real-Stow scenarios were not run.\n'

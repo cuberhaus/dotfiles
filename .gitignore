@@ -222,6 +222,10 @@
 !.config/htop/**
 !.config/betterlockscreen/
 !.config/betterlockscreen/**
+# OpenLogi: track only config.toml; leave lock, claim, and migration backup files ignored.
+!.config/openlogi/
+.config/openlogi/*
+!.config/openlogi/config.toml
 
 # Apps
 !.config/vlc/
