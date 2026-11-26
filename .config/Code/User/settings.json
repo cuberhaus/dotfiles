@@ -374,5 +374,6 @@
 		"matchCommandLine": true
 	}
 },
-"network.meteredConnection": "off"
+"network.meteredConnection": "off",
+"workbench.editor.enablePreview": false
 }

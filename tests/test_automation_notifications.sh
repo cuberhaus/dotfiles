@@ -28,6 +28,7 @@ calls_log="$case_dir/calls.log"
 state="$case_dir/state"
 bash_bin="$(command -v bash)"
 real_date="$(command -v date)"
+real_git="$(command -v git)"
 mkdir -p "$stubs"
 
 fail() {
@@ -45,6 +46,10 @@ assert_equals() {
 
 assert_contains() {
     [[ $1 == *"$2"* ]] || fail "$3 (missing: $2) in:"$'\n'"$1"
+}
+
+assert_not_contains() {
+    [[ $1 != *"$2"* ]] || fail "$3 (unexpected: $2) in:"$'\n'"$1"
 }
 
 assert_exists() { [[ -e $1 ]] || fail "$2 (missing: $1)"; }
@@ -99,6 +104,26 @@ printf '\n' >> "$STUB_LOG"
 exit 0
 EOF
 
+write_stub gh <<'EOF'
+printf 'gh [%s]\n' "$*" >> "$STUB_LOG"
+[[ ${GH_STUB_FAIL:-false} == false ]] || exit 1
+printf '%s\n' 'cuberhaus-test-token'
+EOF
+
+write_stub git <<'EOF'
+is_pull=false
+for arg in "$@"; do
+    [[ $arg == pull ]] && is_pull=true
+done
+if [[ $is_pull == true && ${INTERCEPT_GIT_PULL:-false} == true ]]; then
+    token=${GH_TOKEN:-unset}
+    github_token=${GITHUB_TOKEN:-unset}
+    printf 'git-pull %s token=%s github-token=%s\n' "${2##*/}" "$token" "$github_token" >>"$STUB_LOG"
+    exit 0
+fi
+exec "$REAL_GIT" "$@"
+EOF
+
 write_stub xdg-terminal-exec <<'EOF'
 printf 'xdg-terminal-exec %s\n' "$*" >> "$STUB_LOG"
 exit 0
@@ -145,16 +170,17 @@ run_job() {
     shift
     rm -rf "$bin"
     mkdir -p "$bin"
-    for tool in env mktemp rm rmdir mkdir date grep tail tr tee mkfifo sed awk cat sort dirname find git head wc touch; do
+    for tool in env mktemp rm rmdir mkdir date grep tail tr tee mkfifo sed awk cat sort dirname find head wc touch; do
         ln -sf "$(command -v "$tool")" "$bin/$tool"
     done
+    ln -sf "$stubs/git" "$bin/git"
     for tool in "${case_tools[@]}"; do
         ln -sf "$stubs/$tool" "$bin/$tool"
     done
     : >"$calls_log"
     status=0
     output="$(
-        env -i HOME="$home" PATH="$bin" TMPDIR="$case_dir/tmp" XDG_STATE_HOME="$state" \
+        env -i HOME="$home" PATH="$bin" TMPDIR="$case_dir/tmp" XDG_STATE_HOME="$state" REAL_GIT="$real_git" \
             DBUS_SESSION_BUS_ADDRESS=unix:path=/test/bus STUB_LOG="$calls_log" "${case_env[@]}" \
             "$bash_bin" "$automation/$name" "$@" 2>&1
     )" || status=$?
@@ -182,6 +208,18 @@ last_success() { printf '%s' "$state/cuberhaus-automations/$1.last-success"; }
 ###############################################################
 
 git_quiet() { git -C "$1" "${@:2}" >/dev/null 2>&1; }
+
+make_https_repository() {
+    local path=$1 remote_url=$2
+    mkdir -p "$path"
+    git init -q -b main "$path"
+    printf '%s\n' initial >"$path/file"
+    git_quiet "$path" add file
+    git_quiet "$path" -c user.name=T -c user.email=t@e.invalid commit -m initial
+    git_quiet "$path" remote add origin "$remote_url"
+    git_quiet "$path" update-ref refs/remotes/origin/main "$(git -C "$path" rev-parse HEAD)"
+    git_quiet "$path" branch --set-upstream-to=origin/main main
+}
 
 # make_workspace: a workspace with three repositories under $case_dir/work:
 #   alpha  has a new commit upstream (a pull updates it)
@@ -219,6 +257,41 @@ assert_equals 1 "$(count_of "$(notifications)" 'Notify')" 'a run that updated so
 assert_contains "$calls" "['Workspace pull finished']" 'the summary must carry the title'
 assert_contains "$calls" '1 updated, 1 already up to date.\n1 skipped (no upstream).' 'the summary must count updated, current and skipped repositories'
 assert_exists "$(last_success workspace-pull)" 'a good run must record its time'
+
+# A cuberhaus HTTPS upstream uses the matching gh account without changing the environment token
+# used by other remotes.
+reset_world
+rm -rf "$case_dir/work"
+make_https_repository "$case_dir/work/dotfiles" 'https://github.com/cuberhaus/dotfiles.git'
+make_https_repository "$case_dir/work/other" 'https://github.com/other/example.git'
+case_tools=(id gdbus uname gh)
+case_env=(STUB_RUN=1 INTERCEPT_GIT_PULL=true GH_TOKEN=wrong-active-token GITHUB_TOKEN=wrong-github-token)
+run_job workspace-pull --root "$case_dir/work"
+assert_equals 0 "$status" 'GitHub pulls with a selected cuberhaus token must succeed'
+assert_contains "$calls" 'gh [auth token --hostname github.com --user cuberhaus]' \
+    'the job must request the named cuberhaus account token'
+assert_contains "$calls" 'git-pull dotfiles token=cuberhaus-test-token github-token=unset' \
+    'the cuberhaus token must be scoped to that repository pull'
+assert_contains "$calls" 'git-pull other token=wrong-active-token github-token=wrong-github-token' \
+    'other GitHub accounts must retain their existing environment'
+assert_not_contains "$output" 'cuberhaus-test-token' 'the selected token must never appear in job output'
+
+# If the cuberhaus account is unavailable, do not fall back to whichever GH_TOKEN is active.
+reset_world
+rm -rf "$case_dir/work"
+make_https_repository "$case_dir/work/dotfiles" 'https://github.com/cuberhaus/dotfiles.git'
+case_tools=(id gdbus uname gh)
+case_env=(STUB_RUN=1 GH_TOKEN=wrong-active-token GH_STUB_FAIL=true)
+run_job workspace-pull --root "$case_dir/work"
+assert_equals 1 "$status" 'a missing cuberhaus credential must fail the pull'
+assert_contains "$output" 'could not obtain a GitHub token for account cuberhaus' \
+    'the failure must identify the unavailable account without exposing credentials'
+assert_not_contains "$calls" 'git-pull dotfiles' 'the job must not pull as the active different account'
+
+reset_world
+make_workspace
+run_job workspace-pull --root "$workspace"
+assert_equals 0 "$status" 'the no-op notification check must start from a current workspace'
 
 # Nothing left to update: silent, and still a success.
 rm -f "$(last_success workspace-pull)"
