@@ -56,8 +56,11 @@ into this repo so that every config file stays version-controlled in one place.
 The `Makefile` wraps stow and exposes common tasks. Bootstrap scripts install
 packages and perform one-time setup for each supported OS.
 
-VS Code user settings live in `.config/Code/User/settings.json`. Chat-tool
-terminals use `/bin/bash --noprofile --norc` with `BASH_ENV` and `ENV` removed,
+VS Code user settings live in `.config/Code/User/settings.json`. New Copilot
+chats start with **Allow all** via `chat.defaultConfiguration`, skipping
+ordinary tool confirmations. The older Local agent uses `chat.permissions.default`.
+
+Chat-tool terminals use `/bin/bash --noprofile --norc` with `BASH_ENV` and `ENV` removed,
 so they do not source personal shell startup files. Normal terminals still use
 zsh. Agent terminals retain VS Code's inherited environment and prepend the
 active workspace's `.venv/bin`, making its `python` executable available without

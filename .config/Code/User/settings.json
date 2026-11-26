@@ -365,6 +365,9 @@
       "description": "Tools that execute shell commands."
     }
   ],
+  "chat.defaultConfiguration": {
+    "approvals": "allowAll"
+  },
   "chat.permissions.default": "autoApprove",
   "git.replaceTagsWhenPull": true,
 "dictation.model": "mai",
