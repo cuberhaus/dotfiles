@@ -7,6 +7,16 @@
 ^/\.shellcheckrc
 ^/\.gitattributes
 ^/Makefile
+^/SECURITY\.md
+^/commitlint\.config\.json
+^/skills-lock\.json
+^/autoinstall\.yaml
+^/\.gitleaksignore
+^/\.devcontainer
+^/\.pytest_cache
+^/docs
+^/server
+^/tests
 
 .+~          # emacs backup files
 \#.*\#       # emacs autosave files
