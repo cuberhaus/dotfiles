@@ -56,6 +56,8 @@ REAL_FOLDERS=(
     ".gemini/antigravity-cli"
     # OpenLogi: lock, claim, and migration backup files sit beside config.toml.
     ".config/openlogi"
+    # GitHub Copilot CLI: session state, SQLite store, logs and config.json sit beside settings.json.
+    ".copilot"
 )
 
 for rel in "${REAL_FOLDERS[@]}"; do

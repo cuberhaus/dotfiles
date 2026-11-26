@@ -172,13 +172,14 @@ test_dconf_directory_is_never_linked_into_the_repository() {
     teardown_case
 }
 
-# DaVinci Resolve and Antigravity CLI keep app data (projects, LUTs, conversation DBs, logs)
-# next to the one settings file that is tracked. Where the parent folder is missing on a fresh
-# machine, Stow links the whole folder into the checkout, so the app would write user data
-# inside the repository.
+# DaVinci Resolve, Antigravity CLI, OpenLogi and GitHub Copilot CLI keep app data
+# (projects, LUTs, conversation DBs, sessions, logs) next to the one settings file that is
+# tracked. Where the parent folder is missing on a fresh machine, Stow links the whole folder
+# into the checkout, so the app would write user data inside the repository.
 RESOLVE_CONFIG=.local/share/DaVinciResolve/configs/config.user.xml
 AGY_CONFIG=.gemini/antigravity-cli/settings.json
 OPENLOGI_CONFIG=.config/openlogi/config.toml
+COPILOT_CONFIG=.copilot/settings.json
 
 setup_real_folder_case() {
     local config_rel="$1" content="$2" home_parent_rel="${3:-}"
@@ -340,6 +341,50 @@ test_existing_openlogi_folder_is_left_alone() {
         .config/openlogi/agent.lock
 }
 
+test_stow_folds_the_copilot_folder_without_the_backup_step() {
+    assert_stow_folds_without_backup "$COPILOT_CONFIG" '{"defaultPermissionMode":"allow-all"}' '' .copilot
+}
+
+test_copilot_folder_stays_real_so_its_data_stays_out_of_the_checkout() {
+    assert_real_folder_stays_real \
+        "$COPILOT_CONFIG" '{"defaultPermissionMode":"allow-all"}' '' \
+        .copilot .copilot \
+        .copilot/config.json \
+        .copilot/session-state/run/events.jsonl
+}
+
+test_dry_run_creates_no_copilot_folder() {
+    assert_dry_run_creates_no_real_folder "$COPILOT_CONFIG" '{"defaultPermissionMode":"allow-all"}' '' .copilot
+}
+
+test_existing_copilot_folder_is_left_alone() {
+    assert_existing_real_folder_is_left_alone \
+        "$COPILOT_CONFIG" '{"defaultPermissionMode":"allow-all"}' '{"model":"local"}' \
+        .copilot/config.json
+}
+
+# Copilot CLI resolves the ~/.copilot/settings.json symlink and creates a sibling
+# settings.json.lock inside the package directory; Stow must ignore it.
+test_copilot_lock_file_in_package_is_ignored_by_stow() {
+    setup_real_folder_case "$COPILOT_CONFIG" '{"defaultPermissionMode":"allow-all"}' ''
+    mkdir -p "$HOME/.copilot"
+    : > "$PACKAGE/.copilot/settings.json.lock"
+    : > "$HOME/.copilot/settings.json.lock"
+
+    run_backup
+    run_stow || fail 'Stow must succeed while settings.json.lock exists in both package and HOME'
+
+    [ "$HOME/$COPILOT_CONFIG" -ef "$PACKAGE/$COPILOT_CONFIG" ] \
+        || fail 'settings.json must be linked to the repository file'
+    { [ -f "$HOME/.copilot/settings.json.lock" ] && [ ! -L "$HOME/.copilot/settings.json.lock" ]; } \
+        || fail 'HOME settings.json.lock must stay a regular file, not a Stow link'
+    [ ! -e "$HOME/.dotfiles-backup" ] || fail 'settings.json.lock must not trigger a backup'
+
+    stow -n -v -t "$HOME" -d "$CASE_DIR/cuberhaus" dotfiles > "$CASE_DIR/plan.out" 2>&1 \
+        || fail "Stow must report no drift when settings.json.lock is present: $(cat "$CASE_DIR/plan.out")"
+    teardown_case
+}
+
 # The Makefile passes TARGET so that a scratch target never moves anything out of the real home.
 test_backup_follows_stow_target_instead_of_home() {
     setup_case
@@ -412,6 +457,11 @@ if [ "$STOW_AVAILABLE" = true ]; then
     test_openlogi_folder_stays_real_so_its_data_stays_out_of_the_checkout
     test_dry_run_creates_no_openlogi_folder
     test_existing_openlogi_folder_is_left_alone
+    test_stow_folds_the_copilot_folder_without_the_backup_step
+    test_copilot_folder_stays_real_so_its_data_stays_out_of_the_checkout
+    test_dry_run_creates_no_copilot_folder
+    test_existing_copilot_folder_is_left_alone
+    test_copilot_lock_file_in_package_is_ignored_by_stow
     test_backup_follows_stow_target_instead_of_home
 else
     printf 'SKIP: GNU Stow is not installed; the real-Stow scenarios were not run.\n'

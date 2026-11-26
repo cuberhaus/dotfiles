@@ -59,6 +59,10 @@ packages and perform one-time setup for each supported OS.
 VS Code user settings live in `.config/Code/User/settings.json`. New Copilot
 chats start with **Allow all** via `chat.defaultConfiguration`, skipping
 ordinary tool confirmations. The older Local agent uses `chat.permissions.default`.
+GitHub Copilot CLI user settings live in `.copilot/settings.json`, defaulting
+new interactive sessions to Copilot Fusion High (`"model": "auto"`,
+`"fusionTier": "high"`) and automatic approvals
+(`"defaultPermissionMode": "allow-all"`).
 
 Chat-tool terminals use `/bin/bash --noprofile --norc` with `BASH_ENV` and `ENV` removed,
 so they do not source personal shell startup files. Normal terminals still use

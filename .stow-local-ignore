@@ -36,3 +36,8 @@
 # background), committed as "This is a placeholder". Settings travel with `dconf dump`
 # and `dconf load` instead (.local/scripts/gnome_path and .local/scripts/cinnamon_path).
 ^/\.config/dconf(/|$)
+
+# Copilot CLI resolves the ~/.copilot/settings.json symlink and creates a sibling
+# settings.json.lock inside the package directory. Ignore Copilot lock files so Stow
+# never tries to link them over ~/.copilot/settings.json.lock.
+^/\.copilot/.*\.lock$

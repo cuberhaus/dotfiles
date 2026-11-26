@@ -44,6 +44,13 @@
 !.ssh/config
 
 # =============================================================================
+# .copilot/ — only Copilot CLI user settings (state, sessions, logs stay ignored)
+# =============================================================================
+!.copilot/
+.copilot/*
+!.copilot/settings.json
+
+# =============================================================================
 # .gemini/ — only agy CLI settings (runtime data, history, DBs stay ignored)
 # =============================================================================
 !.gemini/
