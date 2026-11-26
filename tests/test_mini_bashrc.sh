@@ -379,7 +379,7 @@ run_mini "$ws" 'clone-all upd'
 assert_rc 0 'clone-all upd after a push'
 assert_eq "$(sorted "$out")" "$(status_line up-to-date upd/two)
 $(status_line updated upd/one)" 'a pulled change is reported as updated'
-assert_eq "$(git -C "$ws/one" rev-parse HEAD)" "$(git -C "$stub/remotes/upd/one" rev-parse main)" 'the update really fast-forwarded'
+assert_eq "$(git -C "$ws/one" rev-parse HEAD)" "$(git --git-dir="$stub/remotes/upd/one" rev-parse main)" 'the update really fast-forwarded'
 
 # --- owner choice: argument, then CLONE_ALL_OWNER, then the signed-in account -------------------
 make_remote acme/gamma
@@ -947,7 +947,7 @@ EOF
     for repo in a-ahead b-merged c-master d-nohead e-nobase h-nohead-master; do
         git clone -q "$stub/remotes/ah/$repo" "$ahead_ws/$repo" 2>/dev/null
     done
-    git -C "$stub/remotes/ah/a-ahead" branch -q -D gone
+    git --git-dir="$stub/remotes/ah/a-ahead" branch -q -D gone
     mkdir -p "$ahead_ws/sub"
     git clone -q "$stub/remotes/ah/g-nested" "$ahead_ws/sub/g-nested" 2>/dev/null
     git -C "$ahead_ws/d-nohead" remote set-head origin -d >/dev/null
@@ -1066,7 +1066,7 @@ g-nested (base: origin/main)
     stale_mini="$(new_ws parity-ahead-stale-mini)"
     git clone -q "$stub/remotes/ah/i-stale" "$stale_script/i-stale" 2>/dev/null
     git clone -q "$stub/remotes/ah/i-stale" "$stale_mini/i-stale" 2>/dev/null
-    git -C "$stub/remotes/ah/i-stale" branch -q -D old
+    git --git-dir="$stub/remotes/ah/i-stale" branch -q -D old
     run_script "$stale_script" git-ahead -v
     stale_view="$(plain "$out")"
     run_mini "$stale_mini" 'git-ahead -v'
