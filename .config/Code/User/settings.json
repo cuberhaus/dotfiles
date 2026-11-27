@@ -8,6 +8,11 @@
   "terminal.integrated.enablePersistentSessions": false,
   "terminal.integrated.persistentSessionReviveProcess": "never",
   "terminal.integrated.gpuAcceleration": "off",
+  "terminal.integrated.commandsToSkipShell": [
+    "workbench.action.toggleSidebarVisibility",
+    "workbench.action.toggleAuxiliaryBar",
+    "workbench.action.togglePanel"
+  ],
   "terminal.integrated.profiles.linux": {
     "zsh": {
       "path": "/usr/bin/zsh"
@@ -29,6 +34,10 @@
   "vim.incsearch": true,
   "vim.useSystemClipboard": true,
   "vim.useCtrlKeys": true,
+  "vim.handleKeys": {
+    "<C-b>": false,
+    "<C-j>": false
+  },
   "vim.hlsearch": true,
   "vim.leader": "<space>",
   "vim.surround": true,
