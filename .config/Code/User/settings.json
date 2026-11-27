@@ -36,7 +36,8 @@
   "vim.useCtrlKeys": true,
   "vim.handleKeys": {
     "<C-b>": false,
-    "<C-j>": false
+    "<C-j>": false,
+    "<C-w>": false
   },
   "vim.hlsearch": true,
   "vim.leader": "<space>",
@@ -387,5 +388,6 @@
 	}
 },
 "network.meteredConnection": "off",
-"workbench.editor.enablePreview": false
+"workbench.editor.enablePreview": false,
+"diffEditor.ignoreTrimWhitespace": false
 }
