@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import gzip
+import json
 import os
 import pathlib
 import re
@@ -549,6 +550,93 @@ def audit_shell_configuration(repo_root: pathlib.Path, reporter: Reporter) -> No
             reporter.result("OK", f"{relative_path} is deployed from this checkout.")
         else:
             reporter.result("MISSING", f"Managed shell file is missing or differs: ~/{relative_path}", "make restow")
+
+
+GNOME_AUTO_TIMEZONE_PROFILES = {"ubuntu", "work"}
+GNOME_LOCATION_KEY = ("org.gnome.system.location", "enabled")
+GNOME_AUTO_TIMEZONE_KEY = ("org.gnome.desktop.datetime", "automatic-timezone")
+
+
+def is_gnome_session() -> bool:
+    desktops = (os.environ.get(name, "").lower() for name in ("XDG_CURRENT_DESKTOP", "XDG_SESSION_DESKTOP", "DESKTOP_SESSION"))
+    return sys.platform.startswith("linux") and any("gnome" in desktop for desktop in desktops)
+
+
+def gsettings_bool(schema: str, key: str) -> bool | None:
+    try:
+        result = run(["gsettings", "get", schema, key])
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    value = result.stdout.strip()
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    return None
+
+
+def audit_keyboard_swap(repo_root: pathlib.Path, reporter: Reporter) -> None:
+    if not is_gnome_session():
+        return
+    print("\nKeyboard")
+    script = repo_root / ".local" / "scripts" / "keyboard_swap.py"
+    command = shlex.quote(str(repo_root / ".local" / "scripts" / "bin" / "keyboard-swap"))
+    result = run([sys.executable, str(script), "--status-json"])
+    try:
+        state = json.loads(result.stdout) if result.returncode == 0 else None
+        if not isinstance(state, dict) or "x11" not in state or type(state.get("gnome")) is not bool or (
+            state.get("x11") is not None and type(state["x11"]) is not bool
+        ):
+            raise ValueError("invalid keyboard status")
+    except ValueError:
+        reporter.result("WARN", "The GNOME Escape/Caps Lock swap could not be read in this session.")
+        return
+
+    enabled = state["gnome"]
+    reporter.result("OK", f"The GNOME Escape/Caps Lock swap is {'enabled' if enabled else 'disabled'}.")
+    if state["x11"] is None and os.environ.get("DISPLAY"):
+        reporter.result("WARN", "The X11/XWayland keyboard options could not be read.")
+    elif state["x11"] is not None and state["x11"] != enabled:
+        reporter.result(
+            "DRIFT",
+            "The X11/XWayland Escape/Caps Lock swap differs from the GNOME setting.",
+            f"{command} --sync-x11",
+        )
+    print(f"         Toggle:  {style_remedy(f'{command} toggle')}")
+    print(f"                  {style_remedy('# Run it again to switch back.')}")
+    print(f"         Disable: {style_remedy(f'{command} off')}")
+    print(f"         Enable:  {style_remedy(f'{command} on')}")
+
+
+def audit_automatic_timezone(profile: str, reporter: Reporter) -> None:
+    if profile not in GNOME_AUTO_TIMEZONE_PROFILES or not is_gnome_session():
+        return
+    print("\nDate and time")
+    if not shutil.which("gsettings"):
+        reporter.result("WARN", "The GNOME automatic time zone settings could not be read (gsettings is unavailable).")
+        return
+    location = gsettings_bool(*GNOME_LOCATION_KEY)
+    auto_tz = gsettings_bool(*GNOME_AUTO_TIMEZONE_KEY)
+    if location is None or auto_tz is None:
+        reporter.result("WARN", "The GNOME automatic time zone settings could not be read in this session.")
+        return
+    if location and auto_tz:
+        reporter.result("OK", "GNOME Location Services and Automatic Time Zone are enabled.")
+        return
+    fixes = []
+    if not location:
+        fixes.append(f"gsettings set {GNOME_LOCATION_KEY[0]} {GNOME_LOCATION_KEY[1]} true")
+    if not auto_tz:
+        fixes.append(f"gsettings set {GNOME_AUTO_TIMEZONE_KEY[0]} {GNOME_AUTO_TIMEZONE_KEY[1]} true")
+    if not location and not auto_tz:
+        message = "GNOME Location Services and Automatic Time Zone are disabled."
+    elif not location:
+        message = "GNOME Location Services is disabled, so Automatic Time Zone cannot update."
+    else:
+        message = "GNOME Automatic Time Zone is disabled."
+    reporter.result("DRIFT", message, " && ".join(fixes))
 
 
 def global_git_value(key: str) -> str:
@@ -1762,6 +1850,8 @@ def main() -> int:
     audit_git(repo_root, reporter)
     audit_stow(repo_root, reporter, profile)
     audit_shell_configuration(repo_root, reporter)
+    audit_keyboard_swap(repo_root, reporter)
+    audit_automatic_timezone(profile, reporter)
     audit_environment(repo_root, reporter, profile)
     audit_git_configuration(reporter)
     audit_editors_and_fonts(profile, reporter)

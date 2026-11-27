@@ -1047,6 +1047,8 @@ class MainTests(AuditCase):
         "audit_git",
         "audit_stow",
         "audit_shell_configuration",
+        "audit_keyboard_swap",
+        "audit_automatic_timezone",
         "audit_environment",
         "audit_git_configuration",
         "audit_editors_and_fonts",

@@ -1,6 +1,7 @@
 import contextlib
 import importlib.util
 import io
+import os
 import pathlib
 import subprocess
 import sys
@@ -1137,6 +1138,142 @@ antigravity:
             mock.patch.object(audit, "command_succeeds", return_value=True),
         ):
             self.assertFalse(audit.package_is_installed(audit.Package("pacman", "tlp"), set()))
+
+    def run_automatic_timezone_audit(
+        self,
+        audit,
+        profile="work",
+        *,
+        env=None,
+        platform="linux",
+        has_gsettings=True,
+        values=None,
+        returncode=0,
+    ):
+        gsettings_values = values or {
+            audit.GNOME_LOCATION_KEY: "true",
+            audit.GNOME_AUTO_TIMEZONE_KEY: "true",
+        }
+
+        def fake_run(command, cwd=None):
+            if command[:2] == ["gsettings", "get"]:
+                key = (command[2], command[3])
+                stdout = gsettings_values.get(key, "")
+                code = returncode if isinstance(returncode, int) else returncode.get(key, 0)
+                return subprocess.CompletedProcess(command, code, stdout=f"{stdout}\n" if stdout else "", stderr="")
+            raise AssertionError(f"unexpected command: {command}")
+
+        reporter = audit.Reporter()
+        output = io.StringIO()
+        session_env = {"XDG_CURRENT_DESKTOP": "ubuntu:GNOME"} if env is None else env
+        with (
+            mock.patch.object(audit.sys, "platform", platform),
+            mock.patch.dict(os.environ, session_env, clear=True),
+            mock.patch.object(audit.shutil, "which", return_value="/usr/bin/gsettings" if has_gsettings else None),
+            mock.patch.object(audit, "run", side_effect=fake_run),
+            contextlib.redirect_stdout(output),
+        ):
+            audit.audit_automatic_timezone(profile, reporter)
+        return reporter, output.getvalue()
+
+    def test_automatic_timezone_audit_passes_when_both_gnome_keys_are_enabled(self):
+        audit = load_audit_module()
+        for profile in ("ubuntu", "work"):
+            with self.subTest(profile=profile):
+                reporter, output = self.run_automatic_timezone_audit(audit, profile)
+                self.assertEqual((reporter.issues, reporter.warnings), (0, 0))
+                self.assertIn("Date and time", output)
+                self.assertIn("[OK] GNOME Location Services and Automatic Time Zone are enabled.", output)
+
+    def test_automatic_timezone_audit_reports_drift_and_narrow_fix_for_each_disabled_state(self):
+        audit = load_audit_module()
+        cases = (
+            (
+                "false",
+                "false",
+                "[DRIFT] GNOME Location Services and Automatic Time Zone are disabled.",
+                "Fix: gsettings set org.gnome.system.location enabled true && gsettings set org.gnome.desktop.datetime automatic-timezone true",
+            ),
+            (
+                "false",
+                "true",
+                "[DRIFT] GNOME Location Services is disabled, so Automatic Time Zone cannot update.",
+                "Fix: gsettings set org.gnome.system.location enabled true",
+            ),
+            (
+                "true",
+                "false",
+                "[DRIFT] GNOME Automatic Time Zone is disabled.",
+                "Fix: gsettings set org.gnome.desktop.datetime automatic-timezone true",
+            ),
+        )
+        for location, auto_tz, expected_drift, expected_fix in cases:
+            with self.subTest(location=location, auto_tz=auto_tz):
+                reporter, output = self.run_automatic_timezone_audit(
+                    audit,
+                    "work",
+                    values={
+                        audit.GNOME_LOCATION_KEY: location,
+                        audit.GNOME_AUTO_TIMEZONE_KEY: auto_tz,
+                    },
+                )
+                self.assertEqual((reporter.issues, reporter.warnings), (1, 0))
+                self.assertIn(expected_drift, output)
+                self.assertIn(expected_fix, output)
+
+    def test_automatic_timezone_audit_warns_when_gsettings_is_missing_or_unreadable(self):
+        audit = load_audit_module()
+
+        reporter, output = self.run_automatic_timezone_audit(audit, "work", has_gsettings=False)
+        self.assertEqual((reporter.issues, reporter.warnings), (0, 1))
+        self.assertIn("[WARN]", output)
+        self.assertIn("gsettings is unavailable", output)
+
+        reporter, output = self.run_automatic_timezone_audit(audit, "work", returncode=1)
+        self.assertEqual((reporter.issues, reporter.warnings), (0, 1))
+        self.assertIn("[WARN] The GNOME automatic time zone settings could not be read in this session.", output)
+
+        reporter, output = self.run_automatic_timezone_audit(
+            audit,
+            "work",
+            values={
+                audit.GNOME_LOCATION_KEY: "maybe",
+                audit.GNOME_AUTO_TIMEZONE_KEY: "true",
+            },
+        )
+        self.assertEqual((reporter.issues, reporter.warnings), (0, 1))
+        self.assertIn("[WARN] The GNOME automatic time zone settings could not be read in this session.", output)
+
+    def test_automatic_timezone_audit_skips_other_profiles_and_non_gnome_sessions(self):
+        audit = load_audit_module()
+
+        for profile in ("arch", "manjaro", "ubuntu-windows", "mac"):
+            with self.subTest(profile=profile):
+                reporter, output = self.run_automatic_timezone_audit(
+                    audit,
+                    profile,
+                    values={
+                        audit.GNOME_LOCATION_KEY: "false",
+                        audit.GNOME_AUTO_TIMEZONE_KEY: "false",
+                    },
+                )
+                self.assertEqual((reporter.issues, reporter.warnings), (0, 0))
+                self.assertEqual(output, "")
+
+        for env, platform in (({}, "linux"), ({"XDG_CURRENT_DESKTOP": "i3"}, "linux"), ({"XDG_CURRENT_DESKTOP": "GNOME"}, "darwin")):
+            with self.subTest(env=env, platform=platform):
+                reporter, output = self.run_automatic_timezone_audit(
+                    audit,
+                    "ubuntu",
+                    env=env,
+                    platform=platform,
+                    values={
+                        audit.GNOME_LOCATION_KEY: "false",
+                        audit.GNOME_AUTO_TIMEZONE_KEY: "false",
+                    },
+                )
+                self.assertEqual((reporter.issues, reporter.warnings), (0, 0))
+                self.assertEqual(output, "")
 
 
 if __name__ == "__main__":

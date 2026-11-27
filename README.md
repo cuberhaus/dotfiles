@@ -159,6 +159,11 @@ use `make audit-installation PROFILE=arch|manjaro|ubuntu|ubuntu-windows|mac|work
 to override detection. Package expectations are parsed only from functions the
 selected bootstrap actually calls, so commented optional bundles are excluded.
 
+On GNOME, the audit also reports the saved Escape/Caps Lock swap and prints
+commands to toggle it, disable it, or enable it. Toggling again switches it
+back. The choice persists across logins and keeps other keyboard options; the
+Ubuntu and work bootstraps re-enable the swap when run.
+
 On a terminal the report uses colour so that what to do stands out: the command
 under each `Fix:` is cyan and the `#` note under it gray (advice that is not a
 command, such as "Start a new login shell", stays plain); an expected package

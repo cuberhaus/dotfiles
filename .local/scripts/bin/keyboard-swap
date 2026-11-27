@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Description: Toggle the persistent Escape and Caps Lock swap on GNOME.
+# Group: Desktop & hardware
+
+set -euo pipefail
+
+for argument in "$@"; do
+    case "$argument" in
+        -h|--help)
+            printf '%s\n' \
+                'Usage: keyboard-swap toggle|on|off|status' \
+                '' \
+                'Toggle, enable, disable, or report the persistent Escape/Caps Lock swap in a' \
+                'graphical GNOME session. Other keyboard options are preserved. Run toggle again' \
+                'to switch back.'
+            exit 0
+            ;;
+    esac
+done
+
+script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [ -f "$script_dir/keyboard_swap.py" ]; then
+    target="$script_dir/keyboard_swap.py"
+elif [ -n "${DOTFILES:-}" ] && [ -f "$DOTFILES/.local/scripts/keyboard_swap.py" ]; then
+    target="$DOTFILES/.local/scripts/keyboard_swap.py"
+else
+    target="$HOME/.local/scripts/keyboard_swap.py"
+fi
+
+exec python3 "$target" "$@"

@@ -1343,6 +1343,85 @@ gnome_keyboard_layout_uninstall() {
 }
 
 ###############################################################
+# => GNOME automatic time zone (location + automatic-timezone)
+###############################################################
+
+# Enable GNOME Location Services (org.gnome.system.location enabled) and Automatic Time
+# Zone (org.gnome.desktop.datetime automatic-timezone) so the system clock follows local
+# time when travelling without touching the UTC hardware clock (RTC).  GNOME requires
+# Location Services to be enabled before automatic time zone updates run, so location is
+# enabled first.  After each `gsettings set`, the value is read back in a fresh process:
+# without a session D-Bus bus, gsettings falls back to its in-memory backend and exits 0
+# without persisting anything.  Machines without gsettings or without either GNOME schema
+# are skipped.
+gnome_automatic_timezone_install() {
+    local location_schema="org.gnome.system.location"
+    local location_key="enabled"
+    local datetime_schema="org.gnome.desktop.datetime"
+    local datetime_key="automatic-timezone"
+    local location_current datetime_current updated
+
+    if ! location_current="$(gsettings get "$location_schema" "$location_key" 2>/dev/null)" ||
+        ! datetime_current="$(gsettings get "$datetime_schema" "$datetime_key" 2>/dev/null)"; then
+        info "GNOME location/datetime schemas are not available, skipping automatic time zone."
+        return 0
+    fi
+
+    case "$location_current" in
+        true|false) ;;
+        *)
+            warn "Unexpected $location_schema $location_key value: $location_current"
+            return 1
+            ;;
+    esac
+    case "$datetime_current" in
+        true|false) ;;
+        *)
+            warn "Unexpected $datetime_schema $datetime_key value: $datetime_current"
+            return 1
+            ;;
+    esac
+
+    if [[ "$location_current" == "true" && "$datetime_current" == "true" ]]; then
+        info "GNOME automatic time zone is already enabled, skipping."
+        return 0
+    fi
+
+    if [[ "$location_current" != "true" ]]; then
+        gsettings set "$location_schema" "$location_key" true || return 1
+        updated="$(gsettings get "$location_schema" "$location_key" 2>/dev/null)" || return 1
+        if [[ "$updated" != "true" ]]; then
+            warn "gsettings did not persist true for $location_schema $location_key (run from a graphical GNOME session)."
+            return 1
+        fi
+    fi
+
+    if [[ "$datetime_current" != "true" ]]; then
+        gsettings set "$datetime_schema" "$datetime_key" true || return 1
+        updated="$(gsettings get "$datetime_schema" "$datetime_key" 2>/dev/null)" || return 1
+        if [[ "$updated" != "true" ]]; then
+            warn "gsettings did not persist true for $datetime_schema $datetime_key (run from a graphical GNOME session)."
+            return 1
+        fi
+    fi
+
+    info "GNOME Location Services and Automatic Time Zone enabled."
+}
+
+# Undo gnome_automatic_timezone_install: turn off automatic-timezone while leaving
+# org.gnome.system.location enabled untouched in case other GNOME features use it.
+gnome_automatic_timezone_uninstall() {
+    local datetime_schema="org.gnome.desktop.datetime"
+    local datetime_key="automatic-timezone"
+    local current
+
+    current="$(gsettings get "$datetime_schema" "$datetime_key" 2>/dev/null)" || return 0
+    [[ "$current" == "true" ]] || return 0
+
+    gsettings set "$datetime_schema" "$datetime_key" false || return 1
+}
+
+###############################################################
 # => Volatile file handling
 ###############################################################
 
@@ -2573,6 +2652,9 @@ ubuntu_gnome_desktop_install() {
     # Configures Spanish ('es') layout and caps:swapescape in GNOME and XWayland.
     gnome_keyboard_layout_install ||
         warn "GNOME keyboard layout failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; gnome_keyboard_layout_install'"
+    # Enables GNOME Location Services and Automatic Time Zone so the clock adapts when travelling.
+    gnome_automatic_timezone_install ||
+        warn "GNOME automatic time zone failed; rerun it with: bash -c 'source ~/.local/scripts/bootstrap/base_functions; gnome_automatic_timezone_install'"
 }
 
 ## Undo the shared GNOME desktop integration helpers from ubuntu_gnome_desktop_install.
@@ -2581,4 +2663,5 @@ ubuntu_gnome_desktop_uninstall() {
     smb_scheme_handler_uninstall || true
     gnome_screenshot_shortcut_uninstall || true
     gnome_keyboard_layout_uninstall || true
+    gnome_automatic_timezone_uninstall || true
 }

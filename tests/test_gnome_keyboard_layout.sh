@@ -191,8 +191,10 @@ test_profiles_uninstallers_and_shell_files_keep_spanish_layout() {
     grep -Fq 'gnome_keyboard_layout_install' "$REPO_ROOT/.local/scripts/repair-installation" ||
         fail 'repair-installation keyboard step must run gnome_keyboard_layout_install'
     for file in "${shell_files[@]}"; do
+        grep -Fq '/keyboard-swap" --sync-x11' "$file" ||
+            fail "$file must synchronize X11 with the saved GNOME swap setting"
         grep -Fq 'setxkbmap -layout es -option caps:swapescape' "$file" ||
-            fail "$file must pass both -layout es and -option caps:swapescape to setxkbmap"
+            fail "$file must retain the Spanish-layout fallback if keyboard-swap is unavailable"
         if grep -Eq '^[[:space:]]*setxkbmap[[:space:]]+-option' "$file"; then
             fail "$file must not call setxkbmap -option without -layout es (resets XWayland to us)"
         fi
